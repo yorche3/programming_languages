@@ -1,14 +1,22 @@
 #include <stdio.h>
 #include <string.h>
 
+/* 
+ * función auxiliar para las cadenas que terminan con salto de linea
+ * cambia \n (salto de linea) por \0 (carater de fin)
+*/
 char* limpia(char str[]);
 
-// regresa la cadena de saludo
+/* regresa la cadena de saludo */
 char* saludo(){
   return "Hola mundo!";
 }
 
-// hace una copia de la cadena str invertida en inv_str
+/* 
+ * param str : char*
+ * param inv_str : char*
+ * hace una copia de la cadena str invertida en inv_str
+*/
 int invertir(char *str, char *inv_str){
   int i, l = strlen(str), j;
   j = l-1;
@@ -19,10 +27,13 @@ int invertir(char *str, char *inv_str){
   return 1;
 }
 
-// verifica si la cadena word es palindromo
-// regresa 1 si lo es
-// regresa 0 en otro caso
-// regresa -1 si hay un error
+/*
+ * param word : char*
+ * verifica si la cadena word es palindromo
+ * regresa 1 si lo es
+ * regresa 0 en otro caso
+ * regresa -1 si hay un error 
+*/
 int palindromo(char *word){
   int i, l = strlen(word)-1;
   for(i=0; i < l; i++){
@@ -34,7 +45,11 @@ int palindromo(char *word){
   return -1;
 }
 
-// método que devuelve el número de repeticiones de un caracter en la cadena str
+/*
+ * param ch : char
+ * param str : char*
+ * regresa el número de repeticiones del caracter ch en la cadena str 
+*/
 int repeticiones(char ch, char *str){
   int c = 0, i; // número de repeticiones al momento;
   for(i=0; i < strlen(str); i++){
@@ -43,7 +58,7 @@ int repeticiones(char ch, char *str){
   return c;
 }
 
-// funcion donde se muestra lo que hace
+// funcion donde se muestra lo que realizan las funciones
 // regresa 0 si se ejecuto correctamente
 int main(){
   char* hello = saludo();
