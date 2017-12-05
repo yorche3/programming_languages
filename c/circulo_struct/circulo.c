@@ -4,6 +4,11 @@
 #include <string.h>
 #include <math.h>
 
+/**
+ * @author    Jorge Eduardo Ascencio Espíndola
+ * @version   v1.0
+ */
+
 // Funciones auxiliares *
 int verify_int(char *number);
 int verify_double(char *number);
@@ -48,6 +53,7 @@ int main(){
     v = verify_int(e_x);
     printf("%d\n", v);
   }
+  
   v = 1;
   char e_y[255];
   while(v == 1){
@@ -57,10 +63,12 @@ int main(){
     v = verify_int(e_y);
     printf("%d\n", v);
   }
+  
   Punto p;
   p.x = atoi(e_x);
   p.y = atoi(e_y);
   printf("x : %d, y : %d\n", p.x, p.y);
+  
   Circulo c;
   c.centro = p;
   v = 1;
@@ -72,6 +80,7 @@ int main(){
     v = verify_double(e_r);
     printf("%d\n", v);
   }
+  
   c.radio = atof(e_r);
   printf("Area = %.2f\n", area(c));
   return 0;
@@ -99,7 +108,7 @@ int verify_int(char *number){
 int verify_double(char *number){
   int rc;
   regex_t regex; // expresión regular
-  rc = regcomp(&regex, "^(-)?[0-9]*.[0-9]*[^.]", REG_EXTENDED); // Compila la expresión regular
+  rc = regcomp(&regex, "^(-)?[0-9]*(.[0-9])*[^.]", REG_EXTENDED); // Compila la expresión regular
   return regexec(&regex, number, 0, NULL, 0); // Evalua la cadena
 }
 
