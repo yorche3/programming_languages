@@ -1,7 +1,0 @@
-#!/usr/bin/perl
-
-print "What is your name: ";
-$name = <>;
-print "Hello $name";
-
-exit;
