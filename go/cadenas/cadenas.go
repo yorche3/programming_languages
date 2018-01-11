@@ -3,9 +3,14 @@ package main
 import "fmt"
 
 /*
- Genera un saludo
+ * @author   Jorge Eduardo Ascencio Espíndola
+ * @version  v1.0
+ */
 
- @return una cadena con un saludo
+/*
+ * Genera un saludo
+ *
+ * @return una cadena con un saludo
  */
 func hola() string{
   return "Hola"

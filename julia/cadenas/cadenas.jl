@@ -1,5 +1,10 @@
 #!/usr/bin/julia
 
+#=
+ * @author   Jorge Eduardo Ascencio Espíndola
+ * @version  v1.0
+=#
+
 # regresa una cadena con el saludo
 function hola()
   return "Hola"
