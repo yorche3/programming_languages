@@ -1,0 +1,2 @@
+erlang --
+erl -noshell -s [filename] start -s init stop
