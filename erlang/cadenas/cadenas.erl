@@ -7,6 +7,11 @@
 -module(cadenas).
 -export([start/0, palindromo/1]).
 
+%% @doc
+%% Verifica si una palabra es palindromo
+%% @param W palabra a evaluar
+%% @returns true si es palindromo, False en otro caso
+%% @end
 palindromo(W) ->
    if 
       W -> 

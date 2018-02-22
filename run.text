@@ -1,2 +1,65 @@
+Formatting instructions how to compiile and/or run file from console
+# Programming language --
+# Instructions (remplace [filename] with your file name)
+
+c --
+gcc -o [filename] [filename].c & ./[filename]
+
+clojure --
+
+cpp --
+g++ -o [filename] [filename].cpp & ./[filename]
+
+crystal --
+
+dlang --
+dmd [filename] & ./[filename]
+
+elixir --
+
 erlang --
-erl -noshell -s [filename] start -s init stop
+erlc [filename].erl & erl -noshell -s [filename] start -s init stop
+
+genie --
+valac [filename].gs & ./[filename]
+
+go --
+
+groovy --
+
+haskell --
+
+java --
+javac [filename].java & java [filename]
+
+julia --
+julia [filename].jl
+
+lua --
+
+nim --
+
+ocaml --
+
+octave --
+
+perl --
+perl [filename].pl
+
+prolog --
+
+python --
+python3 [filename].py
+
+racket --
+
+ruby --
+ruby [filename].rb
+
+rust --
+
+scala --
+
+scheme --
+
+vala --
