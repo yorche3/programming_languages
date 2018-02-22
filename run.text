@@ -6,6 +6,7 @@ c --
 gcc -o [filename] [filename].c & ./[filename]
 
 clojure --
+clojure [filename].clj
 
 cpp --
 g++ -o [filename] [filename].cpp & ./[filename]
