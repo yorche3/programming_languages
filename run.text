@@ -12,11 +12,13 @@ cpp --
 g++ -o [filename] [filename].cpp & ./[filename]
 
 crystal --
+crystal [filename].cr
 
 dlang --
 dmd [filename] & ./[filename]
 
 elixir --
+elixir [filename].exs
 
 erlang --
 erlc [filename].erl & erl -noshell -s [filename] start -s init stop
