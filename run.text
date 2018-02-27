@@ -42,8 +42,10 @@ julia --
 julia [filename].jl
 
 lua --
+lua [filename].lua
 
 nim --
+nim compile --run greetings.nim || nim compile [filename].nim & ./[filename] 
 
 ocaml --
 
