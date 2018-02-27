@@ -27,10 +27,13 @@ genie --
 valac [filename].gs & ./[filename]
 
 go --
+build & ./[filename].go
 
 groovy --
+grovvy [filename].groovy
 
 haskell --
+ghc [filename].hs
 
 java --
 javac [filename].java & java [filename]
