@@ -41,6 +41,9 @@ javac [filename].java & java [filename]
 julia --
 julia [filename].jl
 
+kotlin --
+kotlinc [filename].kt -include-runtime -d [filename].jar & java -jar [filename].jar
+
 lua --
 lua [filename].lua
 
@@ -48,8 +51,7 @@ nim --
 nim compile --run greetings.nim || nim compile [filename].nim & ./[filename] 
 
 ocaml --
-
-octave --
+ocaml [filename].ml
 
 perl --
 perl [filename].pl
@@ -60,6 +62,7 @@ python --
 python3 [filename].py
 
 racket --
+racket [filename].rkt
 
 ruby --
 ruby [filename].rb
