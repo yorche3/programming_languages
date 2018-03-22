@@ -68,9 +68,11 @@ ruby --
 ruby [filename].rb
 
 rust --
+rustc [filename].rs & ./[filename]
 
 scala --
 
 scheme --
 
 vala --
+valac [filename].vala & ./[filename]
