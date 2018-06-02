@@ -71,6 +71,7 @@ rust --
 rustc [filename].rs & ./[filename]
 
 scala --
+scala [filename].scala
 
 scheme --
 

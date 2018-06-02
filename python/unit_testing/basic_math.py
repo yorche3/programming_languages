@@ -1,8 +1,15 @@
-def hello():
-    return 'hola'
+def add(a, b):
+    return a + b
 
-def min():
-    return 2
+def min(x, y):
+    if x < y:
+        return x
+    else:
+        return y
+    
 
-def max():
-    return 3.4
+def max(x, y):
+    if x > y:
+        return x
+    else:
+        return y

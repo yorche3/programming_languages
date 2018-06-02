@@ -3,14 +3,14 @@ import unittest
 
 class TestBasicMath(unittest.TestCase):
 
-    def test_hello(self):
-        self.assertEqual(hello(), 'hola')
+    def test_add(self):
+        self.assertEqual(add(2,2), 4)
 
     def test_min(self):
-        self.assertEqual(min(),2)
+        self.assertEqual(min(2,5),2)
 
     def test_max(self):
-        self.assertEqual(max(), 3.4)
+        self.assertEqual(max(8, 4), 8)
 
 if __name__ == '__main__':
     unittest.main()
