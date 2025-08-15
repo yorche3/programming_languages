@@ -1,8 +1,6 @@
-class Demo.HelloWorld : GLib.Object {
-    public static int main(string[] args) {
-
-        stdout.printf("Hello, World\n");
-
+public class HelloWorld : Object {
+    static int main(string[] args) {
+        print("Hello, World! from Vala!\n");
         return 0;
     }
 }

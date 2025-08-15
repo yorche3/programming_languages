@@ -1,1 +1,1 @@
-(println "Hello world! from Clojure")
+(println "Hello, World! from Clojure!")

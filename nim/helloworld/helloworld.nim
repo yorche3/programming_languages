@@ -1,1 +1,1 @@
-echo "Hello world! from Nim"
+echo "Hello, World! from Nim!"

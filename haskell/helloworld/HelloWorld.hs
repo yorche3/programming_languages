@@ -1,1 +1,1 @@
-main = putStrLn "Hello world! from Haskell"  
+main = putStrLn "Hello, World! from Haskell!"  

@@ -1,1 +1,1 @@
-println 'Hello world!, from Groovy'
+println 'Hello, World!, from Groovy!'
