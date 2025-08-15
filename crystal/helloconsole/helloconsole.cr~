@@ -1,2 +1,0 @@
-name = read_line
-puts "Hola  "+ name

@@ -1,0 +1,15 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. HELLOUSER.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 USER-NAME PIC X(100).
+
+       PROCEDURE DIVISION.
+           DISPLAY "Enter your name: ".
+           ACCEPT USER-NAME.
+           DISPLAY "Hello, " USER-NAME "!".
+           STOP RUN.

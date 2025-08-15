@@ -1,4 +1,0 @@
-#lang racket
-
-(read-line (current-input-port) 'any)
-(println 'any)
