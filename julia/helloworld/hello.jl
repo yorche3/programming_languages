@@ -1,2 +1,2 @@
 #!/usr/bin/julia
-println("Hello world")
+println("Hello world! from Julia")

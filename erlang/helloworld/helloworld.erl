@@ -2,4 +2,4 @@
 -export([hello_world/0]).
 
 hello_world() ->
-  io:fwrite("hello, world\n").
+  io:fwrite("Hello world! from Erlang\n").
