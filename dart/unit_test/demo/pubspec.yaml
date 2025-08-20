@@ -1,0 +1,7 @@
+name: demo
+description: A simple Dart project
+environment:
+  sdk: ">=3.9.0"
+
+dev_dependencies:
+  test: ^1.24.0

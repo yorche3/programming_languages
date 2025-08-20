@@ -1,0 +1,7 @@
+(test
+ (name test_calculator)
+ (libraries ounit2 demo)
+ (modules test_calculator))
+
+ (test
+  (name test_demo))
