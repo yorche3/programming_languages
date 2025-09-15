@@ -1,0 +1,23 @@
+{
+  "name": "hellouser",
+  "version": "1.0.0",
+  "main": "hello_user.js",
+  "type": "module",
+  "scripts": {
+    "build": "rescript build",
+    "res:build": "rescript",
+    "res:dev": "rescript -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rescript/core": "^1.6.1",
+    "rescript": "^11.1.4"
+  },
+  "dependencies": {
+    "@rescript/react": "^0.14.0"
+  },
+  "description": ""
+}

@@ -1,0 +1,12 @@
+#Start(1756421143379)
+
+  Syntax error!
+  /home/vubuntu/programming_languages/rescript/numbers/test/JestBindings.res:1:9
+  
+  1 │ [@bs.val]
+  2 │ external expect: 'a => Expect.t = "expect"
+  3 │ 
+  
+  Missing expression
+
+#Done(1756421143416)

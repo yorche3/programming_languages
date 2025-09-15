@@ -1,0 +1,36 @@
+$ include "seed7_05.s7i";
+
+const func integer: fibonacci (in integer: n) is func
+  result
+    var integer: res is 0;
+  begin
+    if n <= 0 then
+      res := 0;
+    elsif n = 1 then
+      res := 1;
+    else
+      res := fibonacci(n - 1) + fibonacci(n - 2);
+    end if;
+  end func;
+
+const func integer: factorial(in integer: n) is func
+  result
+    var integer: res is 0;
+  begin
+    if n <= 1 then
+      res := 1;
+    else
+      res := n * factorial(n - 1);
+    end if;
+  end func;
+
+const func integer: sum_numbers(in integer: n) is func
+  result
+    var integer: res is 0;
+  begin
+    if n <= 0 then
+      res := 0;
+    else
+      res := n + sum_numbers(n - 1);
+    end if;
+  end func;

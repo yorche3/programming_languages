@@ -1,0 +1,35 @@
+module Test
+from "result" include Result
+from "list" include List
+
+record TestCase {
+  name: String,
+  result: Number,
+  expected: Number
+}
+
+let assertEqNumber = (testCase) => {
+  let evaluation = Result.isOk(Ok(testCase.result == testCase.expected))
+  if (evaluation) {
+    print("Test " ++ testCase.name ++ " PASSED.")
+  } else {
+    print("Test " ++ testCase.name ++ " FAILED: expected " ++ toString(testCase.expected) ++ ", got " ++ toString(testCase.result))
+  }
+}
+
+let mut testSuite: List<TestCase> = []
+
+let addTest = (testName, testresult, testExpected) => {
+  testSuite = List.append(testSuite, [{name: testName, result: testresult, expected: testExpected}])
+}
+
+let runTests = () => {
+  List.forEach(assertEqNumber, testSuite)
+}
+
+provide {
+  type TestCase,
+  assertEqNumber,
+  runTests,
+  addTest
+}

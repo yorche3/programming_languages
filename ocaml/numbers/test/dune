@@ -1,0 +1,12 @@
+(test
+ (name test_numbers_recursive)
+ (libraries ounit2 numbers)
+ (modules test_numbers_recursive))
+
+(test
+ (name test_numbers_iterative)
+ (libraries ounit2 numbers)
+ (modules test_numbers_iterative))
+
+(test
+ (name test_numbers))

@@ -1,0 +1,14 @@
+rescript = 1
+rule cp
+  command = cp $i $out
+rule touch
+ command = touch $out
+o numbers_iterative.cmi : cp ../bs/src/numbers_iterative.cmi
+o numbers_iterative.cmj : cp ../bs/src/numbers_iterative.cmj
+o numbers_iterative.cmt : cp ../bs/src/numbers_iterative.cmt
+o numbers_iterative.res : cp ../../src/numbers_iterative.res
+o numbers_recursive.cmi : cp ../bs/src/numbers_recursive.cmi
+o numbers_recursive.cmj : cp ../bs/src/numbers_recursive.cmj
+o numbers_recursive.cmt : cp ../bs/src/numbers_recursive.cmt
+o numbers_recursive.res : cp ../../src/numbers_recursive.res
+build install.stamp : touch numbers_iterative.cmi numbers_iterative.cmj numbers_recursive.cmi numbers_recursive.cmj 

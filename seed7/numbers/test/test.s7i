@@ -1,0 +1,10 @@
+$ include "seed7_05.s7i";
+
+const proc: assert (in integer: expected_result, in string: test_name, in integer: given_result) is func
+  begin
+    if expected_result = given_result then
+      writeln(test_name <& "... [OK]");
+    else
+      writeln(test_name <& "... [FAILED]");
+    end if;
+  end func;

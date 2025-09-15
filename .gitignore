@@ -1,4 +1,5 @@
-.clj-kondo/
+.clj*/
 .config/
-.lsp
+.lsp/
+.precomp/
 .vscode/

@@ -1,0 +1,38 @@
+func fibonacci_iter(n, acc2, acc1) {
+  if (n < 1) {
+    return acc2;
+  } else if (n == 2) {
+    return acc1 + acc2;
+  } else {
+    return fibonacci_iter(n - 1, acc1, acc1 + acc2);
+  }
+}
+
+func fibonacci(n) {
+  return fibonacci_iter(n, 0, 1);
+}
+
+func factorial_iter(n, acc)
+{
+  if (n <= 1) {
+    return acc;
+  } else {
+    return factorial_iter(n - 1, n * acc);
+  }
+}
+
+func factorial(n) {
+  return factorial_iter(n, 1);
+}
+
+func sum_numbers_iter(n, acc){
+  if(n <= 0) {
+    return acc;
+  } else {
+    return sum_numbers_iter(n - 1, n + acc);
+  }
+}
+
+func sum_numbers(n) {
+  return sum_numbers_iter(n, 0);
+}

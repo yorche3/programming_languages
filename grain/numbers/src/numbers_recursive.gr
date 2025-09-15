@@ -1,0 +1,27 @@
+module NumbersRecursive
+
+provide let rec fibonacci = n => {
+  if (n <= 0) {
+    0
+  } else if (n == 1) {
+    1
+  } else {
+    fibonacci(n - 1) + fibonacci(n - 2)
+  }
+}
+
+provide let rec factorial = n => {
+  if (n <= 1) {
+    1
+  } else {
+    n * factorial(n - 1)
+  }
+}
+
+provide let rec sumNumbers = n => {
+  if (n <= 0) {
+    0
+  } else {
+    n + sumNumbers(n - 1)
+  }
+}

@@ -1,0 +1,36 @@
+module NumbersIterative
+
+provide let rec fibonacci = n => {
+  let rec fibonacciHelper = (n, acc2, acc1) => {
+    if (n <= 0) {
+      acc2
+    } else if (n <= 2) {
+      acc1 + acc2
+    } else {
+      fibonacciHelper(n - 1, acc1, acc1 + acc2)
+    }
+  }
+  fibonacciHelper(n, 0, 1)
+}
+
+provide let factorial = n => {
+  let rec factorialHelper = (n, acc) => {
+    if (n <= 1) {
+      acc
+    } else {
+      factorialHelper(n - 1, n * acc)
+    }
+  }
+  factorialHelper(n, 1)
+}
+
+provide let sumNumbers = n => {
+  let rec sumNumbersHelper = (n, acc) => {
+    if (n <= 0) {
+      acc
+    } else {
+      sumNumbersHelper(n - 1, n + acc)
+    }
+  }
+  sumNumbersHelper(n, 0)
+}

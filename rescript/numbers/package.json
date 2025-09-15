@@ -1,0 +1,22 @@
+{
+  "name": "numbers",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "bsb -make-world",
+    "test": "bsb -make-world && node ./test/numbers_recursive_test.bs.js && node ./test/numbers_iterative_test.bs.js"
+  },
+  "devDependencies": {
+    "@glennsl/rescript-jest": "^0.11.0",
+    "@rescript/core": "^1.6.1",
+    "bs-platform": "^9.0.2",
+    "rescript": "^11.1.4"
+  },
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

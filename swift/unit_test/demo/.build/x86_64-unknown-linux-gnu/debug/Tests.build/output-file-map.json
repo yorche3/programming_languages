@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/Tests.build/master.swiftdeps"
+  },
+  "/home/vubuntu/programming_languages/swift/unit_test/demo/Tests/CalculatorTests.swift": {
+    "dependencies": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/Tests.build/CalculatorTests.d",
+    "object": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/Tests.build/CalculatorTests.swift.o",
+    "swiftmodule": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/Tests.build/CalculatorTests~partial.swiftmodule",
+    "swift-dependencies": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/Tests.build/CalculatorTests.swiftdeps"
+  }
+}

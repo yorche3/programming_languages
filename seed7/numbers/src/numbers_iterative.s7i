@@ -1,0 +1,51 @@
+$ include "seed7_05.s7i";
+
+const proc: fibonacci_iter(in integer: n, in integer: acc2, in integer: acc1, inout integer: res) is func
+  begin
+    if n <= 0 then
+      res := 0;
+    elsif n <= 2 then
+      res := acc1 + acc2;
+    else
+      fibonacci_iter(n - 1, acc1, acc1 + acc2, res);
+    end if;
+  end func;
+
+const func integer: fibonacci(in integer: n) is func
+  result
+    var integer: res is 0;
+  begin
+    fibonacci_iter(n, 0, 1, res);
+  end func;
+
+const proc: factorial_iter(in integer: n, in integer: acc, inout integer: res) is func
+  begin
+    if n <= 1 then
+      res := acc;
+    else
+      factorial_iter(n - 1, n * acc, res);
+    end if;
+  end func;
+
+const func integer: factorial(in integer: n) is func
+  result
+    var integer: res is 0;
+  begin
+    factorial_iter(n, 1, res);
+  end func;
+
+const proc: sum_numbers_iter(in integer: n, in integer: acc, inout integer: res) is func
+  begin
+    if n <= 0 then
+      res := acc;
+    else
+      sum_numbers_iter(n - 1, n + acc, res);
+    end if;
+  end func;
+
+const func integer: sum_numbers(in integer: n) is func
+  result
+    var integer: res is 0;
+  begin
+    sum_numbers_iter(n, 0, res);
+  end func;

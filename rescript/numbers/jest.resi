@@ -1,0 +1,1 @@
+let testPromise: (string, ~timeout: int=?, unit => Js.promise<A.t<_>>) => unit

@@ -1,0 +1,14 @@
+/home/vubuntu/programming_languages/fs/numbers/src/bin/Debug/net8.0/src.deps.json
+/home/vubuntu/programming_languages/fs/numbers/src/bin/Debug/net8.0/src.dll
+/home/vubuntu/programming_languages/fs/numbers/src/bin/Debug/net8.0/src.pdb
+/home/vubuntu/programming_languages/fs/numbers/src/bin/Debug/net8.0/src.xml
+/home/vubuntu/programming_languages/fs/numbers/src/obj/Debug/net8.0/src.fsproj.AssemblyReference.cache
+/home/vubuntu/programming_languages/fs/numbers/src/obj/Debug/net8.0/src.AssemblyInfoInputs.cache
+/home/vubuntu/programming_languages/fs/numbers/src/obj/Debug/net8.0/src.AssemblyInfo.fs
+/home/vubuntu/programming_languages/fs/numbers/src/obj/Debug/net8.0/src.fsproj.CoreCompileInputs.cache
+/home/vubuntu/programming_languages/fs/numbers/src/obj/Debug/net8.0/src.sourcelink.json
+/home/vubuntu/programming_languages/fs/numbers/src/obj/Debug/net8.0/src.dll
+/home/vubuntu/programming_languages/fs/numbers/src/obj/Debug/net8.0/refint/src.dll
+/home/vubuntu/programming_languages/fs/numbers/src/obj/Debug/net8.0/src.xml
+/home/vubuntu/programming_languages/fs/numbers/src/obj/Debug/net8.0/src.pdb
+/home/vubuntu/programming_languages/fs/numbers/src/obj/Debug/net8.0/ref/src.dll

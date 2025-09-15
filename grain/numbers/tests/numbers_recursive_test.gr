@@ -1,0 +1,15 @@
+module NumbersIterativeTests
+
+from "list" include List
+
+from "../src/numbers_recursive.gr" include NumbersRecursive
+from "./test.gr" include Test
+use NumbersRecursive.*
+use Test.*
+
+Test.addTest("Fibonacci", fibonacci(5), 5)
+Test.addTest("Factorial", factorial(5), 120)
+Test.addTest("SumNumbers", sumNumbers(5), 15)
+
+
+Test.runTests()

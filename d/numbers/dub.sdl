@@ -1,0 +1,8 @@
+name "numbers"
+description "A minimal D application."
+authors "vubuntu"
+copyright "Copyright © 2025, vubuntu"
+license "GPL-3.0-only"
+targetType "executable"
+
+sourceFiles "source/numbers*.d" "test/*.d"

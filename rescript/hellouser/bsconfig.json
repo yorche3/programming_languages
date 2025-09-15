@@ -1,0 +1,13 @@
+{
+  "name": "hellouser",
+  "sources": ["src"],
+  "package-specs": {
+    "module": "commonjs",
+    "in-source": true
+  },
+  "bs-dependencies": [
+    "@rescript/node",
+    "@rescript/react",
+    "@rescript/std"
+  ]
+}

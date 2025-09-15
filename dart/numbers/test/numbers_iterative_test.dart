@@ -1,0 +1,20 @@
+import 'package:test/test.dart';
+import '../lib/numbers_iterative.dart';
+
+void main() {
+  final numbers = NumbersIterative();
+
+  group('NumbersIterative', () {
+    test('fibonacci returns correct value for N=10', () {
+      expect(numbers.fibonacci(10), equals(55));
+    });
+
+    test('factorial returns correct value for N=5', () {
+      expect(numbers.factorial(5), equals(120));
+    });
+
+    test('sumNumbers returns correct sum for N=5', () {
+      expect(numbers.sumNumbers(5), equals(15));
+    });
+  });
+}

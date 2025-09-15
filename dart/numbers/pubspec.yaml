@@ -1,0 +1,8 @@
+name: numbers
+description: A Dart package with recursive and iterative number functions
+version: 1.0.0
+environment:
+  sdk: ">=3.9.0"
+
+dev_dependencies:
+  test: ^1.24.0

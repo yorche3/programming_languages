@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "do9vVaNlZWoAJPb6mm1oCZMBefBk3VysWvui5PrJVdg3LXPFW7AJJk66EZqOwVB+PIvlTiJejBs7Byt/Xxg0bw==",
+  "success": true,
+  "projectFilePath": "/home/vubuntu/programming_languages/fs/numbers/src/src.fsproj",
+  "expectedPackageFiles": [
+    "/home/vubuntu/.nuget/packages/fsharp.core/8.0.102/fsharp.core.8.0.102.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,1 @@
+(format t "Hello, World! from Common Lisp~%")

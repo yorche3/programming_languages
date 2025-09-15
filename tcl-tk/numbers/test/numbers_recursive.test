@@ -1,0 +1,22 @@
+package require Tcl 8.6
+package require tcltest
+
+namespace import ::tcltest::*
+# Load the iterative implementation
+source ../src/numbers_recursive.tcl
+namespace import ::numbers_recursive::*
+
+test fibonacci-1.0 {case fibonacci} {
+    set result [fibonacci {5}]
+} {5}
+    # Factorial tests
+test factorial-2.0 {case factorial} {
+    set result [factorial {5}]
+} {120}
+    # Sum of first N
+test sum_numbers-3.0 {case sum_numbers} {
+    set result [sum_numbers {5}]
+} {15}
+
+::tcltest::cleanupTests
+return

@@ -1,0 +1,23 @@
+-main RunTests
+
+# Specify the source directories for your application code and test code
+-cp src
+-cp test
+
+# Target platform for running the tests (e.g., Neko, JavaScript)
+-neko bin/RunTests.n
+
+# Or for JavaScript:
+# -js bin/Test.js
+
+# Enable compilation for the unit test library
+-lib hx3compat 
+
+# Optional: Add other libraries if your tests or application depend on them
+# -lib mylibrary
+
+# Optional: Enable debugging information for better stack traces
+-debug
+
+# Optional: Define conditional compilation flags if needed for tests
+# -D test_mode

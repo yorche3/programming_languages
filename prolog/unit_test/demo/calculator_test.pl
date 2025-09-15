@@ -4,7 +4,7 @@
 :- begin_tests(calculator_tests).
 test(add) :-
     add(2, 3, Sum),
-    assertion(Sum == 5).
+    assertion(Sum == 15).
 
 test(subtract) :-
     subtract(5, 3, Result),

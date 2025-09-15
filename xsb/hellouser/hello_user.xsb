@@ -1,0 +1,7 @@
+:- use_module(file_io, [fmt_write/2]).
+
+main :- 
+    write('Enter your name: '),
+    read(Name),
+    fmt_write("Hello, %S\n", arg(Name)),
+    halt.

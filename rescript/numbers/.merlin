@@ -1,0 +1,12 @@
+####{BSB GENERATED: NO EDIT
+FLG -ppx '/home/vubuntu/programming_languages/rescript/numbers/node_modules/bs-platform/linux/bsc.exe -as-ppx '
+S /home/vubuntu/programming_languages/rescript/numbers/node_modules/bs-platform/lib/ocaml
+B /home/vubuntu/programming_languages/rescript/numbers/node_modules/bs-platform/lib/ocaml
+FLG -w +a-4-9-20-40-41-42-50-61-102-a-40-42-61
+S /home/vubuntu/programming_languages/rescript/numbers/node_modules/@glennsl/rescript-jest/lib/ocaml
+B /home/vubuntu/programming_languages/rescript/numbers/node_modules/@glennsl/rescript-jest/lib/ocaml
+S test
+B lib/bs/test
+S src
+B lib/bs/src
+####BSB GENERATED: NO EDIT}

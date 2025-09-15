@@ -1,0 +1,4 @@
+print, "Enter your name: "
+name = rdline(stdin)
+print, "Hello, "+ name
+quit()

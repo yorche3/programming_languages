@@ -1,0 +1,18 @@
+name: numbers
+version: 0.1.0
+dependencies:
+  - base >= 4.18.3
+  - hspec
+executables:
+  numbers:
+    main: Main.hs
+    source-dirs: src
+library:
+  source-dirs: src
+tests:
+  unit-tests:
+    main: RunSpecs.hs
+    source-dirs: spec
+    dependencies:
+      - numbers
+      - hspec

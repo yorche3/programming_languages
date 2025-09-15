@@ -1,0 +1,17 @@
+{
+  "": {
+    "swift-dependencies": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/demo.build/master.swiftdeps"
+  },
+  "/home/vubuntu/programming_languages/swift/unit_test/demo/Sources/Calculator.swift": {
+    "dependencies": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/demo.build/Calculator.d",
+    "object": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/demo.build/Calculator.swift.o",
+    "swiftmodule": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/demo.build/Calculator~partial.swiftmodule",
+    "swift-dependencies": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/demo.build/Calculator.swiftdeps"
+  },
+  "/home/vubuntu/programming_languages/swift/unit_test/demo/Sources/main.swift": {
+    "dependencies": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/demo.build/main.d",
+    "object": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/demo.build/main.swift.o",
+    "swiftmodule": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/demo.build/main~partial.swiftmodule",
+    "swift-dependencies": "/home/vubuntu/programming_languages/swift/unit_test/demo/.build/x86_64-unknown-linux-gnu/debug/demo.build/main.swiftdeps"
+  }
+}

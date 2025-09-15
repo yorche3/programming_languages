@@ -1,0 +1,30 @@
+rescript = 1
+g_finger := /home/vubuntu/programming_languages/rescript/numbers/node_modules/@glennsl/rescript-jest/lib/ocaml/install.stamp
+rule astj
+  command = /home/vubuntu/programming_languages/rescript/numbers/node_modules/bs-platform/linux/bsc.exe -w a -bs-v 9.0.2  -absname -bs-ast -o $out $i
+o test/numbers_iterative_tests.ast : astj ../../test/numbers_iterative_tests.res
+rule deps_dev
+  command = /home/vubuntu/programming_languages/rescript/numbers/node_modules/bs-platform/linux/bsb_helper.exe -g -hash 547e14692e0ad89dd0ba00ba7f8a967d $in
+  restat = 1
+o test/numbers_iterative_tests.d : deps_dev test/numbers_iterative_tests.ast
+rule mij_dev
+  command = /home/vubuntu/programming_languages/rescript/numbers/node_modules/bs-platform/linux/bsc.exe -I test -I src -I /home/vubuntu/programming_languages/rescript/numbers/node_modules/@glennsl/rescript-jest/lib/ocaml  -w a -bs-package-name numbers -bs-package-output commonjs:$in_d:.bs.js -bs-v $g_finger $i
+  dyndep = 1
+  restat = 1
+o test/numbers_iterative_tests.cmj test/numbers_iterative_tests.cmi ../../test/numbers_iterative_tests.bs.js : mij_dev test/numbers_iterative_tests.ast
+o test/numbers_recursive_tests.ast : astj ../../test/numbers_recursive_tests.res
+o test/numbers_recursive_tests.d : deps_dev test/numbers_recursive_tests.ast
+o test/numbers_recursive_tests.cmj test/numbers_recursive_tests.cmi ../../test/numbers_recursive_tests.bs.js : mij_dev test/numbers_recursive_tests.ast
+o src/numbers_iterative.ast : astj ../../src/numbers_iterative.res
+rule deps
+  command = /home/vubuntu/programming_languages/rescript/numbers/node_modules/bs-platform/linux/bsb_helper.exe -hash 547e14692e0ad89dd0ba00ba7f8a967d $in
+  restat = 1
+o src/numbers_iterative.d : deps src/numbers_iterative.ast
+rule mij
+  command = /home/vubuntu/programming_languages/rescript/numbers/node_modules/bs-platform/linux/bsc.exe -I src  -w a -bs-package-name numbers -bs-package-output commonjs:$in_d:.bs.js -bs-v $g_finger $i
+  dyndep = 1
+  restat = 1
+o src/numbers_iterative.cmj src/numbers_iterative.cmi ../../src/numbers_iterative.bs.js : mij src/numbers_iterative.ast
+o src/numbers_recursive.ast : astj ../../src/numbers_recursive.res
+o src/numbers_recursive.d : deps src/numbers_recursive.ast
+o src/numbers_recursive.cmj src/numbers_recursive.cmi ../../src/numbers_recursive.bs.js : mij src/numbers_recursive.ast

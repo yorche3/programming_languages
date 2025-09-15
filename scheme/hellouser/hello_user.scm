@@ -1,0 +1,6 @@
+(display "Enter your name: ")
+(newline)
+(define name (read-line))
+(display (string-append "Hello, " name))
+(newline)
+(exit)
