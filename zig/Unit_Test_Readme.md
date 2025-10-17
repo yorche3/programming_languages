@@ -76,5 +76,5 @@ donet build
 ### Test
 - In your tests subproject
 ```bash
-zig test example_test
+zig build test --summary all
 ```

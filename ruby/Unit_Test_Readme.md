@@ -79,5 +79,5 @@ ninja -C build
 ### Test
 - In your tests subproject
 ```bash
-tclsh run_tests.tcl
+rake test
 ```

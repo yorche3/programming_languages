@@ -1,0 +1,28 @@
+use Test;
+
+use lib 'lib';
+use Words;
+
+plan 18;
+
+is(reverse_string('hello'), 'olleh', 'reverse_string 1');
+is(reverse_string('a'), 'a', 'reverse_string 2');
+is(reverse_string(''), '', 'reverse_string 3');
+
+is(is_palindrome('race car'), True, 'is_palindrome 1');
+is(is_palindrome('level'), True, 'is_palindrome 2');
+is(is_palindrome('hello'), False, 'is_palindrome 3');
+is(is_palindrome('a'), True, 'is_palindrome 4');
+is(is_palindrome(''), True, 'is_palindrome 5');
+
+is(kmp_search('test', 'this is a test'), True, 'kmp_search 1');
+is(kmp_search('not', 'this is a test'), False, 'kmp_search 2');
+is(kmp_search('', 'any string'), True, 'kmp_search 3');
+is(kmp_search('abc', 'abc'), True, 'kmp_search 4');
+is(kmp_search('abc', 'ab'), False, 'kmp_search 5');
+
+is(lcs('AGGTAB', 'GXTXAYB'), 4, 'lcs 1');
+is(lcs('ABC', 'ABC'), 3, 'lcs 2');
+is(lcs('ABC', 'DEF'), 0, 'lcs 3');
+is(lcs('', 'ABC'), 0, 'lcs 4');
+is(lcs('ABC', ''), 0, 'lcs 5');

@@ -74,10 +74,12 @@ donet build
 ## Compile and run tests
 ### Compile
 ```bash
-ninja -C build
+npm init -y
+npm install --save-dev typescript jest ts-jest @types/jest
+npx ts-jest config:init
 ```
 ### Test
 - In your tests subproject
 ```bash
-tclsh run_tests.tcl
+npm test
 ```

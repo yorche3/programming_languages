@@ -74,10 +74,13 @@ donet build
 ## Compile and run tests
 ### Compile
 ```bash
-ninja -C build
+npm create rescript-app@latest name_of_your_app
+cd name_of_your_app
+npm install --save-dev jest @glennsl/rescript-jest bs-platform rescript @rescript/core @babel/core @babel/preset-env babel-jest
 ```
 ### Test
 - In your tests subproject
 ```bash
-tclsh run_tests.tcl
+npm test
+npm run res:clean
 ```

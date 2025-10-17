@@ -79,5 +79,5 @@ ninja -C build
 ### Test
 - In your tests subproject
 ```bash
-meson test -C build
+meson setup build
 ```

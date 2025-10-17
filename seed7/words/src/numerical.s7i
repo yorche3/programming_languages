@@ -1,0 +1,65 @@
+$ include "seed7_05.s7i";
+
+const proc: fibonacci_iter(in integer: n, in integer: acc2, in integer: acc1, inout integer: res) is func
+  begin
+    if n <= 0 then
+      res := 0;
+    elsif n <= 2 then
+      res := acc1 + acc2;
+    else
+      fibonacci_iter(n - 1, acc1, acc1 + acc2, res);
+    end if;
+  end func;
+
+const func integer: fibonacci(in integer: n) is func
+  result
+    var integer: res is 0;
+  begin
+    if n < 0 then
+      res := -1;
+    else
+      fibonacci_iter(n, 0, 1, res);
+    end if;
+  end func;
+
+const proc: factorial_iter(in integer: n, in integer: acc, inout integer: res) is func
+  begin
+    if n <= 1 then
+      res := acc;
+    else
+      factorial_iter(n - 1, n * acc, res);
+    end if;
+  end func;
+
+const func integer: factorial(in integer: n) is func
+  result
+    var integer: res is 0;
+  begin
+    if n < 0 then
+      res := -1;
+    else
+      factorial_iter(n, 1, res);
+    end if;
+  end func;
+
+const func integer: gcd (in integer: a, in integer: b) is func
+  result
+    var integer: res is 0;
+  begin
+    if b = 0 then
+      res := a;
+    else
+      res := gcd(b, a rem b);
+    end if;
+  end func;
+
+const func integer: lcm (in integer: a, in integer: b) is func
+  result
+    var integer: res is 0;
+  begin
+    if a = 0 or b = 0 then
+      res := 0;
+    else
+      res := (a * b) div gcd(a, b);
+    end if;
+  end func;

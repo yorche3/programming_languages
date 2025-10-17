@@ -1,0 +1,8 @@
+require 'rake/testtask'
+
+Rake::TestTask.new do |t|
+  t.libs << './src' # add current directory if needed
+  t.test_files = FileList['./spec/**/*.rb'] # adjust path if your tests are elsewhere
+end
+
+task default: :test

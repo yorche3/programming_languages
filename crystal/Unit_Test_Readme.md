@@ -10,9 +10,9 @@ How were built unit test projects.
 ## Structure
 ```text
 demo
-|--- src
-|--- test
-|--- shard.yaml
+├── src
+├── test
+└── shard.yml
 ```
 
 ## Configure

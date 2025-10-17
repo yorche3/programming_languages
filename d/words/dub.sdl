@@ -1,0 +1,7 @@
+name "words"
+description "A minimal D application."
+authors "vubuntu"
+copyright "Copyright © 2025, vubuntu"
+license "MIT"
+
+sourceFiles "source/*.d" "test/*.d"

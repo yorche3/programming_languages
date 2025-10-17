@@ -1,0 +1,9 @@
+$ include "seed7_05.s7i";
+  include "./numerical_test.s7i";
+  include "./words_test.s7i";
+
+const proc: main is func
+  begin
+    run_numerical_suite;
+    run_words_suite;
+  end func;

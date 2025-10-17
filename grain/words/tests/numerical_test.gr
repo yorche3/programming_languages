@@ -1,0 +1,44 @@
+module NumericalTest
+
+from "../src/numerical.gr" include Numerical
+from "./testing.gr" include Testing
+
+use Numerical.*
+use Testing.*
+
+let testSuite = [
+  {
+    name: "Fibonacci",
+    cases: [
+      { result: fibonacci(-3), expected: -1 },
+      { result: fibonacci(10), expected: 55 },
+      { result: fibonacci(15), expected: 610 },
+    ]
+  },
+  {
+    name: "Factorial",
+    cases: [
+      { result: factorial(-3), expected: -1 },
+      { result: factorial(5), expected: 120 },
+      { result: factorial(10), expected: 3628800 },
+    ]
+  },
+  {
+    name: "Greates Common Divisor",
+    cases: [
+      { result: gcd(48, 18), expected: 6 },
+      { result: gcd(100, 25), expected: 25 },
+      { result: gcd(17, 13), expected: 1 },
+    ]
+  },
+  {
+    name: "Lowest Common Multiple",
+    cases: [
+      { result: lcm(4, 6), expected: 12 },
+      { result: lcm(21, 6), expected: 42 },
+      { result: lcm(7, 3), expected: 21 },
+    ]
+  }
+]
+
+runTests(testSuite)

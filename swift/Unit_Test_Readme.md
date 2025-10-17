@@ -74,10 +74,11 @@ donet build
 ## Compile and run tests
 ### Compile
 ```bash
-ninja -C build
+swift package init --type library
 ```
 ### Test
 - In your tests subproject
 ```bash
-tclsh run_tests.tcl
+swift test
+swift package clean
 ```

@@ -1,0 +1,135 @@
+$ include "seed7_05.s7i";
+	include "string.s7i";
+	include "array.s7i";
+	include "boolean.s7i";
+
+const type: TestSuite is new struct
+	var integer: passed is 0;
+	var integer: failed is 0;
+end struct;
+
+const type: Test is new interface;
+const type: arrayTest is array Test;
+const proc: assert_eq (inout TestSuite: suite, in Test: test_case) is DYNAMIC;
+const proc: addTest (inout TestSuite: suite, in string: name, in array Test: test_cases) is DYNAMIC;
+
+const type: TestCase is new struct
+	var string: name is "";
+end	struct;
+
+const func TestCase: test_case (in string: name) is func
+	result
+		var TestCase: a_test_case is TestCase.value;
+	begin
+		a_test_case.name := name;
+	end func;
+
+const type: StringCase is sub TestCase struct
+	var string: expected is "";
+	var string: actual is "";
+end	struct;
+
+const type: IntegerCase is sub TestCase struct
+	var integer: expected is 0;
+	var integer: actual is 0;
+end	struct;
+
+const type: BooleanCase is sub TestCase struct
+	var boolean: expected is FALSE;
+	var boolean: actual is FALSE;
+end struct;
+
+type_implements_interface(StringCase, Test);
+type_implements_interface(IntegerCase, Test);
+type_implements_interface(BooleanCase, Test);
+
+const proc: assert_eq (inout TestSuite: suite, in StringCase: test_case) is func
+	begin
+		if test_case.expected <> test_case.actual then
+			writeln(test_case.name <& " failed... expected : " <& test_case.expected <& " actual : " <& test_case.actual);
+			suite.failed +:= 1;
+		else
+			suite.passed +:= 1;
+		end if;
+	end func;
+
+const proc: assert_eq (inout TestSuite: suite, in IntegerCase: test_case) is func
+	begin
+		if test_case.expected <> test_case.actual then
+			writeln(test_case.name <& " failed... expected : " <& test_case.expected <& " actual : " <& test_case.actual);
+			suite.failed +:= 1;
+		else
+			suite.passed +:= 1;
+		end if;
+	end func;
+
+const proc: assert_eq (inout TestSuite: suite, in BooleanCase: test_case) is func
+	begin
+		if test_case.expected <> test_case.actual then
+			writeln(test_case.name <& " failed... expected : " <& test_case.expected <& " actual : " <& test_case.actual);
+			suite.failed +:= 1;
+		else
+			suite.passed +:= 1;
+		end if;
+	end func;
+
+const proc: addTest (inout TestSuite: suite, in string: name, in array StringCase: test_cases) is func
+	local
+		var StringCase: a_test_case is StringCase.value;
+	begin
+  	for a_test_case range test_cases do
+    	assert_eq(suite, a_test_case);
+  	end for;
+	end func;
+
+const proc: addTest (inout TestSuite: suite, in string: name, in array IntegerCase: test_cases) is func
+	local
+		var IntegerCase: a_test_case is IntegerCase.value;
+	begin
+  	for a_test_case range test_cases do
+    	assert_eq(suite, a_test_case);
+  	end for;
+	end func;
+
+const proc: addTest (inout TestSuite: suite, in string: name, in array BooleanCase: test_cases) is func
+	local
+		var BooleanCase: a_test_case is BooleanCase.value;
+	begin
+  	for a_test_case range test_cases do
+    	assert_eq(suite, a_test_case);
+  	end for;
+	end func;
+
+const func StringCase: test_case (in string: actual, in string: expected, in string: name) is func
+	result
+		var StringCase: a_test_case is StringCase.value;
+	begin
+		a_test_case.actual := actual;
+		a_test_case.expected := expected;
+		a_test_case.name := name;
+	end func;
+
+const func IntegerCase: test_case (in integer: actual, in integer: expected, in string: name) is func
+	result
+		var IntegerCase: a_test_case is IntegerCase.value;
+	begin
+		a_test_case.actual := actual;
+		a_test_case.expected := expected;
+		a_test_case.name := name;
+	end func;
+
+const func BooleanCase: test_case (in boolean: actual, in boolean: expected, in string: name) is func
+	result
+		var BooleanCase: a_test_case is BooleanCase.value;
+	begin
+		a_test_case.actual := actual;
+		a_test_case.expected := expected;
+		a_test_case.name := name;
+	end func;
+
+const proc: summary (in TestSuite: suite) is func
+  begin
+    writeln;
+    writeln("SUMMARY: " <& suite.passed <& " passed, " <& suite.failed <& " failed.");
+    writeln("----------------------------------------");
+  end func;

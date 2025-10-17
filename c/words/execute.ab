@@ -1,0 +1,45 @@
+task build {
+    command "echo" "Building the project using ninja..."
+    command "ninja" "-C" "build"
+    on_failure { 
+        command "echo" "Build failed."
+        command "exit" "1"
+    }
+}
+
+task test {
+    command "echo" "Running tests..."
+    command "./build/test/run_tests"
+    on_failure {
+        command "echo" "Tests failed."
+        command "exit" "1"
+    }
+}
+
+task clean {
+    command "echo" "Cleaning up build artifacts..."
+    command "rm" "-rf" "build"
+    on_failure {
+        command "echo" "Cleanup failed."
+        command "exit" "1"
+    }
+}
+
+task main {
+    build
+    on_success {
+        # Check if the test executable exists
+        command "test" "-f" "./build/test/run_tests"
+        on_success {
+            tests
+        }
+        on_failure {
+            command "echo" "Error: run_tests not found."
+            command "exit" "1"
+        }
+    }
+    clean
+    on_success {
+        command "echo" "Done."
+    }
+}

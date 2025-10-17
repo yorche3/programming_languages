@@ -1,0 +1,58 @@
+module WordsTest
+
+from "../src/words.gr" include Words
+from "./testing.gr" include Testing
+
+use Words.*
+use Testing.*
+
+
+let stringSuite = [
+  {
+    name: "ReverseString",
+    cases: [
+      { result: reverseString("hello"), expected: "olleh" },
+      { result: reverseString(""), expected: "" },
+      { result: reverseString("a"), expected: "a" },
+    ]
+  }
+]
+
+let boolSuite = [
+  {
+    name: "IsPalindrome",
+    cases: [
+      { result: isPalindrome("race car"), expected: true },
+      { result: isPalindrome("hello"), expected: false },
+      { result: isPalindrome("a"), expected: true },
+      { result: isPalindrome(""), expected: true },
+    ]
+  },
+  {
+    name: "KMPSearch",
+    cases: [
+      { result: kmpSearch("test", "this is a test"), expected: true },
+      { result: kmpSearch("not", "this is a test"), expected: false },
+      { result: kmpSearch("", "any string"), expected: true },
+      { result: kmpSearch("abc", "abc"), expected: true },
+      { result: kmpSearch("abc", "ab"), expected: false },
+    ]
+  }
+]
+
+let numberSuite = [
+  {
+    name: "LCS",
+    cases: [
+      { result: lcs("AGGTAB", "GXTXAYB"), expected: 4 },
+      { result: lcs("ABC", "ABC"), expected: 3 },
+      { result: lcs("ABC", "DEF"), expected: 0 },
+      { result: lcs("", "ABC"), expected: 0 },
+      { result: lcs("ABC", ""), expected: 0 },
+    ]
+  }
+]
+
+runTests(stringSuite)
+runTests(boolSuite)
+runTests(numberSuite)

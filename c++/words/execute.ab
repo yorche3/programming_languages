@@ -1,0 +1,26 @@
+task run_bazel_tests {
+    command "echo" "Starting Tests..."
+    command "bazel" "test" "//:all"
+    on_failure {
+        command "echo" "Tests failed!"
+        command "exit" "1"
+    }
+}
+
+task clean_project {
+    command "echo" "Cleaning project..."
+    command "rm" "-rf" "bazel*"
+    command "rm" "-f" "MODULE.bazel.lock"
+    on_failure {
+        command "echo" "Cleanup failed."
+        command "exit" "1"
+    }
+}
+
+task main {
+    run_bazel_tests
+    clean_project
+    on_success {
+        command "echo" "Cleanup completed successfully."
+    }
+}

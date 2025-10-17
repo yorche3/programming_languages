@@ -1,0 +1,29 @@
+{
+  "name": "words",
+  "version": "0.0.0",
+  "scripts": {
+    "res:build": "rescript",
+    "res:clean": "rescript clean",
+    "res:dev": "rescript -w",
+    "test": "rescript && jest"
+  },
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "rescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "@glennsl/rescript-jest": "^0.11.0",
+    "@rescript/core": "^1.6.1",
+    "babel-jest": "^30.2.0",
+    "bs-platform": "^9.0.2",
+    "jest": "^30.2.0",
+    "rescript": "^11.1.4"
+  }
+}

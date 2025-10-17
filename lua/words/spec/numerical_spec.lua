@@ -1,0 +1,27 @@
+local numer = require("numerical")
+
+describe("Numerical Suite", function()
+  it("fibonacci", function()
+    assert.are.equal(-1, numer.fibonacci(-3))
+    assert.are.equal(55, numer.fibonacci(10))
+    assert.are.equal(610, numer.fibonacci(15))
+  end)
+
+  it("factorial", function()
+    assert.are.equal(-1, numer.factorial(-3))
+    assert.are.equal(120, numer.factorial(5))
+    assert.are.equal(3628800, numer.factorial(10))
+  end)
+
+  it("greatest common divisor", function()
+    assert.are.equal(6, numer.gcd(48, 18))
+    assert.are.equal(25, numer.gcd(100, 25))
+    assert.are.equal(1, numer.gcd(17, 13))
+  end)
+
+  it("least common multiple", function()
+    assert.are.equal(12, numer.lcm(4, 6))
+    assert.are.equal(42, numer.lcm(21, 6))
+    assert.are.equal(21, numer.lcm(7, 3))
+  end)
+end)

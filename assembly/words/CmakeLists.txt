@@ -1,0 +1,65 @@
+cmake_minimum_required(VERSION 3.15)
+project(AssemblyTest)
+
+# Find NASM assembler
+find_program(NASM nasm)
+if(NOT NASM)
+    message(FATAL_ERROR "nasm not found")
+endif()
+
+# Define source and test directories
+set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+set(TEST_DIR ${CMAKE_SOURCE_DIR}/test)
+
+# List of source files
+set(SOURCE_ASM
+    "${SRC_DIR}/numerical.asm"
+    "${SRC_DIR}/words.asm"
+)
+
+# List of test files
+set(TEST_ASM
+    "${TEST_DIR}/test.asm"
+    "${TEST_DIR}/numerical_test.asm"
+    "${TEST_DIR}/words_test.asm"
+    "${TEST_DIR}/run_tests.asm"
+)
+
+# Output directory
+set(OUTPUT_DIR ${CMAKE_BINARY_DIR}/build_objects)
+file(MAKE_DIRECTORY ${OUTPUT_DIR})
+
+# Function to assemble ASM files
+function(assemble_asm input_files output_files)
+    foreach(idx ${input_files})
+        get_filename_component(fname ${idx} NAME_WE)
+        set(output_obj "${OUTPUT_DIR}/${fname}.o")
+        add_custom_command(
+            OUTPUT ${output_obj}
+            COMMAND ${NASM} -f elf64 ${idx} -o ${output_obj}
+            DEPENDS ${idx}
+            COMMENT "Assembling ${idx}"
+        )
+        list(APPEND ${output_files} ${output_obj})
+    endforeach()
+endfunction()
+
+# Assemble source files
+assemble_asm("${SOURCE_ASM}" SOURCE_OBJECTS)
+assemble_asm("${TEST_ASM}" TEST_OBJECTS)
+
+# Create executable
+add_custom_target(assemble_all ALL
+    DEPENDS ${SOURCE_OBJECTS} ${TEST_OBJECTS}
+)
+
+add_executable(run_tests
+    ${SOURCE_OBJECTS}
+    ${TEST_OBJECTS}
+)
+
+# Link options
+target_link_options(run_tests PRIVATE -nostartfiles -no-pie -e_start)
+
+# Add dependencies
+add_dependencies(run_tests assemble_all)

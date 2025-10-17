@@ -1,0 +1,43 @@
+$ include "seed7_05.s7i";
+  include "../src/words.s7i";
+  include "./test.s7i";
+  include "boolean.s7i";
+
+const proc: run_words_suite is func
+  local
+    var TestSuite: suite is TestSuite.value;
+  begin
+    writeln("--- Running Word Test Suite ---");
+
+    addTest(suite, "Reverse String", [] (
+      test_case(reverse_string("hello"), "olleh", "reverse 1"),
+      test_case(reverse_string("a"), "a", "reverse 2"),
+      test_case(reverse_string(""), "", "reverse 3")
+    ));
+
+    addTest(suite, "Is Palindrome", [] (
+      test_case(is_palindrome("race car"), TRUE, "palindrome 1"),
+      test_case(is_palindrome("level"), TRUE, "palindrome 2"),
+      test_case(is_palindrome("hello"), FALSE, "palindrome 3"),
+      test_case(is_palindrome("a"), TRUE, "palindrome 4"),
+      test_case(is_palindrome(""), TRUE, "palindrome 5")
+    ));
+
+    addTest(suite, "Is Substring", [] (
+      test_case(kmp_search("test", "this is a test"), TRUE, "substring 1"),
+      test_case(kmp_search("not", "this is a test"), FALSE, "substring 2"),
+      test_case(kmp_search("", "any string"), TRUE, "substring 3"),
+      test_case(kmp_search("abc", "abc"), TRUE, "substring 4"),
+      test_case(kmp_search("abc", "ab"), FALSE, "substring 5")
+    ));
+
+    addTest(suite, "Longest Common Subsequence", [] (
+      test_case(lcs("AGGTAB", "GXTXAYB"), 4, ""),
+      test_case(lcs("ABC", "ABC"), 3, ""),
+      test_case(lcs("ABC", "DEF"), 0, ""),
+      test_case(lcs("", "ABC"), 0, ""),
+      test_case(lcs("ABC", ""), 0, "")
+    ));
+
+    summary(suite);
+  end func;

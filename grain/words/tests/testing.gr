@@ -1,0 +1,53 @@
+module Testing
+
+from "list" include List
+from "string" include String
+
+provide record TestCase<a> {
+  result: a,
+  expected: a,
+}
+
+provide record Test<a> {
+  name: String,
+  cases: List<TestCase<a>>
+}
+
+provide let runTests = (testSuite, printSummary=true) => {
+  let mut passedTests = 0
+  let mut failedTests = 0
+  let mut i = 1
+
+  List.forEach((test) => {
+    let mut testFailed = false
+    print("\n--- Running Test: " ++ test.name ++ " ---")
+
+    List.forEach((case :TestCase<a>) => {
+      let passed = match ((case.result, case.expected)) {
+        (r, e) => r == e,
+      }
+
+      if (!passed) {
+        testFailed = true
+        print("Case " ++ toString(i) ++ 
+          " FAILED: expected " ++ toString(case.expected) ++ ", got " ++ toString(case.result))
+      }
+      i += 1
+    }, test.cases)
+
+    if (testFailed) {
+      failedTests = failedTests + 1
+    } else {
+      passedTests = passedTests + 1
+    }
+    i = 1
+  }, testSuite)
+
+  if (printSummary) {
+    let totalTests = passedTests + failedTests
+    print("\n--- Test Summary ---")
+    print("Tests: " ++ toString(passedTests) ++ " passed, " ++ toString(failedTests) ++ " failed, " ++ toString(totalTests) ++ " total")
+  }
+
+  failedTests == 0
+}

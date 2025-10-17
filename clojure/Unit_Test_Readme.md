@@ -9,11 +9,11 @@ How were built unit test projects.
 ## Structure
 ```text
 demo
-|--- src
-|--- test
-|    |--- run_tests.clj
-|--- deps.edn
-|--- project.clj
+├── src
+├── test
+│   └── run_tests.clj
+├── deps.edn
+└── project.clj
 ```
 
 ## Configure

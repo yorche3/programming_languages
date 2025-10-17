@@ -12,16 +12,16 @@ How were built unit test projects.
 ## Structure
 ```text
 demo
-|--- src
-|    |--- implementations (directory for files.c)
-|    |--- interfaces (directory for files.h)
-|    |--- meson.build
-|--- test
-|    |--- suites (directory for tests.c)
-|    |--- run_tests.c
-|    |--- meson.build
-|--- meson.build
+├── include
+│   └── meson.build
+├── src
+│   └── meson.build
+├── test
+│   ├── run_tests.c
+│   └── meson.build
+└── meson.build
 ```
+
 
 ## Configure
 Go to `demo` directory and

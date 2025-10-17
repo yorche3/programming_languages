@@ -15,7 +15,7 @@ module NumbersRecursive
     end
   end
 
-  def self.sum_numbers(n : Int32)
+  def self.sum_numbers(n : Int32) : Int32
     if (n <= 0)
       return 0
     else

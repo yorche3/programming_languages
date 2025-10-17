@@ -1,0 +1,25 @@
+package require Tcl 8.6
+package require tcltest
+
+namespace import ::tcltest::*
+source ../src/numerical.tcl
+namespace import ::numerical::*
+
+test fibonacci-1.0 {Fibonacci} {
+    list [fibonacci -3] [fibonacci 10] [fibonacci 15]
+} {-1 55 610}
+
+test factorial-2.0 {Factorial} {
+    list [factorial -3] [factorial 5] [factorial 10]
+} {-1 120 3628800}
+
+test gcd-3.0 {Greatest Common Divisor} {
+    list [gcd 48 18] [gcd 100 25] [gcd 17 13]
+} {6 25 1}
+
+test lcm-4.0 {Lowest Common Multiple} {
+    list [lcm 4 6] [lcm 21 6] [lcm 7 3]
+} {12 42 21}
+
+::tcltest::cleanupTests
+return

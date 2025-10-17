@@ -42,5 +42,5 @@ void main() {
 ```
 ## Compile and run tests
 ```bash
-dart test
+art test --reporter=expanded
 ```

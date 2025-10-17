@@ -1,0 +1,25 @@
+package require Tcl 8.6
+package require tcltest
+
+namespace import ::tcltest::*
+source ../src/words.tcl
+namespace import ::words::*
+
+test reverse_string-1.0 {Reverse String} {
+    list [reverse_string "hello"] [reverse_string "a"] [reverse_string ""]
+} {olleh a {}}
+
+test is_palindrome-2.0 {Is Palindrome} {
+    list [is_palindrome "race car"] [is_palindrome "level"] [is_palindrome "hello"] [is_palindrome "a"] [is_palindrome ""]
+} {true true false true true}
+
+test is_substring-3.0 {Is Substring} {
+    list [kmp_search "test" "this is a test"] [kmp_search "not" "this is a test"] [kmp_search "" "any string"] [kmp_search "abc" "abc"] [kmp_search "abc" "ab"]
+} {true false true true false}
+
+test lcs-4.0 {Longest Common Subsequence} {
+    list [lcs "AGGTAB" "GXTXAYB"] [lcs "ABC" "ABC"] [lcs "ABC" "DEF"] [lcs "" "ABC"] [lcs "ABC" ""]
+} {4 3 0 0 0}
+
+::tcltest::cleanupTests
+return

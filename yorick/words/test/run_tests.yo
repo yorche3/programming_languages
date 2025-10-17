@@ -1,0 +1,5 @@
+#include "numerical_test.yo"
+#include "words_test.yo"
+
+suite_numerical
+suite_words

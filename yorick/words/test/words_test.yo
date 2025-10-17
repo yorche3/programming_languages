@@ -1,0 +1,66 @@
+#include "../src/words.yo"
+
+test_run = 0
+test_failed = 0
+
+func assert_equal(actual, expected, test_name) {
+  test_run++
+  if (actual != expected) {
+    test_failed++
+    s = swrite(format="FAILED: %s. Expected '%d', but got '%d'.", test_name, expected, actual)
+    print, s
+  }
+}
+
+func assert_equal_string(actual, expected, test_name) {
+  test_run++
+  if (actual != expected) {
+    test_failed++
+    s = swrite(format="FAILED: %s. Expected '%s', but got '%s'.", test_name, expected, actual)
+    print, s
+  }
+}
+
+func reverse_string_test(void) {
+	assert_equal_string, reverse_string("hello"), "olleh", "reverse_string 1"
+	assert_equal_string, reverse_string("a"), "a", "reverse_string 2"
+	assert_equal_string, reverse_string(""), "", "reverse_string 3"
+}
+
+func is_palindrome_test(void) {
+  	assert_equal, is_palindrome("race car"), 1, "is_palindrome 1"
+	assert_equal, is_palindrome("level"), 1, "is_palindrome 2"
+	assert_equal, is_palindrome("hello"), 0, "is_palindrome 3"
+	assert_equal, is_palindrome("a"), 1, "is_palindrome 4"
+	assert_equal, is_palindrome(""), 1, "is_palindrome 5"
+}
+
+func is_substring_test(void) {
+	assert_equal, kmp_search("test", "this is a test"), 1, "kmp_search 1"
+	assert_equal, kmp_search("not", "this is a test"), 0, "kmp_search 2"
+	assert_equal, kmp_search("", "any string"), 1, "kmp_search 3"
+	assert_equal, kmp_search("abc", "abc"), 1, "kmp_search 4"
+	assert_equal, kmp_search("abc", "ab"), 0, "kmp_search 5"
+}
+
+func lcs_test(void) {
+	assert_equal, lcs("AGGTAB", "GXTXAYB"), 4, "lcs 1"
+	assert_equal, lcs("ABC", "ABC"), 3, "lcs 2"
+	assert_equal, lcs("ABC", "DEF"), 0, "lcs 3"
+	assert_equal, lcs("", "ABC"), 0, "lcs 4"
+	assert_equal, lcs("ABC", ""), 0, "lcs 5"
+}
+
+func suite_words(void) {
+	test_run = 0
+	test_failed = 0
+
+	reverse_string_test
+	is_palindrome_test
+	is_substring_test
+	lcs_test
+
+	print, "\n--- Words Suite Summary ---"
+	s = swrite(format="PASSED: %d, FAILED: %d, total: %d", test_run - test_failed, test_failed, test_run)
+	print, s
+}

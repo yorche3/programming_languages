@@ -1,0 +1,142 @@
+$ include "seed7_05.s7i";
+	include "array.s7i";
+	include "boolean.s7i";
+	include "string.s7i";
+
+const func string: reverse_string (in string: s) is func
+  result
+    var string: reversed_s is "";
+	local
+		var integer: j is 0;
+  begin
+		j := length(s);
+		while 1 <= j do
+			reversed_s &:= s[j];
+			decr(j);
+		end while;
+  end func;
+
+const func boolean: is_alnum (in char: c) is func
+  result
+    var boolean: res is FALSE;
+  begin
+		res := c <> ' ' and c <> '\n' and c <> '\t' and c <> '\r';
+  end func;
+
+const func boolean: is_palindrome (in string: s) is func
+  result
+    var boolean: res is TRUE;
+  local
+		var integer: i is 1;
+		var integer: j is 0;
+    var string: cleaned_s is "";
+    var char: a_char is ' ';
+  begin
+    for a_char range s do
+      if is_alnum(a_char) then
+        cleaned_s &:= a_char;
+      end if;
+    end for;
+    j := length(cleaned_s);
+    while i < j do
+      if cleaned_s[i] <> cleaned_s[j] then
+        res := FALSE;
+      end if;
+      i +:= 1;
+      j -:= 1;
+    end while;
+  end func;
+
+const type: arrayInteger is array integer;
+
+const func arrayInteger: compute_lps_array (in string: patt) is func
+  result
+    var arrayInteger: lps is arrayInteger.value;
+	local
+		var integer: len_patt is 0;
+		var integer: i is 2;
+		var integer: len_m is 0;
+  begin
+		len_patt := length(patt);
+		lps := len_patt times 0;
+		while i <= len_patt do
+			if patt[i] = patt[len_m + 1] then
+				len_m +:= 1;
+				lps[i] := len_m;
+				i +:= 1;
+			else
+				if len_m = 0 then
+					lps[i] := 0;
+					i +:= 1;
+				else
+					len_m := lps[len_m];
+				end if;
+			end if;
+		end while;
+  end func;
+
+const func boolean: kmp_search (in string: pat, in string: s) is func
+  result
+    var boolean: found is FALSE;
+	local
+		var integer: len_pat is 0;
+		var integer: len_s is 0;
+		var integer: i is 1;
+		var integer: j is 1;
+		var arrayInteger: lps is arrayInteger.value;
+  begin
+		len_pat := length(pat);
+		len_s := length(s);
+		if len_pat = 0 then
+			found := TRUE;
+		elsif len_pat > len_s then
+			found := FALSE;
+		else
+			lps := compute_lps_array(pat);
+			while i <= len_s do
+				if pat[j] = s[i] then
+					incr(i);
+					incr(j);
+					if j = len_pat then
+						found := TRUE;
+					end if;
+				else
+					if j <> 1 then
+						j := lps[j - 1];
+						if j = 0 then
+							incr(j);
+						end if;
+					else
+						i +:= 1;
+					end if;
+				end if;
+			end while;
+		end if;
+  end func;
+
+const type: matrixArray is array arrayInteger;
+
+const func integer: lcs (in string: str1, in string: str2) is func
+  result
+    var integer: res is 0;
+	local
+		var integer: len1 is 0;
+		var integer: len2 is 0;
+		var matrixArray: dp is matrixArray.value;
+		var integer: i is 0;
+		var integer: j is 0;
+	begin
+		len1 := length(str1);
+		len2 := length(str2);
+		dp := (len1 + 1) times ((len2 + 1) times 0);
+		for i range 2 to (len1 + 1) do
+			for j range 2 to (len2 + 1) do
+				if str1[i - 1] = str2[j - 1] then
+					dp[i][j] := dp[i - 1][j - 1] + 1;
+				else
+					dp[i][j] := max(dp[i - 1][j], dp[i][j - 1]);
+				end if;
+			end for;
+		end for;
+		res := dp[len1 + 1][len2 + 1];
+  end func;

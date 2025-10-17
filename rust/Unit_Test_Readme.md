@@ -74,10 +74,10 @@ donet build
 ## Compile and run tests
 ### Compile
 ```bash
-ninja -C build
+cargo init --lib
 ```
 ### Test
 - In your tests subproject
 ```bash
-tclsh run_tests.tcl
+cargo test
 ```

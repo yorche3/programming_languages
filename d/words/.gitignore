@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/words
+words.so
+words.dylib
+words.dll
+words.a
+words.lib
+words-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

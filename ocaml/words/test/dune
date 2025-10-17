@@ -1,0 +1,9 @@
+(test
+ (name test_numerical)
+ (libraries ounit2 liby)
+ (modules test_numerical))
+ 
+(test
+ (name test_words)
+ (libraries ounit2 liby)
+ (modules test_words))

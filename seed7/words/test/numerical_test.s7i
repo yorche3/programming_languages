@@ -1,0 +1,34 @@
+$ include "seed7_05.s7i";
+  include "../src/numerical.s7i";
+  include "./test.s7i";
+
+const proc: run_numerical_suite is func
+  local
+    var TestSuite: suite is TestSuite.value;
+  begin
+    writeln("--- Running Numerical Test Suite ---");
+		addTest(suite, "Fibonacci", [] (
+      test_case(fibonacci(-3), -1, ""),
+      test_case(fibonacci(10), 55, ""),
+      test_case(fibonacci(15), 610, "")
+    ));
+
+    addTest(suite, "Factorial", [] (
+      test_case(factorial(-3), -1, ""),
+      test_case(factorial(5), 120, ""),
+      test_case(factorial(10), 3628800, "")
+    ));
+
+		addTest(suite, "Greatest Common Divisor", [] (
+			test_case(gcd(48, 18), 6, ""),
+			test_case(gcd(100, 25), 25, ""),
+			test_case(gcd(17, 13), 1, "")
+		));
+		
+		addTest(suite, "Least Common Multiple", [] (
+			test_case(lcm(4, 6), 12, ""),
+			test_case(lcm(21, 6), 42, ""),
+			test_case(lcm(7, 3), 21, "")
+		));
+    summary(suite);
+  end func;

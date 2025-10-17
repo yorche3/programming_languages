@@ -1,0 +1,20 @@
+{
+  "name": "words",
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    },
+    {
+      "dir": "test",
+      "type": "dev"
+    }
+  ],
+  "package-specs": {
+    "module": "esmodule",
+    "in-source": true
+  },
+  "suffix": ".res.mjs",
+  "bs-dependencies": [],
+  "bs-dev-dependencies": ["@glennsl/rescript-jest"]
+}
