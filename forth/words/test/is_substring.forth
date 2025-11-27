@@ -111,4 +111,8 @@ variable found
 ;
 
 s" test" s" this is a test" is-substring lps . cr
+s" not" s" this is a test" is-substring lps . cr
+s" " s" any string" is-substring . cr
+s" abc" s" abc" is-substring lps . cr
+s" abc" s" ab" is-substring . cr
 bye

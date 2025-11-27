@@ -9,6 +9,8 @@
   then
 ;
 
+variable lps
+
 variable i-var
 variable j-var
 variable aux
@@ -89,7 +91,7 @@ variable len
 	then
 ;
 
-variable lps
+
 : print-array ( n -- )
   0 do
 		i lps + c@ . \ get lps[i]
@@ -98,7 +100,6 @@ variable lps
 
 \ Define the general-purpose array creation word
 : init-array ( u -- )
-	dump-stack
   create dup , cells allot
 	does>
 		u< 0= -24 and throw ( invalid numeric argument )

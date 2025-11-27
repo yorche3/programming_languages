@@ -17,11 +17,13 @@ include test.forth
 ;
 
 : test-is-substring ( -- )
-	S" test" S" this is a test" is-substring -1 assert-equals
+	cr ." Is Substring starting..." cr
+	s" test" s" this is a test" is-substring -1 assert-equals
 	s" not" s" this is a test" is-substring 0 assert-equals
 	s" " s" any string" is-substring -1 assert-equals
 	s" abc" s" abc" is-substring -1 assert-equals
 	s" abc" s" ab" is-substring 0 assert-equals
+	cr ." Is Substring finished..." cr
 ;
 
 : run-words-tests ( -- )
