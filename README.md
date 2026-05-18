@@ -76,9 +76,9 @@ The complete documentation, including the roadmap, the detailed structure and gu
 
 ## 🗺️ Roadmap
 
-Consulta el archivo [`ROADMAP.md`](ROADMAP.md) para obtener información sobre los objetivos futuros y el plan de desarrollo.
+Consulta el archivo [`ROADMAP.md`](docs/ROADMAP.md) para obtener información sobre los objetivos futuros y el plan de desarrollo.
 
-Check the [`ROADMAP.md`](ROADMAP.md) file for information about future objectives and the development plan.
+Check the [`ROADMAP.md`](docs/ROADMAP.md) file for information about future objectives and the development plan.
 
 ```text
 programming_languages/
