@@ -18,7 +18,7 @@ This monorepo aims to provide a comprehensive learning and experimentation envir
 
 ```text
 programming_languages/
-├── doc/ # Especificaciones, pseudocódigo y casos de prueba / Specification, pseudocode and test cases
+├── docs/ # Especificaciones, pseudocódigo y casos de prueba / Specification, pseudocode and test cases
 ├── programing_language_name/ # Implementaciones de cada lenguaje / Implementations of each language
 ...
 ```

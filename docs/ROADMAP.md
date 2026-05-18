@@ -8,14 +8,30 @@
 
 ---
 
+## 🚀 Inicio del flujo / Starting the Flow
+
+**ES:** Para comenzar a implementar, abre el primer documento de especificación:
+
+**EN:** To start implementing, open the first specification document:
+
+👉 **[`core/foundations/01_Hello_World.md`](core/foundations/01_Hello_World.md)** ← **INICIO / START**
+
+Luego sigue la numeración secuencial para avanzar en el flujo de implementación:
+
+```text
+01_Hello_World.md  →  02_Hello_User.md  →  03_Unit_Test.md  →  04_Numbers.md  →  ...
+```
+
+---
+
 ## Fase 0 — Fundamentos / Foundations (✅ Completada)
 
-| Módulo | Estado | Lenguajes | Notas |
-|--------|--------|-----------|-------|
-| `core.foundations.helloworld` | ✅ | Todos | Base mínima del lenguaje |
-| `core.foundations.hellouser` | ✅ | Todos | Entrada/salida interactiva |
-| `core.foundations.unit_test` | ✅ | Todos | Pruebas unitarias (TDD básico) |
-| `core.foundations.numbers` | ✅ | Todos | Algoritmos numéricos iterativos |
+| Módulo | Estado | Lenguajes | Especificación | Notas |
+|--------|--------|-----------|----------------|-------|
+| `core.foundations.helloworld` | ✅ | Todos | [`📄 01_Hello_World.md`](core/foundations/01_Hello_World.md) | Base mínima del lenguaje |
+| `core.foundations.hellouser` | ✅ | Todos | [`📄 02_Hello_User.md`](core/foundations/02_Hello_User.md) | Entrada/salida interactiva |
+| `core.foundations.unit_test` | ✅ | Todos | `03_Unit_Test.md` | Pruebas unitarias (TDD básico) |
+| `core.foundations.numbers` | ✅ | Todos | `04_Numbers.md` | Algoritmos numéricos iterativos |
 
 ---
 
