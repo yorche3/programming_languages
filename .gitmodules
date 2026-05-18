@@ -1,3 +1,6 @@
 [submodule "ada"]
 	path = ada
 	url = git@github.com:yorche3/ada.git
+[submodule "javascript"]
+	path = javascript
+	url = git@github.com:yorche3/javascript.git
