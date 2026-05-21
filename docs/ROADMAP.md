@@ -19,7 +19,7 @@
 Luego sigue la numeración secuencial para avanzar en el flujo de implementación:
 
 ```text
-01_Hello_World.md  →  02_Hello_User.md  →  03_Unit_Test.md  →  04_Numbers.md  →  ...
+01_Hello_World.md  →  02_Hello_User.md  →  03_Unit_Test_Demo.md  →  04_Numbers.md  →  ...
 ```
 
 ---
@@ -28,10 +28,10 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 | Módulo | Estado | Lenguajes | Especificación | Notas |
 |--------|--------|-----------|----------------|-------|
-| `core.foundations.helloworld` | ✅ | Todos | [`📄 01_Hello_World.md`](core/foundations/01_Hello_World.md) | Base mínima del lenguaje |
-| `core.foundations.hellouser` | ✅ | Todos | [`📄 02_Hello_User.md`](core/foundations/02_Hello_User.md) | Entrada/salida interactiva |
-| `core.foundations.unit_test` | ✅ | Todos | `03_Unit_Test.md` | Pruebas unitarias (TDD básico) |
-| `core.foundations.numbers` | ✅ | Todos | `04_Numbers.md` | Algoritmos numéricos iterativos |
+| `core.foundations.hello_world` | ✅ | Todos | [`📄 01_Hello_World.md`](core/foundations/01_Hello_World.md) | Base mínima del lenguaje |
+| `core.foundations.hello_user` | ✅ | Todos | [`📄 02_Hello_User.md`](core/foundations/02_Hello_User.md) | Entrada/salida interactiva |
+| `core.foundations.unit_test` | ✅ | Todos | `03_Unit_Test_Demo.md` | Operaciones aritméticas básicas con unit tests |
+| `core.foundations.numbers` | ✅ | Todos | `04_Numbers.md` | Algoritmos numéricos recursivos e iterativos |
 
 ---
 
@@ -159,23 +159,23 @@ A medida que se avanza a proyectos más complejos (a partir de `ui.cliapp`), los
 ## Resumen de progreso / Progress Summary
 
 ```text
-core.foundations.helloworld       ✅
-core.foundations.hellouser        ✅
-core.foundations.unit_test        ✅
-core.foundations.numbers          ✅
-core.text.transformations         ✅
-core.text.patterns                ✅
-core.text.regex                   📋
-core.text.parsing                 📋
-core.algorithms.sorting           📋
-core.algorithms.data_structures   📋
-core.algorithms.searching         📋
-core.data.input_output            📋
-core.data.modeling                📋
-core.data.data_base               📋
-core.math.statistics              📋
-core.math.linear_algebra          📋
-util                              ⏳
+core.foundations.hello_world       ✅
+core.foundations.hello_user        ✅
+core.foundations.unit_test         ✅
+core.foundations.numbers           ✅
+core.text.transformations          ✅
+core.text.patterns                 ✅
+core.text.regex                    📋
+core.text.parsing                  📋
+core.algorithms.sorting            📋
+core.algorithms.data_structures    📋
+core.algorithms.searching          📋
+core.data.input_output             📋
+core.data.modeling                 📋
+core.data.data_base                📋
+core.math.statistics               📋
+core.math.linear_algebra           📋
+util                               ⏳
 ui.cliapp    (Docker + Jenkins SAST/OWASP)  ⏳
 ui.tuiapp    (Docker + Jenkins SAST/OWASP)  ⏳
 ui.guiapp    (Docker + Jenkins SAST/OWASP)  ⏳

@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto de nombre `hellouser` cuyo contenido sea un solo archivo (`hellouser.ext` / `HelloUser.ext`) que solicite al usuario su nombre, lo almacene en una variable `name`, y luego muestre "Hello, {name}!" en la consola. | Create a project named `hellouser` with a single file (`hellouser.ext` or `HelloUser.ext`) that asks the user for their name, stores it in a variable `name`, and then displays "Hello, {name}!" in the console. |
+| Crear un proyecto de nombre `hello_user` cuyo contenido sea un solo archivo (`hello_user.ext` / `HelloUser.ext`) que solicite al usuario su nombre, lo almacene en una variable `name`, y luego muestre "Hello, {name}!" en la consola. | Create a project named `hello_user` with a single file (`hello_user.ext` or `HelloUser.ext`) that asks the user for their name, stores it in a variable `name`, and then displays "Hello, {name}!" in the console. |
 
 ### Entrada / Input
 
@@ -50,8 +50,8 @@ Hello, John!
       **EN:** The program runs without errors and displays the exact message.
 - [ ] **ES:** Usa únicamente la biblioteca estándar del lenguaje (sin dependencias externas).  
       **EN:** Uses only the language's standard library (no external dependencies).
-- [ ] **ES:** El archivo fuente sigue la convención de nombre del lenguaje (`hellouser.ext` o `HelloUser.ext`, donde `.ext` es la extensión propia del lenguaje).  
-      **EN:** The source file follows the language's naming convention (`hellouser.ext` or `HelloUser.ext`, where `.ext` is the language-specific extension).
+- [ ] **ES:** El archivo fuente sigue la convención de nombre del lenguaje (`hello_user.ext` o `HelloUser.ext`, donde `.ext` es la extensión propia del lenguaje).  
+      **EN:** The source file follows the language's naming convention (`hello_user.ext` or `HelloUser.ext`, where `.ext` is the language-specific extension).
 
 ---
 
@@ -68,7 +68,7 @@ show "Hello, " + name + "!"
 ### Python
 
 ```python
-# hellouser.py
+# hello_user.py
 name = input("What is your name? ")
 print("Hello, " + name + "!")
 ```
@@ -99,16 +99,16 @@ programming_languages/
     └── core/
         └── foundations/
             └── hello_user/
-                ├── hellouser.ext    # Código fuente / Source code (.ext = extensión del lenguaje / language extension)
-                └── README.md        # Instrucciones específicas (opcional)
+                ├── hello_user.ext    # Código fuente / Source code (.ext = extensión del lenguaje / language extension)
+                └── README.md         # Instrucciones específicas (opcional)
 ```
 
 ---
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [03_Unit_Test_Demo.md](03_Unit_Test_Demo.md) — Pruebas unitarias con algoritmos recursivos.  
-👉 Continue with [03_Unit_Test_Demo.md](03_Unit_Test_Demo.md) — Unit testing with recursive algorithms.
+👉 Sigue con [03_Unit_Test_Demo.md](03_Unit_Test_Demo.md) — Pruebas unitarias con operaciones aritméticas básicas.  
+👉 Continue with [03_Unit_Test_Demo.md](03_Unit_Test_Demo.md) — Unit testing with basic arithmetic operations.
 
 ---
 

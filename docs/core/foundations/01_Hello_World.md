@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto de nombre `helloworld` cuyo contenido sea un solo archivo (`helloworld.ext` / `HelloWorld.ext`) que imprima "Hello, World! from {Nombre del Lenguaje}!" en la consola y finalice. | Create a project named `helloworld` with a single file (`helloworld.ext` or `HelloWorld.ext`) that prints "Hello, World! from {Language Name}!" to the console and ends. |
+| Crear un proyecto de nombre `hello_world` cuyo contenido sea un solo archivo (`hello_world.ext` / `HelloWorld.ext`) que imprima "Hello, World! from {Nombre del Lenguaje}!" en la consola y finalice. | Create a project named `hello_world` with a single file (`hello_world.ext` or `HelloWorld.ext`) that prints "Hello, World! from {Language Name}!" to the console and ends. |
 
 ### Entrada / Input
 
@@ -49,8 +49,8 @@ Hello, World! from Python!
       **EN:** The program runs without errors and displays the exact message.
 - [ ] **ES:** Usa únicamente la biblioteca estándar del lenguaje (sin dependencias externas).  
       **EN:** Uses only the language's standard library (no external dependencies).
-- [ ] **ES:** El archivo fuente sigue la convención de nombre del lenguaje (`helloworld.ext` o `HelloWorld.ext`, donde `.ext` es la extensión propia del lenguaje).  
-      **EN:** The source file follows the language's naming convention (`helloworld.ext` or `HelloWorld.ext`, where `.ext` is the language-specific extension).
+- [ ] **ES:** El archivo fuente sigue la convención de nombre del lenguaje (`hello_world.ext` o `HelloWorld.ext`, donde `.ext` es la extensión propia del lenguaje).  
+      **EN:** The source file follows the language's naming convention (`hello_world.ext` or `HelloWorld.ext`, where `.ext` is the language-specific extension).
 
 ---
 
@@ -65,7 +65,7 @@ show "Hello, World! from Pseudocode!"
 ### Python
 
 ```python
-# helloworld.py
+# hello_world.py
 print("Hello, World! from Python!")
 ```
 
@@ -90,7 +90,8 @@ programming_languages/
     └── core/
         └── foundations/
             └── hello_world/
-                ├── helloworld.ext    # Código fuente / Source code (.ext = extensión del lenguaje / language extension)
+
+                ├── hello_world.ext   # Código fuente / Source code (.ext = extensión del lenguaje / language extension)
                 └── README.md         # Instrucciones específicas (opcional)
 ```
 

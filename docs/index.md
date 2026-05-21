@@ -41,7 +41,7 @@ programming_languages/
 │       └── foundations/
 │           ├── 01_Hello_World.md  # ← Inicio del flujo / Flow start
 │           ├── 02_Hello_User.md   # Siguiente / Next
-│           ├── 03_Unit_Test.md    # ...
+│           ├── 03_Unit_Test_Demo.md    # ...
 │           └── ...
 ├── python/                        # 🐍 Implementaciones Python
 ├── java/                          # ☕ Implementaciones Java
@@ -53,17 +53,17 @@ programming_languages/
 
 ## 📁 Convenciones de archivos / File Naming Conventions
 
-**ES:** En las especificaciones encontrarás referencias como `helloworld.ext`. El `.ext` es un marcador de posición (placeholder) que debes reemplazar por la extensión estándar de tu lenguaje (`.py`, `.java`, `.go`, `.rs`, etc.). El nombre base (`helloworld` en minúsculas o `HelloWorld` en CamelCase) debe seguir la convención de nomenclatura que dicta cada lenguaje.
+**ES:** En las especificaciones encontrarás referencias como `hello_world.ext`. El `.ext` es un marcador de posición (placeholder) que debes reemplazar por la extensión estándar de tu lenguaje (`.py`, `.java`, `.go`, `.rs`, etc.). El nombre base (en `snake_case` como `hello_world`) debe adaptarse a la convención de nomenclatura que dicta cada lenguaje (CamelCase, PascalCase, etc.).
 
-**EN:** In the specifications you'll find references like `helloworld.ext`. The `.ext` is a placeholder that you must replace with your language's standard extension (`.py`, `.java`, `.go`, `.rs`, etc.). The base name (`helloworld` in lowercase or `HelloWorld` in CamelCase) must follow the naming convention dictated by each language.
+**EN:** In the specifications you'll find references like `hello_world.ext`. The `.ext` is a placeholder that you must replace with your language's standard extension (`.py`, `.java`, `.go`, `.rs`, etc.). The base name (in `snake_case` like `hello_world`) must adapt to the naming convention dictated by each language (CamelCase, PascalCase, etc.).
 
 | Ejemplo / Example | Lenguaje / Language |
 |-------------------|-------------------|
-| `helloworld.py` | Python |
+| `hello_world.py` | Python |
 | `HelloWorld.java` | Java |
-| `helloworld.go` | Go |
+| `hello_world.go` | Go |
 | `HelloWorld.cs` | C# |
-| `helloworld.rs` | Rust |
+| `hello_world.rs` | Rust |
 | `hello_world.ex` | Elixir |
 
 ---
@@ -119,7 +119,7 @@ git submodule update --init --recursive
 📂 docs/core/foundations/
 ├── 01_Hello_World.md     ← 🚀 INICIO / START
 ├── 02_Hello_User.md      ← Siguiente / Next
-├── 03_Unit_Test.md       ← ...
+├── 03_Unit_Test_Demo.md       ← ...
 ├── 04_Numbers.md
 ├── ...
 │

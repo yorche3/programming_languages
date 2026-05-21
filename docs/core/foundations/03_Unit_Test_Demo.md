@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 03 — Unit Testing
-description: Tercera especificación / Third specification — Pruebas unitarias con algoritmos recursivos
+description: Tercera especificación / Third specification — Pruebas unitarias con operaciones aritméticas básicas
 nav_order: 3
 parent: Fundamentos / Foundations
 grand_parent: Core
@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar algoritmos recursivos clásicos (similares a su definición matemática) y validar su correctitud mediante pruebas unitarias, creando una estructura base tipo librería para futuros desarrollos. | Implement classic recursive algorithms (similar to their mathematical definition) and validate their correctness through unit tests, creating a base library-style structure for future development. |
+| Implementar un módulo `calculator` con operaciones aritméticas básicas (`addition`, `subtraction`, `multiply`, `division`) utilizando implementaciones intuitivas y educativas, y validar su correctitud mediante pruebas unitarias, creando una estructura base tipo biblioteca para futuros desarrollos. | Implement a `calculator` module with basic arithmetic operations (`addition`, `subtraction`, `multiply`, `division`) using intuitive and educational implementations, and validate their correctness through unit tests, creating a base library-style structure for future development. |
 
 ---
 
@@ -27,7 +27,19 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto dentro de un directorio `unit_test` con los siguientes módulos: `Calculator` (clase/namespace) que contenga los métodos `addition(a, b)` y `subtracttion(a, b)`, `Recursive` (clase/namespace) que contenga los métodos `sum_of_first_n(n)`, `factorial(n)`, y `fibonacci(n)` con su implementación recursiva más intuitiva posible, `Recursive With Accumulator` (clase/namespace) que contenga los métodos `sum_of_first_n`, `factorial`, y `fibonacci` con su implementación recursiva con acumulador (tail-call optimization *No todos los lenguajes lo soportan*) y cada uno de estos módulos debe tener su correspondiente suite de pruebas unitarias que cubran todas las funcionalidades implementadas. | Create a project within a `unit_test` directory with the following modules: `Calculator` (class/namespace) that contains the `addition(a, b)` and `subtracttion(a, b)` methods, `Recursive` (class/namespace) that contains the `sum_of_first_n(n)`, `factorial(n)`, and `fibonacci(n)` methods with their direct recursive implementation, `Recursive With Accumulator` (class/namespace) that contains the `sum_of_first_n`, `factorial`, and `fibonacci` methods with their recursive implementation with accumulator (tail-call optimization *Not all languages support it*) and each of these modules should have its corresponding unit tests suite that covers all implemented functionalities. |
+| Crear un proyecto dentro de un directorio `unit_test` con un módulo `calculator` (clase/namespace) que contenga los métodos `addition(a, b)`, `subtraction(a, b)`, `multiply(a, b)` y `division(a, b)` con implementaciones intuitivas/educativas, junto con un conjunto de pruebas unitarias que verifiquen su correcto funcionamiento. | Create a project inside a `unit_test` directory with a `calculator` module (class/namespace) containing `addition(a, b)`, `subtraction(a, b)`, `multiply(a, b)` and `division(a, b)` methods with intuitive/educational implementations, along with a set of unit tests that verify their correct behavior. |
+
+#### Implementaciones esperadas
+
+| Operación | Implementación educativa |
+|-----------|-------------------------|
+| `addition(a, b)` | Suma directa (`a + b`) — operación básica |
+| `subtraction(a, b)` | Resta directa (`a - b`) — operación básica |
+| `multiply(a, b)` | Suma repetitiva: sumar `a` consigo mismo `b` veces |
+| `division(a, b)` | Resta repetitiva: contar cuántas veces cabe `b` en `a` |
+
+> **ES:** Estas implementaciones educativas sientan las bases para entender cómo se construyen operaciones complejas a partir de operaciones simples, concepto que se explorará a fondo en el siguiente módulo (`04_Numbers.md`).  
+> **EN:** These educational implementations lay the groundwork for understanding how complex operations are built from simple ones, a concept that will be explored in depth in the next module (`04_Numbers.md`).
 
 ### Entrada / Input
 
@@ -37,16 +49,20 @@ Ninguna (no requiere entrada del usuario; las pruebas definen sus propios valore
 ### Salida esperada / Expected Output
 
 ```
-Tests run: 2, Passed: 2, Failed: 0
+Tests run: 4, Passed: 4, Failed: 0
 ```
 
-> **ES:** La salida exacta depende del framework de pruebas del lenguaje, pero todas las pruebas deben pasar.  
-> **EN:** The exact output depends on the language's test framework, but all tests must pass.
+> **ES:** La salida exacta depende del framework/biblioteca de pruebas del lenguaje (como `unittest` en Python, `JUnit` en Java, etc.), pero todas las pruebas deben pasar.  
+> **EN:** The exact output depends on the language's test framework/library (like `unittest` in Python, `JUnit` in Java, etc.), but all tests must pass.
 
 ## ✅ Criterios de aceptación / Acceptance Criteria
 
-- [ ] **ES:** Las pruebas unitarias se ejecutan sin errores y verifican las funciones/métodos de cada clase/namespace.  
-      **EN:** Unit tests run without errors and verify both operations (`add` and `subtract`).
+- [ ] **ES:** Las pruebas unitarias se ejecutan sin errores y verifican las 4 operaciones (`addition`, `subtraction`, `multiply`, `division`).  
+      **EN:** Unit tests run without errors and verify all 4 operations (`addition`, `subtraction`, `multiply`, `division`).
+- [ ] **ES:** `multiply` se implementa como suma repetitiva (no usa el operador `*`).  
+      **EN:** `multiply` is implemented as repeated addition (does not use the `*` operator).
+- [ ] **ES:** `division` se implementa como resta repetitiva (no usa el operador `/`).  
+      **EN:** `division` is implemented as repeated subtraction (does not use the `/` operator).
 - [ ] **ES:** El proyecto separa el código fuente (`src/`) de las pruebas (`test/`).  
       **EN:** The project separates source code (`src/`) from tests (`test/`).
 - [ ] **ES:** Usa únicamente la biblioteca estándar del lenguaje (sin dependencias externas).  
@@ -62,90 +78,162 @@ Tests run: 2, Passed: 2, Failed: 0
 container calculator
     .- addition(a, b)
         return a + b
+
     .- subtraction(a, b)
         return a - b
+
+    .- multiply(a, b)
+        result = 0
+        for i = 1 to b
+            result = addition(result, a)
+        return result
+
+    .- division(a, b)
+        if b == 0
+            return error "Division by zero"
+        count = 0
+        while a >= b
+            a = subtraction(a, b)
+            count = count + 1
+        return count
 end container
 ```
 
 ```pseudocode
-container recursive
-    .- sum_of_first_n(n)
-        if n == 0
-            return 0
-        return n + sum_of_first_n(n - 1)
-    .- factorial(n)
-        if n == 0
-            return 1
-        return n * factorial(n - 1)
-    .- fibonacci(n)
-        if n <= 1
-            return n
-        return fibonacci(n - 1) + fibonacci(n - 2)
-end container
-```
+suite calculator_tests from TestBase
+    .- test_addition
+        assert(addition(2, 3) == 5)
 
-```pseudocode
-container recursive_with_accumulator
-    .- sum_of_first_n(n)
-        return sum_of_first_n_iter(n, 0)
-    .- sum_of_first_n_iter(n, acc)
-        if n <= 0
-            return acc
-        return sum_of_first_n_iter(n - 1, n + acc)
-    .- factorial(n)
-        return factorial_iter(n, 1)
-    .- factorial_iter(n, acc)
-        if n <= 1
-            return acc
-        return factorial_iter(n - 1, n * acc)
-    .- fibonacci(n)
-        return fibonacci_iter(n, 0, 1)
-    .- fibonacci_iter(n, acc2, acc1)
-        if n <= 0
-            return acc2
-        if n <= 2
-            return acc1 + acc2
-        return fibonacci_iter(n - 1, acc1, acc1 + acc2)
-end container
-```
+    .- test_subtraction
+        assert(subtraction(5, 2) == 3)
 
-```pseudocode
-suite test_container_name
-    .- test_function/method_name
-        assert container_name.function/method_name(input) == expected_output
+    .- test_multiply
+        assert(multiply(3, 4) == 12)
+
+    .- test_division
+        assert(division(10, 3) == 3)
 end suite
 ```
 
-### Casos de prueba / Test Cases
+> **ES:** La `suite` agrupa todas las pruebas de un módulo. La cláusula `from TestBase` indica que la suite se adapta o hereda de la biblioteca/framework de pruebas del lenguaje (ej: `unittest.TestCase` en Python, `junit.framework.TestCase` en Java). Cada método `test_*` contiene una aserción que valida el resultado esperado.  
+> **EN:** The `suite` groups all tests for a module. The `from TestBase` clause indicates that the suite adapts or inherits from the language's testing library/framework (e.g., `unittest.TestCase` in Python, `junit.framework.TestCase` in Java). Each `test_*` method contains an assertion that validates the expected result.
 
-Para las pruebas unitarias, se deben considerar los siguientes escenarios:
+### Python
 
-- Casos normales: Entradas válidas y salidas esperadas.
+```python
+# src/calculator.py
+class Calculator:
+    @staticmethod
+    def addition(a, b):
+        return a + b
 
-La suite de pruebas del contenedor `calculator` debe incluir pruebas para las funciones `addition` y `subtraction` con las siguientes entradas y salidas:
+    @staticmethod
+    def subtraction(a, b):
+        return a - b
 
-addition:
-- Entrada: (2, 3) -> Salida: 5
-subtraction:
-- Entrada: (5, 2) -> Salida: 3
+    @staticmethod
+    def multiply(a, b):
+        result = 0
+        for _ in range(b):
+            result = Calculator.addition(result, a)
+        return result
 
-La suite de pruebas del contenedor `recursive` debe incluir pruebas para las funciones `sum_of_first_n`, `factorial`, y `fibonacci` con las siguientes entradas y salidas:
+    @staticmethod
+    def division(a, b):
+        if b == 0:
+            raise ValueError("Division by zero")
+        count = 0
+        while a >= b:
+            a = Calculator.subtraction(a, b)
+            count += 1
+        return count
+```
 
-sum_of_first_n:
-- Entrada: 3 -> Salida: 6 (1 + 2 + 3)
-factorial:
-- Entrada: 4 -> Salida: 24 (1 * 2 * 3 * 4)
-fibonacci:
-- Entrada: 6 -> Salida: 8 (0, 1, 1, 2, 3, 5)
+```python
+# test/test_calculator.py
+import unittest
+from src.calculator import Calculator
 
-La suite de pruebas del contenedor `recursive_with_accumulator` debe incluir pruebas para las funciones `sum_of_first_n`, `factorial`, y `fibonacci` con las siguientes entradas y salidas:
+class TestCalculator(unittest.TestCase):
+    def test_addition(self):
+        self.assertEqual(Calculator.addition(2, 3), 5)
 
-sum_of_first_n:
-- Entrada: 3 -> Salida: 6 (1 + 2 + 3)
-factorial:
-- Entrada: 4 -> Salida: 24 (1 * 2 * 3 * 4)
-fibonacci:
-- Entrada: 6 -> Salida: 8 (0, 1, 1, 2, 3, 5)
+    def test_subtraction(self):
+        self.assertEqual(Calculator.subtraction(5, 2), 3)
+
+    def test_multiply(self):
+        self.assertEqual(Calculator.multiply(3, 4), 12)
+
+    def test_division(self):
+        self.assertEqual(Calculator.division(10, 3), 3)
+
+if __name__ == "__main__":
+    unittest.main()
+```
+
+### Java
+
+```java
+// src/Calculator.java
+public class Calculator {
+    public static int addition(int a, int b) {
+        return a + b;
+    }
+
+    public static int subtraction(int a, int b) {
+        return a - b;
+    }
+
+    public static int multiply(int a, int b) {
+        int result = 0;
+        for (int i = 0; i < b; i++) {
+            result = addition(result, a);
+        }
+        return result;
+    }
+
+    public static int division(int a, int b) {
+        if (b == 0) {
+            throw new IllegalArgumentException("Division by zero");
+        }
+        int count = 0;
+        while (a >= b) {
+            a = subtraction(a, b);
+            count++;
+        }
+        return count;
+    }
+}
+```
+
+```java
+// test/CalculatorTest.java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class CalculatorTest {
+
+    @Test
+    public void testAddition() {
+        assertEquals(5, Calculator.addition(2, 3));
+    }
+
+    @Test
+    public void testSubtraction() {
+        assertEquals(3, Calculator.subtraction(5, 2));
+    }
+
+    @Test
+    public void testMultiply() {
+        assertEquals(12, Calculator.multiply(3, 4));
+    }
+
+    @Test
+    public void testDivision() {
+        assertEquals(3, Calculator.division(10, 3));
+    }
+}
+```
 
 ---
 
@@ -159,18 +247,18 @@ programming_languages/
             └── unit_test/
                 └── demo/
                     ├── src/
-                    │   └── calculator.ext       # Código fuente / Source code
-                    ├── test/
-                    │   └── test.ext             # Pruebas unitarias / Unit tests
-                    └── run_tests.ext            # Script opcional para ejecutar pruebas / Optional script to run tests
+                    │   └── calculator.ext          # Código fuente / Source code
+                    └── test/
+                        ├── test_calculator.ext     # Pruebas unitarias / Unit tests
+                        └── run_tests.ext           # Script opcional para ejecutar pruebas / Optional script to run tests
 ```
 
 ---
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`04_Numbers.md`](04_Numbers.md) — Algoritmos numéricos recursivos (Fibonacci, factorial, suma).  
-👉 Continue with [`04_Numbers.md`](04_Numbers.md) — Recursive numerical algorithms (Fibonacci, factorial, sum).
+👉 Sigue con [`04_Numbers.md`](04_Numbers.md) — Algoritmos numéricos recursivos e iterativos (Fibonacci, factorial, suma).  
+👉 Continue with [`04_Numbers.md`](04_Numbers.md) — Recursive and iterative numerical algorithms (Fibonacci, factorial, sum).
 
 ---
 
