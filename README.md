@@ -207,3 +207,19 @@ interop.system_calls
 interop.other_lang_bridge
 tools
 ```
+
+### 01 — Hello World
+
+Como todo primer paso para aprender cualquier lenguaje de programación, se escribirá un programa simple que muestre "Hello, World!" en la consola/terminal. Este es un proyecto básico pero fundamental para entender cómo funcionan los programas, cómo se configura el entorno de desarrollo y cómo se ejecuta el código.
+
+### 02 — Hello User
+
+Una vez que ya hayamos escrito nuestro primer programa, es el momento de dar paso a los elementos que permiten a los programas manejar los datos, estas son las variables. En este proyecto aprenderemos a declarar y usar variables,así como interactuar con el usuario a nivel básico por medio de las funciones/métodos que provee la biblioteca estándar del lenguaje.
+
+### 03 — Unit Testing
+
+Cambiamos de dirección y pasamos de usar la sintaxis que te ofrece el lenguaje a la implementación propia por medio de un lenguaje que se asemeje en este caso las `matemáticas`. Se hara implementación de tus primeros algoritmos recursivos que se asemejan a la forma más natural en que los estudias matemáticamente, además te permitirá explorar la forma atómica para verificar la correctitud de tu código por medio de pruebas unitarias, creando una estructura base tipo lib para tus siguientes desarrollos más complejos.
+
+### 04 — Numbers
+
+Después de entender cómo manejar variables, escribir funciones que vienen de un lenguaje como las matemáticas y realizar pruebas unitarias, es el momento de explorar las bases de mejora en la eficiencia del código. Para esto nos enfocaremos en pasar los algoritmos recursivos y recursivos con acumulador a iterativos para mejorar su eficiencia en cuanto a llamado a funciones y uso de memoria.
