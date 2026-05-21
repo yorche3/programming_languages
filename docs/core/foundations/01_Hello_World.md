@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Realizar un programa básico para introducirse en la programación. | Create a basic program to introduce yourself in programming. |
+| Escribir un programa básico que imprime "Hello, World!" en la consola para familiarizarse con la sintaxis fundamental del lenguaje, la configuración del entorno de desarrollo y la ejecución del código. | Write a basic program that prints "Hello, World!" to the console to get familiar with the language's fundamental syntax, development environment setup, and code execution. |
 
 ---
 
