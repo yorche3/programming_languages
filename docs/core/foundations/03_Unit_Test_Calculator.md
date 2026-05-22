@@ -89,9 +89,7 @@ container calculator
         return result
 
     .- division(a, b)
-        if b == 0
-            return error "Division by zero"
-        count = 0
+        // Division by zero is not implemented in this example
         while a >= b
             a = subtraction(a, b)
             count = count + 1
@@ -100,23 +98,30 @@ end container
 ```
 
 ```pseudocode
-suite calculator_tests from TestBase
+suite calculator_test extends TestBase
     .- test_addition
-        assert(addition(2, 3) == 5)
+        assert addition(2, 3) == 5
 
     .- test_subtraction
-        assert(subtraction(5, 2) == 3)
+        assert subtraction(5, 2) == 3
 
     .- test_multiply
-        assert(multiply(3, 4) == 12)
+        assert multiply(3, 4) == 12
 
     .- test_division
-        assert(division(10, 3) == 3)
+        assert division(10, 3) == 3
 end suite
 ```
 
-> **ES:** La `suite` agrupa todas las pruebas de un módulo. La cláusula `from TestBase` indica que la suite se adapta o hereda de la biblioteca/framework de pruebas del lenguaje (ej: `unittest.TestCase` en Python, `junit.framework.TestCase` en Java). Cada método `test_*` contiene una aserción que valida el resultado esperado.  
-> **EN:** The `suite` groups all tests for a module. The `from TestBase` clause indicates that the suite adapts or inherits from the language's testing library/framework (e.g., `unittest.TestCase` in Python, `junit.framework.TestCase` in Java). Each `test_*` method contains an assertion that validates the expected result.
+```pseudocode
+runner run_tests
+    execute calculator_test
+    show report
+end runner
+```
+
+> **ES:** `calculator_test` agrupa todas las pruebas del módulo `calculator`. La cláusula `extends TestBase` indica que la suite se adapta o hereda de la biblioteca/framework de pruebas del lenguaje (ej: `unittest.TestCase` en Python, `junit.framework.TestCase` en Java). Cada función/método `test_*` puede tener una o más aserciones. `run_tests` es el punto de entrada que ejecuta todas las suites y muestra el resumen (se crea solo en caso de que el lenguaje no lo incluya).  
+> **EN:** `calculator_test` groups all tests for the `calculator` module. The `extends TestBase` clause indicates that the suite adapts or inherits from the language's testing library/framework (e.g., `unittest.TestCase` in Python, `junit.framework.TestCase` in Java). Each `test_*` function/method can have one or more assertions. `run_tests` is the entry point that executes all suites and shows the summary (created only if the language doesn't include it).
 
 ### Python
 
@@ -193,9 +198,6 @@ public class Calculator {
     }
 
     public static int division(int a, int b) {
-        if (b == 0) {
-            throw new IllegalArgumentException("Division by zero");
-        }
         int count = 0;
         while (a >= b) {
             a = subtraction(a, b);
@@ -245,13 +247,16 @@ programming_languages/
     └── core/
         └── foundations/
             └── unit_test/
-                └── demo/
+                └── calculator/
                     ├── src/
                     │   └── calculator.ext          # Código fuente / Source code
                     └── test/
-                        ├── test_calculator.ext     # Pruebas unitarias / Unit tests
-                        └── run_tests.ext           # Script opcional para ejecutar pruebas / Optional script to run tests
+                        ├── calculator_test.ext     # Suite de pruebas / Test suite
+                        └── run_tests.ext           # Punto de entrada / Entry point
 ```
+
+> **ES:** `calculator_test.ext` es la suite que contiene todas las pruebas. `run_tests.ext` es el punto de entrada que ejecuta las suites y muestra el resumen.  
+> **EN:** `calculator_test.ext` is the suite containing all tests. `run_tests.ext` is the entry point that executes suites and shows the summary.
 
 ---
 

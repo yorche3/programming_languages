@@ -29,8 +29,8 @@ docs/core/
 │   ├── 02_Hello_User.md
 │   ├── 03_Unit_Test_Demo.md
 │   └── 04_Numbers.md
-├── text/                 # Procesamiento de texto / Text processing
 ├── algorithms/           # Algoritmos y estructuras de datos / Algorithms & data structures
+├── text/                 # Procesamiento de texto / Text processing
 ├── data/                 # Entrada/salida, modelado, bases de datos / I/O, modeling, databases
 ├── math/                 # Estadística, álgebra lineal / Statistics, linear algebra
 └── Readme.md             # Este archivo / This file
@@ -40,9 +40,9 @@ docs/core/
 
 ## 🎯 Propósito / Purpose
 
-**ES:** El objetivo principal de `core/` es proporcionar una base sólida y progresiva de conceptos de programación, implementables en cualquier lenguaje. A partir de los fundamentos, cada sección aborda un área distinta (texto, algoritmos, datos, matemáticas) construyendo sobre lo aprendido anteriormente.
+**ES:** El objetivo principal de `core/` es proporcionar una base sólida y progresiva de conceptos de programación, implementables en cualquier lenguaje. A partir de los fundamentos, cada sección aborda un área distinta (algoritmos, texto, datos, matemáticas) construyendo sobre lo aprendido anteriormente.
 
-**EN:** The main purpose of `core/` is to provide a solid and progressive foundation of programming concepts, implementable in any language. Starting from the foundations, each section covers a different area (text, algorithms, data, mathematics) building on previously learned concepts.
+**EN:** The main purpose of `core/` is to provide a solid and progressive foundation of programming concepts, implementable in any language. Starting from the foundations, each section covers a different area (algorithms, text, data, mathematics) building on previously learned concepts.
 
 ---
 
@@ -86,8 +86,8 @@ docs/core/
 
 | Sección / Section | ES | EN |
 |-------------------|----|----|
-| `text/` | Transformaciones, patrones, expresiones regulares, parsing | Transformations, patterns, regex, parsing |
-| `algorithms/` | Ordenamiento, búsqueda, estructuras de datos | Sorting, searching, data structures |
+| `algorithms/` | Ordenamiento, búsqueda, estructuras de datos (valores centinela, sin excepciones) | Sorting, searching, data structures (sentinel values, no exceptions) |
+| `text/` | Transformaciones, patrones, expresiones regulares, parsing (excepciones) | Transformations, patterns, regex, parsing (exceptions) |
 | `data/` | Entrada/salida de archivos, modelado, bases de datos | File I/O, modeling, databases |
 | `math/` | Estadística, álgebra lineal | Statistics, linear algebra |
 

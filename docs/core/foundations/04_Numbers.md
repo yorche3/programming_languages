@@ -9,7 +9,7 @@ grand_parent: Core
 
 # 🚀 04 — Numbers
 
-> [← Volver a 03_Unit_Test_Demo](03_Unit_Test_Demo.md)  
+> [← Volver a 03_Unit_Test_Calculator](03_Unit_Test_Calculator.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ---
@@ -202,8 +202,8 @@ programming_languages/
                 │   ├── recursive_with_accumulator.ext  # Recursión con acumulador / Accumulator recursion
                 │   └── iterative.ext                  # Versión iterativa / Iterative version
                 └── test/
-                    ├── test_numbers.ext               # Pruebas unitarias / Unit tests
-                    └── run_tests.ext                  # Script opcional para ejecutar pruebas / Optional script to run tests
+                    ├── numbers_test.ext               # Suite de pruebas / Test suite
+                    └── run_tests.ext                  # Punto de entrada / Entry point
 ```
 
 > **ES:** Para ejecutar las pruebas, usa el comando propio del framework/biblioteca de tu lenguaje (ej: `python -m unittest discover`, `mvn test`, `go test ./...`, etc.).  
@@ -218,4 +218,4 @@ programming_languages/
 
 ---
 
-*[← Volver a 03_Unit_Test_Demo](03_Unit_Test_Demo.md) | [↑ Inicio](../../index.md)*
+*[← Volver a 03_Unit_Test_Calculator](03_Unit_Test_Calculator.md) | [↑ Inicio](../../index.md)*

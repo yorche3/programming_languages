@@ -123,12 +123,18 @@ git submodule update --init --recursive
 ├── 04_Numbers.md
 ├── ...
 │
+📂 docs/core/algorithms/
+├── ...
+│
 📂 docs/core/text/
 ├── 01_Transformations.md
 ├── 02_Patterns.md
 ├── ...
 │
-📂 docs/core/algorithms/
+📂 docs/core/data/
+├── ...
+│
+📂 docs/core/math/
 ├── ...
 ```
 
