@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar un módulo `calculator` con operaciones aritméticas básicas (`addition`, `subtraction`, `multiply`, `division`) utilizando implementaciones intuitivas y educativas, y validar su correctitud mediante pruebas unitarias, creando una estructura base tipo biblioteca para futuros desarrollos. | Implement a `calculator` module with basic arithmetic operations (`addition`, `subtraction`, `multiply`, `division`) using intuitive and educational implementations, and validate their correctness through unit tests, creating a base library-style structure for future development. |
+| Implementar un módulo `calculator` con operaciones aritméticas básicas (`addition`, `subtraction`, `multiplication`, `division`, `modulus`) utilizando implementaciones intuitivas y educativas, y validar su correctitud mediante pruebas unitarias, creando una estructura base tipo biblioteca para futuros desarrollos. | Implement a `calculator` module with basic arithmetic operations (`addition`, `subtraction`, `multiplication`, `division`, `modulus`) using intuitive and educational implementations, and validate their correctness through unit tests, creating a base library-style structure for future development. |
 
 ---
 
@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto dentro de un directorio `unit_test` con un módulo `calculator` (clase/namespace) que contenga los métodos `addition(a, b)`, `subtraction(a, b)`, `multiply(a, b)` y `division(a, b)` con implementaciones intuitivas/educativas, junto con un conjunto de pruebas unitarias que verifiquen su correcto funcionamiento. | Create a project inside a `unit_test` directory with a `calculator` module (class/namespace) containing `addition(a, b)`, `subtraction(a, b)`, `multiply(a, b)` and `division(a, b)` methods with intuitive/educational implementations, along with a set of unit tests that verify their correct behavior. |
+| Crear un proyecto dentro de un directorio `unit_test` con un módulo `calculator` (clase/namespace) que contenga los métodos `addition(a, b)`, `subtraction(a, b)`, `multiplication(a, b)`, `division(a, b)` y `modulus(a, b)` con implementaciones intuitivas/educativas, junto con un conjunto de pruebas unitarias que verifiquen su correcto funcionamiento. | Create a project inside a `unit_test` directory with a `calculator` module (class/namespace) containing `addition(a, b)`, `subtraction(a, b)`, `multiplication(a, b)`, `division(a, b)` and `modulus(a, b)` methods with intuitive/educational implementations, along with a set of unit tests that verify their correct behavior. |
 
 #### Implementaciones esperadas
 
@@ -35,8 +35,9 @@ grand_parent: Core
 |-----------|-------------------------|
 | `addition(a, b)` | Suma directa (`a + b`) — operación básica |
 | `subtraction(a, b)` | Resta directa (`a - b`) — operación básica |
-| `multiply(a, b)` | Suma repetitiva: sumar `a` consigo mismo `b` veces |
+| `multiplication(a, b)` | Suma repetitiva: sumar `a` consigo mismo `b` veces |
 | `division(a, b)` | Resta repetitiva: contar cuántas veces cabe `b` en `a` |
+| `modulus(a, b)` | Resta repetitiva: obtener el resto de `a ÷ b` (usa `division` y `multiplication`) |
 
 > **ES:** Estas implementaciones educativas sientan las bases para entender cómo se construyen operaciones complejas a partir de operaciones simples, concepto que se explorará a fondo en el siguiente módulo (`04_Numbers.md`).  
 > **EN:** These educational implementations lay the groundwork for understanding how complex operations are built from simple ones, a concept that will be explored in depth in the next module (`04_Numbers.md`).
@@ -49,7 +50,7 @@ Ninguna (no requiere entrada del usuario; las pruebas definen sus propios valore
 ### Salida esperada / Expected Output
 
 ```
-Tests run: 4, Passed: 4, Failed: 0
+Tests run: 5, Passed: 5, Failed: 0
 ```
 
 > **ES:** La salida exacta depende del framework/biblioteca de pruebas del lenguaje (como `unittest` en Python, `JUnit` en Java, etc.), pero todas las pruebas deben pasar.  
@@ -57,12 +58,14 @@ Tests run: 4, Passed: 4, Failed: 0
 
 ## ✅ Criterios de aceptación / Acceptance Criteria
 
-- [ ] **ES:** Las pruebas unitarias se ejecutan sin errores y verifican las 4 operaciones (`addition`, `subtraction`, `multiply`, `division`).  
-      **EN:** Unit tests run without errors and verify all 4 operations (`addition`, `subtraction`, `multiply`, `division`).
-- [ ] **ES:** `multiply` se implementa como suma repetitiva (no usa el operador `*`).  
-      **EN:** `multiply` is implemented as repeated addition (does not use the `*` operator).
+- [ ] **ES:** Las pruebas unitarias se ejecutan sin errores y verifican las 5 operaciones (`addition`, `subtraction`, `multiplication`, `division`, `modulus`).  
+      **EN:** Unit tests run without errors and verify all 5 operations (`addition`, `subtraction`, `multiplication`, `division`, `modulus`).
+- [ ] **ES:** `multiplication` se implementa como suma repetitiva (no usa el operador `*`).  
+      **EN:** `multiplication` is implemented as repeated addition (does not use the `*` operator).
 - [ ] **ES:** `division` se implementa como resta repetitiva (no usa el operador `/`).  
       **EN:** `division` is implemented as repeated subtraction (does not use the `/` operator).
+- [ ] **ES:** `modulus` se implementa usando `division` y `multiplication` (no usa el operador `%`).  
+      **EN:** `modulus` is implemented using `division` and `multiplication` (does not use the `%` operator).
 - [ ] **ES:** El proyecto separa el código fuente (`src/`) de las pruebas (`test/`).  
       **EN:** The project separates source code (`src/`) from tests (`test/`).
 - [ ] **ES:** Usa únicamente la biblioteca estándar del lenguaje (sin dependencias externas).  
@@ -82,7 +85,7 @@ container calculator
     .- subtraction(a, b)
         return a - b
 
-    .- multiply(a, b)
+    .- multiplication(a, b)
         result = 0
         for i = 1 to b
             result = addition(result, a)
@@ -90,10 +93,16 @@ container calculator
 
     .- division(a, b)
         // Division by zero is not implemented in this example
+        quotient = 0
         while a >= b
             a = subtraction(a, b)
-            count = count + 1
-        return count
+            quotient = addition(quotient, 1)
+        return quotient
+
+    .- modulus(a, b)
+        q = division(a, b)
+        p = multiplication(q, b)
+        return subtraction(a, p)
 end container
 ```
 
@@ -105,11 +114,14 @@ suite calculator_test extends TestBase
     .- test_subtraction
         assert subtraction(5, 2) == 3
 
-    .- test_multiply
-        assert multiply(3, 4) == 12
+    .- test_multiplication
+        assert multiplication(3, 4) == 12
 
     .- test_division
         assert division(10, 3) == 3
+
+    .- test_modulus
+        assert modulus(10, 3) == 1
 end suite
 ```
 
@@ -137,7 +149,7 @@ class Calculator:
         return a - b
 
     @staticmethod
-    def multiply(a, b):
+    def multiplication(a, b):
         result = 0
         for _ in range(b):
             result = Calculator.addition(result, a)
@@ -152,6 +164,14 @@ class Calculator:
             a = Calculator.subtraction(a, b)
             count += 1
         return count
+
+    @staticmethod
+    def modulus(a, b):
+        if b == 0:
+            raise ValueError("Division by zero")
+        q = Calculator.division(a, b)
+        p = Calculator.multiplication(q, b)
+        return Calculator.subtraction(a, p)
 ```
 
 ```python
@@ -166,11 +186,14 @@ class TestCalculator(unittest.TestCase):
     def test_subtraction(self):
         self.assertEqual(Calculator.subtraction(5, 2), 3)
 
-    def test_multiply(self):
-        self.assertEqual(Calculator.multiply(3, 4), 12)
+    def test_multiplication(self):
+        self.assertEqual(Calculator.multiplication(3, 4), 12)
 
     def test_division(self):
         self.assertEqual(Calculator.division(10, 3), 3)
+
+    def test_modulus(self):
+        self.assertEqual(Calculator.modulus(10, 3), 1)
 
 if __name__ == "__main__":
     unittest.main()
@@ -189,7 +212,7 @@ public class Calculator {
         return a - b;
     }
 
-    public static int multiply(int a, int b) {
+    public static int multiplication(int a, int b) {
         int result = 0;
         for (int i = 0; i < b; i++) {
             result = addition(result, a);
@@ -204,6 +227,12 @@ public class Calculator {
             count++;
         }
         return count;
+    }
+
+    public static int modulus(int a, int b) {
+        int q = division(a, b);
+        int p = multiplication(q, b);
+        return subtraction(a, p);
     }
 }
 ```
@@ -226,13 +255,18 @@ public class CalculatorTest {
     }
 
     @Test
-    public void testMultiply() {
-        assertEquals(12, Calculator.multiply(3, 4));
+    public void testMultiplication() {
+        assertEquals(12, Calculator.multiplication(3, 4));
     }
 
     @Test
     public void testDivision() {
         assertEquals(3, Calculator.division(10, 3));
+    }
+
+    @Test
+    public void testModulus() {
+        assertEquals(1, Calculator.modulus(10, 3));
     }
 }
 ```
