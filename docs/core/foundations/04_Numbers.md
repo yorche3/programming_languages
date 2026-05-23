@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 04 — Numbers
-description: Cuarta especificación / Fourth specification — Algoritmos numéricos (Fibonacci, factorial, suma) en 3 enfoques
+description: Cuarta especificación / Fourth specification — Algoritmos numéricos (suma, factorial, Fibonacci, MCD, MCM) en 3 enfoques
 nav_order: 4
 parent: Fundamentos / Foundations
 grand_parent: Core
@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Explorar la optimización de código implementando algoritmos numéricos clásicos (Fibonacci, factorial, suma de primeros n números) en tres enfoques progresivos: recursión directa, recursión con acumulador (tail-call) e iterativo, comprendiendo las ventajas de cada uno en términos de legibilidad, eficiencia y uso de memoria. | Explore code optimization by implementing classic numerical algorithms (Fibonacci, factorial, sum of first n numbers) in three progressive approaches: direct recursion, accumulator recursion (tail-call), and iterative, understanding the advantages of each in terms of readability, efficiency, and memory usage. |
+| Explorar la optimización de código implementando algoritmos numéricos clásicos (suma de primeros n números, factorial, Fibonacci, máximo común divisor, mínimo común múltiplo) en tres enfoques progresivos: recursión directa, recursión con acumulador (tail-call) e iterativo, comprendiendo las ventajas de cada uno en términos de legibilidad, eficiencia y uso de memoria. | Explore code optimization by implementing classic numerical algorithms (sum of first n numbers, factorial, Fibonacci, greatest common divisor, least common multiple) in three progressive approaches: direct recursion, accumulator recursion (tail-call), and iterative, understanding the advantages of each in terms of readability, efficiency, and memory usage. |
 
 ---
 
@@ -27,15 +27,15 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `numbers` con tres módulos (`recursive`, `recursive_with_accumulator`, `iterative`) que implementen los algoritmos de Fibonacci, factorial y suma de los primeros n números, cada una con un enfoque diferente. Incluir una suite de pruebas unitarias que verifique todas las implementaciones con los casos de prueba especificados. | Create a `numbers` project with three modules (`recursive`, `recursive_with_accumulator`, `iterative`) that implement the Fibonacci, factorial, and sum of the first n numbers algorithms, each with a different approach. Include a unit test suite that verifies all implementations with the specified test cases. |
+| Crear un proyecto `numbers` con un único archivo que implemente los algoritmos de suma de los primeros n números, factorial, Fibonacci, máximo común divisor y mínimo común múltiplo **en tres enfoques** (recursión directa `_rec`, recursión con acumulador `_acc` e iterativo `_ite`), más helpers privados `_help`. Incluir suites de prueba unitarias separadas por enfoque que verifiquen todas las implementaciones con los casos de prueba especificados. | Create a `numbers` project with a single file implementing the sum of first n numbers, factorial, Fibonacci, greatest common divisor, and least common multiple algorithms **in three approaches** (direct recursion `_rec`, accumulator recursion `_acc`, and iterative `_ite`), plus private `_help` helpers. Include separate unit test suites per approach that verify all implementations with the specified test cases. |
 
 ### Progresión de optimización
 
 | Módulo | Enfoque | Características |
 |--------|---------|-----------------|
 | `recursive` | Recursión directa (definición matemática) | ❌ Múltiples llamadas recursivas, alto uso de pila, código más legible y cercano a la definición matemática |
-| `recursive_with_accumulator` | Recursión con acumulador (tail-call style) | ✅ Una sola llamada recursiva por paso, prepara el terreno para la versión iterativa, menor uso de pila (si el lenguaje optimiza tail-call) |
-| `iterative` | Iterativo (bucles) | ✅✅ Sin llamadas recursivas, memoria constante O(1), máxima eficiencia en tiempo y espacio |
+| `recursive_with_accumulator` | Recursión con acumulador (tail-call style) | ✅ Una sola llamada recursiva por paso, prepara el terreno para la versión iterativa, menor uso de pila (si el lenguaje implementa tail-call optimization) |
+| `iterative` | Iterativo (bucles) | ✅✅ Sin llamadas recursivas, memoria constante, máxima eficiencia en tiempo y espacio |
 
 ### Entrada / Input
 
@@ -45,8 +45,8 @@ Ninguna (no requiere entrada del usuario; las pruebas definen sus propios valore
 ### Salida esperada / Expected Output
 
 ```
-tests runned 9
-passed 9
+tests runned 33
+passed 33
 failed 0
 ```
 
@@ -55,8 +55,8 @@ failed 0
 
 ## ✅ Criterios de aceptación / Acceptance Criteria
 
-- [ ] **ES:** Se implementan los tres algoritmos (Fibonacci, factorial, suma) en los tres enfoques.  
-      **EN:** All three algorithms (Fibonacci, factorial, sum) are implemented in all three approaches.
+- [ ] **ES:** Se implementan los cinco algoritmos (suma, factorial, Fibonacci, MCD, MCM) en los tres enfoques.  
+      **EN:** All five algorithms (sum, factorial, Fibonacci, GCF, LCM) are implemented in all three approaches.
 - [ ] **ES:** `recursive` usa recursión directa (similar a la definición matemática).  
       **EN:** `recursive` uses direct recursion (similar to the mathematical definition).
 - [ ] **ES:** `recursive_with_accumulator` usa recursión con acumulador (tail-call style).  
@@ -72,64 +72,95 @@ failed 0
 
 ## 💡 Ejemplo / Example
 
-### Pseudocódigo / Pseudocode — recursive
+### Pseudocódigo / Pseudocode — recursive (`_rec`)
 
 ```pseudocode
 container recursive
-    .- fibonacci(n)
-        if n <= 1
-            return n
-        return fibonacci(n - 1) + fibonacci(n - 2)
-
-    .- factorial(n)
-        if n == 0
-            return 1
-        return n * factorial(n - 1)
-
-    .- sum_of_first_n(n)
+    .- sum_of_first_n_rec(n)
         if n == 0
             return 0
-        return n + sum_of_first_n(n - 1)
+        return n + sum_of_first_n_rec(n - 1)
+
+    .- factorial_rec(n)
+        if n == 0
+            return 1
+        return n * factorial_rec(n - 1)
+
+    .- fibonacci_rec(n)
+        if n <= 1
+            return n
+        return fibonacci_rec(n - 1) + fibonacci_rec(n - 2)
+
+    .- greatest_common_divisor_rec(a, b)
+        if b == 0
+            return a
+        return greatest_common_divisor_rec(b, a % b)
+
+    .- least_common_multiple_rec(a, b)
+        return (a * b) / greatest_common_divisor_rec(a, b)
 end container
 ```
 
-### Pseudocódigo / Pseudocode — recursive_with_accumulator
+### Pseudocódigo / Pseudocode — recursive_with_accumulator (`_acc`)
 
 ```pseudocode
 container recursive_with_accumulator
-    .- fibonacci(n)
-        return fibonacci_iter(n, 0, 1)
+    .- sum_of_first_n_acc(n)
+        return sum_of_first_n_acc_help(n, 0)
 
-    .- fibonacci_iter(n, acc2, acc1)
+    .- sum_of_first_n_acc_help(n, acc)
+        if n <= 0
+            return acc
+        return sum_of_first_n_acc_help(n - 1, n + acc)
+
+    .- factorial_acc(n)
+        return factorial_acc_help(n, 1)
+
+    .- factorial_acc_help(n, acc)
+        if n <= 1
+            return acc
+        return factorial_acc_help(n - 1, n * acc)
+
+    .- fibonacci_acc(n)
+        return fibonacci_acc_help(n, 0, 1)
+
+    .- fibonacci_acc_help(n, acc2, acc1)
         if n <= 0
             return acc2
         if n <= 2
             return acc1 + acc2
-        return fibonacci_iter(n - 1, acc1, acc1 + acc2)
+        return fibonacci_acc_help(n - 1, acc1, acc1 + acc2)
 
-    .- factorial(n)
-        return factorial_iter(n, 1)
+    .- greatest_common_divisor_acc(a, b)
+        return greatest_common_divisor_acc_help(a, b)
 
-    .- factorial_iter(n, acc)
-        if n <= 1
-            return acc
-        return factorial_iter(n - 1, n * acc)
+    .- greatest_common_divisor_acc_help(a, b)
+        if b == 0
+            return a
+        return greatest_common_divisor_acc_help(b, a % b)
 
-    .- sum_numbers(n)
-        return sum_numbers_iter(n, 0)
-
-    .- sum_numbers_iter(n, acc)
-        if n <= 0
-            return acc
-        return sum_numbers_iter(n - 1, n + acc)
+    .- least_common_multiple_acc(a, b)
+        return (a * b) / greatest_common_divisor_acc(a, b)
 end container
 ```
 
-### Pseudocódigo / Pseudocode — iterative
+### Pseudocódigo / Pseudocode — iterative (`_ite`)
 
 ```pseudocode
 container iterative
-    .- fibonacci(n)
+    .- sum_of_first_n_ite(n)
+        result = 0
+        for i = 1 to n
+            result = result + i
+        return result
+
+    .- factorial_ite(n)
+        result = 1
+        for i = 2 to n
+            result = result * i
+        return result
+
+    .- fibonacci_ite(n)
         if n <= 1
             return n
         acc2 = 0
@@ -140,17 +171,16 @@ container iterative
             acc1 = temp
         return acc1
 
-    .- factorial(n)
-        result = 1
-        for i = 2 to n
-            result = result * i
-        return result
+    .- greatest_common_divisor_ite(a, b)
+        temp = 0
+        while b != 0
+            temp = b
+            b = a % b
+            a = temp
+        return a
 
-    .- sum_of_first_n(n)
-        result = 0
-        for i = 1 to n
-            result = result + i
-        return result
+    .- least_common_multiple_ite(a, b)
+        return (a * b) / greatest_common_divisor_ite(a, b)
 end container
 ```
 
@@ -160,27 +190,39 @@ Las pruebas unitarias deben verificar los siguientes casos para cada módulo y a
 
 | Módulo | Algoritmo | Entrada | Salida esperada |
 |--------|-----------|---------|----------------|
-| `recursive` | `fibonacci(n)` | 0 | 0 |
-| `recursive` | `fibonacci(n)` | 1 | 1 |
-| `recursive` | `fibonacci(n)` | 6 | 8 |
-| `recursive` | `factorial(n)` | 0 | 1 |
-| `recursive` | `factorial(n)` | 4 | 24 |
-| `recursive` | `sum_of_first_n(n)` | 0 | 0 |
-| `recursive` | `sum_of_first_n(n)` | 3 | 6 |
-| `recursive_with_accumulator` | `fibonacci(n)` | 0 | 0 |
-| `recursive_with_accumulator` | `fibonacci(n)` | 1 | 1 |
-| `recursive_with_accumulator` | `fibonacci(n)` | 6 | 8 |
-| `recursive_with_accumulator` | `factorial(n)` | 0 | 1 |
-| `recursive_with_accumulator` | `factorial(n)` | 4 | 24 |
-| `recursive_with_accumulator` | `sum_numbers(n)` | 0 | 0 |
-| `recursive_with_accumulator` | `sum_numbers(n)` | 3 | 6 |
-| `iterative` | `fibonacci(n)` | 0 | 0 |
-| `iterative` | `fibonacci(n)` | 1 | 1 |
-| `iterative` | `fibonacci(n)` | 6 | 8 |
-| `iterative` | `factorial(n)` | 0 | 1 |
-| `iterative` | `factorial(n)` | 4 | 24 |
-| `iterative` | `sum_of_first_n(n)` | 0 | 0 |
-| `iterative` | `sum_of_first_n(n)` | 3 | 6 |
+| `recursive` | `sum_of_first_n_rec(n)` | 0 | 0 |
+| `recursive` | `sum_of_first_n_rec(n)` | 3 | 6 |
+| `recursive` | `factorial_rec(n)` | 0 | 1 |
+| `recursive` | `factorial_rec(n)` | 4 | 24 |
+| `recursive` | `fibonacci_rec(n)` | 0 | 0 |
+| `recursive` | `fibonacci_rec(n)` | 1 | 1 |
+| `recursive` | `fibonacci_rec(n)` | 6 | 8 |
+| `recursive` | `greatest_common_divisor_rec(a, b)` | 12, 8 | 4 |
+| `recursive` | `greatest_common_divisor_rec(a, b)` | 7, 5 | 1 |
+| `recursive` | `least_common_multiple_rec(a, b)` | 4, 6 | 12 |
+| `recursive` | `least_common_multiple_rec(a, b)` | 6, 8 | 24 |
+| `recursive_with_accumulator` | `sum_of_first_n_acc(n)` | 0 | 0 |
+| `recursive_with_accumulator` | `sum_of_first_n_acc(n)` | 3 | 6 |
+| `recursive_with_accumulator` | `factorial_acc(n)` | 0 | 1 |
+| `recursive_with_accumulator` | `factorial_acc(n)` | 4 | 24 |
+| `recursive_with_accumulator` | `fibonacci_acc(n)` | 0 | 0 |
+| `recursive_with_accumulator` | `fibonacci_acc(n)` | 1 | 1 |
+| `recursive_with_accumulator` | `fibonacci_acc(n)` | 6 | 8 |
+| `recursive_with_accumulator` | `greatest_common_divisor_acc(a, b)` | 12, 8 | 4 |
+| `recursive_with_accumulator` | `greatest_common_divisor_acc(a, b)` | 7, 5 | 1 |
+| `recursive_with_accumulator` | `least_common_multiple_acc(a, b)` | 4, 6 | 12 |
+| `recursive_with_accumulator` | `least_common_multiple_acc(a, b)` | 6, 8 | 24 |
+| `iterative` | `sum_of_first_n_ite(n)` | 0 | 0 |
+| `iterative` | `sum_of_first_n_ite(n)` | 3 | 6 |
+| `iterative` | `factorial_ite(n)` | 0 | 1 |
+| `iterative` | `factorial_ite(n)` | 4 | 24 |
+| `iterative` | `fibonacci_ite(n)` | 0 | 0 |
+| `iterative` | `fibonacci_ite(n)` | 1 | 1 |
+| `iterative` | `fibonacci_ite(n)` | 6 | 8 |
+| `iterative` | `greatest_common_divisor_ite(a, b)` | 12, 8 | 4 |
+| `iterative` | `greatest_common_divisor_ite(a, b)` | 7, 5 | 1 |
+| `iterative` | `least_common_multiple_ite(a, b)` | 4, 6 | 12 |
+| `iterative` | `least_common_multiple_ite(a, b)` | 6, 8 | 24 |
 
 ---
 
@@ -198,16 +240,16 @@ programming_languages/
         └── foundations/
             └── numbers/
                 ├── src/
-                │   ├── recursive.ext                  # Recursión directa / Direct recursion
-                │   ├── recursive_with_accumulator.ext  # Recursión con acumulador / Accumulator recursion
-                │   └── iterative.ext                  # Versión iterativa / Iterative version
+                │   └── numbers.ext                  # Único archivo: 3 enfoques en 1
                 └── test/
-                    ├── numbers_test.ext               # Suite de pruebas / Test suite
-                    └── run_tests.ext                  # Punto de entrada / Entry point
+                    ├── recursive_tests.ext           # Tests: enfoque recursivo
+                    ├── recursive_with_acc_tests.ext  # Tests: enfoque con acumulador
+                    ├── iterative_tests.ext           # Tests: enfoque iterativo
+                    └── run_tests.ext                 # Punto de entrada
 ```
 
-> **ES:** Para ejecutar las pruebas, usa el comando propio del framework/biblioteca de tu lenguaje (ej: `python -m unittest discover`, `mvn test`, `go test ./...`, etc.).  
-> **EN:** To run the tests, use the command provided by your language's test framework/library (e.g., `python -m unittest discover`, `mvn test`, `go test ./...`, etc.).
+> **ES:** Los nombres de las funciones siguen el patrón `algoritmo_(rec|acc|ite)` con helpers privados `algoritmo_(rec|acc|ite)_help`. Las suites de prueba están separadas por enfoque pero todas referencian el mismo `numbers.ext`. Para ejecutar las pruebas, usa el comando propio del framework/biblioteca de tu lenguaje.
+> **EN:** Function names follow the pattern `algorithm_(rec|acc|ite)` with private helpers `algorithm_(rec|acc|ite)_help`. Test suites are separated by approach but all reference the same `numbers.ext`. To run the tests, use the command provided by your language's test framework/library.
 
 ---
 
