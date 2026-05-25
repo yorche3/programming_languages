@@ -68,8 +68,8 @@ There is no global installation required. Each language is configured and run in
 
 ## 📖 Documentación / Documentation
 
-La documentación completa, incluyendo el roadmap, la estructura detallada y guías está disponible en la carpeta `doc` y en el sitio web del monorepo:
+La documentación completa, incluyendo el roadmap, la estructura detallada y guías está disponible en la carpeta `docs` y en el sitio web del monorepo:
 
-The complete documentation, including the roadmap, the detailed structure and guides is available in the `doc` folder and on the monorepo website:
+The complete documentation, including the roadmap, the detailed structure and guides is available in the `docs` folder and on the monorepo website:
 
 👉 https://yorche3.github.io/programming_languages

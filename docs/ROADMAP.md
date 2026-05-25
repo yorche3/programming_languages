@@ -19,7 +19,7 @@
 Luego sigue la numeración secuencial para avanzar en el flujo de implementación:
 
 ```text
-01_Hello_World.md  →  02_Hello_User.md  →  03_Unit_Test_Demo.md  →  04_Numbers.md  →  ...
+01_Hello_World.md  →  02_Hello_User.md  →  03_Unit_Test_Calculator.md  →  04_Numbers.md  →  ...
 ```
 
 ---
@@ -48,7 +48,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 |--------|--------|-----------|----------------|-------|
 | `core.foundations.hello_world` | ✅ | Todos | [`📄 01_Hello_World.md`](core/foundations/01_Hello_World.md) | Base mínima del lenguaje |
 | `core.foundations.hello_user` | ✅ | Todos | [`📄 02_Hello_User.md`](core/foundations/02_Hello_User.md) | Entrada/salida interactiva |
-| `core.foundations.unit_test` | ✅ | Todos | [`📄 03_Unit_Test_Demo.md`](core/foundations/03_Unit_Test_Demo.md) | Operaciones aritméticas básicas con unit tests |
+| `core.foundations.unit_test` | ✅ | Todos | [`📄 03_Unit_Test_Calculator.md`](core/foundations/03_Unit_Test_Calculator.md) | Operaciones aritméticas básicas con unit tests |
 | `core.foundations.numbers` | ✅ | Todos | [`📄 04_Numbers.md`](core/foundations/04_Numbers.md) | Algoritmos numéricos recursivos e iterativos |
 
 ---
@@ -61,7 +61,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 | Módulo | Estado | Algoritmos |
 |--------|--------|------------|
-| `core.algorithms.sorting` | 📋 | bubble, insertion, selection, quick, merge, heap, radix, bucket, shell, counting |
+| `core.algorithms.sorting` | ✅ | bubble, insertion, selection, quick, merge, heap, radix, bucket, shell, counting |
 | `core.algorithms.data_structures` | 📋 | stack, queue, linked_list, tree, graph, hash_table, heap, set |
 | `core.algorithms.searching` | 📋 | linear, binary, jump, interpolation |
 
@@ -75,8 +75,8 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
-| `core.text.transformations` | ✅ | reverse, remove_blank_chars |
-| `core.text.patterns` | ✅ | palindrome, anagram, substring, LPP, KMP, LCS, LCP, Boyer-Moore, Z-Algorithm |
+| `core.text.transformations` | ✅ | reverse, remove_blank_chars, to_uppercase, to_lowercase, capitalize, trim, trim_start, trim_end, pad_left, pad_right |
+| `core.text.patterns` | 📋 | palindrome, anagram, substring, LPP, KMP, LCS, LCP, Boyer-Moore, Z-Algorithm |
 | `core.text.regex` | 📋 | Patrones de email, teléfono, etc. |
 | `core.text.parsing` | 📋 | csv_parser, json_parser, arithmetic_parser |
 
@@ -218,11 +218,11 @@ core.foundations.hello_world          ✅
 core.foundations.hello_user           ✅
 core.foundations.unit_test            ✅
 core.foundations.numbers              ✅
-core.algorithms.sorting               📋
+core.algorithms.sorting               ✅
 core.algorithms.data_structures       📋
 core.algorithms.searching             📋
 core.text.transformations             ✅
-core.text.patterns                    ✅
+core.text.patterns                    📋
 core.text.regex                       📋
 core.text.parsing                     📋
 core.data.input_output                📋

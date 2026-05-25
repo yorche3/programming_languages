@@ -4,7 +4,7 @@ title: 01 — Hello World
 description: Primera especificación / First specification — Hello World en cualquier lenguaje
 nav_order: 1
 parent: Fundamentos / Foundations
-grand_parent: Core
+grand_parent: 🧱 Core
 ---
 
 # 🚀 01 — Hello World
@@ -90,7 +90,6 @@ programming_languages/
     └── core/
         └── foundations/
             └── hello_world/
-
                 ├── hello_world.ext   # Código fuente / Source code (.ext = extensión del lenguaje / language extension)
                 └── README.md         # Instrucciones específicas (opcional)
 ```
