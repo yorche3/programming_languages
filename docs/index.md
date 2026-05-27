@@ -24,7 +24,7 @@ description: Implementación de conceptos de programación en múltiples lenguaj
 | Ruta / Path | Contenido / Content |
 |-------------|--------------------|
 | [`🗺️ ROADMAP.md`](ROADMAP.md) | Plan de desarrollo completo / Full development plan |
-| [`🚀 01_Hello_World.md`](core/foundations/01_Hello_World.md) | **Inicio del flujo de implementación** / Start the implementation flow |
+| [`🧱 Core`](core/README.md) | Índice general de la documentación base / Main core documentation index |
 
 > 💡 **Convención de nombres / Naming convention:** Los documentos siguen una numeración secuencial (`01_`, `02_`, `03_`…) que indica el orden recomendado de implementación. Sigue la numeración para avanzar en el flujo.
 
@@ -38,10 +38,20 @@ programming_languages/
 │   ├── index.md                   # Portada / Landing page
 │   ├── ROADMAP.md                 # Plan de desarrollo / Development roadmap
 │   └── core/
-│       └── foundations/
-│           ├── 01_Hello_World.md  # ← Inicio del flujo / Flow start
-│           ├── 02_Hello_User.md   # Siguiente / Next
-│           ├── 03_Unit_Test_Demo.md    # ...
+│       ├── README.md              # Índice general / Main core index
+│       ├── foundations/
+│       │   ├── README.md
+│       │   ├── 01_Hello_World.md
+│       │   ├── 02_Hello_User.md
+│       │   ├── 03_Unit_Test_Calculator.md
+│       │   └── 04_Numbers.md
+│       ├── algorithms/
+│       │   ├── README.md
+│       │   ├── 05_Sorting.md
+│       │   └── ...
+│       └── text/
+│           ├── README.md
+│           ├── 01_Transformations.md
 │           └── ...
 ├── python/                        # 🐍 Implementaciones Python
 ├── java/                          # ☕ Implementaciones Java
@@ -116,26 +126,26 @@ git submodule update --init --recursive
 **EN:** The specification documents are numbered sequentially. This way you can follow the implementation path without getting lost:
 
 ```text
-📂 docs/core/foundations/
-├── 01_Hello_World.md     ← 🚀 INICIO / START
-├── 02_Hello_User.md      ← Siguiente / Next
-├── 03_Unit_Test_Demo.md       ← ...
-├── 04_Numbers.md
-├── ...
-│
-📂 docs/core/algorithms/
-├── ...
-│
-📂 docs/core/text/
-├── 01_Transformations.md
-├── 02_Patterns.md
-├── ...
-│
-📂 docs/core/data/
-├── ...
-│
-📂 docs/core/math/
-├── ...
+📂 docs/core/
+├── README.md             ← Índice general / Main index
+├── foundations/          ← Fase 0
+│   ├── README.md         ← Índice / Index
+│   ├── 01_Hello_World.md ← 🚀 INICIO / START
+│   ├── 02_Hello_User.md
+│   ├── 03_Unit_Test_Calculator.md
+│   └── 04_Numbers.md
+├── algorithms/           ← Fase 1 — Algoritmos Puros
+│   ├── README.md
+│   ├── 01_Sorting.md     ← naive_sort (O(n²))
+│   └── ...
+├── text/                 ← Fase 2 — Procesamiento Contiguo
+│   ├── README.md
+│   ├── 01_Transformations.md
+│   └── ...
+├── data/                 ← Fase 3 — Abstracción y Persistencia
+│   └── README.md
+└── math/                 ← Fase 4
+    └── README.md
 ```
 
 > **Consejo / Tip:** Si estás en GitHub Pages, usa la navegación del sitio. Si estás en el repositorio directamente, abre los archivos `.md` en orden numérico.

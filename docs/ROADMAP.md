@@ -33,9 +33,9 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 | Concepto introducido / Concept introduced | Fase / Phase | Dónde se practica / Where practiced |
 |-------------------------------------------|-------------|-------------------------------------|
 | Bucles, condicionales, funciones / Loops, conditionals, functions | 0 — **Foundations** | `hello_world`, `hello_user`, `unit_test`, `numbers` |
-| **Valores centinela** (sin excepciones): la función devuelve un valor especial (`-1`, `None`) para indicar error sin interrumpir el flujo / **Sentinel values** (no exceptions): function returns a special value (`-1`, `None`) to indicate error without interrupting flow | 1 — **Algorithms** | `sorting`, `searching`, `data_structures` |
-| **Excepciones**: los algoritmos lanzan/atrapan excepciones para entradas inválidas / **Exceptions**: algorithms throw/catch exceptions for invalid inputs | 2 — **Text** | `regex`, `parsing`, `patterns` con validación |
-| **Tipos de retorno** (Option/Result, Maybe/Either) si el lenguaje lo soporta / **Return types** (Option/Result, Maybe/Either) if the language supports it | 3 — **Data** | `input_output`, `data_base` |
+| **Valores centinela** (sin excepciones): la función devuelve un valor especial (`-1`, `None`) para indicar error sin interrumpir el flujo / **Sentinel values** (no exceptions): function returns a special value (`-1`, `None`) to indicate error without interrupting flow | 1 — **Algorithms Pure** | `naive_sort`, `efficient_sort`, `distributed_sort`, `data_structures`, `searching` |
+| **Excepciones**: los algoritmos lanzan/atrapan excepciones para entradas inválidas / **Exceptions**: algorithms throw/catch exceptions for invalid inputs | 2 — **Contiguous Processing** | `patterns`, `substr`, `input_output`, `etl_basico` |
+| **Tipos de retorno** (Option/Result, Maybe/Either) si el lenguaje lo soporta / **Return types** (Option/Result, Maybe/Either) if the language supports it | 3 — **Abstraction & Persistence** | `modeling`, `regex`, `parsing`, `data_base`, `integracion_etl` |
 
 > **ES:** Esto explica por qué en `algorithms` el código "no muere" sino que devuelve un valor especial, y en `text` ya se usan excepciones. Las pruebas unitarias verifican estos comportamientos según corresponda.  
 > **EN:** This explains why in `algorithms` the code "doesn't crash" but returns a special value, and in `text` exceptions are already used. Unit tests verify these behaviors accordingly.
@@ -53,46 +53,61 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 ---
 
-## Fase 1 — Algoritmos y Estructuras de Datos / Algorithms & Data Structures (📋)
+## Fase 1 — Algoritmos Puros / Algorithms Pure (📋)
 
-**ES:** Los algoritmos usan **valores centinela** (sin excepciones) para indicar errores. Esto mantiene la lógica simple y evita interrumpir el flujo de control.
+**ES:** Algoritmos estructurados solo con arrays y valores centinela. Sin excepciones, sin estructuras avanzadas. Se progresa desde los algoritmos más simples hasta los optimizados.
 
-**EN:** Algorithms use **sentinel values** (no exceptions) to indicate errors. This keeps logic simple and avoids interrupting the control flow.
+**EN:** Algorithms structured with only arrays and sentinel values. No exceptions, no advanced structures. Progress from the simplest to the optimized algorithms.
 
 | Módulo | Estado | Algoritmos |
 |--------|--------|------------|
-| `core.algorithms.sorting` | ✅ | bubble, insertion, selection, quick, merge, heap, radix, bucket, shell, counting |
-| `core.algorithms.data_structures` | 📋 | stack, queue, linked_list, tree, graph, hash_table, heap, set |
+| `core.algorithms.naive_sort` | ✅ | bubble, insertion, selection |
+| `core.algorithms.data_structures` | 📋 | stack, queue, linked_list, tree, graph (con arrays) |
+| `core.algorithms.efficient_sort` | 📋 | quick, merge, heap |
+| `core.algorithms.distributed_sort` | 📋 | radix, bucket, shell, counting |
 | `core.algorithms.searching` | 📋 | linear, binary, jump, interpolation |
 
----
-
-## Fase 2 — Texto / Text (✅ Completada hasta patterns)
-
-**ES:** El procesamiento de texto introduce el **manejo de excepciones** para validar entradas (patrones inválidos, formatos incorrectos, etc.).
-
-**EN:** Text processing introduces **exception handling** to validate inputs (invalid patterns, incorrect formats, etc.).
-
-| Módulo | Estado | Notas |
-|--------|--------|-------|
-| `core.text.transformations` | ✅ | reverse, remove_blank_chars, to_uppercase, to_lowercase, capitalize, trim, trim_start, trim_end, pad_left, pad_right |
-| `core.text.patterns` | 📋 | palindrome, anagram, substring, LPP, KMP, LCS, LCP, Boyer-Moore, Z-Algorithm |
-| `core.text.regex` | 📋 | Patrones de email, teléfono, etc. |
-| `core.text.parsing` | 📋 | csv_parser, json_parser, arithmetic_parser |
+> **ES:** `naive_sort` (O(n²)) ya está implementado en `05_Sorting.md`. Los módulos `efficient_sort` y `distributed_sort` se separarán en documentos propios para mantener el foco didáctico.
+> **EN:** `naive_sort` (O(n²)) is already implemented in `05_Sorting.md`. The `efficient_sort` and `distributed_sort` modules will have their own documents to maintain didactic focus.
 
 ---
 
-## Fase 3 — Datos / Data (📋)
+## Fase 2 — Procesamiento Contiguo / Contiguous Processing (📋)
 
-**ES:** El manejo de datos introduce **tipos de retorno** (Option/Result, Maybe/Either) cuando el lenguaje lo soporta, para modelar operaciones que pueden fallar (archivos, BD).
+**ES:** Procesamiento de datos usando solo estructuras contiguas (arrays, archivos). Se introducen excepciones para manejar errores. Incluye transformaciones de texto, búsqueda de patrones básicos, I/O de archivos y ETL básico.
 
-**EN:** Data handling introduces **return types** (Option/Result, Maybe/Either) when the language supports it, to model operations that may fail (files, DB).
+**EN:** Data processing using only contiguous structures (arrays, files). Exceptions are introduced for error handling. Includes string transformations, basic pattern matching, file I/O, and basic ETL.
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
-| `core.data.input_output` | 📋 | Archivos (read, write, append) con excepciones y validaciones |
-| `core.data.modeling` | 📋 | user, product, order… |
+| `core.text.transformations` | ✅ | reverse, trim, capitalize, to_uppercase, to_lowercase, pad_left/right, remove_blank_chars |
+| `core.text.patterns` | 📋 | palindrome, anagram (con arrays ASCII, sin HashMaps) |
+| `core.text.substr` | 📋 | Naive Search, LPP, KMP, Boyer-Moore, LCS, LCP, Z-Algorithm |
+| `core.text.input_output` | 📋 | Archivos (read, write, append) con excepciones y validaciones |
+| `core.text.etl_basico` | 📋 | CSV parse, JSON parse básico, transformaciones de datos |
+
+> **ES:** Esta fase sustituye el concepto anterior de "Text" puro. Ahora incluye I/O de archivos y ETL básico usando solo arrays. Los algoritmos de patrón más complejos (KMP, Boyer-Moore) usan tablas de salto basadas en arrays.
+> **EN:** This phase replaces the previous pure "Text" concept. It now includes file I/O and basic ETL using only arrays. Complex pattern algorithms (KMP, Boyer-Moore) use array-based jump tables.
+
+---
+
+## Fase 3 — Abstracción y Persistencia / Abstraction & Persistence (📋)
+
+**ES:** Se introducen tipos de retorno (Option/Result), modelado de datos, expresiones regulares, parsing formal, bases de datos y ETL integrado. Es la capa de abstracción sobre el procesamiento contiguo.
+
+**EN:** Return types (Option/Result), data modeling, regular expressions, formal parsing, databases, and integrated ETL are introduced. This is the abstraction layer over contiguous processing.
+
+| Módulo | Estado | Notas |
+|--------|--------|-------|
+| `core.data.modeling` | 📋 | user, product, order... |
+| `core.data.strsearch` | 📋 | String search con abstracciones y tipos de retorno |
+| `core.data.regex` | 📋 | Patrones de email, teléfono, etc. |
+| `core.data.parsing` | 📋 | csv_parser, json_parser, arithmetic_parser |
 | `core.data.data_base` | 📋 | raw_queries, ORM, connection_pool |
+| `core.data.integracion_etl` | 📋 | Pipelines ETL que integran I/O, regex y BD |
+
+> **ES:** La Fase 3 unifica lo que antes eran Fase 2 (regex, parsing) y Fase 3 (modeling, data_base) en una sola capa de abstracción. El ETL básico de la Fase 2 se integra aquí con BD para formar pipelines completos.
+> **EN:** Phase 3 unifies what were previously Phase 2 (regex, parsing) and Phase 3 (modeling, data_base) into a single abstraction layer. The basic ETL from Phase 2 is integrated here with databases to form complete pipelines.
 
 ---
 
@@ -138,7 +153,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 ## Fase 5 — Interfaz de Usuario / UI (⏳ — Proyectos complejos)
 
 > **ES:** A partir de esta fase, cada proyecto incluirá:  
-> - ✅ **Jenkinsfile** — Pipeline CI/CD  
+> - ✅ **Jenkinsfile** — Pipeline CI/CD 
 > - ✅ **Dockerfile** — Contenedor de construcción y ejecución  
 > - ✅ **docker-compose.yml** — Orquestación local (si aplica)  
 > - 🔒 **Análisis de seguridad estático (SAST)** — Aplicación de análisis de código  
@@ -214,24 +229,43 @@ A medida que se avanza a proyectos más complejos (a partir de `ui.cliapp`), los
 ## Resumen de progreso / Progress Summary
 
 ```text
+## Fase 0 — Foundations ✅
 core.foundations.hello_world          ✅
 core.foundations.hello_user           ✅
 core.foundations.unit_test            ✅
 core.foundations.numbers              ✅
-core.algorithms.sorting               ✅
+
+## Fase 1 — Algorithms Pure 📋
+core.algorithms.naive_sort            ✅
 core.algorithms.data_structures       📋
+core.algorithms.efficient_sort        📋
+core.algorithms.distributed_sort      📋
 core.algorithms.searching             📋
+
+## Fase 2 — Contiguous Processing 📋
 core.text.transformations             ✅
 core.text.patterns                    📋
-core.text.regex                       📋
-core.text.parsing                     📋
-core.data.input_output                📋
+core.text.substr                       📋
+core.text.input_output                📋
+core.text.etl_basico                  📋
+
+## Fase 3 — Abstraction & Persistence 📋
 core.data.modeling                    📋
+core.data.strsearch                   📋
+core.data.regex                       📋
+core.data.parsing                     📋
 core.data.data_base                   📋
+core.data.integracion_etl             📋
+
+## Fase 4 — Math 📋
 core.math.statistics                  📋
 core.math.linear_algebra              📋
+
+## Utilidades y Herramientas ⏳
 util.{logging,db,data_transform,...}  ⏳
 tools.{sast_ada,coverage_reporter}    ⏳
+
+## Proyectos complejos ⏳
 ui.cliapp   (Docker + Jenkins SAST/OWASP) ⏳
 ui.tuiapp   (Docker + Jenkins SAST/OWASP) ⏳
 ui.guiapp   (Docker + Jenkins SAST/OWASP) ⏳
