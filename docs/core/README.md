@@ -48,3 +48,57 @@ has_children: true
 ---
 
 *[← Volver al inicio](../index.md)*
+
+🔁 Flujo completo de trabajo paso a paso
+1️⃣ Partir desde dev actualizada
+bash
+
+git switch dev
+git pull origin dev   # actualiza dev con los últimos cambios remotos
+
+2️⃣ Crear una nueva rama feature desde dev
+bash
+
+git switch -c feature/autenticacion   # ejemplo: feature/autenticacion
+
+3️⃣ Trabajar en la feature (commits normales)
+bash
+
+# ... editas archivos ...
+git add .
+git commit -m "Añadir login básico"
+git push -u origin feature/autenticacion   # primera subida (opcional)
+
+4️⃣ Integrar la feature terminada en dev
+Opción A – Merge directo (recomendada para features pequeñas)
+bash
+
+git switch dev
+git pull origin dev                # aseguras dev actualizada
+git merge --no-ff feature/autenticacion   # fusiona la feature
+git push origin dev
+
+Opción B – Con integración previa de dev en la feature (para evitar conflictos grandes)
+bash
+
+git switch feature/autenticacion
+git merge dev                       # trae lo último de dev a tu feature
+# (resuelves conflictos si los hay)
+git add . && git commit -m "Merge dev into feature"
+git switch dev
+git merge --no-ff feature/autenticacion
+git push origin dev
+
+5️⃣ Eliminar la rama feature (local y remota)
+bash
+
+git branch -d feature/autenticacion
+git push origin --delete feature/autenticacion
+
+6️⃣ Cuando dev está estable, fusionarla a main
+bash
+
+git switch main
+git pull origin main
+git merge --no-ff dev
+git push origin main
