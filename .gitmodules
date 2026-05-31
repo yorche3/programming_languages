@@ -7,3 +7,6 @@
 [submodule "assembly"]
 	path = assembly
 	url = git@github.com:yorche3/assembly.git
+[submodule "ballerina"]
+	path = ballerina
+	url = git@github.com:yorche3/ballerina.git
