@@ -1,0 +1,19 @@
+# Define a list of modules
+modules := ["numerical", "words"]
+
+# Main task
+task main {
+    # Loop over each module
+    for module in modules {
+        # Add the module
+        command "echo" "Adding module '${module}'"
+        command "bal" "add" module
+        on_failure {
+            command "echo" "Failed to add '${module}' module."
+            command "exit" "1"
+        }
+    }
+
+    # Final success message
+    command "echo" "Setup completed successfully!"
+}
