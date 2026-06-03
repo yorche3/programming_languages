@@ -10,3 +10,6 @@
 [submodule "ballerina"]
 	path = ballerina
 	url = git@github.com:yorche3/ballerina.git
+[submodule "c"]
+	path = c
+	url = git@github.com:yorche3/c.git
