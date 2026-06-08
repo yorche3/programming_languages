@@ -16,3 +16,6 @@
 [submodule "csharp"]
 	path = csharp
 	url = git@github.com:yorche3/csharp.git
+[submodule "cpp"]
+	path = cpp
+	url = git@github.com:yorche3/cpp.git
