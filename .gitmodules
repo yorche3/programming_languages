@@ -19,3 +19,6 @@
 [submodule "cpp"]
 	path = cpp
 	url = git@github.com:yorche3/cpp.git
+[submodule "clojure"]
+	path = clojure
+	url = git@github.com:yorche3/clojure.git

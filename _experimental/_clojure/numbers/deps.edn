@@ -1,0 +1,6 @@
+{:deps {org.clojure/clojure {:mvn/version "1.11.1"}}
+ :paths ["src" "test"] 
+ :aliases {:test {:extra-paths ["test"]}}
+ :prep-lib {:alias :build
+                 :fn compile
+                 :ensure "target/classes"}}                                                                   
