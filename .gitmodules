@@ -22,3 +22,6 @@
 [submodule "clojure"]
 	path = clojure
 	url = git@github.com:yorche3/clojure.git
+[submodule "cobol"]
+	path = cobol
+	url = git@github.com:yorche3/cobol.git
