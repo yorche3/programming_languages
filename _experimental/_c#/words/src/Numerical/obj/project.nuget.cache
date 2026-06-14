@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "bR5RhdwEpVw=",
+  "dgSpecHash": "jkJvWAhFX58=",
   "success": true,
   "projectFilePath": "/home/yorche3/programming_languages/_experimental/_c#/words/src/Numerical/Numerical.csproj",
   "expectedPackageFiles": [
-    "/home/yorche3/.nuget/packages/microsoft.netcore.app.ref/8.0.27/microsoft.netcore.app.ref.8.0.27.nupkg.sha512",
-    "/home/yorche3/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.27/microsoft.aspnetcore.app.ref.8.0.27.nupkg.sha512"
+    "/home/yorche3/.nuget/packages/microsoft.netcore.app.ref/8.0.28/microsoft.netcore.app.ref.8.0.28.nupkg.sha512",
+    "/home/yorche3/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.28/microsoft.aspnetcore.app.ref.8.0.28.nupkg.sha512"
   ],
   "logs": []
 }
