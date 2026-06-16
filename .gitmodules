@@ -31,3 +31,6 @@
 [submodule "crystal"]
 	path = crystal
 	url = git@github.com:yorche3/crystal.git
+[submodule "d"]
+	path = d
+	url = git@github.com:yorche3/d.git
