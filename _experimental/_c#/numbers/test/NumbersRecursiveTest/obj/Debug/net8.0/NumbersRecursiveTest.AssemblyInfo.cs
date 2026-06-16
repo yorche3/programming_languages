@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NumbersRecursiveTest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+80183be6ff66e5b8c370b63e67e306ae0b4cee48")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+98b6dbcf4a7c1f8c8f04f70e448abd53e71a8b99")]
 [assembly: System.Reflection.AssemblyProductAttribute("NumbersRecursiveTest")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NumbersRecursiveTest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
