@@ -28,3 +28,6 @@
 [submodule "common-lisp"]
 	path = common-lisp
 	url = git@github.com:yorche3/common-lisp.git
+[submodule "crystal"]
+	path = crystal
+	url = git@github.com:yorche3/crystal.git
