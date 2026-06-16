@@ -25,3 +25,6 @@
 [submodule "cobol"]
 	path = cobol
 	url = git@github.com:yorche3/cobol.git
+[submodule "common-lisp"]
+	path = common-lisp
+	url = git@github.com:yorche3/common-lisp.git

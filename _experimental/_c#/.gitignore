@@ -19,3 +19,7 @@ packages/
 
 # macOS
 .DS_Store
+
+*.cs
+*.cache
+Debug/

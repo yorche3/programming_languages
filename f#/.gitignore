@@ -1,0 +1,6 @@
+bin/
+ob/
+Debug/
+
+*.cs
+*.cache
