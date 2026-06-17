@@ -34,3 +34,6 @@
 [submodule "d"]
 	path = d
 	url = git@github.com:yorche3/d.git
+[submodule "dart"]
+	path = dart
+	url = git@github.com:yorche3/dart.git

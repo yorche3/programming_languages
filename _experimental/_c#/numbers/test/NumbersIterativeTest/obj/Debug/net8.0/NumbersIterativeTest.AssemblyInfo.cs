@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NumbersIterativeTest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+98b6dbcf4a7c1f8c8f04f70e448abd53e71a8b99")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+41bf6eeb89436fc08dbab0a9c301d2b44cb0fec4")]
 [assembly: System.Reflection.AssemblyProductAttribute("NumbersIterativeTest")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NumbersIterativeTest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
