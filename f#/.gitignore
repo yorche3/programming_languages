@@ -2,5 +2,5 @@ bin/
 ob/
 Debug/
 
-*.cs
+*.fs
 *.cache
