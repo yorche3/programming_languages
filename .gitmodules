@@ -37,3 +37,6 @@
 [submodule "dart"]
 	path = dart
 	url = git@github.com:yorche3/dart.git
+[submodule "elixir"]
+	path = elixir
+	url = git@github.com:yorche3/elixir.git
