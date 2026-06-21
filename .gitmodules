@@ -40,3 +40,6 @@
 [submodule "elixir"]
 	path = elixir
 	url = git@github.com:yorche3/elixir.git
+[submodule "elm"]
+	path = elm
+	url = git@github.com:yorche3/elm.git
