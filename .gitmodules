@@ -43,3 +43,6 @@
 [submodule "elm"]
 	path = elm
 	url = git@github.com:yorche3/elm.git
+[submodule "erlang"]
+	path = erlang
+	url = git@github.com:yorche3/erlang.git
