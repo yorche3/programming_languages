@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NumericalTest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+41bf6eeb89436fc08dbab0a9c301d2b44cb0fec4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1be6e1b40d959a0b8bc3a384d223884624bc726e")]
 [assembly: System.Reflection.AssemblyProductAttribute("NumericalTest")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NumericalTest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
