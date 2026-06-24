@@ -46,3 +46,6 @@
 [submodule "erlang"]
 	path = erlang
 	url = git@github.com:yorche3/erlang.git
+[submodule "fsharp"]
+	path = fsharp
+	url = git@github.com:yorche3/fsharp.git
