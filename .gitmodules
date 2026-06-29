@@ -49,3 +49,6 @@
 [submodule "fsharp"]
 	path = fsharp
 	url = git@github.com:yorche3/fsharp.git
+[submodule "forth"]
+	path = forth
+	url = git@github.com:yorche3/forth.git
