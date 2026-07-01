@@ -52,3 +52,6 @@
 [submodule "forth"]
 	path = forth
 	url = git@github.com:yorche3/forth.git
+[submodule "gleam"]
+	path = gleam
+	url = git@github.com:yorche3/gleam.git

@@ -6,6 +6,7 @@
 .codacy/
 .continue/
 _superbol/
+dotnet-tools.json
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
