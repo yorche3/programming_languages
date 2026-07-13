@@ -55,3 +55,6 @@
 [submodule "gleam"]
 	path = gleam
 	url = git@github.com:yorche3/gleam.git
+[submodule "go"]
+	path = go
+	url = git@github.com:yorche3/go.git
