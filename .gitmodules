@@ -61,3 +61,6 @@
 [submodule "grain"]
 	path = grain
 	url = git@github.com:yorche3/grain.git
+[submodule "groovy"]
+	path = groovy
+	url = git@github.com:yorche3/groovy.git
