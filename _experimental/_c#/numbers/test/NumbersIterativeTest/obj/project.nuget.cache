@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "zClVDfQJKZA=",
+  "dgSpecHash": "MLeUyGa9G/s=",
   "success": true,
   "projectFilePath": "/home/yorche3/programming_languages/_experimental/_c#/numbers/test/NumbersIterativeTest/NumbersIterativeTest.csproj",
   "expectedPackageFiles": [
@@ -93,8 +93,8 @@
     "/home/yorche3/.nuget/packages/xunit.extensibility.core/2.4.2/xunit.extensibility.core.2.4.2.nupkg.sha512",
     "/home/yorche3/.nuget/packages/xunit.extensibility.execution/2.4.2/xunit.extensibility.execution.2.4.2.nupkg.sha512",
     "/home/yorche3/.nuget/packages/xunit.runner.visualstudio/2.4.5/xunit.runner.visualstudio.2.4.5.nupkg.sha512",
-    "/home/yorche3/.nuget/packages/microsoft.netcore.app.ref/8.0.28/microsoft.netcore.app.ref.8.0.28.nupkg.sha512",
-    "/home/yorche3/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.28/microsoft.aspnetcore.app.ref.8.0.28.nupkg.sha512"
+    "/home/yorche3/.nuget/packages/microsoft.netcore.app.ref/8.0.29/microsoft.netcore.app.ref.8.0.29.nupkg.sha512",
+    "/home/yorche3/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.29/microsoft.aspnetcore.app.ref.8.0.29.nupkg.sha512"
   ],
   "logs": []
 }
