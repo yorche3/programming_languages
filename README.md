@@ -32,9 +32,19 @@ Each language folder contains its respective `Readme.md` with detailed installat
 
 ## 🔗 Submódulos / Submodules
 
-Algunos lenguajes (Ada, Java, Python, etc.) están alojados en repositorios separados para mantener el monorepo limpio y organizado. Para clonar el monorepo completamente con todos los submódulos usa el siguiente comando:
+El repositorio convive con **dos convenciones de estructura** mientras avanza la migración lenguaje por lenguaje:
 
-Some languages (Ada, Java, Python, etc.) are hosted in separate repositories to keep the monorepo clean and organized. To clone the entire monorepo with all submodules use the following command:
+- **Lenguajes homologados (submódulo):** ya migrados al estándar `core/{fase}/{módulo}/README.md`, con repositorio propio referenciado como submódulo Git (ver [`.gitmodules`](.gitmodules)).
+- **Lenguajes en estructura legacy:** conservan la organización previa (carpetas planas `helloworld/`, `hellouser/`, `numbers/`, `words/`) directamente en el monorepo, sin submódulo. Se homologan de forma incremental conforme se practica cada lenguaje.
+
+The repository lives with **two structure conventions** while the language-by-language migration progresses:
+
+- **Homologated languages (submodule):** already migrated to the `core/{phase}/{module}/README.md` standard, with their own repository referenced as a Git submodule (see [`.gitmodules`](.gitmodules)).
+- **Languages in legacy structure:** keep the previous layout (flat `helloworld/`, `hellouser/`, `numbers/`, `words/` folders) directly in the monorepo, without a submodule. They get homologated incrementally as each language is practiced.
+
+Para clonar el monorepo completamente con todos los submódulos usa el siguiente comando:
+
+To clone the entire monorepo with all submodules use the following command:
 
 ```bash
 git clone --recurse-submodules https://github.com/yorche3/programming_languages.git

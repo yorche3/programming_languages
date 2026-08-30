@@ -25,6 +25,9 @@ description: Implementación de conceptos de programación en múltiples lenguaj
 |-------------|--------------------|
 | [`🗺️ ROADMAP.md`](ROADMAP.md) | Plan de desarrollo completo / Full development plan |
 | [`🧱 Core`](core/README.md) | Índice general de la documentación base / Main core documentation index |
+| [`📄 Plantilla_Readme.md`](Plantilla_Readme.md) | Plantilla de README para sub-proyectos individuales / README template for individual sub-projects |
+| [`🤖 Plantilla_Agente.md`](Plantilla_Agente.md) | Guía operativa para agentes de IA que documentan o corrigen el repo / Operational guide for AI agents documenting or fixing the repo |
+| [`🤝 CONTRIBUTING.md`](CONTRIBUTING.md) | Convención de commits / Commit convention |
 
 > 💡 **Convención de nombres / Naming convention:** Los documentos siguen una numeración secuencial (`01_`, `02_`, `03_`…) que indica el orden recomendado de implementación. Sigue la numeración para avanzar en el flujo.
 
@@ -80,9 +83,18 @@ programming_languages/
 
 ## 🔗 Submódulos / Submodules
 
-**ES:** Algunos lenguajes (Ada, Java, Python, etc.) están alojados en repositorios separados para mantener el monorepo limpio y organizado.
+**ES:** El repositorio convive con **dos convenciones de estructura** mientras avanza la migración lenguaje por lenguaje:
 
-**EN:** Some languages (Ada, Java, Python, etc.) are hosted in separate repositories to keep the monorepo clean and organized.
+- **Lenguajes homologados (submódulo):** ya migrados al estándar `core/{fase}/{módulo}/README.md` descrito en este sitio, con repositorio propio referenciado como submódulo Git (ver [`.gitmodules`](https://github.com/yorche3/programming_languages/blob/main/.gitmodules)).
+- **Lenguajes en estructura legacy:** conservan la organización previa (carpetas planas `helloworld/`, `hellouser/`, `numbers/`, `words/`) directamente en el monorepo, sin submódulo. No tienen una fecha fija de migración — se homologan de forma incremental conforme el autor practica cada lenguaje.
+
+**EN:** The repository lives with **two structure conventions** while the language-by-language migration progresses:
+
+- **Homologated languages (submodule):** already migrated to the `core/{phase}/{module}/README.md` standard described on this site, with their own repository referenced as a Git submodule (see [`.gitmodules`](https://github.com/yorche3/programming_languages/blob/main/.gitmodules)).
+- **Languages in legacy structure:** keep the previous layout (flat `helloworld/`, `hellouser/`, `numbers/`, `words/` folders) directly in the monorepo, without a submodule. There's no fixed migration date — they get homologated incrementally as the author practices each language.
+
+> **ES:** Antes de crear o corregir documentación para un lenguaje, verifica si está en `.gitmodules` (homologado) o no (legacy) — la estructura y las plantillas aplicables difieren. Ver [`Plantilla_Agente.md`](Plantilla_Agente.md).
+> **EN:** Before creating or fixing documentation for a language, check whether it's in `.gitmodules` (homologated) or not (legacy) — the applicable structure and templates differ. See [`Plantilla_Agente.md`](Plantilla_Agente.md).
 
 ```bash
 # Clonar con submódulos / Clone with submodules
