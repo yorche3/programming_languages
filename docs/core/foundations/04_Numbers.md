@@ -50,8 +50,33 @@ passed 33
 failed 0
 ```
 
-> **ES:** La salida exacta depende del framework/biblioteca de pruebas del lenguaje, pero **todas las pruebas deben pasar** (failed = 0).  
-> **EN:** The exact output depends on the language's test framework/library, but **all tests must pass** (failed = 0).
+> **ES:** La salida exacta depende del framework/biblioteca de pruebas del lenguaje, pero **todas las pruebas deben pasar** (failed = 0). La cantidad de pruebas (y qué suites se implementan) depende de las capacidades del lenguaje, no de una lista fija:
+>
+> - **`recursive`**: se implementa y prueba siempre (11 casos). Todo lenguaje soporta al menos recursión directa.
+> - **`recursive_with_accumulator`**: se prueba (11 casos) **solo si el lenguaje ofrece TCO real/garantizado** (auto-recursión de cola optimizada por el compilador/runtime, ej. Scheme, Erlang/Elixir, Clojure `recur`, Scala `@tailrec`, F#, GHC en la práctica). Si el lenguaje **no** garantiza TCO, `_acc` puede conservarse en el código fuente como puente didáctico hacia `_ite`, pero **no se le escriben pruebas unitarias propias** — no aporta ninguna ventaja medible frente a `_rec` sin TCO.
+> - **`iterative`**: se prueba (11 casos) **solo si el lenguaje ofrece construcciones iterativas nativas** (bucles `for`/`while`, o combinadores equivalentes tipo `loop`/`fold`/`reduce` usados de forma explícitamente iterativa). Algunos lenguajes puramente funcionales no exponen iteración imperativa y expresan todo mediante recursión/TCO; en ese caso se omite esta suite.
+>
+> Combina ambos criterios de forma independiente para tu lenguaje. Ejemplos de combinaciones válidas:
+> - TCO ✅ + iteración ✅ → `_rec` + `_acc` + `_ite` = 33 pruebas.
+> - TCO ✅ + sin iteración nativa → `_rec` + `_acc` = 22 pruebas.
+> - Sin TCO + iteración ✅ → `_rec` + `_ite` = 22 pruebas.
+> - Sin TCO + sin iteración nativa → `_rec` = 11 pruebas (caso raro).
+>
+> Documenta en el README de tu implementación cuál combinación aplica y por qué, en vez de asumir el conteo de 33 por defecto.
+>
+> **EN:** The exact output depends on the language's test framework/library, but **all tests must pass** (failed = 0). The number of tests (and which suites are implemented) depends on the language's capabilities, not a fixed list:
+>
+> - **`recursive`**: always implemented and tested (11 cases). Every language supports at least direct recursion.
+> - **`recursive_with_accumulator`**: tested (11 cases) **only if the language provides real/guaranteed TCO** (compiler/runtime-optimized self-tail-calls, e.g. Scheme, Erlang/Elixir, Clojure `recur`, Scala `@tailrec`, F#, GHC in practice). If the language does **not** guarantee TCO, `_acc` may still be kept in source code as an educational bridge toward `_ite`, but **no dedicated unit tests are written for it** — it provides no measurable benefit over `_rec` without TCO.
+> - **`iterative`**: tested (11 cases) **only if the language offers native iterative constructs** (`for`/`while` loops, or equivalent combinators like `loop`/`fold`/`reduce` used in an explicitly iterative style). Some purely functional languages don't expose imperative iteration and express everything through recursion/TCO; in that case this suite is omitted.
+>
+> Combine both criteria independently for your language. Valid combination examples:
+> - TCO ✅ + iteration ✅ → `_rec` + `_acc` + `_ite` = 33 tests.
+> - TCO ✅ + no native iteration → `_rec` + `_acc` = 22 tests.
+> - No TCO + iteration ✅ → `_rec` + `_ite` = 22 tests.
+> - No TCO + no native iteration → `_rec` = 11 tests (rare case).
+>
+> Document in your implementation's README which combination applies and why, instead of assuming the default count of 33.
 
 ## ✅ Criterios de aceptación / Acceptance Criteria
 
