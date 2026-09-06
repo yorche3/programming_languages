@@ -70,3 +70,6 @@
 [submodule "java"]
 	path = java
 	url = git@github.com:yorche3/java.git
+[submodule "javascript"]
+	path = javascript
+	url = git@github.com:yorche3/javascript.git
