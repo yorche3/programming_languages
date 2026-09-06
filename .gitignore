@@ -11,5 +11,12 @@ dotnet-tools.json
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
 
+# Build artifacts / generated files
+**/.gradle/
+**/.kotlin/
+**/build/
+**/target/
+**/node_modules/
+
 *_bkp
 .fake
