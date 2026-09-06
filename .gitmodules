@@ -67,3 +67,6 @@
 [submodule "haxe"]
 	path = haxe
 	url = git@github.com:yorche3/haxe.git
+[submodule "java"]
+	path = java
+	url = git@github.com:yorche3/java.git
