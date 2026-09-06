@@ -24,33 +24,35 @@ grand_parent: Programming Languages Monorepo
 
 ## 📁 Especificaciones / Specifications
 
-| Módulo | Estado | Tema |
-|--------|--------|------|
-| `naive_sort` | ✅ | bubble, insertion, selection (O(n²)) |
-| `data_structures` | 📋 | stack, queue, linked_list, tree, graph (con arrays) |
-| `efficient_sort` | 📋 | quick, merge, heap (O(n log n)) |
-| `distributed_sort` | 📋 | radix, bucket, shell, counting |
-| `searching` | 📋 | linear, binary, jump, interpolation |
+| Módulo | Estado | Tema | Especificación |
+|--------|--------|------|----------------|
+| `naive_sort` | 🔄 | bubble, insertion, selection (O(n²)) | [`05_Naive_Sort.md`](05_Naive_Sort.md) |
+| `data_structures` | 📋 | stack, queue, linked_list, tree, graph (con arrays) | [`06_Data_Structures.md`](06_Data_Structures.md) |
+| `structures_apps` | 📋 | delimitadores balanceados, postfija/RPN, listas (reverse, ciclo), recorridos de árbol | [`07_Structures_Apps.md`](07_Structures_Apps.md) |
+| `efficient_sort` | 📋 | quick, merge, heap (O(n log n)) | [`08_Efficient_Sort.md`](08_Efficient_Sort.md) |
+| `distributed_sort` | 📋 | radix, bucket, shell, counting | [`09_Distributed_Sort.md`](09_Distributed_Sort.md) |
+| `searching` | 📋 | linear, binary, jump, interpolation | [`10_Searching.md`](10_Searching.md) |
 
-> **ES:** Los algoritmos O(n²) están implementados en `05_Sorting.md`. Los módulos `efficient_sort` y `distributed_sort` se documentarán por separado.
-> **EN:** O(n²) algorithms are implemented in `05_Sorting.md`. The `efficient_sort` and `distributed_sort` modules will be documented separately.
+> **ES:** Las especificaciones siguen una numeración continua canónica de `05_` a `10_`. Las implementaciones históricas están en proceso de refactorización hacia la estructura homologada `core/algorithms/` en cada submódulo.
+> **EN:** Specifications follow a canonical continuous numbering from `05_` to `10_`. Historical implementations are undergoing refactoring into the standardized `core/algorithms/` layout in each submodule.
 
 ---
 
 ## 🧭 Flujo recomendado / Recommended flow
 
-1. `naive_sort`
-2. `data_structures`
-3. `efficient_sort`
-4. `distributed_sort`
-5. `searching`
+1. `05_Naive_Sort.md`
+2. `06_Data_Structures.md`
+3. `07_Structures_Apps.md`
+4. `08_Efficient_Sort.md`
+5. `09_Distributed_Sort.md`
+6. `10_Searching.md`
 
 ---
 
 ## ▶️ Siguiente / Next
 
-👉 Continúa con [`naive_sort`](05_Sorting.md).  
-👉 Continue with [`naive_sort`](05_Sorting.md).
+👉 Comienza con [`05_Naive_Sort.md`](05_Naive_Sort.md).  
+👉 Start with [`05_Naive_Sort.md`](05_Naive_Sort.md).
 
 ---
 

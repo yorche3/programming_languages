@@ -280,8 +280,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 El siguiente paso depende de tu ruta de aprendizaje — Continúa con los siguientes módulos de **Core** o explora otras secciones.  
-👉 The next step depends on your learning path — Continue with the next **Core** modules or explore other sections.
+👉 Sigue con [`05_Naive_Sort.md`](../algorithms/05_Naive_Sort.md) — Algoritmos elementales de ordenamiento $O(n^2)$ (Bubble, Insertion, Selection).  
+👉 Continue with [`05_Naive_Sort.md`](../algorithms/05_Naive_Sort.md) — Elementary $O(n^2)$ sorting algorithms (Bubble, Insertion, Selection).
 
 ---
 

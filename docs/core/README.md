@@ -24,11 +24,12 @@ has_children: true
 
 | Sección | Fase | Estado | Índice |
 |---------|------|--------|--------|
-| [`foundations/`](foundations/) | Fase 0 | ✅ | [`README.md`](foundations/README.md) |
-| [`algorithms/`](algorithms/) | Fase 1 — Algoritmos Puros | ✅ | [`README.md`](algorithms/README.md) |
-| [`text/`](text/) | Fase 2 — Procesamiento Contiguo | ✅ | [`README.md`](text/README.md) |
-| [`data/`](data/) | Fase 3 — Abstracción y Persistencia | 📋 | [`README.md`](data/README.md) |
-| [`math/`](math/) | Fase 4 | 📋 | [`README.md`](math/README.md) |
+| [`foundations/`](foundations/) | Fase 0 | 🔄 | [`README.md`](foundations/README.md) |
+| [`algorithms/`](algorithms/) | Fase 1 — Algoritmos Puros | 📋 | [`README.md`](algorithms/README.md) |
+| [`text/`](text/) | Fase 2 — Procesamiento Contiguo | 📋 | [`README.md`](text/README.md) |
+| [`structures/`](structures/) | Fase 3 — Algoritmos sobre Estructuras | 📋 | [`README.md`](structures/README.md) |
+| [`data/`](data/) | Fase 4 — Abstracción y Persistencia | 📋 | [`README.md`](data/README.md) |
+| [`math/`](math/) | Fase 5 — Matemáticas | 📋 | [`README.md`](math/README.md) |
 
 ---
 

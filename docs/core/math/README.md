@@ -2,7 +2,7 @@
 layout: default
 title: Matemáticas / Math
 description: Índice de la sección de matemáticas — estadística, álgebra lineal / Index for the mathematics section — statistics, linear algebra
-nav_order: 4
+nav_order: 6
 parent: Core
 grand_parent: Programming Languages Monorepo
 ---

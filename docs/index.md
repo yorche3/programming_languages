@@ -42,23 +42,37 @@ programming_languages/
 │   ├── ROADMAP.md                 # Plan de desarrollo / Development roadmap
 │   └── core/
 │       ├── README.md              # Índice general / Main core index
-│       ├── foundations/
+│       ├── foundations/           # Fase 0 (01_ a 04_)
 │       │   ├── README.md
 │       │   ├── 01_Hello_World.md
 │       │   ├── 02_Hello_User.md
 │       │   ├── 03_Unit_Test_Calculator.md
 │       │   └── 04_Numbers.md
-│       ├── algorithms/
+│       ├── algorithms/            # Fase 1 — Algoritmos Puros (05_ a 10_)
 │       │   ├── README.md
-│       │   ├── 05_Sorting.md
+│       │   ├── 05_Naive_Sort.md
+│       │   ├── 06_Data_Structures.md
+│       │   ├── 07_Structures_Apps.md
+│       │   ├── 08_Efficient_Sort.md
+│       │   ├── 09_Distributed_Sort.md
+│       │   └── 10_Searching.md
+│       ├── text/                  # Fase 2 — Procesamiento Contiguo (11_ a 15_)
+│       │   ├── README.md
 │       │   └── ...
-│       └── text/
-│           ├── README.md
-│           ├── 01_Transformations.md
-│           └── ...
-├── python/                        # 🐍 Implementaciones Python
-├── java/                          # ☕ Implementaciones Java
-├── go/                            # 🔵 Implementaciones Go
+│       ├── structures/            # Fase 3 — Algoritmos sobre Estructuras (16_ a 19_)
+│       │   ├── README.md
+│       │   ├── 16_Graph_Algorithms.md
+│       │   ├── 17_Backtracking.md
+│       │   ├── 18_Dynamic_Programming.md
+│       │   └── 19_Greedy.md
+│       ├── data/                  # Fase 4 — Abstracción y Persistencia
+│       │   └── README.md
+│       └── math/                  # Fase 5 — Matemáticas
+│           └── README.md
+├── _experimental/                 # 🧪 Sandbox / Legacy Staging (primeros acercamientos)
+├── python/                        # 🐍 Implementaciones Python (submódulo o legacy)
+├── java/                          # ☕ Implementaciones Java (submódulo)
+├── go/                            # 🔵 Implementaciones Go (submódulo)
 └── ... (resto de lenguajes)
 ```
 
@@ -81,20 +95,22 @@ programming_languages/
 
 ---
 
-## 🔗 Submódulos / Submodules
+## 🔗 Submódulos y Entornos / Submodules & Environments
 
-**ES:** El repositorio convive con **dos convenciones de estructura** mientras avanza la migración lenguaje por lenguaje:
+**ES:** El repositorio organiza sus implementaciones en tres estados o niveles:
 
-- **Lenguajes homologados (submódulo):** ya migrados al estándar `core/{fase}/{módulo}/README.md` descrito en este sitio, con repositorio propio referenciado como submódulo Git (ver [`.gitmodules`](https://github.com/yorche3/programming_languages/blob/main/.gitmodules)).
-- **Lenguajes en estructura legacy:** conservan la organización previa (carpetas planas `helloworld/`, `hellouser/`, `numbers/`, `words/`) directamente en el monorepo, sin submódulo. No tienen una fecha fija de migración — se homologan de forma incremental conforme el autor practica cada lenguaje.
+1. **Lenguajes homologados (submódulo Git):** Migrados formalmente a la jerarquía estándar `core/{fase}/{módulo}/` documentada en este sitio. Cuentan con repositorio independiente conectado como submódulo Git (ver [`.gitmodules`](https://github.com/yorche3/programming_languages/blob/main/.gitmodules)).
+2. **Lenguajes en estructura legacy:** Conservan carpetas planas en la raíz (`helloworld/`, `hellouser/`, `numbers/`, `words/`) directamente en el monorepo sin submódulo. Se migran progresivamente al estándar.
+3. **`_experimental/` (Sandbox & Legacy Staging):** Espacio donde se preserva el primer acercamiento experimental del autor con cada lenguaje (estructuras con `numbers/`, `words/`, `unit_test/demo/`). Funciona como banco de pruebas y archivo histórico de implementaciones previas a su homologación en `core/`.
 
-**EN:** The repository lives with **two structure conventions** while the language-by-language migration progresses:
+**EN:** The repository organizes its implementations into three tiers:
 
-- **Homologated languages (submodule):** already migrated to the `core/{phase}/{module}/README.md` standard described on this site, with their own repository referenced as a Git submodule (see [`.gitmodules`](https://github.com/yorche3/programming_languages/blob/main/.gitmodules)).
-- **Languages in legacy structure:** keep the previous layout (flat `helloworld/`, `hellouser/`, `numbers/`, `words/` folders) directly in the monorepo, without a submodule. There's no fixed migration date — they get homologated incrementally as the author practices each language.
+1. **Homologated languages (Git submodule):** Formally migrated to the standardized `core/{phase}/{module}/` hierarchy documented on this site. They have their own repository linked as a Git submodule (see [`.gitmodules`](https://github.com/yorche3/programming_languages/blob/main/.gitmodules)).
+2. **Languages in legacy structure:** Maintain flat folders at the root (`helloworld/`, `hellouser/`, `numbers/`, `words/`) directly in the monorepo without a submodule. They are incrementally migrated to the standard.
+3. **`_experimental/` (Sandbox & Legacy Staging):** Space preserving the author's initial experimental exploration with each language (folders with `numbers/`, `words/`, `unit_test/demo/`). It acts as a sandbox and historical staging area prior to formal standardization in `core/`.
 
-> **ES:** Antes de crear o corregir documentación para un lenguaje, verifica si está en `.gitmodules` (homologado) o no (legacy) — la estructura y las plantillas aplicables difieren. Ver [`Plantilla_Agente.md`](Plantilla_Agente.md).
-> **EN:** Before creating or fixing documentation for a language, check whether it's in `.gitmodules` (homologated) or not (legacy) — the applicable structure and templates differ. See [`Plantilla_Agente.md`](Plantilla_Agente.md).
+> **ES:** Antes de crear o corregir documentación para un lenguaje, verifica si está en `.gitmodules` (homologado), en la raíz (legacy) o en `_experimental/` — la estructura y las plantillas aplicables difieren. Ver [`Plantilla_Agente.md`](Plantilla_Agente.md).
+> **EN:** Before creating or fixing documentation for a language, check whether it is in `.gitmodules` (homologated), in the root (legacy), or in `_experimental/` — the applicable structure and templates differ. See [`Plantilla_Agente.md`](Plantilla_Agente.md).
 
 ```bash
 # Clonar con submódulos / Clone with submodules
@@ -133,34 +149,48 @@ git submodule update --init --recursive
 
 ## 🔢 Flujo de implementación / Implementation Flow
 
-**ES:** Los documentos de especificación están numerados secuencialmente. Así puedes seguir el camino de implementación sin perderte:
+**ES:** Los documentos de especificación en **Core** siguen una numeración secuencial canónica (`01_`, `02_`, `03_`… hasta `19_`). Una vez dominada la base de Core, las fases de aplicación (**UI** y **Web**) pueden abordarse en paralelo, reiniciando su curva pedagógica desde el bootstrapping elemental de la interfaz hasta servicios reales:
 
-**EN:** The specification documents are numbered sequentially. This way you can follow the implementation path without getting lost:
+**EN:** Specification documents in **Core** follow a canonical sequential numbering (`01_`, `02_`, `03_`… through `19_`). Once the Core foundation is mastered, the application tracks (**UI** and **Web**) can be tackled in parallel, restarting their pedagogical curve from elemental interface bootstrapping to real-world services:
 
 ```text
 📂 docs/core/
-├── README.md             ← Índice general / Main index
-├── foundations/          ← Fase 0
-│   ├── README.md         ← Índice / Index
-│   ├── 01_Hello_World.md ← 🚀 INICIO / START
+├── README.md               ← Índice general / Main index
+├── foundations/            ← Fase 0 (Sintaxis, E/S básica, testing, recursión)
+│   ├── README.md
+│   ├── 01_Hello_World.md   ← 🚀 INICIO / START
 │   ├── 02_Hello_User.md
 │   ├── 03_Unit_Test_Calculator.md
 │   └── 04_Numbers.md
-├── algorithms/           ← Fase 1 — Algoritmos Puros
+├── algorithms/             ← Fase 1 — Algoritmos Puros (arrays, centinelas, O(n²) a O(n log n))
 │   ├── README.md
-│   ├── 01_Sorting.md     ← naive_sort (O(n²))
-│   └── ...
-├── text/                 ← Fase 2 — Procesamiento Contiguo
+│   ├── 05_Naive_Sort.md
+│   ├── 06_Data_Structures.md
+│   ├── 07_Structures_Apps.md
+│   ├── 08_Efficient_Sort.md
+│   ├── 09_Distributed_Sort.md
+│   └── 10_Searching.md
+├── text/                   ← Fase 2 — Procesamiento Contiguo (strings, excepciones, I/O)
 │   ├── README.md
-│   ├── 01_Transformations.md
-│   └── ...
-├── data/                 ← Fase 3 — Abstracción y Persistencia
+│   ├── 11_Transformations.md
+│   └── ... (hasta 15_ETL_Basico.md)
+├── structures/             ← Fase 3 — Algoritmos sobre Estructuras (grafos, backtracking, DP, greedy)
+│   ├── README.md
+│   ├── 16_Graph_Algorithms.md
+│   ├── 17_Backtracking.md
+│   ├── 18_Dynamic_Programming.md
+│   └── 19_Greedy.md
+├── data/                   ← Fase 4 — Abstracción y Persistencia (Result/Option, BD, ORM)
 │   └── README.md
-└── math/                 ← Fase 4
+└── math/                   ← Fase 5 — Matemáticas (estadística, álgebra lineal)
     └── README.md
+
+🔀 Tracks Paralelos de Aplicación (post-Core o en paralelo):
+├── UI (Fase 6)            ← Bootstrapping CLI/TUI/GUI → Menús con Core → Servicios CRUD (Exit Codes)
+└── Web (Fase 7)           ← Servidor MVC/REST → Despacho a Core → APIs con persistencia (HTTP Status)
 ```
 
-> **Consejo / Tip:** Si estás en GitHub Pages, usa la navegación del sitio. Si estás en el repositorio directamente, abre los archivos `.md` en orden numérico.
+> **Consejo / Tip:** Si estás en GitHub Pages, usa la navegación del sitio. Si estás en el repositorio directamente, abre los archivos `.md` en orden numérico dentro de `docs/core/`.
 
 ---
 
