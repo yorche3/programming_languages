@@ -76,3 +76,6 @@
 [submodule "julia"]
 	path = julia
 	url = git@github.com:yorche3/julia.git
+[submodule "kotlin"]
+	path = kotlin
+	url = git@github.com:yorche3/kotlin.git
