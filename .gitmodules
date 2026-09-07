@@ -79,3 +79,6 @@
 [submodule "kotlin"]
 	path = kotlin
 	url = git@github.com:yorche3/kotlin.git
+[submodule "lua"]
+	path = lua
+	url = git@github.com:yorche3/lua.git
