@@ -5,6 +5,8 @@
 .vscode/
 .codacy/
 .continue/
+.psc-ide-port
+
 _superbol/
 dotnet-tools.json
 

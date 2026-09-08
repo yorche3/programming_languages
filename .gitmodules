@@ -94,3 +94,6 @@
 [submodule "prolog"]
 	path = prolog
 	url = git@github.com:yorche3/prolog.git
+[submodule "purescript"]
+	path = purescript
+	url = git@github.com:yorche3/purescript.git
