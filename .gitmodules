@@ -91,3 +91,6 @@
 [submodule "perl"]
 	path = perl
 	url = git@github.com:yorche3/perl.git
+[submodule "prolog"]
+	path = prolog
+	url = git@github.com:yorche3/prolog.git
