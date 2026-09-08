@@ -85,3 +85,6 @@
 [submodule "nim"]
 	path = nim
 	url = git@github.com:yorche3/nim.git
+[submodule "ocaml"]
+	path = ocaml
+	url = git@github.com:yorche3/ocaml.git
