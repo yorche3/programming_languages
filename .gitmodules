@@ -88,3 +88,6 @@
 [submodule "ocaml"]
 	path = ocaml
 	url = git@github.com:yorche3/ocaml.git
+[submodule "perl"]
+	path = perl
+	url = git@github.com:yorche3/perl.git
