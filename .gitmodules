@@ -82,3 +82,6 @@
 [submodule "lua"]
 	path = lua
 	url = git@github.com:yorche3/lua.git
+[submodule "nim"]
+	path = nim
+	url = git@github.com:yorche3/nim.git
