@@ -5,7 +5,6 @@
 .vscode/
 .codacy/
 .continue/
-.psc-ide-port
 
 _superbol/
 dotnet-tools.json
@@ -22,3 +21,4 @@ dotnet-tools.json
 
 *_bkp
 .fake
+.psc-ide-port
