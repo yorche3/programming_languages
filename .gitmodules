@@ -106,3 +106,6 @@
 [submodule "racket"]
 	path = racket
 	url = git@github.com:yorche3/racket.git
+[submodule "raku"]
+	path = raku
+	url = git@github.com:yorche3/raku.git
