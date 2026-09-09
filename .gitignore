@@ -22,3 +22,5 @@ dotnet-tools.json
 *_bkp
 .fake
 .psc-ide-port
+package-lock.json
+package.json
