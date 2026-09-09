@@ -109,3 +109,6 @@
 [submodule "raku"]
 	path = raku
 	url = git@github.com:yorche3/raku.git
+[submodule "rescript"]
+	path = rescript
+	url = git@github.com:yorche3/rescript.git
