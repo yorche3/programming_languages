@@ -100,3 +100,6 @@
 [submodule "python"]
 	path = python
 	url = git@github.com:yorche3/python.git
+[submodule "r"]
+	path = r
+	url = git@github.com:yorche3/r.git
