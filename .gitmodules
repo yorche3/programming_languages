@@ -97,3 +97,6 @@
 [submodule "purescript"]
 	path = purescript
 	url = git@github.com:yorche3/purescript.git
+[submodule "python"]
+	path = python
+	url = git@github.com:yorche3/python.git
