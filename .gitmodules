@@ -115,3 +115,6 @@
 [submodule "rexx"]
 	path = rexx
 	url = git@github.com:yorche3/rexx.git
+[submodule "ruby"]
+	path = ruby
+	url = git@github.com:yorche3/ruby.git
