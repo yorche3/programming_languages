@@ -112,3 +112,6 @@
 [submodule "rescript"]
 	path = rescript
 	url = git@github.com:yorche3/rescript.git
+[submodule "rexx"]
+	path = rexx
+	url = git@github.com:yorche3/rexx.git
