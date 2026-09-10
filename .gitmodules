@@ -118,3 +118,6 @@
 [submodule "ruby"]
 	path = ruby
 	url = git@github.com:yorche3/ruby.git
+[submodule "rust"]
+	path = rust
+	url = git@github.com:yorche3/rust.git
