@@ -130,3 +130,6 @@
 [submodule "swift"]
 	path = swift
 	url = git@github.com:yorche3/swift.git
+[submodule "typescript"]
+	path = typescript
+	url = git@github.com:yorche3/typescript.git
