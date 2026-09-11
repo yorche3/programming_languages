@@ -127,3 +127,6 @@
 [submodule "scheme"]
 	path = scheme
 	url = git@github.com:yorche3/scheme.git
+[submodule "swift"]
+	path = swift
+	url = git@github.com:yorche3/swift.git
