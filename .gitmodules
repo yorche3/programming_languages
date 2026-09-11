@@ -121,3 +121,6 @@
 [submodule "rust"]
 	path = rust
 	url = git@github.com:yorche3/rust.git
+[submodule "scala"]
+	path = scala
+	url = git@github.com:yorche3/scala.git
