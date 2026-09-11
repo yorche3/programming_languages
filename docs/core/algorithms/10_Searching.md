@@ -118,8 +118,8 @@ end container
 
 - [ ] **ES:** Se implementan los cuatro algoritmos respetando sus fórmulas de salto y cálculo de índice.  
       **EN:** All four algorithms are implemented respecting their jumping formulas and index calculations.
-- [ ] **ES:** Cuando el elemento no existe o la entrada es inválida, se devuelve el centinela `-1`, sin excepciones.  
-      **EN:** When the element does not exist or input is invalid, the sentinel `-1` is returned, no exceptions.
+- [ ] **ES:** Cuando el elemento no existe o la entrada es inválida, se devuelve el indicador de fallo compatible con el lenguaje/API (por ejemplo, `-1` cuando el índice lo permite), sin excepciones.
+    **EN:** When the element does not exist or input is invalid, a language/API-compatible failure indicator is returned (for example, `-1` when the index type permits it), without exceptions.
 - [ ] **ES:** `binary_search` evita el desbordamiento de enteros calculando el punto medio con `low + div(high - low, 2)`.  
       **EN:** `binary_search` prevents integer overflow calculating the midpoint with `low + div(high - low, 2)`.
 - [ ] **ES:** El proyecto separa el código fuente (`src/`) de las pruebas (`test/`).  

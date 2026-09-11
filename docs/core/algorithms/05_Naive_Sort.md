@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 05 — Naive Sort
-description: Quinta especificación / Fifth specification — Ordenamiento elemental O(n²) con arrays y valores centinela
+description: Quinta especificación / Fifth specification — Ordenamiento elemental O(n²) con arrays e indicadores de fallo
 nav_order: 1
 parent: Algoritmos Puros / Algorithms Pure
 grand_parent: Core
@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `naive_sort` con un módulo que contenga las funciones `bubble_sort(arr)`, `insertion_sort(arr)` y `selection_sort(arr)`. Cada función recibe un array de enteros y devuelve el array ordenado de menor a mayor (de forma in-place o retornando una copia ordenada según el paradigma del lenguaje). Si el array es nulo, devuelve un valor centinela (`-1` o indicador nulo); si está vacío, devuelve el mismo array vacío. Sin excepciones. | Create a `naive_sort` project with a module containing `bubble_sort(arr)`, `insertion_sort(arr)`, and `selection_sort(arr)`. Each function takes an integer array and returns it sorted in ascending order (in-place or returning a sorted copy depending on the language paradigm). If the array is null, returns a sentinel value (`-1` or null indicator); if empty, returns the same empty array. No exceptions. |
+| Crear un proyecto `naive_sort` con un módulo que contenga las funciones `bubble_sort(arr)`, `insertion_sort(arr)` y `selection_sort(arr)`. Cada función recibe un array de enteros y devuelve el array ordenado de menor a mayor (de forma in-place o retornando una copia ordenada según el paradigma del lenguaje). Si la entrada es nula o inválida, devuelve el indicador de fallo definido por el lenguaje o la API (`-1`, `null`, `Option/Maybe` vacío, `Result` de error u otra representación equivalente); si está vacía, devuelve el mismo array vacío. No lanza excepciones. | Create a `naive_sort` project with a module containing `bubble_sort(arr)`, `insertion_sort(arr)`, and `selection_sort(arr)`. Each function takes an integer array and returns it sorted in ascending order (in-place or returning a sorted copy depending on the language paradigm). If the input is null or invalid, it returns the failure indicator defined by the language or API (`-1`, `null`, empty `Option/Maybe`, error `Result`, or another equivalent representation); if empty, it returns the same empty array. It does not throw exceptions. |
 
 ### Implementaciones esperadas
 
@@ -42,8 +42,8 @@ grand_parent: Core
 ```pseudocode
 container naive_sort
     .- bubble_sort(arr)
-        if arr is null
-            return -1                      # centinela
+        if arr is null or invalid
+            return failure_indicator       # representación de fallo del lenguaje
         n = size(arr)
         if n <= 1
             return arr
@@ -58,8 +58,8 @@ container naive_sort
         return arr
 
     .- insertion_sort(arr)
-        if arr is null
-            return -1
+        if arr is null or invalid
+            return failure_indicator
         n = size(arr)
         if n <= 1
             return arr
@@ -73,8 +73,8 @@ container naive_sort
         return arr
 
     .- selection_sort(arr)
-        if arr is null
-            return -1
+        if arr is null or invalid
+            return failure_indicator
         n = size(arr)
         if n <= 1
             return arr
@@ -103,6 +103,9 @@ Las pruebas unitarias deben validar los siguientes casos para cada uno de los tr
 | Un solo elemento | `[42]` | `[42]` |
 | Array vacío | `[]` | `[]` |
 
+> **ES:** Si el lenguaje/API puede representar una entrada nula o inválida, añade un caso controlado que compruebe el indicador de fallo correspondiente. No es una prueba para provocar una excepción: el contrato exige devolver el indicador y continuar con el runner. Si el tipo de array no admite `null`, documenta la representación equivalente y conserva el resto de casos.
+> **EN:** If the language/API can represent a null or invalid input, add a controlled case that checks the corresponding failure indicator. This is not an exception-triggering test: the contract requires returning the indicator and continuing through the runner. If the array type cannot represent `null`, document the equivalent representation and keep the remaining cases.
+
 ---
 
 ## ✅ Criterios de aceptación / Acceptance Criteria
@@ -111,10 +114,13 @@ Las pruebas unitarias deben validar los siguientes casos para cada uno de los tr
       **EN:** All three algorithms (`bubble_sort`, `insertion_sort`, `selection_sort`) are implemented without invoking native sort libraries.
 - [ ] **ES:** `bubble_sort` incluye la optimización de salida temprana con bandera de intercambio (`swapped`).  
       **EN:** `bubble_sort` includes the early-exit optimization with a swap flag (`swapped`).
-- [ ] **ES:** Casos inválidos/nulos retornan valor centinela (`-1` o nulo del lenguaje) sin lanzar excepciones.  
-      **EN:** Invalid/null cases return a sentinel value (`-1` or language null) without throwing exceptions.
+- [ ] **ES:** Casos inválidos/nulos retornan el indicador de fallo del lenguaje/API (`-1`, `null`, `Option/Maybe` vacío, `Result` de error o equivalente) sin lanzar excepciones.
+    **EN:** Invalid/null cases return the language/API failure indicator (`-1`, `null`, empty `Option/Maybe`, error `Result`, or equivalent) without throwing exceptions.
 - [ ] **ES:** El proyecto separa el código fuente (`src/`) de las pruebas (`test/`).  
       **EN:** The project separates source code (`src/`) from tests (`test/`).
+
+> **ES:** En esta fase los casos inválidos son entradas controladas del contrato y no errores inesperados. Las excepciones y validaciones idiomáticas se introducen posteriormente en `core/text`; más adelante se formalizan retornos `Option`/`Result` en la fase de abstracción y persistencia.
+> **EN:** In this phase, invalid cases are controlled contract inputs, not unexpected errors. Idiomatic exceptions and validation are introduced later in `core/text`; `Option`/`Result` returns are formalized afterward in the abstraction and persistence phase.
 
 ---
 

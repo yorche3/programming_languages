@@ -120,8 +120,8 @@ end container
 
 - [ ] **ES:** Se resuelven los problemas utilizando las estructuras modeladas con arrays de la especificación `06_Data_Structures`.  
       **EN:** Problems are solved using the array-modeled structures from specification `06_Data_Structures`.
-- [ ] **ES:** Casos no válidos (desbalance, división por cero, RPN malformada) retornan valores centinela (`false` o `-1`), sin excepciones.  
-      **EN:** Invalid cases (unbalance, division by zero, malformed RPN) return sentinel values (`false` or `-1`), no exceptions.
+- [ ] **ES:** Casos no válidos (desbalance, división por cero, RPN malformada) retornan el indicador de fallo compatible con el lenguaje/API (por ejemplo, `false` o `-1`), sin excepciones.
+    **EN:** Invalid cases (unbalance, division by zero, malformed RPN) return a language/API-compatible failure indicator (for example, `false` or `-1`), without exceptions.
 - [ ] **ES:** La detección de ciclo en lista enlazada utiliza el algoritmo de punteros lento y rápido con memoria auxiliar $O(1)$.  
       **EN:** Linked list cycle detection uses the slow/fast pointer algorithm with $O(1)$ auxiliary memory.
 - [ ] **ES:** El recorrido por niveles de árbol binario se implementa mediante la cola circular (`Queue`) de la especificación previa.  

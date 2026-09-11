@@ -132,8 +132,8 @@ end container
 
 - [ ] **ES:** Las cinco estructuras se modelan usando arrays e índices enteros como mecanismo de almacenamiento primario.  
       **EN:** All five structures are modeled using arrays and integer indices as primary storage mechanism.
-- [ ] **ES:** Operaciones inválidas (underflow, overflow, nodo no encontrado) devuelven el valor centinela `-1`, sin excepciones.  
-      **EN:** Invalid operations (underflow, overflow, node not found) return the sentinel value `-1`, no exceptions.
+- [ ] **ES:** Operaciones inválidas (underflow, overflow, nodo no encontrado) devuelven el indicador de fallo compatible con el lenguaje/API (por ejemplo, `-1` cuando el tipo lo permite), sin excepciones.
+    **EN:** Invalid operations (underflow, overflow, node not found) return a language/API-compatible failure indicator (for example, `-1` when the type permits it), without exceptions.
 - [ ] **ES:** Se implementa cola circular que reutiliza posiciones liberadas mediante aritmética modular.  
       **EN:** A circular queue is implemented reusing freed slots via modular arithmetic.
 - [ ] **ES:** El proyecto separa el código fuente (`src/`) de las pruebas (`test/`).  

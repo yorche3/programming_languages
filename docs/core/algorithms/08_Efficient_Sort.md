@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `efficient_sort` con un módulo que contenga las funciones `quick_sort(arr)`, `merge_sort(arr)` y `heap_sort(arr)`. Cada función ordena un array de enteros en orden ascendente. Arrays nulos devuelven el valor centinela `-1`; arrays vacíos o de un elemento se devuelven sin modificar. Sin excepciones. | Create an `efficient_sort` project with a module containing `quick_sort(arr)`, `merge_sort(arr)`, and `heap_sort(arr)`. Each function sorts an integer array in ascending order. Null arrays return the sentinel value `-1`; empty or single-element arrays return unchanged. No exceptions. |
+| Crear un proyecto `efficient_sort` con un módulo que contenga las funciones `quick_sort(arr)`, `merge_sort(arr)` y `heap_sort(arr)`. Cada función ordena un array de enteros en orden ascendente. Arrays nulos devuelven el indicador de fallo definido por el lenguaje/API; arrays vacíos o de un elemento se devuelven sin modificar. Sin excepciones. | Create an `efficient_sort` project with a module containing `quick_sort(arr)`, `merge_sort(arr)`, and `heap_sort(arr)`. Each function sorts an integer array in ascending order. Null arrays return the failure indicator defined by the language/API; empty or single-element arrays return unchanged. No exceptions. |
 
 ### Algoritmos esperados
 

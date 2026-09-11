@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `distributed_sort` con un módulo que implemente `counting_sort(arr)`, `radix_sort(arr)`, `bucket_sort(arr)` y `shell_sort(arr)`. Cada algoritmo ordena enteros no negativos (o con rango conocido) en orden ascendente. Casos nulos devuelven el centinela `-1`. Sin excepciones. | Create a `distributed_sort` project with a module implementing `counting_sort(arr)`, `radix_sort(arr)`, `bucket_sort(arr)`, and `shell_sort(arr)`. Each algorithm sorts non-negative integers (or known-range integers) in ascending order. Null cases return the sentinel `-1`. No exceptions. |
+| Crear un proyecto `distributed_sort` con un módulo que implemente `counting_sort(arr)`, `radix_sort(arr)`, `bucket_sort(arr)` y `shell_sort(arr)`. Cada algoritmo ordena enteros no negativos (o con rango conocido) en orden ascendente. Los casos nulos devuelven el indicador de fallo definido por el lenguaje/API. Sin excepciones. | Create a `distributed_sort` project with a module implementing `counting_sort(arr)`, `radix_sort(arr)`, `bucket_sort(arr)`, and `shell_sort(arr)`. Each algorithm sorts non-negative integers (or integers in a known range) in ascending order. Null cases return the failure indicator defined by the language/API. No exceptions. |
 
 ### Algoritmos esperados
 

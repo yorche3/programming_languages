@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Algoritmos Puros / Algorithms Pure
-description: Índice de la sección de algoritmos puros — solo arrays, valores centinela / Index for the pure algorithms section — only arrays, sentinel values
+description: Índice de la sección de algoritmos puros — solo arrays e indicadores de fallo / Index for the pure algorithms section — only arrays and failure indicators
 nav_order: 2
 parent: Core
 grand_parent: Programming Languages Monorepo
@@ -16,9 +16,9 @@ grand_parent: Programming Languages Monorepo
 
 ## 📖 Descripción / Description
 
-**ES:** Algoritmos estructurados solo con arrays y valores centinela. Sin excepciones, sin estructuras avanzadas. La progresión va desde los más simples a los optimizados, incluyendo estructuras de datos implementadas con arrays.
+**ES:** Algoritmos estructurados solo con arrays e indicadores de fallo compatibles con cada lenguaje. Sin excepciones, sin estructuras avanzadas. La progresión va desde los más simples a los optimizados, incluyendo estructuras de datos implementadas con arrays.
 
-**EN:** Algorithms structured with only arrays and sentinel values. No exceptions, no advanced structures. The progression goes from the simplest to the optimized, including data structures implemented with arrays.
+**EN:** Algorithms structured with only arrays and language-compatible failure indicators. No exceptions, no advanced structures. The progression goes from the simplest to the optimized, including data structures implemented with arrays.
 
 ---
 
