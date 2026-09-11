@@ -142,3 +142,6 @@
 [submodule "vala"]
 	path = vala
 	url = git@github.com:yorche3/vala.git
+[submodule "zig"]
+	path = zig
+	url = git@github.com:yorche3/zig.git
