@@ -136,3 +136,6 @@
 [submodule "tcl-tk"]
 	path = tcl-tk
 	url = git@github.com:yorche3/tcl-tk.git
+[submodule "v"]
+	path = v
+	url = git@github.com:yorche3/v.git
