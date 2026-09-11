@@ -139,3 +139,6 @@
 [submodule "v"]
 	path = v
 	url = git@github.com:yorche3/v.git
+[submodule "vala"]
+	path = vala
+	url = git@github.com:yorche3/vala.git
