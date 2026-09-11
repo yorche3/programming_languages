@@ -142,6 +142,3 @@
 [submodule "vala"]
 	path = vala
 	url = git@github.com:yorche3/vala.git
-[submodule "yorick"]
-	path = yorick
-	url = git@github.com:yorche3/yorick.git
