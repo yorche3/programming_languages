@@ -1,3 +1,0 @@
-module HelloWorld
-
-print("Hello, World! from Grain!")

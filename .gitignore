@@ -3,3 +3,29 @@
 .lsp/
 .precomp/
 .vscode/
+.codacy/
+.continue/
+
+_superbol/
+dotnet-tools.json
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
+
+# Build artifacts / generated files
+**/.gradle/
+**/.kotlin/
+**/build/
+**/target/
+**/node_modules/
+**/.bsp/
+**/.metals/
+**/.scala-build/
+*.class
+*.tasty
+
+*_bkp
+.fake
+.psc-ide-port
+package-lock.json
+package.json

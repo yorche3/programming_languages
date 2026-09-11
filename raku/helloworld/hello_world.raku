@@ -1,1 +1,0 @@
-say 'Hello, World! from Raku';

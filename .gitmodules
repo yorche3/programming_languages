@@ -1,0 +1,147 @@
+[submodule "ada"]
+	path = ada
+	url = git@github.com:yorche3/ada.git
+[submodule "assembly"]
+	path = assembly
+	url = git@github.com:yorche3/assembly.git
+[submodule "ballerina"]
+	path = ballerina
+	url = git@github.com:yorche3/ballerina.git
+[submodule "c"]
+	path = c
+	url = git@github.com:yorche3/c.git
+[submodule "csharp"]
+	path = csharp
+	url = git@github.com:yorche3/csharp.git
+[submodule "cpp"]
+	path = cpp
+	url = git@github.com:yorche3/cpp.git
+[submodule "clojure"]
+	path = clojure
+	url = git@github.com:yorche3/clojure.git
+[submodule "cobol"]
+	path = cobol
+	url = git@github.com:yorche3/cobol.git
+[submodule "common-lisp"]
+	path = common-lisp
+	url = git@github.com:yorche3/common-lisp.git
+[submodule "crystal"]
+	path = crystal
+	url = git@github.com:yorche3/crystal.git
+[submodule "d"]
+	path = d
+	url = git@github.com:yorche3/d.git
+[submodule "dart"]
+	path = dart
+	url = git@github.com:yorche3/dart.git
+[submodule "elixir"]
+	path = elixir
+	url = git@github.com:yorche3/elixir.git
+[submodule "elm"]
+	path = elm
+	url = git@github.com:yorche3/elm.git
+[submodule "erlang"]
+	path = erlang
+	url = git@github.com:yorche3/erlang.git
+[submodule "fsharp"]
+	path = fsharp
+	url = git@github.com:yorche3/fsharp.git
+[submodule "forth"]
+	path = forth
+	url = git@github.com:yorche3/forth.git
+[submodule "gleam"]
+	path = gleam
+	url = git@github.com:yorche3/gleam.git
+[submodule "go"]
+	path = go
+	url = git@github.com:yorche3/go.git
+[submodule "grain"]
+	path = grain
+	url = git@github.com:yorche3/grain.git
+[submodule "groovy"]
+	path = groovy
+	url = git@github.com:yorche3/groovy.git
+[submodule "haskell"]
+	path = haskell
+	url = git@github.com:yorche3/haskell.git
+[submodule "haxe"]
+	path = haxe
+	url = git@github.com:yorche3/haxe.git 
+[submodule "java"]
+	path = java
+	url = git@github.com:yorche3/java.git
+[submodule "javascript"]
+	path = javascript
+	url = git@github.com:yorche3/javascript.git
+[submodule "julia"]
+	path = julia
+	url = git@github.com:yorche3/julia.git
+[submodule "kotlin"]
+	path = kotlin
+	url = git@github.com:yorche3/kotlin.git
+[submodule "lua"]
+	path = lua
+	url = git@github.com:yorche3/lua.git
+[submodule "nim"]
+	path = nim
+	url = git@github.com:yorche3/nim.git
+[submodule "ocaml"]
+	path = ocaml
+	url = git@github.com:yorche3/ocaml.git
+[submodule "perl"]
+	path = perl
+	url = git@github.com:yorche3/perl.git
+[submodule "prolog"]
+	path = prolog
+	url = git@github.com:yorche3/prolog.git
+[submodule "purescript"]
+	path = purescript
+	url = git@github.com:yorche3/purescript.git
+[submodule "python"]
+	path = python
+	url = git@github.com:yorche3/python.git
+[submodule "r"]
+	path = r
+	url = git@github.com:yorche3/r.git
+[submodule "racket"]
+	path = racket
+	url = git@github.com:yorche3/racket.git
+[submodule "raku"]
+	path = raku
+	url = git@github.com:yorche3/raku.git
+[submodule "rescript"]
+	path = rescript
+	url = git@github.com:yorche3/rescript.git
+[submodule "rexx"]
+	path = rexx
+	url = git@github.com:yorche3/rexx.git
+[submodule "ruby"]
+	path = ruby
+	url = git@github.com:yorche3/ruby.git
+[submodule "rust"]
+	path = rust
+	url = git@github.com:yorche3/rust.git
+[submodule "scala"]
+	path = scala
+	url = git@github.com:yorche3/scala.git
+[submodule "scheme"]
+	path = scheme
+	url = git@github.com:yorche3/scheme.git
+[submodule "swift"]
+	path = swift
+	url = git@github.com:yorche3/swift.git
+[submodule "typescript"]
+	path = typescript
+	url = git@github.com:yorche3/typescript.git
+[submodule "tcl-tk"]
+	path = tcl-tk
+	url = git@github.com:yorche3/tcl-tk.git
+[submodule "v"]
+	path = v
+	url = git@github.com:yorche3/v.git
+[submodule "vala"]
+	path = vala
+	url = git@github.com:yorche3/vala.git
+[submodule "zig"]
+	path = zig
+	url = git@github.com:yorche3/zig.git

@@ -1,0 +1,33 @@
+title: 🌐 Programming Languages Monorepo
+description: Implementación de conceptos de programación en múltiples lenguajes / Programming concepts implemented in multiple languages
+remote_theme: just-the-docs/just-the-docs
+
+# GitHub Pages sirve este sitio desde /docs en la rama main
+# GitHub Pages serves this site from /docs on the main branch
+url: "https://yorche3.github.io"
+baseurl: "/programming_languages"
+
+# Navegación / Navigation
+nav_order: 1
+has_children: false
+
+# Búsqueda integrada del tema / Theme built-in search
+search_enabled: true
+
+# Enlace "Editar esta página" hacia el repositorio
+# "Edit this page" link back to the repository
+gh_edit_link: true
+gh_edit_link_text: "Editar esta página en GitHub / Edit this page on GitHub"
+gh_edit_repository: "https://github.com/yorche3/programming_languages"
+gh_edit_branch: "main"
+gh_edit_view_mode: "tree"
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
