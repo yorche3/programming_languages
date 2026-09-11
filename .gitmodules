@@ -133,3 +133,6 @@
 [submodule "typescript"]
 	path = typescript
 	url = git@github.com:yorche3/typescript.git
+[submodule "tcl-tk"]
+	path = tcl-tk
+	url = git@github.com:yorche3/tcl-tk.git
