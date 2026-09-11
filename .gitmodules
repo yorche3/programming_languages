@@ -124,3 +124,6 @@
 [submodule "scala"]
 	path = scala
 	url = git@github.com:yorche3/scala.git
+[submodule "scheme"]
+	path = scheme
+	url = git@github.com:yorche3/scheme.git
