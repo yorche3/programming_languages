@@ -103,8 +103,8 @@ end container
       **EN:** `counting_sort` is stable (traverses back-to-front when placing elements in output).
 - [ ] **ES:** `radix_sort` opera dígito a dígito de forma LSD (Least Significant Digit).  
       **EN:** `radix_sort` operates digit-by-digit in LSD (Least Significant Digit) fashion.
-- [ ] **ES:** Entradas nulas devuelven `-1` (valor centinela), sin excepciones.  
-      **EN:** Null inputs return `-1` (sentinel value), no exceptions.
+- [ ] **ES:** Entradas nulas devuelven el indicador de fallo compatible con el lenguaje/API (por ejemplo, `-1` cuando el tipo lo permite), sin excepciones.
+    **EN:** Null inputs return a language/API-compatible failure indicator (for example, `-1` when the type permits it), without exceptions.
 - [ ] **ES:** El proyecto separa `src/` de `test/` y usa el framework de pruebas del lenguaje.  
       **EN:** The project separates `src/` from `test/` and uses the language's test framework.
 

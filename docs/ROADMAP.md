@@ -1,5 +1,7 @@
 # 🗺️ Roadmap
 
+> **Cierre / Closure:** registra la evidencia en [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) antes de cambiar el estado de un módulo o fase.
+
 > **Leyenda / Legend:**
 > - ✅ **Completado** / Completed
 > - 🔄 **En progreso** / In progress
@@ -33,9 +35,9 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 | Concepto introducido / Concept introduced | Fase / Phase | Dónde se practica / Where practiced |
 |-------------------------------------------|-------------|-------------------------------------|
 | Bucles, condicionales, funciones / Loops, conditionals, functions | 0 — **Foundations** | `hello_world`, `hello_user`, `unit_test`, `numbers` |
-| **Valores centinela** (sin excepciones): la función devuelve un valor especial (`-1`, `None`) para indicar error sin interrumpir el flujo / **Sentinel values** (no exceptions): function returns a special value (`-1`, `None`) to indicate error without interrupting flow | 1 — **Algorithms Pure** | `naive_sort`, `data_structures`, `structures_apps`, `efficient_sort`, `distributed_sort`, `searching` |
+| **Indicadores de fallo compatibles con el lenguaje/API** (sin excepciones): la función devuelve una representación controlada (`-1`, `None`, `null`, `Option/Maybe`, `Result`, etc.) sin interrumpir el flujo / **Language/API-compatible failure indicators** (no exceptions): function returns a controlled representation (`-1`, `None`, `null`, `Option/Maybe`, `Result`, etc.) without interrupting flow | 1 — **Algorithms Pure** | `naive_sort`, `data_structures`, `structures_apps`, `efficient_sort`, `distributed_sort`, `searching` |
 | **Excepciones**: los algoritmos lanzan/atrapan excepciones para entradas inválidas / **Exceptions**: algorithms throw/catch exceptions for invalid inputs | 2 — **Contiguous Processing** | `patterns`, `substr`, `input_output`, `etl_basico` |
-| **Aplicación de estructuras y paradigmas de optimización** (grafos, backtracking, DP, greedy) — sigue usando valores centinela / **Application of structures and optimization paradigms** (graphs, backtracking, DP, greedy) — still uses sentinel values | 3 — **Algorithms on Structures** | `graph_algorithms`, `backtracking`, `dynamic_programming`, `greedy` |
+| **Aplicación de estructuras y paradigmas de optimización** (grafos, backtracking, DP, greedy) — sigue usando indicadores de fallo compatibles / **Application of structures and optimization paradigms** (graphs, backtracking, DP, greedy) — still uses compatible failure indicators | 3 — **Algorithms on Structures** | `graph_algorithms`, `backtracking`, `dynamic_programming`, `greedy` |
 | **Tipos de retorno** (Option/Result, Maybe/Either) si el lenguaje lo soporta / **Return types** (Option/Result, Maybe/Either) if the language supports it | 4 — **Abstraction & Persistence** | `modeling`, `regex`, `parsing`, `data_base`, `integracion_etl` |
 
 > **ES:** Esto explica por qué en `algorithms` el código "no muere" sino que devuelve un valor especial, y en `text` ya se usan excepciones. Las pruebas unitarias verifican estos comportamientos según corresponda.  
@@ -43,37 +45,37 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 ---
 
-## Fase 0 — Fundamentos / Foundations (🔄 Refactorización en curso)
+## Fase 0 — Fundamentos / Foundations (✅ Completada / Completed)
 
 | Módulo | Estado | Lenguajes | Especificación | Notas |
 |--------|--------|-----------|----------------|-------|
-| `core.foundations.hello_world` | 🔄 | 25/53 | [`📄 01_Hello_World.md`](core/foundations/01_Hello_World.md) | Base mínima del lenguaje |
-| `core.foundations.hello_user` | 🔄 | 24/53 | [`📄 02_Hello_User.md`](core/foundations/02_Hello_User.md) | Entrada/salida interactiva |
-| `core.foundations.unit_test` | 🔄 | 26/53 | [`📄 03_Unit_Test_Calculator.md`](core/foundations/03_Unit_Test_Calculator.md) | Operaciones aritméticas básicas con unit tests |
-| `core.foundations.numbers` | 🔄 | 26/53 | [`📄 04_Numbers.md`](core/foundations/04_Numbers.md) | Algoritmos numéricos recursivos e iterativos |
+| `core.foundations.hello_world` | ✅ | 49/49 | [`📄 01_Hello_World.md`](core/foundations/01_Hello_World.md) | Base mínima del lenguaje |
+| `core.foundations.hello_user` | ✅ | 49/49 | [`📄 02_Hello_User.md`](core/foundations/02_Hello_User.md) | Entrada/salida interactiva |
+| `core.foundations.unit_test` | ✅ | 49/49 | [`📄 03_Unit_Test_Calculator.md`](core/foundations/03_Unit_Test_Calculator.md) | Operaciones aritméticas básicas con unit tests |
+| `core.foundations.numbers` | ✅ | 49/49 | [`📄 04_Numbers.md`](core/foundations/04_Numbers.md) | Algoritmos numéricos recursivos e iterativos |
 
-> **ES:** La fase 0 se está refactorizando a la estructura homologada `core/foundations/` en todos los submódulos de lenguajes. **24 de 53 lenguajes** tienen los 4 módulos completos. El estado ✅ se recuperará cuando los 53 lenguajes estén homologados.
-> **EN:** Phase 0 is being refactored to the standardized `core/foundations/` layout in all language submodules. **24 of 53 languages** have all 4 modules complete. The ✅ status will return once all 53 languages are standardized.
+> **ES:** Los **49 submódulos registrados en `.gitmodules`** tienen los cuatro módulos de Foundations homologados y documentados. Foundations queda cerrada; la siguiente fase visible es Algorithms Pure.
+> **EN:** All **49 submodules registered in `.gitmodules`** have the four Foundations modules standardized and documented. Foundations is complete; Algorithms Pure is the next visible phase.
 
 ---
 
-## Fase 1 — Algoritmos Puros / Algorithms Pure (📋)
+## Fase 1 — Algoritmos Puros / Algorithms Pure (🔄 En progreso / In progress)
 
-**ES:** Algoritmos estructurados solo con arrays y valores centinela. Sin excepciones, sin estructuras avanzadas. Se progresa desde los algoritmos más simples hasta los optimizados.
+**ES:** Algoritmos estructurados solo con arrays e indicadores de fallo compatibles con cada lenguaje/API. Sin excepciones, sin estructuras avanzadas. Se progresa desde los algoritmos más simples hasta los optimizados.
 
-**EN:** Algorithms structured with only arrays and sentinel values. No exceptions, no advanced structures. Progress from the simplest to the optimized algorithms.
+**EN:** Algorithms structured with only arrays and language/API-compatible failure indicators. No exceptions, no advanced structures. Progress from the simplest to the optimized algorithms.
 
 | Módulo | Estado | Algoritmos | Especificación |
 |--------|--------|------------|----------------|
-| `core.algorithms.naive_sort` | 🔄 | bubble, insertion, selection | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
+| `core.algorithms.naive_sort` | 📋 | bubble, insertion, selection | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
 | `core.algorithms.data_structures` | 📋 | stack, queue, linked_list, tree, graph (con arrays) | [`📄 06_Data_Structures.md`](core/algorithms/06_Data_Structures.md) |
 | `core.algorithms.structures_apps` | 📋 | delimitadores balanceados, postfija/RPN, reverse y detección de ciclo en listas, recorridos de árbol (pre/in/post/level) | [`📄 07_Structures_Apps.md`](core/algorithms/07_Structures_Apps.md) |
 | `core.algorithms.efficient_sort` | 📋 | quick, merge, heap | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |
 | `core.algorithms.distributed_sort` | 📋 | radix, bucket, shell, counting | [`📄 09_Distributed_Sort.md`](core/algorithms/09_Distributed_Sort.md) |
 | `core.algorithms.searching` | 📋 | linear, binary, jump, interpolation | [`📄 10_Searching.md`](core/algorithms/10_Searching.md) |
 
-> **ES:** `naive_sort` (O(n²)) se especificó en `05_Naive_Sort.md`, pero sus implementaciones **aún no se han refactorizado** a la estructura homologada `core/algorithms/` (0/53 lenguajes). `structures_apps` aplica las estructuras de `data_structures` en algoritmos simples, manteniendo la complejidad por debajo de los de la Fase 2. Los módulos de la Fase 1 siguen una numeración continua canónica de `05_` a `10_`.
-> **EN:** `naive_sort` (O(n²)) was specified in `05_Naive_Sort.md`, but its implementations have **not yet been refactored** to the standardized `core/algorithms/` layout (0/53 languages). `structures_apps` applies the `data_structures` structures in simple algorithms, keeping complexity below Phase 2's. Phase 1 modules follow a canonical continuous numbering from `05_` to `10_`.
+> **ES:** `naive_sort` (O(n²)) se especificó en `05_Naive_Sort.md`, pero sus implementaciones **aún no se han refactorizado** a la estructura homologada `core/algorithms/` (0/49 submódulos). `structures_apps` aplica las estructuras de `data_structures` en algoritmos simples, manteniendo la complejidad por debajo de los de la Fase 2. Los módulos de la Fase 1 siguen una numeración continua canónica de `05_` a `10_`.
+> **EN:** `naive_sort` (O(n²)) was specified in `05_Naive_Sort.md`, but its implementations have **not yet been refactored** to the standardized `core/algorithms/` layout (0/49 submodules). `structures_apps` applies the `data_structures` structures in simple algorithms, keeping complexity below Phase 2's. Phase 1 modules follow a canonical continuous numbering from `05_` to `10_`.
 
 ---
 
@@ -91,16 +93,16 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 | `core.text.input_output` | 📋 | Archivos (read, write, append) con excepciones y validaciones |
 | `core.text.etl_basico` | 📋 | CSV parse, JSON parse básico, transformaciones de datos |
 
-> **ES:** `transformations` aún **no se ha refactorizado** a la estructura homologada `core/text/` (0/53 lenguajes). Esta fase sustituye el concepto anterior de "Text" puro. Ahora incluye I/O de archivos y ETL básico usando solo arrays. Los algoritmos de patrón más complejos (KMP, Boyer-Moore) usan tablas de salto basadas en arrays.
-> **EN:** `transformations` has **not yet been refactored** to the standardized `core/text/` layout (0/53 languages). This phase replaces the previous pure "Text" concept. It now includes file I/O and basic ETL using only arrays. Complex pattern algorithms (KMP, Boyer-Moore) use array-based jump tables.
+> **ES:** `transformations` aún **no se ha refactorizado** a la estructura homologada `core/text/` (0/49 submódulos). Esta fase sustituye el concepto anterior de "Text" puro. Ahora incluye I/O de archivos y ETL básico usando solo arrays. Los algoritmos de patrón más complejos (KMP, Boyer-Moore) usan tablas de salto basadas en arrays.
+> **EN:** `transformations` has **not yet been refactored** to the standardized `core/text/` layout (0/49 submodules). This phase replaces the previous pure "Text" concept. It now includes file I/O and basic ETL using only arrays. Complex pattern algorithms (KMP, Boyer-Moore) use array-based jump tables.
 
 ---
 
 ## Fase 3 — Algoritmos sobre Estructuras / Algorithms on Structures (📋)
 
-**ES:** Algoritmos que aplican las estructuras construidas en la Fase 1 (árboles, grafos, colas, pilas) junto con los paradigmas de optimización: backtracking, programación dinámica y greedy. Implementados desde cero, siguen usando arrays y valores centinela. Su complejidad es mayor que la de los algoritmos de texto de la Fase 2, por lo que van después de ella.
+**ES:** Algoritmos que aplican las estructuras construidas en la Fase 1 (árboles, grafos, colas, pilas) junto con los paradigmas de optimización: backtracking, programación dinámica y greedy. Implementados desde cero, siguen usando arrays e indicadores de fallo compatibles. Su complejidad es mayor que la de los algoritmos de texto de la Fase 2, por lo que van después de ella.
 
-**EN:** Algorithms that apply the structures built in Phase 1 (trees, graphs, queues, stacks) together with the optimization paradigms: backtracking, dynamic programming, and greedy. Implemented from scratch, they still use arrays and sentinel values. Their complexity is higher than the Phase 2 text algorithms, so they come after it.
+**EN:** Algorithms that apply the structures built in Phase 1 (trees, graphs, queues, stacks) together with the optimization paradigms: backtracking, dynamic programming, and greedy. Implemented from scratch, they still use arrays and compatible failure indicators. Their complexity is higher than the Phase 2 text algorithms, so they come after it.
 
 | Módulo | Estado | Algoritmos | Especificación |
 |--------|--------|------------|----------------|
@@ -182,7 +184,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
    - *Paso 2 — Menús y orquestación:* Construir menús interactivos o enrutadores de endpoints para despachar y ejecutar las funcionalidades y algoritmos previamente construidos y probados en Core (`algorithms_menu`).
    - *Paso 3 — Servicios de datos reales:* Conectar con bases de datos, almacenamiento persistente, transformaciones de datos y consultas completas (CRUD, pipelines ETL expuestos).
 2. **Manejo de errores por capas:**
-   - En **Core** se valida la lógica pura del dominio y de los algoritmos (mediante valores centinela en Fases 1 y 3, excepciones en Fase 2, o tipos Result/Option en Fase 4).
+   - En **Core** se valida la lógica pura del dominio y de los algoritmos (mediante indicadores de fallo compatibles en Fases 1 y 3, excepciones en Fase 2, o tipos Result/Option en Fase 4).
    - En **UI y Web**, la capa de interfaz atrapa esos resultados y los traduce a los códigos de error (*code errors*) propios de cada medio: códigos de salida de proceso (*exit codes* como `exit 1` / `exit 2`) en CLI, mensajes de estado visuales en GUI/TUI, y códigos de estado HTTP (400 Bad Request, 404 Not Found, 422 Unprocessable Entity, 500 Internal Error) en Web.
 
 **EN:** The **UI (Phase 6)** and **Web (Phase 7)** phases are **application tracks** that can be started in parallel or as a subsequent step to Core:
@@ -192,7 +194,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
    - *Step 2 — Menus and orchestration:* Building interactive menus or endpoint routers to dispatch and execute functionalities and algorithms already built and tested in Core (`algorithms_menu`).
    - *Step 3 — Real data services:* Connecting to databases, persistent storage, data transformations, and full queries (CRUD, exposed ETL pipelines).
 2. **Layered error handling:**
-   - In **Core**, pure domain and algorithm logic is validated (using sentinel values in Phases 1 and 3, exceptions in Phase 2, or Result/Option types in Phase 4).
+   - In **Core**, pure domain and algorithm logic is validated (using compatible failure indicators in Phases 1 and 3, exceptions in Phase 2, or Result/Option types in Phase 4).
    - In **UI and Web**, the interface layer catches these results and translates them into medium-specific *code errors*: process exit codes (`exit 1` / `exit 2`) in CLI, visual status messages in GUI/TUI, and HTTP status codes (400, 404, 422, 500) in Web.
 
 ---
@@ -275,17 +277,17 @@ A medida que se avanza a proyectos más complejos (a partir de `ui.cliapp`), los
 
 ## Resumen de progreso / Progress Summary
 
-> **ES:** Los contadores `X/53` indican cuántos de los **53 lenguajes** del monorepo tienen el módulo implementado y homologado bajo `core/` (se excluyen copias de respaldo y `_experimental/`).
-> **EN:** The `X/53` counters indicate how many of the monorepo's **53 languages** have the module implemented and standardized under `core/` (backup copies and `_experimental/` are excluded).
+> **ES:** Los contadores `X/49` indican cuántos de los **49 submódulos registrados en `.gitmodules`** tienen el módulo implementado y homologado bajo `core/`. Los lenguajes legacy, copias de respaldo, `_experimental/` y lenguajes eliminados como `seed7` no forman parte del denominador.
+> **EN:** The `X/49` counters indicate how many of the **49 submodules registered in `.gitmodules`** have the module implemented and standardized under `core/`. Legacy languages, backups, `_experimental/`, and removed languages such as `seed7` are excluded from the denominator.
 
 ```text
-## Fase 0 — Foundations 🔄 (completos: 24/53 lenguajes)
-core.foundations.hello_world          🔄 25/53
-core.foundations.hello_user           🔄 24/53
-core.foundations.unit_test            🔄 26/53
-core.foundations.numbers              🔄 26/53
+## Fase 0 — Foundations ✅ (completos: 49/49 submódulos)
+core.foundations.hello_world          ✅ 49/49
+core.foundations.hello_user           ✅ 49/49
+core.foundations.unit_test            ✅ 49/49
+core.foundations.numbers              ✅ 49/49
 
-## Fase 1 — Algorithms Pure 📋 (refactorizados: 0/53)
+## Fase 1 — Algorithms Pure 🔄 (fase abierta; implementados: 0/49)
 core.algorithms.naive_sort            🔄 (refactor pendiente)
 core.algorithms.data_structures       📋
 core.algorithms.structures_apps       📋
@@ -293,14 +295,14 @@ core.algorithms.efficient_sort        📋
 core.algorithms.distributed_sort      📋
 core.algorithms.searching             📋
 
-## Fase 2 — Contiguous Processing 📋 (refactorizados: 0/53)
+## Fase 2 — Contiguous Processing 📋 (refactorizados: 0/49)
 core.text.transformations             🔄 (refactor pendiente)
 core.text.patterns                    📋
 core.text.substr                      📋
 core.text.input_output                📋
 core.text.etl_basico                  📋
 
-## Fase 3 — Algorithms on Structures 📋 (implementados: 0/53)
+## Fase 3 — Algorithms on Structures 📋 (implementados: 0/49)
 core.structures.graph_algorithms      📋
 core.structures.backtracking          📋
 core.structures.dynamic_programming   📋

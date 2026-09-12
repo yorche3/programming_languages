@@ -17,9 +17,9 @@ has_children: true
 
 ## 📖 Descripción / Description
 
-**ES:** Algoritmos que aplican las estructuras construidas en la Fase 1 (árboles, grafos, pilas, colas) junto con los paradigmas de optimización. Siguen implementándose desde cero, con arrays y valores centinela (sin excepciones). Su complejidad supera la de los algoritmos de texto de la Fase 2, por lo que esta sección va después de ella.
+**ES:** Algoritmos que aplican las estructuras construidas en la Fase 1 (árboles, grafos, pilas, colas) junto con los paradigmas de optimización. Siguen implementándose desde cero, con arrays e indicadores de fallo compatibles con el lenguaje/API (sin excepciones). Su complejidad supera la de los algoritmos de texto de la Fase 2, por lo que esta sección va después de ella.
 
-**EN:** Algorithms that apply the structures built in Phase 1 (trees, graphs, stacks, queues) together with optimization paradigms. They are still implemented from scratch, with arrays and sentinel values (no exceptions). Their complexity exceeds the Phase 2 text algorithms, so this section comes after it.
+**EN:** Algorithms that apply the structures built in Phase 1 (trees, graphs, stacks, queues) together with optimization paradigms. They are still implemented from scratch, with arrays and language/API-compatible failure indicators (no exceptions). Their complexity exceeds the Phase 2 text algorithms, so this section comes after it.
 
 ---
 

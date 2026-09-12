@@ -31,8 +31,8 @@ has_children: true
 | [`03_Unit_Test_Calculator.md`](03_Unit_Test_Calculator.md) | ✅ | Pruebas unitarias / Unit tests |
 | [`04_Numbers.md`](04_Numbers.md) | ✅ | Algoritmos numéricos / Numerical algorithms |
 
-> **ES:** Estado de implementación: **24/53 lenguajes** tienen los 4 módulos homologados bajo `core/foundations/` (helloworld 25/53, hellouser 24/53, unit_test 26/53, numbers 26/53). La refactorización al estándar `core/` sigue en curso.
-> **EN:** Implementation status: **24/53 languages** have all 4 modules standardized under `core/foundations/` (helloworld 25/53, hellouser 24/53, unit_test 26/53, numbers 26/53). The refactoring to the `core/` standard is ongoing.
+> **ES:** Estado de implementación: **49/49 submódulos registrados en `.gitmodules`** tienen los 4 módulos homologados bajo `core/foundations/`. Foundations está completada; la siguiente fase es `core/algorithms/`.
+> **EN:** Implementation status: **49/49 submodules registered in `.gitmodules`** have all 4 modules standardized under `core/foundations/`. Foundations is complete; the next phase is `core/algorithms/`.
 
 ---
 

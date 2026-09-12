@@ -33,8 +33,8 @@ grand_parent: Programming Languages Monorepo
 | `distributed_sort` | 📋 | radix, bucket, shell, counting | [`09_Distributed_Sort.md`](09_Distributed_Sort.md) |
 | `searching` | 📋 | linear, binary, jump, interpolation | [`10_Searching.md`](10_Searching.md) |
 
-> **ES:** Las especificaciones siguen una numeración continua canónica de `05_` a `10_`. Las implementaciones históricas están en proceso de refactorización hacia la estructura homologada `core/algorithms/` en cada submódulo.
-> **EN:** Specifications follow a canonical continuous numbering from `05_` to `10_`. Historical implementations are undergoing refactoring into the standardized `core/algorithms/` layout in each submodule.
+> **ES:** Las especificaciones siguen una numeración continua canónica de `05_` a `10_`. Algorithms Pure es la siguiente fase abierta; sus implementaciones comenzarán ahora en los submódulos con Foundations completada.
+> **EN:** Specifications follow a canonical continuous numbering from `05_` to `10_`. Algorithms Pure is the next open phase; its implementations will now begin in submodules with Foundations complete.
 
 ---
 

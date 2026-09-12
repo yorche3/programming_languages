@@ -24,8 +24,8 @@ has_children: true
 
 | Sección | Fase | Estado | Índice |
 |---------|------|--------|--------|
-| [`foundations/`](foundations/) | Fase 0 | 🔄 | [`README.md`](foundations/README.md) |
-| [`algorithms/`](algorithms/) | Fase 1 — Algoritmos Puros | 📋 | [`README.md`](algorithms/README.md) |
+| [`foundations/`](foundations/) | Fase 0 | ✅ | [`README.md`](foundations/README.md) |
+| [`algorithms/`](algorithms/) | Fase 1 — Algoritmos Puros | 🔄 | [`README.md`](algorithms/README.md) |
 | [`text/`](text/) | Fase 2 — Procesamiento Contiguo | 📋 | [`README.md`](text/README.md) |
 | [`structures/`](structures/) | Fase 3 — Algoritmos sobre Estructuras | 📋 | [`README.md`](structures/README.md) |
 | [`data/`](data/) | Fase 4 — Abstracción y Persistencia | 📋 | [`README.md`](data/README.md) |
@@ -50,56 +50,38 @@ has_children: true
 
 *[← Volver al inicio](../index.md)*
 
-🔁 Flujo completo de trabajo paso a paso
-1️⃣ Partir desde dev actualizada
-bash
+## 🔁 Flujo completo de trabajo / Complete workflow
 
-git switch dev
-git pull origin dev   # actualiza dev con los últimos cambios remotos
+1. Partir desde `main` actualizada / Start from updated `main`.
 
-2️⃣ Crear una nueva rama feature desde dev
-bash
-
-git switch -c feature/autenticacion   # ejemplo: feature/autenticacion
-
-3️⃣ Trabajar en la feature (commits normales)
-bash
-
-# ... editas archivos ...
-git add .
-git commit -m "Añadir login básico"
-git push -u origin feature/autenticacion   # primera subida (opcional)
-
-4️⃣ Integrar la feature terminada en dev
-Opción A – Merge directo (recomendada para features pequeñas)
-bash
-
-git switch dev
-git pull origin dev                # aseguras dev actualizada
-git merge --no-ff feature/autenticacion   # fusiona la feature
-git push origin dev
-
-Opción B – Con integración previa de dev en la feature (para evitar conflictos grandes)
-bash
-
-git switch feature/autenticacion
-git merge dev                       # trae lo último de dev a tu feature
-# (resuelves conflictos si los hay)
-git add . && git commit -m "Merge dev into feature"
-git switch dev
-git merge --no-ff feature/autenticacion
-git push origin dev
-
-5️⃣ Eliminar la rama feature (local y remota)
-bash
-
-git branch -d feature/autenticacion
-git push origin --delete feature/autenticacion
-
-6️⃣ Cuando dev está estable, fusionarla a main
-bash
-
+```bash
 git switch main
 git pull origin main
-git merge --no-ff dev
-git push origin main
+```
+
+2. Crear una rama corta / Create a short-lived branch.
+
+```bash
+git switch -c docs/actualizar-readme
+```
+
+3. Trabajar, verificar y registrar evidencia / Work, verify, and record evidence.
+
+```bash
+git diff --check
+git status --short
+```
+
+Para cerrar un módulo o fase, completa
+[`ROADMAP_UPDATE_CHECKLIST.md`](../ROADMAP_UPDATE_CHECKLIST.md) y actualiza
+`ROADMAP.md` solo con código, tests y documentación verificados.
+
+4. Integrar después de revisión / Integrate after review.
+
+```bash
+git switch main
+git merge --no-ff docs/actualizar-readme
+```
+
+Las mismas reglas se aplican dentro de cada submódulo. No se presupone una
+rama intermedia; los cambios se integran desde ramas cortas a `main`.

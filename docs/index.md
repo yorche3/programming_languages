@@ -25,8 +25,9 @@ description: Implementación de conceptos de programación en múltiples lenguaj
 |-------------|--------------------|
 | [`🗺️ ROADMAP.md`](ROADMAP.md) | Plan de desarrollo completo / Full development plan |
 | [`🧱 Core`](core/README.md) | Índice general de la documentación base / Main core documentation index |
-| [`📄 Plantilla_Readme.md`](Plantilla_Readme.md) | Plantilla de README para sub-proyectos individuales / README template for individual sub-projects |
-| [`🤖 Plantilla_Agente.md`](Plantilla_Agente.md) | Guía operativa para agentes de IA que documentan o corrigen el repo / Operational guide for AI agents documenting or fixing the repo |
+| [`📄 README_Template.md`](README_Template.md) | Plantilla de README para sub-proyectos individuales / README template for individual sub-projects |
+| [`🤖 AGENT_Template.md`](AGENT_Template.md) | Guía operativa para agentes de IA que documentan o corrigen el repo / Operational guide for AI agents documenting or fixing the repo |
+| [`✅ ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) | Registro de cierres que autorizan actualizaciones del roadmap / Closure record authorizing roadmap updates |
 | [`🤝 CONTRIBUTING.md`](CONTRIBUTING.md) | Convención de commits / Commit convention |
 
 > 💡 **Convención de nombres / Naming convention:** Los documentos siguen una numeración secuencial (`01_`, `02_`, `03_`…) que indica el orden recomendado de implementación. Sigue la numeración para avanzar en el flujo.
@@ -109,8 +110,8 @@ programming_languages/
 2. **Languages in legacy structure:** Maintain flat folders at the root (`helloworld/`, `hellouser/`, `numbers/`, `words/`) directly in the monorepo without a submodule. They are incrementally migrated to the standard.
 3. **`_experimental/` (Sandbox & Legacy Staging):** Space preserving the author's initial experimental exploration with each language (folders with `numbers/`, `words/`, `unit_test/demo/`). It acts as a sandbox and historical staging area prior to formal standardization in `core/`.
 
-> **ES:** Antes de crear o corregir documentación para un lenguaje, verifica si está en `.gitmodules` (homologado), en la raíz (legacy) o en `_experimental/` — la estructura y las plantillas aplicables difieren. Ver [`Plantilla_Agente.md`](Plantilla_Agente.md).
-> **EN:** Before creating or fixing documentation for a language, check whether it is in `.gitmodules` (homologated), in the root (legacy), or in `_experimental/` — the applicable structure and templates differ. See [`Plantilla_Agente.md`](Plantilla_Agente.md).
+> **ES:** Antes de crear o corregir documentación para un lenguaje, verifica si está en `.gitmodules` (homologado), en la raíz (legacy) o en `_experimental/` — la estructura y las plantillas aplicables difieren. Ver [`AGENT_Template.md`](AGENT_Template.md).
+> **EN:** Before creating or fixing documentation for a language, check whether it is in `.gitmodules` (homologated), in the root (legacy), or in `_experimental/` — the applicable structure and templates differ. See [`AGENT_Template.md`](AGENT_Template.md).
 
 ```bash
 # Clonar con submódulos / Clone with submodules

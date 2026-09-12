@@ -32,8 +32,8 @@ grand_parent: Programming Languages Monorepo
 | `input_output` | 📋 | Archivos (read, write, append) con excepciones y validaciones |
 | `etl_basico` | 📋 | CSV parse, JSON parse básico, transformaciones de datos |
 
-> **ES:** `transformations` aún **no se ha refactorizado** a la estructura homologada `core/text/` (0/53 lenguajes); su estado se marcará ✅ cuando las implementaciones estén migradas.
-> **EN:** `transformations` has **not yet been refactored** to the standardized `core/text/` layout (0/53 languages); its status will return to ✅ once implementations are migrated.
+> **ES:** `transformations` aún **no se ha refactorizado** a la estructura homologada `core/text/` (0/49 submódulos registrados en `.gitmodules`); su estado se marcará ✅ cuando las implementaciones estén migradas.
+> **EN:** `transformations` has **not yet been refactored** to the standardized `core/text/` layout (0/49 submodules registered in `.gitmodules`); its status will return to ✅ once implementations are migrated.
 
 ---
 

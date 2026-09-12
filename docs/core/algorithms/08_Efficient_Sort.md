@@ -128,8 +128,8 @@ end container
       **EN:** All three algorithms (`quick_sort`, `merge_sort`, `heap_sort`) are implemented without invoking native system libraries.
 - [ ] **ES:** `heap_sort` implementa el montículo binario mediante array plano con procedimiento explícito de `sift_down` (este procedimiento es la base de la cola de prioridad de Dijkstra).  
       **EN:** `heap_sort` implements the binary heap via flat array with explicit `sift_down` procedure (this procedure is the basis for Dijkstra's priority queue).
-- [ ] **ES:** El caso nulo retorna `-1` (valor centinela), sin excepciones.  
-      **EN:** Null case returns `-1` (sentinel value), no exceptions.
+- [ ] **ES:** El caso nulo retorna el indicador de fallo compatible con el lenguaje/API (por ejemplo, `-1` cuando el tipo lo permite), sin excepciones.
+    **EN:** Null input returns a language/API-compatible failure indicator (for example, `-1` when the type permits it), without exceptions.
 - [ ] **ES:** El proyecto separa el código fuente (`src/`) de las pruebas (`test/`).  
       **EN:** The project separates source code (`src/`) from tests (`test/`).
 

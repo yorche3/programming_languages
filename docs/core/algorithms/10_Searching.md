@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar los algoritmos fundamentales de búsqueda sobre arrays: **Linear Search**, **Binary Search**, **Jump Search** e **Interpolation Search**, analizando el compromiso entre precondiciones de ordenamiento y rendimiento temporal ($O(n)$, $O(\sqrt{n})$, $O(\log n)$ y $O(\log \log n)$), devolviendo el índice encontrado o el valor centinela `-1` si el elemento no está presente. | Implement fundamental search algorithms on arrays: **Linear Search**, **Binary Search**, **Jump Search**, and **Interpolation Search**, analyzing the trade-off between sorting preconditions and time performance ($O(n)$, $O(\sqrt{n})$, $O(\log n)$, and $O(\log \log n)$), returning the found index or the sentinel value `-1` if the element is not present. |
+| Implementar los algoritmos fundamentales de búsqueda sobre arrays: **Linear Search**, **Binary Search**, **Jump Search** e **Interpolation Search**, analizando el compromiso entre precondiciones de ordenamiento y rendimiento temporal ($O(n)$, $O(\sqrt{n})$, $O(\log n)$ y $O(\log \log n)$), devolviendo el índice encontrado o el indicador de fallo compatible con el lenguaje/API si el elemento no está presente. | Implement fundamental search algorithms on arrays: **Linear Search**, **Binary Search**, **Jump Search**, and **Interpolation Search**, analyzing the trade-off between sorting preconditions and time performance ($O(n)$, $O(\sqrt{n})$, $O(\log n)$, and $O(\log \log n)$), returning the found index or a language/API-compatible failure indicator if the element is not present. |
 
 ---
 
@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `searching` con un módulo que contenga las funciones `linear_search(arr, target)`, `binary_search(arr, target)`, `jump_search(arr, target)` e `interpolation_search(arr, target)`. Cada función devuelve el índice base 0 donde se ubica `target` en `arr`. Si el elemento no existe, o si el array es nulo/vacío, devuelve `-1`. Sin excepciones. | Create a `searching` project with a module containing `linear_search(arr, target)`, `binary_search(arr, target)`, `jump_search(arr, target)`, and `interpolation_search(arr, target)`. Each function returns the 0-based index where `target` is located in `arr`. If the element does not exist, or if the array is null/empty, returns `-1`. No exceptions. |
+| Crear un proyecto `searching` con un módulo que contenga las funciones `linear_search(arr, target)`, `binary_search(arr, target)`, `jump_search(arr, target)` e `interpolation_search(arr, target)`. Cada función devuelve el índice base 0 donde se ubica `target` en `arr`. Si el elemento no existe, o si el array es nulo/vacío, devuelve el indicador de fallo compatible con el lenguaje/API. Sin excepciones. | Create a `searching` project with a module containing `linear_search(arr, target)`, `binary_search(arr, target)`, `jump_search(arr, target)`, and `interpolation_search(arr, target)`. Each function returns the 0-based index where `target` is located in `arr`. If the element does not exist, or if the array is null/empty, returns the language/API-compatible failure indicator. No exceptions. |
 
 ### Algoritmos esperados
 

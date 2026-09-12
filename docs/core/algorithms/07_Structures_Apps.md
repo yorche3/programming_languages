@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `structures_apps` con un módulo que resuelva los cuatro problemas aplicando directamente las estructuras de la especificación `06_Data_Structures`. Errores de sintaxis o expresiones no computables devuelven el valor centinela `-1`. Sin excepciones. | Create a `structures_apps` project with a module solving the four problems by directly applying the structures from `06_Data_Structures`. Syntax errors or non-computable expressions return the sentinel value `-1`. No exceptions. |
+| Crear un proyecto `structures_apps` con un módulo que resuelva los cuatro problemas aplicando directamente las estructuras de la especificación `06_Data_Structures`. Errores de sintaxis o expresiones no computables devuelven el indicador de fallo compatible con el lenguaje/API (por ejemplo, `-1` cuando el tipo lo permite). Sin excepciones. | Create a `structures_apps` project with a module solving the four problems by directly applying the structures from `06_Data_Structures`. Syntax errors or non-computable expressions return the language/API-compatible failure indicator (for example, `-1` when the type permits it). No exceptions. |
 
 ### Aplicaciones y Algoritmos esperados
 

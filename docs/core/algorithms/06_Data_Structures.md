@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Construir las estructuras de datos fundamentales (**Stack**, **Queue**, **Linked List**, **Binary Tree** y **Graph**) modeladas directamente sobre **arrays e índices**, comprendiendo la mecánica de memoria subyacente y empleando valores centinela (`-1`) para manejar condiciones de desbordamiento (overflow) o subdesbordamiento (underflow) sin excepciones. | Build fundamental data structures (**Stack**, **Queue**, **Linked List**, **Binary Tree**, and **Graph**) modeled directly on **arrays and indices**, understanding underlying memory mechanics and using sentinel values (`-1`) to handle overflow and underflow conditions without exceptions. |
+| Construir las estructuras de datos fundamentales (**Stack**, **Queue**, **Linked List**, **Binary Tree** y **Graph**) modeladas directamente sobre **arrays e índices**, comprendiendo la mecánica de memoria subyacente y empleando indicadores de fallo compatibles con el lenguaje/API (por ejemplo, `-1` cuando el tipo lo permite) para manejar condiciones de desbordamiento (overflow) o subdesbordamiento (underflow) sin excepciones. | Build fundamental data structures (**Stack**, **Queue**, **Linked List**, **Binary Tree**, and **Graph**) modeled directly on **arrays and indices**, understanding underlying memory mechanics and using language/API-compatible failure indicators (for example, `-1` when the type permits it) to handle overflow and underflow conditions without exceptions. |
 
 ---
 
