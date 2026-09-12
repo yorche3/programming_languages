@@ -47,8 +47,8 @@ has_children: true
 
 ## ▶️ Siguiente / Next
 
-👉 Después de completar los fundamentos, continúa con [`../algorithms/`](../algorithms/) y [`../text/`](../text/).  
-👉 After completing the foundations, continue with [`../algorithms/`](../algorithms/) and [`../text/`](../text/).
+👉 Después de completar los fundamentos, continúa con [`../algorithms/`](../algorithms/README.md) y [`../text/`](../text/).  
+👉 After completing the foundations, continue with [`../algorithms/`](../algorithms/README.md) and [`../text/`](../text/).
 
 ---
 

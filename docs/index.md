@@ -24,6 +24,7 @@ description: Implementación de conceptos de programación en múltiples lenguaj
 | Ruta / Path | Contenido / Content |
 |-------------|--------------------|
 | [`🗺️ ROADMAP.md`](ROADMAP.md) | Plan de desarrollo completo / Full development plan |
+| [`📜 CHANGELOG.md`](../CHANGELOG.md) | Historial de releases del monorepo / Monorepo release history |
 | [`🧱 Core`](core/README.md) | Índice general de la documentación base / Main core documentation index |
 | [`📄 README_Template.md`](README_Template.md) | Plantilla de README para sub-proyectos individuales / README template for individual sub-projects |
 | [`🤖 AGENT_Template.md`](AGENT_Template.md) | Guía operativa para agentes de IA que documentan o corrigen el repo / Operational guide for AI agents documenting or fixing the repo |
