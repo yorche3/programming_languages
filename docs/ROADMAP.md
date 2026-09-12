@@ -65,17 +65,17 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 **EN:** Algorithms structured with only arrays and language/API-compatible failure indicators. No exceptions, no advanced structures. Progress from the simplest to the optimized algorithms.
 
-| Módulo | Estado | Algoritmos | Especificación |
-|--------|--------|------------|----------------|
-| `core.algorithms.naive_sort` | 📋 | bubble, insertion, selection | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
-| `core.algorithms.data_structures` | 📋 | stack, queue, linked_list, tree, graph (con arrays) | [`📄 06_Data_Structures.md`](core/algorithms/06_Data_Structures.md) |
-| `core.algorithms.structures_apps` | 📋 | delimitadores balanceados, postfija/RPN, reverse y detección de ciclo en listas, recorridos de árbol (pre/in/post/level) | [`📄 07_Structures_Apps.md`](core/algorithms/07_Structures_Apps.md) |
-| `core.algorithms.efficient_sort` | 📋 | quick, merge, heap | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |
-| `core.algorithms.distributed_sort` | 📋 | radix, bucket, shell, counting | [`📄 09_Distributed_Sort.md`](core/algorithms/09_Distributed_Sort.md) |
-| `core.algorithms.searching` | 📋 | linear, binary, jump, interpolation | [`📄 10_Searching.md`](core/algorithms/10_Searching.md) |
+| Módulo | Estado | Lenguajes | Algoritmos | Especificación |
+|--------|--------|-----------|------------|----------------|
+| `core.algorithms.naive_sort` | 🔄 | 1/49 | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
+| `core.algorithms.data_structures` | 📋 | 0/49 | stack, queue, linked_list, tree, graph (con arrays) | [`📄 06_Data_Structures.md`](core/algorithms/06_Data_Structures.md) |
+| `core.algorithms.structures_apps` | 📋 | 0/49 | delimitadores balanceados, postfija/RPN, reverse y detección de ciclo en listas, recorridos de árbol (pre/in/post/level) | [`📄 07_Structures_Apps.md`](core/algorithms/07_Structures_Apps.md) |
+| `core.algorithms.efficient_sort` | 📋 | 0/49 | quick, merge, heap | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |
+| `core.algorithms.distributed_sort` | 📋 | 0/49 | radix, bucket, shell, counting | [`📄 09_Distributed_Sort.md`](core/algorithms/09_Distributed_Sort.md) |
+| `core.algorithms.searching` | 📋 | 0/49 | linear, binary, jump, interpolation | [`📄 10_Searching.md`](core/algorithms/10_Searching.md) |
 
-> **ES:** `naive_sort` (O(n²)) se especificó en `05_Naive_Sort.md`, pero sus implementaciones **aún no se han refactorizado** a la estructura homologada `core/algorithms/` (0/49 submódulos). `structures_apps` aplica las estructuras de `data_structures` en algoritmos simples, manteniendo la complejidad por debajo de los de la Fase 2. Los módulos de la Fase 1 siguen una numeración continua canónica de `05_` a `10_`.
-> **EN:** `naive_sort` (O(n²)) was specified in `05_Naive_Sort.md`, but its implementations have **not yet been refactored** to the standardized `core/algorithms/` layout (0/49 submodules). `structures_apps` applies the `data_structures` structures in simple algorithms, keeping complexity below Phase 2's. Phase 1 modules follow a canonical continuous numbering from `05_` to `10_`.
+> **ES:** `naive_sort` (O(n²)) se especificó en `05_Naive_Sort.md` y ya cuenta con su primera implementación homologada bajo `core/algorithms/naive_sort/` (**1/49**, Ada), con código, tests ejecutados y README verificados. El resto de lenguajes sigue pendiente. `structures_apps` aplica las estructuras de `data_structures` en algoritmos simples, manteniendo la complejidad por debajo de los de la Fase 2. Los módulos de la Fase 1 siguen una numeración continua canónica de `05_` a `10_`.
+> **EN:** `naive_sort` (O(n²)) was specified in `05_Naive_Sort.md` and now has its first standardized implementation under `core/algorithms/naive_sort/` (**1/49**, Ada), with verified code, executed tests, and README. The remaining languages are still pending. `structures_apps` applies the `data_structures` structures in simple algorithms, keeping complexity below Phase 2's. Phase 1 modules follow a canonical continuous numbering from `05_` to `10_`.
 
 ---
 
@@ -287,8 +287,8 @@ core.foundations.hello_user           ✅ 49/49
 core.foundations.unit_test            ✅ 49/49
 core.foundations.numbers              ✅ 49/49
 
-## Fase 1 — Algorithms Pure 🔄 (fase abierta; implementados: 0/49)
-core.algorithms.naive_sort            🔄 (refactor pendiente)
+## Fase 1 — Algorithms Pure 🔄 (fase abierta; implementados: 1/49)
+core.algorithms.naive_sort            🔄 1/49 (Ada)
 core.algorithms.data_structures       📋
 core.algorithms.structures_apps       📋
 core.algorithms.efficient_sort        📋

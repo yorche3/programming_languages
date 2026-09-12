@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar los tres algoritmos elementales de ordenamiento ($O(n^2)$): **Bubble Sort**, **Insertion Sort** y **Selection Sort**, trabajando directamente sobre arrays y utilizando comparaciones e intercambios paso a paso sin bibliotecas de ordenamiento del sistema ni estructuras auxiliares complejas. | Implement the three elementary sorting algorithms ($O(n^2)$): **Bubble Sort**, **Insertion Sort**, and **Selection Sort**, working directly over arrays and using step-by-step comparisons and swaps without system sorting libraries or complex auxiliary structures. |
+| Implementar los tres algoritmos elementales de ordenamiento ($O(n^2)$): **Selection Sort**, **Bubble Sort** e **Insertion Sort**, trabajando directamente sobre arrays y utilizando comparaciones e intercambios paso a paso sin bibliotecas de ordenamiento del sistema ni estructuras auxiliares complejas. | Implement the three elementary sorting algorithms ($O(n^2)$): **Selection Sort**, **Bubble Sort**, and **Insertion Sort**, working directly over arrays and using step-by-step comparisons and swaps without system sorting libraries or complex auxiliary structures. |
 
 ---
 
@@ -27,23 +27,38 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `naive_sort` con un módulo que contenga las funciones `bubble_sort(arr)`, `insertion_sort(arr)` y `selection_sort(arr)`. Cada función recibe un array de enteros y devuelve el array ordenado de menor a mayor (de forma in-place o retornando una copia ordenada según el paradigma del lenguaje). Si la entrada es nula o inválida, devuelve el indicador de fallo definido por el lenguaje o la API (`-1`, `null`, `Option/Maybe` vacío, `Result` de error u otra representación equivalente); si está vacía, devuelve el mismo array vacío. No lanza excepciones. | Create a `naive_sort` project with a module containing `bubble_sort(arr)`, `insertion_sort(arr)`, and `selection_sort(arr)`. Each function takes an integer array and returns it sorted in ascending order (in-place or returning a sorted copy depending on the language paradigm). If the input is null or invalid, it returns the failure indicator defined by the language or API (`-1`, `null`, empty `Option/Maybe`, error `Result`, or another equivalent representation); if empty, it returns the same empty array. It does not throw exceptions. |
+| Crear un proyecto `naive_sort` con un módulo que contenga las funciones `selection_sort(arr)`, `bubble_sort(arr)` e `insertion_sort(arr)`. Cada función recibe un array de enteros y devuelve el array ordenado de menor a mayor (de forma in-place o retornando una copia ordenada según el paradigma del lenguaje). Si la entrada es nula o inválida, devuelve el indicador de fallo definido por el lenguaje o la API (`-1`, `null`, `Option/Maybe` vacío, `Result` de error u otra representación equivalente); si está vacía, devuelve el mismo array vacío. No lanza excepciones. | Create a `naive_sort` project with a module containing `selection_sort(arr)`, `bubble_sort(arr)`, and `insertion_sort(arr)`. Each function takes an integer array and returns it sorted in ascending order (in-place or returning a sorted copy depending on the language paradigm). If the input is null or invalid, it returns the failure indicator defined by the language or API (`-1`, `null`, empty `Option/Maybe`, error `Result`, or another equivalent representation); if empty, it returns the same empty array. It does not throw exceptions. |
 
 ### Implementaciones esperadas
 
 | Algoritmo | Estrategia | Complejidad temporal | In-place |
 |-----------|------------|---------------------|:--------:|
+| `selection_sort(arr)` | Encuentra iterativamente el mínimo del resto no ordenado y lo ubica al inicio | $O(n^2)$ siempre | ✅ |
 | `bubble_sort(arr)` | Compara e intercambia adyacentes; optimizado con bandera si no hay swaps | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ |
 | `insertion_sort(arr)` | Construye el sub-array ordenado insertando cada elemento en su posición | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ |
-| `selection_sort(arr)` | Encuentra iterativamente el mínimo del resto no ordenado y lo ubica al inicio | $O(n^2)$ siempre | ✅ |
 
 ### Pseudocódigo / Pseudocode
 
 ```pseudocode
 container naive_sort
-    .- bubble_sort(arr)
+    .- selection_sort(arr)
         if arr is null or invalid
             return failure_indicator       # representación de fallo del lenguaje
+        n = size(arr)
+        if n <= 1
+            return arr
+        for i = 0 to n - 2
+            min_idx = i
+            for j = i + 1 to n - 1
+                if arr[j] < arr[min_idx]
+                    min_idx = j
+            if min_idx != i
+                swap(arr, i, min_idx)
+        return arr
+
+    .- bubble_sort(arr)
+        if arr is null or invalid
+            return failure_indicator
         n = size(arr)
         if n <= 1
             return arr
@@ -71,21 +86,6 @@ container naive_sort
                 j = j - 1
             arr[j + 1] = key
         return arr
-
-    .- selection_sort(arr)
-        if arr is null or invalid
-            return failure_indicator
-        n = size(arr)
-        if n <= 1
-            return arr
-        for i = 0 to n - 2
-            min_idx = i
-            for j = i + 1 to n - 1
-                if arr[j] < arr[min_idx]
-                    min_idx = j
-            if min_idx != i
-                swap(arr, i, min_idx)
-        return arr
 end container
 ```
 
@@ -110,8 +110,8 @@ Las pruebas unitarias deben validar los siguientes casos para cada uno de los tr
 
 ## ✅ Criterios de aceptación / Acceptance Criteria
 
-- [ ] **ES:** Se implementan los tres algoritmos (`bubble_sort`, `insertion_sort`, `selection_sort`) sin invocar bibliotecas nativas de sort.  
-      **EN:** All three algorithms (`bubble_sort`, `insertion_sort`, `selection_sort`) are implemented without invoking native sort libraries.
+- [ ] **ES:** Se implementan los tres algoritmos (`selection_sort`, `bubble_sort`, `insertion_sort`) sin invocar bibliotecas nativas de sort.  
+      **EN:** All three algorithms (`selection_sort`, `bubble_sort`, `insertion_sort`) are implemented without invoking native sort libraries.
 - [ ] **ES:** `bubble_sort` incluye la optimización de salida temprana con bandera de intercambio (`swapped`).  
       **EN:** `bubble_sort` includes the early-exit optimization with a swap flag (`swapped`).
 - [ ] **ES:** Casos inválidos/nulos retornan el indicador de fallo del lenguaje/API (`-1`, `null`, `Option/Maybe` vacío, `Result` de error o equivalente) sin lanzar excepciones.

@@ -32,6 +32,16 @@ La implementación de código nuevo requiere una petición explícita del autor.
 - No ejecutar `git push` ni crear commits salvo instrucción explícita.
 - No modificar `docs/ROADMAP.md` durante una implementación parcial.
 
+## Convenciones de ramas
+
+- Usar ramas cortas con formato `tipo/fase/modulo`, en minúsculas y `kebab-case`.
+- Ejemplos: `feat/algorithms/naive-sort`, `docs/foundations/readme-template`,
+  `fix/foundations/numbers` y `chore/repo/submodule-pointer`.
+- En un submódulo, integrar primero el cambio en su propio `main`.
+- Actualizar el puntero del submódulo en el monorepo solo después de esa
+  integración y antes de integrar la rama del monorepo.
+- No apuntar el monorepo a una rama de trabajo no integrada del submódulo.
+
 ## Flujo de cierre de módulo o fase
 
 La delegación de documentación solo puede marcarse como finalizada cuando:

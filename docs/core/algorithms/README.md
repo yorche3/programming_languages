@@ -26,7 +26,7 @@ grand_parent: Programming Languages Monorepo
 
 | Módulo | Estado | Tema | Especificación |
 |--------|--------|------|----------------|
-| `naive_sort` | 🔄 | bubble, insertion, selection (O(n²)) | [`05_Naive_Sort.md`](05_Naive_Sort.md) |
+| `naive_sort` | 🔄 | selection, bubble, insertion (O(n²)) | [`05_Naive_Sort.md`](05_Naive_Sort.md) |
 | `data_structures` | 📋 | stack, queue, linked_list, tree, graph (con arrays) | [`06_Data_Structures.md`](06_Data_Structures.md) |
 | `structures_apps` | 📋 | delimitadores balanceados, postfija/RPN, listas (reverse, ciclo), recorridos de árbol | [`07_Structures_Apps.md`](07_Structures_Apps.md) |
 | `efficient_sort` | 📋 | quick, merge, heap (O(n log n)) | [`08_Efficient_Sort.md`](08_Efficient_Sort.md) |

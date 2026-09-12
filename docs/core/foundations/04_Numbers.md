@@ -280,8 +280,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`05_Naive_Sort.md`](../algorithms/05_Naive_Sort.md) — Algoritmos elementales de ordenamiento $O(n^2)$ (Bubble, Insertion, Selection).  
-👉 Continue with [`05_Naive_Sort.md`](../algorithms/05_Naive_Sort.md) — Elementary $O(n^2)$ sorting algorithms (Bubble, Insertion, Selection).
+👉 Sigue con [`05_Naive_Sort.md`](../algorithms/05_Naive_Sort.md) — Algoritmos elementales de ordenamiento $O(n^2)$ (Selection, Bubble, Insertion).
+👉 Continue with [`05_Naive_Sort.md`](../algorithms/05_Naive_Sort.md) — Elementary $O(n^2)$ sorting algorithms (Selection, Bubble, Insertion).
 
 ---
 
