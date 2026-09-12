@@ -49,3 +49,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`ada/core/algorithms/naive_sort/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 📋 -> 🔄 (1/49)
 Observaciones / Notes: Primera implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. En Ada no existe representación de array nulo, por lo que el escenario inválido de la especificación queda documentado como no representable.
+
+Fecha / Date: 2026-09-12
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): assembly
+Código verificado / Code verified: yes (bugs corregidos: sintaxis GAS en vez de NASM, `rsi`/`esi` reutilizado para la bandera `swapped` en bubble_sort, límite fuera de uno en el bucle interno de bubble_sort, `rbx` sin preservar, `rax` sin fijar en los casos vacío/un elemento)
+Tests y comandos / Tests and commands:
+- `make run` en `assembly/core/algorithms/naive_sort` -> 24 tests ejecutados, 24 exitosos, 0 fallidos
+README(s) verificado(s) / README(s) verified: yes (`assembly/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 1/49 (Ada) -> 2/49 (Ada, Assembly)
+Observaciones / Notes: Segunda implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. A diferencia de Ada, en Assembly el array es un puntero crudo, por lo que `null` sí es representable; se añadió un octavo caso de prueba (puntero nulo) además de los 7 del enunciado.
