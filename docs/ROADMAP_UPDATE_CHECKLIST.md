@@ -120,3 +120,15 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`common-lisp/core/algorithms/naive_sort/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 6/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL) -> 7/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp)
 Observaciones / Notes: Séptima implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. La realización difiere del pseudocódigo por convención del lenguaje: Common Lisp es funcional y su idioma evita la mutación, así que las tres funciones devuelven una copia ordenada en lugar de ordenar in-place (la especificación permite ambas variantes). El indicador de fallo es `nil` (valor válido en Common Lisp) y se añadió el octavo caso controlado (`nil` -> `nil`), ya que el lenguaje puede representarlo. El sistema base no tiene dependencias externas; se eliminó `alexandria`, que estaba declarada pero sin usar, y `fiveam` se usa solo en el sistema de pruebas. Las aserciones usan `equalp` en vez de `equal`, porque `equal` no compara vectores generales elemento a elemento. El runner nativo funciona con `(asdf:test-system :naive-sort)` gracias al `test-op` declarado en `naive-sort.asd`.
+
+Fecha / Date: 2026-09-13
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): cpp
+Código verificado / Code verified: yes (mitigación aplicada: `bubble_sort` no incluía la salida temprana con bandera `swapped` exigida por los criterios de aceptación; se añadió y se re-verificó)
+Tests y comandos / Tests and commands:
+- `bazelisk test //...` en `cpp/core/algorithms/naive_sort` -> `[==========] 3 tests from 1 test suite ran. [  PASSED  ] 3 tests.` (21 aserciones: 7 casos × 3 algoritmos)
+- `g++ -std=c++17 -Wall -Wextra -Wpedantic -Iinclude -c src/naive_sort.cpp` -> sin warnings
+README(s) verificado(s) / README(s) verified: yes (`cpp/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 7/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp) -> 8/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp, C++)
+Observaciones / Notes: Octava implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. Verificación previa al README: se comparó la implementación con el pseudocódigo y se detectó que `bubble_sort` omitía la salida temprana con bandera `swapped` (criterio de aceptación de `05_Naive_Sort.md`), lo que degradaba el mejor caso a O(n²); se notificó al desarrollador y se mitigó antes de generar el README. Las demás divergencias no son funcionales: las funciones reciben el vector por valor y devuelven una copia ordenada (la especificación permite in-place o copia), y `selection_sort` siempre intercambia, lo que equivale al guardas `if (min_idx != i)` del pseudocódigo. El caso nulo no es representable con `std::vector<int>` por valor; se documenta como no representable y se conservan los 7 casos canónicos. La implementación compila sin warnings con `-Wall -Wextra -Wpedantic`.
