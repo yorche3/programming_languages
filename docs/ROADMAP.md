@@ -67,7 +67,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 | Módulo | Estado | Lenguajes | Algoritmos | Especificación |
 |--------|--------|-----------|------------|----------------|
-| `core.algorithms.naive_sort` | 🔄 | 5/49 | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
+| `core.algorithms.naive_sort` | 🔄 | 6/49 | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
 | `core.algorithms.data_structures` | 📋 | 0/49 | stack, queue, linked_list, tree, graph (con arrays) | [`📄 06_Data_Structures.md`](core/algorithms/06_Data_Structures.md) |
 | `core.algorithms.structures_apps` | 📋 | 0/49 | delimitadores balanceados, postfija/RPN, reverse y detección de ciclo en listas, recorridos de árbol (pre/in/post/level) | [`📄 07_Structures_Apps.md`](core/algorithms/07_Structures_Apps.md) |
 | `core.algorithms.efficient_sort` | 📋 | 0/49 | quick, merge, heap | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |

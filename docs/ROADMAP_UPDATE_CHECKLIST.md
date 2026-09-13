@@ -96,3 +96,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`clojure/core/algorithms/naive_sort/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 4/49 (Ada, Assembly, Ballerina, C) -> 5/49 (Ada, Assembly, Ballerina, C, Clojure)
 Observaciones / Notes: Quinta implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. La realización difiere de la establecida en la especificación: Clojure es funcional y su idioma evita la mutación, así que las tres funciones devuelven siempre una colección nueva en lugar de ordenar in-place; el concepto algorítmico es el mismo. El indicador de fallo es `nil` (valor válido en Clojure) y se añadió el octavo caso. El runner nativo ya existía (`build.clj` -> `cognitect.test-runner`), por lo que no se generó un archivo de ejecución aparte.
+
+Fecha / Date: 2026-09-13
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): cobol
+Código verificado / Code verified: yes
+Tests y comandos / Tests and commands:
+- `make clean && make && ./run_tests` en `cobol/core/algorithms/naive_sort` -> 78 tests ejecutados, 78 exitosos, 0 fallidos
+README(s) verificado(s) / README(s) verified: yes (`cobol/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 5/49 (Ada, Assembly, Ballerina, C, Clojure) -> 6/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL)
+Observaciones / Notes: Sexta implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. COBOL es un lenguaje orientado a procedimientos que no soporta recursión de forma natural. Todos los algoritmos se implementaron de manera iterativa. El manejo de arrays se realiza mediante estructuras con cláusulas OCCURS. La implementación sigue el patrón de devolver un código de retorno (RETURN-CODE) para indicar éxito o fracaso.
