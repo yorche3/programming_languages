@@ -84,3 +84,15 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`c/core/algorithms/naive_sort/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 3/49 (Ada, Assembly, Ballerina) -> 4/49 (Ada, Assembly, Ballerina, C)
 Observaciones / Notes: Cuarta implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. En C el ordenamiento es in-place (paradigma del lenguaje, permitido por la especificación); el indicador de fallo es `NULL` y se añadió el octavo caso (`arr = NULL`). Las pruebas copian cada fixture a un buffer `scratch` con `memcpy` porque los fixtures son `const` y compartidos entre los tres algoritmos.
+
+Fecha / Date: 2026-09-12
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): clojure
+Código verificado / Code verified: yes
+Tests y comandos / Tests and commands:
+- `clojure -T:build test` en `clojure/core/algorithms/naive_sort` -> `Ran 3 tests containing 24 assertions. 0 failures, 0 errors.`
+- Verificación previa en copia desechable fuera del repositorio, para no tocar `src/` durante la generación de tests: implementación funcional correcta -> 0 failures; implementación rota a propósito -> 3 failures con mensajes como `insertion-sort should sort negative values`
+README(s) verificado(s) / README(s) verified: yes (`clojure/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 4/49 (Ada, Assembly, Ballerina, C) -> 5/49 (Ada, Assembly, Ballerina, C, Clojure)
+Observaciones / Notes: Quinta implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. La realización difiere de la establecida en la especificación: Clojure es funcional y su idioma evita la mutación, así que las tres funciones devuelven siempre una colección nueva en lugar de ordenar in-place; el concepto algorítmico es el mismo. El indicador de fallo es `nil` (valor válido en Clojure) y se añadió el octavo caso. El runner nativo ya existía (`build.clj` -> `cognitect.test-runner`), por lo que no se generó un archivo de ejecución aparte.
