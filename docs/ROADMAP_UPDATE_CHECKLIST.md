@@ -72,3 +72,15 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`ballerina/core/algorithms/naive_sort/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 2/49 (Ada, Assembly) -> 3/49 (Ada, Assembly, Ballerina)
 Observaciones / Notes: Tercera implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. Ballerina no admite `int[]` nulo, pero sí el tipo nillable `int[]?`, que se usa como indicador de fallo; se añadió el octavo caso (`()`). El clonado es responsabilidad de la implementación, por lo que los fixtures compartidos se pasan como entradas de solo lectura sin clonar en el test.
+
+Fecha / Date: 2026-09-12
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): c
+Código verificado / Code verified: yes
+Tests y comandos / Tests and commands:
+- `make test` en `c/core/algorithms/naive_sort` (compilación limpia, sin warnings con `-Wall -Wextra -std=c99`) -> `Tested: 3 | Passing: 3 | Failing: 0 | Crashing: 0` (24 aserciones)
+- Prueba negativa: con la comparación de `insertion_sort` invertida -> `Passing: 2 | Failing: 1`, confirmando que la suite detecta fallos
+README(s) verificado(s) / README(s) verified: yes (`c/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 3/49 (Ada, Assembly, Ballerina) -> 4/49 (Ada, Assembly, Ballerina, C)
+Observaciones / Notes: Cuarta implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. En C el ordenamiento es in-place (paradigma del lenguaje, permitido por la especificación); el indicador de fallo es `NULL` y se añadió el octavo caso (`arr = NULL`). Las pruebas copian cada fixture a un buffer `scratch` con `memcpy` porque los fixtures son `const` y compartidos entre los tres algoritmos.
