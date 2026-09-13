@@ -107,3 +107,16 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`cobol/core/algorithms/naive_sort/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 5/49 (Ada, Assembly, Ballerina, C, Clojure) -> 6/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL)
 Observaciones / Notes: Sexta implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. COBOL es un lenguaje orientado a procedimientos que no soporta recursión de forma natural. Todos los algoritmos se implementaron de manera iterativa. El manejo de arrays se realiza mediante estructuras con cláusulas OCCURS. La implementación sigue el patrón de devolver un código de retorno (RETURN-CODE) para indicar éxito o fracaso.
+
+Fecha / Date: 2026-09-13
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): common-lisp
+Código verificado / Code verified: yes
+Tests y comandos / Tests and commands:
+- `ros run --load run-tests.lisp --eval '(uiop:quit)'` en `common-lisp/core/algorithms/naive_sort` -> `Running test suite NAIVE-SORT-SUITE ... Did 24 checks. Pass: 24 (100%) Skip: 0 (0%) Fail: 0 (0%)`
+- `(asdf:test-system :naive-sort)` (vía ASDF) -> mismos resultados, 24 checks
+- Prueba negativa: con la comparación de la suite devolviendo siempre `nil` -> 24 fallos, confirmando que la suite detecta fallos
+README(s) verificado(s) / README(s) verified: yes (`common-lisp/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 6/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL) -> 7/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp)
+Observaciones / Notes: Séptima implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. La realización difiere del pseudocódigo por convención del lenguaje: Common Lisp es funcional y su idioma evita la mutación, así que las tres funciones devuelven una copia ordenada en lugar de ordenar in-place (la especificación permite ambas variantes). El indicador de fallo es `nil` (valor válido en Common Lisp) y se añadió el octavo caso controlado (`nil` -> `nil`), ya que el lenguaje puede representarlo. El sistema base no tiene dependencias externas; se eliminó `alexandria`, que estaba declarada pero sin usar, y `fiveam` se usa solo en el sistema de pruebas. Las aserciones usan `equalp` en vez de `equal`, porque `equal` no compara vectores generales elemento a elemento. El runner nativo funciona con `(asdf:test-system :naive-sort)` gracias al `test-op` declarado en `naive-sort.asd`.
