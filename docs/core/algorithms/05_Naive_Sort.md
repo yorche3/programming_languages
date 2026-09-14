@@ -32,7 +32,7 @@ grand_parent: Core
 ### Implementaciones esperadas
 
 | Algoritmo | Estrategia | Complejidad temporal | In-place |
-|-----------|------------|---------------------|:--------:|
+| ----------- | ------------ | --------------------- | :--------: |
 | `selection_sort(arr)` | Encuentra iterativamente el mínimo del resto no ordenado y lo ubica al inicio | $O(n^2)$ siempre | ✅ |
 | `bubble_sort(arr)` | Compara e intercambia adyacentes; optimizado con bandera si no hay swaps | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ |
 | `insertion_sort(arr)` | Construye el sub-array ordenado insertando cada elemento en su posición | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ |
@@ -94,7 +94,7 @@ end container
 Las pruebas unitarias deben validar los siguientes casos para cada uno de los tres algoritmos:
 
 | Caso | Entrada | Salida esperada |
-|------|---------|----------------|
+| ------ | --------- | ---------------- |
 | Array estándar desordenado | `[5, 2, 9, 1, 5, 6]` | `[1, 2, 5, 5, 6, 9]` |
 | Array ya ordenado | `[1, 2, 3, 4, 5]` | `[1, 2, 3, 4, 5]` |
 | Array en orden inverso | `[5, 4, 3, 2, 1]` | `[1, 2, 3, 4, 5]` |
