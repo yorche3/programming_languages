@@ -1,13 +1,13 @@
 ---
 layout: default
-title: 16 — Graph Algorithms
-description: Decimosexta especificación / Sixteenth specification — Algoritmos de grafos con arrays y valores centinela
+title: 15 — Graph Algorithms
+description: Decimoquinta especificación / Fifteenth specification — Algoritmos de grafos con arrays y valores centinela
 nav_order: 1
 parent: Algoritmos sobre Estructuras / Algorithms on Structures
 grand_parent: Core
 ---
 
-# 🚀 16 — Graph Algorithms
+# 🚀 15 — Graph Algorithms
 
 > [← Volver a Algoritmos sobre Estructuras](README.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
@@ -151,8 +151,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`17_Backtracking.md`](17_Backtracking.md) — Recursión con retroceso (N-Queens, permutaciones, laberinto).  
-👉 Continue with [`17_Backtracking.md`](17_Backtracking.md) — Backtracking recursion (N-Queens, permutations, maze).
+👉 Sigue con [`16_Backtracking.md`](16_Backtracking.md) — Recursión con retroceso (N-Queens, permutaciones, laberinto).  
+👉 Continue with [`16_Backtracking.md`](16_Backtracking.md) — Backtracking recursion (N-Queens, permutations, maze).
 
 ---
 

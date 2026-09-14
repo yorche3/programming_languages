@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 09 — Distributed Sort
-description: Novena especificación / Ninth specification — Algoritmos no comparativos y distribuidos (Counting, Radix, Bucket, Shell)
-nav_order: 5
+title: 08 — Distributed Sort
+description: Octava especificación / Eighth specification — Algoritmos no comparativos y distribuidos (Counting, Radix, Bucket, Shell)
+nav_order: 4
 parent: Algoritmos Puros / Algorithms Pure
 grand_parent: Core
 ---
 
-# 🚀 09 — Distributed Sort
+# 🚀 08 — Distributed Sort
 
-> [← Volver a 08_Efficient_Sort](08_Efficient_Sort.md)  
+> [← Volver a 07_Efficient_Sort](07_Efficient_Sort.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ---
@@ -129,8 +129,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`10_Searching.md`](10_Searching.md) — Algoritmos de búsqueda (Linear, Binary, Jump, Interpolation).  
-👉 Continue with [`10_Searching.md`](10_Searching.md) — Searching algorithms (Linear, Binary, Jump, Interpolation).
+👉 Sigue con [`09_Searching.md`](09_Searching.md) — Algoritmos de búsqueda (Linear, Binary, Jump, Interpolation).  
+👉 Continue with [`09_Searching.md`](09_Searching.md) — Searching algorithms (Linear, Binary, Jump, Interpolation).
 
 ---
 

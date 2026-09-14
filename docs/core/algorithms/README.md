@@ -27,14 +27,13 @@ grand_parent: Programming Languages Monorepo
 | Módulo | Estado | Tema | Especificación |
 |--------|--------|------|----------------|
 | `naive_sort` | 🔄 | selection, bubble, insertion (O(n²)) | [`05_Naive_Sort.md`](05_Naive_Sort.md) |
-| `data_structures` | 📋 | stack, queue, linked_list, tree, graph (con arrays) | [`06_Data_Structures.md`](06_Data_Structures.md) |
-| `structures_apps` | 📋 | delimitadores balanceados, postfija/RPN, listas (reverse, ciclo), recorridos de árbol | [`07_Structures_Apps.md`](07_Structures_Apps.md) |
-| `efficient_sort` | 📋 | quick, merge, heap (O(n log n)) | [`08_Efficient_Sort.md`](08_Efficient_Sort.md) |
-| `distributed_sort` | 📋 | radix, bucket, shell, counting | [`09_Distributed_Sort.md`](09_Distributed_Sort.md) |
-| `searching` | 📋 | linear, binary, jump, interpolation | [`10_Searching.md`](10_Searching.md) |
+| `data_structures` | 📋 | construcción y contrato de stack, queue, linked_list, tree y graph sobre arrays | [`06_Data_Structures.md`](06_Data_Structures.md) |
+| `efficient_sort` | 📋 | quick, merge, heap (O(n log n)) | [`07_Efficient_Sort.md`](07_Efficient_Sort.md) |
+| `distributed_sort` | 📋 | radix, bucket, shell, counting | [`08_Distributed_Sort.md`](08_Distributed_Sort.md) |
+| `searching` | 📋 | arrays numéricos; linear sin orden y binary/jump/interpolation con orden como precondición | [`09_Searching.md`](09_Searching.md) |
 
-> **ES:** Las especificaciones siguen una numeración continua canónica de `05_` a `10_`. Algorithms Pure es la siguiente fase abierta; sus implementaciones comenzarán ahora en los submódulos con Foundations completada.
-> **EN:** Specifications follow a canonical continuous numbering from `05_` to `10_`. Algorithms Pure is the next open phase; its implementations will now begin in submodules with Foundations complete.
+> **ES:** `data_structures` construye el ADT y verifica sus invariantes; los módulos siguientes pueden usar las colecciones optimizadas del lenguaje cuando construir la estructura no sea el objetivo. `searching` cierra la fase como consumidor de los ordenamientos: las búsquedas indexadas reciben un array ya ordenado y las pruebas muestran explícitamente esa preparación sin incluirla en la función de búsqueda. Las strings no forman parte de Algorithms Pure.
+> **EN:** `data_structures` builds the ADT and verifies its invariants; later modules may use the language's optimized collections when building the structure is not the objective. `searching` closes the phase as a consumer of sorting: indexed searches receive an already sorted array and tests explicitly show that preparation without including it in the search function. Strings are not part of Algorithms Pure.
 
 ---
 
@@ -42,10 +41,9 @@ grand_parent: Programming Languages Monorepo
 
 1. `05_Naive_Sort.md`
 2. `06_Data_Structures.md`
-3. `07_Structures_Apps.md`
-4. `08_Efficient_Sort.md`
-5. `09_Distributed_Sort.md`
-6. `10_Searching.md`
+3. `07_Efficient_Sort.md`
+4. `08_Distributed_Sort.md`
+5. `09_Searching.md`
 
 ---
 

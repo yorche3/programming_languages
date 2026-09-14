@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 10 — Searching
-description: Décima especificación / Tenth specification — Algoritmos de búsqueda sobre arrays (Linear, Binary, Jump, Interpolation)
-nav_order: 6
+title: 09 — Searching
+description: Novena especificación / Ninth specification — Algoritmos de búsqueda sobre arrays (Linear, Binary, Jump, Interpolation)
+nav_order: 5
 parent: Algoritmos Puros / Algorithms Pure
 grand_parent: Core
 ---
 
-# 🚀 10 — Searching
+# 🚀 09 — Searching
 
-> [← Volver a 09_Distributed_Sort](09_Distributed_Sort.md)  
+> [← Volver a 08_Distributed_Sort](08_Distributed_Sort.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ---
@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar los algoritmos fundamentales de búsqueda sobre arrays: **Linear Search**, **Binary Search**, **Jump Search** e **Interpolation Search**, analizando el compromiso entre precondiciones de ordenamiento y rendimiento temporal ($O(n)$, $O(\sqrt{n})$, $O(\log n)$ y $O(\log \log n)$), devolviendo el índice encontrado o el indicador de fallo compatible con el lenguaje/API si el elemento no está presente. | Implement fundamental search algorithms on arrays: **Linear Search**, **Binary Search**, **Jump Search**, and **Interpolation Search**, analyzing the trade-off between sorting preconditions and time performance ($O(n)$, $O(\sqrt{n})$, $O(\log n)$, and $O(\log \log n)$), returning the found index or a language/API-compatible failure indicator if the element is not present. |
+| Implementar algoritmos de búsqueda sobre **arrays numéricos** y razonar sobre las precondiciones que hacen aplicable cada uno. `linear_search` no requiere orden; **Binary**, **Jump** e **Interpolation** requieren un array en orden ascendente, e Interpolation además una distribución aproximadamente uniforme. Este módulo consume los ordenamientos de la fase: la búsqueda no ordena, copia ni modifica su entrada. | Implement search algorithms over **numeric arrays** and reason about the preconditions that make each applicable. `linear_search` requires no ordering; **Binary**, **Jump**, and **Interpolation** require an ascending array, and Interpolation additionally needs an approximately uniform distribution. This module consumes the phase's sorting algorithms: search does not sort, copy, or mutate its input. |
 
 ---
 
@@ -37,6 +37,9 @@ grand_parent: Core
 | `binary_search(arr, target)` | Array ordenado ascendente | $O(\log n)$ | Divide el espacio de búsqueda a la mitad en cada paso |
 | `jump_search(arr, target)` | Array ordenado ascendente | $O(\sqrt{n})$ | Salta bloques de tamaño $m = \lfloor \sqrt{n} \rfloor$ y luego busca lineal |
 | `interpolation_search(arr, target)` | Array ordenado y uniformemente distribuido | $O(\log \log n)$ promedio, $O(n)$ peor | Estima la posición mediante interpolación lineal de valores |
+
+> **ES:** **Precondición contractual:** `binary_search`, `jump_search` e `interpolation_search` reciben arrays ya ordenados; no llaman a `sort()` ni a un algoritmo propio internamente. La suite debe incluir, además de arrays literales ordenados, un caso de composición: crear un array desordenado, ordenar una **copia** con uno de los algoritmos previos (`selection_sort`, `quick_sort`, `counting_sort` u otro aplicable) y después invocar la búsqueda. La aserción debe comprobar que la búsqueda no mutó el array ordenado. Strings y listas quedan fuera de este módulo.
+> **EN:** **Contractual precondition:** `binary_search`, `jump_search`, and `interpolation_search` receive already sorted arrays; they do not call `sort()` or an own algorithm internally. Beyond sorted literal arrays, the suite must include one composition case: create an unordered array, sort a **copy** with a previous algorithm (`selection_sort`, `quick_sort`, `counting_sort`, or another applicable one), and then invoke search. The assertion must verify that search did not mutate the sorted array. Strings and lists are outside this module.
 
 ### Pseudocódigo / Pseudocode
 
@@ -111,6 +114,7 @@ end container
 | `interpolation_search` | `[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]` | 15 | -1 |
 | Todos | `[]` (vacío) | 5 | -1 |
 | Todos | `[42]` (un elemento) | 42 | 0 |
+| Composición | Copia de `[10, 50, 30, 70, 80, 20]`, ordenada previamente con un sort propio | 70 | Índice de `70`; la búsqueda conserva el array ordenado |
 
 ---
 
@@ -122,6 +126,8 @@ end container
     **EN:** When the element does not exist or input is invalid, a language/API-compatible failure indicator is returned (for example, `-1` when the index type permits it), without exceptions.
 - [ ] **ES:** `binary_search` evita el desbordamiento de enteros calculando el punto medio con `low + div(high - low, 2)`.  
       **EN:** `binary_search` prevents integer overflow calculating the midpoint with `low + div(high - low, 2)`.
+- [ ] **ES:** Las pruebas muestran al menos una composición explícita con un ordenamiento anterior; ninguna función de búsqueda ordena o muta el array recibido.
+    **EN:** Tests show at least one explicit composition with a preceding sort; no search function sorts or mutates the received array.
 - [ ] **ES:** El proyecto separa el código fuente (`src/`) de las pruebas (`test/`).  
       **EN:** The project separates source code (`src/`) from tests (`test/`).
 

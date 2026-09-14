@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 18 — Dynamic Programming
-description: Decimoctava especificación / Eighteenth specification — Programación dinámica con tablas
+title: 17 — Dynamic Programming
+description: Decimoséptima especificación / Seventeenth specification — Programación dinámica con tablas
 nav_order: 3
 parent: Algoritmos sobre Estructuras / Algorithms on Structures
 grand_parent: Core
 ---
 
-# 🚀 18 — Dynamic Programming
+# 🚀 17 — Dynamic Programming
 
-> [← Volver a 17_Backtracking](17_Backtracking.md)  
+> [← Volver a 16_Backtracking](16_Backtracking.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ---
@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar algoritmos de programación dinámica (knapsack 0/1, coin change, LIS y caminos en grid) descomponiendo el problema en subproblemas superpuestos y almacenando resultados en tablas (arrays), sin colecciones externas ni excepciones. | Implement dynamic programming algorithms (0/1 knapsack, coin change, LIS, and grid paths) by decomposing the problem into overlapping subproblems and storing results in tables (arrays), without external collections or exceptions. |
+| Implementar algoritmos de programación dinámica (LCS, knapsack 0/1, coin change, LIS y caminos en grid) descomponiendo el problema en subproblemas superpuestos y almacenando resultados en tablas (arrays), sin colecciones externas ni excepciones. LCS enlaza la fase de strings con el modelo de estado bidimensional de DP. | Implement dynamic programming algorithms (LCS, 0/1 knapsack, coin change, LIS, and grid paths) by decomposing the problem into overlapping subproblems and storing results in tables (arrays), without external collections or exceptions. LCS connects the string phase to DP's two-dimensional state model. |
 
 ---
 
@@ -27,12 +27,13 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `dynamic_programming` con un módulo que implemente los cuatro algoritmos usando tabulación (bottom-up) con arrays. Los problemas sin solución devuelven `-1` (sentinela). | Create a `dynamic_programming` project with a module implementing the four algorithms using bottom-up tabulation with arrays. Problems with no solution return `-1` (sentinel). |
+| Crear un proyecto `dynamic_programming` con un módulo que implemente los cinco algoritmos usando tabulación (bottom-up) con arrays. Los problemas sin solución devuelven `-1` (sentinela). | Create a `dynamic_programming` project with a module implementing the five algorithms using bottom-up tabulation with arrays. Problems with no solution return `-1` (sentinel). |
 
 ### Implementaciones esperadas
 
 | Algoritmo | Descripción |
 |-----------|-------------|
+| `longest_common_subsequence(left, right)` | Longitud de la subsecuencia común más larga (LCS) entre dos strings/secuencias indexables |
 | `knapsack_01(weights, values, capacity)` | Valor máximo del problema de la mochila 0/1 |
 | `coin_change(coins, amount)` | Mínimo número de monedas; `-1` si no se puede formar |
 | `longest_increasing_subsequence(list)` | Longitud de la subsecuencia creciente más larga (LIS) |
@@ -42,6 +43,16 @@ grand_parent: Core
 
 ```pseudocode
 container dynamic_programming
+    .- longest_common_subsequence(left, right)
+        dp = array(size(left) + 1, size(right) + 1, 0)
+        for i = 1 to size(left)
+            for j = 1 to size(right)
+                if left[i - 1] == right[j - 1]
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return dp[size(left)][size(right)]
+
     .- knapsack_01(weights, values, capacity)
         n = size(weights)
         dp = array(n + 1, capacity + 1, 0)
@@ -91,6 +102,8 @@ end container
 
 | Algoritmo | Entrada | Salida esperada |
 |-----------|---------|----------------|
+| `longest_common_subsequence` | `"ABCBDAB"`, `"BDCABA"` | 4 |
+| `longest_common_subsequence` | `"abc"`, `"def"` | 0 |
 | `knapsack_01` | weights=[2,3,4], values=[4,5,8], capacity=5 | 9 |
 | `knapsack_01` | weights=[3,2], values=[6,5], capacity=1 | 0 |
 | `coin_change` | coins=[1,5,10], amount=11 | 2 |
@@ -131,8 +144,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`19_Greedy.md`](19_Greedy.md) — Algoritmos voraces (activity selection, fractional knapsack).  
-👉 Continue with [`19_Greedy.md`](19_Greedy.md) — Greedy algorithms (activity selection, fractional knapsack).
+👉 Sigue con [`18_Greedy.md`](18_Greedy.md) — Algoritmos voraces (activity selection, fractional knapsack).  
+👉 Continue with [`18_Greedy.md`](18_Greedy.md) — Greedy algorithms (activity selection, fractional knapsack).
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 06 — Data Structures
-description: Sexta especificación / Sixth specification — Estructuras fundamentales (Stack, Queue, LinkedList, Tree, Graph) con arrays
+description: Sexta especificación / Sixth specification — Construcción y contratos de estructuras fundamentales
 nav_order: 2
 parent: Algoritmos Puros / Algorithms Pure
 grand_parent: Core
@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Construir las estructuras de datos fundamentales (**Stack**, **Queue**, **Linked List**, **Binary Tree** y **Graph**) modeladas directamente sobre **arrays e índices**, comprendiendo la mecánica de memoria subyacente y empleando indicadores de fallo compatibles con el lenguaje/API (por ejemplo, `-1` cuando el tipo lo permite) para manejar condiciones de desbordamiento (overflow) o subdesbordamiento (underflow) sin excepciones. | Build fundamental data structures (**Stack**, **Queue**, **Linked List**, **Binary Tree**, and **Graph**) modeled directly on **arrays and indices**, understanding underlying memory mechanics and using language/API-compatible failure indicators (for example, `-1` when the type permits it) to handle overflow and underflow conditions without exceptions. |
+| Construir las estructuras fundamentales (**Stack**, **Queue**, **Linked List**, **Binary Tree** y **Graph**) sobre **arrays e índices** para comprender su representación, capacidad, invariantes y contratos. El objetivo del módulo es construir y verificar los ADTs; las aplicaciones posteriores pueden usar el ADT o colección optimizada del lenguaje cuando implementar la estructura ya no sea el objetivo. | Build fundamental data structures (**Stack**, **Queue**, **Linked List**, **Binary Tree**, and **Graph**) over **arrays and indices** to understand their representation, capacity, invariants, and contracts. This module's goal is to build and verify ADTs; later applications may use the language's optimized ADT or collection when implementing the structure is no longer the goal. |
 
 ---
 
@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `data_structures` que contenga las cinco estructuras de datos clásicas implementadas usando arrays como almacenamiento de memoria interno. Cada operación devuelve `-1` cuando falla (pila/cola vacía al extraer, o llena al insertar en capacidad fija). | Create a `data_structures` project containing the five classic data structures implemented using arrays as internal memory storage. Each operation returns `-1` when it fails (empty stack/queue on extraction, or full on fixed-capacity insertion). |
+| Crear `data_structures` como un paquete o módulo importable. Implementa las cinco estructuras usando arrays como almacenamiento interno y publica una API mínima. La suite de pruebas valida representación, overflow, underflow, límites, orden de extracción y resultados. Cada operación fallida devuelve el indicador compatible con el tipo; no lanza excepciones. | Create `data_structures` as an importable package or module. Implement the five structures using arrays as internal storage and expose a minimal API. The test suite validates representation, overflow, underflow, boundaries, removal order, and results. Every failed operation returns the type-compatible indicator; it does not throw exceptions. |
 
 ### Estructuras y Operaciones esperadas
 
@@ -160,8 +160,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`07_Structures_Apps.md`](07_Structures_Apps.md) — Aplicaciones directas de estructuras sobre arrays (paréntesis, RPN, recorridos).  
-👉 Continue with [`07_Structures_Apps.md`](07_Structures_Apps.md) — Direct applications of array-based structures (parentheses, RPN, traversals).
+👉 Sigue con [`07_Efficient_Sort.md`](07_Efficient_Sort.md).
+👉 Continue with [`07_Efficient_Sort.md`](07_Efficient_Sort.md).
 
 ---
 

@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 08 — Efficient Sort
-description: Octava especificación / Eighth specification — Ordenamiento óptimo por comparación O(n log n) (Quick, Merge, Heap)
-nav_order: 4
+title: 07 — Efficient Sort
+description: Séptima especificación / Seventh specification — Ordenamiento óptimo por comparación O(n log n) (Quick, Merge, Heap)
+nav_order: 3
 parent: Algoritmos Puros / Algorithms Pure
 grand_parent: Core
 ---
 
-# 🚀 08 — Efficient Sort
+# 🚀 07 — Efficient Sort
 
-> [← Volver a 07_Structures_Apps](07_Structures_Apps.md)  
+> [← Volver a 06_Data_Structures](06_Data_Structures.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ---
@@ -154,8 +154,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`09_Distributed_Sort.md`](09_Distributed_Sort.md) — Ordenamiento no comparativo y variantes avanzadas (Counting, Radix, Bucket, Shell).  
-👉 Continue with [`09_Distributed_Sort.md`](09_Distributed_Sort.md) — Non-comparative sorting and advanced variants (Counting, Radix, Bucket, Shell).
+👉 Sigue con [`08_Distributed_Sort.md`](08_Distributed_Sort.md) — Ordenamiento no comparativo y variantes avanzadas (Counting, Radix, Bucket, Shell).  
+👉 Continue with [`08_Distributed_Sort.md`](08_Distributed_Sort.md) — Non-comparative sorting and advanced variants (Counting, Radix, Bucket, Shell).
 
 ---
 

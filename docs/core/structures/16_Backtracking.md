@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 17 — Backtracking
-description: Decimoséptima especificación / Seventeenth specification — Recursión con retroceso
+title: 16 — Backtracking
+description: Decimosexta especificación / Sixteenth specification — Recursión con retroceso
 nav_order: 2
 parent: Algoritmos sobre Estructuras / Algorithms on Structures
 grand_parent: Core
 ---
 
-# 🚀 17 — Backtracking
+# 🚀 16 — Backtracking
 
-> [← Volver a 16_Graph_Algorithms](16_Graph_Algorithms.md)  
+> [← Volver a 15_Graph_Algorithms](15_Graph_Algorithms.md)
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ---
@@ -128,8 +128,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`18_Dynamic_Programming.md`](18_Dynamic_Programming.md) — Optimización con tablas (knapsack, coin change, LIS).  
-👉 Continue with [`18_Dynamic_Programming.md`](18_Dynamic_Programming.md) — Table-based optimization (knapsack, coin change, LIS).
+👉 Sigue con [`17_Dynamic_Programming.md`](17_Dynamic_Programming.md) — Optimización con tablas (knapsack, coin change, LIS).  
+👉 Continue with [`17_Dynamic_Programming.md`](17_Dynamic_Programming.md) — Table-based optimization (knapsack, coin change, LIS).
 
 ---
 
