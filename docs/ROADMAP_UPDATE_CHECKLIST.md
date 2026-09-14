@@ -132,3 +132,15 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`cpp/core/algorithms/naive_sort/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 7/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp) -> 8/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp, C++)
 Observaciones / Notes: Octava implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. Verificación previa al README: se comparó la implementación con el pseudocódigo y se detectó que `bubble_sort` omitía la salida temprana con bandera `swapped` (criterio de aceptación de `05_Naive_Sort.md`), lo que degradaba el mejor caso a O(n²); se notificó al desarrollador y se mitigó antes de generar el README. Las demás divergencias no son funcionales: las funciones reciben el vector por valor y devuelven una copia ordenada (la especificación permite in-place o copia), y `selection_sort` siempre intercambia, lo que equivale al guardas `if (min_idx != i)` del pseudocódigo. El caso nulo no es representable con `std::vector<int>` por valor; se documenta como no representable y se conservan los 7 casos canónicos. La implementación compila sin warnings con `-Wall -Wextra -Wpedantic`.
+
+Fecha / Date: 2026-09-13
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): crystal
+Código verificado / Code verified: yes (corrección aplicada: eliminado `return nil if arr.nil?` de los tres algoritmos y corregida la sintaxis de lambda en tests)
+Tests y comandos / Tests and commands:
+- `crystal spec` en `crystal/core/algorithms/naive_sort` -> 3 tests ejecutados, 3 exitosos, 0 fallidos (21 aserciones: 7 casos × 3 algoritmos)
+- `crystal build src/naive_sort.cr` -> sin warnings ni errores
+README(s) verificado(s) / README(s) verified: yes (`crystal/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 8/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp, C++) -> 9/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp, C++, Crystal)
+Observaciones / Notes: Novena implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. Crystal es un lenguaje orientado a objetos con tipado estático inferido. Los tres algoritmos operan in-place sobre el array recibido (paradigma imperativo del lenguaje, permitido por la especificación). El tipo `Array(Int32)` no permite `nil`, por lo que el caso de entrada nula no es representable y se documenta como tal. Todos los algoritmos usan iteración (bucles `each`, `loop`, `while`) siguiendo el estilo idiomático de Crystal, que no garantiza TCO. Las pruebas usan el framework estándar `spec` de Crystal y clonan los fixtures con `.dup` para evitar efectos secundarios al ordenar in-place.
