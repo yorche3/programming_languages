@@ -144,3 +144,15 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`crystal/core/algorithms/naive_sort/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 8/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp, C++) -> 9/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp, C++, Crystal)
 Observaciones / Notes: Novena implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. Crystal es un lenguaje orientado a objetos con tipado estático inferido. Los tres algoritmos operan in-place sobre el array recibido (paradigma imperativo del lenguaje, permitido por la especificación). El tipo `Array(Int32)` no permite `nil`, por lo que el caso de entrada nula no es representable y se documenta como tal. Todos los algoritmos usan iteración (bucles `each`, `loop`, `while`) siguiendo el estilo idiomático de Crystal, que no garantiza TCO. Las pruebas usan el framework estándar `spec` de Crystal y clonan los fixtures con `.dup` para evitar efectos secundarios al ordenar in-place.
+
+Fecha / Date: 2026-09-14
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): csharp
+Código verificado / Code verified: yes (mitigación aplicada: las firmas de `SelectionSort`, `BubbleSort` e `InsertionSort` declaraban `int[]` no anulable pese a comprobar `arr == null`, lo que producía `CS8603` en `src/` y `CS8622` al pasar los métodos a `Func<int[]?, int[]?>` en los tests; se cambiaron parámetro y retorno a `int[]?` y se re-verificó)
+Tests y comandos / Tests and commands:
+- `dotnet build NaiveSort.slnx` en `csharp/core/algorithms/naive_sort` -> build correcto, 0 warnings, 0 errores
+- `dotnet test NaiveSort.slnx` -> `Test summary: total: 3, failed: 0, succeeded: 3, skipped: 0, duration: 0.7s` (24 aserciones: 8 casos × 3 algoritmos)
+README(s) verificado(s) / README(s) verified: yes (`csharp/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 9/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp, C++, Crystal) -> 10/49 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal)
+Observaciones / Notes: Décima implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. C# tiene los *nullable reference types* habilitados (`<Nullable>enable</Nullable>`), por lo que el indicador de fallo `null` exige declarar parámetro y retorno como `int[]?`; se añadió el octavo caso controlado (`null` -> `null`). Los tres algoritmos ordenan in-place (paradigma imperativo, permitido por la especificación). La clase se llama `NaiveSortImpl` para no chocar con el namespace `NaiveSort`. El runner es `dotnet test` sobre la solución `.slnx`; no se generó un archivo de ejecución aparte porque .NET descubre automáticamente los `[Fact]`. Se añadió `.gitignore` del módulo, pero permanecen 25 archivos `bin/`/`obj/` ya rastreados en el índice anteriores a su creación.
