@@ -180,3 +180,16 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`dart/core/algorithms/naive_sort/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 11/49 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D) -> 12/49 (…, D, Dart)
 Observaciones / Notes: Duodécima implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. El parámetro y el retorno son `List<int>?` porque `null` es el indicador de fallo del lenguaje, y se añadió el octavo caso (`null` -> `null`). Los tres algoritmos ordenan in-place sobre la lista recibida (idiomático en Dart). La clase `NaiveSort` agrupa métodos `static`, siguiendo la convención de `Numbers` en `numbers/`. Los fixtures del test son `const` y cada caso ordena una copia con `List<int>.of`, evitando que la mutación in-place contamine los demás casos o falle contra una lista inmutable. `dart analyze` usa `package:lints/recommended.yaml` vía `analysis_options.yaml`.
+
+Fecha / Date: 2026-09-14
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): elixir
+Código verificado / Code verified: yes (mitigaciones aplicadas: en `lib/naive_sort.ex:38`, `{swapped, rest} = bubble_pass([a | tail])` declaraba una variable `swapped` sin usar, que hacía fallar `mix compile --warnings-as-errors`; se renombró a `_swapped`. Además `lib/naive_sort.ex` no cumplía `mix format --check-formatted` por líneas en blanco sobrantes; se aplicó `mix format`)
+Tests y comandos / Tests and commands:
+- `mix compile --force --warnings-as-errors` en `elixir/core/algorithms/naive_sort` -> `Compiling 1 file (.ex)` y `Generated naive_sort app` (exit 0, 0 warnings)
+- `mix format --check-formatted` -> sin archivos pendientes (exit 0)
+- `mix test` -> `Finished in 0.01 seconds (0.00s async, 0.01s sync)` y `Result: 3 passed` (3 tests, 8 casos × 3 algoritmos = 24 aserciones)
+README(s) verificado(s) / README(s) verified: yes (`elixir/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 12/49 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart) -> 13/49 (…, D, Dart, Elixir)
+Observaciones / Notes: Decimotercera implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. Elixir no tiene bucles imperativos ni listas mutables, así que los tres algoritmos son recursivos y devuelven una lista nueva: el `swap` in-place del pseudocódigo no es representable (divergencia idiomática aceptada). La bandera `swapped` de `bubble_sort` se conserva como el valor de retorno de `bubble_pass/1`, que empaqueta `{swapped, lista}`, manteniendo la salida temprana. `nil` es el indicador de fallo y se retorna como valor, con el octavo caso `assert sort_function.(nil) == nil`. Los casos base `[]` y `[a]` se resuelven por cláusulas en lugar de un `if n <= 1`. Ubicación desviada de la especificación: el código va en `lib/` (convención de Mix) y no hay `run_tests.exs` porque ExUnit incorpora su propio runner vía `mix test`. El índice de fase `elixir/core/algorithms/README.md` se creó en este cierre.
