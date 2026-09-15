@@ -71,7 +71,7 @@ marca como completa hasta que sus módulos requeridos cumplen todos los puntos.
 
 - [ ] Código y tests verificados, si forman parte de la tarea.
 - [ ] README generado o actualizado con `README_Template.md`.
-- [ ] Estado del roadmap comprobado y actualizado solo al cerrar el trabajo.
+- [ ] Estado del roadmap comprobado y actualizado solo al cerrar el trabajo. El hecho de estar generado el README para el módulo del lenguaje actual se considera como implementación finalizada.
 - [ ] Registro correspondiente añadido en `ROADMAP_UPDATE_CHECKLIST.md`.
 - [ ] `git diff --check` sin errores.
 - [ ] Sin push ni commit no solicitados.

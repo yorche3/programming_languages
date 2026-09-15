@@ -156,3 +156,27 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`csharp/core/algorithms/naive_sort/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 9/49 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp, C++, Crystal) -> 10/49 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal)
 Observaciones / Notes: Décima implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. C# tiene los *nullable reference types* habilitados (`<Nullable>enable</Nullable>`), por lo que el indicador de fallo `null` exige declarar parámetro y retorno como `int[]?`; se añadió el octavo caso controlado (`null` -> `null`). Los tres algoritmos ordenan in-place (paradigma imperativo, permitido por la especificación). La clase se llama `NaiveSortImpl` para no chocar con el namespace `NaiveSort`. El runner es `dotnet test` sobre la solución `.slnx`; no se generó un archivo de ejecución aparte porque .NET descubre automáticamente los `[Fact]`. Se añadió `.gitignore` del módulo, pero permanecen 25 archivos `bin/`/`obj/` ya rastreados en el índice anteriores a su creación.
+
+Fecha / Date: 2026-09-14
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): d
+Código verificado / Code verified: yes
+Tests y comandos / Tests and commands:
+- `dub test` en `d/core/algorithms/naive_sort` -> `1 modules passed unittests` (3 bloques `unittest`, 24 aserciones: 8 casos × 3 algoritmos)
+- `dmd -c -o- -w -wi source/naive_sort.d` -> sin salida, exit 0 (compila sin warnings)
+README(s) verificado(s) / README(s) verified: yes (`d/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 10/49 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal) -> 11/49 (…, C++, Crystal, D)
+Observaciones / Notes: Undécima implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. Los arrays de D son *slices* (puntero + longitud), por lo que `null` es representable y se añadió el octavo caso (`null` -> `null`). Los tres algoritmos ordenan in-place sobre el slice recibido (idiomático en D). `insertionSort` usa `size_t` y la variante de desplazamiento `while (j > 0 && arr[j - 1] > key)`, equivalente al pseudocódigo sin índice con signo. El paquete se configuró como `targetType "library"` y se eliminó el `source/app.d` generado por `dub init` porque su `void main()` choca con el runner de `dub test` (`only one entry point 'main' is allowed`). Los fixtures del test son `static immutable` y cada caso ordena una copia con `.dup`.
+
+Fecha / Date: 2026-09-14
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): dart
+Código verificado / Code verified: yes (mitigación aplicada: el scaffold de `dart create` en `example/naive_sort_example.dart` seguía referenciando la clase `Awesome`, eliminada al implementar `NaiveSort`, y hacía fallar `dart analyze` con `undefined_function`; se actualizó el ejemplo a una llamada real a `NaiveSort.selectionSort`)
+Tests y comandos / Tests and commands:
+- `dart test` en `dart/core/algorithms/naive_sort` -> `00:00 +3: All tests passed!` (3 tests, 8 casos × 3 algoritmos = 24 aserciones)
+- `dart analyze` -> `No issues found!` (exit 0)
+README(s) verificado(s) / README(s) verified: yes (`dart/core/algorithms/naive_sort/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.naive_sort` 11/49 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D) -> 12/49 (…, D, Dart)
+Observaciones / Notes: Duodécima implementación homologada de la Fase 1. No cierra la fase: faltan los demás lenguajes y los módulos restantes. El parámetro y el retorno son `List<int>?` porque `null` es el indicador de fallo del lenguaje, y se añadió el octavo caso (`null` -> `null`). Los tres algoritmos ordenan in-place sobre la lista recibida (idiomático en Dart). La clase `NaiveSort` agrupa métodos `static`, siguiendo la convención de `Numbers` en `numbers/`. Los fixtures del test son `const` y cada caso ordena una copia con `List<int>.of`, evitando que la mutación in-place contamine los demás casos o falle contra una lista inmutable. `dart analyze` usa `package:lints/recommended.yaml` vía `analysis_options.yaml`.

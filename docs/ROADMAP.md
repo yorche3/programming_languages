@@ -67,7 +67,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 | Módulo | Estado | Lenguajes | Algoritmos | Especificación |
 |--------|--------|-----------|------------|----------------|
-| `core.algorithms.naive_sort` | 🔄 | 10/49 | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
+| `core.algorithms.naive_sort` | 🔄 | 12/49 | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
 | `core.algorithms.data_structures` | 📋 | 0/49 | construcción y contrato de stack, queue, linked_list, tree y graph sobre arrays | [`📄 06_Data_Structures.md`](core/algorithms/06_Data_Structures.md) |
 | `core.algorithms.efficient_sort` | 📋 | 0/49 | quick, merge, heap; puede usar ADTs optimizados del lenguaje salvo `sort()` | [`📄 07_Efficient_Sort.md`](core/algorithms/07_Efficient_Sort.md) |
 | `core.algorithms.distributed_sort` | 📋 | 0/49 | radix, bucket, shell, counting | [`📄 08_Distributed_Sort.md`](core/algorithms/08_Distributed_Sort.md) |
@@ -291,7 +291,7 @@ core.foundations.unit_test            ✅ 49/49
 core.foundations.numbers              ✅ 49/49
 
 ## Fase 1 — Algorithms Pure 🔄 (fase abierta; implementados: 1/49)
-core.algorithms.naive_sort            🔄 10/49 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal)
+core.algorithms.naive_sort            🔄 12/49 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart)
 core.algorithms.data_structures       📋
 core.algorithms.efficient_sort        📋
 core.algorithms.distributed_sort      📋
