@@ -12,6 +12,9 @@ dotnet-tools.json
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
 
+# Reusable AI prompt files (local only, never tracked)
+.github/prompts/
+
 # Build artifacts / generated files
 **/.gradle/
 **/.kotlin/
