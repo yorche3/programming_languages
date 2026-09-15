@@ -24,6 +24,7 @@ has_children: true
 
 | Sección | Fase | Estado | Índice |
 |---------|------|--------|--------|
+| [`00_Project_Initialization_Guide.md`](00_Project_Initialization_Guide.md) | Guía de inicialización | ✅ | Comandos de scaffolding por lenguaje |
 | [`foundations/`](foundations/) | Fase 0 | ✅ | [`README.md`](foundations/README.md) |
 | [`algorithms/`](algorithms/) | Fase 1 — Algoritmos Puros | 🔄 | [`README.md`](algorithms/README.md) |
 | [`text/`](text/) | Fase 2 — Procesamiento Contiguo | 📋 | [`README.md`](text/README.md) |
