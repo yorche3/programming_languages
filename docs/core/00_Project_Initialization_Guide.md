@@ -78,7 +78,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **gleam** | ✅ `gleam new {modulo}` | `gleam.toml`, `manifest.toml` | ✅ `gleam test` |
 | **go** | ✅ `go mod init example.com/{modulo}` | `go.mod` | ✅ `go test ./...` |
 | **grain** | ✍️ `mkdir -p src tests` + `Makefile` | `Makefile` | ✅ `make test` |
-| **groovy** | 🔧 `gradle init --type java-library` | `build.gradle`, `settings.gradle`, `gradle/wrapper/` | ✅ `./gradlew test` |
+| **groovy** | 🔧 `gradle init --type groovy-library` | `build.gradle`, `settings.gradle`, `gradle/wrapper/` | ✅ `./gradlew test` |
 | **haskell** | 🔧 `cabal init --lib` | `{modulo}.cabal` | ✅ `cabal test` |
 | **haxe** | ✅ `mkdir -p src test` | `build.hxml`, `RunTests.hx` | ✅ `haxe build.hxml` |
 | **java** | 🔧 `mvn archetype:generate` | `pom.xml` | ✅ `mvn test` |
