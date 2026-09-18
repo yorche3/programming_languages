@@ -81,7 +81,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **groovy** | 🔧 `gradle init --type groovy-library` | `build.gradle`, `settings.gradle`, `gradle/wrapper/` | ✅ `./gradlew test` |
 | **haskell** | 🔧 `cabal init --lib` | `{modulo}.cabal` | ✅ `cabal test` |
 | **haxe** | ✅ `mkdir -p src test` | `build.hxml`, `RunTests.hx` | ✅ `haxe build.hxml` |
-| **java** | 🔧 `mvn archetype:generate` | `pom.xml` | ✅ `mvn test` |
+| **java** | 🔧 `mvn archetype:generate -DgroupId=com.example -DartifactId={modulo} -DarchetypeGroupId=org.apache.maven.archetypes -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false` | `pom.xml` | ✅ `mvn test` |
 | **javascript** | 🔧 `npm init -y` | `package.json`, `jest.config.js` | ✅ `npm test` |
 | **julia** | ✍️ `mkdir -p src test` + `Project.toml` | `Project.toml`, `Manifest.toml` | ✅ `julia --project=. test/run_tests.jl` |
 | **kotlin** | 🔧 `gradle init --type kotlin-library` | `build.gradle.kts`, `settings.gradle.kts` | ✅ `./gradlew test` |
