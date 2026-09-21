@@ -81,10 +81,11 @@ type glot
 |---------|-------|---------|-------|:------:|
 | 0.1.0 | 2026-09-20 | `versions/glot_0.1.0.sh` | Hello World en Bash (`echo "Hello World! from Bash!"`) | ✅ cerrada |
 | 0.2.0 | 2026-09-20 | `glot.sh` | Nombre por argumento o por entrada estándar y saludo `Hello, <nombre>!` (equivalente a `hellouser`) | 🔄 viva |
-| 0.3.0 | — | `glot.sh` | Función `glot` cargable con `source`, con `hello`, `version` y `help`, y resolución de la raíz del monorepo | ⏳ ideas |
-| 0.4.0 | — | `glot.sh` | `glot set {lenguaje} {modulo}`: `cd` al submódulo, rama `tipo/fase/modulo`, `git push -u origin` y comando de inicialización del lenguaje | ⏳ ideas |
-| 0.5.0 | — | `glot.sh` | `glot test`: ejecuta el comando nativo de pruebas del lenguaje y módulo asignados | ⏳ ideas |
-| 0.6.0 | — | `glot.sh` | Estado persistente de la asignación (`status`, `unset`) y autocompletado | ⏳ ideas |
+| 0.3.0 | — | `glot.sh` | **Contrato y dispatcher** de verbos (L0) y harness de pruebas propio, con las claves del manager reservadas | 📐 especificada |
+| 0.4.0 | — | `glot.sh` | **Almacén clave/valor** (L1): `set`, `get`, `unset`, `list`, `path`, con el estado en XDG | ⏳ propuesta |
+| 0.5.0 | — | `glot.sh` | **`use <lenguaje> <módulo>` (L2)** validado contra `.gitmodules`, y función cargable con `source` para el `cd` | ⏳ propuesta |
+| 0.6.0 | — | `glot.sh` | **`test` (L3)**: ejecuta el comando nativo del lenguaje y módulo asignados; `status` y `doctor` ampliados | ⏳ propuesta |
+| 0.7.0 | — | `glot.sh` | Autocompletado (`complete -F _glot_complete glot`) | ⏳ propuesta |
 
 ### 0.1.0 — 2026-09-20 (cerrada)
 
@@ -102,6 +103,59 @@ type glot
 
 ---
 
+## 📐 Especificación v0.3.0 (en desarrollo) / v0.3.0 specification
+
+**ES:** Versión dedicada a la **capa de contrato (L0)**: el dispatcher de verbos y las reglas que reutilizarán todas las versiones siguientes. No incluye almacenamiento; el estado (L1) llega en la v0.4.0.
+
+**EN:** This version covers the **contract layer (L0)**: the verb dispatcher and the rules every following version will reuse. It does not include storage; the state (L1) arrives in v0.4.0.
+
+### Decisiones confirmadas / Confirmed decisions
+
+| Tema | Decisión |
+|------|----------|
+| Alcance de v0.3.0 | Solo L0: contrato y dispatcher |
+| Claves reservadas | `lang`, `module` y `branch` documentadas ya, aunque sus verbos lleguen después |
+| Verificación | Harness propio en `scripts/tests/`, sin dependencias externas (`bats` y `jq` no están instalados) |
+| Estado (desde v0.4.0) | XDG: `$XDG_STATE_HOME/glot/…` con fallback `~/.local/state/glot/` y override `GLOT_STATE_FILE` |
+| Ejecución | Script ejecutado; la función cargable con `source` llega en v0.5.0, cuando `use` necesite cambiar el shell |
+
+### Contrato de todos los verbos / Verb contract
+
+| Regla | Detalle |
+|-------|---------|
+| stdout | Solo el dato (así `$(glot get lang)` será utilizable en v0.4.0) |
+| stderr | Diagnóstico, avisos y errores |
+| Códigos de salida | `0` correcto · `1` error de entorno o dato ausente · `2` uso incorrecto · `3` estado ilegible o no escribible |
+| Flags | `-h/--help` (general y por verbo), `--version`, `-q/--quiet`; los verbos que mutan aceptarán `-n/--dry-run` |
+| Interacción | Un verbo nunca pregunta: el dato llega por argumento o por stdin |
+| Idempotencia | Repetir el mismo efecto no cambia el resultado ni el código de salida |
+| Testabilidad | La raíz del repo y (desde v0.4.0) la ruta del estado son inyectables por variable |
+
+### Verbos de v0.3.0 / v0.3.0 verbs
+
+| Verbo | Comportamiento | Código |
+|-------|----------------|:------:|
+| `version`, `--version` | `glot 0.3.0` | 0 |
+| `help`, `-h`, `--help`, `help <verbo>` | Ayuda general o de un verbo | 0 |
+| `doctor` | Diagnóstico: versión de bash, git, raíz del monorepo y ruta prevista del estado | 0 / 1 |
+| `greet [nombre]` | `Hello, <nombre>!` con el nombre por argumento o por stdin | 0 / 2 |
+| Verbo desconocido | Error en stderr y sugerencia de `help` | 2 |
+
+> **ES:** Compatibilidad heredada: `glot <algo-que-no-es-verbo>` sigue tratándose como `greet <nombre>` para no romper el uso de v0.2.0; se retira en v1.0.0.
+> **EN:** Legacy compatibility: `glot <something-that-is-not-a-verb>` is still treated as `greet <name>` so v0.2.0 usage keeps working; it is removed in v1.0.0.
+
+### Fuera de alcance / Out of scope
+
+Almacén `set/get/unset/list/path` (v0.4.0), `use <lenguaje> <módulo>` (v0.5.0), `test` y `status` (v0.6.0) y autocompletado (v0.7.0).
+
+### Verificación / Verification
+
+`scripts/tests/` con runner propio y sin dependencias; cada caso trabaja en un directorio temporal (`mktemp -d`) para no tocar nada del usuario. Casos previstos: formato de `version`; `help` general y `help <verbo>`; verbo desconocido → `2`; `greet Ada` y `printf 'Ada\n' | glot greet`; silencio con `-q`; `doctor` dentro del monorepo (detecta la raíz) y fuera de él; y que `glot version | wc -l` devuelva exactamente `1` (stdout limpio, sin diagnóstico).
+
+**DoD de la versión:** `bash -n` limpio, harness en verde, README y log al día, snapshot en `versions/` y rama `chore/repo/glot-v0.3` fusionada en `main`.
+
+---
+
 ## 🔖 Convención de versiones y archivado / Versioning & archiving
 
 - **SemVer** `MAJOR.MINOR.PATCH`; el número vive en el encabezado de `glot.sh` y en la tabla de este README (desde v0.3.0 también en `glot version`).
@@ -115,8 +169,8 @@ type glot
 
 | Herramienta | Uso | Verificación |
 |-------------|-----|--------------|
-| Bash 5.2 | Ejecutar `glot.sh` y, desde v0.3.0, cargarlo con `source` | `bash --version` |
-| Git 2.43 | Desde v0.3.0: resolver el monorepo con `git rev-parse --show-superproject-working-tree` | `git --version` |
+| Bash 5.2 | Ejecutar `glot.sh` y, desde v0.5.0, cargarlo con `source` | `bash --version` |
+| Git 2.43 | Desde v0.3.0: `doctor` resuelve la raíz con `git rev-parse --show-superproject-working-tree` | `git --version` |
 
 ---
 
@@ -131,14 +185,22 @@ bash -n scripts/glot.sh     # sintaxis
 
 ---
 
-## 🧱 Reglas de diseño (desde v0.3.0) / Design rules
+## 🧱 Reglas de diseño / Design rules
 
-Se fijan aquí para no tener que rehacerlas cuando `glot` pase a ser una función (v0.3.0):
+### Contrato de todos los verbos (desde v0.3.0)
 
-1. **Cargable con `source`**: nunca `exit`, sin cambiar opciones globales del shell (`set -e`, `IFS`) ni el directorio actual; todo sale con `return`.
-2. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION` y `GLOT_ROOT`.
-3. **Salidas bilingües ES/EN** y códigos de salida: `0` correcto, `1` error de entorno, `2` uso incorrecto.
-4. **Raíz del monorepo**: `GLOT_ROOT` → superproyecto → raíz git, para que funcione también desde dentro de un submódulo.
+1. **stdout solo dato, stderr solo diagnóstico**, para que la salida se pueda canalizar y capturar.
+2. **Códigos de salida estables**: `0` correcto, `1` error de entorno o dato ausente, `2` uso incorrecto, `3` estado ilegible o no escribible.
+3. **Nunca preguntar** en un verbo: el dato llega por argumento o stdin.
+4. **Idempotencia** cuando se repite el mismo efecto.
+5. **Inyectable para test**: raíz del repo y ruta del estado sobreescribibles por variable (`GLOT_ROOT`, `GLOT_STATE_FILE`).
+6. **Mensajes bilingües ES/EN** en `help`, `doctor` y errores; los datos de salida (como `Hello, Ada!`) no se traducen.
+7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT` y `GLOT_STATE_FILE`.
+
+### Reglas cuando sea cargable con `source` (desde v0.5.0)
+
+8. **Sin `exit`, sin tocar opciones globales del shell** (`set -e`, `IFS`) ni el directorio actual fuera de un verbo que lo pida explícitamente; todo sale con `return`.
+9. **Raíz del monorepo**: `GLOT_ROOT` → superproyecto → raíz git, para que funcione también desde dentro de un submódulo.
 
 ---
 
