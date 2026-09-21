@@ -10,7 +10,8 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 - Nueva carpeta `scripts/` para las herramientas del monorepo, con `glot`: un CLI
   que crece por versiones siguiendo las especificaciones de los lenguajes
-  (v0.1.0 `Hello World`, v0.2.0 equivalente a `hellouser`).
+  (v0.1.0 `Hello World`, v0.2.0 equivalente a `hellouser` y v0.3.0 contrato y
+  dispatcher de verbos con harness de pruebas propio).
 - Se abrió la fase `Algorithms Pure` como siguiente fase del roadmap.
 - Se estableció el flujo de cierre documental y actualización del roadmap.
 

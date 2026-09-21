@@ -35,7 +35,7 @@ La implementación de código nuevo requiere una petición explícita del autor.
   roadmap) y documentarlo en `scripts/README.md`.
 - Refactorizar o implementar código solo cuando el autor lo solicite.
 - No ejecutar `git push` ni crear commits salvo instrucción explícita; tampoco
-  los subcomandos de `glot` que crean ramas o empujan (`set`).
+  los subcomandos de `glot` que crean ramas o empujan (`use`).
 - No modificar `docs/ROADMAP.md` durante una implementación parcial.
 
 ## Convenciones de ramas
