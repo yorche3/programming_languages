@@ -84,9 +84,10 @@ There is no global installation required. Each language is configured and run in
 **EN:** The [`scripts/`](scripts/) folder holds tools meant to be used **on this monorepo**. They are not roadmap modules: they touch neither `.gitmodules` nor the `X/49` counters. The first one is `glot`, a CLI that grows version by version following the same specifications as the languages (v0.1.0 was its `Hello World` and v0.2.0 the `hellouser` equivalent).
 
 ```bash
-cd /home/yorche3/programming_languages
-./scripts/glot.sh Ada                    # Hello, Ada!
-printf 'Ada\n' | ./scripts/glot.sh       # Hello, Ada! desde la entrada estándar / from stdin
+cd "$REPO"                               # ruta de tu clon / path to your clone
+./scripts/glot.sh version
+./scripts/glot.sh greet Ada              # Hello, Ada!
+printf 'Ada\n' | ./scripts/glot.sh greet # también desde stdin / also from stdin
 ```
 
 Detalles, log de versiones y convención de archivado en [`scripts/README.md`](scripts/README.md).
