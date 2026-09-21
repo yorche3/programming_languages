@@ -104,7 +104,7 @@ type glot
 
 ## 🔖 Convención de versiones y archivado / Versioning & archiving
 
-- **SemVer** `MAJOR.MINOR.PATCH`; el número vive en el encabezado de `glot.sh` y en la tabla de este README (desde v0.2.0 también en `glot version`).
+- **SemVer** `MAJOR.MINOR.PATCH`; el número vive en el encabezado de `glot.sh` y en la tabla de este README (desde v0.3.0 también en `glot version`).
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
 - `versions/` ya contiene [`glot_0.1.0.sh`](versions/glot_0.1.0.sh), el snapshot de la primera versión cerrada.
@@ -115,8 +115,8 @@ type glot
 
 | Herramienta | Uso | Verificación |
 |-------------|-----|--------------|
-| Bash 5.2 | Ejecutar `glot.sh` y, desde v0.2.0, cargarlo con `source` | `bash --version` |
-| Git 2.43 | Desde v0.2.0: resolver el monorepo con `git rev-parse --show-superproject-working-tree` | `git --version` |
+| Bash 5.2 | Ejecutar `glot.sh` y, desde v0.3.0, cargarlo con `source` | `bash --version` |
+| Git 2.43 | Desde v0.3.0: resolver el monorepo con `git rev-parse --show-superproject-working-tree` | `git --version` |
 
 ---
 
@@ -144,8 +144,8 @@ Se fijan aquí para no tener que rehacerlas cuando `glot` pase a ser una funció
 
 ## 🧭 Gobernanza / Governance
 
-- **ES:** `scripts/` vive en el repositorio raíz (no en ningún submódulo) y no entra en los contadores del roadmap. Pendiente: añadir la fila en [`README.md`](../README.md) (Estructura), la nota de cambios solo-monorepo en [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md) y el límite correspondiente en [`AGENTS.md`](../AGENTS.md).
-- **EN:** `scripts/` lives in the root repository (not in any submodule) and is not part of the roadmap counters. Pending: add the row in [`README.md`](../README.md) (Structure), the monorepo-only change note in [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md), and the matching boundary in [`AGENTS.md`](../AGENTS.md).
+- **ES:** `scripts/` vive en el repositorio raíz (no en ningún submódulo) y no entra en los contadores del roadmap. Está documentado en la raíz: sección «Herramientas del monorepo» de [`README.md`](../README.md), scope `glot` y cierre de versión en [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md), límite del tooling en [`AGENTS.md`](../AGENTS.md), mención en [`docs/index.md`](../docs/index.md) (sitio GitHub Pages) y entrada en [`CHANGELOG.md`](../CHANGELOG.md).
+- **EN:** `scripts/` lives in the root repository (not in any submodule) and is not part of the roadmap counters. It is documented at the root: the "Monorepo tooling" section in [`README.md`](../README.md), the `glot` scope and version closing in [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md), the tooling boundary in [`AGENTS.md`](../AGENTS.md), a mention in [`docs/index.md`](../docs/index.md) (GitHub Pages site) and an entry in [`CHANGELOG.md`](../CHANGELOG.md).
 
 ---
 

@@ -14,6 +14,9 @@ La implementación de código nuevo requiere una petición explícita del autor.
 - Las especificaciones generales viven en `docs/core/`.
 - `docs/README_Template.md` es la plantilla para READMEs de Nivel 3.
 - `docs/AGENT_Template.md` es la guía detallada para agentes.
+- `scripts/README.md` es la fuente de verdad del tooling del repositorio
+  (herramienta `glot`), que no es un módulo del roadmap y no altera los
+  contadores `X/49`.
 
 ## Antes de trabajar
 
@@ -28,8 +31,11 @@ La implementación de código nuevo requiere una petición explícita del autor.
 
 - Generar o corregir documentación usando la plantilla vigente.
 - Revisar código, tests y documentación ya existentes.
+- Verificar el tooling de `scripts/` (herramientas del repositorio, fuera del
+  roadmap) y documentarlo en `scripts/README.md`.
 - Refactorizar o implementar código solo cuando el autor lo solicite.
-- No ejecutar `git push` ni crear commits salvo instrucción explícita.
+- No ejecutar `git push` ni crear commits salvo instrucción explícita; tampoco
+  los subcomandos de `glot` que crean ramas o empujan (`set`).
 - No modificar `docs/ROADMAP.md` durante una implementación parcial.
 
 ## Convenciones de ramas

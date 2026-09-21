@@ -71,6 +71,7 @@ programming_languages/
 │       └── math/                  # Fase 5 — Matemáticas
 │           └── README.md
 ├── _experimental/                 # 🧪 Sandbox / Legacy Staging (primeros acercamientos)
+├── scripts/                       # 🛠️ Herramientas del monorepo / Monorepo tooling (`glot`)
 ├── python/                        # 🐍 Implementaciones Python (submódulo o legacy)
 ├── java/                          # ☕ Implementaciones Java (submódulo)
 ├── go/                            # 🔵 Implementaciones Go (submódulo)
@@ -135,6 +136,7 @@ git submodule update --init --recursive
 | 2️⃣ | Lee el `README.md` del lenguaje para instalar dependencias / Read the language's `README.md` to install dependencies |
 | 3️⃣ | Sigue el flujo desde [`01_Hello_World.md`](core/foundations/01_Hello_World.md) / Follow the flow from `01_Hello_World.md` |
 | 4️⃣ | Implementa, prueba y avanza al siguiente documento numerado / Implement, test, and advance to the next numbered document |
+| 5️⃣ | (Opcional) Carga las herramientas del monorepo: [`scripts/README.md`](https://github.com/yorche3/programming_languages/blob/main/scripts/README.md) / (Optional) Load the monorepo tooling |
 
 ---
 

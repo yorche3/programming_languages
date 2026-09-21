@@ -19,6 +19,7 @@ This monorepo aims to provide a comprehensive learning and experimentation envir
 ```text
 programming_languages/
 ├── docs/ # Especificaciones, pseudocódigo y casos de prueba / Specification, pseudocode and test cases
+├── scripts/ # Herramientas del monorepo / Monorepo tooling
 ├── programing_language_name/ # Implementaciones de cada lenguaje / Implementations of each language
 ...
 ```
@@ -75,6 +76,21 @@ git submodule update --init --recursive
 No hay una instalación global requerida. Cada lenguaje se configura y ejecuta de manera independiente.
 
 There is no global installation required. Each language is configured and run independently.
+
+## 🛠️ Herramientas del monorepo / Monorepo tooling
+
+**ES:** La carpeta [`scripts/`](scripts/) reúne herramientas pensadas para usarse **sobre este monorepo**. No son módulos del roadmap: no tocan `.gitmodules` ni los contadores `X/49`. La primera es `glot`, un CLI que crece por versiones siguiendo las mismas especificaciones que los lenguajes (la v0.1.0 fue su `Hello World` y la v0.2.0 el equivalente a `hellouser`).
+
+**EN:** The [`scripts/`](scripts/) folder holds tools meant to be used **on this monorepo**. They are not roadmap modules: they touch neither `.gitmodules` nor the `X/49` counters. The first one is `glot`, a CLI that grows version by version following the same specifications as the languages (v0.1.0 was its `Hello World` and v0.2.0 the `hellouser` equivalent).
+
+```bash
+cd /home/yorche3/programming_languages
+./scripts/glot.sh Ada                    # Hello, Ada!
+printf 'Ada\n' | ./scripts/glot.sh       # Hello, Ada! desde la entrada estándar / from stdin
+```
+
+Detalles, log de versiones y convención de archivado en [`scripts/README.md`](scripts/README.md).
+Details, version log and archiving convention in [`scripts/README.md`](scripts/README.md).
 
 ## 📖 Documentación / Documentation
 
