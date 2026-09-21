@@ -14,6 +14,9 @@ GLOT_SH="$TESTS_DIR/../glot.sh"
 WORK_DIR="$(mktemp -d)"
 trap 'rm -rf -- "$WORK_DIR"' EXIT
 
+# Estado aislado: ningún caso toca el estado real del usuario.
+export GLOT_STATE_FILE="$WORK_DIR/state"
+
 passed=0
 failed=0
 
@@ -80,13 +83,13 @@ glot_run_in() {
 
 # version
 glot_run version
-assert_eq 'version: salida' 'glot 0.3.0' "$out"
+assert_eq 'version: salida' 'glot 0.4.0' "$out"
 assert_eq 'version: código' '0' "$rc_last"
 assert_eq 'version: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 
 # --version
 glot_run --version
-assert_eq '--version: salida' 'glot 0.3.0' "$out"
+assert_eq '--version: salida' 'glot 0.4.0' "$out"
 assert_eq '--version: código' '0' "$rc_last"
 
 # help general y por verbo
@@ -147,10 +150,10 @@ assert_contains 'nombre suelto: sugiere greet' 'glot greet Ada' "$err"
 # doctor dentro del monorepo
 glot_run doctor
 assert_eq 'doctor dentro: código' '0' "$rc_last"
-assert_contains 'doctor dentro: versión' 'version: 0.3.0' "$out"
+assert_contains 'doctor dentro: versión' 'version: 0.4.0' "$out"
 assert_contains 'doctor dentro: script_dir' 'script_dir:' "$out"
 assert_contains 'doctor dentro: raíz detectada' 'root: /' "$out"
-assert_contains 'doctor dentro: ruta del estado' 'state_dir:' "$out"
+assert_contains 'doctor dentro: ruta del estado' 'state_file:' "$out"
 
 # doctor con -q silencia el encabezado de stderr
 glot_run -q doctor
@@ -161,6 +164,86 @@ assert_eq 'doctor -q: stderr vacío' '' "$err"
 glot_run_in "$WORK_DIR" doctor
 assert_eq 'doctor fuera: código' '1' "$rc_last"
 assert_contains 'doctor fuera: raíz no detectada' 'no detectado' "$out"
+
+# --- almacén de estado (v0.4.0) ----------------------------------------------
+
+# path
+glot_run path
+assert_eq 'path: código' '0' "$rc_last"
+assert_eq 'path: ruta del estado aislado' "$GLOT_STATE_FILE" "$out"
+
+# set + get
+glot_run set lang php
+assert_eq 'set: código' '0' "$rc_last"
+assert_eq 'set: stdout vacío (el aviso va a stderr)' '' "$out"
+glot_run get lang
+assert_eq 'get: salida' 'php' "$out"
+assert_eq 'get: código' '0' "$rc_last"
+
+# get de clave inexistente
+glot_run get nope
+assert_eq 'get inexistente: código' '1' "$rc_last"
+assert_eq 'get inexistente: stdout vacío' '' "$out"
+assert_contains 'get inexistente: mensaje' 'key not found' "$err"
+
+# valores con espacios, con '=' y vacío
+glot_run set nota 'hola mundo'
+glot_run get nota
+assert_eq 'valor con espacios' 'hola mundo' "$out"
+glot_run set kv 'a=b'
+glot_run get kv
+assert_eq 'valor con igual' 'a=b' "$out"
+glot_run set vacio ''
+assert_eq 'valor vacío: código' '0' "$rc_last"
+glot_run get vacio
+assert_eq 'valor vacío: código al leer' '0' "$rc_last"
+assert_eq 'valor vacío: salida vacía' '' "$out"
+
+# validaciones
+glot_run set 'clave mala' v
+assert_eq 'clave inválida: código' '2' "$rc_last"
+assert_eq 'clave inválida: stdout vacío' '' "$out"
+glot_run set k $'a\nb'
+assert_eq 'valor con salto de línea: código' '2' "$rc_last"
+assert_eq 'valor con salto de línea: stdout vacío' '' "$out"
+glot_run set solo-una-clave
+assert_eq 'set sin valor: código' '2' "$rc_last"
+
+# list ordenado por clave
+glot_run list
+assert_eq 'list: orden por clave' "$(printf '%s\n' 'kv=a=b' 'lang=php' 'nota=hola mundo' 'vacio=')" "$out"
+
+# dry-run no escribe
+glot_run -n set otro x
+assert_eq 'dry-run: plan en stdout' 'otro=x' "$out"
+assert_eq 'dry-run: código' '0' "$rc_last"
+glot_run get otro
+assert_eq 'dry-run: no se escribió' '1' "$rc_last"
+
+# unset idempotente
+glot_run unset lang
+assert_eq 'unset: código' '0' "$rc_last"
+glot_run get lang
+assert_eq 'unset: la clave ya no está' '1' "$rc_last"
+glot_run unset lang
+assert_eq 'unset repetido: código' '0' "$rc_last"
+
+# concurrencia: dos escrituras en paralelo con flock
+("$GLOT_SH" set c1 uno >/dev/null 2>&1) &
+("$GLOT_SH" set c2 dos >/dev/null 2>&1) &
+wait || true
+glot_run list
+assert_contains 'concurrencia: c1 presente' 'c1=uno' "$out"
+assert_contains 'concurrencia: c2 presente' 'c2=dos' "$out"
+
+# permisos del estado y de su directorio
+assert_eq 'permisos del archivo' '600' "$(stat -c '%a' "$GLOT_STATE_FILE")"
+assert_eq 'permisos del directorio' '700' "$(stat -c '%a' "$(dirname -- "$GLOT_STATE_FILE")")"
+
+# doctor refleja el estado
+glot_run doctor
+assert_contains 'doctor: ruta del estado aislado' "state_file: $GLOT_STATE_FILE" "$out"
+assert_contains 'doctor: estado legible' 'state_file_ok: yes' "$out"
 
 # --- resumen -----------------------------------------------------------------
 
