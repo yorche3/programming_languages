@@ -30,6 +30,7 @@ description: Implementación de conceptos de programación en múltiples lenguaj
 | [`🤖 AGENT_Template.md`](AGENT_Template.md) | Guía operativa para agentes de IA que documentan o corrigen el repo / Operational guide for AI agents documenting or fixing the repo |
 | [`✅ ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) | Registro de cierres que autorizan actualizaciones del roadmap / Closure record authorizing roadmap updates |
 | [`🤝 CONTRIBUTING.md`](CONTRIBUTING.md) | Convención de commits / Commit convention |
+| [`🔁 WORKFLOW.md`](WORKFLOW.md) | Ciclo de trabajo de un módulo (sprint) / Module work cycle (sprint) |
 
 > 💡 **Convención de nombres / Naming convention:** Los documentos siguen una numeración secuencial (`01_`, `02_`, `03_`…) que indica el orden recomendado de implementación. Sigue la numeración para avanzar en el flujo.
 
@@ -42,6 +43,7 @@ programming_languages/
 ├── docs/                          # 🌐 Sitio web / Website (GitHub Pages)
 │   ├── index.md                   # Portada / Landing page
 │   ├── ROADMAP.md                 # Plan de desarrollo / Development roadmap
+│   ├── WORKFLOW.md                # Ciclo de trabajo de un módulo / Module work cycle
 │   └── core/
 │       ├── README.md              # Índice general / Main core index
 │       ├── foundations/           # Fase 0 (01_ a 04_)
@@ -71,7 +73,7 @@ programming_languages/
 │       └── math/                  # Fase 5 — Matemáticas
 │           └── README.md
 ├── _experimental/                 # 🧪 Sandbox / Legacy Staging (primeros acercamientos)
-├── scripts/                       # 🛠️ Herramientas del monorepo / Monorepo tooling (`glot`)
+├── scripts/                       # 🛠️ Tooling del monorepo / Monorepo tooling (`glot` + `docs/` + `versions/`)
 ├── python/                        # 🐍 Implementaciones Python (submódulo o legacy)
 ├── java/                          # ☕ Implementaciones Java (submódulo)
 ├── go/                            # 🔵 Implementaciones Go (submódulo)

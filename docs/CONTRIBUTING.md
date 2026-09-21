@@ -186,6 +186,10 @@ rama en `main`, de modo que `main` siempre contenga una versión terminada.
 
 ## ✅ Cierre de documentación y roadmap / Documentation and roadmap closure
 
+El ciclo completo de un módulo —los pasos, quién los hace y qué evidencia deja cada uno— está en [`WORKFLOW.md`](WORKFLOW.md).
+
+The full module cycle —its steps, who performs them and the evidence each one leaves— is in [`WORKFLOW.md`](WORKFLOW.md).
+
 Una delegación de documentación no finaliza al generar un README. Debe
 verificarse el código, ejecutar los tests disponibles, comprobar el README del
 módulo y registrar la evidencia en

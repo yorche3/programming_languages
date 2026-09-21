@@ -14,6 +14,8 @@ La implementación de código nuevo requiere una petición explícita del autor.
 - Las especificaciones generales viven en `docs/core/`.
 - `docs/README_Template.md` es la plantilla para READMEs de Nivel 3.
 - `docs/AGENT_Template.md` es la guía detallada para agentes.
+- `docs/WORKFLOW.md` describe el ciclo de trabajo de un módulo (sprint): pasos,
+  evidencia de cada paso y reparto entre autor, tooling y agente.
 - `scripts/README.md` es la fuente de verdad del tooling del repositorio
   (herramienta `glot`), que no es un módulo del roadmap y no altera los
   contadores `X/49`.

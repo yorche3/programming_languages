@@ -79,19 +79,19 @@ There is no global installation required. Each language is configured and run in
 
 ## 🛠️ Herramientas del monorepo / Monorepo tooling
 
-**ES:** La carpeta [`scripts/`](scripts/) reúne herramientas pensadas para usarse **sobre este monorepo**. No son módulos del roadmap: no tocan `.gitmodules` ni los contadores `X/49`. La primera es `glot`, un CLI que crece por versiones siguiendo las mismas especificaciones que los lenguajes (la v0.1.0 fue su `Hello World` y la v0.2.0 el equivalente a `hellouser`).
+**ES:** La carpeta [`scripts/`](scripts/) reúne herramientas pensadas para usarse **sobre este monorepo**. No son módulos del roadmap: no tocan `.gitmodules` ni los contadores `X/49`. La primera es `glot`, un CLI que convierte el ciclo de trabajo de un módulo —situar, crear, ejecutar, delegar, cerrar y publicar— en comandos reproducibles, y crece por versiones (la v0.4.0 es su almacén de estado).
 
-**EN:** The [`scripts/`](scripts/) folder holds tools meant to be used **on this monorepo**. They are not roadmap modules: they touch neither `.gitmodules` nor the `X/49` counters. The first one is `glot`, a CLI that grows version by version following the same specifications as the languages (v0.1.0 was its `Hello World` and v0.2.0 the `hellouser` equivalent).
+**EN:** The [`scripts/`](scripts/) folder holds tools meant to be used **on this monorepo**. They are not roadmap modules: they touch neither `.gitmodules` nor the `X/49` counters. The first one is `glot`, a CLI that turns the per-module work cycle —locate, create, run, delegate, close and publish— into reproducible commands, and grows version by version (v0.4.0 is its state store).
 
 ```bash
 cd "$REPO"                               # ruta de tu clon / path to your clone
 ./scripts/glot.sh version
-./scripts/glot.sh greet Ada              # Hello, Ada!
-printf 'Ada\n' | ./scripts/glot.sh greet # también desde stdin / also from stdin
+./scripts/glot.sh doctor
+./scripts/glot.sh set lang php && ./scripts/glot.sh get lang
 ```
 
-Detalles, log de versiones y convención de archivado en [`scripts/README.md`](scripts/README.md).
-Details, version log and archiving convention in [`scripts/README.md`](scripts/README.md).
+Documentación del tooling en [`scripts/README.md`](scripts/README.md) (roadmap, sprint, contrato, tripas, log y validación) y el ciclo de trabajo del módulo, que aplica a todos los lenguajes, en [`docs/WORKFLOW.md`](docs/WORKFLOW.md).
+Tooling documentation in [`scripts/README.md`](scripts/README.md) (roadmap, sprint, contract, internals, log and validation) and the module work cycle, which applies to every language, in [`docs/WORKFLOW.md`](docs/WORKFLOW.md).
 
 ## 📖 Documentación / Documentation
 

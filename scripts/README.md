@@ -1,8 +1,51 @@
 # 🛠️ glot — CLI del monorepo / monorepo CLI
 
-`glot` es el script de práctica del propio repositorio: igual que los lenguajes del roadmap empiezan por un `helloworld`, `glot` empieza por su «hello world» en Bash (v0.1.0) y crece versión a versión. Es **tooling del monorepo**: no es un módulo del roadmap, no altera `.gitmodules` ni los contadores `X/49` de [`docs/ROADMAP.md`](../docs/ROADMAP.md).
+**ES:** `glot` convierte el ciclo de trabajo de un módulo —**situar, crear, ejecutar, delegar, cerrar y publicar**— en comandos reproducibles, y deja la evidencia en el repositorio. Es **tooling del monorepo**: no es un módulo del roadmap, no altera `.gitmodules` ni los contadores `X/49` de [`docs/ROADMAP.md`](../docs/ROADMAP.md).
+
+**EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/49` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
 Versión viva / Live version: **v0.4.0** en [`glot.sh`](glot.sh).
+
+---
+
+## 🎯 Objetivo y límites / Goal and boundaries
+
+| Responsabilidad / Responsibility | Detalle / Detail |
+|---|---|
+| Resolver catálogo y estado | Lenguaje, fase, módulo, rama y especificación del trabajo en curso |
+| Preparar el entorno | Directorio del módulo, rama de trabajo y, desde L9, la toolchain esperada |
+| Ejecutar y verificar | Comandos nativos del lenguaje desde cualquier directorio, leyendo el estado |
+| Preparar los encargos de IA | Arma el encargo para el agente con las plantillas de `.github/prompts`; no lo ejecuta por su cuenta |
+| Registrar la evidencia | Salidas reales, checklist de cierre, roadmap y puntero del submódulo |
+
+**No-objetivos / Non-goals:** no es un módulo del roadmap ni toca `.gitmodules` o los contadores; no escribe documentación (la encarga y la valida); no sustituye al agente de VS Code; no publica nada que no se le pida explícitamente; no instala toolchains antes de L9; no es un gestor de proyectos.
+
+El detalle de cada capa y el orden de las versiones están en [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+---
+
+## 🚀 Empezar / Quick start
+
+```bash
+cd "$REPO"                              # ruta de tu clon / path to your clone
+./scripts/glot.sh version
+./scripts/glot.sh doctor
+./scripts/glot.sh set lang php && ./scripts/glot.sh get lang
+```
+
+---
+
+## 📚 Documentación / Documentation
+
+| Documento | Contenido |
+|-----------|-----------|
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Capas L0–L9, versiones, criterios de orden y decisiones abiertas |
+| [`docs/SPRINT.md`](docs/SPRINT.md) | El ciclo de módulo: 9 pasos, comandos, evidencias y encargos de IA |
+| [`docs/CONTRACT.md`](docs/CONTRACT.md) | Contrato de todos los verbos, códigos de salida, almacén de estado y especificación de `use` |
+| [`docs/INTERNALS.md`](docs/INTERNALS.md) | Cómo funciona el script por dentro |
+| [`docs/VERSIONS.md`](docs/VERSIONS.md) | Log de versiones, archivado, requisitos y cómo verificar |
+| [`docs/VALIDATION.md`](docs/VALIDATION.md) | Validador automático con GitHub Copilot CLI |
+| [`../docs/WORKFLOW.md`](../docs/WORKFLOW.md) | Ciclo de trabajo del módulo: **norma del monorepo** (todos los lenguajes) |
 
 ---
 
@@ -10,8 +53,15 @@ Versión viva / Live version: **v0.4.0** en [`glot.sh`](glot.sh).
 
 ```text
 scripts/
-├── README.md                 # Este archivo / This file
+├── README.md                 # Este archivo: qué es glot y mapa de la documentación
 ├── glot.sh                   # Versión viva / live version (v0.4.0)
+├── docs/                     # Documentación del tooling
+│   ├── ROADMAP.md
+│   ├── SPRINT.md
+│   ├── CONTRACT.md
+│   ├── INTERNALS.md
+│   ├── VALIDATION.md
+│   └── VERSIONS.md
 ├── tests/
 │   └── glot_test.sh          # Harness de pruebas, sin dependencias
 └── versions/                 # Snapshots de versiones cerradas
@@ -20,214 +70,13 @@ scripts/
     └── glot_0.3.0.sh
 ```
 
-| Archivo | Propósito |
-|---------|-----------|
-| [`glot.sh`](glot.sh) | Versión en desarrollo del CLI. Hoy: dispatcher de verbos (L0) más el almacén clave/valor (L1), con `version`, `help`, `doctor`, `greet`, `hello`, `set`, `get`, `unset`, `list` y `path`. |
-| [`tests/glot_test.sh`](tests/glot_test.sh) | Harness propio: ejecuta `glot.sh` real y comprueba contrato, verbos, estado y códigos de salida. |
-| [`versions/glot_0.1.0.sh`](versions/glot_0.1.0.sh) | Foto inmutable de la v0.1.0: `echo "Hello World! from Bash!"`. |
-| [`versions/glot_0.2.0.sh`](versions/glot_0.2.0.sh) | Foto inmutable de la v0.2.0: nombre por argumento, stdin o prompt. |
-| [`versions/glot_0.3.0.sh`](versions/glot_0.3.0.sh) | Foto inmutable de la v0.3.0: contrato L0 y dispatcher de verbos, cerrada con 39 comprobaciones en verde. |
-
----
-
-## 🚀 Funcionamiento actual / Current behaviour (v0.4.0)
-
-**ES:** El script es un **dispatcher de verbos** con el contrato L0 (`stdout` solo datos, `stderr` solo diagnóstico, códigos estables) más el **almacén de estado clave/valor** (L1): `set`, `get`, `unset`, `list` y `path`, guardado en el directorio de estado XDG. No asume ninguna ruta del usuario: se localiza con `BASH_SOURCE`, resuelve la raíz del monorepo por `GLOT_ROOT`, el superproyecto o la raíz de git, y acepta `GLOT_STATE_DIR`/`GLOT_STATE_FILE` para el estado. Los verbos que mutan se pueden previsualizar con `-n/--dry-run` y nunca escriben sin que se lo pidas. Se ejecuta; no hace falta cargarlo.
-
-**EN:** The script is a **verb dispatcher** implementing the L0 contract (stdout data only, stderr diagnostics only, stable exit codes) plus the **key/value state store** (L1): `set`, `get`, `unset`, `list` and `path`, kept in the XDG state directory. It assumes no user path: it locates itself through `BASH_SOURCE`, resolves the monorepo root from `GLOT_ROOT`, the superproject or the git root, and accepts `GLOT_STATE_DIR`/`GLOT_STATE_FILE` for state. Mutating verbs can be previewed with `-n/--dry-run` and never write unless asked. It is executed; sourcing is not needed.
-
-```bash
-cd "$REPO"                              # ruta de tu clon / path to your clone
-./scripts/glot.sh version
-./scripts/glot.sh help
-./scripts/glot.sh doctor
-./scripts/glot.sh greet Ada
-printf 'Ada\n' | ./scripts/glot.sh greet
-./scripts/glot.sh set lang php          # estado (L1) / state (L1)
-./scripts/glot.sh get lang
-./scripts/glot.sh list
-./scripts/glot.sh -n set lang lua       # dry-run: previsualiza sin escribir
-```
-
-| Verbo | Comportamiento | Código |
-|-------|----------------|:------:|
-| `version`, `--version` | Versión instalada | 0 |
-| `help [verbo]` | Ayuda general o de un verbo | 0 |
-| `doctor` | Diagnóstico: bash, git, raíz del monorepo y estado | 0 / 1 |
-| `greet [nombre]` | `Hello, <nombre>!` con el nombre por argumento o por stdin | 0 / 2 |
-| `hello [nombre]` | Igual que `greet` (compatibilidad v0.2.0, se retira en v1.0.0) | 0 / 2 |
-| `set <clave> <valor>` | Guarda una clave en el estado; aviso a stderr | 0 / 2 / 3 |
-| `get <clave>` | Imprime el valor (`stdout`) | 0 / 1 / 2 |
-| `unset <clave>` | Borra la clave; idempotente | 0 / 2 / 3 |
-| `list` | Todas las claves como `clave=valor`, ordenadas | 0 / 3 |
-| `path` | Ruta del fichero de estado | 0 |
-
-**Salidas reales / Actual output:**
-
-En las pruebas del estado se usa un directorio temporal (`GLOT_STATE_DIR=/tmp/tmp.GYOITHDNMX`) para no tocar el estado real del usuario; esos son los caminos que aparecen abajo.
-
-```text
-$ ./scripts/glot.sh version
-glot 0.4.0
-```
-
-```text
-$ ./scripts/glot.sh greet Ada
-Hello, Ada!
-$ printf 'Ada\n' | ./scripts/glot.sh greet
-Hello, Ada!
-```
-
-```text
-$ ./scripts/glot.sh set lang php
-set: lang                     # ← stderr: diagnóstico, no dato
-$ ./scripts/glot.sh set module 05_Naive_Sort
-set: module
-$ ./scripts/glot.sh set nota 'hola mundo'
-set: nota
-$ ./scripts/glot.sh get lang
-php
-$ ./scripts/glot.sh list
-lang=php
-module=05_Naive_Sort
-nota=hola mundo
-$ ./scripts/glot.sh path
-/tmp/tmp.GYOITHDNMX/state
-$ ./scripts/glot.sh get nope; echo $?
-glot: error: clave no encontrada / key not found: nope
-1
-$ ./scripts/glot.sh -n set lang lua
-lang=lua                      # dry-run: imprime lo que haría, no escribe
-$ ./scripts/glot.sh unset nota
-unset: nota
-$ ./scripts/glot.sh unset nota
-unset: nota (no estaba / was not set)   # idempotente, rc 0
-$ ./scripts/glot.sh list
-lang=php
-module=05_Naive_Sort
-```
-
-```text
-$ stat -c '%a %n' "$GLOT_STATE_DIR" "$GLOT_STATE_DIR/state"
-700 /tmp/tmp.GYOITHDNMX
-600 /tmp/tmp.GYOITHDNMX/state
-```
-
-```text
-$ ./scripts/glot.sh doctor
-glot doctor — diagnóstico / diagnostics
-version: 0.4.0
-script_dir: /home/yorche3/programming_languages/scripts
-bash: 5.2.21(1)-release
-bash_ok: yes
-git: git version 2.43.0
-root: /home/yorche3/programming_languages
-state_dir: /tmp/tmp.GYOITHDNMX (existe / exists)
-state_file: /tmp/tmp.GYOITHDNMX/state
-state_file_ok: yes (3 claves / keys)
-```
-
-```text
-$ ./scripts/glot.sh nope
-glot: error: verbo desconocido / unknown verb: nope
-si querías el saludo / if you meant the greeting: glot greet nope
-glot: prueba / try: glot help
-$ echo $?
-2
-```
-
-> **ES:** El encabezado de `doctor` y los avisos van a `stderr`, así que con `-q` la salida de `stdout` queda lista para parsear (`clave: valor`). Lo mismo con `set`/`unset`: confirman por `stderr` para que `$(glot get lang)` solo capture el valor. Las rutas que aparecen en esa salida son las detectadas en tu entorno, no constantes del script.
-> **EN:** `doctor`'s header and warnings go to `stderr`, so with `-q` the `stdout` output is ready to parse (`key: value`). Same for `set`/`unset`: they confirm on `stderr` so `$(glot get lang)` captures only the value. The paths shown in that output are detected in your environment, not constants baked into the script.
-
----
-
-## 🔍 Cómo funciona por dentro / How it works internally
-
-**ES:** Recorrido del script v0.4.0, del argumento al código de salida. No es documentación línea a línea: solo lo necesario para leerlo, entender las decisiones raras y extenderlo.
-
-**EN:** A walkthrough of the v0.4.0 script, from argument to exit code. It is not line-by-line documentation: just what is needed to read it, understand the odd decisions and extend it.
-
-### 1. Arranque y localización / Startup and self-location
-
-1. `set -euo pipefail` al principio: como el archivo se **ejecuta**, cualquier orden que falle detiene el script y el `return` de un verbo se convierte en su código de salida. Esta línea desaparecerá cuando el archivo se cargue con `source` (v0.5.0), porque ahí no puede tocar las opciones del shell.
-2. `GLOT_VERSION="0.4.0"` es la única constante propia; el resto de funciones y variables internas llevan el prefijo `_glot_` para poder cargarse más adelante sin contaminar el entorno.
-3. `GLOT_SCRIPT_DIR` se obtiene de `BASH_SOURCE[0]`, resolviendo enlaces simbólicos con `readlink` y normalizando con `cd … && pwd -P`. Es lo que permite invocar el script desde cualquier directorio (o desde un enlace) sin rutas fijas.
-
-### 2. Lectura de argumentos / Argument parsing
-
-1. **Primero los flags globales**: un bucle consume `-q`/`--quiet` y `-n`/`--dry-run` mientras aparezcan *antes* del verbo y activa `_glot_quiet` o `_glot_dry_run`; al primer argumento que no es flag, el bucle corta.
-2. **El primer argumento libre es el verbo**; el resto se conserva intacto y se pasa al verbo (`set lang php` → verbo `set`, argumentos `lang` y `php`).
-3. Sin argumentos, `cmd` queda vacío y comparte rama con `help`: un CLI que no recibe nada y pide ayuda es preferible a uno que falla.
-
-### 3. Despacho / Dispatch
-
-Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
-
-| Entrada | Rama | Efecto |
-|---------|------|--------|
-| `""`, `help`, `-h`, `--help` | `_glot_cmd_help "$@"` | Ayuda general, o la del verbo si se pasa uno |
-| `version`, `-V`, `--version` | `_glot_cmd_version` | Imprime la versión |
-| `doctor` | `_glot_cmd_doctor` | Recoge el entorno y devuelve `0`/`1` |
-| `greet`, `hello` | `_glot_cmd_greet "$@"` | Saludo; `hello` es el alias de compatibilidad v0.2.0 |
-| `set`, `get`, `unset`, `list` | `_glot_cmd_<verbo> "$@"` | Operan sobre el almacén de estado (L1) |
-| `path` | `_glot_cmd_path` | Ruta del fichero de estado, sin leerlo |
-| otra opción (`-*`) | error de uso | `2` y mensaje en `stderr` |
-| cualquier otra cosa | error de verbo | `2`, sugiere `glot greet <algo>` y `glot help` |
-
-> **ES:** La última rama es deliberada: **no** intenta adivinar si era un nombre (eso hacía v0.2.0) porque un error de tecleo debe fallar rápido, no saludar.
-> **EN:** The last branch is deliberate: it does **not** guess whether the argument was a name (v0.2.0 did), because a typo must fail fast instead of greeting.
-
-### 4. El almacén de estado / The state store (L1)
-
-1. **Dónde vive**: `GLOT_STATE_DIR` → `$XDG_STATE_HOME/glot` → `~/.local/state/glot`. El fichero es `<dir>/state`, salvo que se fije `GLOT_STATE_FILE`, que gana a todo (es lo que usa el harness para aislarse).
-2. **Formato**: una línea `clave=valor` por entrada. Las claves solo admiten `[A-Za-z0-9_.-]` y los valores no pueden llevar salto de línea ni CR; lo que no cumple se rechaza con `2` antes de tocar el disco.
-3. **Escritura atómica**: `_glot_state_rewrite` escribe un temporal con `mktemp` en el mismo directorio, le pone `chmod 600`, lo mueve con `mv -f` (atómico dentro del mismo sistema de ficheros) y borra el temporal si algo falla; el directorio se crea con `chmod 700`. Un corte a mitad no deja el fichero a medias.
-4. **Concurrencia**: el ciclo leer-modificar-escribir va dentro de `flock 9` sobre `<fichero>.lock`, en un subshell, para que dos `set` simultáneos no se pisen. El `.lock` permanece en el directorio: es inocuo.
-5. **Lectura**: `list` ordena con `LC_ALL=C sort -t= -k1,1`, así el orden no depende del idioma del entorno. `get` distingue «no encontrada» (`1` y error en stderr) de «valor vacío» (`0` y línea vacía): dato ausente no es lo mismo que dato vacío.
-6. **Errores de estado**: si no se puede crear o escribir, el verbo devuelve `3` y no `1`, para que quien llama distinga «me falta un dato» de «no puedo guardar».
-7. **`-n/--dry-run`**: los verbos que mutan imprimen el efecto en stdout (`clave=valor`) y no escriben; `set` valida igual la clave y el valor, así el ensayo detecta los mismos errores de uso que la ejecución.
-
-### 5. Qué hace cada verbo / What each verb does
-
-| Verbo | Lee | Decide | Escribe | Devuelve |
-|-------|-----|--------|---------|:--------:|
-| `version` | — | — | `glot 0.4.0` en stdout | `0` |
-| `help [verbo]` | El verbo opcional | Si hay verbo, ayuda corta; si no, tabla general | stdout | `0`, o `2` si el verbo no existe |
-| `doctor` | bash, git, raíz del monorepo, estado | Marca `1` si falta bash 4+, git o la raíz | `clave: valor` en stdout; encabezado y avisos en stderr | `0` o `1` |
-| `greet [nombre]` | El argumento; si no hay, una línea de stdin | Si stdin es terminal falla sin bloquearse; descarta el CRLF final | `Hello, <nombre>!` en stdout | `0`, o `2` sin nombre |
-| `set <clave> <valor>` | Los dos argumentos | Valida clave y valor; `-n` corta antes de escribir | Confirmación por stderr; con `-n`, `clave=valor` en stdout | `0`, `2` o `3` |
-| `get <clave>` | El fichero de estado | Distingue ausente de vacío | El valor en stdout | `0`, `1` o `2` |
-| `unset <clave>` | El fichero de estado | Es idempotente: borrar lo que no está no es error | Confirmación por stderr | `0`, `2` o `3` |
-| `list` | El fichero de estado | Ordena por clave en `LC_ALL=C` | `clave=valor` en stdout | `0` o `3` |
-| `path` | Las variables de entorno | — | La ruta del estado en stdout | `0` |
-
-Detalles no evidentes / Non-obvious details:
-
-- **`[[ -t 0 ]]`** evita quedarse esperando entrada cuando se ejecuta `glot greet` a mano en una terminal: prefiere fallar con un mensaje útil antes que colgarse.
-- **`IFS= read -r name || true`** lee una línea sin interpretar barras invertidas y sin abortar por `set -e` si llega EOF.
-- **`${name%$'\r'}`** descarta el terminador CRLF, igual que los módulos `hellouser` de los lenguajes.
-- **`_glot_repo_root`** busca la raíz en este orden: `GLOT_ROOT` → `git rev-parse --show-superproject-working-tree` (así detecta el monorepo cuando estás dentro de un submódulo) → `git rev-parse --show-toplevel`. Si no encuentra ninguna, no inventa una ruta: `doctor` lo informa y devuelve `1`.
-- **`_glot_state_dir`/`_glot_state_file`** resuelven las rutas en el orden descrito en la sección 4; `doctor` informa de cuáles se han usado, de si el directorio existe y de cuántas claves hay.
-- **`cmd || rc=$?`** aparece donde una orden puede fallar (`flock`, `mv`) porque el archivo se ejecuta con `set -e`: hay que capturar el código antes de que el shell aborte y decidir después si eso es `1`, `2` o `3`.
-
-### 6. Salida y códigos / Output and exit codes
-
-1. Los verbos escriben **solo datos** en stdout; los errores salen por `_glot_error` y los avisos por `_glot_warn`, ambos a stderr. `set`/`unset` confirman por stderr: su stdout solo lleva datos si `-n` está activo.
-2. `_glot_info` escribe en stderr salvo que se haya pasado `-q/--quiet`; de ahí que `doctor -q` deje stdout parseable.
-3. El código final del script es el del verbo: la última orden del archivo es `glot "$@"`, y con `set -e` un `return 2` dentro de un verbo termina el script con `2`.
-4. `3` está reservado al estado: no se pudo leer, crear o escribir. Los errores de uso siguen siendo `2` y los de entorno `1`.
-
-### 7. Lo que todavía no hace / What it does not do yet
-
-No hay catálogo ni asignación de lenguaje/módulo: eso es L2 (v0.5.0). Las claves `lang`, `module` y `branch` siguen reservadas en la especificación y el almacén ya las admite, pero nada las escribe ni las interpreta todavía.
-
 ---
 
 ## ⚙️ Seteo en `.bashrc` / Shell setup
 
-**Hasta v0.4.0:** no hace falta cargarlo, se ejecuta directamente (por eso el script sí usa `set -euo pipefail`: no se carga con `source`).
+**Hasta v1.0.0:** no hace falta cargarlo, se ejecuta directamente. Por eso el script sí usa `set -euo pipefail`: no se carga con `source`.
 
-**Desde v0.5.0:** `glot` pasará a ser una función y se cargará al arrancar el shell. Usa una variable en lugar de una ruta fija:
+**Desde v1.0.0:** `glot` será además una función cargable —es la única forma de que `use` haga el `cd` real— y `install` escribirá la línea por ti. Mientras tanto, si quieres adelantarlo, usa una variable en lugar de una ruta fija:
 
 ```bash
 # ~/.bashrc — ajusta REPO a la ruta de tu clon / point REPO at your clone
@@ -235,271 +84,16 @@ REPO="${REPO:-$HOME/programming_languages}"
 source "$REPO/scripts/glot.sh"
 ```
 
-Comprobar que quedó cargado:
-
-```bash
-type glot
-```
-
-> **ES:** Lo que esté en `glot.sh` es lo que cargará cada shell nuevo, así que la rama `main` debe quedar siempre en un estado cargable (ver «Rama y flujo»).
-> **EN:** Whatever `glot.sh` contains is what every new shell will load, so the `main` branch must always stay in a loadable state (see "Branch & flow").
+> **ES:** Lo que esté en `glot.sh` es lo que cargará cada shell nuevo, así que la rama `main` debe quedar siempre en un estado cargable.
+> **EN:** Whatever `glot.sh` contains is what every new shell will load, so the `main` branch must always stay in a loadable state.
 
 ---
 
-## 🧾 Log de versiones / Version log
+## 🌿 Rama y flujo / Branch & flow
 
-| Versión | Fecha | Archivo | Añade | Estado |
-|---------|-------|---------|-------|:------:|
-| 0.1.0 | 2026-09-20 | `versions/glot_0.1.0.sh` | Hello World en Bash (`echo "Hello World! from Bash!"`) | ✅ cerrada |
-| 0.2.0 | 2026-09-20 | `versions/glot_0.2.0.sh` | Nombre por argumento o por entrada estándar y saludo `Hello, <nombre>!` (equivalente a `hellouser`) | ✅ cerrada |
-| 0.3.0 | 2026-09-20 | `versions/glot_0.3.0.sh` | **Contrato y dispatcher** (L0): `version`, `help`, `doctor`, `greet`, `hello`, sin rutas del usuario, más harness de pruebas propio | ✅ cerrada |
-| 0.4.0 | 2026-09-21 | `glot.sh` | **Almacén clave/valor** (L1): `set`, `get`, `unset`, `list`, `path`, en XDG, atómico bajo `flock` y con `-n/--dry-run` | 🔄 viva |
-| 0.5.0 | — | `glot.sh` | **`use <lenguaje> <módulo>` (L2)** validado contra `.gitmodules`, y función cargable con `source` para el `cd` | ⏳ propuesta |
-| 0.6.0 | — | `glot.sh` | **Catálogo y autocompletado** (L2.5): `langs`, `modules`, `progress`, comando nativo por lenguaje y completions v1 | ⏳ propuesta |
-| 0.7.0 | — | `glot.sh` | **Ejecución (L3)**: `test` (comando nativo del asignado) y `verify` (sintaxis/lint) | ⏳ propuesta |
-| 0.8.0 | — | `glot.sh` | **Creación (L4)**: `new`/`scaffold` con el comando de inicialización del lenguaje, esqueleto y contrato de pruebas | ⏳ propuesta |
-| 0.9.0 | — | `glot.sh` | **Evidencia (L5)**: `evidence`/`close` con salidas reales y `validate` (validador automático con Copilot CLI) | ⏳ propuesta |
-| 0.10.0 | — | `glot.sh` | **Higiene (L6)**: `status` (submódulos, ramas, punteros), `clean` de artefactos y `submodule sync` | ⏳ propuesta |
-| 1.0.0 | — | `glot.sh` | **Instalación (L7)**: `install`/`uninstall` (`.bashrc` + completions), `doctor` completo y retirada de `hello` | ⏳ propuesta |
+**ES:** Al ser un cambio solo-monorepo, sigue la regla de [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md): una rama corta por versión, `chore/repo/glot-v0.X`, fusionada en `main` cuando el snapshot ya está en `versions/`. Así `main` nunca queda con un `glot.sh` a medias que rompa los shells nuevos.
 
-### 0.1.0 — 2026-09-20 (cerrada)
-
-- **Añade:** `echo "Hello World! from Bash!"`, el equivalente del `helloworld` de los lenguajes aplicado al tooling del repositorio.
-- **Cómo se usaba:** `./scripts/glot.sh`.
-- **Snapshot:** [`versions/glot_0.1.0.sh`](versions/glot_0.1.0.sh), archivado al abrir la v0.2.0.
-- **Verificación:** `bash -n scripts/glot.sh` (sin salida) y ejecución real → `Hello World! from Bash!`, código de salida `0`.
-
-### 0.2.0 — 2026-09-20 (cerrada)
-
-- **Añade:** el nombre llega como argumento (`./scripts/glot.sh Ada`) o por la entrada estándar; si no llega por ninguna de las dos vías, el script pregunta `Enter your name: ` y lee con `read -r`.
-- **Equivalencia:** es el `hellouser` del tooling (especificación 02_Hello_User): pide el nombre, lo guarda en una variable y saluda.
-- **Snapshot:** [`versions/glot_0.2.0.sh`](versions/glot_0.2.0.sh), archivado al abrir la v0.3.0.
-- **Verificación:** `bash -n scripts/glot.sh` (sin salida) y ejecución real de las tres vías → `Hello, Ada!` (`rc=0`), `Enter your name: Hello, Ada!` (`rc=0`) y `Hello, Grace Hopper!` con entrada `printf 'Grace Hopper\r\n'`.
-- **Notas:** `read -r` evita que se interpreten las barras invertidas; `${name%$'\r'}` descarta el terminador CRLF, igual que los módulos `hellouser` de los lenguajes; con entrada vacía (EOF) imprime `Enter your name: Hello, !` y devuelve `0`, sin abortar pese a `set -e`.
-
-### 0.3.0 — 2026-09-20 (cerrada)
-
-- **Añade:** el contrato L0 y el dispatcher de verbos: `version`, `help [verbo]`, `doctor` y `greet [nombre]`, con `stdout` = datos, `stderr` = diagnóstico y códigos `0/1/2`; y el harness `scripts/tests/glot_test.sh` (39 comprobaciones, sin dependencias).
-- **Sin rutas del usuario:** el script se localiza con `BASH_SOURCE` y resuelve la raíz con `GLOT_ROOT` → superproyecto → raíz git; la documentación usa variables en lugar de rutas fijas.
-- **Cambios respecto a v0.2.0:** se retira el prompt interactivo (los verbos nunca preguntan: el dato llega por argumento o stdin) y un primer argumento que no es verbo ya no se interpreta como nombre: devuelve `2` con la sugerencia `glot greet <nombre>`. El saludo de v0.2.0 se conserva como verbo `hello`, que se retira en v1.0.0.
-- **Verificación:** `bash -n` limpio en `glot.sh`, el harness y el snapshot; `./scripts/tests/glot_test.sh` → `glot tests: 39 passed, 0 failed` (rc `0`); `doctor` dentro del monorepo rc `0` y fuera rc `1` con `root: (no detectado / not detected)`.
-- **Documentación:** sección «Cómo funciona por dentro», con el recorrido de los argumentos, la tabla de despacho, qué lee y decide cada verbo y los detalles no evidentes (`-t 0`, `read -r`, CRLF, resolución de la raíz).
-- **Snapshot:** [`versions/glot_0.3.0.sh`](versions/glot_0.3.0.sh), archivado al abrir la v0.4.0.
-- **Notas:** al pasar a v0.4.0 se ajustó un detalle del contrato: las confirmaciones de `set`/`unset` van a `stderr` (antes se mezclaban con el dato en stdout de los verbos de estado) y se estrenó el código `3` para el estado ilegible.
-
-### 0.4.0 — 2026-09-21 (viva)
-
-- **Añade:** el **almacén de estado** (L1) con `set`, `get`, `unset`, `list` y `path`; escritura atómica (`mktemp` + `mv -f`) bajo `flock`, permisos `600` del fichero y `700` del directorio, `-n/--dry-run` en los verbos que mutan, y `doctor` ampliado con `state_dir`, `state_file` y `state_file_ok`.
-- **Contrato:** se estrena el código `3` (estado ilegible o no escribible) y se documenta el formato `clave=valor` con clave `[A-Za-z0-9_.-]` y valor sin saltos de línea.
-- **Sin rutas del usuario:** el estado se resuelve con `GLOT_STATE_DIR` → `XDG_STATE_HOME` → `~/.local/state/glot`, y `GLOT_STATE_FILE` gana a todo; el harness se aísla con esa variable.
-- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 71 passed, 0 failed` (rc `0`); `get` de clave ausente → `1`; clave inválida y valor con salto de línea → `2`; `unset` repetido → `0`; `-n set lang lua` imprime `lang=lua` y no escribe; `stat -c '%a'` → `600` el fichero y `700` el directorio.
-- **Snapshot:** se archivará en `versions/glot_0.4.0.sh` al cerrar la versión.
-
----
-
-## 📐 Especificación v0.4.0 (en desarrollo) / v0.4.0 specification
-
-**ES:** Versión dedicada al **almacén de estado (L1)**: guardar y leer la asignación de trabajo (lenguaje, módulo, rama) en un fichero `clave=valor` bajo XDG. Es el cimiento que consumirán `use` (v0.5.0), el progreso (v0.6.0) y `test` (v0.7.0). No incluye catálogo ni asignación: eso llega en la v0.5.0.
-
-**EN:** This version covers the **state store (L1)**: storing and reading the working assignment (language, module, branch) in a `key=value` file under XDG. It is the foundation that `use` (v0.5.0), progress (v0.6.0) and `test` (v0.7.0) will consume. It does not include catalog or assignment: those arrive in v0.5.0.
-
-### Decisiones confirmadas / Confirmed decisions
-
-| Tema | Decisión |
-|------|----------|
-| Alcance de v0.4.0 | Solo L1: el almacén. Nada de catálogo, asignación ni ejecución |
-| Ubicación del estado | XDG: `$XDG_STATE_HOME/glot/state` con fallback `~/.local/state/glot/state`; `GLOT_STATE_DIR` cambia el directorio y `GLOT_STATE_FILE` el fichero |
-| Formato | Texto plano, una línea `clave=valor` por entrada; clave `[A-Za-z0-9_.-]+`, valor sin `\n` ni `\r` |
-| Escritura | Atómica: temporal con `mktemp` en el mismo directorio + `chmod 600` + `mv -f`; el directorio se crea con `chmod 700` |
-| Concurrencia | `flock` sobre `<fichero>.lock` rodeando el ciclo leer-modificar-escribir |
-| Permisos | `600` el fichero y `700` el directorio: el estado es del usuario y no debe ser legible por otros |
-| Claves reservadas | `lang`, `module` y `branch`: el almacén ya las admite, pero las escribirá `use` en la v0.5.0 |
-| Verificación | Harness propio en `scripts/tests/`, sin dependencias externas (`bats` y `jq` no están instalados) |
-| Ejecución | Script ejecutado; la función cargable con `source` llega en v0.5.0, cuando `use` necesite cambiar el shell |
-| Rutas | Sin rutas del usuario: el script se localiza con `BASH_SOURCE` y la raíz se resuelve con `GLOT_ROOT` → superproyecto → raíz git; la documentación usa variables |
-| Retirada de `hello` | En v1.0.0 |
-
-### Contrato de todos los verbos / Verb contract
-
-| Regla | Detalle |
-|-------|---------|
-| stdout | Solo el dato (así `$(glot get lang)` es utilizable) |
-| stderr | Diagnóstico, avisos y errores; `set`/`unset` confirman aquí |
-| Códigos de salida | `0` correcto · `1` error de entorno o dato ausente · `2` uso incorrecto · `3` estado ilegible o no escribible |
-| Flags | `-h/--help` (general y por verbo), `--version`, `-q/--quiet`; desde v0.4.0, `-n/--dry-run` en los verbos que mutan |
-| Interacción | Un verbo nunca pregunta: el dato llega por argumento o por stdin |
-| Idempotencia | Repetir el mismo efecto no cambia el resultado ni el código de salida |
-| Testabilidad | La raíz del repo y la ruta del estado son inyectables por variable (`GLOT_ROOT`, `GLOT_STATE_DIR`/`GLOT_STATE_FILE`) |
-
-### Verbos de v0.4.0 / v0.4.0 verbs
-
-| Verbo | Comportamiento | Código |
-|-------|----------------|:------:|
-| `version`, `--version` | `glot 0.4.0` | 0 |
-| `help`, `-h`, `--help`, `help <verbo>` | Ayuda general o de un verbo | 0 |
-| `doctor` | Diagnóstico: bash, git, raíz del monorepo, directorio y fichero de estado, y número de claves | 0 / 1 |
-| `greet [nombre]` | `Hello, <nombre>!` con el nombre por argumento o por stdin | 0 / 2 |
-| `hello [nombre]` | Igual que `greet`; compatibilidad con v0.2.0, se retira en v1.0.0 | 0 / 2 |
-| `set <clave> <valor>` | Guarda la clave; confirma por stderr; con `-n`, imprime `clave=valor` y no escribe | 0 / 2 / 3 |
-| `get <clave>` | Imprime el valor en stdout | 0 / 1 / 2 |
-| `unset <clave>` | Borra la clave; repetirlo no es error | 0 / 2 / 3 |
-| `list` | Todas las entradas `clave=valor`, ordenadas por clave en `LC_ALL=C` | 0 / 3 |
-| `path` | Ruta del fichero de estado | 0 |
-| Verbo desconocido | Error en stderr, sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
-
-> **ES:** La compatibilidad con v0.2.0 se hace con el verbo explícito `hello`, no interpretando un nombre suelto: `glot Ada` devuelve `2` y sugiere `glot greet Ada`.
-> **EN:** v0.2.0 compatibility is provided by the explicit `hello` verb, not by treating a bare name as input: `glot Ada` returns `2` and suggests `glot greet Ada`.
-
-### Fuera de alcance / Out of scope
-
-`use <lenguaje> <módulo>` (v0.5.0), catálogo y autocompletado (v0.6.0), `test` y `verify` (v0.7.0), `new`/`scaffold` (v0.8.0), evidencia y `validate` (v0.9.0), higiene del repo (v0.10.0) e instalación (v1.0.0). El almacén de v0.4.0 no interpreta las claves reservadas: solo guarda y devuelve texto.
-
-### Verificación / Verification
-
-`scripts/tests/` con runner propio y sin dependencias; cada caso trabaja en un directorio temporal (`mktemp -d`) y aísla el estado con `GLOT_STATE_FILE` para no tocar nada del usuario. 71 comprobaciones: formato de `version`; `help` general y `help <verbo>`; verbo desconocido → `2`; `greet Ada` y `printf 'Ada\n' | glot greet`; silencio con `-q`; `doctor` dentro del monorepo (detecta la raíz y el estado) y fuera de él; que `glot version | wc -l` devuelva exactamente `1`; ida y vuelta `set`/`get`; `get` de clave ausente → `1`; valores con espacios, con `=` y vacíos; clave inválida y valor con salto de línea → `2`; `list` en orden exacto; `-n set` que no escribe; `unset` idempotente; dos `set` en paralelo que conservan ambas claves; y permisos `600`/`700` comprobados con `stat -c` (GNU coreutils).
-
-**DoD de la versión:** `bash -n` limpio, harness en verde, README y log al día, snapshot en `versions/` y rama `chore/repo/glot-v0.4` fusionada en `main`.
-
----
-
-## 🧭 Camino de versiones / Version roadmap
-
-**ES:** El objetivo es un **CLI de operación del monorepo**: asignar lenguaje/fase/módulo, preparar el entorno, ejecutar y verificar, y cerrar con evidencia, cargable desde `.bashrc` con autocompletado. El orden de las versiones sigue dos criterios: **primero leer, después mutar**, y **el autocompletado acompaña al catálogo**, no llega al final.
-
-**EN:** The goal is a **monorepo operations CLI**: assign language/phase/module, prepare the environment, run and verify, and close with evidence, loadable from `.bashrc` with completion. The version order follows two rules: **read first, mutate later**, and **completion ships with the catalog**, not at the end.
-
-| Versión | Capa | Añade | Por qué ahí |
-|---------|------|-------|-------------|
-| 0.4.0 | L1 estado | `set/get/unset/list/path`, XDG | Cimiento que consumen `use`, `test` y el progreso |
-| 0.5.0 | L2 asignación | `use <lenguaje> <módulo>` + `source`/`cd` | Acordado: es el paso que cambia el shell |
-| 0.6.0 | L2.5 catálogo | `langs`, `modules`, `progress`, comando nativo por lenguaje y **autocompletado v1** (verbos, lenguajes, módulos) | Los datos ya existen (`.gitmodules`, la guía de inicialización, el roadmap); el autocompletado los necesita |
-| 0.7.0 | L3 ejecución | `test` (comando nativo del asignado) y `verify` (sintaxis/lint) | Primer consumo real del catálogo y del estado |
-| 0.8.0 | L4 creación | `new`/`scaffold`: comando de inicialización del lenguaje, esqueleto y contrato de pruebas | Reutiliza catálogo + estado; elimina el andamiaje manual repetido |
-| 0.9.0 | L5 evidencia | `evidence`/`close`: recoge salidas reales y **prepara el encargo documental** (READMEs, checklist, roadmap) | El cierre documental requiere validación: lo ejecuta el agente, no el script |
-| 0.10.0 | L6 higiene | `status` (submódulos, ramas, punteros), `clean` (artefactos), `submodule sync` | Ops diaria; solo lectura primero, mutaciones con `-n` |
-| 1.0.0 | L7 instalación | `install`/`uninstall` (`.bashrc` + completions), `doctor` completo, retirada de `hello` | 1.0 = objetivo original cumplido |
-| ⏳ | L8 toolchains | Versión esperada por lenguaje y comprobación/instalación (`mise`, `nvm`, `pyenv`) | Segunda acepción de «manejador de versiones»; llega después del ciclo del roadmap |
-
-### Reparto de responsabilidades: script y agente / Script and agent split
-
-**ES:** `glot` es el **orquestador**: resuelve catálogo y estado, ejecuta los comandos de terminal (git, ramas, inicialización, tests, lint), captura las **salidas reales** y prepara el encargo. La parte documental (generar o modificar READMEs, checklist y roadmap) la ejecuta el **agente de VS Code**, porque requiere validación y criterio. La delegación se diseña como estrategia enchufable: por defecto el encargo se imprime en `stdout` (listo para pegar en el chat) y, si el entorno lo permite, se envía a un comando definido en `GLOT_DELEGATE` (por ejemplo `code chat`). Comprobado en este entorno: `code chat` **no está disponible** (el CLI remoto pasa `chat` a Electron) y `code agent` responde `The 'agent' command is not supported by the remote CLI`, así que el valor por defecto es imprimir.
-
-**EN:** `glot` is the **orchestrator**: it resolves catalog and state, runs terminal commands (git, branches, initialization, tests, lint), captures **real outputs** and prepares the request. The documentation part (creating or modifying READMEs, checklist and roadmap) is executed by the **VS Code agent**, because it needs validation and judgement. Delegation is designed as a pluggable strategy: by default the request is printed to `stdout` (ready to paste into the chat) and, when the environment allows it, it is piped to a command set in `GLOT_DELEGATE` (for example `code chat`). Verified in this environment: `code chat` is **not available** (the remote CLI forwards `chat` to Electron) and `code agent` answers `The 'agent' command is not supported by the remote CLI`, so the default is printing.
-
-### Validación automática con Copilot CLI / Automated validation with Copilot CLI
-
-**ES:** Para tareas que dependen de plantillas y de leer código fuente (que un README cumpla `docs/README_Template.md`, que estén las secciones obligatorias, que las salidas sean reales, que los enlaces relativos existan…), `glot` podrá delegar en el **GitHub Copilot CLI** como validador automático. Es complementario al reparto anterior: el agente **escribe**, el validador **comprueba**.
-
-**EN:** For tasks that depend on templates and on reading source code (a README matching `docs/README_Template.md`, required sections present, outputs being real, relative links resolving…), `glot` will be able to delegate to the **GitHub Copilot CLI** as an automatic validator. It complements the split above: the agent **writes**, the validator **checks**.
-
-**Dependencia opcional:** el validador necesita el binario `copilot` y la suscripción del autor, así que no es una dependencia del repositorio: `doctor` informa si está disponible y `validate` avisa y devuelve `1` cuando falta. Verificado el 2026-09-21 con **GitHub Copilot CLI 1.0.86** (`~/.local/bin/copilot`).
-
-#### Invocación verificada / Verified invocation
-
-```bash
-COPILOT_MODEL=gpt-5-mini COPILOT_AUTO_TIER=efficiency \
-copilot -C "$MODULE_DIR" -p "<instrucciones de validación>" \
-        -s --output-format json \
-        --reasoning-effort low --max-ai-credits 30 \
-        --allow-all-tools --deny-tool 'write' \
-        --share "$EVIDENCE_DIR/validate-<modulo>.md"
-```
-
-| Flag | Por qué |
-|------|---------|
-| `-C <dir>` | Se ejecuta en el directorio del módulo, así que el validador ve su README y sus fuentes |
-| `-p` + `-s` | Una sola corrida y solo la respuesta, sin estadísticas: listo para parsear |
-| `--output-format json` | JSONL, un objeto por línea: `glot` lee el veredicto sin interpretar texto libre |
-| `--allow-all-tools` | Obligatorio en modo no interactivo |
-| `--deny-tool 'write'` | Deja el validador en solo lectura: las denegaciones tienen prioridad sobre `--allow-all-tools` |
-| `--max-ai-credits 30` | Cap blando de gasto en una corrida desatendida |
-| `--share <ruta>` | Guarda la sesión en markdown, que sirve como evidencia del cierre |
-
-#### Política de modelo y coste / Model and cost policy
-
-| Palanca | Cómo | Nota |
-|---------|------|------|
-| Modelo fijo | `--model <nombre>`, `COPILOT_MODEL` o la clave `model` de `~/.copilot/settings.json` | El flag gana a la variable de entorno y esta al fichero |
-| Modo auto | `--model auto` con `--auto-tier efficiency` (o `COPILOT_AUTO_TIER`) | `efficiency` es la palanca directa para «auto pero barato» |
-| Esfuerzo | `--reasoning-effort low` (o `minimal` para chequeos mecánicos) | Se pasa por flag: no aparece como clave de nivel superior en `copilot help config` |
-| Contexto | `--context default` | `long_context` es el tier de pago por contexto y no hace falta para validar un README |
-| Coste | `/model` muestra el coste relativo por token y `copilot help billing` explica los AI credits | El gasto de una corrida se acota con `--max-ai-credits` |
-
-**Recomendado para `validate`:** `auto` con `efficiency`, o un modelo pequeño fijo (`gpt-5-mini`, `gpt-5.4-mini`, `claude-haiku-4.5`), siempre con `--reasoning-effort low`. Los modelos grandes se reservan al trabajo interactivo. La lista de modelos la manda el CLI instalado (`copilot help config`, clave `model`), no este README.
-
-**Advertencias / Warnings:**
-
-- **No** exportar `COPILOT_ALLOW_ALL=true` en `.bashrc`: con el valor exacto `"true"` además confía en el directorio de trabajo y carga sus skills y hooks, que pueden ejecutar shell. Mejor `--allow-all-tools` por corrida.
-- `~/.copilot/config.json` guarda un token OAuth (`authTokens`): es un secreto y no debe copiarse a la documentación ni a los logs de `glot`.
-- `copilot help permissions` documenta los *kinds* de permiso (`shell(...)`, `write(path)`, `url(...)`, `mcp(...)`), pero no el catálogo de nombres para `--available-tools`/`--excluded-tools`; la lista exacta se ve en `/permissions` en modo interactivo.
-
-**Contrato previsto del verbo `validate` (v0.9.0, L5):** `stdout` = hallazgos (`clave: valor` o viñetas) más `--share` con la sesión; códigos `0` sin hallazgos · `1` con hallazgos o validador ausente · `2` uso incorrecto · `3` no se pudo ejecutar.
-
----
-
-## 🔖 Convención de versiones y archivado / Versioning & archiving
-
-- **SemVer** `MAJOR.MINOR.PATCH`; el número vive en el encabezado de `glot.sh` y en la tabla de este README (desde v0.3.0 también en `glot version`).
-- **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
-- Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` ya contiene [`glot_0.1.0.sh`](versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](versions/glot_0.2.0.sh) y [`glot_0.3.0.sh`](versions/glot_0.3.0.sh), los snapshots de las versiones cerradas.
-
----
-
-## ✅ Requisitos / Requirements
-
-| Herramienta | Uso | Verificación |
-|-------------|-----|--------------|
-| Bash 5.2 | Ejecutar `glot.sh` y, desde v0.5.0, cargarlo con `source` | `bash --version` |
-| Git 2.43 | Desde v0.3.0: `doctor` resuelve la raíz con `git rev-parse --show-superproject-working-tree` | `git --version` |
-| coreutils y util-linux | Desde v0.4.0: el almacén usa `mktemp`, `mv`, `chmod` y `flock` | `mktemp --version`, `flock --version` |
-| GNU coreutils (`stat -c`) | Solo para el harness: comprueba los permisos `600`/`700` | `stat --version` |
-| GitHub Copilot CLI 1.0.86 (opcional) | Validador automático de `validate` (v0.9.0) | `copilot --version` |
-
----
-
-## 🧪 Cómo verificar / How to verify
-
-```bash
-bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado y códigos (71 comprobaciones)
-./scripts/glot.sh doctor            # diagnóstico del entorno
-
-# Estado en un directorio propio, sin tocar el del usuario / state in its own dir
-export GLOT_STATE_DIR=$(mktemp -d)
-./scripts/glot.sh set lang php      # set: lang (stderr)
-./scripts/glot.sh get lang          # php
-./scripts/glot.sh list              # lang=php
-```
-
-`shellcheck` no está instalado en este entorno; conviene añadirlo a la verificación cuando exista CI.
-
----
-
-## 🧱 Reglas de diseño / Design rules
-
-### Contrato de todos los verbos (desde v0.3.0)
-
-1. **stdout solo dato, stderr solo diagnóstico**, para que la salida se pueda canalizar y capturar.
-2. **Códigos de salida estables**: `0` correcto, `1` error de entorno o dato ausente, `2` uso incorrecto, `3` estado ilegible o no escribible.
-3. **Nunca preguntar** en un verbo: el dato llega por argumento o stdin.
-4. **Idempotencia** cuando se repite el mismo efecto.
-5. **Inyectable para test**: raíz del repo y ruta del estado sobreescribibles por variable (`GLOT_ROOT`, `GLOT_STATE_FILE`).
-6. **Mensajes bilingües ES/EN** en `help`, `doctor` y errores; los datos de salida (como `Hello, Ada!`) no se traducen.
-7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR` y `GLOT_STATE_FILE`.
-
-### Almacén de estado (desde v0.4.0)
-
-8. **Texto plano y validado antes de escribir**: `clave=valor`, clave `[A-Za-z0-9_.-]+`, valor sin `\n` ni `\r`; lo que no cumpla falla con `2` sin tocar el disco.
-9. **Escritura atómica y bloqueada**: temporal en el mismo directorio + `mv -f`, todo bajo `flock`; el estado nunca queda a medias ni lo pisa otro proceso.
-10. **Permisos restrictivos**: `600` el fichero y `700` el directorio, porque el estado es del usuario.
-11. **`3` para el estado**: no se pudo leer, crear o escribir; no se confunde con «falta un dato» (`1`) ni con «mal uso» (`2`).
-12. **Ensayo antes de mutar**: todo verbo que escribe admite `-n/--dry-run` y valida igual que en la ejecución real.
-
-### Reglas cuando sea cargable con `source` (desde v0.5.0)
-
-13. **Sin `exit`, sin tocar opciones globales del shell** (`set -e`, `IFS`) ni el directorio actual fuera de un verbo que lo pida explícitamente; todo sale con `return`.
-14. **Raíz del monorepo**: `GLOT_ROOT` → superproyecto → raíz git, para que funcione también desde dentro de un submódulo.
+**EN:** As a monorepo-only change, follow [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md): one short branch per version, `chore/repo/glot-v0.X`, merged into `main` once the snapshot is in `versions/`. That way `main` never keeps a half-finished `glot.sh`.
 
 ---
 
@@ -507,12 +101,3 @@ export GLOT_STATE_DIR=$(mktemp -d)
 
 - **ES:** `scripts/` vive en el repositorio raíz (no en ningún submódulo) y no entra en los contadores del roadmap. Está documentado en la raíz: sección «Herramientas del monorepo» de [`README.md`](../README.md), scope `glot` y cierre de versión en [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md), límite del tooling en [`AGENTS.md`](../AGENTS.md), mención en [`docs/index.md`](../docs/index.md) (sitio GitHub Pages) y entrada en [`CHANGELOG.md`](../CHANGELOG.md).
 - **EN:** `scripts/` lives in the root repository (not in any submodule) and is not part of the roadmap counters. It is documented at the root: the "Monorepo tooling" section in [`README.md`](../README.md), the `glot` scope and version closing in [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md), the tooling boundary in [`AGENTS.md`](../AGENTS.md), a mention in [`docs/index.md`](../docs/index.md) (GitHub Pages site) and an entry in [`CHANGELOG.md`](../CHANGELOG.md).
-
----
-
-## 🌿 Rama y flujo / Branch & flow
-
-**ES:** Al ser un cambio solo-monorepo, sigue la regla de [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md): rama corta desde `main` con formato `chore/repo/<módulo>`, por ejemplo `chore/repo/glot`. Recomendado: una rama por versión y fusionar en `main` al cerrarla (cuando el snapshot ya está en `versions/`), para que `main` nunca quede con un `glot.sh` a medias que rompa los shells nuevos.
-
-**EN:** As a monorepo-only change, follow [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md): a short branch from `main` named `chore/repo/<module>`, for example `chore/repo/glot`. Recommended: one branch per version, merged into `main` when the version closes (once the snapshot is in `versions/`), so `main` never keeps a half-finished `glot.sh` that breaks new shells.
-
