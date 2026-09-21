@@ -12,6 +12,9 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   que crece por versiones siguiendo las especificaciones de los lenguajes
   (v0.1.0 `Hello World`, v0.2.0 equivalente a `hellouser` y v0.3.0 contrato y
   dispatcher de verbos con harness de pruebas propio).
+- Se documentó el camino de versiones de `glot` (capas L1 a L8), el reparto de
+  responsabilidades entre script y agente y la política del validador automático
+  con GitHub Copilot CLI (modelo económico, salida JSONL y solo lectura).
 - Se abrió la fase `Algorithms Pure` como siguiente fase del roadmap.
 - Se estableció el flujo de cierre documental y actualización del roadmap.
 

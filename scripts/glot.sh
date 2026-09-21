@@ -187,47 +187,65 @@ _glot_cmd_help() {
 # --- dispatcher --------------------------------------------------------------
 
 glot() {
+    # Inicializa las variables de estado globales / Initialize global state variables
     local cmd=""
 
+    # Opciones globales: -q / --quiet
+    # Procesa las opciones globales antes de despachar el comando
+    # Process global options before dispatching the command
     while [[ $# -gt 0 ]]; do
+        # Maneja las opciones globales / Handle global options
         case "$1" in
             -q | --quiet)
+                # Activa el modo silencioso / Enable quiet mode
                 _glot_quiet=1
+                # Continúa con el siguiente argumento / Continue with the next argument
                 shift
                 ;;
             *) break ;;
         esac
     done
 
+    # Despacha el comando / Dispatch the command
     cmd="${1:-}"
+    # El primer argumento después de las opciones globales es el comando / The first argument after global options is the command
     if [[ $# -gt 0 ]]; then
+        # Elimina el comando de la lista de argumentos / Remove the command from the argument list
         shift
     fi
 
+    # Despacha el comando según el verbo / Dispatch the command based on the verb
     case "$cmd" in
         "" | help | -h | --help)
+            # Muestra la ayuda para el comando dado / Show help for the given command
             _glot_cmd_help "$@"
             ;;
         version | -V | --version)
+            # Muestra la versión de la herramienta / Show the tool version
             _glot_cmd_version
             ;;
         doctor)
+            # Ejecuta el diagnóstico del entorno / Run environment diagnostics
             _glot_cmd_doctor
             ;;
         greet)
+            # Saluda al usuario / Greet the user
             _glot_cmd_greet "$@"
             ;;
         hello)
             # Compatibilidad v0.2.0: saludo con el nombre de v0.2 sin verbo.
             # Se retira en v1.0.0.
+            # Greet the user (deprecated)
             _glot_cmd_greet "$@"
             ;;
         -*)
+            # Maneja las opciones desconocidas / Handle unknown options
             _glot_error "opción desconocida / unknown option: $cmd"
             _glot_hint
             return 2
             ;;
         *)
+            # Maneja los verbos desconocidos / Handle unknown verbs
             _glot_error "verbo desconocido / unknown verb: $cmd"
             _glot_info "si querías el saludo / if you meant the greeting: glot greet $cmd"
             _glot_hint

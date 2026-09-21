@@ -186,8 +186,12 @@ type glot
 | 0.3.0 | 2026-09-20 | `glot.sh` | **Contrato y dispatcher** (L0): `version`, `help`, `doctor`, `greet`, `hello`, sin rutas del usuario, más harness de pruebas propio | 🔄 viva |
 | 0.4.0 | — | `glot.sh` | **Almacén clave/valor** (L1): `set`, `get`, `unset`, `list`, `path`, con el estado en XDG | ⏳ propuesta |
 | 0.5.0 | — | `glot.sh` | **`use <lenguaje> <módulo>` (L2)** validado contra `.gitmodules`, y función cargable con `source` para el `cd` | ⏳ propuesta |
-| 0.6.0 | — | `glot.sh` | **`test` (L3)**: ejecuta el comando nativo del lenguaje y módulo asignados; `status` y `doctor` ampliados | ⏳ propuesta |
-| 0.7.0 | — | `glot.sh` | Autocompletado (`complete -F _glot_complete glot`) | ⏳ propuesta |
+| 0.6.0 | — | `glot.sh` | **Catálogo y autocompletado** (L2.5): `langs`, `modules`, `progress`, comando nativo por lenguaje y completions v1 | ⏳ propuesta |
+| 0.7.0 | — | `glot.sh` | **Ejecución (L3)**: `test` (comando nativo del asignado) y `verify` (sintaxis/lint) | ⏳ propuesta |
+| 0.8.0 | — | `glot.sh` | **Creación (L4)**: `new`/`scaffold` con el comando de inicialización del lenguaje, esqueleto y contrato de pruebas | ⏳ propuesta |
+| 0.9.0 | — | `glot.sh` | **Evidencia (L5)**: `evidence`/`close` con salidas reales y `validate` (validador automático con Copilot CLI) | ⏳ propuesta |
+| 0.10.0 | — | `glot.sh` | **Higiene (L6)**: `status` (submódulos, ramas, punteros), `clean` de artefactos y `submodule sync` | ⏳ propuesta |
+| 1.0.0 | — | `glot.sh` | **Instalación (L7)**: `install`/`uninstall` (`.bashrc` + completions), `doctor` completo y retirada de `hello` | ⏳ propuesta |
 
 ### 0.1.0 — 2026-09-20 (cerrada)
 
@@ -260,13 +264,88 @@ type glot
 
 ### Fuera de alcance / Out of scope
 
-Almacén `set/get/unset/list/path` (v0.4.0), `use <lenguaje> <módulo>` (v0.5.0), `test` y `status` (v0.6.0) y autocompletado (v0.7.0).
+Almacén `set/get/unset/list/path` (v0.4.0), `use <lenguaje> <módulo>` (v0.5.0), catálogo y autocompletado (v0.6.0), `test` y `verify` (v0.7.0), `new`/`scaffold` (v0.8.0), evidencia y `validate` (v0.9.0) e higiene del repo (v0.10.0).
 
 ### Verificación / Verification
 
 `scripts/tests/` con runner propio y sin dependencias; cada caso trabaja en un directorio temporal (`mktemp -d`) para no tocar nada del usuario. Casos previstos: formato de `version`; `help` general y `help <verbo>`; verbo desconocido → `2`; `greet Ada` y `printf 'Ada\n' | glot greet`; silencio con `-q`; `doctor` dentro del monorepo (detecta la raíz) y fuera de él; y que `glot version | wc -l` devuelva exactamente `1` (stdout limpio, sin diagnóstico).
 
 **DoD de la versión:** `bash -n` limpio, harness en verde, README y log al día, snapshot en `versions/` y rama `chore/repo/glot-v0.3` fusionada en `main`.
+
+---
+
+## 🧭 Camino de versiones / Version roadmap
+
+**ES:** El objetivo es un **CLI de operación del monorepo**: asignar lenguaje/fase/módulo, preparar el entorno, ejecutar y verificar, y cerrar con evidencia, cargable desde `.bashrc` con autocompletado. El orden de las versiones sigue dos criterios: **primero leer, después mutar**, y **el autocompletado acompaña al catálogo**, no llega al final.
+
+**EN:** The goal is a **monorepo operations CLI**: assign language/phase/module, prepare the environment, run and verify, and close with evidence, loadable from `.bashrc` with completion. The version order follows two rules: **read first, mutate later**, and **completion ships with the catalog**, not at the end.
+
+| Versión | Capa | Añade | Por qué ahí |
+|---------|------|-------|-------------|
+| 0.4.0 | L1 estado | `set/get/unset/list/path`, XDG | Cimiento que consumen `use`, `test` y el progreso |
+| 0.5.0 | L2 asignación | `use <lenguaje> <módulo>` + `source`/`cd` | Acordado: es el paso que cambia el shell |
+| 0.6.0 | L2.5 catálogo | `langs`, `modules`, `progress`, comando nativo por lenguaje y **autocompletado v1** (verbos, lenguajes, módulos) | Los datos ya existen (`.gitmodules`, la guía de inicialización, el roadmap); el autocompletado los necesita |
+| 0.7.0 | L3 ejecución | `test` (comando nativo del asignado) y `verify` (sintaxis/lint) | Primer consumo real del catálogo y del estado |
+| 0.8.0 | L4 creación | `new`/`scaffold`: comando de inicialización del lenguaje, esqueleto y contrato de pruebas | Reutiliza catálogo + estado; elimina el andamiaje manual repetido |
+| 0.9.0 | L5 evidencia | `evidence`/`close`: recoge salidas reales y **prepara el encargo documental** (READMEs, checklist, roadmap) | El cierre documental requiere validación: lo ejecuta el agente, no el script |
+| 0.10.0 | L6 higiene | `status` (submódulos, ramas, punteros), `clean` (artefactos), `submodule sync` | Ops diaria; solo lectura primero, mutaciones con `-n` |
+| 1.0.0 | L7 instalación | `install`/`uninstall` (`.bashrc` + completions), `doctor` completo, retirada de `hello` | 1.0 = objetivo original cumplido |
+| ⏳ | L8 toolchains | Versión esperada por lenguaje y comprobación/instalación (`mise`, `nvm`, `pyenv`) | Segunda acepción de «manejador de versiones»; llega después del ciclo del roadmap |
+
+### Reparto de responsabilidades: script y agente / Script and agent split
+
+**ES:** `glot` es el **orquestador**: resuelve catálogo y estado, ejecuta los comandos de terminal (git, ramas, inicialización, tests, lint), captura las **salidas reales** y prepara el encargo. La parte documental (generar o modificar READMEs, checklist y roadmap) la ejecuta el **agente de VS Code**, porque requiere validación y criterio. La delegación se diseña como estrategia enchufable: por defecto el encargo se imprime en `stdout` (listo para pegar en el chat) y, si el entorno lo permite, se envía a un comando definido en `GLOT_DELEGATE` (por ejemplo `code chat`). Comprobado en este entorno: `code chat` **no está disponible** (el CLI remoto pasa `chat` a Electron) y `code agent` responde `The 'agent' command is not supported by the remote CLI`, así que el valor por defecto es imprimir.
+
+**EN:** `glot` is the **orchestrator**: it resolves catalog and state, runs terminal commands (git, branches, initialization, tests, lint), captures **real outputs** and prepares the request. The documentation part (creating or modifying READMEs, checklist and roadmap) is executed by the **VS Code agent**, because it needs validation and judgement. Delegation is designed as a pluggable strategy: by default the request is printed to `stdout` (ready to paste into the chat) and, when the environment allows it, it is piped to a command set in `GLOT_DELEGATE` (for example `code chat`). Verified in this environment: `code chat` is **not available** (the remote CLI forwards `chat` to Electron) and `code agent` answers `The 'agent' command is not supported by the remote CLI`, so the default is printing.
+
+### Validación automática con Copilot CLI / Automated validation with Copilot CLI
+
+**ES:** Para tareas que dependen de plantillas y de leer código fuente (que un README cumpla `docs/README_Template.md`, que estén las secciones obligatorias, que las salidas sean reales, que los enlaces relativos existan…), `glot` podrá delegar en el **GitHub Copilot CLI** como validador automático. Es complementario al reparto anterior: el agente **escribe**, el validador **comprueba**.
+
+**EN:** For tasks that depend on templates and on reading source code (a README matching `docs/README_Template.md`, required sections present, outputs being real, relative links resolving…), `glot` will be able to delegate to the **GitHub Copilot CLI** as an automatic validator. It complements the split above: the agent **writes**, the validator **checks**.
+
+**Dependencia opcional:** el validador necesita el binario `copilot` y la suscripción del autor, así que no es una dependencia del repositorio: `doctor` informa si está disponible y `validate` avisa y devuelve `1` cuando falta. Verificado el 2026-09-21 con **GitHub Copilot CLI 1.0.86** (`~/.local/bin/copilot`).
+
+#### Invocación verificada / Verified invocation
+
+```bash
+COPILOT_MODEL=gpt-5-mini COPILOT_AUTO_TIER=efficiency \
+copilot -C "$MODULE_DIR" -p "<instrucciones de validación>" \
+        -s --output-format json \
+        --reasoning-effort low --max-ai-credits 30 \
+        --allow-all-tools --deny-tool 'write' \
+        --share "$EVIDENCE_DIR/validate-<modulo>.md"
+```
+
+| Flag | Por qué |
+|------|---------|
+| `-C <dir>` | Se ejecuta en el directorio del módulo, así que el validador ve su README y sus fuentes |
+| `-p` + `-s` | Una sola corrida y solo la respuesta, sin estadísticas: listo para parsear |
+| `--output-format json` | JSONL, un objeto por línea: `glot` lee el veredicto sin interpretar texto libre |
+| `--allow-all-tools` | Obligatorio en modo no interactivo |
+| `--deny-tool 'write'` | Deja el validador en solo lectura: las denegaciones tienen prioridad sobre `--allow-all-tools` |
+| `--max-ai-credits 30` | Cap blando de gasto en una corrida desatendida |
+| `--share <ruta>` | Guarda la sesión en markdown, que sirve como evidencia del cierre |
+
+#### Política de modelo y coste / Model and cost policy
+
+| Palanca | Cómo | Nota |
+|---------|------|------|
+| Modelo fijo | `--model <nombre>`, `COPILOT_MODEL` o la clave `model` de `~/.copilot/settings.json` | El flag gana a la variable de entorno y esta al fichero |
+| Modo auto | `--model auto` con `--auto-tier efficiency` (o `COPILOT_AUTO_TIER`) | `efficiency` es la palanca directa para «auto pero barato» |
+| Esfuerzo | `--reasoning-effort low` (o `minimal` para chequeos mecánicos) | Se pasa por flag: no aparece como clave de nivel superior en `copilot help config` |
+| Contexto | `--context default` | `long_context` es el tier de pago por contexto y no hace falta para validar un README |
+| Coste | `/model` muestra el coste relativo por token y `copilot help billing` explica los AI credits | El gasto de una corrida se acota con `--max-ai-credits` |
+
+**Recomendado para `validate`:** `auto` con `efficiency`, o un modelo pequeño fijo (`gpt-5-mini`, `gpt-5.4-mini`, `claude-haiku-4.5`), siempre con `--reasoning-effort low`. Los modelos grandes se reservan al trabajo interactivo. La lista de modelos la manda el CLI instalado (`copilot help config`, clave `model`), no este README.
+
+**Advertencias / Warnings:**
+
+- **No** exportar `COPILOT_ALLOW_ALL=true` en `.bashrc`: con el valor exacto `"true"` además confía en el directorio de trabajo y carga sus skills y hooks, que pueden ejecutar shell. Mejor `--allow-all-tools` por corrida.
+- `~/.copilot/config.json` guarda un token OAuth (`authTokens`): es un secreto y no debe copiarse a la documentación ni a los logs de `glot`.
+- `copilot help permissions` documenta los *kinds* de permiso (`shell(...)`, `write(path)`, `url(...)`, `mcp(...)`), pero no el catálogo de nombres para `--available-tools`/`--excluded-tools`; la lista exacta se ve en `/permissions` en modo interactivo.
+
+**Contrato previsto del verbo `validate` (v0.9.0, L5):** `stdout` = hallazgos (`clave: valor` o viñetas) más `--share` con la sesión; códigos `0` sin hallazgos · `1` con hallazgos o validador ausente · `2` uso incorrecto · `3` no se pudo ejecutar.
 
 ---
 
@@ -285,6 +364,7 @@ Almacén `set/get/unset/list/path` (v0.4.0), `use <lenguaje> <módulo>` (v0.5.0)
 |-------------|-----|--------------|
 | Bash 5.2 | Ejecutar `glot.sh` y, desde v0.5.0, cargarlo con `source` | `bash --version` |
 | Git 2.43 | Desde v0.3.0: `doctor` resuelve la raíz con `git rev-parse --show-superproject-working-tree` | `git --version` |
+| GitHub Copilot CLI 1.0.86 (opcional) | Validador automático de `validate` (v0.9.0) | `copilot --version` |
 
 ---
 
