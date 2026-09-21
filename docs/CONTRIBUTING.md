@@ -106,11 +106,11 @@ el identificador del módulo o la infraestructura afectada:
 
 - **Por fase:** `foundations`, `algorithms`, `text`, `structures`, `data`, `math`, `ui`, `web`
 - **Por módulo:** `hello_world`, `calculator`, `numbers`, `naive_sort`, `data_structures`, `transformations`, etc.
-- **Por infraestructura:** `submodule`, `ci`, `docker`, `docs`
+- **Por infraestructura:** `submodule`, `ci`, `docker`, `docs`, `glot` (herramientas de `scripts/`)
 
 **EN:** The `(scope)` is optional in Conventional Commits, but mandatory here
 for module and submodule changes. Use the affected module or infrastructure
-identifier.
+identifier (`glot` identifies the monorepo tooling under `scripts/`).
 
 ---
 
@@ -178,6 +178,11 @@ no esté integrada en su `main`.
 Para especificaciones, documentación o configuración de la raíz, usa una rama
 `docs/<phase>/<module>` o `chore/repo/<module>` directamente desde el `main` del
 monorepo. Estos cambios no requieren modificar un submódulo.
+
+Las herramientas de [`scripts/`](https://github.com/yorche3/programming_languages/tree/main/scripts)
+siguen la misma regla con el módulo `glot` (ramas `chore/repo/glot-v0.X`). Cada
+versión se cierra copiando `glot.sh` a `scripts/versions/` antes de fusionar la
+rama en `main`, de modo que `main` siempre contenga una versión terminada.
 
 ## ✅ Cierre de documentación y roadmap / Documentation and roadmap closure
 

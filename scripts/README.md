@@ -2,7 +2,7 @@
 
 `glot` es el script de práctica del propio repositorio: igual que los lenguajes del roadmap empiezan por un `helloworld`, `glot` empieza por su «hello world» en Bash (v0.1.0) y crece versión a versión. Es **tooling del monorepo**: no es un módulo del roadmap, no altera `.gitmodules` ni los contadores `X/49` de [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v0.1.0** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v0.2.0** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -11,45 +11,53 @@ Versión viva / Live version: **v0.1.0** en [`glot.sh`](glot.sh).
 ```text
 scripts/
 ├── README.md                 # Este archivo / This file
-├── glot.sh                   # Versión viva / live version (v0.1.0)
-└── versions/                 # Snapshots de versiones cerradas (se crea al cerrar la v0.1.0)
+├── glot.sh                   # Versión viva / live version (v0.2.0)
+└── versions/                 # Snapshots de versiones cerradas
     └── glot_0.1.0.sh
 ```
 
 | Archivo | Propósito |
 |---------|-----------|
-| [`glot.sh`](glot.sh) | Versión en desarrollo del CLI. Hoy: `echo "Hello World! from Bash!"`. |
-| `versions/glot_<versión>.sh` | Foto inmutable de una versión cerrada. Todavía no existe ninguna. |
+| [`glot.sh`](glot.sh) | Versión en desarrollo del CLI. Hoy: pide un nombre y saluda (`Hello, <nombre>!`). |
+| [`versions/glot_0.1.0.sh`](versions/glot_0.1.0.sh) | Foto inmutable de la v0.1.0: `echo "Hello World! from Bash!"`. |
 
 ---
 
-## 🚀 Funcionamiento actual / Current behaviour (v0.1.0)
+## 🚀 Funcionamiento actual / Current behaviour (v0.2.0)
 
-**ES:** Hoy el script solo imprime el saludo inicial. No se carga con `source` ni necesita `.bashrc`: se ejecuta.
+**ES:** El script pide un nombre y muestra `Hello, <nombre>!`. El nombre puede llegar de tres formas: como argumento, por la entrada estándar o de forma interactiva. No se carga con `source` ni necesita `.bashrc`: se ejecuta.
 
-**EN:** Today the script only prints the greeting. It is not sourced and does not need `.bashrc`: it is executed.
+**EN:** The script asks for a name and prints `Hello, <name>!`. The name can arrive in three ways: as an argument, through standard input, or interactively. It is not sourced and does not need `.bashrc`: it is executed.
 
 ```bash
 cd /home/yorche3/programming_languages
-./scripts/glot.sh        # equivalente: bash scripts/glot.sh
+./scripts/glot.sh Ada                    # 1) argumento / argument
+printf 'Ada\n' | ./scripts/glot.sh       # 2) entrada estándar / standard input
+./scripts/glot.sh                        # 3) interactivo: pregunta el nombre
 ```
 
-**Salida real / Actual output:**
+**Salidas reales / Actual output:**
 
 ```text
-$ ./scripts/glot.sh
-Hello World! from Bash!
-$ echo $?
-0
+$ ./scripts/glot.sh Ada
+Hello, Ada!
 ```
+
+```text
+$ printf 'Ada\n' | ./scripts/glot.sh
+Enter your name: Hello, Ada!
+```
+
+El prompt queda en la misma línea que la entrada porque no se imprime un salto de línea después de `Enter your name: `.
+The prompt stays on the same line as the input because no newline is printed after `Enter your name: `.
 
 ---
 
 ## ⚙️ Seteo en `.bashrc` / Shell setup
 
-**v0.1.0:** no hace falta cargarlo, se ejecuta directamente.
+**Hasta v0.2.0:** no hace falta cargarlo, se ejecuta directamente (por eso el script sí usa `set -euo pipefail`: no se carga con `source`).
 
-**Desde v0.2.0:** `glot` pasará a ser una función y se cargará al arrancar el shell:
+**Desde v0.3.0:** `glot` pasará a ser una función y se cargará al arrancar el shell:
 
 ```bash
 # ~/.bashrc
@@ -71,27 +79,35 @@ type glot
 
 | Versión | Fecha | Archivo | Añade | Estado |
 |---------|-------|---------|-------|:------:|
-| 0.1.0 | 2026-09-20 | `glot.sh` | Hello World en Bash (script ejecutable) | 🔄 viva |
-| 0.2.0 | — | `glot.sh` | Función `glot` cargable con `source`, con `hello`, `version` y `help`, y resolución de la raíz del monorepo | ⏳ ideas |
-| 0.3.0 | — | `glot.sh` | `glot set {lenguaje} {modulo}`: `cd` al submódulo, rama `tipo/fase/modulo`, `git push -u origin` y comando de inicialización del lenguaje | ⏳ ideas |
-| 0.4.0 | — | `glot.sh` | `glot test`: ejecuta el comando nativo de pruebas del lenguaje y módulo asignados | ⏳ ideas |
-| 0.5.0 | — | `glot.sh` | Estado persistente de la asignación (`status`, `unset`) y autocompletado | ⏳ ideas |
+| 0.1.0 | 2026-09-20 | `versions/glot_0.1.0.sh` | Hello World en Bash (`echo "Hello World! from Bash!"`) | ✅ cerrada |
+| 0.2.0 | 2026-09-20 | `glot.sh` | Nombre por argumento o por entrada estándar y saludo `Hello, <nombre>!` (equivalente a `hellouser`) | 🔄 viva |
+| 0.3.0 | — | `glot.sh` | Función `glot` cargable con `source`, con `hello`, `version` y `help`, y resolución de la raíz del monorepo | ⏳ ideas |
+| 0.4.0 | — | `glot.sh` | `glot set {lenguaje} {modulo}`: `cd` al submódulo, rama `tipo/fase/modulo`, `git push -u origin` y comando de inicialización del lenguaje | ⏳ ideas |
+| 0.5.0 | — | `glot.sh` | `glot test`: ejecuta el comando nativo de pruebas del lenguaje y módulo asignados | ⏳ ideas |
+| 0.6.0 | — | `glot.sh` | Estado persistente de la asignación (`status`, `unset`) y autocompletado | ⏳ ideas |
 
-### 0.1.0 — 2026-09-20
+### 0.1.0 — 2026-09-20 (cerrada)
 
 - **Añade:** `echo "Hello World! from Bash!"`, el equivalente del `helloworld` de los lenguajes aplicado al tooling del repositorio.
-- **Cómo se usa:** `./scripts/glot.sh`.
-- **Snapshot:** aún sin archivar; se copiará a `versions/glot_0.1.0.sh` al cerrar la versión siguiente.
+- **Cómo se usaba:** `./scripts/glot.sh`.
+- **Snapshot:** [`versions/glot_0.1.0.sh`](versions/glot_0.1.0.sh), archivado al abrir la v0.2.0.
 - **Verificación:** `bash -n scripts/glot.sh` (sin salida) y ejecución real → `Hello World! from Bash!`, código de salida `0`.
+
+### 0.2.0 — 2026-09-20 (viva)
+
+- **Añade:** el nombre llega como argumento (`./scripts/glot.sh Ada`) o por la entrada estándar; si no llega por ninguna de las dos vías, el script pregunta `Enter your name: ` y lee con `read -r`.
+- **Equivalencia:** es el `hellouser` del tooling (especificación 02_Hello_User): pide el nombre, lo guarda en una variable y saluda.
+- **Verificación:** `bash -n scripts/glot.sh` (sin salida) y ejecución real de las tres vías → `Hello, Ada!` (`rc=0`), `Enter your name: Hello, Ada!` (`rc=0`) y `Hello, Grace Hopper!` con entrada `printf 'Grace Hopper\r\n'`.
+- **Notas:** `read -r` evita que se interpreten las barras invertidas; `${name%$'\r'}` descarta el terminador CRLF, igual que los módulos `hellouser` de los lenguajes; con entrada vacía (EOF) imprime `Enter your name: Hello, !` y devuelve `0`, sin abortar pese a `set -e`.
 
 ---
 
 ## 🔖 Convención de versiones y archivado / Versioning & archiving
 
-- **SemVer** `MAJOR.MINOR.PATCH`; el número vive en el encabezado de `glot.sh` y en la tabla de este README (desde v0.2.0 también en `glot version`).
+- **SemVer** `MAJOR.MINOR.PATCH`; el número vive en el encabezado de `glot.sh` y en la tabla de este README (desde v0.3.0 también en `glot version`).
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` se crea al cerrar la primera versión (Git no versiona carpetas vacías).
+- `versions/` ya contiene [`glot_0.1.0.sh`](versions/glot_0.1.0.sh), el snapshot de la primera versión cerrada.
 
 ---
 
@@ -99,8 +115,8 @@ type glot
 
 | Herramienta | Uso | Verificación |
 |-------------|-----|--------------|
-| Bash 5.2 | Ejecutar `glot.sh` y, desde v0.2.0, cargarlo con `source` | `bash --version` |
-| Git 2.43 | Desde v0.2.0: resolver el monorepo con `git rev-parse --show-superproject-working-tree` | `git --version` |
+| Bash 5.2 | Ejecutar `glot.sh` y, desde v0.3.0, cargarlo con `source` | `bash --version` |
+| Git 2.43 | Desde v0.3.0: resolver el monorepo con `git rev-parse --show-superproject-working-tree` | `git --version` |
 
 ---
 
@@ -115,9 +131,9 @@ bash -n scripts/glot.sh     # sintaxis
 
 ---
 
-## 🧱 Reglas de diseño (desde v0.2.0) / Design rules
+## 🧱 Reglas de diseño (desde v0.3.0) / Design rules
 
-Se fijan aquí para no tener que rehacerlas cuando `glot` pase a ser una función:
+Se fijan aquí para no tener que rehacerlas cuando `glot` pase a ser una función (v0.3.0):
 
 1. **Cargable con `source`**: nunca `exit`, sin cambiar opciones globales del shell (`set -e`, `IFS`) ni el directorio actual; todo sale con `return`.
 2. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION` y `GLOT_ROOT`.
@@ -128,8 +144,8 @@ Se fijan aquí para no tener que rehacerlas cuando `glot` pase a ser una funció
 
 ## 🧭 Gobernanza / Governance
 
-- **ES:** `scripts/` vive en el repositorio raíz (no en ningún submódulo) y no entra en los contadores del roadmap. Pendiente: añadir la fila en [`README.md`](../README.md) (Estructura), la nota de cambios solo-monorepo en [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md) y el límite correspondiente en [`AGENTS.md`](../AGENTS.md).
-- **EN:** `scripts/` lives in the root repository (not in any submodule) and is not part of the roadmap counters. Pending: add the row in [`README.md`](../README.md) (Structure), the monorepo-only change note in [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md), and the matching boundary in [`AGENTS.md`](../AGENTS.md).
+- **ES:** `scripts/` vive en el repositorio raíz (no en ningún submódulo) y no entra en los contadores del roadmap. Está documentado en la raíz: sección «Herramientas del monorepo» de [`README.md`](../README.md), scope `glot` y cierre de versión en [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md), límite del tooling en [`AGENTS.md`](../AGENTS.md), mención en [`docs/index.md`](../docs/index.md) (sitio GitHub Pages) y entrada en [`CHANGELOG.md`](../CHANGELOG.md).
+- **EN:** `scripts/` lives in the root repository (not in any submodule) and is not part of the roadmap counters. It is documented at the root: the "Monorepo tooling" section in [`README.md`](../README.md), the `glot` scope and version closing in [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md), the tooling boundary in [`AGENTS.md`](../AGENTS.md), a mention in [`docs/index.md`](../docs/index.md) (GitHub Pages site) and an entry in [`CHANGELOG.md`](../CHANGELOG.md).
 
 ---
 
