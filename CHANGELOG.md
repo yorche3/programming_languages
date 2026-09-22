@@ -42,7 +42,7 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   directorio, con el código `4` de verificación fallida y los marcadores
   `{modulo}`, `{Modulo}` y `{suite}` resueltos contra el módulo real; el
   catálogo de datos suma la columna del verificador (14 de 50 lenguajes) y
-  `doctor` informa de la cobertura, con 256 comprobaciones en el harness.
+  `doctor` informa de la cobertura, con 258 comprobaciones en el harness.
 - Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
   `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
   estados, método reproducible y plan de cierre.

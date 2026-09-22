@@ -12,7 +12,7 @@
 | 0.4.0 | 2026-09-21 | [`versions/glot_0.4.0.sh`](../versions/glot_0.4.0.sh) | **Almacén clave/valor** (L1): `set`, `get`, `unset`, `list`, `path`, en XDG, atómico bajo `flock` y con `-n/--dry-run` | ✅ cerrada |
 | 0.5.0 | 2026-09-22 | [`versions/glot_0.5.0.sh`](../versions/glot_0.5.0.sh) | **Asignación** (L2): `use <lenguaje> <fase>/<módulo> [tipo]`, que sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado) | ✅ cerrada |
 | 0.6.0 | 2026-09-22 | [`versions/glot_0.6.0.sh`](../versions/glot_0.6.0.sh) | **Catálogo** (L2.5): `langs`, `modules`, `progress` y `completion`, con el conversor de nombres y los comandos nativos por lenguaje | ✅ cerrada |
-| 0.7.0 | 2026-09-22 | [`glot.sh`](../glot.sh) | **Ejecución** (L3): `test` y `verify`, con el código `4` de verificación fallida, los marcadores de la tabla de comandos y la cobertura de verificadores | 🔄 viva |
+| 0.7.0 | 2026-09-22 | [`versions/glot_0.7.0.sh`](../versions/glot_0.7.0.sh) | **Ejecución** (L3): `test` y `verify`, con el código `4` de verificación fallida, los marcadores de la tabla de comandos y la cobertura de verificadores | ✅ cerrada |
 
 ---
 
@@ -79,8 +79,8 @@
 - **Corrige la tabla de comandos:** nueve filas no eran ejecutables como estaban. `ada` apuntaba a `tests` (el directorio real es `test`), `kotlin` usaba un envoltorio que no existe, `scala` necesita `-batch -no-colors` para no quedarse esperando, `prolog` y `tcl-tk` requieren `cd test` (tcl-tk además `TCLLIBPATH`), `vala` necesita `--pkg glib-2.0` y ejecutar el binario, `scheme` usa `--no-auto-compile` con la suite de Guile, `common-lisp` necesita el `--eval '(uiop:quit)'` y `nim` va con `nimble test`. Se corrigen en la guía de inicialización y en el catálogo, con lo que documentan y ejecutan los módulos.
 - **Columna nueva `verify`:** 14 de los 50 lenguajes tienen verificador **verificado** (crystal, dart, elixir, go, julia, nim, perl, php, python, r, ruby, rust, v, zig). El resto imprime `skipped` y `doctor` informa de la cobertura: `verify_commands: 14 de / of 50`.
 - **Hallazgo declarado:** el verificador encuentra hallazgos de formato **preexistentes** en tres módulos ya homologados (V, Rust y Crystal). No se tocan en esta versión: quedan visibles como deuda.
-- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 256 passed, 0 failed` (rc `0`). Ejecuciones reales sobre el monorepo: `test` en `php` (`OK (3 tests, 21 assertions)`), `prolog` (3 subtests passed), `vala` (`ok 1..3`) y `tcl-tk` (`Total 21 Passed 21 Failed 0`) → rc `0`; `verify php` → `No syntax errors detected` rc `0`; `verify v` y `verify rust` → rc `4` con los hallazgos preexistentes; `verify ada` → `skipped` rc `0`.
-- **Snapshot:** se archivará en `versions/glot_0.7.0.sh` al abrir la v0.8.0 (ver la puerta de entrada).
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 258 passed, 0 failed` (rc `0`). Ejecuciones reales sobre el monorepo: `test` en `php` (`OK (3 tests, 21 assertions)`), `prolog` (3 subtests passed), `vala` (`ok 1..3`) y `tcl-tk` (`Total 21 Passed 21 Failed 0`) → rc `0`; `verify php` → `No syntax errors detected` rc `0`; `verify v` y `verify rust` → rc `4` con los hallazgos preexistentes; `verify ada` → `skipped` rc `0`.
+- **Snapshot:** [`versions/glot_0.7.0.sh`](../versions/glot_0.7.0.sh), archivado **antes** de fusionar la rama en `main` y antes de abrir la v0.8.0, para que la puerta de entrada no bloquee el arranque de la siguiente versión.
 
 ---
 
@@ -90,7 +90,8 @@
 - **Puerta de entrada:** ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`. Si falta, se copia `glot.sh` con el sufijo de su versión y solo después se reanuda la implementación de la nueva.
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh) y [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh).
+- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh) y [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh).
+- El harness **comprueba la puerta de entrada**: exige el snapshot de la versión anterior a la viva, así que no se puede empezar una versión nueva sin haber archivado la anterior.
 - Cada versión se cierra en su propia rama `chore/repo/glot-v0.X` antes de fusionarla en `main` (ver [`README.md`](../README.md)).
 
 ---
@@ -102,6 +103,7 @@
 - [ ] Salidas reales capturadas y documentadas (sin editar).
 - [ ] `scripts/README.md` y los documentos de `scripts/docs/` al día.
 - [ ] Snapshot copiado a `versions/glot_<versión>.sh` y fila del log marcada `✅`.
+- [ ] El harness pasa, incluida la comprobación de la **puerta de entrada**: el snapshot de la versión anterior a la viva existe.
 - [ ] Rama `chore/repo/glot-v0.X` fusionada en `main`.
 - [ ] `git diff --check` sin errores y sin `push` ni `commit` hechos por el agente.
 
@@ -125,7 +127,7 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución y códigos (256 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución y códigos (258 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
 ./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
 ./scripts/glot.sh modules           # catálogo de módulos con su especificación
