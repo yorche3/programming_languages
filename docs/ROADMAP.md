@@ -280,8 +280,8 @@ A medida que se avanza a proyectos más complejos (a partir de `ui.cliapp`), los
 
 ## Resumen de progreso / Progress Summary
 
-> **ES:** Los contadores `X/50` indican cuántos de los **50 submódulos registrados en `.gitmodules`** tienen el módulo implementado y homologado bajo `core/`. Los lenguajes legacy, copias de respaldo, `_experimental/` y lenguajes eliminados como `seed7` no forman parte del denominador.
-> **EN:** The `X/50` counters indicate how many of the **50 submodules registered in `.gitmodules`** have the module implemented and standardized under `core/`. Legacy languages, backups, `_experimental/`, and removed languages such as `seed7` are excluded from the denominator.
+> **ES:** Los contadores `X/50` indican cuántos de los **50 submódulos registrados en `.gitmodules`** tienen el módulo implementado y **homologado** bajo `core/`. **Registrado** es la pertenencia técnica a `.gitmodules` (el denominador, 50); **homologado** es el estado **finalizado|concluido** de un módulo en un lenguaje (el numerador, la `X`). Los lenguajes legacy, copias de respaldo, `_experimental/` y lenguajes eliminados como `seed7` no forman parte del denominador.
+> **EN:** The `X/50` counters indicate how many of the **50 submodules registered in `.gitmodules`** have the module implemented and **standardized** under `core/`. **Registered** is technical membership of `.gitmodules` (the denominator, 50); **standardized** is the **finished|concluded** state of a module in a language (the numerator, the `X`). Legacy languages, backups, `_experimental/`, and removed languages such as `seed7` are excluded from the denominator.
 
 ```text
 ## Fase 0 — Foundations ✅ (completos: 50/50 submódulos)

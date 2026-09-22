@@ -11,6 +11,8 @@ set -euo pipefail
 
 TESTS_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 GLOT_SH="$TESTS_DIR/../glot.sh"
+REPO="$(cd -- "$TESTS_DIR/../.." && pwd -P)"
+GUIDE="$REPO/docs/core/00_Project_Initialization_Guide.md"
 WORK_DIR="$(mktemp -d)"
 trap 'rm -rf -- "$WORK_DIR"' EXIT
 
@@ -83,13 +85,13 @@ glot_run_in() {
 
 # version
 glot_run version
-assert_eq 'version: salida' 'glot 0.5.0' "$out"
+assert_eq 'version: salida' 'glot 0.6.0' "$out"
 assert_eq 'version: código' '0' "$rc_last"
 assert_eq 'version: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 
 # --version
 glot_run --version
-assert_eq '--version: salida' 'glot 0.5.0' "$out"
+assert_eq '--version: salida' 'glot 0.6.0' "$out"
 assert_eq '--version: código' '0' "$rc_last"
 
 # help general y por verbo
@@ -150,7 +152,7 @@ assert_contains 'nombre suelto: sugiere greet' 'glot greet Ada' "$err"
 # doctor dentro del monorepo
 glot_run doctor
 assert_eq 'doctor dentro: código' '0' "$rc_last"
-assert_contains 'doctor dentro: versión' 'version: 0.5.0' "$out"
+assert_contains 'doctor dentro: versión' 'version: 0.6.0' "$out"
 assert_contains 'doctor dentro: script_dir' 'script_dir:' "$out"
 assert_contains 'doctor dentro: raíz detectada' 'root: /' "$out"
 assert_contains 'doctor dentro: ruta del estado' 'state_file:' "$out"
@@ -254,8 +256,12 @@ SANDBOX="$WORK_DIR/sandbox"
 # la rama sin salir de $WORK_DIR ni tocar la red.
 sandbox_make() {
     rm -rf -- "$SANDBOX"
-    mkdir -p -- "$SANDBOX/docs/core/algorithms" "$SANDBOX/remote"
+    mkdir -p -- "$SANDBOX/docs/core/algorithms" "$SANDBOX/docs/core/foundations" "$SANDBOX/remote"
     printf '# 05 — Naive Sort\n' >"$SANDBOX/docs/core/algorithms/05_Naive_Sort.md"
+    # Fase con nombres divergentes: el id del roadmap no es el de la carpeta ni el
+    # del documento, que es justo lo que el conversor tiene que resolver.
+    printf '# 01 — Hello World\n' >"$SANDBOX/docs/core/foundations/01_Hello_World.md"
+    printf '# 03 — Unit Test Calculator\n' >"$SANDBOX/docs/core/foundations/03_Unit_Test_Calculator.md"
 
     cat >"$SANDBOX/.gitmodules" <<'EOF'
 [submodule "php"]
@@ -267,12 +273,14 @@ EOF
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
-    mkdir -p -- "$SANDBOX/php/core/algorithms"
+    mkdir -p -- "$SANDBOX/php/core/algorithms" "$SANDBOX/php/core/foundations/unit_test/calculator"
     git -C "$SANDBOX/php" init -q -b main
     git -C "$SANDBOX/php" config user.email 'glot@test'
     git -C "$SANDBOX/php" config user.name 'glot test'
     printf '# php\n' >"$SANDBOX/php/README.md"
     printf '# algorithms\n' >"$SANDBOX/php/core/algorithms/README.md"
+    printf '# foundations\n' >"$SANDBOX/php/core/foundations/README.md"
+    printf '# calculator\n' >"$SANDBOX/php/core/foundations/unit_test/calculator/README.md"
     git -C "$SANDBOX/php" add -A
     git -C "$SANDBOX/php" commit -q -m 'chore: base'
     git -C "$SANDBOX/php" remote add origin "$SANDBOX/remote/php.git"
@@ -293,6 +301,16 @@ glot_run_from() {
     shift
     local rc=0
     out="$(cd -- "$dir" && GLOT_ROOT="$SANDBOX" "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+# glot_run_no_home [args...] — ejecuta glot sin HOME, sin XDG_STATE_HOME y sin
+# GLOT_STATE_FILE, para comprobar que el estado falla con un mensaje propio.
+glot_run_no_home() {
+    local rc=0
+    out="$(cd -- "$WORK_DIR" && env -u HOME -u XDG_STATE_HOME -u GLOT_STATE_FILE -u GLOT_ROOT \
+        "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
     err="$(cat -- "$WORK_DIR/stderr")"
     rc_last="$rc"
 }
@@ -474,6 +492,156 @@ glot_run_sandbox use php algorithms/naive_sort
 assert_eq 'use con la ruta ocupada por un archivo: código' '1' "$rc_last"
 assert_contains 'use con la ruta ocupada por un archivo: error' 'no es un directorio' "$err"
 rm -f -- "$SANDBOX/php/core/algorithms/naive_sort"
+
+# --- casos de la especificación v0.6.0 (L2.5, catálogo) ----------------------
+
+registered="$(git config --file "$REPO/.gitmodules" --get-regexp '\.path$' | wc -l | tr -d ' ')"
+roadmap_core="$(grep -cE '^core\.[a-z_]+\.[a-z_0-9]+[[:space:]]' "$REPO/docs/ROADMAP.md" | tr -d ' ')"
+
+# langs: un lenguaje por línea, con su comando nativo de pruebas
+glot_run langs
+assert_eq 'langs: código' '0' "$rc_last"
+assert_eq 'langs: un registro por lenguaje registrado' "$registered" "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'langs: dos columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=2')"
+assert_eq 'langs: ninguno sin comando de pruebas' '' "$(printf '%s\n' "$out" | awk -F'\t' '$2=="" || $2=="-"')"
+assert_eq 'langs: ordenado' "$(printf '%s\n' "$out" | cut -f1 | LC_ALL=C sort)" "$(printf '%s\n' "$out" | cut -f1)"
+
+# modules: el catálogo del roadmap, con la especificación resuelta
+glot_run modules
+assert_eq 'modules: código' '0' "$rc_last"
+assert_eq 'modules: un registro por módulo del roadmap' "$roadmap_core" "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'modules: cuatro columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=4')"
+assert_eq 'modules: identificadores del roadmap' '' "$(printf '%s\n' "$out" | awk -F'\t' '$1!="core."$2"."$3')"
+assert_eq 'modules: las especificaciones que declara existen' '' \
+    "$(printf '%s\n' "$out" | awk -F'\t' '$4!="-"' | while IFS=$'\t' read -r _id _phase _module spec; do
+        [[ -f "$REPO/$spec" ]] || printf '%s\n' "$spec"
+    done)"
+
+glot_run modules foundations
+assert_eq 'modules foundations: cuatro módulos' '4' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_contains 'modules foundations: incluye unit_test' 'core.foundations.unit_test' "$out"
+assert_contains 'modules foundations: documento divergente resuelto' 'docs/core/foundations/03_Unit_Test_Calculator.md' "$out"
+
+glot_run modules nope
+assert_eq 'modules con fase inexistente: código' '1' "$rc_last"
+assert_contains 'modules con fase inexistente: error' 'fase sin módulos' "$err"
+
+# progress: contadores globales y coherencia con el roadmap
+glot_run progress
+assert_eq 'progress: código' '0' "$rc_last"
+assert_eq 'progress: cinco claves' '5' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'progress: registrados = lenguajes de .gitmodules' "$registered" "$(printf '%s\n' "$out" | sed -n 's/^registrados=//p')"
+assert_eq 'progress: modulos = módulos del roadmap' "$roadmap_core" "$(printf '%s\n' "$out" | sed -n 's/^modulos=//p')"
+assert_eq 'progress: pares_total = módulos por lenguajes' \
+    "$((roadmap_core * registered))" "$(printf '%s\n' "$out" | sed -n 's/^pares_total=//p')"
+# Recuento independiente: módulos cuyo contador del roadmap está completo.
+expected_done="$(grep -E '^core\.[a-z_]+\.[a-z_0-9]+[[:space:]]' "$REPO/docs/ROADMAP.md" |
+    grep -oE '[0-9]+/[0-9]+' | awk -F/ '$1==$2' | wc -l | tr -d ' ')"
+assert_eq 'progress: homologados = módulos completos del roadmap' \
+    "$expected_done" "$(printf '%s\n' "$out" | sed -n 's/^homologados=//p')"
+
+glot_run progress foundations
+assert_eq 'progress foundations: cuatro módulos' '4' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_contains 'progress foundations: hello_world completo' "$(printf 'hello_world\tdone')" "$out"
+assert_eq 'progress foundations: denominador = registrados' '' \
+    "$(printf '%s\n' "$out" | awk -F'\t' -v n="$registered" '$4!=n')"
+
+glot_run progress nope
+assert_eq 'progress con fase inexistente: código' '1' "$rc_last"
+
+# completion: se imprime, no se instala
+glot_run completion
+assert_eq 'completion sin argumento: bash por defecto' '0' "$rc_last"
+assert_contains 'completion sin argumento: guion de bash' 'complete -F _glot_complete glot' "$out"
+
+glot_run completion bash
+assert_eq 'completion bash: código' '0' "$rc_last"
+assert_contains 'completion bash: completa el catálogo' '"$glot" langs' "$out"
+
+glot_run completion zsh
+assert_eq 'completion zsh: código' '0' "$rc_last"
+assert_contains 'completion zsh: registra el compdef' 'compdef _glot_zsh glot' "$out"
+
+glot_run completion fish
+assert_eq 'completion con shell no soportado: código' '2' "$rc_last"
+assert_contains 'completion con shell no soportado: error' 'shell no soportado' "$err"
+
+glot_run completion bash zsh
+assert_eq 'completion con dos argumentos: código' '2' "$rc_last"
+
+# el autocompletado de bash completa de verdad: verbos y catálogo en vivo
+bash_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot la); COMP_CWORD=1; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_eq 'completion bash: completa un verbo' 'langs' "$bash_comp"
+
+bash_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot use ph); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_eq 'completion bash: completa el lenguaje' 'php' "$bash_comp"
+
+bash_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot use php alg); COMP_CWORD=3; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"' | head -1)"
+assert_eq 'completion bash: completa fase/módulo' 'algorithms/naive_sort' "$bash_comp"
+
+bash_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot get m); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_eq 'completion bash: completa una clave reservada' 'module' "$bash_comp"
+
+# el autocompletado de zsh se verifica solo si zsh está instalado: no es una
+# dependencia del repositorio
+if command -v zsh >/dev/null 2>&1; then
+    assert_eq 'completion zsh: sintaxis' '0' "$(zsh -n "$REPO/scripts/completions/glot.zsh" >/dev/null 2>&1 && echo 0 || echo 1)"
+    zsh_comp="$(GLOT_CMD="$GLOT_SH" zsh -f -c 'autoload -Uz compinit && compinit -u && source '"$REPO"'/scripts/completions/glot.zsh && print -r -- ${_comps[glot]}' 2>/dev/null)"
+    assert_eq 'completion zsh: registra el compdef' '_glot_zsh' "$zsh_comp"
+fi
+
+# doctor: comprueba lo que el almacén y el catálogo necesitan de verdad
+glot_run doctor
+assert_eq 'doctor: código' '0' "$rc_last"
+for tool in flock mktemp sort awk cat; do
+    assert_contains "doctor: comprueba $tool" "$tool: " "$out"
+done
+assert_contains 'doctor: ruta del catálogo de datos' 'data_file: ' "$out"
+assert_contains 'doctor: cobertura de comandos nativos' "native_commands: $registered de / of $registered" "$out"
+assert_contains 'doctor: módulos del roadmap' 'roadmap_modules: ' "$out"
+assert_contains 'doctor: autocompletado bash' 'completion_bash: yes' "$out"
+assert_contains 'doctor: autocompletado zsh' 'completion_zsh: yes' "$out"
+
+# el catálogo de datos y la guía de inicialización no se pueden separar
+guide_langs="$(awk -F'|' '/^\| \*\*[a-z]/ {gsub(/\*/,"",$2); gsub(/[ \t]/,"",$2); print $2}' "$GUIDE")"
+data_langs="$(cut -f1 "$REPO/scripts/data/languages.tsv")"
+assert_eq 'catálogo y guía: mismos lenguajes' "$guide_langs" "$data_langs"
+
+guide_tests="$(awk -F'|' '/^\| \*\*[a-z]/ {print $5}' "$GUIDE" |
+    LC_ALL=C sed 's/`//g; s/  */ /g; s/^ //; s/ $//; s/\xef\xb8\x8f//g; s/\xe2\x9c\x85//g; s/\xf0\x9f\x94\xa7//g; s/\xe2\x9c\x8d//g; s/  */ /g; s/^ //; s/ $//')"
+data_tests="$(cut -f4 "$REPO/scripts/data/languages.tsv")"
+assert_eq 'catálogo y guía: mismos comandos de pruebas' "$guide_tests" "$data_tests"
+
+# el conversor resuelve el id del roadmap aunque no coincida con la carpeta ni con
+# el documento: es el fallo que el fixture anterior no podía ver
+sandbox_make
+
+glot_run_sandbox -n use php foundations/unit_test
+assert_eq 'use con nombre divergente: código' '0' "$rc_last"
+assert_contains 'use con nombre divergente: id canónico' 'module=unit_test' "$out"
+assert_contains 'use con nombre divergente: documento divergente' 'spec=docs/core/foundations/03_Unit_Test_Calculator.md' "$out"
+assert_contains 'use con nombre divergente: carpeta anidada' 'unit_test/calculator' "$err"
+assert_contains 'use con nombre divergente: avisa de que no genera esqueleto' 'no se genera esqueleto' "$err"
+assert_eq 'use con nombre divergente: sin mkdir' 'no' "$(case "$out" in *'mkdir -p'*) echo si ;; *) echo no ;; esac)"
+
+glot_run_sandbox -n use php foundations/helloworld
+assert_eq 'use con el nombre de la carpeta: código' '0' "$rc_last"
+assert_contains 'use con el nombre de la carpeta: id canónico' 'module=hello_world' "$out"
+assert_contains 'use con el nombre de la carpeta: especificación' 'spec=docs/core/foundations/01_Hello_World.md' "$out"
+assert_contains 'use con el nombre de la carpeta: rama en kebab' 'branch=feat/foundations/hello-world' "$out"
+
+glot_run_sandbox use php foundations/nope
+assert_eq 'use sin especificación: código' '1' "$rc_last"
+assert_contains 'use sin especificación: error' 'especificación ausente' "$err"
+assert_contains 'use sin especificación: sugiere el catálogo' 'glot modules foundations' "$err"
+
+# el estado no se inventa una ruta si no hay HOME ni XDG_STATE_HOME
+glot_run_no_home path
+assert_eq 'sin HOME: path falla con 1' '1' "$rc_last"
+assert_contains 'sin HOME: mensaje propio' 'define GLOT_STATE_DIR' "$err"
+
+glot_run_no_home get lang
+assert_eq 'sin HOME: get devuelve 3' '3' "$rc_last"
 
 # --- resumen -----------------------------------------------------------------
 

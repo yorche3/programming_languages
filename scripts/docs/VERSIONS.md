@@ -10,7 +10,8 @@
 | 0.2.0 | 2026-09-20 | [`versions/glot_0.2.0.sh`](../versions/glot_0.2.0.sh) | Nombre por argumento o por entrada estándar y saludo `Hello, <nombre>!` (equivalente a `hellouser`) | ✅ cerrada |
 | 0.3.0 | 2026-09-20 | [`versions/glot_0.3.0.sh`](../versions/glot_0.3.0.sh) | **Contrato y dispatcher** (L0): `version`, `help`, `doctor`, `greet`, `hello`, sin rutas del usuario, más harness de pruebas propio | ✅ cerrada |
 | 0.4.0 | 2026-09-21 | [`versions/glot_0.4.0.sh`](../versions/glot_0.4.0.sh) | **Almacén clave/valor** (L1): `set`, `get`, `unset`, `list`, `path`, en XDG, atómico bajo `flock` y con `-n/--dry-run` | ✅ cerrada |
-| 0.5.0 | 2026-09-21 | [`glot.sh`](../glot.sh) | **Asignación** (L2): `use <lenguaje> <fase>/<módulo> [tipo]`, que valida, crea el directorio del módulo, prepara y publica la rama, guarda el estado del sprint e imprime la ruta | 🔄 viva |
+| 0.5.0 | 2026-09-22 | [`versions/glot_0.5.0.sh`](../versions/glot_0.5.0.sh) | **Asignación** (L2): `use <lenguaje> <fase>/<módulo> [tipo]`, que sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado) | ✅ cerrada |
+| 0.6.0 | 2026-09-22 | [`glot.sh`](../glot.sh) | **Catálogo** (L2.5): `langs`, `modules`, `progress` y `completion`, con el conversor de nombres y los comandos nativos por lenguaje | 🔄 viva |
 
 ---
 
@@ -47,7 +48,7 @@
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 71 passed, 0 failed` (rc `0`); `get` de clave ausente → `1`; clave inválida y valor con salto de línea → `2`; `unset` repetido → `0`; `-n set lang lua` imprime `lang=lua` y no escribe; `stat -c '%a'` → `600` el fichero y `700` el directorio.
 - **Snapshot:** [`versions/glot_0.4.0.sh`](../versions/glot_0.4.0.sh), archivado al abrir la v0.5.0.
 
-## 0.5.0 — 2026-09-21 (viva)
+## 0.5.0 — 2026-09-22 (cerrada)
 
 - **Añade:** la **asignación** (L2) con `use <lenguaje> <fase>/<módulo> [tipo]`, que **sitúa el trabajo**: valida lenguaje, fase, módulo, tipo y árbol **sin tocar nada**, resuelve la especificación `docs/core/{fase}/{NN}_{Nombre}.md` y después **lee el estado y nunca lo fuerza**. Reconoce cuatro estados: **nuevo** (no existe la carpeta) → crea la rama desde `main`, la publica con `push -u origin` y crea la carpeta vacía; **en curso y limpio** (la rama ya existe) → la activa y la publica; **reanudar** (trabajo sin confirmar dentro del módulo) → no crea ni cambia nada y solo informa, republicando si ya estás en la rama; **cerrado** (limpio sobre `main` y sin rama) → con `tipo` explícito abre la rama de mantenimiento desde `main`; sin él avisa y sugiere. En todos los casos escribe las seis claves del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`) e imprime la ruta absoluta del módulo en stdout.
 - **Contrato:** `2` para uso incorrecto (argumentos, tipo no permitido, opción desconocida), `1` para entorno o dato ausente (lenguaje fuera de `.gitmodules`, especificación ausente, submódulo sin inicializar, cambios sin confirmar **fuera** del directorio del módulo, rama no creable o no publicable) y `3` si el estado no se puede escribir (avisando de que el módulo y la rama ya quedaron preparados). No hace commits, ni `git add`, ni esqueleto, ni toca el monorepo.
@@ -55,16 +56,29 @@
 - **`tipo`:** por defecto `feat`, que es el de la rama propia del módulo. Por eso, con el módulo **ya cerrado**, hay que indicarlo: así no se resucita una rama `feat` fantasma. Con el módulo **nuevo** el valor por defecto se aplica sin preguntar.
 - **`-n/--dry-run`:** imprime el plan completo sin tocar el repositorio ni el estado: la rama desde `main`, el `push -u` y la creación de la carpeta para un módulo nuevo; la activación y el `push -u` para un módulo en curso; nada para un reanudar; y la rama de mantenimiento para un módulo cerrado con `tipo`.
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 158 passed, 0 failed` (rc `0`), con un sandbox de git propio (monorepo falso con `.gitmodules`, especificación y un submódulo `php` con remoto desnudo) para que `use` cree la rama desde `main`, la publique con upstream y genere la carpeta en un módulo nuevo, active una rama existente, abra una de mantenimiento en un módulo cerrado y respete el trabajo sin confirmar, sin salir del directorio temporal ni tocar la red. Ensayo real sobre el monorepo: `./scripts/glot.sh -n use php algorithms/naive_sort` → aviso de módulo existente, activación de `feat/algorithms/naive-sort` y estado intacto; `./scripts/glot.sh -n use php algorithms/naive_sort test` → plan de la rama de mantenimiento `test/algorithms/naive-sort` desde `main`.
-- **Snapshot:** se archivará en `versions/glot_0.5.0.sh` al cerrar la versión.
+- **Snapshot:** [`versions/glot_0.5.0.sh`](../versions/glot_0.5.0.sh), archivado al abrir la v0.6.0; su contenido es el que tenía `main` en el cierre de la versión.
+
+## 0.6.0 — 2026-09-22 (viva)
+
+- **Añade:** el **catálogo** (L2.5) con `langs`, `modules`, `progress` y `completion`, más el **conversor de nombres**: de un id canónico (`data_structures`) salen el nombre legible, el del documento, la rama, el nombre del commit y la carpeta.
+- **Fuentes:** `.gitmodules` (lenguajes, el denominador), el bloque de contadores de `docs/ROADMAP.md` (módulos y estado, la fuente de verdad), `docs/core/{fase}/` (especificaciones, con el prefijo `NN` leído del disco) y [`data/languages.tsv`](../data/languages.tsv) (comandos nativos por lenguaje, con test de deriva contra la guía de inicialización).
+- **Nombres legacy:** `hello_world` → carpeta `helloworld` (en 49 lenguajes; Ada usa el id tal cual) y `hello_user` → `hellouser`; `unit_test` → carpeta `unit_test/calculator` y documento `03_Unit_Test_Calculator.md`. Se resuelven sondeando el disco, no con una tabla completa, y la comparación del documento no distingue mayúsculas (`etl_basico` encuentra `14_ETL_Basico.md`).
+- **Corrige:** `use` ya no falla con los módulos cuyo nombre de carpeta o de documento no sigue el id del roadmap (`foundations/helloworld` y `foundations/unit_test` devolvían `1` con 158 comprobaciones en verde). El fixture del harness incluye ahora una fase con nombres divergentes, que es justo por lo que el fallo no se veía.
+- **Robustez:** `doctor` comprueba `flock`, `mktemp`, `sort`, `awk` y `cat`, la cobertura del catálogo de datos, los dos guiones de autocompletado y la lectura del roadmap; el estado ya no se inventa una ruta si no hay `HOME` ni `XDG_STATE_HOME` (mensaje propio en vez de abortar por `set -u`).
+- **Autocompletado:** `completions/glot.bash` y `completions/glot.zsh`, con completado **dinámico** de lenguajes, fases y módulos preguntando al catálogo. Se imprimen con `glot completion <shell>`; **no** se instalan (eso es `install`, v1.0.0).
+- **Contrato:** `langs` devuelve `lenguaje<TAB>prueba nativa`; `modules` devuelve `id<TAB>fase<TAB>módulo<TAB>especificación`; `progress` devuelve `clave=valor` sin fase y TSV con fase. Los estados del roadmap se traducen a `done`/`in_progress`/`planned`/`pending`: ASCII, sin emoji en la salida.
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 227 passed, 0 failed` (rc `0`); incluye la deriva guía ↔ `data/languages.tsv`, la resolución de los nombres divergentes en el sandbox, el autocompletado de bash de punta a punta y, cuando `zsh` está instalado, su sintaxis y su `compdef` (verificado con `zsh 5.9.2`).
+- **Snapshot:** se archivará en `versions/glot_0.6.0.sh` al abrir la v0.7.0 (ver la puerta de entrada).
 
 ---
 
 ## 🔖 Convención de archivado / Archiving convention
 
 - **SemVer** `MAJOR.MINOR.PATCH`; el número vive en el encabezado de [`glot.sh`](../glot.sh) y en la tabla de este documento (desde v0.3.0 también en `glot version`).
+- **Puerta de entrada:** ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`. Si falta, se copia `glot.sh` con el sufijo de su versión y solo después se reanuda la implementación de la nueva.
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh) y [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh).
+- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh) y [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh).
 - Cada versión se cierra en su propia rama `chore/repo/glot-v0.X` antes de fusionarla en `main` (ver [`README.md`](../README.md)).
 
 ---
@@ -85,10 +99,11 @@
 
 | Herramienta | Uso | Verificación |
 |-------------|-----|--------------|
-| Bash 5.2 | Ejecutar `glot.sh` y, desde v1.0.0, cargarlo con `source` | `bash --version` |
-| Git 2.43 | Desde v0.3.0: `doctor` resuelve la raíz con `git rev-parse --show-superproject-working-tree`; desde v0.5.0, `use` prepara y publica ramas | `git --version` |
-| coreutils y util-linux | Desde v0.4.0: el almacén usa `mktemp`, `mv`, `chmod` y `flock` | `mktemp --version`, `flock --version` |
+| Bash 5.2 | Ejecutar `glot.sh` y, desde v1.0.0, cargarlo con `source`. Desde v0.6.0 el conversor de nombres usa `${var,,}`, `${var^}` y `${1//_/-}` (bash 4+) | `bash --version` |
+| Git 2.43 | Desde v0.3.0: `doctor` resuelve la raíz con `git rev-parse --show-superproject-working-tree`; desde v0.5.0, `use` prepara y publica ramas; desde v0.6.0, `langs` lee `.gitmodules` y el catálogo resuelve el lenguaje desde la raíz de git | `git --version` |
+| coreutils y util-linux | Desde v0.4.0: el almacén usa `mktemp`, `mv`, `chmod` y `flock`; `doctor` lo comprueba desde v0.6.0 | `mktemp --version`, `flock --version` |
 | GNU coreutils (`stat -c`) | Solo para el harness: comprueba los permisos `600`/`700` | `stat --version` |
+| zsh 5.9 (opcional) | Solo para verificar el autocompletado de `completions/glot.zsh`; el harness se salta sus dos comprobaciones si no está | `zsh --version` |
 | GitHub Copilot CLI 1.0.86 (opcional) | Validador automático de `validate` (v0.10.0) | `copilot --version` |
 
 ---
@@ -97,8 +112,12 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, use y códigos (158 comprobaciones)
-./scripts/glot.sh doctor            # diagnóstico del entorno
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo y códigos (227 comprobaciones)
+./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
+./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
+./scripts/glot.sh modules           # catálogo de módulos con su especificación
+./scripts/glot.sh progress          # contadores del roadmap
+./scripts/glot.sh completion bash   # autocompletado en stdout
 ./scripts/glot.sh -n use php algorithms/naive_sort   # ensayo de `use`: plan sin tocar nada
 
 # Estado en un directorio propio, sin tocar el del usuario / state in its own dir

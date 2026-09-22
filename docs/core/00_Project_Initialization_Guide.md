@@ -17,7 +17,7 @@ grand_parent: Programming Languages Monorepo
 
 | Español | English |
 |---------|---------|
-| Concentrar en **un solo archivo** los comandos de inicialización de los **49 lenguajes** homologados, para crear el esqueleto de un módulo nuevo sin tener que recordar la herramienta de cada ecosistema. Los requisitos de instalación no se repiten aquí: cada lenguaje los documenta en su propio README. | Gather in a **single file** the initialization commands for the **49 standardized languages**, so the skeleton of a new module can be created without remembering each ecosystem's tooling. Installation requirements are not repeated here: each language documents them in its own README. |
+| Concentrar en **un solo archivo** los comandos de inicialización de los **50 lenguajes** homologados, para crear el esqueleto de un módulo nuevo sin tener que recordar la herramienta de cada ecosistema. Los requisitos de instalación no se repiten aquí: cada lenguaje los documenta en su propio README. | Gather in a **single file** the initialization commands for the **50 standardized languages**, so the skeleton of a new module can be created without remembering each ecosystem's tooling. Installation requirements are not repeated here: each language documents them in its own README. |
 
 **ES:** Este documento cubre la **creación del esqueleto** (carpetas, manifiesto y archivos base). El código, la especificación y los tests siguen el flujo normal: especificación en `docs/core/`, implementación en `{lenguaje}/core/{fase}/{modulo}/`, README al cerrar el módulo.
 
@@ -89,6 +89,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **nim** | 🔧 `nimble init` | `{modulo}.nimble`, `test/config.nims` | ✅ `nimble test` · ✅ `nim c -r test/{suite}.nim` |
 | **ocaml** | 🔧 `dune init proj {modulo}` | `dune-project`, `src/dune`, `test/dune` | ✅ `dune runtest` |
 | **perl** | ✍️ `mkdir -p src test` | — | ✅ `prove --ext=.pl test/` |
+| **php** | ✍️ `mkdir -p src test` + `composer require --dev phpunit/phpunit` | `composer.json`, `phpunit.xml`, `.gitignore` | ✅ `composer test` |
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ `swipl -q -f {suite}.pl -t halt` |
 | **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `spago test` |
 | **python** | 🔧 `uv init --lib` | `pyproject.toml`, `conftest.py` | ✅ `pytest` |
@@ -351,6 +352,22 @@ mkdir -p src test
 {modulo}/
 ├── src/{modulo}.pl
 └── test/                    # una suite .pl por enfoque (Test2::Bundle::More)
+```
+
+### PHP — `src/` + `test/` con Composer y PHPUnit
+
+```bash
+mkdir -p src test
+composer require --dev phpunit/phpunit
+```
+
+```text
+{modulo}/
+├── composer.json            # PHPUnit (dev) + autoload classmap + script test
+├── phpunit.xml              # bootstrap + suite sobre test/
+├── .gitignore               # vendor/, composer.lock y cachés
+├── src/{Modulo}.php
+└── test/{Modulo}Test.php    # una suite PHPUnit por enfoque
 ```
 
 ### Prolog — `src/` + `test/`

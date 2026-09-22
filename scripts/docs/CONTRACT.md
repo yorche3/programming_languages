@@ -35,7 +35,7 @@
 
 ---
 
-## 🧰 Verbos de la versión viva (v0.5.0) / Verbs in the live version
+## 🧰 Verbos de la versión viva (v0.6.0) / Verbs in the live version
 
 | Verbo | Comportamiento | Código |
 |-------|----------------|:------:|
@@ -49,7 +49,11 @@
 | `unset <clave>` | Borra la clave; repetirlo no es error | 0 / 2 / 3 |
 | `list` | Todas las entradas `clave=valor`, ordenadas por clave en `LC_ALL=C` | 0 / 3 |
 | `path` | Ruta del fichero de estado | 0 |
-| `use <lenguaje> <fase>/<módulo> [tipo]` | Sitúa el trabajo: valida, crea el directorio del módulo, prepara y publica la rama, guarda el estado del sprint; imprime la ruta del módulo | 0 / 1 / 2 / 3 |
+| `use <lenguaje> <fase>/<módulo> [tipo]` | Sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado): valida, activa o crea la rama desde `main`, la publica con `-u` y crea la carpeta del módulo si falta; con trabajo sin confirmar no toca nada. Guarda el estado del sprint e imprime la ruta | 0 / 1 / 2 / 3 |
+| `langs` | Catálogo de lenguajes: uno por línea con su **comando nativo de pruebas** | 0 / 1 |
+| `modules [fase]` | Catálogo de módulos del roadmap con su especificación resuelta (`-` si aún no existe) | 0 / 1 / 2 |
+| `progress [fase]` | Estado del roadmap: sin fase, contadores globales en `clave=valor`; con fase, una línea por módulo | 0 / 1 / 2 |
+| `completion [bash\|zsh]` | Imprime el guion de autocompletado en stdout; **no** lo instala | 0 / 1 / 2 |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
 
 ---
@@ -106,9 +110,56 @@
 
 ### Desde v1.0.0 — cuando sea cargable con `source`
 
-13. **Sin `exit`, sin tocar opciones globales del shell** (`set -e`, `IFS`) ni el directorio actual fuera de un verbo que lo pida explícitamente; todo sale con `return`.
+13. **Sin `exit`, sin tocar opciones globales del shell** (`set -e`, `IFS`) ni el directorio actual fuera de un verbo que lo pida explícitamente; todo sale con `return`. La única excepción es el subshell del almacén (`( … )` en `_glot_state_rewrite`), donde `exit` termina ese subshell y no el shell que haya cargado `glot`.
 14. **Raíz del monorepo**: `GLOT_ROOT` → superproyecto → raíz git, para que funcione también desde dentro de un submódulo.
 15. **Un solo archivo, dos modos**: la guarda `"${BASH_SOURCE[0]}" == "$0"` ejecuta el dispatcher solo cuando se invoca como programa; cargado con `source`, el archivo define la función y no ejecuta nada.
+
+---
+
+## 🧭 Catálogo (L2.5, v0.6.0) / Catalogue
+
+**ES:** El catálogo **no adivina nombres: los convierte**. Cada módulo tiene un **id canónico** —el del roadmap— y todas sus formas se derivan de él. Las divergencias legacy se resuelven con excepciones mínimas y sondeo del disco, nunca con una tabla completa que haya que mantener a mano.
+
+**EN:** The catalogue **does not guess names: it converts them**. Every module has a **canonical id** —the roadmap's— and all its forms derive from it. Legacy divergences are solved with minimal exceptions and probing the disk, never with a full table to maintain by hand.
+
+### De un id a todas sus formas / From one id to all its forms
+
+| Forma / Form | `data_structures` | Cómo se obtiene / How |
+|--------------|-------------------|------------------------|
+| `name` (legible) | `Data Structures` | palabras capitalizadas, separadas por espacio |
+| `project_name` (id) | `data_structures` | el id canónico del roadmap; no se deriva, se declara |
+| `branch` | `data-structures` | `_glot_kebab`: `_` → `-` |
+| documento | `NN_Data_Structures.md` | stem en `Title_Case` con `_`; el prefijo `NN` se **lee** de `docs/core/{fase}/` |
+| commit | `data structures` | minúsculas y espacios |
+
+**ES:** Excepciones declaradas (todo lo demás sigue la convención): `unit_test` → documento `03_Unit_Test_Calculator.md`; carpetas `helloworld`/`hellouser` (49 lenguajes; Ada usa el id tal cual) y `unit_test/calculator`, que el sondeo resuelve prefiriendo la forma más específica. La comparación del nombre del documento no distingue mayúsculas, así que `etl_basico` encuentra `14_ETL_Basico.md`.
+
+**EN:** Declared exceptions (everything else follows the convention): `unit_test` → document `03_Unit_Test_Calculator.md`; folders `helloworld`/`hellouser` (49 languages; Ada uses the id as is) and `unit_test/calculator`, which the probe resolves preferring the most specific form. Document name matching is case-insensitive, so `etl_basico` finds `14_ETL_Basico.md`.
+
+### Fuentes de datos / Data sources
+
+| Dato / Datum | Fuente / Source |
+|--------------|-----------------|
+| Lenguajes registrados | `.gitmodules` (el denominador, 50) |
+| Módulos y su estado | el bloque de contadores de `docs/ROADMAP.md` (fuente de verdad) |
+| Especificación de cada módulo | `docs/core/{fase}/{NN}_{Nombre}.md`, con el prefijo leído del disco |
+| Comandos nativos por lenguaje | [`data/languages.tsv`](../data/languages.tsv), con cabecera documentada en [`data/README.md`](../data/README.md) |
+| Texto del autocompletado | [`completions/glot.bash`](../completions/glot.bash) y [`completions/glot.zsh`](../completions/glot.zsh) |
+
+### Formatos de salida / Output formats
+
+| Verbo | stdout |
+|-------|--------|
+| `langs` | `lenguaje<TAB>prueba nativa`, uno por línea, ordenado en `LC_ALL=C` |
+| `modules [fase]` | `id<TAB>fase<TAB>módulo<TAB>especificación` (`-` si el documento aún no existe) |
+| `progress` | `registrados=` · `homologados=` · `modulos=` · `pares_hechos=` · `pares_total=`, uno por línea |
+| `progress <fase>` | `modulo<TAB>estado<TAB>hechos<TAB>total` |
+
+**ES:** El **estado** se traduce de la marca del roadmap a una palabra en ASCII (`done`, `in_progress`, `planned`, `pending`) para que la salida sea parseable y no dependa de un emoji que un editor pueda corromper. El parser reconoce las marcas **por bytes**; una línea de `core.*` que no entienda es un error `1`, nunca un recuento inventado. Además, `progress` avisa si el contador `X/N` contradice la lista de lenguajes que el propio roadmap escribe entre paréntesis, o si su denominador no coincide con los lenguajes registrados.
+
+**EN:** The **status** is translated from the roadmap mark into an ASCII word (`done`, `in_progress`, `planned`, `pending`) so the output is parseable and does not depend on an emoji an editor could corrupt. The parser recognises marks **by bytes**; a `core.*` line it does not understand is a `1` error, never an invented count. `progress` also warns when the `X/N` counter contradicts the language list the roadmap writes in parentheses, or when its denominator differs from the registered languages.
+
+**ES:** **Definición / Definition:** `registrados` = lenguajes de `.gitmodules`; `homologados` = módulos con su contador completo; `pares_*` = suma de `X` y de `módulos × registrados`.
 
 ---
 

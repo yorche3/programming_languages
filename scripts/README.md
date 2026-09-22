@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v0.5.0** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v0.6.0** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -30,7 +30,11 @@ El detalle de cada capa y el orden de las versiones están en [`docs/ROADMAP.md`
 cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh version
 ./scripts/glot.sh doctor
+./scripts/glot.sh langs
+./scripts/glot.sh modules
+./scripts/glot.sh progress
 ./scripts/glot.sh set lang php && ./scripts/glot.sh get lang
+source <(./scripts/glot.sh completion bash)   # autocompletado / completion
 ```
 
 ---
@@ -39,7 +43,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 
 | Documento | Contenido |
 |-----------|-----------|
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Capas L0–L9, versiones, criterios de orden y decisiones abiertas |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Capas L0–L9, versiones, criterios de orden y decisiones cerradas |
 | [`docs/SPRINT.md`](docs/SPRINT.md) | El ciclo de módulo: 9 pasos, comandos, evidencias y encargos de IA |
 | [`docs/CONTRACT.md`](docs/CONTRACT.md) | Contrato de todos los verbos, códigos de salida, almacén de estado y especificación de `use` |
 | [`docs/INTERNALS.md`](docs/INTERNALS.md) | Cómo funciona el script por dentro |
@@ -54,7 +58,13 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                   # Versión viva / live version (v0.5.0)
+├── glot.sh                   # Versión viva / live version (v0.6.0)
+├── completions/              # Autocompletado por shell (se imprime en stdout)
+│   ├── glot.bash
+│   └── glot.zsh
+├── data/                     # Catálogo de datos del tooling
+│   ├── README.md
+│   └── languages.tsv         # Un lenguaje por fila: init, manifiestos y pruebas
 ├── docs/                     # Documentación del tooling
 │   ├── ROADMAP.md
 │   ├── SPRINT.md
@@ -68,7 +78,8 @@ scripts/
     ├── glot_0.1.0.sh
     ├── glot_0.2.0.sh
     ├── glot_0.3.0.sh
-    └── glot_0.4.0.sh
+    ├── glot_0.4.0.sh
+    └── glot_0.5.0.sh
 ```
 
 ---
@@ -92,7 +103,7 @@ source "$REPO/scripts/glot.sh"
 
 ## 🌿 Rama y flujo / Branch & flow
 
-**ES:** Al ser un cambio solo-monorepo, sigue la regla de [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md): una rama corta por versión, `chore/repo/glot-v0.X`, fusionada en `main` cuando el snapshot ya está en `versions/`. Así `main` nunca queda con un `glot.sh` a medias que rompa los shells nuevos.
+**ES:** Al ser un cambio solo-monorepo, sigue la regla de [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md): una rama corta por versión, `chore/repo/glot-v0.X`, fusionada en `main` cuando el snapshot ya está en `versions/`. Así `main` nunca queda con un `glot.sh` a medias que rompa los shells nuevos. Esa es también la **puerta de entrada**: ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`; si falta, se copia primero y después se reanuda la implementación.
 
 **EN:** As a monorepo-only change, follow [`docs/CONTRIBUTING.md`](../docs/CONTRIBUTING.md): one short branch per version, `chore/repo/glot-v0.X`, merged into `main` once the snapshot is in `versions/`. That way `main` never keeps a half-finished `glot.sh`.
 
