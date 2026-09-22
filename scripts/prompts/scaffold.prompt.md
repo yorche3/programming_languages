@@ -50,6 +50,15 @@ resultado (aplanó el nido, quitó el `.git` anidado, descartó el vendoring que
 rechaza); con `manual` creó las carpetas del esqueleto. Los lenguajes marcados `deferred` no
 tienen inicializador validado: ahí el esqueleto lo construyes tú.
 
+## Contrato del encargo / Deliverable
+
+| Aspecto | Detalle |
+|---|---|
+| **Entrada** | El directorio del módulo con lo que dejó `glot new`, la especificación, la fila de `{lang}` en `scripts/data/languages.tsv` y los módulos homologados del lenguaje |
+| **Salida** | Un esqueleto que compila, resuelve o instala, y cuyo runner de pruebas **arranca**; `.gitignore` verificado; sin runners de ejemplo ni nombres que no encajen |
+| **Fuera de alcance** | La suite (encargo `suite`, paso 4b), la implementación (paso 5), el README (paso 7) y los commits (`glot save`) |
+| **Evidencia** | La salida real del comando nativo de pruebas y de `git check-ignore -v`, pegadas sin editar |
+
 ---
 
 ## Procedimiento
@@ -66,21 +75,21 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 ### 2. Ajustar el esqueleto a lo que el módulo requiere
 
-El inicializador deja cosas que el módulo no usa; esto es lo que sí es tu tarea:
+El inicializador deja cosas que el módulo no usa. Esto es lo que sí es tu tarea, y así se
+detecta cada caso:
 
-- **Runners no usados**: quita el `main`/`app`/`example` de ejemplo si el módulo es una
-  biblioteca. Rompen el runner de pruebas generado por la herramienta (casos reales:
-  `dub test` en D, `dotnet test` en C#, `zig build test` con `src/main.zig`).
-- **Nombres predefinidos que no encajan**: renombra lo que el inicializador nombró con el
-  nombre del directorio o de la plantilla (`MyLib.hs`, `naive_sort_spec.cr`, `library.cabal`)
-  a la convención del módulo, y ajusta el manifiesto (nombre, versión, descripción) para que
-  concuerde con `{module}` / `{Module}`.
-- **Layout divergente**: si el inicializador creó `bin/`+`lib/` y el lenguaje usa `src/`+`test/`
-  en este repositorio, deja **una** disposición, la que ya usan los módulos homologados.
-- **Lenguajes `deferred`**: construye el esqueleto completo (`mkdir -p` + manifiesto) según la
-  guía y los módulos existentes.
-- Conserva lo que el inicializador haga bien (estructura de pruebas, manifiesto, `LICENSE`,
-  `README` generado si el módulo no tiene el suyo). **No** escribas la implementación.
+| Resto / Leftover | Cómo se detecta | Qué se hace |
+|------------------|-----------------|-------------|
+| **Runner de ejemplo**: un punto de entrada `main`/`app`/`example` en lo que es una biblioteca | El inicializador generó un ejecutable y el módulo expone funciones | Quitarlo: rompe el runner de pruebas de la herramienta (casos reales: `dub test` en D, `dotnet test` en C#, `zig build test` con `src/main.zig`) |
+| **Nombres predefinidos** que no encajan | Un archivo o manifiesto se llama como la plantilla (`MyLib.hs`, `<dir>_spec.<ext>`, `library.cabal`) y no como el módulo | Renombrar a la convención del módulo y ajustar el manifiesto (nombre, versión, descripción) para que concuerde con `{module}` / `{Module}` |
+| **Layout divergente** | El inicializador creó `bin/`+`lib/` y este repositorio usa `src/`+`test/` en ese lenguaje, o al revés | Dejar **una** disposición: la que ya usan los módulos homologados |
+| **Andamiaje de otro fin** | CI propia del inicializador, *samples*, `example/`, utilidades que el módulo no usa | Conservar si el repositorio también lo conserva en otros módulos del lenguaje; quitar solo lo que rompe o contradice la convención, y decirlo |
+| **Lenguaje `deferred`** | La columna 6 del catálogo dice `deferred` y `glot new` imprimió `skipped` | Construir el esqueleto completo (`mkdir -p` + manifiesto) según la guía y los módulos existentes |
+
+**Regla de conservación:** lo que el inicializador haga bien se queda (estructura de pruebas,
+manifiesto, `LICENSE`, el `README` generado si el módulo no tiene el suyo). Solo se cambia lo
+que **contradice** al módulo o al repositorio, y cada cambio se justifica en una línea.
+**No** escribas la implementación ni la suite.
 
 ### 3. `.gitignore` del módulo
 
@@ -132,7 +141,9 @@ eso corresponde a otra delegación.
 
 - [ ] Variables resueltas y confirmadas con evidencia del repositorio.
 - [ ] Esqueleto ajustado a lo que el módulo requiere, sin runners de ejemplo ni nombres que no encajen.
+- [ ] Layout igual al de los módulos homologados del mismo lenguaje.
 - [ ] Manifiesto con el nombre del módulo (`{module}` / `{Module}`).
+- [ ] Cada ajuste justificado en una línea; lo que ya estaba bien, intacto.
 - [ ] `.gitignore` verificado con `git check-ignore -v`.
 - [ ] Comando nativo de pruebas ejecutado, con salida real, aunque la suite esté pendiente.
 - [ ] Sin suite escrita, sin implementación y sin cambios en la especificación ni el roadmap.
