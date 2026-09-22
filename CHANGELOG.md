@@ -13,6 +13,12 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   (v0.1.0 `Hello World`, v0.2.0 equivalente a `hellouser`, v0.3.0 contrato y
   dispatcher de verbos y v0.4.0 almacén de estado clave/valor en XDG), con
   harness de pruebas propio y snapshots en `scripts/versions/`.
+- `glot` v0.5.0: verbo `use`, que sitúa el trabajo del sprint y reconoce cuatro
+  estados (nuevo, en curso, reanudar y cerrado): activa o crea la rama
+  `{tipo}/{fase}/{módulo}` desde `main`, la publica con upstream y crea la
+  carpeta si falta, y no crea ni cambia nada cuando hay trabajo sin confirmar;
+  guarda el estado del sprint e imprime la ruta, con ensayo `-n/--dry-run` y
+  158 comprobaciones en el harness.
 - Se documentó el camino de versiones de `glot` (capas L0 a L9), el reparto de
   responsabilidades entre script y agente y la política del validador automático
   con GitHub Copilot CLI (modelo económico, salida JSONL y solo lectura).

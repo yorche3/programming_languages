@@ -35,11 +35,11 @@
 
 ---
 
-## 🧰 Verbos de la versión viva (v0.4.0) / Verbs in the live version
+## 🧰 Verbos de la versión viva (v0.5.0) / Verbs in the live version
 
 | Verbo | Comportamiento | Código |
 |-------|----------------|:------:|
-| `version`, `--version` | `glot 0.4.0` | 0 |
+| `version`, `--version` | `glot 0.5.0` | 0 |
 | `help`, `-h`, `--help`, `help <verbo>` | Ayuda general o de un verbo | 0 |
 | `doctor` | Diagnóstico: bash, git, raíz del monorepo, directorio y fichero de estado, y número de claves | 0 / 1 |
 | `greet [nombre]` | `Hello, <nombre>!` con el nombre por argumento o por stdin | 0 / 2 |
@@ -49,6 +49,7 @@
 | `unset <clave>` | Borra la clave; repetirlo no es error | 0 / 2 / 3 |
 | `list` | Todas las entradas `clave=valor`, ordenadas por clave en `LC_ALL=C` | 0 / 3 |
 | `path` | Ruta del fichero de estado | 0 |
+| `use <lenguaje> <fase>/<módulo> [tipo]` | Sitúa el trabajo: valida, crea el directorio del módulo, prepara y publica la rama, guarda el estado del sprint; imprime la ruta del módulo | 0 / 1 / 2 / 3 |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
 
 ---
@@ -77,9 +78,9 @@
 | `spec` | Ruta de la especificación (`docs/core/algorithms/05_Naive_Sort.md`) | `use` (v0.5.0) |
 | `repo` | Ruta del submódulo dentro del monorepo | `use` (v0.5.0) |
 
-**ES:** Hasta la v0.4.0 el almacén solo guarda y devuelve texto: no interpreta ninguna clave. La v0.5.0 empieza a escribir estas seis.
+**ES:** Hasta la v0.4.0 el almacén solo guardaba y devolvía texto: no interpretaba ninguna clave. Desde la v0.5.0 las escribe `use`.
 
-**EN:** Up to v0.4.0 the store only saves and returns text: it interprets no key. v0.5.0 starts writing these six.
+**EN:** Up to v0.4.0 the store only saved and returned text: it interpreted no key. Since v0.5.0, `use` writes them.
 
 ---
 
@@ -111,33 +112,50 @@
 
 ---
 
-## 🧾 Especificación de `use` (v0.5.0) / `use` specification
+## 🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
 
 ```bash
 glot use <lenguaje> <fase>/<módulo> [tipo]     # tipo por defecto: feat
 glot use <fase>/<módulo> [tipo]                # dentro del submódulo, deduce el lenguaje
 ```
 
-**ES:** `use` **sitúa el trabajo**: dice dónde vas a trabajar y lo deja preparado. No implementa, no genera esqueleto y no toca el monorepo.
+**ES:** `use` **sitúa el trabajo**: dice dónde vas a trabajar y lo deja preparado. Lee el estado, nunca lo fuerza: **con trabajo sin confirmar no crea ni cambia ramas**. No implementa, no genera esqueleto (solo crea la carpeta vacía del módulo) y no toca el monorepo.
 
-**EN:** `use` **locates the work**: it tells you where you will be working and gets it ready. It does not implement, does not scaffold and does not touch the monorepo.
+**EN:** `use` **locates the work**: it tells you where you will be working and gets it ready. It reads the state, never forces it: **with uncommitted work it creates and switches nothing**. It does not implement, does not scaffold (it only creates the empty module folder) and does not touch the monorepo.
 
 | Paso | Efecto |
 |:----:|--------|
 | 1 | Valida lenguaje, fase, módulo, `tipo` y estado del árbol **sin tocar nada** |
 | 2 | Resuelve la especificación `docs/core/{fase}/{NN}_{Nombre}.md` |
-| 3 | Crea `{lenguaje}/core/{fase}/{módulo}` si no existe (**vacío**: sin `src/` ni `test/`) |
-| 4 | `checkout` de `{tipo}/{fase}/{módulo}` o `checkout -b` si no existe; idempotente si ya estás en ella |
-| 5 | Publica la rama: `git push -u origin {rama}` |
+| 3 | Clasifica el estado: ¿existe la carpeta del módulo? ¿existe la rama `{tipo}/{fase}/{módulo}`? ¿hay trabajo sin confirmar? |
+| 4 | **Árbol limpio**: activa la rama si ya existe, o la crea **desde `main`** si no, y la publica con `push -u origin {rama}`. Crea `{lenguaje}/core/{fase}/{módulo}` (**vacía**: sin `src/` ni `test/`) solo si falta |
+| 5 | **Trabajo sin confirmar** (estado normal de reanudar): no crea ni cambia ramas. Si ya estás en la rama objetivo, la republica; si no, informa de dónde estás y de la rama que falta |
 | 6 | Escribe el estado (`lang`, `phase`, `module`, `branch`, `spec`, `repo`) |
 | 7 | Imprime la **ruta absoluta** del módulo en stdout |
+
+### Estados del sprint / Sprint states
+
+**ES:** Los cuatro estados que `use` reconoce. El directorio del módulo **no** cuenta como suciedad ajena: dentro de él, un árbol sucio es el estado normal de un sprint a medias (fin de jornada, corte de luz, implementación incompleta), no una anomalía.
+
+**EN:** The four states `use` recognises. The module directory does **not** count as foreign dirt: inside it, a dirty tree is the normal state of an unfinished sprint (end of the day, power cut, incomplete implementation), not an anomaly.
+
+| Estado | Árbol | Rama `{tipo}/{fase}/{módulo}` | Qué hace `use` |
+|--------|-------|-------------------------------|----------------|
+| **Nuevo** | — | no existe | crea la rama desde `main`, la publica, crea la carpeta vacía y guarda el estado |
+| **En curso, limpio** | limpio | existe | la activa (aunque estés en `main`), la publica y guarda el estado |
+| **Reanudar** | con trabajo sin confirmar | exista o no | **no crea ni cambia nada**: republica si ya estás en la rama; si no, informa de dónde estás |
+| **Cerrado** | limpio sobre `main` | no existe | con `tipo` explícito abre la rama de mantenimiento (`test`, `fix`, `refactor`…) desde `main` y la publica; sin `tipo`, avisa y sugiere uno |
+
+**ES:** El `tipo` por defecto (`feat`) es el de la rama propia del módulo: por eso, con el módulo **ya cerrado**, `use` exige indicarlo para no resucitar una rama `feat` fantasma. Con el módulo **nuevo** el valor por defecto se aplica sin preguntar.
+
+**EN:** The default `tipo` (`feat`) is the module's own branch type: that is why, with an **already closed** module, `use` requires it to be given so a phantom `feat` branch is not resurrected. With a **new** module the default applies without asking.
 
 | Comprobación | Falla con |
 |--------------|:---------:|
 | Faltan argumentos, `tipo` fuera de `feat\|fix\|docs\|chore\|refactor\|test`, opción desconocida | `2` |
-| Lenguaje fuera de `.gitmodules` · especificación ausente · submódulo sin inicializar · árbol con cambios sin confirmar | `1` |
-| Estado no escribible (la rama ya estaría preparada: se avisa por stderr) | `3` |
+| Lenguaje fuera de `.gitmodules` · especificación ausente · submódulo sin inicializar · cambios sin confirmar **fuera** del directorio del módulo · la ruta del módulo existe y no es un directorio · rama no creable o no publicable | `1` |
+| Estado no escribible (el módulo y la rama ya estarían preparados: se avisa por stderr) | `3` |
 
-**ES:** **No hace:** commits, `git add`, correr el inicializador, generar esqueleto, tocar la rama del monorepo ni el puntero del submódulo. **El `cd` real no llega hasta la v1.0.0** (capa cargable): hasta entonces, `cd "$(glot use …)"`.
+**ES:** **No hace:** commits, `git add`, correr el inicializador, generar esqueleto (`src/`, `test/` y el contrato de pruebas son de `new`, v0.9.0), tocar la rama del monorepo ni el puntero del submódulo. **Con trabajo sin confirmar nunca crea ni cambia de rama**: reanudar es su caso principal, no un error. **El `cd` real no llega hasta la v1.0.0** (capa cargable): hasta entonces, `cd "$(glot use …)"`.
 
-**EN:** **It does not:** commit, `git add`, run the initializer, scaffold, touch the monorepo branch or the submodule pointer. **The real `cd` arrives in v1.0.0** (loadable layer): until then, `cd "$(glot use …)"`.
+**EN:** **It does not:** commit, `git add`, run the initializer, scaffold (`src/`, `test/` and the test contract belong to `new`, v0.9.0), touch the monorepo branch or the submodule pointer. **With uncommitted work it never creates or switches branches**: resuming is its main case, not an error. **The real `cd` arrives in v1.0.0** (loadable layer): until then, `cd "$(glot use …)"`.
