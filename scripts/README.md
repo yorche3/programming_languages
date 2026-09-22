@@ -39,7 +39,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 
 | Documento | Contenido |
 |-----------|-----------|
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Capas L0–L9, versiones, criterios de orden y decisiones abiertas |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Capas L0–L9, versiones, criterios de orden y decisiones cerradas |
 | [`docs/SPRINT.md`](docs/SPRINT.md) | El ciclo de módulo: 9 pasos, comandos, evidencias y encargos de IA |
 | [`docs/CONTRACT.md`](docs/CONTRACT.md) | Contrato de todos los verbos, códigos de salida, almacén de estado y especificación de `use` |
 | [`docs/INTERNALS.md`](docs/INTERNALS.md) | Cómo funciona el script por dentro |

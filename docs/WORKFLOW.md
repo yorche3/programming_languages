@@ -56,9 +56,9 @@
 | 8 Puntero e índices | decide | ejecuta | **escribe la documentación** |
 | 9 Registro del cierre | autoriza | encarga | **escribe el registro** |
 
-**ES:** Los pasos 4, 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El agente se invoca con las plantillas de [`.github/prompts/`](../.github/prompts/) y **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
+**ES:** Los pasos 4, 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El agente se invoca con las plantillas de `.github/prompts/`, que **no se versionan** (`.gitignore` las excluye) y se normalizarán para `glot` en la L4 (v0.8.0), y **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
 
-**EN:** Steps 4, 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). The agent is invoked with the templates in [`.github/prompts/`](../.github/prompts/) and **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
+**EN:** Steps 4, 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). The agent is invoked with the `.github/prompts/` templates, which are **not versioned** (`.gitignore` excludes them) and will be normalised for `glot` in L4 (v0.8.0), and **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
 
 ---
 

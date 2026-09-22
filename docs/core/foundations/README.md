@@ -31,8 +31,8 @@ has_children: true
 | [`03_Unit_Test_Calculator.md`](03_Unit_Test_Calculator.md) | ✅ | Pruebas unitarias / Unit tests |
 | [`04_Numbers.md`](04_Numbers.md) | ✅ | Algoritmos numéricos / Numerical algorithms |
 
-> **ES:** Estado de implementación: **49/49 submódulos registrados en `.gitmodules`** tienen los 4 módulos homologados bajo `core/foundations/`. Foundations está completada; la siguiente fase es `core/algorithms/`.
-> **EN:** Implementation status: **49/49 submodules registered in `.gitmodules`** have all 4 modules standardized under `core/foundations/`. Foundations is complete; the next phase is `core/algorithms/`.
+> **ES:** Estado de implementación: **50/50 submódulos registrados en `.gitmodules`** tienen los 4 módulos homologados bajo `core/foundations/`. Foundations está completada; la siguiente fase es `core/algorithms/`.
+> **EN:** Implementation status: **50/50 submodules registered in `.gitmodules`** have all 4 modules standardized under `core/foundations/`. Foundations is complete; the next phase is `core/algorithms/`.
 
 ---
 

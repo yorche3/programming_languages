@@ -87,10 +87,20 @@ La política del validador automático (invocación, modelo y coste, advertencia
 
 ---
 
-## ⏳ Decisiones abiertas / Open decisions
+## ✅ Decisiones cerradas / Closed decisions
 
-| Tema | Situación | Recomendación |
-|------|-----------|---------------|
-| Contador de `progress` | `.gitmodules` registra **50** submódulos (php incluido) y [`docs/ROADMAP.md`](../../docs/ROADMAP.md) habla de **49** homologados | `progress` informa de ambos: `registrados 50 / homologados 49`; el desfase de php ya está anotado en el checklist |
-| División de prompts | `module-readme.prompt.md` cubre hoy README del módulo **más** índices y roadmap | Partirlo en dos encargos: `docs-module` (README de Nivel 3) y `docs-language` (readmes faltantes e índices N1/N2/N3) |
-| Nombre del tercer contador | El roadmap no distingue «registrado» de «homologado» | Reservar el vocabulario en `progress` antes de la v0.6.0 |
+**ES:** Las tres decisiones que quedaban abiertas para la v0.6.0 se resolvieron el 2026-09-22.
+
+**EN:** The three decisions pending for v0.6.0 were resolved on 2026-09-22.
+
+| Tema | Decisión |
+|------|----------|
+| Contador de `progress` | El denominador son los **50** submódulos de `.gitmodules`. `progress` informa de los dos números: `registrados 50` (pertenencia a `.gitmodules`) y `homologados X` (módulos terminados). Cualquier contador `X/49` que quedara en la documentación se corrige a `X/50` |
+| Vocabulario | Se mantiene **homologado** para el estado «finalizado\|concluido» y para marcar que el estado actual se actualizó; **registrado** queda reservado a la pertenencia técnica a `.gitmodules` |
+| División de prompts | `module-readme.prompt.md` cubre hoy README del módulo **más** índices y roadmap: se partirá en `docs-module` (README de Nivel 3) y `docs-language` (readmes faltantes e índices N1/N2/N3) |
+
+### Prompts: alcance actual / Prompts: current scope
+
+**ES:** Las plantillas de `.github/prompts/` **no se versionan**: `.gitignore` las excluye expresamente («Reusable AI prompt files (local only, never tracked)»). Son las que usa el autor, y por eso están documentadas en [`SPRINT.md`](SPRINT.md) y en [`docs/WORKFLOW.md`](../../docs/WORKFLOW.md), pero **no son accesibles** a quien clone el repositorio: fuera de este equipo esos archivos no existen. Se quedan como están hasta la **L4 (v0.8.0, `prompt`)**, donde se van a normalizar y modularizar para el flujo de `glot`: encargos más específicos, uno por paso del sprint, y el encargo armado por el script con el estado del sprint en lugar de pegarlo a mano.
+
+**EN:** The `.github/prompts/` templates are **not versioned**: `.gitignore` excludes them explicitly ("Reusable AI prompt files (local only, never tracked)"). They are the ones the author uses, which is why they are documented in [`SPRINT.md`](SPRINT.md) and [`docs/WORKFLOW.md`](../../docs/WORKFLOW.md), but they are **not accessible** to anyone cloning the repository: outside this machine those files do not exist. They stay as they are until **L4 (v0.8.0, `prompt`)**, where they will be normalised and modularised for the `glot` flow: more specific requests, one per sprint step, with the request built by the script from the sprint state instead of pasted by hand.

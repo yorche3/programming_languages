@@ -26,6 +26,13 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   monorepo en `docs/WORKFLOW.md`, y la documentación de `glot` se dividió en
   `scripts/README.md` (índice) más `scripts/docs/`: roadmap por capas L0–L9,
   sprint, contrato de verbos, tripas del script, log de versiones y validación.
+- Se cerraron las decisiones abiertas de `glot` para la v0.6.0 y se unificó el
+  vocabulario: **registrado** es la pertenencia técnica a `.gitmodules` (el
+  denominador, 50) y **homologado** el estado «finalizado|concluido» de un
+  módulo en un lenguaje (el numerador).
+- Se documentó el alcance real de `.github/prompts/` (plantillas locales que
+  `.gitignore` no versiona y que se normalizarán en la L4) en
+  `scripts/docs/ROADMAP.md`, `scripts/docs/SPRINT.md` y `docs/WORKFLOW.md`.
 - Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
   `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
   estados, método reproducible y plan de cierre.
@@ -39,6 +46,12 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   `50/50`.
 - Las plantillas de documentación usan nombres en inglés terminados en
   `_Template`.
+
+### Fixed
+
+- Los contadores `X/49` que quedaban en la documentación pasan a `X/50`
+  (Foundations, fase de texto y guía de inicialización, que además incorpora la
+  fila y la estructura de `php`).
 
 ## [0.1.0] - 2026-09-11
 
