@@ -79,9 +79,9 @@ There is no global installation required. Each language is configured and run in
 
 ## 🛠️ Herramientas del monorepo / Monorepo tooling
 
-**ES:** La carpeta [`scripts/`](scripts/) reúne herramientas pensadas para usarse **sobre este monorepo**. No son módulos del roadmap: no tocan `.gitmodules` ni los contadores `X/49`. La primera es `glot`, un CLI que convierte el ciclo de trabajo de un módulo —situar, crear, ejecutar, delegar, cerrar y publicar— en comandos reproducibles, y crece por versiones (la v0.4.0 es su almacén de estado).
+**ES:** La carpeta [`scripts/`](scripts/) reúne herramientas pensadas para usarse **sobre este monorepo**. No son módulos del roadmap: no tocan `.gitmodules` ni los contadores `X/50`. La primera es `glot`, un CLI que convierte el ciclo de trabajo de un módulo —situar, crear, ejecutar, delegar, cerrar y publicar— en comandos reproducibles, y crece por versiones (la v0.4.0 es su almacén de estado).
 
-**EN:** The [`scripts/`](scripts/) folder holds tools meant to be used **on this monorepo**. They are not roadmap modules: they touch neither `.gitmodules` nor the `X/49` counters. The first one is `glot`, a CLI that turns the per-module work cycle —locate, create, run, delegate, close and publish— into reproducible commands, and grows version by version (v0.4.0 is its state store).
+**EN:** The [`scripts/`](scripts/) folder holds tools meant to be used **on this monorepo**. They are not roadmap modules: they touch neither `.gitmodules` nor the `X/50` counters. The first one is `glot`, a CLI that turns the per-module work cycle —locate, create, run, delegate, close and publish— into reproducible commands, and grows version by version (v0.4.0 is its state store).
 
 ```bash
 cd "$REPO"                               # ruta de tu clon / path to your clone

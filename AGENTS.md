@@ -18,7 +18,7 @@ La implementación de código nuevo requiere una petición explícita del autor.
   evidencia de cada paso y reparto entre autor, tooling y agente.
 - `scripts/README.md` es la fuente de verdad del tooling del repositorio
   (herramienta `glot`), que no es un módulo del roadmap y no altera los
-  contadores `X/49`.
+  contadores `X/50`.
 
 ## Antes de trabajar
 
