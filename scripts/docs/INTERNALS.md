@@ -71,11 +71,25 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 
 ## 6. El verbo `use` / The `use` verb (L2)
 
-**ES:** `_glot_cmd_use` hace ocho pasos y **todas las validaciones ocurren antes de tocar nada**: lee los argumentos (el lenguaje se puede omitir si estás dentro del submódulo y el `tipo` por defecto es `feat`), comprueba el lenguaje contra `.gitmodules`, que el submódulo esté inicializado, que la fase exista, que la especificación exista (`_glot_spec_for` compara el nombre del módulo con `docs/core/{fase}/{NN}_{Nombre}.md`) y que el árbol no tenga cambios ajenos al directorio del módulo. Después crea el directorio vacío, prepara la rama (`checkout` o `checkout -b`, según exista ya), la publica con `push -u origin`, escribe las seis claves del estado e imprime la ruta absoluta. Con `-n` imprime el mismo plan sin ejecutarlo.
+**ES:** `_glot_cmd_use` **valida antes de tocar nada**: lee los argumentos (el lenguaje se puede omitir si estás dentro del submódulo, el `tipo` por defecto es `feat` y se recuerda si se dio explícitamente, porque con el módulo cerrado es obligatorio), comprueba el lenguaje contra `.gitmodules`, que el submódulo esté inicializado, que la fase exista, que la especificación exista (`_glot_spec_for` compara el nombre del módulo con `docs/core/{fase}/{NN}_{Nombre}.md`) y que el árbol no tenga cambios sin confirmar **fuera** del directorio del módulo. Después **lee el estado y nunca lo fuerza**, con dos banderas que deciden todo: `module_exists` (¿existe la carpeta?) y `branch_exists` (¿existe la rama `{tipo}/{fase}/{módulo}`?), más `dirty_work` (cualquier resto de suciedad, que ya solo puede estar dentro del módulo):
 
-**EN:** `_glot_cmd_use` runs eight steps and **every validation happens before touching anything**: it reads the arguments (the language may be omitted inside a submodule and the default `tipo` is `feat`), checks the language against `.gitmodules`, that the submodule is initialised, that the phase exists, that the specification exists (`_glot_spec_for` matches the module name against `docs/core/{phase}/{NN}_{Name}.md`) and that the tree has no changes outside the module directory. Then it creates the empty directory, prepares the branch (`checkout` or `checkout -b`, depending on whether it exists), publishes it with `push -u origin`, writes the six state keys and prints the absolute path. With `-n` it prints the same plan without running it.
+- **nuevo** (sin carpeta): `switch -c {rama} main` (o activa la rama si ya existe; si no hay `main`, avisa y la crea desde el HEAD actual), `push -u origin` y `mkdir -p` de la carpeta;
+- **en curso y limpio** (rama existente, `dirty_work` vacío): activa la rama y publica;
+- **reanudar** (`dirty_work` no vacío): no toca nada; si ya estás en la rama objetivo la republica, y si no, informa de dónde estás y de la rama que falta;
+- **cerrado** (limpio, sin rama): con `kind_given` abre la rama de mantenimiento desde `main` y la publica; sin él avisa y sugiere los tipos.
 
-**ES:** Detalles no evidentes: el directorio del módulo **no** cuenta como suciedad (por eso `use` se puede repetir sin fallar), y si el estado no se puede escribir devuelve `3` avisando de que la rama ya quedó preparada.
+Para terminar escribe las seis claves del estado e imprime la ruta absoluta. Con `-n` imprime ese mismo plan sin ejecutarlo (y sin pasos cuando el estado es reanudar o cerrado sin tipo).
+
+**EN:** `_glot_cmd_use` **validates before touching anything**: it reads the arguments (the language may be omitted inside a submodule, the default `tipo` is `feat` and whether it was given explicitly is remembered, because a closed module requires it), checks the language against `.gitmodules`, that the submodule is initialised, that the phase exists, that the specification exists (`_glot_spec_for` matches the module name against `docs/core/{phase}/{NN}_{Name}.md`) and that the tree has no uncommitted changes **outside** the module directory. Then it **reads the state and never forces it**, with two flags deciding everything: `module_exists` (does the folder exist?) and `branch_exists` (does the `{tipo}/{fase}/{módulo}` branch exist?), plus `dirty_work` (any remaining dirt, which can only be inside the module):
+
+- **new** (no folder): `switch -c {branch} main` (or activate the branch if it already exists; with no `main` it warns and creates it from the current HEAD), `push -u origin` and `mkdir -p` of the folder;
+- **in progress and clean** (branch exists, `dirty_work` empty): activates the branch and publishes;
+- **resume** (`dirty_work` not empty): touches nothing; if you are already on the target branch it republishes it, otherwise it reports where you are and which branch is missing;
+- **closed** (clean, no branch): with `kind_given` it opens the maintenance branch from `main` and publishes it; without it, it warns and suggests the types.
+
+Finally it writes the six state keys and prints the absolute path. With `-n` it prints that same plan without running it (and no steps when the state is resume or closed without a type).
+
+**ES:** Detalles no evidentes: el directorio del módulo **no** cuenta como suciedad, así que un sprint a medias (fin de jornada, corte de luz, implementación incompleta) no bloquea `use`; `current == branch` implica que el `push -u` es seguro porque `push` no toca el árbol de trabajo; y si el estado no se puede escribir devuelve `3` avisando de que el módulo y la rama ya quedaron preparados.
 
 ## 7. Salida y códigos / Output and exit codes
 
@@ -86,4 +100,4 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 
 ## 8. Lo que todavía no hace / What it does not do yet
 
-No hay catálogo ni comando nativo por lenguaje: eso es L2.5 (v0.6.0). La asignación ya existe (L2, v0.5.0): `use` escribe las seis claves reservadas, crea el directorio del módulo y prepara y publica la rama.
+No hay catálogo ni comando nativo por lenguaje: eso es L2.5 (v0.6.0). La asignación ya existe (L2, v0.5.0): `use` escribe las seis claves reservadas y sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado), sin crear ni cambiar ramas cuando hay trabajo sin confirmar.

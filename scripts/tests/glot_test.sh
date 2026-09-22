@@ -299,14 +299,17 @@ glot_run_from() {
 
 sandbox_make
 
-# sitúa el trabajo: directorio, rama, publicación y estado
+# módulo nuevo: crea la rama desde main, la publica con -u y crea su carpeta
 glot_run_sandbox use php algorithms/naive_sort
 assert_eq 'use: código' '0' "$rc_last"
 assert_eq 'use: ruta del módulo en stdout' "$SANDBOX/php/core/algorithms/naive_sort" "$out"
 assert_eq 'use: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
-assert_eq 'use: rama activa' 'feat/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+assert_eq 'use: crea el directorio del módulo' 'si' "$([[ -d "$SANDBOX/php/core/algorithms/naive_sort" ]] && echo si || echo no)"
+assert_eq 'use: no avisa de módulo existente' 'no' "$(case "$err" in *'no se genera esqueleto'*) echo si ;; *) echo no ;; esac)"
+assert_eq 'use: activa la rama' 'feat/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+assert_eq 'use: la rama nace de main' "$(git -C "$SANDBOX/php" rev-parse main)" "$(git -C "$SANDBOX/php" rev-parse feat/algorithms/naive-sort)"
 assert_eq 'use: rama publicada con upstream' 'feat/algorithms/naive-sort' "$(git -C "$SANDBOX/php" rev-parse --abbrev-ref --symbolic-full-name '@{u}' | sed 's|^origin/||')"
-assert_eq 'use: la rama existe en el remoto' 'feat/algorithms/naive-sort' "$(git -C "$SANDBOX/remote/php.git" rev-parse --verify --quiet refs/heads/feat/algorithms/naive-sort >/dev/null && echo feat/algorithms/naive-sort)"
+assert_eq 'use: la rama existe en el remoto' 'si' "$(git -C "$SANDBOX/remote/php.git" show-ref --verify --quiet refs/heads/feat/algorithms/naive-sort && echo si || echo no)"
 
 glot_run get lang
 assert_eq 'use: estado lang' 'php' "$out"
@@ -321,40 +324,116 @@ assert_eq 'use: estado spec' 'docs/core/algorithms/05_Naive_Sort.md' "$out"
 glot_run get repo
 assert_eq 'use: estado repo' 'php' "$out"
 
-# idempotente: el directorio que ya creó no cuenta como árbol sucio
+# módulo existente: avisa, no crea nada y republica la rama activa
 glot_run_sandbox use php algorithms/naive_sort
 assert_eq 'use repetido: código' '0' "$rc_last"
 assert_eq 'use repetido: ruta' "$SANDBOX/php/core/algorithms/naive_sort" "$out"
+assert_contains 'use repetido: aviso de módulo existente' 'no se genera esqueleto' "$err"
+assert_contains 'use repetido: aviso de que no hay esqueleto' 'no scaffolding' "$err"
+assert_contains 'use repetido: rama ya activa' 'rama ya activa' "$err"
+assert_contains 'use repetido: republica' 'published: origin/feat/algorithms/naive-sort' "$err"
 
-# ensayo con la rama ya creada: el plan no la vuelve a crear
+# ensayo con módulo y rama existentes: avisa y publica en el plan, sin crear nada
 glot_run_sandbox -n use php algorithms/naive_sort
-assert_eq 'use -n con rama existente: código' '0' "$rc_last"
-assert_contains 'use -n con rama existente: checkout sin -b' 'git -C '"$SANDBOX"'/php checkout feat/algorithms/naive-sort' "$out"
+assert_eq 'use -n con todo existente: código' '0' "$rc_last"
+assert_contains 'use -n con todo existente: aviso de módulo' 'no se genera esqueleto' "$err"
+assert_contains 'use -n con todo existente: plan de publicación' 'push -u origin feat/algorithms/naive-sort' "$out"
+assert_eq 'use -n con todo existente: sin mkdir' 'no' "$(case "$out" in *'mkdir -p'*) echo si ;; *) echo no ;; esac)"
+assert_eq 'use -n con todo existente: sin checkout' 'no' "$(case "$out" in *checkout*) echo si ;; *) echo no ;; esac)"
 
-# ensayo: imprime el plan y no toca ni git ni el estado
-git -C "$SANDBOX/php" checkout -q main
+# ensayo con módulo y rama inexistentes: plan de creación completa y ningún efecto
+git -C "$SANDBOX/php" switch -q main
 git -C "$SANDBOX/php" branch -q -D feat/algorithms/naive-sort
 rm -rf -- "$SANDBOX/php/core/algorithms/naive_sort"
 glot_run unset branch
 glot_run_sandbox -n use php algorithms/naive_sort
 assert_eq 'use -n: código' '0' "$rc_last"
-assert_contains 'use -n: plan de rama' 'checkout -b feat/algorithms/naive-sort' "$out"
+assert_contains 'use -n: plan de rama desde main' 'switch -c feat/algorithms/naive-sort main' "$out"
 assert_contains 'use -n: plan de publicación' 'push -u origin feat/algorithms/naive-sort' "$out"
+assert_contains 'use -n: plan de creación del directorio' 'mkdir -p '"$SANDBOX"'/php/core/algorithms/naive_sort' "$out"
 assert_contains 'use -n: plan de estado' 'branch=feat/algorithms/naive-sort' "$out"
 assert_eq 'use -n: no crea el directorio' 'no' "$([[ -e "$SANDBOX/php/core/algorithms/naive_sort" ]] && echo si || echo no)"
+assert_eq 'use -n: no crea la rama' 'no' "$(git -C "$SANDBOX/php" show-ref --verify --quiet refs/heads/feat/algorithms/naive-sort && echo si || echo no)"
 assert_eq 'use -n: sigue en main' 'main' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
 glot_run get branch
 assert_eq 'use -n: no escribe el estado' '1' "$rc_last"
 
-# tipo explícito
+# módulo nuevo con otro tipo: la rama nace de main con ese tipo
 glot_run_sandbox use php algorithms/naive_sort docs
 assert_eq 'use docs: código' '0' "$rc_last"
-assert_eq 'use docs: rama activa' 'docs/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+assert_eq 'use docs: activa la rama' 'docs/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+assert_eq 'use docs: la rama nace de main' "$(git -C "$SANDBOX/php" rev-parse main)" "$(git -C "$SANDBOX/php" rev-parse docs/algorithms/naive-sort)"
+
+# módulo cerrado (limpio, sobre main) con tipo explícito: abre rama de mantenimiento
+git -C "$SANDBOX/php" switch -q main
+git -C "$SANDBOX/php" branch -q -D docs/algorithms/naive-sort
+glot_run_sandbox use php algorithms/naive_sort docs
+assert_eq 'use de módulo cerrado: código' '0' "$rc_last"
+assert_contains 'use de módulo cerrado: avisa de la rama creada' 'rama creada desde main' "$err"
+assert_eq 'use de módulo cerrado: activa la rama' 'docs/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+assert_eq 'use de módulo cerrado: la rama nace de main' "$(git -C "$SANDBOX/php" rev-parse main)" "$(git -C "$SANDBOX/php" rev-parse docs/algorithms/naive-sort)"
+assert_eq 'use de módulo cerrado: publicada con upstream' 'docs/algorithms/naive-sort' "$(git -C "$SANDBOX/php" rev-parse --abbrev-ref --symbolic-full-name '@{u}' | sed 's|^origin/||')"
+assert_eq 'use de módulo cerrado: la rama está en el remoto' 'si' "$(git -C "$SANDBOX/remote/php.git" show-ref --verify --quiet refs/heads/docs/algorithms/naive-sort && echo si || echo no)"
+
+# módulo cerrado sin tipo: avisa y no crea nada (el feat por defecto es del módulo nuevo)
+git -C "$SANDBOX/php" switch -q main
+git -C "$SANDBOX/php" branch -q -D docs/algorithms/naive-sort
+glot_run_sandbox use php algorithms/naive_sort
+assert_eq 'use de módulo cerrado sin tipo: código' '0' "$rc_last"
+assert_contains 'use de módulo cerrado sin tipo: avisa' 'ya está cerrado y no se indicó tipo' "$err"
+assert_contains 'use de módulo cerrado sin tipo: sugiere el tipo' 'test|fix|refactor|docs|chore' "$err"
+assert_eq 'use de módulo cerrado sin tipo: no crea la rama' 'no' "$(git -C "$SANDBOX/php" show-ref --verify --quiet refs/heads/feat/algorithms/naive-sort && echo si || echo no)"
+assert_eq 'use de módulo cerrado sin tipo: sigue en main' 'main' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+
+# árbol limpio y rama del módulo ya existente: la activa y la publica
+git -C "$SANDBOX/php" branch -q feat/algorithms/naive-sort main
+glot_run_sandbox use php algorithms/naive_sort
+assert_eq 'use con rama existente: código' '0' "$rc_last"
+assert_contains 'use con rama existente: informa de la activación' 'rama activada' "$err"
+assert_eq 'use con rama existente: activa la rama' 'feat/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+assert_contains 'use con rama existente: publica' 'published: origin/feat/algorithms/naive-sort' "$err"
+
+# módulo ausente pero con la rama ya creada: la activa en vez de recrearla
+git -C "$SANDBOX/php" switch -q main
+git -C "$SANDBOX/php" switch -q -C feat/algorithms/naive-sort main
+rm -rf -- "$SANDBOX/php/core/algorithms/naive_sort"
+glot_run_sandbox use php algorithms/naive_sort
+assert_eq 'use con rama previa: código' '0' "$rc_last"
+assert_contains 'use con rama previa: informa de rama activada' 'rama existente activada' "$err"
+assert_eq 'use con rama previa: activa la rama existente' 'feat/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+assert_eq 'use con rama previa: crea el directorio' 'si' "$([[ -d "$SANDBOX/php/core/algorithms/naive_sort" ]] && echo si || echo no)"
 
 # desde dentro del submódulo se puede omitir el lenguaje
 glot_run_from "$SANDBOX/php" use algorithms/naive_sort fix
 assert_eq 'use sin lenguaje dentro del submódulo: código' '0' "$rc_last"
-assert_eq 'use sin lenguaje dentro del submódulo: rama' 'fix/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+glot_run get branch
+assert_eq 'use sin lenguaje dentro del submódulo: rama esperada' 'fix/algorithms/naive-sort' "$out"
+
+# trabajo sin confirmar dentro del módulo (reanudar): no crea ni cambia ramas
+printf 'work in progress\n' > "$SANDBOX/php/core/algorithms/naive_sort/wip.txt"
+git -C "$SANDBOX/php" switch -q main
+glot_run_sandbox use php algorithms/naive_sort test
+assert_eq 'use reanudando en main: código' '0' "$rc_last"
+assert_contains 'use reanudando en main: avisa del trabajo sin confirmar' 'trabajo sin confirmar y la rama no existe' "$err"
+assert_eq 'use reanudando en main: no crea la rama' 'no' "$(git -C "$SANDBOX/php" show-ref --verify --quiet refs/heads/test/algorithms/naive-sort && echo si || echo no)"
+assert_eq 'use reanudando en main: sigue en main' 'main' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+assert_eq 'use reanudando en main: conserva el trabajo' 'si' "$([[ -f "$SANDBOX/php/core/algorithms/naive_sort/wip.txt" ]] && echo si || echo no)"
+
+# reanudar sobre la rama del módulo: se republica y el trabajo no se toca
+git -C "$SANDBOX/php" switch -q feat/algorithms/naive-sort
+glot_run_sandbox use php algorithms/naive_sort
+assert_eq 'use reanudando en la rama: código' '0' "$rc_last"
+assert_contains 'use reanudando en la rama: rama ya activa' 'rama ya activa' "$err"
+assert_contains 'use reanudando en la rama: republica' 'published: origin/feat/algorithms/naive-sort' "$err"
+assert_eq 'use reanudando en la rama: conserva el trabajo' 'si' "$([[ -f "$SANDBOX/php/core/algorithms/naive_sort/wip.txt" ]] && echo si || echo no)"
+assert_eq 'use reanudando en la rama: el árbol sigue sucio' 'si' "$([[ -n "$(git -C "$SANDBOX/php" status --porcelain)" ]] && echo si || echo no)"
+
+# el trabajo del módulo no cuenta como suciedad ajena, pero el de fuera sí
+printf 'x\n' > "$SANDBOX/php/otro.txt"
+glot_run_sandbox use php algorithms/naive_sort
+assert_eq 'use con cambios fuera del módulo: código' '1' "$rc_last"
+assert_contains 'use con cambios fuera del módulo: avisa' 'fuera del módulo' "$err"
+rm -f -- "$SANDBOX/php/otro.txt"
 
 # errores de uso
 glot_run_sandbox use
@@ -387,6 +466,14 @@ glot_run_sandbox use php algorithms/naive_sort
 assert_eq 'use con árbol sucio: código' '1' "$rc_last"
 assert_contains 'use con árbol sucio: error' 'sin confirmar' "$err"
 git -C "$SANDBOX/php" checkout -q -- .
+
+# la ruta del módulo existe pero no es un directorio
+rm -rf -- "$SANDBOX/php/core/algorithms/naive_sort"
+printf 'choque\n' >"$SANDBOX/php/core/algorithms/naive_sort"
+glot_run_sandbox use php algorithms/naive_sort
+assert_eq 'use con la ruta ocupada por un archivo: código' '1' "$rc_last"
+assert_contains 'use con la ruta ocupada por un archivo: error' 'no es un directorio' "$err"
+rm -f -- "$SANDBOX/php/core/algorithms/naive_sort"
 
 # --- resumen -----------------------------------------------------------------
 

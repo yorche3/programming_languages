@@ -384,10 +384,15 @@ Verbos / Verbs:
   list                Lista el estado como clave=valor / lists state as key=value
   path                Imprime la ruta del archivo de estado / prints the state file path
   use <lenguaje> <fase>/<módulo> [tipo]
-                     Sitúa el trabajo: valida, crea el directorio del módulo,
-                     prepara y publica la rama, guarda el estado e imprime la ruta
-                     Locates the work: validates, creates the module directory,
-                     prepares and publishes the branch, stores state, prints the path
+                     Sitúa el trabajo: valida y, con el árbol limpio, activa o crea
+                     la rama {tipo}/{fase}/{módulo} desde main y la publica con
+                     upstream; con trabajo sin confirmar solo informa (si ya estás
+                     en la rama, la republica). Guarda el estado e imprime la ruta
+                     Locates the work: validates and, with a clean tree, activates or
+                     creates the {tipo}/{fase}/{módulo} branch from main and publishes
+                     it with upstream; with uncommitted work it only reports (if you
+                     are already on the branch, it republishes it). Stores state and
+                     prints the module path
 
 Opciones globales / Global options:
   -q, --quiet        Silencia el diagnóstico de stderr / silence stderr diagnostics
@@ -436,12 +441,19 @@ _glot_help_verb() {
             ;;
         use)
             printf 'glot use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint\n'
-            printf '  valida contra .gitmodules, crea el directorio del módulo, prepara y publica\n'
-            printf '  la rama {tipo}/{fase}/{módulo}, guarda el estado e imprime la ruta del módulo\n'
+            printf '  valida contra .gitmodules y la especificación; con el árbol limpio\n'
+            printf '  activa o crea la rama {tipo}/{fase}/{módulo} desde main y la publica\n'
+            printf '  con -u; con trabajo sin confirmar solo informa (si ya estás en la rama,\n'
+            printf '  la republica). Crea la carpeta del módulo si falta. Guarda el estado\n'
+            printf '  e imprime la ruta\n'
             printf 'glot use <language> <phase>/<module> [type] — locates the sprint work\n'
-            printf '  validates against .gitmodules, creates the module directory, prepares and\n'
-            printf '  publishes the {type}/{phase}/{module} branch, stores the state, prints the path\n'
+            printf '  validates against .gitmodules and the spec; with a clean tree it\n'
+            printf '  activates or creates the {type}/{phase}/{module} branch from main and\n'
+            printf '  publishes it with -u; with uncommitted work it only reports (if you are\n'
+            printf '  already on the branch, it republishes it). Creates the module folder\n'
+            printf '  when missing. Stores state and prints the path\n'
             printf 'Tipos / types: feat (por defecto/default), fix, docs, chore, refactor, test\n'
+            printf 'Con el módulo ya cerrado hay que indicar el tipo / with a closed module the type must be given\n'
             printf 'Desde dentro de un submódulo se puede omitir el lenguaje / the language can be omitted inside a submodule\n'
             ;;
         *)
@@ -515,9 +527,10 @@ _glot_spec_for() {
 }
 
 # _glot_cmd_use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint:
-# valida, crea el directorio del módulo, prepara y publica la rama, guarda el estado
-# e imprime la ruta absoluta del módulo. No implementa, no genera esqueleto y no
-# toca el monorepo.
+# valida y, con el árbol limpio, activa o crea la rama {tipo}/{fase}/{módulo} desde
+# main y la publica con upstream; con trabajo sin confirmar solo informa (salvo que
+# ya estés en la rama, que se republica). Guarda el estado e imprime la ruta
+# absoluta. No implementa, no genera esqueleto y no toca el monorepo.
 _glot_cmd_use() {
     local -a pos=()
     local arg=""
@@ -533,8 +546,11 @@ _glot_cmd_use() {
     local branch=""
     local current=""
     local dirty=""
+    local dirty_work=""
     local pair=""
     local branch_exists=0
+    local module_exists=0
+    local kind_given=0
 
     # 1. Argumentos: rechaza opciones y decide qué es cada posición.
     for arg in "$@"; do
@@ -562,6 +578,7 @@ _glot_cmd_use() {
             if [[ "${pos[0]}" == */* ]]; then
                 target="${pos[0]}"
                 kind="${pos[1]}"
+                kind_given=1
             else
                 lang="${pos[0]}"
                 target="${pos[1]}"
@@ -571,6 +588,7 @@ _glot_cmd_use() {
             lang="${pos[0]}"
             target="${pos[1]}"
             kind="${pos[2]}"
+            kind_given=1
             ;;
         *)
             _glot_error "uso / usage: glot use <lenguaje> <fase>/<módulo> [tipo]"
@@ -638,23 +656,56 @@ _glot_cmd_use() {
         branch_exists=1
     fi
 
-    # El propio directorio del módulo no cuenta como suciedad: use lo puede crear.
+    # El directorio puede existir ya: se está trabajando en el módulo o está cerrado.
+    # En ese caso no hay esqueleto que crear y solo se avisa, sin bloquear.
+    if [[ -d "$module_dir" ]]; then
+        module_exists=1
+    elif [[ -e "$module_dir" ]]; then
+        _glot_error "la ruta del módulo existe y no es un directorio / module path exists and is not a directory: $module_dir"
+        return 1
+    fi
+
+    # El propio directorio del módulo no cuenta como suciedad: dentro de él, un
+    # árbol sucio es el estado normal de un sprint en curso (reanudar tras una
+    # jornada, un corte de luz o una implementación a medias).
     dirty="$(git -C "$sub" status --porcelain 2>/dev/null | grep -vE "core/$phase/$module(/|\$)" || true)"
     if [[ -n "$dirty" ]]; then
-        _glot_error "el submódulo tiene cambios sin confirmar / submodule has uncommitted changes"
+        _glot_error "el submódulo tiene cambios sin confirmar fuera del módulo / submodule has uncommitted changes outside the module"
         _glot_info "$dirty"
         return 1
     fi
 
+    # Descartado lo anterior, cualquier resto de suciedad está dentro del módulo:
+    # trabajo de un sprint a medias. `use` lo respeta y nunca crea ni cambia ramas
+    # con trabajo sin confirmar.
+    dirty_work="$(git -C "$sub" status --porcelain 2>/dev/null || true)"
+
     # 3. Ensayo: imprime el plan y no toca ni git ni el estado.
     if ((_glot_dry_run)); then
-        printf 'mkdir -p %s\n' "$module_dir"
-        if ((branch_exists)); then
-            printf 'git -C %s checkout %s\n' "$sub" "$branch"
+        if ((module_exists)); then
+            _glot_warn "el módulo ya existe, no se genera esqueleto / module already exists, no scaffolding: $module_dir"
+            if [[ "$current" == "$branch" ]]; then
+                printf 'git -C %s push -u origin %s\n' "$sub" "$branch"
+            elif ((branch_exists)) && [[ -z "$dirty_work" ]]; then
+                printf 'git -C %s switch %s\n' "$sub" "$branch"
+                printf 'git -C %s push -u origin %s\n' "$sub" "$branch"
+            elif [[ -n "$dirty_work" ]]; then
+                printf '# sin pasos: hay trabajo sin confirmar / no steps: there is uncommitted work\n'
+            elif ((kind_given)); then
+                printf 'git -C %s switch -c %s main\n' "$sub" "$branch"
+                printf 'git -C %s push -u origin %s\n' "$sub" "$branch"
+            else
+                printf '# sin pasos: módulo cerrado y sin tipo / no steps: closed module and no type\n'
+            fi
         else
-            printf 'git -C %s checkout -b %s\n' "$sub" "$branch"
+            if ((branch_exists)); then
+                printf 'git -C %s switch %s\n' "$sub" "$branch"
+            else
+                printf 'git -C %s switch -c %s main\n' "$sub" "$branch"
+            fi
+            printf 'git -C %s push -u origin %s\n' "$sub" "$branch"
+            printf 'mkdir -p %s\n' "$module_dir"
         fi
-        printf 'git -C %s push -u origin %s\n' "$sub" "$branch"
         printf 'lang=%s\n' "$lang"
         printf 'phase=%s\n' "$phase"
         printf 'module=%s\n' "$module"
@@ -664,36 +715,92 @@ _glot_cmd_use() {
         return 0
     fi
 
-    # 4. Directorio del módulo (vacío: el esqueleto llega con `new`, v0.9.0).
-    if ! mkdir -p -- "$module_dir"; then
-        _glot_error "no se pudo crear el directorio / cannot create directory: $module_dir"
-        return 1
-    fi
+    # 4. Dos preguntas deciden todo: ¿existe el módulo? ¿existe la rama objetivo?
+    #    Regla de oro: con trabajo sin confirmar, `use` no crea ni cambia ramas,
+    #    solo informa; con el árbol limpio, situarse es seguro.
+    #    - módulo NUEVO: se cambia a su rama, creada desde main, se publica con
+    #      upstream y se crea el directorio del módulo (vacío: el esqueleto del
+    #      lenguaje es de `new`, v0.9.0);
+    #    - módulo EXISTENTE: la carpeta ya está, no hay esqueleto que crear. Si ya
+    #      estás en la rama, se republica (el push no toca el árbol de trabajo, así
+    #      que reanudar con trabajo a medias es seguro); con el árbol limpio se
+    #      activa la rama existente o se abre una de mantenimiento cuando el módulo
+    #      ya está cerrado y se indica el tipo.
+    if ((module_exists)); then
+        _glot_warn "el módulo ya existe, no se genera esqueleto / module already exists, no scaffolding: $module_dir"
 
-    # 5. Rama: idempotente si ya está activa.
-    if [[ "$current" == "$branch" ]]; then
-        _glot_info "rama ya activa / branch already active: $branch"
-    elif ((branch_exists)); then
-        if ! git -C "$sub" checkout -q -- "$branch"; then
-            _glot_error "no se pudo cambiar de rama / cannot switch branch: $branch"
-            return 1
+        if [[ "$current" == "$branch" ]]; then
+            _glot_info "rama ya activa / branch already active: $branch"
+            if ! git -C "$sub" push -q -u origin "$branch" 2>/dev/null; then
+                _glot_error "no se pudo publicar la rama / cannot publish branch: $branch"
+                _glot_info "la rama local existe; revisa el remoto / the local branch exists; check the remote"
+                return 1
+            fi
+            _glot_info "publicada / published: origin/$branch"
+        elif ((branch_exists)) && [[ -z "$dirty_work" ]]; then
+            if ! git -C "$sub" switch -q "$branch" 2>/dev/null; then
+                _glot_error "no se pudo activar la rama / cannot switch to branch: $branch"
+                return 1
+            fi
+            _glot_info "rama activada / branch activated: ${current:-detached} → $branch"
+            if ! git -C "$sub" push -q -u origin "$branch" 2>/dev/null; then
+                _glot_error "no se pudo publicar la rama / cannot publish branch: $branch"
+                return 1
+            fi
+            _glot_info "publicada / published: origin/$branch"
+        elif ((branch_exists)); then
+            _glot_warn "existe la rama $branch, pero no estás en ella / branch $branch exists, but you are not on it"
+            _glot_info "hay trabajo sin confirmar: use no cambia de rama / there is uncommitted work: use does not switch branches"
+            _glot_info "actual / current: ${current:-detached}; cámbiate tú / switch yourself: git -C $sub switch $branch"
+        elif [[ -n "$dirty_work" ]]; then
+            _glot_warn "trabajo sin confirmar y la rama no existe / uncommitted work and the branch does not exist: $branch"
+            _glot_info "use no crea ni cambia nada; confirma o publica tu trabajo / use creates and changes nothing; commit or publish your work"
+            _glot_info "actual / current: ${current:-detached}; listo cuando quieras / ready when you want: git -C $sub switch -c $branch"
+        elif ((kind_given)); then
+            if git -C "$sub" switch -q -c "$branch" main 2>/dev/null; then
+                _glot_info "rama creada desde main / branch created from main: $branch"
+            elif git -C "$sub" switch -q -c "$branch" 2>/dev/null; then
+                _glot_warn "no hay rama main; la rama nace de ${current:-HEAD} / no main branch; branch created from ${current:-HEAD}"
+            else
+                _glot_error "no se pudo crear la rama / cannot create branch: $branch"
+                return 1
+            fi
+            if ! git -C "$sub" push -q -u origin "$branch" 2>/dev/null; then
+                _glot_error "no se pudo publicar la rama / cannot publish branch: $branch"
+                return 1
+            fi
+            _glot_info "publicada / published: origin/$branch"
+        else
+            _glot_warn "el módulo ya está cerrado y no se indicó tipo / the module is already closed and no type was given"
+            _glot_info "indica el tipo de trabajo / name the kind of work: glot use $lang $target test|fix|refactor|docs|chore"
         fi
-        _glot_info "rama / branch: $branch"
     else
-        if ! git -C "$sub" checkout -q -b "$branch"; then
+        if ((branch_exists)); then
+            if ! git -C "$sub" switch -q "$branch" 2>/dev/null; then
+                _glot_error "no se pudo activar la rama / cannot switch to branch: $branch"
+                return 1
+            fi
+            _glot_info "rama existente activada / existing branch activated: $branch"
+        elif git -C "$sub" switch -q -c "$branch" main 2>/dev/null; then
+            _glot_info "rama creada desde main / branch created from main: $branch"
+        elif git -C "$sub" switch -q -c "$branch" 2>/dev/null; then
+            _glot_warn "no hay rama main; la rama nace de ${current:-HEAD} / no main branch; branch created from ${current:-HEAD}"
+        else
             _glot_error "no se pudo crear la rama / cannot create branch: $branch"
             return 1
         fi
-        _glot_info "rama creada / branch created: $branch"
-    fi
 
-    # 6. Publicación: la rama siempre se publica (decisión del autor).
-    if ! git -C "$sub" push -q -u origin "$branch" 2>/dev/null; then
-        _glot_error "no se pudo publicar la rama / cannot publish branch: $branch"
-        _glot_info "la rama local existe; revisa el remoto / the local branch exists; check the remote"
-        return 1
+        if ! git -C "$sub" push -q -u origin "$branch" 2>/dev/null; then
+            _glot_error "no se pudo publicar la rama / cannot publish branch: $branch"
+            return 1
+        fi
+        _glot_info "publicada / published: origin/$branch"
+
+        if ! mkdir -p -- "$module_dir"; then
+            _glot_error "no se pudo crear el directorio / cannot create directory: $module_dir"
+            return 1
+        fi
     fi
-    _glot_info "publicada / published: origin/$branch"
 
     # 7. Estado del sprint: si falla, la rama ya estaría preparada y se avisa.
     for pair in "lang=$lang" "phase=$phase" "module=$module" "branch=$branch" "spec=$spec" "repo=$lang"; do

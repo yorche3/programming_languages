@@ -57,7 +57,7 @@
 | Versión | Capa | Pasos del sprint | Añade | Por qué ahí / Why there |
 |---------|:----:|:----------------:|-------|-------------------------|
 | 0.4.0 | L1 | — | `set`, `get`, `unset`, `list`, `path` en XDG | Cimiento que consumen `use`, `test` y el progreso |
-| 0.5.0 | L2 | 2–3 | `use <lenguaje> <fase>/<módulo> [tipo]`: valida contra `.gitmodules`, crea el directorio si falta, prepara y publica la rama, guarda el estado e imprime la ruta | Es el paso que sitúa el trabajo; el `cd` real que lo completa llega con la capa cargable |
+| 0.5.0 | L2 | 2–3 | `use <lenguaje> <fase>/<módulo> [tipo]`: valida contra `.gitmodules` y sitúa el trabajo según cuatro estados (nuevo, en curso, reanudar, cerrado): activa o crea la rama desde `main`, la publica con upstream, crea la carpeta si falta y no toca nada cuando hay trabajo sin confirmar. Guarda el estado e imprime la ruta | Es el paso que sitúa el trabajo; el `cd` real que lo completa llega con la capa cargable |
 | 0.6.0 | L2.5 | apoyo a todos | `langs`, `modules`, `progress`, comando nativo por lenguaje y autocompletado v1 | Los datos ya existen; el autocompletado los necesita |
 | 0.7.0 | L3 | 5–7 | `test` (comando nativo del asignado) y `verify` (sintaxis/lint), desde cualquier directorio | Primer consumo real del catálogo y del estado |
 | 0.8.0 | L4 | 4–8 | `prompt`/`ask`: arma el encargo para el agente con las plantillas de `.github/prompts`, con `GLOT_DELEGATE` como estrategia enchufable | **Solo imprime texto**: no muta nada, así que va antes que la capa que sí muta |
