@@ -13,7 +13,7 @@ _glot_complete() {
     local glot="${GLOT_CMD:-glot}"
     local words=""
     local keys="lang phase module branch spec repo"
-    local verbs="version help doctor greet hello langs modules progress completion use test verify set get unset list path"
+    local verbs="version help doctor greet hello langs modules progress completion use test verify prompt ask set get unset list path"
 
     if ((COMP_CWORD == 1)); then
         COMPREPLY=($(compgen -W "$verbs -q --quiet -n --dry-run -h --help --version" -- "$cur"))
@@ -36,6 +36,15 @@ _glot_complete() {
             ;;
         test | verify)
             if ((COMP_CWORD == 2)); then
+                words="$("$glot" langs 2>/dev/null | cut -f1)"
+            else
+                words="$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"
+            fi
+            ;;
+        prompt | ask)
+            if ((COMP_CWORD == 2)); then
+                words="$("$glot" prompt 2>/dev/null | cut -f1 | grep -v -e '^$')"
+            elif ((COMP_CWORD == 3)); then
                 words="$("$glot" langs 2>/dev/null | cut -f1)"
             else
                 words="$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"

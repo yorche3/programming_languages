@@ -43,6 +43,12 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   `{modulo}`, `{Modulo}` y `{suite}` resueltos contra el módulo real; el
   catálogo de datos suma la columna del verificador (14 de 50 lenguajes) y
   `doctor` informa de la cobertura, con 258 comprobaciones en el harness.
+- `glot` v0.8.0: **delegación** (L4) con `prompt` (registro de encargos y
+  encargo armado con el estado del sprint) y `ask` (envío a `GLOT_DELEGATE` por
+  stdin); las cuatro plantillas del ciclo quedan **versionadas** en
+  `scripts/prompts/` (`scaffold`, `implement`, `docs-module`, `docs-language`) y
+  el vocabulario de marcadores se unifica con el del catálogo, con 286
+  comprobaciones en el harness.
 - Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
   `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
   estados, método reproducible y plan de cierre.
@@ -54,6 +60,11 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Los marcadores de las plantillas y del catálogo de datos pasan a un solo
+  vocabulario anclado al estado del sprint: `{modulo}`/`{Modulo}` se renombran a
+  `{module}`/`{Module}` en la guía de inicialización (87 ocurrencias) y en
+  `scripts/data/languages.tsv` (23), y las plantillas dejan `{lenguaje}`,
+  `{fase}` y `{especificacion}` por `{lang}`, `{phase}` y `{spec}`.
 - El roadmap reconoce los **50** submódulos registrados en `.gitmodules`: `php`
   entra en el contador y Foundations y `core.algorithms.naive_sort` pasan a
   `50/50`.
@@ -62,6 +73,9 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- La clave reservada `repo` se documentaba como «ruta del submódulo dentro del
+  monorepo» cuando `use` guarda el **nombre** del submódulo; el contrato ya dice
+  lo que hace el código.
 - Nueve filas de la tabla de comandos nativos no eran ejecutables como estaban
   (`ada` apuntaba a un directorio inexistente, `kotlin` a un envoltorio ausente,
   `scala` se quedaba esperando sin `-batch`, `prolog`, `tcl-tk` y `scheme`

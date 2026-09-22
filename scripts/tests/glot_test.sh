@@ -85,13 +85,13 @@ glot_run_in() {
 
 # version
 glot_run version
-assert_eq 'version: salida' 'glot 0.7.0' "$out"
+assert_eq 'version: salida' 'glot 0.8.0' "$out"
 assert_eq 'version: código' '0' "$rc_last"
 assert_eq 'version: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 
 # --version
 glot_run --version
-assert_eq '--version: salida' 'glot 0.7.0' "$out"
+assert_eq '--version: salida' 'glot 0.8.0' "$out"
 assert_eq '--version: código' '0' "$rc_last"
 
 # help general y por verbo
@@ -152,7 +152,7 @@ assert_contains 'nombre suelto: sugiere greet' 'glot greet Ada' "$err"
 # doctor dentro del monorepo
 glot_run doctor
 assert_eq 'doctor dentro: código' '0' "$rc_last"
-assert_contains 'doctor dentro: versión' 'version: 0.7.0' "$out"
+assert_contains 'doctor dentro: versión' 'version: 0.8.0' "$out"
 assert_contains 'doctor dentro: script_dir' 'script_dir:' "$out"
 assert_contains 'doctor dentro: raíz detectada' 'root: /' "$out"
 assert_contains 'doctor dentro: ruta del estado' 'state_file:' "$out"
@@ -311,6 +311,26 @@ glot_run_no_home() {
     local rc=0
     out="$(cd -- "$WORK_DIR" && env -u HOME -u XDG_STATE_HOME -u GLOT_STATE_FILE -u GLOT_ROOT \
         "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+# glot_run_nodelegate [args...] — ejecuta glot sin GLOT_DELEGATE, para que el caso no
+# dependa de lo que tenga exportado la sesión.
+glot_run_nodelegate() {
+    local rc=0
+    out="$(env -u GLOT_DELEGATE "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+# glot_run_delegate <orden> [args...] — ejecuta glot con GLOT_DELEGATE apuntando a esa
+# orden, para verificar la estrategia de envío sin salir del directorio temporal.
+glot_run_delegate() {
+    local delegate="$1"
+    shift
+    local rc=0
+    out="$(GLOT_DELEGATE="$delegate" "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
     err="$(cat -- "$WORK_DIR/stderr")"
     rc_last="$rc"
 }
@@ -645,7 +665,7 @@ assert_eq 'sin HOME: get devuelve 3' '3' "$rc_last"
 
 # --- casos de la especificación v0.7.0 (L3, ejecución) ----------------------
 
-# la plantilla del catálogo se expande con el módulo real: {modulo}, {Modulo} y {suite}
+# la plantilla del catálogo se expande con el módulo real: {module}, {Module} y {suite}
 glot_run -n test php algorithms/naive_sort
 assert_eq 'test -n: código' '0' "$rc_last"
 assert_eq 'test -n: un plan y solo uno' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
@@ -664,7 +684,7 @@ assert_contains 'test -n: sufijo fijo tras {suite}' 'naive_sort_tests_guile.scm'
 
 glot_run -n test vala algorithms/naive_sort
 assert_contains 'test -n: {suite} dentro de una ruta' 'test/naive_sort_tests.vala' "$out"
-assert_contains 'test -n: {modulo} en el binario' '/tmp/naive_sort-tests' "$out"
+assert_contains 'test -n: {module} en el binario' '/tmp/naive_sort-tests' "$out"
 
 glot_run -n test tcl-tk algorithms/naive_sort
 assert_contains 'test -n: suite con extensión .test' 'naive_sort.test' "$out"
@@ -715,6 +735,68 @@ glot_run doctor
 assert_eq 'doctor: código' '0' "$rc_last"
 assert_contains 'doctor: cobertura de verificadores' 'verify_commands: ' "$out"
 assert_contains 'doctor: hay verificadores' 'verify_commands: 14 de / of 50' "$out"
+
+# --- casos de la especificación v0.8.0 (L4, delegación) ---------------------
+
+# registro de encargos: nombre<TAB>paso<TAB>descripción, leído del frontmatter
+glot_run prompt
+assert_eq 'prompt: código' '0' "$rc_last"
+assert_eq 'prompt: cuatro encargos' '4' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'prompt: tres columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=3')"
+assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
+assert_contains 'prompt: docs-language en el paso 8' "$(printf 'docs-language\t8')" "$out"
+
+# el encargo lleva la cabecera con el estado del sprint y la plantilla expandida
+glot_run prompt scaffold php algorithms/naive_sort
+assert_eq 'prompt scaffold: código' '0' "$rc_last"
+assert_contains 'prompt scaffold: nombre y objetivo' '# Encargo `scaffold` — php algorithms/naive_sort' "$out"
+assert_contains 'prompt scaffold: spec del estado' '| spec | docs/core/algorithms/05_Naive_Sort.md |' "$out"
+assert_contains 'prompt scaffold: directorio del módulo' '/php/core/algorithms/naive_sort |' "$out"
+assert_contains 'prompt scaffold: marcadores expandidos' 'php/core/algorithms/naive_sort' "$out"
+assert_eq 'prompt scaffold: sin frontmatter de VS Code' 'no' "$(case "$out" in *'mode: agent'*) echo si ;; *) echo no ;; esac)"
+assert_eq 'prompt scaffold: sin marcadores sin resolver' '' "$(printf '%s\n' "$out" | grep -oE '\{[a-zA-Z_]+\}' | sort -u)"
+
+glot_run prompt implement php algorithms/naive_sort
+assert_contains 'prompt implement: encargo del paso 5' 'Implementación del módulo' "$out"
+
+glot_run prompt nope
+assert_eq 'prompt con encargo desconocido: código' '1' "$rc_last"
+assert_contains 'prompt con encargo desconocido: sugiere el registro' 'glot prompt' "$err"
+
+# ask: sin delegado no hay nada que enviar
+ask_nodelegate() {
+    local rc=0
+    out="$(env -u GLOT_DELEGATE "$GLOT_SH" ask "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+ask_nodelegate implement php algorithms/naive_sort
+assert_eq 'ask sin delegado: código' '1' "$rc_last"
+assert_contains 'ask sin delegado: explica GLOT_DELEGATE' 'GLOT_DELEGATE' "$err"
+
+ask_nodelegate
+assert_eq 'ask sin encargo: código' '2' "$rc_last"
+
+# ask con delegado: el encargo va por stdin y su salida a stdout
+glot_run_delegate 'wc -l' ask implement php algorithms/naive_sort
+assert_eq 'ask con delegado: código' '0' "$rc_last"
+assert_eq 'ask con delegado: recibe el encargo por stdin' 'si' "$([[ "$out" =~ ^[[:space:]]*[0-9]+$ && "$out" -gt 20 ]] && echo si || echo no)"
+assert_contains 'ask con delegado: lo anuncia por stderr' 'delegado / delegate' "$err"
+
+glot_run_delegate 'false' ask implement php algorithms/naive_sort
+assert_eq 'ask con delegado que falla: código' '1' "$rc_last"
+assert_contains 'ask con delegado que falla: error' 'el delegado falló' "$err"
+
+glot_run_delegate 'cat >/dev/null' -n ask implement php algorithms/naive_sort
+assert_eq 'ask -n: código' '0' "$rc_last"
+assert_contains 'ask -n: imprime el plan sin enviar' 'cat >/dev/null' "$out"
+
+# doctor informa de las plantillas y del delegado
+glot_run doctor
+assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
+assert_contains 'doctor: registro de encargos' 'prompts_ok: 4 encargos / requests' "$out"
+assert_contains 'doctor: delegado sin configurar' 'delegate: (sin configurar / not configured)' "$out"
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 

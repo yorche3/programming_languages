@@ -57,6 +57,8 @@
 | `completion [bash\|zsh]` | Imprime el guion de autocompletado en stdout; **no** lo instala | 0 / 1 / 2 |
 | `test [lenguaje] [fase/módulo]` | Ejecuta la suite del módulo asignado en su directorio, con el comando nativo del lenguaje; la salida del runner va a stdout | 0 / 1 / 2 / 3 / **4** |
 | `verify [lenguaje] [fase/módulo]` | Ejecuta el verificador (sintaxis/formato) del lenguaje; imprime `skipped` si aún no tiene uno | 0 / 1 / 2 / 3 / **4** |
+| `prompt [encargo] [lenguaje] [fase/módulo]` | Sin encargo, lista el registro; con encargo, imprime el encargo armado (estado del sprint + plantilla expandida) | 0 / 1 / 2 / 3 |
+| `ask <encargo> [lenguaje] [fase/módulo]` | Arma el encargo y lo envía a `GLOT_DELEGATE` por stdin; su salida va a stdout | 0 / 1 / 2 / 3 |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
 
 ---
@@ -83,7 +85,7 @@
 | `module` | Módulo en `snake_case` (`naive_sort`) | `use` (v0.5.0) |
 | `branch` | Rama de trabajo (`feat/algorithms/naive-sort`) | `use` (v0.5.0) |
 | `spec` | Ruta de la especificación (`docs/core/algorithms/05_Naive_Sort.md`) | `use` (v0.5.0) |
-| `repo` | Ruta del submódulo dentro del monorepo | `use` (v0.5.0) |
+| `repo` | Nombre del submódulo en la raíz del monorepo (`php`) | `use` (v0.5.0) |
 
 **ES:** Hasta la v0.4.0 el almacén solo guardaba y devolvía texto: no interpretaba ninguna clave. Desde la v0.5.0 las escribe `use`.
 
@@ -177,7 +179,11 @@
 | Objetivo / Target | `glot <verbo> [lenguaje] [fase/módulo]`; lo que no llegue por argumento se completa con el **estado del sprint** (`lang`, `phase`, `module`) |
 | Directorio / Directory | `{lenguaje}/core/{fase}/{módulo}`; si el comando empieza por `cd X &&`, ese `cd` se respeta |
 | Comando / Command | Columna 4 (`test`) o 5 (`verify`) de [`data/languages.tsv`](../data/languages.tsv) |
-| Marcadores / Placeholders | `{modulo}` → id (`naive_sort`), `{Modulo}` → PascalCase (`NaiveSort`), `{suite}` → archivo de suite |
+| Marcadores / Placeholders | `{module}` → id (`naive_sort`), `{Module}` → PascalCase (`NaiveSort`), `{suite}` → archivo de suite |
+
+**ES:** El vocabulario de marcadores es **uno solo** para el catálogo y para las plantillas de encargo, anclado a las claves del estado: `{lang}`, `{phase}`, `{module}`, `{repo}`, `{branch}`, `{spec}`, más `{Module}` (PascalCase), `{suite}` (catálogo) y `{module_dir}` (ruta absoluta del módulo).
+
+**EN:** The placeholder vocabulary is **a single one** for both the catalogue and the request templates, anchored to the state keys: `{lang}`, `{phase}`, `{module}`, `{repo}`, `{branch}`, `{spec}`, plus `{Module}` (PascalCase), `{suite}` (catalogue) and `{module_dir}` (absolute module path).
 
 **ES:** `{suite}` **no** se adivina: se deduce del propio patrón. Del token que lo contiene se toman el prefijo y el sufijo (`test/{suite}.vala` → `test/*.vala`; `{suite}_guile.scm` → `*_guile.scm`), se busca en el directorio efectivo del comando y se exige **una única** coincidencia; cero o varias son un error en vez de una elección silenciosa.
 
@@ -193,6 +199,27 @@
 **ES:** La tabla de comandos es **superficie de ejecución**: por eso se versiona, `glot doctor` informa de su ruta y de su cobertura, `-n` imprime el comando exacto antes de correrlo y el harness comprueba su forma. Los comandos salen de la ejecución real de los módulos: **tres lenguajes ya homologados** (V, Rust y Crystal) tienen hallazgos de formato preexistentes, así que `verify` informa de ellos con `4`; no es un fallo de `glot` ni una regresión.
 
 **EN:** The command table is an **execution surface**: that is why it is versioned, `glot doctor` reports its path and coverage, `-n` prints the exact command before running it, and the harness checks its shape. The commands come from real module runs: **three already-homologated languages** (V, Rust and Crystal) have pre-existing formatting findings, so `verify` reports them with `4`; it is not a `glot` failure nor a regression.
+
+---
+
+## 🤝 Delegación (L4, v0.8.0) / Delegation
+
+**ES:** `prompt` **arma** el encargo para el agente y `ask` lo **envía**. Ninguno de los dos ejecuta el trabajo ni escribe en el repositorio: `prompt` imprime texto y `ask` lo entrega al delegado. Las plantillas viven **versionadas** en [`prompts/`](../prompts/), junto al tooling.
+
+**EN:** `prompt` **builds** the request for the agent and `ask` **sends** it. Neither runs the work nor writes to the repository: `prompt` prints text and `ask` hands it to the delegate. Templates live **versioned** in [`prompts/`](../prompts/), next to the tooling.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Registro / Registry | `prompts/*.prompt.md`; el `name`, el `step` y la `description` salen de su frontmatter, así que añadir un encargo es añadir un archivo |
+| Salida de `prompt` / `prompt` output | Cabecera con el estado del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `module_dir`) + la plantilla sin frontmatter y con los marcadores resueltos |
+| `-n/--dry-run` | `prompt` no lo necesita (imprimir es su función); `ask -n` imprime el plan sin enviar nada |
+| Delegado / Delegate | `GLOT_DELEGATE`: el encargo va por **stdin** y su salida va a **stdout**. Sin la variable, `ask` devuelve `1` |
+| Plantilla local / Local template | Si solo existe en `.github/prompts/` (banco local del autor, no versionado), `prompt` la usa **avisando** |
+| Marcador desconocido | Error `1` con el marcador y la lista de los válidos: nunca texto literal silencioso |
+
+**ES:** `ask` es una **superficie de ejecución** como la tabla de comandos: la orden sale de una variable de entorno, se anuncia por stderr y `-n` la muestra antes de lanzarla. Un delegado que falla devuelve `1`, no `4`: no es una verificación.
+
+**EN:** `ask` is an **execution surface** like the command table: the command comes from an environment variable, it is announced on stderr and `-n` shows it before running it. A failing delegate returns `1`, not `4`: it is not a verification.
 
 ---
 

@@ -17,7 +17,7 @@
 | Resolver catálogo y estado | Lenguaje, fase, módulo, rama y especificación del trabajo en curso |
 | Preparar el entorno | Directorio del módulo, rama de trabajo y, desde L9, la toolchain esperada |
 | Ejecutar y verificar | Comandos nativos del lenguaje desde cualquier directorio, leyendo el estado |
-| Preparar los encargos de IA | Arma el encargo para el agente con las plantillas de `.github/prompts`; no lo ejecuta por su cuenta |
+| Preparar los encargos de IA | Arma el encargo para el agente con las plantillas versionadas de `scripts/prompts/`; no lo ejecuta por su cuenta |
 | Registrar la evidencia | Salidas reales, checklist de cierre, roadmap y puntero del submódulo |
 
 **No-objetivos / Non-goals:** no es un módulo del roadmap ni toca `.gitmodules` o los contadores `X/50`; no escribe documentación (la encarga y la valida); no sustituye al agente de VS Code; no publica nada que no se le pida explícitamente; no instala toolchains antes de L9; no es un gestor de proyectos.
@@ -44,7 +44,7 @@
 | L2 | Asignación: situar el trabajo (`use`) | 0.5.0 ✅ |
 | L2.5 | Catálogo (`langs`, `modules`, `progress`), comandos nativos y autocompletado | 0.6.0 ✅ |
 | L3 | Ejecución: `test` y `verify` | 0.7.0 ✅ |
-| L4 | Delegación: `prompt` (encargos de IA) | 0.8.0 |
+| L4 | Delegación: `prompt` (encargos de IA) y `ask` (envío al delegado) | 0.8.0 ✅ |
 | L5 | Creación y registro: `new`, `save` | 0.9.0 |
 | L6 | Evidencia y cierre: `evidence`, `close`, `validate` | 0.10.0 |
 | L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.11.0 |
@@ -61,7 +61,7 @@
 | 0.5.0 | L2 | 2–3 | `use <lenguaje> <fase>/<módulo> [tipo]`: valida contra `.gitmodules` y sitúa el trabajo según cuatro estados (nuevo, en curso, reanudar, cerrado): activa o crea la rama desde `main`, la publica con upstream, crea la carpeta si falta y no toca nada cuando hay trabajo sin confirmar. Guarda el estado e imprime la ruta | Es el paso que sitúa el trabajo; el `cd` real que lo completa llega con la capa cargable |
 | 0.6.0 | L2.5 | apoyo a todos | `langs`, `modules`, `progress` y `completion`: el **conversor de nombres** (id canónico → documento, rama, commit y carpeta), los comandos nativos por lenguaje en `data/languages.tsv` y el autocompletado de bash y zsh con completado dinámico | Los datos ya existen; el autocompletado los necesita, y `use` deja de depender de un heurístico de nombres |
 | 0.7.0 | L3 | 5–7 | `test` (suite del módulo asignado, con el comando nativo del lenguaje) y `verify` (sintaxis/formato), desde cualquier directorio, con el código `4` de verificación fallida y los marcadores `{modulo}`/`{Modulo}`/`{suite}` resueltos contra el módulo real | Primer consumo real del catálogo y del estado; la tabla de comandos se corrige contra los módulos ya homologados
-| 0.8.0 | L4 | 4–8 | `prompt`/`ask`: arma el encargo para el agente con las plantillas de `.github/prompts`, con `GLOT_DELEGATE` como estrategia enchufable | **Solo imprime texto**: no muta nada, así que va antes que la capa que sí muta |
+| 0.8.0 | L4 | 4–8 | `prompt`/`ask`: arma el encargo para el agente con las plantillas **versionadas** de `scripts/prompts/`, con el estado del sprint expandido y `GLOT_DELEGATE` como estrategia enchufable | **Solo imprime texto** (o lo envía): no muta nada, así que va antes que la capa que sí muta |
 | 0.9.0 | L5 | 4 | `new`/`scaffold` (inicializador del lenguaje, esqueleto y contrato de pruebas) y `save` (commit guiado con la convención del repo) | Reutiliza catálogo y estado; elimina el andamiaje manual repetido |
 | 0.10.0 | L6 | 7–8 | `evidence` (salidas reales), `close` (checklist + roadmap) y `validate` (validador automático con Copilot CLI) | El cierre documental requiere validación: la ejecuta el agente, el script la encarga y la comprueba |
 | 0.11.0 | L7 | 1, 9 | `status` (submódulos, ramas, punteros), `pointer` (actualiza el puntero del submódulo en el monorepo), `clean` de artefactos y `submodule sync` | Ops diaria; primero solo lectura, las mutaciones con `-n` |
@@ -98,10 +98,10 @@ La política del validador automático (invocación, modelo y coste, advertencia
 |------|----------|
 | Contador de `progress` | El denominador son los **50** submódulos de `.gitmodules`. `progress` informa de los dos números: `registrados 50` (pertenencia a `.gitmodules`) y `homologados X` (módulos terminados). Cualquier contador `X/49` que quedara en la documentación se corrige a `X/50` |
 | Vocabulario | Se mantiene **homologado** para el estado «finalizado\|concluido» y para marcar que el estado actual se actualizó; **registrado** queda reservado a la pertenencia técnica a `.gitmodules` |
-| División de prompts | `module-readme.prompt.md` cubre hoy README del módulo **más** índices y roadmap: se partirá en `docs-module` (README de Nivel 3) y `docs-language` (readmes faltantes e índices N1/N2/N3) |
+| División de prompts | `module-readme.prompt.md` cubría README del módulo **más** índices y roadmap: **hecho** en la v0.8.0, con `docs-module` (paso 7) y `docs-language` (paso 8) separados y versionados en `scripts/prompts/` |
 
 ### Prompts: alcance actual / Prompts: current scope
 
-**ES:** Las plantillas de `.github/prompts/` **no se versionan**: `.gitignore` las excluye expresamente («Reusable AI prompt files (local only, never tracked)»). Son las que usa el autor, y por eso están documentadas en [`SPRINT.md`](SPRINT.md) y en [`docs/WORKFLOW.md`](../../docs/WORKFLOW.md), pero **no son accesibles** a quien clone el repositorio: fuera de este equipo esos archivos no existen. Se quedan como están hasta la **L4 (v0.8.0, `prompt`)**, donde se van a normalizar y modularizar para el flujo de `glot`: encargos más específicos, uno por paso del sprint, y el encargo armado por el script con el estado del sprint en lugar de pegarlo a mano.
+**ES:** Las plantillas **normalizadas viven versionadas** en `scripts/prompts/`, junto al tooling: `glot prompt` las lista y las arma con el estado del sprint. `.github/prompts/` sigue siendo el banco local del autor (`.gitignore` lo excluye con «local only, never tracked»): `glot` lo acepta como respaldo cuando falta la versionada, **avisando** de que no viaja en el repositorio.
 
-**EN:** The `.github/prompts/` templates are **not versioned**: `.gitignore` excludes them explicitly ("Reusable AI prompt files (local only, never tracked)"). They are the ones the author uses, which is why they are documented in [`SPRINT.md`](SPRINT.md) and [`docs/WORKFLOW.md`](../../docs/WORKFLOW.md), but they are **not accessible** to anyone cloning the repository: outside this machine those files do not exist. They stay as they are until **L4 (v0.8.0, `prompt`)**, where they will be normalised and modularised for the `glot` flow: more specific requests, one per sprint step, with the request built by the script from the sprint state instead of pasted by hand.
+**EN:** The **normalised templates are versioned** in `scripts/prompts/`, next to the tooling: `glot prompt` lists them and builds them from the sprint state. `.github/prompts/` remains the author's local bank (`.gitignore` excludes it with "local only, never tracked"): `glot` accepts it as a fallback when the versioned one is missing, **warning** that it does not travel with the repository.

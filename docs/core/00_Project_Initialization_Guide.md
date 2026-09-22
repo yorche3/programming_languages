@@ -19,7 +19,7 @@ grand_parent: Programming Languages Monorepo
 |---------|---------|
 | Concentrar en **un solo archivo** los comandos de inicialización de los **50 lenguajes** homologados, para crear el esqueleto de un módulo nuevo sin tener que recordar la herramienta de cada ecosistema. Los requisitos de instalación no se repiten aquí: cada lenguaje los documenta en su propio README. | Gather in a **single file** the initialization commands for the **50 standardized languages**, so the skeleton of a new module can be created without remembering each ecosystem's tooling. Installation requirements are not repeated here: each language documents them in its own README. |
 
-**ES:** Este documento cubre la **creación del esqueleto** (carpetas, manifiesto y archivos base). El código, la especificación y los tests siguen el flujo normal: especificación en `docs/core/`, implementación en `{lenguaje}/core/{fase}/{modulo}/`, README al cerrar el módulo.
+**ES:** Este documento cubre la **creación del esqueleto** (carpetas, manifiesto y archivos base). El código, la especificación y los tests siguen el flujo normal: especificación en `docs/core/`, implementación en `{lenguaje}/core/{fase}/{module}/`, README al cerrar el módulo.
 
 **EN:** This document covers **skeleton creation** (folders, manifest, and base files). Code, specification, and tests follow the normal flow: spec in `docs/core/`, implementation in `{language}/core/{phase}/{module}/`, README when closing the module.
 
@@ -30,7 +30,7 @@ grand_parent: Programming Languages Monorepo
 Todos los comandos se ejecutan **desde la raíz del submódulo del lenguaje**, dentro de la carpeta del módulo:
 
 ```bash
-cd {lenguaje}/core/{fase}/{modulo}
+cd {lenguaje}/core/{fase}/{module}
 ```
 
 Ejemplos reales de ruta:
@@ -48,7 +48,7 @@ dart/core/algorithms/naive_sort    # Fase 1 — Algoritmos Puros
 | 🔧 | Comando **estándar del ecosistema**: no está documentado en este repositorio, pero es la herramienta oficial del lenguaje para generar un esqueleto tipo librería. |
 | ✍️ | **Sin herramienta de scaffolding**: el proyecto se crea a mano. Se describe la estructura usada por el módulo `numbers/` de ese lenguaje. |
 
-`{modulo}` es el nombre del módulo (`numbers`, `naive_sort`, …) y `{Modulo}` su forma en `PascalCase` cuando el lenguaje lo exige (`Numbers`, `NaiveSort`).
+`{module}` es el nombre del módulo (`numbers`, `naive_sort`, …) y `{Module}` su forma en `PascalCase` cuando el lenguaje lo exige (`Numbers`, `NaiveSort`).
 
 ---
 
@@ -58,36 +58,36 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 
 | Lenguaje | Comando de inicialización | Manifiesto / archivos clave | Pruebas |
 |----------|---------------------------|-----------------------------|---------|
-| **ada** | ✅ `alr init --lib {modulo}` | `alire.toml`, `{modulo}.gpr`, `config/` | ✅ `alr -C test run` |
+| **ada** | ✅ `alr init --lib {module}` | `alire.toml`, `{module}.gpr`, `config/` | ✅ `alr -C test run` |
 | **assembly** | ✍️ `mkdir -p src test` + `Makefile` | `Makefile` | ✅ `make run` |
-| **ballerina** | 🔧 `bal new {modulo}` | `Ballerina.toml`, `{modulo}.bal`, `tests/` | ✅ `bal test` |
-| **c** | ✍️ `mkdir -p include src test` + `Makefile` | `include/{modulo}.h`, `Makefile` | ✅ `make test` |
+| **ballerina** | 🔧 `bal new {module}` | `Ballerina.toml`, `{module}.bal`, `tests/` | ✅ `bal test` |
+| **c** | ✍️ `mkdir -p include src test` + `Makefile` | `include/{module}.h`, `Makefile` | ✅ `make test` |
 | **clojure** | ✅ `clojure -T:build new` | `deps.edn`, `build.clj` | ✅ `clojure -T:build test` |
 | **cobol** | ✍️ `mkdir -p src/copybooks src/lib test` | `Makefile`, `run_tests` | ✅ `make test` |
-| **common-lisp** | ✍️ `mkdir -p src tests` | `{modulo}.asd`, `run-tests.lisp` | ✅ `ros run --load run-tests.lisp --eval '(uiop:quit)'` |
+| **common-lisp** | ✍️ `mkdir -p src tests` | `{module}.asd`, `run-tests.lisp` | ✅ `ros run --load run-tests.lisp --eval '(uiop:quit)'` |
 | **cpp** | ✅ Configuración manual de Bazel (`MODULE.bazel`, `WORKSPACE`, targets en `BUILD`) | `BUILD`, `MODULE.bazel`, `.bazelversion` | ✅ `bazelisk test //...` |
-| **crystal** | 🔧 `crystal init lib {modulo}` | `shard.yml` | ✅ `crystal spec` |
-| **csharp** | ✅ `dotnet new classlib -n {Modulo} -o src/{Modulo}` | `{Modulo}.slnx`, `src/{Modulo}/{Modulo}.csproj` | ✅ `dotnet test {Modulo}.slnx` |
-| **d** | ✅ `dub init {modulo} --format=sdl` | `dub.sdl` | ✅ `dub test` |
-| **dart** | ✅ `dart create -t package {modulo}` | `pubspec.yaml`, `analysis_options.yaml` | ✅ `dart test` · ✅ `dart analyze` |
-| **elixir** | 🔧 `mix new {modulo} --module {Modulo}` | `mix.exs` | ✅ `mix test` |
+| **crystal** | 🔧 `crystal init lib {module}` | `shard.yml` | ✅ `crystal spec` |
+| **csharp** | ✅ `dotnet new classlib -n {Module} -o src/{Module}` | `{Module}.slnx`, `src/{Module}/{Module}.csproj` | ✅ `dotnet test {Module}.slnx` |
+| **d** | ✅ `dub init {module} --format=sdl` | `dub.sdl` | ✅ `dub test` |
+| **dart** | ✅ `dart create -t package {module}` | `pubspec.yaml`, `analysis_options.yaml` | ✅ `dart test` · ✅ `dart analyze` |
+| **elixir** | 🔧 `mix new {module} --module {Module}` | `mix.exs` | ✅ `mix test` |
 | **elm** | 🔧 `elm init` | `elm.json` | ✅ `elm-test` |
-| **erlang** | ✅ `rebar3 new lib {modulo}` | `rebar.config`, `src/{modulo}.app.src` | ✅ `rebar3 eunit` |
+| **erlang** | ✅ `rebar3 new lib {module}` | `rebar.config`, `src/{module}.app.src` | ✅ `rebar3 eunit` |
 | **forth** | ✍️ `mkdir -p src test` | — (runner casero `test.forth`) | ✅ `cd test && gforth run-tests.forth` |
-| **fsharp** | 🔧 `dotnet new classlib -lang F# -n {Modulo} -o src/{Modulo}` | `{Modulo}.slnx`, `src/{Modulo}/{Modulo}.fsproj` | ✅ `dotnet test` |
-| **gleam** | ✅ `gleam new {modulo}` | `gleam.toml`, `manifest.toml` | ✅ `gleam test` |
-| **go** | ✅ `go mod init example.com/{modulo}` | `go.mod` | ✅ `go test ./...` |
+| **fsharp** | 🔧 `dotnet new classlib -lang F# -n {Module} -o src/{Module}` | `{Module}.slnx`, `src/{Module}/{Module}.fsproj` | ✅ `dotnet test` |
+| **gleam** | ✅ `gleam new {module}` | `gleam.toml`, `manifest.toml` | ✅ `gleam test` |
+| **go** | ✅ `go mod init example.com/{module}` | `go.mod` | ✅ `go test ./...` |
 | **grain** | ✍️ `mkdir -p src tests` + `Makefile` | `Makefile` | ✅ `make test` |
 | **groovy** | 🔧 `gradle init --type groovy-library` | `build.gradle`, `settings.gradle`, `gradle/wrapper/` | ✅ `./gradlew test` |
-| **haskell** | 🔧 `cabal init --lib` | `{modulo}.cabal` | ✅ `cabal test` |
+| **haskell** | 🔧 `cabal init --lib` | `{module}.cabal` | ✅ `cabal test` |
 | **haxe** | ✅ `mkdir -p src test` | `build.hxml`, `RunTests.hx` | ✅ `haxe build.hxml` |
-| **java** | 🔧 `mvn archetype:generate -DgroupId=com.example -DartifactId={modulo} -DarchetypeGroupId=org.apache.maven.archetypes -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false` | `pom.xml` | ✅ `mvn test` |
+| **java** | 🔧 `mvn archetype:generate -DgroupId=com.example -DartifactId={module} -DarchetypeGroupId=org.apache.maven.archetypes -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false` | `pom.xml` | ✅ `mvn test` |
 | **javascript** | 🔧 `npm init -y` | `package.json`, `jest.config.js` | ✅ `npm test` |
 | **julia** | ✍️ `mkdir -p src test` + `Project.toml` | `Project.toml`, `Manifest.toml` | ✅ `julia --project=. test/run_tests.jl` |
 | **kotlin** | 🔧 `gradle init --type kotlin-library` | `build.gradle.kts`, `settings.gradle.kts` | ✅ `gradle test` |
-| **lua** | 🔧 `luarocks init` | `{modulo}.rockspec`, `.busted` | ✅ `busted` |
-| **nim** | 🔧 `nimble init` | `{modulo}.nimble`, `test/config.nims` | ✅ `nimble test` |
-| **ocaml** | 🔧 `dune init proj {modulo}` | `dune-project`, `src/dune`, `test/dune` | ✅ `dune runtest` |
+| **lua** | 🔧 `luarocks init` | `{module}.rockspec`, `.busted` | ✅ `busted` |
+| **nim** | 🔧 `nimble init` | `{module}.nimble`, `test/config.nims` | ✅ `nimble test` |
+| **ocaml** | 🔧 `dune init proj {module}` | `dune-project`, `src/dune`, `test/dune` | ✅ `dune runtest` |
 | **perl** | ✍️ `mkdir -p src test` | — | ✅ `prove --ext=.pl test/` |
 | **php** | ✍️ `mkdir -p src test` + `composer require --dev phpunit/phpunit` | `composer.json`, `phpunit.xml`, `.gitignore` | ✅ `composer test` |
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ `cd test && swipl -q -f {suite}.pl -t halt` |
@@ -102,11 +102,11 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **rust** | ✅ `cargo init --lib` | `Cargo.toml` | ✅ `cargo test` |
 | **scala** | ✅ `mkdir -p src/main/scala src/test/scala project` | `build.sbt`, `project/build.properties` | ✅ `sbt -batch -no-colors test` |
 | **scheme** | ✍️ `mkdir -p src test` | — | ✅ `cd test && guile --no-auto-compile -s {suite}_guile.scm` |
-| **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Modulo}/` | ✅ `swift test` |
+| **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Module}/` | ✅ `swift test` |
 | **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ `cd test && TCLLIBPATH="$(cd ../src && pwd)" tclsh9.0 {suite}.test` |
 | **typescript** | ✅ `npm init -y` | `package.json`, `tsconfig.json`, `jest.config.cjs` | ✅ `npm test` |
 | **v** | ✍️ `mkdir -p src test` + `v.mod` | `v.mod` | ✅ `v test .` |
-| **vala** | ✍️ `mkdir -p src test` | — | ✅ `valac src/{modulo}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{modulo}-tests && /tmp/{modulo}-tests` |
+| **vala** | ✍️ `mkdir -p src test` | — | ✅ `valac src/{module}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{module}-tests && /tmp/{module}-tests` |
 | **zig** | ✅ `zig init` | `build.zig` | ✅ `zig build test` |
 
 ---
@@ -119,20 +119,20 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 
 ```bash
 # Ada — biblioteca + subproyecto de tests
-alr init --lib {modulo}
+alr init --lib {module}
 alr init --bin tests
 
 # C# — solución + biblioteca + proyecto de tests enlazado
-dotnet new sln -n {Modulo}
-dotnet new classlib -n {Modulo} -o src/{Modulo}
-dotnet new xunit -n {Modulo}.Tests -o test/{Modulo}.Tests
-dotnet sln add src/{Modulo}/{Modulo}.csproj test/{Modulo}.Tests/{Modulo}.Tests.csproj
+dotnet new sln -n {Module}
+dotnet new classlib -n {Module} -o src/{Module}
+dotnet new xunit -n {Module}.Tests -o test/{Module}.Tests
+dotnet sln add src/{Module}/{Module}.csproj test/{Module}.Tests/{Module}.Tests.csproj
 
 # F# — igual que C# pero con plantillas de F#
-dotnet new sln -n {Modulo}
-dotnet new classlib -lang F# -n {Modulo} -o src/{Modulo}
-dotnet new xunit -n {Modulo}.Tests -o test/{Modulo}.Tests
-dotnet sln add src/{Modulo}/{Modulo}.fsproj test/{Modulo}.Tests/{Modulo}.Tests.fsproj
+dotnet new sln -n {Module}
+dotnet new classlib -lang F# -n {Module} -o src/{Module}
+dotnet new xunit -n {Module}.Tests -o test/{Module}.Tests
+dotnet sln add src/{Module}/{Module}.fsproj test/{Module}.Tests/{Module}.Tests.fsproj
 
 # Haxe — estructura manual + framework de pruebas
 mkdir -p src test
@@ -179,7 +179,7 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── Makefile
 ├── src/                     # un archivo .asm por enfoque
 └── test/                    # suites + run_tests.asm + test_macros.inc + test_utils.asm
@@ -192,10 +192,10 @@ mkdir -p include src test
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── Makefile
-├── include/{modulo}.h       # header público
-├── src/{modulo}.c           # implementación
+├── include/{module}.h       # header público
+├── src/{module}.c           # implementación
 └── test/                    # una suite .c por enfoque
 ```
 
@@ -206,7 +206,7 @@ mkdir -p src/copybooks src/lib test
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── Makefile
 ├── run_tests                # script de ejecución
 ├── src/copybooks/           # copybooks
@@ -221,10 +221,10 @@ mkdir -p src tests
 ```
 
 ```text
-{modulo}/
-├── {modulo}.asd             # definición del sistema ASDF (+ test-op)
+{module}/
+├── {module}.asd             # definición del sistema ASDF (+ test-op)
 ├── run-tests.lisp           # runner FiveAM
-├── src/{modulo}.lisp
+├── src/{module}.lisp
 └── tests/                   # una suite .lisp por enfoque
 ```
 
@@ -235,8 +235,8 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
-├── src/{modulo}.forth
+{module}/
+├── src/{module}.forth
 └── test/                    # test.forth (runner casero) + suites + run-tests.forth
 ```
 
@@ -247,9 +247,9 @@ mkdir -p src tests
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── Makefile
-├── src/{modulo}.gr
+├── src/{module}.gr
 └── tests/                   # suites + run_tests.gr + testing.gr
 ```
 
@@ -261,10 +261,10 @@ haxelib install utest         # framework de pruebas
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── build.hxml               # target de compilación y de tests
 ├── RunTests.hx              # runner de utest
-├── src/{Modulo}.hx
+├── src/{Module}.hx
 └── test/                    # una suite .hx por enfoque
 ```
 
@@ -275,7 +275,7 @@ mkdir -p src/main/java src/test/java
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── pom.xml
 └── src/
     ├── main/java/           # clase del módulo
@@ -291,10 +291,10 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── package.json
 ├── jest.config.js
-├── src/{modulo}.js
+├── src/{module}.js
 └── test/                    # una suite por enfoque
 ```
 
@@ -305,10 +305,10 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── Project.toml
 ├── Manifest.toml
-├── src/{Modulo}.jl
+├── src/{Module}.jl
 └── test/                    # suites + run_tests.jl
 ```
 
@@ -319,7 +319,7 @@ mkdir -p src/main/kotlin src/test/kotlin
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── build.gradle.kts
 ├── settings.gradle.kts
 ├── gradle/wrapper/
@@ -335,10 +335,10 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── dune-project
 ├── src/dune                 # declara la librería
-├── src/{modulo}.ml          # (+ {modulo}.mli opcional)
+├── src/{module}.ml          # (+ {module}.mli opcional)
 └── test/dune                # declara el ejecutable de tests
 ```
 
@@ -349,8 +349,8 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
-├── src/{modulo}.pl
+{module}/
+├── src/{module}.pl
 └── test/                    # una suite .pl por enfoque (Test2::Bundle::More)
 ```
 
@@ -362,12 +362,12 @@ composer require --dev phpunit/phpunit
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── composer.json            # PHPUnit (dev) + autoload classmap + script test
 ├── phpunit.xml              # bootstrap + suite sobre test/
 ├── .gitignore               # vendor/, composer.lock y cachés
-├── src/{Modulo}.php
-└── test/{Modulo}Test.php    # una suite PHPUnit por enfoque
+├── src/{Module}.php
+└── test/{Module}Test.php    # una suite PHPUnit por enfoque
 ```
 
 ### Prolog — `src/` + `test/`
@@ -377,8 +377,8 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
-├── src/{modulo}.pl          # base de conocimiento
+{module}/
+├── src/{module}.pl          # base de conocimiento
 └── test/                    # suites plunit por enfoque
 ```
 
@@ -389,10 +389,10 @@ mkdir -p src tests
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── pyproject.toml           # metadatos + configuración de pytest
 ├── conftest.py              # añade src/ a sys.path
-├── src/{modulo}.py
+├── src/{module}.py
 └── tests/                   # conftest.py + una suite por enfoque
 ```
 
@@ -403,8 +403,8 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
-├── src/{modulo}.R
+{module}/
+├── src/{module}.R
 └── test/                    # suites + run_tests.R
 ```
 
@@ -415,8 +415,8 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
-├── src/{modulo}.rkt
+{module}/
+├── src/{module}.rkt
 └── test/                    # suites + run_tests.rkt
 ```
 
@@ -427,8 +427,8 @@ mkdir -p lib t
 ```
 
 ```text
-{modulo}/
-├── lib/{Modulo}.rakumod
+{module}/
+├── lib/{Module}.rakumod
 └── t/                       # suites .rakutest por enfoque
 ```
 
@@ -439,8 +439,8 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
-├── src/{modulo}.rexx
+{module}/
+├── src/{module}.rexx
 └── test/                    # una suite .rexx por enfoque
 ```
 
@@ -453,10 +453,10 @@ bundle install
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── Gemfile
 ├── .rspec
-├── src/{modulo}.rb
+├── src/{module}.rb
 └── test/                    # una suite _tests.rb por enfoque
 ```
 
@@ -467,7 +467,7 @@ mkdir -p src/main/scala src/test/scala project
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── build.sbt
 ├── project/build.properties
 └── src/
@@ -482,22 +482,22 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
-├── src/{modulo}.scm
+{module}/
+├── src/{module}.scm
 └── test/                    # suites por enfoque (+ variantes _guile.scm)
 ```
 
 ### Swift — Swift Package Manager
 
 ```bash
-mkdir -p Sources/{Modulo} Tests/{Modulo}Tests
+mkdir -p Sources/{Module} Tests/{Module}Tests
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── Package.swift
-├── Sources/{Modulo}/        # código público
-└── Tests/{Modulo}Tests/     # suites XCTest
+├── Sources/{Module}/        # código público
+└── Tests/{Module}Tests/     # suites XCTest
 ```
 
 ### Tcl — `src/` + `test/`
@@ -507,8 +507,8 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
-├── src/{modulo}.tcl         # namespace + package provide
+{module}/
+├── src/{module}.tcl         # namespace + package provide
 ├── src/pkgIndex.tcl         # permite package require
 └── test/                    # suites .test con Tcltest
 ```
@@ -529,8 +529,8 @@ mkdir -p src test
 ```
 
 ```text
-{modulo}/
-├── src/{modulo}.vala
+{module}/
+├── src/{module}.vala
 └── test/                    # una suite .vala por enfoque (GLib.Test)
 ```
 
@@ -542,15 +542,15 @@ v init                        # genera v.mod
 ```
 
 ```text
-{modulo}/
+{module}/
 ├── v.mod
-├── src/{modulo}.v
+├── src/{module}.v
 └── test/                    # archivos _test.v con funciones test_*
 ```
 
 ### Manifiestos que `mkdir` no crea / Manifests `mkdir` does not create
 
-**ES:** Cuando el lenguaje exige un manifiesto mínimo, escríbelo a mano después del `mkdir -p`: `Project.toml` en Julia, `v.mod` en V, `{modulo}.nimble` en Nim, `{modulo}.rockspec` en Lua, `pom.xml` en Java, `build.gradle(.kts)` en Groovy y Kotlin.
+**ES:** Cuando el lenguaje exige un manifiesto mínimo, escríbelo a mano después del `mkdir -p`: `Project.toml` en Julia, `v.mod` en V, `{module}.nimble` en Nim, `{module}.rockspec` en Lua, `pom.xml` en Java, `build.gradle(.kts)` en Groovy y Kotlin.
 
 **EN:** When the language requires a minimal manifest, write it by hand after `mkdir -p`: `Project.toml` in Julia, `v.mod` in V, `{module}.nimble` in Nim, `{module}.rockspec` in Lua, `pom.xml` in Java, `build.gradle(.kts)` in Groovy and Kotlin.
 

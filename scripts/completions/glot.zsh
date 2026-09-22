@@ -9,7 +9,7 @@
 
 _glot_zsh() {
     local glot="${GLOT_CMD:-glot}"
-    local -a verbs fases modulos lenguajes
+    local -a verbs fases modulos lenguajes encargos
 
     verbs=(
         'version:versión instalada'
@@ -22,6 +22,8 @@ _glot_zsh() {
         'use:sitúa el trabajo del sprint'
         'test:ejecuta la suite del módulo asignado'
         'verify:ejecuta el verificador del lenguaje'
+        'prompt:arma el encargo del sprint'
+        'ask:envía el encargo al delegado'
         'set:guarda una clave del estado'
         'get:lee una clave del estado'
         'unset:borra una clave del estado'
@@ -50,6 +52,18 @@ _glot_zsh() {
             ;;
         test | verify)
             if ((CURRENT == 3)); then
+                lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
+                _describe 'lenguaje' lenguajes
+            else
+                modulos=(${(f)"$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"})
+                _describe 'módulo' modulos
+            fi
+            ;;
+        prompt | ask)
+            if ((CURRENT == 3)); then
+                encargos=(${(f)"$("$glot" prompt 2>/dev/null | cut -f1)"})
+                _describe 'encargo' encargos
+            elif ((CURRENT == 4)); then
                 lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
                 _describe 'lenguaje' lenguajes
             else
