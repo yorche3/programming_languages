@@ -56,9 +56,9 @@
 | 8 Puntero e índices | decide | ejecuta | **escribe la documentación** |
 | 9 Registro del cierre | autoriza | encarga | **escribe el registro** |
 
-**ES:** Los pasos 4, 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El encargo lo arma `glot prompt <encargo>` con las plantillas **versionadas** de [`scripts/prompts/`](../scripts/prompts/); el banco local de `.github/prompts/` (que `.gitignore` excluye) se acepta como respaldo, con aviso. El agente **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
+**ES:** Los pasos 4a, 4b, 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El encargo lo arma `glot prompt <encargo>` con las plantillas **versionadas** de [`scripts/prompts/`](../scripts/prompts/); el banco local de `.github/prompts/` (que `.gitignore` excluye) se acepta como respaldo, con aviso. El agente **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
 
-**EN:** Steps 4, 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). The request is built by `glot prompt <request>` from the **versioned** templates in [`scripts/prompts/`](../scripts/prompts/); the local bank in `.github/prompts/` (excluded by `.gitignore`) is accepted as a fallback, with a warning. The agent **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
+**EN:** Steps 4a, 4b, 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). The request is built by `glot prompt <request>` from the **versioned** templates in [`scripts/prompts/`](../scripts/prompts/); the local bank in `.github/prompts/` (excluded by `.gitignore`) is accepted as a fallback, with a warning. The agent **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
 
 ---
 

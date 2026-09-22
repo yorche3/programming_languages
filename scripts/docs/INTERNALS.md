@@ -54,7 +54,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 
 | Verbo | Lee | Decide | Escribe | Devuelve |
 |-------|-----|--------|---------|:--------:|
-| `version` | — | — | `glot 0.6.0` en stdout | `0` |
+| `version` | — | — | `glot 0.9.0` en stdout | `0` |
 | `help [verbo]` | El verbo opcional | Si hay verbo, ayuda corta; si no, tabla general | stdout | `0`, o `2` si el verbo no existe |
 | `doctor` | bash, git, raíz del monorepo, estado | Marca `1` si falta bash 4+, git o la raíz | `clave: valor` en stdout; encabezado y avisos en stderr | `0` o `1` |
 | `greet [nombre]` | El argumento; si no hay, una línea de stdin | Si stdin es terminal falla sin bloquearse; descarta el CRLF final | `Hello, <nombre>!` en stdout | `0`, o `2` sin nombre |
@@ -72,6 +72,8 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `verify [lenguaje] [fase/módulo]` | Igual, con la columna 5 | Si el lenguaje no tiene verificador, imprime `skipped` y no falla | La salida del verificador en stdout | `0`, `1`, `2`, `3` o `4` |
 | `prompt [encargo] [lenguaje] [fase/módulo]` | El registro de plantillas y el estado del sprint | Sin encargo lista; con encargo, expande los marcadores | El encargo completo en stdout | `0`, `1`, `2` o `3` |
 | `ask <encargo> [lenguaje] [fase/módulo]` | Igual, más `GLOT_DELEGATE` | Sin delegado configurado devuelve `1` | La salida del delegado en stdout | `0`, `1`, `2` o `3` |
+| `new [lenguaje] [fase/módulo]` | El estado del sprint, el catálogo de datos y el directorio del módulo | Según la columna 6: ejecuta la herramienta, crea carpetas o se aplaza; después normaliza | La ruta del módulo, o `skipped` | `0`, `1`, `2` o `4` |
+| `save <paso\|alias> [lenguaje] [fase/módulo]` | El catálogo de commits, el estado del sprint y el índice del submódulo | Resuelve el mensaje del paso; rechaza los pasos del monorepo | El SHA corto del commit, o `nothing` | `0`, `1`, `2`, `3` o `4` |
 
 ### Detalles no evidentes / Non-obvious details
 
@@ -134,13 +136,27 @@ Finally it writes the six state keys and prints the absolute path. With `-n` it 
 
 **EN:** `_glot_prompt_body` strips the frontmatter —when pasting the request it only gets in the way— and `_glot_expand_state` replaces the placeholders with the state keys plus `{Module}` and `{module_dir}`; then it **looks for the first remaining `{…}`** and fails with `1` naming it: an unresolved placeholder is an error, never literal text the agent could misread. The request header carries the sprint state in a table, with the branch **read from git** (`symbolic-ref`), not from memory. `ask` adds one thing: if `GLOT_DELEGATE` is set, the request goes over stdin to that command and its output straight to stdout; with `-n` the plan is printed.
 
-## 10. Salida y códigos / Output and exit codes
+## 10. La creación y el registro / Creation and recording (L5)
+
+**ES:** `new` y `save` tienen en común una idea: **lo que se puede saber, no se escribe en el script**. `new` lee el tipo de inicialización de la columna 6 del catálogo y `_glot_expand_command` resuelve el comando de la columna 7, que se ejecuta **en el directorio del módulo** con `</dev/null` —el inicializador nunca puede quedarse esperando una respuesta— y en un subshell. `deferred` no ejecuta nada: informa, remite al encargo `scaffold` e imprime `skipped` con `0`, igual que `verify` sin verificador. El directorio lo prepara `use`: si no existe, `new` no lo inventa, y si ya tiene contenido **no se pisa nada** (misma política que `use` con un módulo existente).
+
+**EN:** `new` and `save` share one idea: **what can be known is not written into the script**. `new` reads the initialisation kind from column 6 of the catalogue and `_glot_expand_command` resolves the command from column 7, which runs **in the module directory** with `</dev/null` —the initializer can never sit waiting for an answer— and inside a subshell. `deferred` runs nothing: it reports, points at the `scaffold` request and prints `skipped` with `0`, just like `verify` without a verifier. The directory is prepared by `use`: if it does not exist, `new` does not invent it, and if it already has content **nothing is overwritten** (same policy as `use` with an existing module).
+
+**ES:** `_glot_init_normalise` aplica la columna 8 en orden, con dos operaciones cerradas: `flat:<sub>` (`_glot_init_flat` activa `dotglob` y `nullglob`, sube cada entrada —incluidos los archivos ocultos— y borra `<sub>`) y `rm:<ruta>`, tolerante por diseño porque es limpieza, no una existencia. Nada más: el catálogo es el que decide, y una operación desconocida devuelve `1` en vez de improvisar. Los inicializadores que crean un proyecto hijo y además un `.git` propio (`crystal init lib`, `gleam new`) se declaran `rm:{module}/.git` **antes** de `flat:{module}`: el orden importa, porque después del aplanado esa ruta ya no existe. Las columnas 6, 7 y 8 se verificaron ejecutando cada inicializador en un directorio temporal y con la entrada cerrada; un caso que no se pudo verificar así no se añadió y quedó como `deferred`.
+
+**EN:** `_glot_init_normalise` applies column 8 in order, with two closed operations: `flat:<sub>` (`_glot_init_flat` enables `dotglob` and `nullglob`, moves every entry —hidden files included— up and removes `<sub>`) and `rm:<path>`, tolerant by design because it is cleanup, not an existence check. Nothing else: the catalogue decides, and an unknown operation returns `1` instead of improvising. Initializers that create a child project and a `.git` of their own (`crystal init lib`, `gleam new`) declare `rm:{module}/.git` **before** `flat:{module}`: the order matters, because after flattening that path no longer exists. Columns 6, 7 and 8 were verified by running each initializer in a temporary directory with stdin closed; a case that could not be verified that way was not added and stayed `deferred`.
+
+**ES:** `save` lee `data/commits.tsv` (paso, alias, ámbito, mensaje) con `_glot_commit_line`, acepta el paso o el alias del encargo y exige ámbito `submodule`: los pasos del monorepo se rechazan con `1` y remiten a `close` y `pointer`, que aún no existen. El mensaje se expande con `_glot_expand_state`, así que un marcador sin resolver es el mismo error `1` que en los encargos. Antes de confirmar se nombran por stderr los dos hallazgos que no bloquean —cambios fuera del módulo, que entran igual porque `add -A` es del submódulo, y una rama activa que no es la del estado del sprint—, y el resultado es el SHA corto o `nothing` si el árbol ya estaba limpio. **Nunca hace push**: publicar la rama es de `use` y subir el trabajo es del autor.
+
+**EN:** `save` reads `data/commits.tsv` (step, alias, scope, message) with `_glot_commit_line`, accepts either the step or the request alias and requires the `submodule` scope: monorepo steps are rejected with `1` and point at `close` and `pointer`, which do not exist yet. The message is expanded with `_glot_expand_state`, so an unresolved placeholder is the same `1` error as in requests. Before committing, the two non-blocking findings are named on stderr —changes outside the module, which go in anyway because `add -A` is the submodule's, and an active branch that is not the sprint state's—, and the result is the short SHA or `nothing` if the tree was already clean. It **never pushes**: publishing the branch is `use`'s job and pushing the work is the author's.
+
+## 11. Salida y códigos / Output and exit codes
 
 1. Los verbos escriben **solo datos** en stdout; los errores salen por `_glot_error` y los avisos por `_glot_warn`, ambos a stderr. `set`/`unset` confirman por stderr: su stdout solo lleva datos si `-n` está activo.
 2. `_glot_info` escribe en stderr salvo que se haya pasado `-q/--quiet`. Los flags globales se leen **antes** del verbo, así que la forma silenciosa y parseable es `glot -q doctor`, no `doctor -q` (ahí el flag llega como argumento del verbo y se ignora).
 3. El código final del script es el del verbo: la última orden del archivo es `glot "$@"`, y con `set -e` un `return 2` dentro de un verbo termina el script con `2`.
 4. `3` está reservado al estado: no se pudo leer, crear o escribir. Los errores de uso siguen siendo `2` y los de entorno `1`.
 
-## 11. Lo que todavía no hace / What it does not do yet
+## 12. Lo que todavía no hace / What it does not do yet
 
-El catálogo (L2.5, v0.6.0), la ejecución (L3, v0.7.0) y la delegación (L4, v0.8.0) ya existen. Lo que falta: el andamiaje y los commits guiados (L5, v0.9.0), la evidencia y el cierre (L6, v0.10.0), la higiene de punteros (L7, v0.11.0) y la instalación con la función cargable (L8, v1.0.0), que es donde `use` hará el `cd` de verdad y el autocompletado se instalará solo. Tampoco hay barrido por lenguaje: `test` actúa sobre el objetivo asignado, uno cada vez.
+El catálogo (L2.5, v0.6.0), la ejecución (L3, v0.7.0), la delegación (L4, v0.8.0) y la creación y el registro (L5, v0.9.0) ya existen. Lo que falta: la evidencia y el cierre (L6, v0.10.0), la higiene de punteros (L7, v0.11.0) y la instalación con la función cargable (L8, v1.0.0), que es donde `use` hará el `cd` de verdad y el autocompletado se instalará solo. En L5 queda fuera, a propósito, lo que exige **leer** la especificación: adaptar runners de ejemplo y nombres predefinidos lo hace el encargo `scaffold`, no el script. Tampoco hay barrido por lenguaje: `test` actúa sobre el objetivo asignado, uno cada vez.

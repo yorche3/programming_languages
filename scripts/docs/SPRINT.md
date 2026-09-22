@@ -17,7 +17,8 @@
 | 1 | Reconocimiento | `git status --short`, `git submodule status`, `glot progress` (0.6.0), `glot status` (0.11.0) | — | autor / script |
 | 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo, estado `lang/phase/module/branch/spec/repo`, ruta en `stdout` | script |
 | 3 | Rama publicada | incluido en `use`: `git push -u origin feat/algorithms/naive-sort` | Rama `feat/{fase}/{módulo}` con upstream | script |
-| 4 | Esqueleto y tests | `glot prompt scaffold` (0.8.0) → plantilla local `scaffold-and-unit-tests.prompt.md` · `glot new` (0.9.0) · `glot save` (0.9.0) | `chore(algorithms): add scaffold and tests for naive sort` | **agente** + script |
+| 4a | Esqueleto | `glot new` (0.9.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas, sin runners de ejemplo; `.gitignore` verificado | script + **agente** |
+| 4b | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4b` (0.9.0) | Suite unitaria derivada de la especificación, con salida real | **agente** |
 | 5 | Implementación | `glot prompt implement` (0.8.0) + `glot test` (0.7.0) | `feat(algorithms): add naive sort implementation`; suite en verde | autor / **agente** |
 | 6 | Verificación | `glot test`, `glot verify` (0.7.0) · `glot prompt validate` (0.10.0) | Salida real de la suite y del analizador, sin warnings **nuevos** | script + **agente** |
 | 7 | Cierre documental del módulo | `glot prompt docs-module` (0.8.0) → README de Nivel 3 desde [`README_Template.md`](../../docs/README_Template.md) | `docs(naive-sort): add README for naive sort module` | **agente** |
@@ -41,12 +42,17 @@
 
 | Paso | Mensaje |
 |------|---------|
-| Esqueleto y tests | `chore({fase}): add scaffold and tests for {módulo}` |
-| Implementación | `feat({fase}): add {módulo} implementation` |
-| README del módulo | `docs({módulo}): add README for {módulo} module` |
-| Índices y lenguaje | `docs: add README for {fase} and update indexes` |
-| Puntero en el monorepo | `chore(submodule): update {lenguaje} pointer` |
-| Cierre del roadmap | `docs(roadmap): close {fase}/{módulo} for {lenguaje}` |
+| Esqueleto | `chore({phase}): add scaffold for {module}` |
+| Suite de pruebas | `chore({phase}): add suite for {module}` |
+| Implementación | `feat({phase}): add {module} implementation` |
+| README del módulo | `docs({module}): add README for {module} module` |
+| Índices y lenguaje | `docs: add README for {phase} and update indexes` |
+| Puntero en el monorepo | `chore(submodule): update {lang} pointer` |
+| Cierre del roadmap | `docs(roadmap): close {phase}/{module} for {lang}` |
+
+**ES:** Esta tabla es la fuente de los mensajes y vive **también en datos** ([`scripts/data/commits.tsv`](../../scripts/data/commits.tsv)), que es lo que lee `glot save <paso>`; el harness comprueba la deriva entre las dos. Los marcadores son los mismos del resto del tooling (`{phase}`, `{module}`, `{lang}`), no sus traducciones.
+
+**EN:** This table is the source of the messages and it lives **in data too** ([`scripts/data/commits.tsv`](../../scripts/data/commits.tsv)), which is what `glot save <step>` reads; the harness checks for drift between the two. The placeholders are the same ones used by the rest of the tooling (`{phase}`, `{module}`, `{lang}`), not their translations.
 
 **EN:** Actual repository convention (Conventional Commits, phase or module scope). The scope is the phase for scaffolding and implementation, and the module for its own README.
 
@@ -54,13 +60,14 @@
 
 ## 🤖 Los pasos con IA, y por qué / The AI-assisted steps, and why
 
-**ES:** Los pasos 4, 5, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/). El banco local de `.github/prompts/` sigue ahí como taller del autor y `glot` lo acepta como respaldo, avisando de que no viaja en el repositorio.
+**ES:** Los pasos 4a, 4b, 5, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/). El banco local de `.github/prompts/` sigue ahí como taller del autor y `glot` lo acepta como respaldo, avisando de que no viaja en el repositorio.
 
-**EN:** Steps 4, 5, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Since v0.8.0 the request is built by `glot prompt <request>` from the sprint state, and the templates are **versioned** in [`scripts/prompts/`](../../scripts/prompts/). The local bank in `.github/prompts/` remains the author's workshop and `glot` accepts it as a fallback, warning that it does not travel with the repository.
+**EN:** Steps 4a, 4b, 5, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Since v0.8.0 the request is built by `glot prompt <request>` from the sprint state, and the templates are **versioned** in [`scripts/prompts/`](../../scripts/prompts/). The local bank in `.github/prompts/` remains the author's workshop and `glot` accepts it as a fallback, warning that it does not travel with the repository.
 
 | Encargo previsto | Plantilla versionada | Paso |
 |------------------|----------------------|:----:|
-| `scaffold` | [`scaffold.prompt.md`](../../scripts/prompts/scaffold.prompt.md) | 4 |
+| `scaffold` | [`scaffold.prompt.md`](../../scripts/prompts/scaffold.prompt.md) | 4a |
+| `suite` | [`suite.prompt.md`](../../scripts/prompts/suite.prompt.md) | 4b |
 | `implement` | [`implement.prompt.md`](../../scripts/prompts/implement.prompt.md) | 5 |
 | `docs-module` | [`docs-module.prompt.md`](../../scripts/prompts/docs-module.prompt.md) | 7 |
 | `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 |

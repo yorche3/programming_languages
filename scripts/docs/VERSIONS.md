@@ -14,6 +14,7 @@
 | 0.6.0 | 2026-09-22 | [`versions/glot_0.6.0.sh`](../versions/glot_0.6.0.sh) | **Catálogo** (L2.5): `langs`, `modules`, `progress` y `completion`, con el conversor de nombres y los comandos nativos por lenguaje | ✅ cerrada |
 | 0.7.0 | 2026-09-22 | [`versions/glot_0.7.0.sh`](../versions/glot_0.7.0.sh) | **Ejecución** (L3): `test` y `verify`, con el código `4` de verificación fallida, los marcadores de la tabla de comandos y la cobertura de verificadores | ✅ cerrada |
 | 0.8.0 | 2026-09-22 | [`versions/glot_0.8.0.sh`](../versions/glot_0.8.0.sh) | **Delegación** (L4): `prompt` y `ask`, con las cuatro plantillas versionadas de `scripts/prompts/` y un solo vocabulario de marcadores | ✅ cerrada |
+| 0.9.0 | 2026-09-22 | — (viva / live) | **Creación y registro** (L5): `new` (inicializador del lenguaje, esqueleto y normalización) y `save` (commit guiado desde el catálogo `data/commits.tsv`), con la tabla de inicialización ampliada | 🔄 en curso / in progress |
 
 ---
 
@@ -60,7 +61,7 @@
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 158 passed, 0 failed` (rc `0`), con un sandbox de git propio (monorepo falso con `.gitmodules`, especificación y un submódulo `php` con remoto desnudo) para que `use` cree la rama desde `main`, la publique con upstream y genere la carpeta en un módulo nuevo, active una rama existente, abra una de mantenimiento en un módulo cerrado y respete el trabajo sin confirmar, sin salir del directorio temporal ni tocar la red. Ensayo real sobre el monorepo: `./scripts/glot.sh -n use php algorithms/naive_sort` → aviso de módulo existente, activación de `feat/algorithms/naive-sort` y estado intacto; `./scripts/glot.sh -n use php algorithms/naive_sort test` → plan de la rama de mantenimiento `test/algorithms/naive-sort` desde `main`.
 - **Snapshot:** [`versions/glot_0.5.0.sh`](../versions/glot_0.5.0.sh), archivado al abrir la v0.6.0; su contenido es el que tenía `main` en el cierre de la versión.
 
-## 0.6.0 — 2026-09-22 (viva)
+## 0.6.0 — 2026-09-22 (cerrada)
 
 - **Añade:** el **catálogo** (L2.5) con `langs`, `modules`, `progress` y `completion`, más el **conversor de nombres**: de un id canónico (`data_structures`) salen el nombre legible, el del documento, la rama, el nombre del commit y la carpeta.
 - **Fuentes:** `.gitmodules` (lenguajes, el denominador), el bloque de contadores de `docs/ROADMAP.md` (módulos y estado, la fuente de verdad), `docs/core/{fase}/` (especificaciones, con el prefijo `NN` leído del disco) y [`data/languages.tsv`](../data/languages.tsv) (comandos nativos por lenguaje, con test de deriva contra la guía de inicialización).
@@ -72,7 +73,7 @@
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 227 passed, 0 failed` (rc `0`); incluye la deriva guía ↔ `data/languages.tsv`, la resolución de los nombres divergentes en el sandbox, el autocompletado de bash de punta a punta y, cuando `zsh` está instalado, su sintaxis y su `compdef` (verificado con `zsh 5.9.2`).
 - **Snapshot:** [`versions/glot_0.6.0.sh`](../versions/glot_0.6.0.sh), archivado al abrir la v0.7.0; su contenido es el que tenía `main` en el cierre de la versión.
 
-## 0.7.0 — 2026-09-22 (viva)
+## 0.7.0 — 2026-09-22 (cerrada)
 
 - **Añade:** la **ejecución** (L3) con `test` (suite del módulo asignado, con el comando nativo del lenguaje) y `verify` (sintaxis/formato), los dos desde cualquier directorio: el objetivo se resuelve con los argumentos y, lo que falte, con el estado del sprint (`lang`, `phase`, `module`).
 - **Contrato:** se estrena el código `4` (**verificación fallida**), para que un CI distinga «no pude ejecutar» (`1`) de «ejecuté y está en rojo» (`4`). `-n/--dry-run` imprime el plan (`cd <módulo> && <comando>`) sin ejecutar nada, también aquí.
@@ -83,7 +84,7 @@
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 258 passed, 0 failed` (rc `0`). Ejecuciones reales sobre el monorepo: `test` en `php` (`OK (3 tests, 21 assertions)`), `prolog` (3 subtests passed), `vala` (`ok 1..3`) y `tcl-tk` (`Total 21 Passed 21 Failed 0`) → rc `0`; `verify php` → `No syntax errors detected` rc `0`; `verify v` y `verify rust` → rc `4` con los hallazgos preexistentes; `verify ada` → `skipped` rc `0`.
 - **Snapshot:** [`versions/glot_0.7.0.sh`](../versions/glot_0.7.0.sh), archivado **antes** de fusionar la rama en `main` y antes de abrir la v0.8.0, para que la puerta de entrada no bloquee el arranque de la siguiente versión.
 
-## 0.8.0 — 2026-09-22 (viva)
+## 0.8.0 — 2026-09-22 (cerrada)
 
 - **Añade:** la **delegación** (L4) con `prompt` (sin argumentos lista el registro; con encargo imprime la cabecera del estado del sprint y la plantilla expandida) y `ask` (el mismo encargo, enviado a `GLOT_DELEGATE` por stdin). Ninguno de los dos ejecuta el trabajo ni escribe en el repositorio.
 - **Plantillas versionadas:** cuatro encargos en `scripts/prompts/` — `scaffold` (paso 4), `implement` (5), `docs-module` (7) y `docs-language` (8) — normalizados desde el banco local de `.github/prompts/`. El registro no está codificado: `glot prompt` recorre `*.prompt.md` y lee `name`, `step` y `description` del frontmatter, así que añadir un encargo es añadir un archivo.
@@ -93,6 +94,20 @@
 - **Corrige:** la clave reservada `repo` se documentaba como «ruta del submódulo dentro del monorepo» cuando `use` guarda el **nombre** del submódulo; la tabla del contrato ya dice lo que hace el código.
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 286 passed, 0 failed` (rc `0`). Reproducción real: `glot prompt` → 4 encargos con su paso; `glot prompt scaffold php algorithms/naive_sort` → cabecera con `spec` y `module_dir` y plantilla sin frontmatter y sin marcadores; `GLOT_DELEGATE='wc -l' glot ask implement php algorithms/naive_sort` → el encargo completo (115 líneas) por stdin, rc `0`; sin delegado → rc `1`; delegado que falla → rc `1`.
 - **Snapshot:** [`versions/glot_0.8.0.sh`](../versions/glot_0.8.0.sh), archivado **antes** de fusionar la rama en `main` y antes de abrir la v0.9.0, para que la puerta de entrada no bloquee el arranque de la siguiente versión.
+
+## 0.9.0 — 2026-09-22 (viva)
+
+- **Añade:** la **creación y el registro** (L5) con `new` (inicializador del lenguaje y esqueleto mecánico del módulo) y `save` (commit guiado con la convención del repositorio), los dos verbos que hasta la v0.8.0 se hacían a mano.
+- **`new` tiene dos modos, decididos por dato:** con `tool` ejecuta el inicializador del lenguaje en el directorio del módulo; con `manual` crea las carpetas del esqueleto; con `deferred` no ejecuta nada, informa, remite al encargo `scaffold` e imprime `skipped` (como `verify` sin verificador). No escribe la suite: eso es el encargo `suite` (paso 4b).
+- **Tabla de inicialización ampliada** en [`data/languages.tsv`](../data/languages.tsv): de 5 a 8 columnas, con el **tipo** (columna 6, la leyenda ✅/🔧/✍️ de la guía recuperada como dato), el **comando** (7) y la **normalización** (8). Resultado: **22 lenguajes con herramienta**, **21 de estructura manual** y **7 aplazados** al agente.
+- **Normalización declarada, no adivinada:** `flat:<sub>` sube el contenido del proyecto hijo (los inicializadores que anidan, como `crystal init lib` o `dart create`) y `rm:<ruta>` limpia. `crystal` y `gleam` crean además un `.git` propio: se borra **antes** de aplanar, porque un repositorio dentro de un submódulo no es válido. Un lenguaje sin operación declarada no se toca.
+- **Tabla paso → mensaje, en datos:** [`data/commits.tsv`](../data/commits.tsv) (`paso`, `alias`, `ámbito`, `mensaje`). `save` acepta el paso (`4a`, `4b`, `5`, `7`, `8`) o el nombre del encargo (`scaffold`, `suite`, `implement`, `docs-module`, `docs-language`). Los pasos del monorepo (puntero y roadmap) se rechazan con `1` y remiten a `close` (v0.10.0) y `pointer` (v0.11.0).
+- **Encargo nuevo:** `suite` (paso 4b) con el contrato de pruebas unitarias, que estaba dentro de `scaffold`. El paso 4 del sprint se parte en **4a** (esqueleto, `glot new` + `glot prompt scaffold`) y **4b** (suite, `glot prompt suite`), con dos commits: `chore({phase}): add scaffold for {module}` y `chore({phase}): add suite for {module}`.
+- **Contrato:** `new` devuelve `4` si el inicializador falla y `0` con `skipped` si el esqueleto está aplazado; `save` devuelve el **SHA corto** por stdout o `nothing` si no hay nada que confirmar, **nunca hace push** y solo confirma en el submódulo. Los dos respetan `-n/--dry-run`, obligatorio por mutar.
+- **Hallazgos que no bloquean, nombrados antes de confirmar:** cambios fuera del módulo (que entran igual, porque `add -A` es del submódulo) y una rama activa que no es la del estado del sprint.
+- **`doctor`:** informa de la cobertura de inicializadores (`new_commands: 43 de / of 50 (deferred: 7)`) y del catálogo de commits (`commit_steps: 7 de / of which 5 son del submódulo`).
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 346 passed, 0 failed` (rc `0`), con la **deriva** entre `data/commits.tsv` y la tabla del sprint, la coherencia del catálogo de inicialización (tipos válidos, comando obligatorio salvo en `deferred`, operaciones conocidas) y el ciclo completo `use` → `new` → `save` en el sandbox, sobre `ruby` (manual) y `python` (deferred).
+- **Snapshot:** pendiente: se archiva como `versions/glot_0.9.0.sh` **antes** de fusionar la rama en `main` y de abrir la v0.10.0, para que la puerta de entrada no bloquee el arranque de la siguiente versión.
 
 ---
 
@@ -139,7 +154,7 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación y códigos (286 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación y códigos (346 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
 ./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
 ./scripts/glot.sh modules           # catálogo de módulos con su especificación
@@ -151,6 +166,9 @@ bash -n scripts/glot.sh              # sintaxis
 ./scripts/glot.sh prompt                             # registro de encargos
 ./scripts/glot.sh prompt scaffold php algorithms/naive_sort   # encargo armado
 GLOT_DELEGATE='cat' ./scripts/glot.sh ask implement php algorithms/naive_sort
+./scripts/glot.sh -n new php algorithms/naive_sort          # esqueleto: comando y normalización
+./scripts/glot.sh new python algorithms/naive_sort          # aplazado al agente: skipped
+./scripts/glot.sh -n save 4a php algorithms/naive_sort      # commit guiado: git add + mensaje
 ./scripts/glot.sh -n use php algorithms/naive_sort   # ensayo de `use`: plan sin tocar nada
 
 # Estado en un directorio propio, sin tocar el del usuario / state in its own dir
