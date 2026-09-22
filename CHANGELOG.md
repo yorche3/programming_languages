@@ -53,7 +53,7 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   decididos por dato: ejecuta el inicializador del lenguaje, construye el
   esqueleto manual o lo aplaza al agente, y normaliza lo que deja el
   inicializador) y `save` (commit guiado cuyo mensaje sale del catálogo y que
-  nunca hace push), con 346 comprobaciones en el harness.
+  nunca hace push), con 361 comprobaciones en el harness.
 - La tabla de inicialización de `scripts/data/languages.tsv` pasa de 5 a 8
   columnas: la leyenda de la guía (✅ verificado · 🔧 ecosistema · ✍️ manual) se
   recupera como dato y se añaden el comando y la normalización, verificados

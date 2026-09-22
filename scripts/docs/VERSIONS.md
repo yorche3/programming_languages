@@ -106,7 +106,7 @@
 - **Contrato:** `new` devuelve `4` si el inicializador falla y `0` con `skipped` si el esqueleto está aplazado; `save` devuelve el **SHA corto** por stdout o `nothing` si no hay nada que confirmar, **nunca hace push** y solo confirma en el submódulo. Los dos respetan `-n/--dry-run`, obligatorio por mutar.
 - **Hallazgos que no bloquean, nombrados antes de confirmar:** cambios fuera del módulo (que entran igual, porque `add -A` es del submódulo) y una rama activa que no es la del estado del sprint.
 - **`doctor`:** informa de la cobertura de inicializadores (`new_commands: 43 de / of 50 (deferred: 7)`) y del catálogo de commits (`commit_steps: 7 de / of which 5 son del submódulo`).
-- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 346 passed, 0 failed` (rc `0`), con la **deriva** entre `data/commits.tsv` y la tabla del sprint, la coherencia del catálogo de inicialización (tipos válidos, comando obligatorio salvo en `deferred`, operaciones conocidas) y el ciclo completo `use` → `new` → `save` en el sandbox, sobre `ruby` (manual) y `python` (deferred).
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 361 passed, 0 failed` (rc `0`), con la **deriva** entre `data/commits.tsv` y la tabla del sprint, la coherencia del catálogo de inicialización (tipos válidos, comando obligatorio salvo en `deferred`, operaciones conocidas), el ciclo completo `use` → `new` → `save` en el sandbox sobre `ruby` (manual) y `python` (deferred), y la **genericidad de las plantillas** (ninguna lleva casos ni nombres de un módulo concreto).
 - **Snapshot:** pendiente: se archiva como `versions/glot_0.9.0.sh` **antes** de fusionar la rama en `main` y de abrir la v0.10.0, para que la puerta de entrada no bloquee el arranque de la siguiente versión.
 
 ---
@@ -154,7 +154,7 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación y códigos (346 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, plantillas y códigos (361 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
 ./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
 ./scripts/glot.sh modules           # catálogo de módulos con su especificación

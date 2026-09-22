@@ -54,7 +54,7 @@ _glot_zsh() {
             ;;
         save)
             if ((CURRENT == 3)); then
-                pasos=(${(f)"$("$glot" save 2>/dev/null | cut -f1,2 | tr '\t' '\n')"})
+                pasos=(${(f)"$({ "$glot" save || true; } 2>/dev/null | cut -f1,2 | tr '\t' '\n')"})
                 _describe 'paso' pasos
             elif ((CURRENT == 4)); then
                 lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})

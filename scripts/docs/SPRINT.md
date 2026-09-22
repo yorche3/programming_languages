@@ -73,6 +73,10 @@
 | `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 |
 | `validate` | — (llega con `validate`, v0.10.0) | 6 |
 
+**ES:** Las plantillas son **genéricas**: no llevan datos de ningún módulo concreto (ni casos de prueba ni nombres de archivo). Cada encargo **lee** lo que necesita de la especificación del módulo y de los módulos ya homologados del lenguaje; el harness comprueba que ninguna plantilla vuelva a llevar datos de un módulo.
+
+**EN:** The templates are **generic**: they carry no data from any particular module (no test cases, no file names). Each request **reads** what it needs from the module's specification and from the language's already homologated modules; the harness checks that no template carries module data again.
+
 ---
 
 ## 🧭 Estado del sprint y dónde vive / Sprint state and where it lives

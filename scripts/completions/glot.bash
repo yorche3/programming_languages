@@ -43,7 +43,7 @@ _glot_complete() {
             ;;
         save)
             if ((COMP_CWORD == 2)); then
-                words="$("$glot" save 2>/dev/null | cut -f1,2 | tr '\t' '\n')"
+                words="$({ "$glot" save || true; } 2>/dev/null | cut -f1,2 | tr '\t' '\n')"
             elif ((COMP_CWORD == 3)); then
                 words="$("$glot" langs 2>/dev/null | cut -f1)"
             else
