@@ -14,9 +14,10 @@ language, **tab-separated**, no header, sorted by submodule name.
 | 1 | Lenguaje, tal como aparece en `.gitmodules` | `php` |
 | 2 | Comando de inicialización del ecosistema | `mkdir -p src test + composer require --dev phpunit/phpunit` |
 | 3 | Manifiestos y archivos clave | `composer.json, phpunit.xml, .gitignore` |
-| 4 | Comando nativo de pruebas | `composer test` |
+| 4 | Comando nativo de pruebas (lo ejecuta `glot test`) | `composer test` |
+| 5 | Verificador de sintaxis o formato (lo ejecuta `glot verify`); `-` si el lenguaje aún no tiene | `php -l src/{Modulo}.php` |
 
-**ES:** El contenido sale de la tabla maestra de
+**ES:** Las columnas 2 a 4 salen de la tabla maestra de
 [`docs/core/00_Project_Initialization_Guide.md`](../../docs/core/00_Project_Initialization_Guide.md),
 que sigue siendo el documento humano: aquí solo está lo que el tooling necesita.
 El harness comprueba que **los dos no se separan** (mismos lenguajes y mismos
@@ -24,13 +25,29 @@ comandos de pruebas), así que si actualizas la guía hay que actualizar el TSV,
 al revés. El número de filas tiene que ser igual a los lenguajes de `.gitmodules`;
 `glot doctor` lo informa como `native_commands`.
 
-**EN:** The content comes from the master table in
+**EN:** Columns 2 to 4 come from the master table in
 [`docs/core/00_Project_Initialization_Guide.md`](../../docs/core/00_Project_Initialization_Guide.md),
 which remains the human document: only what the tooling needs lives here. The
 harness checks that **the two do not drift apart** (same languages and same test
 commands), so updating the guide means updating the TSV, and vice versa. The row
 count must equal the languages in `.gitmodules`; `glot doctor` reports it as
 `native_commands`.
+
+**ES:** La **columna 5 se mantiene a mano** y solo con verificadores **ejecutados
+de verdad** en el módulo correspondiente; la cobertura se informa en `doctor` como
+`verify_commands` y crece cuando un lenguaje suma su verificador. Las columnas 4 y
+5 pueden llevar marcadores (`{modulo}`, `{Modulo}`, `{suite}`): `glot` los resuelve
+contra el módulo real antes de ejecutar, y `-n` imprime el resultado. El régimen de
+`nim`, `perl`, `php` y `ruby` se apoya en el nombre del archivo, así que un módulo
+que no lo siga necesitará revisar su fila.
+
+**EN:** **Column 5 is maintained by hand** and only with verifiers **actually run**
+in the corresponding module; coverage is reported by `doctor` as
+`verify_commands` and grows as languages add their verifier. Columns 4 and 5 may
+carry placeholders (`{modulo}`, `{Modulo}`, `{suite}`): `glot` resolves them against
+the real module before running, and `-n` prints the result. The `nim`, `perl`, `php`
+and `ruby` rows rely on the file name, so a module not following it will need its row
+reviewed.
 
 ## 🔁 Regeneración / Regeneration
 

@@ -20,6 +20,8 @@ _glot_zsh() {
         'progress:estado del roadmap'
         'completion:imprime el autocompletado'
         'use:sitúa el trabajo del sprint'
+        'test:ejecuta la suite del módulo asignado'
+        'verify:ejecuta el verificador del lenguaje'
         'set:guarda una clave del estado'
         'get:lee una clave del estado'
         'unset:borra una clave del estado'
@@ -38,6 +40,15 @@ _glot_zsh() {
             _describe 'fase' fases
             ;;
         use)
+            if ((CURRENT == 3)); then
+                lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
+                _describe 'lenguaje' lenguajes
+            else
+                modulos=(${(f)"$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"})
+                _describe 'módulo' modulos
+            fi
+            ;;
+        test | verify)
             if ((CURRENT == 3)); then
                 lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
                 _describe 'lenguaje' lenguajes

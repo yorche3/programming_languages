@@ -13,7 +13,7 @@
 | stdout | Solo el dato (así `$(glot get lang)` es utilizable) |
 | stderr | Diagnóstico, avisos y errores; `set`/`unset` confirman aquí |
 | Códigos de salida | `0` correcto · `1` error de entorno o dato ausente · `2` uso incorrecto · `3` estado ilegible o no escribible |
-| Flags | `-h/--help` (general y por verbo), `--version`, `-q/--quiet`; desde v0.4.0, `-n/--dry-run` en los verbos que mutan |
+| Flags | `-h/--help` (general y por verbo), `--version`, `-q/--quiet`; desde v0.4.0, `-n/--dry-run` en los verbos que mutan y, desde v0.7.0, también en `test`/`verify`, donde imprime el comando sin ejecutarlo |
 | Interacción | Un verbo nunca pregunta: el dato llega por argumento o por stdin |
 | Idempotencia | Repetir el mismo efecto no cambia el resultado ni el código de salida |
 | Testabilidad | La raíz del repo y la ruta del estado son inyectables por variable (`GLOT_ROOT`, `GLOT_STATE_DIR`/`GLOT_STATE_FILE`) |
@@ -29,9 +29,10 @@
 | `1` | Entorno o dato ausente | Falta bash 4+, git, la raíz del monorepo, un lenguaje de `.gitmodules`, la especificación, o el árbol tiene cambios sin confirmar |
 | `2` | Uso incorrecto | Verbo desconocido, opción desconocida, argumentos de menos, valor inválido |
 | `3` | Estado ilegible o no escribible | No se pudo leer, crear o escribir el almacén |
+| `4` | Verificación fallida | `test` o `verify` se ejecutaron y **fallaron**: la suite en rojo o hallazgos del analizador |
 
-> **ES:** `3` no se confunde con `1`: quien llama debe poder distinguir «me falta un dato» de «no puedo guardar».
-> **EN:** `3` is not confused with `1`: callers must be able to tell "I am missing a datum" from "I cannot save".
+> **ES:** `3` no se confunde con `1`: quien llama debe poder distinguir «me falta un dato» de «no puedo guardar». `4` tampoco se confunde con `1`: un CI necesita distinguir «no pude ejecutar la suite» de «la ejecuté y está en rojo».
+> **EN:** `3` is not confused with `1`: callers must be able to tell "I am missing a datum" from "I cannot save". `4` is not confused with `1` either: a CI needs to tell "I could not run the suite" from "I ran it and it is red".
 
 ---
 
@@ -54,6 +55,8 @@
 | `modules [fase]` | Catálogo de módulos del roadmap con su especificación resuelta (`-` si aún no existe) | 0 / 1 / 2 |
 | `progress [fase]` | Estado del roadmap: sin fase, contadores globales en `clave=valor`; con fase, una línea por módulo | 0 / 1 / 2 |
 | `completion [bash\|zsh]` | Imprime el guion de autocompletado en stdout; **no** lo instala | 0 / 1 / 2 |
+| `test [lenguaje] [fase/módulo]` | Ejecuta la suite del módulo asignado en su directorio, con el comando nativo del lenguaje; la salida del runner va a stdout | 0 / 1 / 2 / 3 / **4** |
+| `verify [lenguaje] [fase/módulo]` | Ejecuta el verificador (sintaxis/formato) del lenguaje; imprime `skipped` si aún no tiene uno | 0 / 1 / 2 / 3 / **4** |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
 
 ---
@@ -160,6 +163,36 @@
 **EN:** The **status** is translated from the roadmap mark into an ASCII word (`done`, `in_progress`, `planned`, `pending`) so the output is parseable and does not depend on an emoji an editor could corrupt. The parser recognises marks **by bytes**; a `core.*` line it does not understand is a `1` error, never an invented count. `progress` also warns when the `X/N` counter contradicts the language list the roadmap writes in parentheses, or when its denominator differs from the registered languages.
 
 **ES:** **Definición / Definition:** `registrados` = lenguajes de `.gitmodules`; `homologados` = módulos con su contador completo; `pares_*` = suma de `X` y de `módulos × registrados`.
+
+---
+
+## ▶️ Ejecución (L3, v0.7.0) / Execution
+
+**ES:** `test` y `verify` son la capa que **ejecuta** el trabajo: leen el catálogo, resuelven el objetivo y corren el comando del lenguaje en el directorio del módulo. La salida del runner va a **stdout tal cual** (es el dato y la evidencia del sprint); los avisos y el comando elegido van a stderr.
+
+**EN:** `test` and `verify` are the layer that **executes** the work: they read the catalogue, resolve the target and run the language command in the module directory. The runner output goes to **stdout as is** (it is the datum and the sprint evidence); warnings and the chosen command go to stderr.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Objetivo / Target | `glot <verbo> [lenguaje] [fase/módulo]`; lo que no llegue por argumento se completa con el **estado del sprint** (`lang`, `phase`, `module`) |
+| Directorio / Directory | `{lenguaje}/core/{fase}/{módulo}`; si el comando empieza por `cd X &&`, ese `cd` se respeta |
+| Comando / Command | Columna 4 (`test`) o 5 (`verify`) de [`data/languages.tsv`](../data/languages.tsv) |
+| Marcadores / Placeholders | `{modulo}` → id (`naive_sort`), `{Modulo}` → PascalCase (`NaiveSort`), `{suite}` → archivo de suite |
+
+**ES:** `{suite}` **no** se adivina: se deduce del propio patrón. Del token que lo contiene se toman el prefijo y el sufijo (`test/{suite}.vala` → `test/*.vala`; `{suite}_guile.scm` → `*_guile.scm`), se busca en el directorio efectivo del comando y se exige **una única** coincidencia; cero o varias son un error en vez de una elección silenciosa.
+
+**EN:** `{suite}` is **not** guessed: it is derived from the pattern itself. The prefix and suffix are taken from the token containing it (`test/{suite}.vala` → `test/*.vala`; `{suite}_guile.scm` → `*_guile.scm`), it is searched for in the command's effective directory, and **exactly one** match is required; zero or several is an error instead of a silent choice.
+
+| Resultado / Outcome | Código / Code |
+|---------------------|:-------------:|
+| Suite o verificador en verde | `0` |
+| La suite o el verificador fallaron | `4` |
+| El lenguaje aún no tiene verificador (imprime `skipped`) | `0` |
+| No se pudo preparar (sin estado, módulo o fase inexistentes, suite ambigua) | `1` |
+
+**ES:** La tabla de comandos es **superficie de ejecución**: por eso se versiona, `glot doctor` informa de su ruta y de su cobertura, `-n` imprime el comando exacto antes de correrlo y el harness comprueba su forma. Los comandos salen de la ejecución real de los módulos: **tres lenguajes ya homologados** (V, Rust y Crystal) tienen hallazgos de formato preexistentes, así que `verify` informa de ellos con `4`; no es un fallo de `glot` ni una regresión.
+
+**EN:** The command table is an **execution surface**: that is why it is versioned, `glot doctor` reports its path and coverage, `-n` prints the exact command before running it, and the harness checks its shape. The commands come from real module runs: **three already-homologated languages** (V, Rust and Crystal) have pre-existing formatting findings, so `verify` reports them with `4`; it is not a `glot` failure nor a regression.
 
 ---
 

@@ -32,6 +32,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `path` | `_glot_cmd_path` | Ruta del fichero de estado, sin leerlo |
 | `use` | `_glot_cmd_use "$@"` | Sitúa el trabajo del sprint (L2): catálogo, ramas y estado del sprint |
 | `langs`, `modules`, `progress`, `completion` | `_glot_cmd_<verbo> "$@"` | Catálogo, estado del roadmap y autocompletado (L2.5) |
+| `test`, `verify` | `_glot_cmd_<verbo> "$@"` → `_glot_cmd_run` | Ejecución (L3): resuelven el objetivo y corren el comando del lenguaje |
 | otra opción (`-*`) | error de uso | `2` y mensaje en `stderr` |
 | cualquier otra cosa | error de verbo | `2`, sugiere `glot greet <algo>` y `glot help` |
 
@@ -66,6 +67,8 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `modules [fase]` | El roadmap y `docs/core/` | Filtra por fase y resuelve la especificación de cada módulo | `id<TAB>fase<TAB>módulo<TAB>especificación` | `0`, `1` o `2` |
 | `progress [fase]` | El roadmap y `.gitmodules` | Agrega contadores; avisa si el contador contradice la lista o el denominador | `clave=valor`, o `modulo<TAB>estado<TAB>hechos<TAB>total` | `0`, `1` o `2` |
 | `completion [shell]` | `completions/glot.<shell>` | Comprueba el shell soportado | El guion completo en stdout | `0`, `1` o `2` |
+| `test [lenguaje] [fase/módulo]` | El estado del sprint, el catálogo de datos y el directorio del módulo | Resuelve el objetivo, expande los marcadores y ejecuta | La salida del runner, tal cual, en stdout | `0`, `1`, `2`, `3` o `4` |
+| `verify [lenguaje] [fase/módulo]` | Igual, con la columna 5 | Si el lenguaje no tiene verificador, imprime `skipped` y no falla | La salida del verificador en stdout | `0`, `1`, `2`, `3` o `4` |
 
 ### Detalles no evidentes / Non-obvious details
 
@@ -108,13 +111,23 @@ Finally it writes the six state keys and prints the absolute path. With `-n` it 
 
 **EN:** Sources: `.gitmodules` for the languages (the denominator), `docs/ROADMAP.md` for the modules and their state (the source of truth), `docs/core/` for the specifications and `data/languages.tsv` for the native commands. `modules` and `progress` **do not count the tree: they read the roadmap**, and `progress` warns when the counter disagrees with the parenthesised list or with the registered languages. If the roadmap cannot be understood, it returns `1`: an invented count would be worse than an error. Status marks are recognised **by bytes** (`$'\xe2\x9c\x85'`, `$'\xf0\x9f\x94\x84'`, …) so the parser does not depend on the emoji surviving an editor, and they are translated into ASCII words (`done`, `in_progress`, `planned`, `pending`) because stdout is data, not presentation.
 
-## 8. Salida y códigos / Output and exit codes
+## 8. La capa de ejecución / The execution layer (L3)
+
+**ES:** `test` y `verify` comparten cuerpo en `_glot_cmd_run`: `_glot_exec_target` resuelve el objetivo (los argumentos mandan y el estado del sprint completa lo que falte, incluida la normalización del id canónico) y `_glot_lang_field` lee la plantilla de la columna 4 o 5 del catálogo de datos. Después `_glot_module_dir` da el directorio de trabajo —el del módulo, o el de su subcarpeta real, que es lo que resuelve `unit_test/calculator`— y `_glot_expand_command` sustituye los marcadores: `{modulo}` y `{Modulo}` son directos, y `{suite}` se **deduce del propio patrón** en vez de adivinarse: del token que lo contiene se toman el prefijo y el sufijo (`test/{suite}.vala` → `test/*.vala`, `{suite}_guile.scm` → `*_guile.scm`), se busca en el directorio efectivo —el del `cd` inicial del comando, si lo hay— y se exige una única coincidencia; cero o varias devuelven `1` con los candidatos.
+
+**EN:** `test` and `verify` share a body in `_glot_cmd_run`: `_glot_exec_target` resolves the target (arguments win and the sprint state fills the gaps, including canonical id normalisation) and `_glot_lang_field` reads the template from column 4 or 5 of the data catalogue. Then `_glot_module_dir` gives the working directory —the module's, or that of its real subfolder, which is how `unit_test/calculator` is resolved— and `_glot_expand_command` replaces the placeholders: `{modulo}` and `{Modulo}` are direct, and `{suite}` is **derived from the pattern itself** instead of guessed: the prefix and suffix are taken from the token containing it (`test/{suite}.vala` → `test/*.vala`, `{suite}_guile.scm` → `*_guile.scm`), it is searched for in the effective directory —the one of the command's initial `cd`, if any— and exactly one match is required; zero or several return `1` with the candidates.
+
+**ES:** La ejecución es `(cd -- "$dir" && eval "$cmd")` en un subshell: el `cd` del propio comando se respeta y el árbol de trabajo del shell que llama no se toca. La salida del runner no se toca ni se filtra —va a stdout— porque es el dato y la evidencia del sprint, y el comando elegido se anuncia por stderr. El código del runner se traduce: `0` verde, `4` verificación fallida; usar `1` mezclaría «no pude ejecutar» con «está en rojo». Con `-n` se imprime el plan completo (`cd <módulo> && <comando>`) sin ejecutar nada, y `verify` con la columna 5 a `-` imprime `skipped` y devuelve `0`: no tener verificador no es un fallo, y `doctor` informa de cuántos lenguajes lo tienen.
+
+**EN:** Execution is `(cd -- "$dir" && eval "$cmd")` in a subshell: the command's own `cd` is honoured and the calling shell's working tree is untouched. The runner output is neither touched nor filtered —it goes to stdout— because it is the sprint's datum and evidence, and the chosen command is announced on stderr. The runner's code is translated: `0` green, `4` verification failed; using `1` would mix "I could not run it" with "it is red". With `-n` the whole plan (`cd <module> && <command>`) is printed without running anything, and `verify` with column 5 set to `-` prints `skipped` and returns `0`: having no verifier is not a failure, and `doctor` reports how many languages have one.
+
+## 9. Salida y códigos / Output and exit codes
 
 1. Los verbos escriben **solo datos** en stdout; los errores salen por `_glot_error` y los avisos por `_glot_warn`, ambos a stderr. `set`/`unset` confirman por stderr: su stdout solo lleva datos si `-n` está activo.
 2. `_glot_info` escribe en stderr salvo que se haya pasado `-q/--quiet`. Los flags globales se leen **antes** del verbo, así que la forma silenciosa y parseable es `glot -q doctor`, no `doctor -q` (ahí el flag llega como argumento del verbo y se ignora).
 3. El código final del script es el del verbo: la última orden del archivo es `glot "$@"`, y con `set -e` un `return 2` dentro de un verbo termina el script con `2`.
 4. `3` está reservado al estado: no se pudo leer, crear o escribir. Los errores de uso siguen siendo `2` y los de entorno `1`.
 
-## 9. Lo que todavía no hace / What it does not do yet
+## 10. Lo que todavía no hace / What it does not do yet
 
-El catálogo ya existe (L2.5, v0.6.0): `langs`, `modules`, `progress` y `completion`. Lo que falta es su consumo real: `test` y `verify` ejecutan los comandos nativos (L3, v0.7.0), la delegación de encargos llega en L4 (v0.8.0) y la instalación del autocompletado en L8 (v1.0.0), que es donde `use` hará el `cd` de verdad.
+El catálogo (L2.5, v0.6.0) y la ejecución (L3, v0.7.0) ya existen. Lo que falta: los encargos de IA (L4, v0.8.0), el andamiaje y los commits guiados (L5, v0.9.0), la evidencia y el cierre (L6, v0.10.0), la higiene de punteros (L7, v0.11.0) y la instalación con la función cargable (L8, v1.0.0), que es donde `use` hará el `cd` de verdad y el autocompletado se instalará solo. Tampoco hay barrido por lenguaje: `test` actúa sobre el objetivo asignado, uno cada vez.

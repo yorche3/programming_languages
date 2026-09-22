@@ -37,12 +37,18 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   `scripts/data/languages.tsv`, con test de deriva contra la guía de
   inicialización, y el autocompletado de bash y zsh (dinámico) se imprime con
   `glot completion`, con 227 comprobaciones en el harness.
-- Se documentó el alcance real de `.github/prompts/` (plantillas locales que
-  `.gitignore` no versiona y que se normalizarán en la L4) en
-  `scripts/docs/ROADMAP.md`, `scripts/docs/SPRINT.md` y `docs/WORKFLOW.md`.
+- `glot` v0.7.0: **ejecución** (L3) con `test` (suite del módulo asignado, con el
+  comando nativo del lenguaje) y `verify` (sintaxis/formato), desde cualquier
+  directorio, con el código `4` de verificación fallida y los marcadores
+  `{modulo}`, `{Modulo}` y `{suite}` resueltos contra el módulo real; el
+  catálogo de datos suma la columna del verificador (14 de 50 lenguajes) y
+  `doctor` informa de la cobertura, con 258 comprobaciones en el harness.
 - Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
   `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
   estados, método reproducible y plan de cierre.
+- Se documentó el alcance real de `.github/prompts/` (plantillas locales que
+  `.gitignore` no versiona y que se normalizarán en la L4) en
+  `scripts/docs/ROADMAP.md`, `scripts/docs/SPRINT.md` y `docs/WORKFLOW.md`.
 - Se abrió la fase `Algorithms Pure` como siguiente fase del roadmap.
 - Se estableció el flujo de cierre documental y actualización del roadmap.
 
@@ -56,6 +62,13 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Nueve filas de la tabla de comandos nativos no eran ejecutables como estaban
+  (`ada` apuntaba a un directorio inexistente, `kotlin` a un envoltorio ausente,
+  `scala` se quedaba esperando sin `-batch`, `prolog`, `tcl-tk` y `scheme`
+  necesitaban su propio directorio o banderas, `vala` requería `--pkg glib-2.0`
+  y ejecutar el binario, `common-lisp` el `--eval` de salida y `nim` el runner
+  de `nimble`). Se corrigen en la guía de inicialización y en el catálogo de
+  datos.
 - `glot use` no resolvía los módulos cuyo nombre de carpeta o de documento no
   sigue el id del roadmap: `foundations/helloworld` y `foundations/unit_test`
   devolvían `1` (especificación ausente) por un heurístico sobre el nombre del
