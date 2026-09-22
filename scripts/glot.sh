@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# glot 0.6.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2) y
-# catálogo (L2.5): conversor de nombres, `langs`, `modules`, `progress` y
-# autocompletado.
+# glot 0.7.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2),
+# catálogo (L2.5) y ejecución (L3): `test` y `verify`.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -22,7 +21,7 @@
 
 set -euo pipefail
 
-GLOT_VERSION="0.6.0"
+GLOT_VERSION="0.7.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible.
@@ -315,6 +314,7 @@ _glot_cmd_doctor() {
 
     local registered=0
     local covered=0
+    local verifiers=0
     local data=""
     if root="$(_glot_repo_root)"; then
         registered="$(_glot_langs | wc -l | tr -d ' ')"
@@ -322,6 +322,8 @@ _glot_cmd_doctor() {
             printf 'data_file: %s\n' "$data"
             covered="$(awk -F'\t' 'END {print NR}' "$data")"
             printf 'native_commands: %s de / of %s\n' "$covered" "$registered"
+            verifiers="$(awk -F'\t' '$5 != "-"' "$data" | wc -l | tr -d ' ')"
+            printf 'verify_commands: %s de / of %s\n' "$verifiers" "$registered"
             if ((covered != registered)); then
                 _glot_warn 'el catálogo de datos no cubre los lenguajes registrados / the data catalogue does not cover the registered languages'
                 status=1
@@ -608,6 +610,191 @@ _glot_cmd_completion() {
     cat -- "$file"
 }
 
+# --- ejecución (L3) ----------------------------------------------------------
+
+# _glot_exec_target <args...> — resuelve lenguaje, fase y módulo para `test`/`verify`:
+# los argumentos mandan y el estado completa lo que falte. Imprime
+# `lenguaje<TAB>fase<TAB>módulo` y devuelve 1 si falta un dato o 3 si el estado no se
+# puede leer.
+_glot_exec_target() {
+    local -a pos=()
+    local arg=""
+    local lang=""
+    local target=""
+    local phase=""
+    local module=""
+    local root=""
+    local rc=0
+
+    for arg in "$@"; do
+        case "$arg" in
+            -*)
+                _glot_error "opción desconocida / unknown option: $arg"
+                _glot_hint
+                return 2
+                ;;
+        esac
+        pos+=("$arg")
+    done
+
+    case "${#pos[@]}" in
+        0) ;;
+        1)
+            if [[ "${pos[0]}" == */* ]]; then
+                target="${pos[0]}"
+            else
+                lang="${pos[0]}"
+            fi
+            ;;
+        2)
+            lang="${pos[0]}"
+            target="${pos[1]}"
+            ;;
+        *)
+            _glot_error 'uso / usage: glot <test|verify> [lenguaje] [fase/módulo]'
+            _glot_hint
+            return 2
+            ;;
+    esac
+
+    if [[ -z "$lang" ]]; then
+        lang="$(_glot_state_get lang)" || rc=$?
+        if ((rc == 3)); then
+            return 3
+        fi
+    fi
+
+    if [[ -z "$target" ]]; then
+        phase="$(_glot_state_get phase 2>/dev/null || true)"
+        module="$(_glot_state_get module 2>/dev/null || true)"
+        if [[ -n "$phase" && -n "$module" ]]; then
+            target="$phase/$module"
+        fi
+    fi
+
+    if [[ -z "$lang" || -z "$target" ]]; then
+        _glot_error 'faltan datos del sprint / missing sprint data'
+        _glot_info 'sitúa el trabajo primero / place the work first: glot use <lenguaje> <fase>/<módulo>'
+        return 1
+    fi
+
+    phase="${target%%/*}"
+    module="${target#*/}"
+    if [[ -z "$phase" || -z "$module" || "$phase" == "$target" ]]; then
+        _glot_error "fase/módulo mal formados / malformed phase/module: $target"
+        return 2
+    fi
+
+    if ! _glot_langs | grep -qx -- "$lang"; then
+        _glot_error "lenguaje no registrado en .gitmodules / language not in .gitmodules: $lang"
+        return 1
+    fi
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    if [[ ! -d "$root/$lang/core/$phase" ]]; then
+        _glot_error "fase inexistente / missing phase: $phase"
+        return 1
+    fi
+
+    if ! module="$(_glot_canon_module "$root" "$phase" "$module")"; then
+        _glot_error "módulo desconocido / unknown module: $phase/$module"
+        _glot_info "mira el catálogo / check the catalogue: glot modules $phase"
+        return 1
+    fi
+
+    printf '%s\t%s\t%s\n' "$lang" "$phase" "$module"
+}
+
+# _glot_cmd_run test|verify [args...] — cuerpo común de la capa de ejecución: resuelve
+# el objetivo, lee la plantilla del catálogo de datos, resuelve sus marcadores y la
+# ejecuta en el directorio del módulo. La salida del runner va a stdout tal cual: es el
+# dato. Códigos: 0 correcto · 4 la verificación falló.
+_glot_cmd_run() {
+    local kind="$1"
+    local field=""
+    local root=""
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local dir=""
+    local template=""
+    local cmd=""
+    local rc=0
+
+    shift
+
+    case "$kind" in
+        test) field=4 ;;
+        verify) field=5 ;;
+        *)
+            _glot_error "verbo de ejecución desconocido / unknown execution verb: $kind"
+            return 2
+            ;;
+    esac
+
+    target="$(_glot_exec_target "$@")" || return $?
+
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    template="$(_glot_lang_field "$lang" "$field")" || {
+        _glot_error "lenguaje fuera del catálogo de datos / language missing from the data catalogue: $lang"
+        _glot_info "revisa / check: glot doctor"
+        return 1
+    }
+
+    if [[ "$template" == "-" ]]; then
+        _glot_info "sin verificador para $lang: se omite / no verifier for $lang: skipped"
+        printf 'skipped\n'
+        return 0
+    fi
+
+    dir="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    if [[ ! -d "$dir" ]]; then
+        _glot_error "el módulo no existe / module not found: $dir"
+        _glot_info "sitúalo primero / place it first: glot use $lang $phase/$module"
+        return 1
+    fi
+
+    if ! cmd="$(_glot_expand_command "$dir" "$module" "$template")"; then
+        return 1
+    fi
+
+    if ((_glot_dry_run)); then
+        printf 'cd %s && %s\n' "$dir" "$cmd"
+        return 0
+    fi
+
+    _glot_info "$kind: $cmd"
+
+    (cd -- "$dir" && eval "$cmd") || rc=$?
+
+    if ((rc != 0)); then
+        _glot_warn "$kind falló / failed: $lang $phase/$module (código / code $rc)"
+        return 4
+    fi
+
+    _glot_info "$kind: en verde / green"
+    return 0
+}
+
+_glot_cmd_test() {
+    _glot_cmd_run test "$@"
+}
+
+_glot_cmd_verify() {
+    _glot_cmd_run verify "$@"
+}
+
 _glot_usage() {
     cat <<'EOF'
 glot — CLI del monorepo / monorepo CLI
@@ -636,6 +823,16 @@ Verbos / Verbs:
                      de la fase / roadmap state: global counters, or one line per module
   completion [shell]  Imprime el autocompletado en stdout (bash|zsh)
                      Prints the completion script to stdout (bash|zsh)
+  test [lenguaje] [fase/módulo]
+                     Ejecuta la suite del módulo asignado en su directorio; la salida
+                     del runner va a stdout. Sin argumentos usa el estado del sprint
+                     Runs the assigned module's suite in its directory; the runner's
+                     output goes to stdout. With no arguments it uses the sprint state
+  verify [lenguaje] [fase/módulo]
+                     Ejecuta el verificador (sintaxis/lint) del lenguaje; `skipped` si
+                     el lenguaje aún no tiene uno
+                     Runs the language verifier (syntax/lint); `skipped` when the
+                     language has none yet
   use <lenguaje> <fase>/<módulo> [tipo]
                      Sitúa el trabajo: valida y, con el árbol limpio, activa o crea
                      la rama {tipo}/{fase}/{módulo} desde main y la publica con
@@ -713,6 +910,20 @@ _glot_help_verb() {
             printf 'glot completion [bash|zsh] — imprime el autocompletado en stdout\n'
             printf 'glot completion [bash|zsh] — prints the completion script to stdout\n'
             printf 'No lo instala: eso es de install (v1.0.0) / it does not install it: that is install (v1.0.0)\n'
+            ;;
+        test)
+            printf 'glot test [lenguaje] [fase/módulo] — ejecuta la suite del módulo asignado\n'
+            printf 'glot test [language] [phase/module] — runs the assigned module suite\n'
+            printf 'En el directorio del módulo, con el comando nativo del lenguaje; la salida del runner va a stdout\n'
+            printf 'In the module directory, with the language native command; the runner output goes to stdout\n'
+            printf 'Códigos / codes: 0 verde · 1 no se pudo preparar · 4 falló / failed\n'
+            ;;
+        verify)
+            printf 'glot verify [lenguaje] [fase/módulo] — ejecuta el verificador del lenguaje\n'
+            printf 'glot verify [language] [phase/module] — runs the language verifier\n'
+            printf 'Sintaxis o formato, con la herramienta del propio lenguaje; `skipped` si no hay\n'
+            printf 'Syntax or formatting, with the language own tool; `skipped` when there is none\n'
+            printf 'Códigos / codes: 0 correcto · 4 hallazgos / findings\n'
             ;;
         use)
             printf 'glot use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint\n'
@@ -947,6 +1158,99 @@ _glot_module_folder() {
     done
 
     return 1
+}
+
+# _glot_module_dir <raíz> <lenguaje> <fase> <id> — directorio de trabajo del módulo
+# (donde viven `src/` y la suite). Si la carpeta no existe todavía, devuelve la ruta
+# convencional, que es la que `use` creará.
+_glot_module_dir() {
+    local root="$1"
+    local lang="$2"
+    local phase="$3"
+    local id="$4"
+    local folder=""
+
+    folder="$(_glot_module_folder "$root" "$lang" "$phase" "$id" || printf '%s' "$id")"
+    printf '%s\n' "$root/$lang/core/$phase/$folder"
+}
+
+# _glot_pascal <id> — forma PascalCase del id: naive_sort -> NaiveSort.
+_glot_pascal() {
+    local title=""
+
+    title="$(_glot_title "$1")"
+    printf '%s\n' "${title// /}"
+}
+
+# _glot_expand_command <directorio> <id> <plantilla> — resuelve los marcadores de la
+# plantilla: `{modulo}` (id), `{Modulo}` (PascalCase) y `{suite}` (archivo de suite).
+# `{suite}` se deduce del propio patrón: del token que lo contiene se toman el prefijo
+# y el sufijo (`test/{suite}.vala` -> `test/*.vala`, `{suite}_guile.scm` ->
+# `*_guile.scm`), se busca en el directorio efectivo —el del `cd` inicial, si lo hay—
+# y se exige una única coincidencia que además nombre al módulo.
+_glot_expand_command() {
+    local dir="$1"
+    local id="$2"
+    local template="$3"
+    local cmd="$template"
+    local effdir=""
+    local prefix=""
+    local suffix=""
+    local file=""
+    local base=""
+    local norm=""
+    local want=""
+    local -a hits=()
+    local -a named=()
+
+    cmd="${cmd//\{modulo\}/$id}"
+    cmd="${cmd//\{Modulo\}/$(_glot_pascal "$id")}"
+
+    [[ "$cmd" == *'{suite}'* ]] || {
+        printf '%s\n' "$cmd"
+        return 0
+    }
+
+    effdir="$dir"
+    if [[ "$cmd" =~ ^cd[[:space:]]+([^[:space:]\&]+)[[:space:]]+\&\&[[:space:]]+ ]]; then
+        effdir="$dir/${BASH_REMATCH[1]}"
+    fi
+
+    prefix="${cmd%%\{suite\}*}"
+    prefix="${prefix##*[[:space:]]}"
+    suffix="${cmd#*\{suite\}}"
+    suffix="${suffix%%[[:space:]]*}"
+
+    for file in "$effdir/$prefix"*"$suffix"; do
+        [[ -f "$file" ]] || continue
+        base="$(basename -- "$file")"
+        hits+=("$base")
+    done
+
+    if (( ${#hits[@]} == 0 )); then
+        _glot_error "no se encontró la suite / suite not found: $effdir/$prefix*$suffix"
+        return 1
+    fi
+
+    if (( ${#hits[@]} > 1 )); then
+        want="${id//[-_]/}"
+        want="${want,,}"
+        for base in "${hits[@]}"; do
+            norm="${base//[-_]/}"
+            norm="${norm,,}"
+            [[ "$norm" == *"$want"* ]] && named+=("$base")
+        done
+        (( ${#named[@]} == 1 )) && hits=("${named[0]}")
+    fi
+
+    if (( ${#hits[@]} != 1 )); then
+        _glot_error "suite ambigua / ambiguous suite: ${hits[*]}"
+        return 1
+    fi
+
+    base="${hits[0]}"
+    base="${base%"$suffix"}"
+    printf '%s\n' "${cmd//\{suite\}/$base}"
 }
 
 # _glot_status_name <marca> — traduce la marca del roadmap a una palabra estable.
@@ -1440,6 +1744,14 @@ glot() {
         completion)
             # Autocompletado en stdout / Completion script on stdout
             _glot_cmd_completion "$@"
+            ;;
+        test)
+            # Ejecuta la suite del módulo asignado / Runs the assigned module suite
+            _glot_cmd_test "$@"
+            ;;
+        verify)
+            # Ejecuta el verificador del lenguaje / Runs the language verifier
+            _glot_cmd_verify "$@"
             ;;
         use)
             # Sitúa el trabajo del sprint / Locates the sprint work
