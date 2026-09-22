@@ -49,6 +49,22 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   `scripts/prompts/` (`scaffold`, `implement`, `docs-module`, `docs-language`) y
   el vocabulario de marcadores se unifica con el del catálogo, con 286
   comprobaciones en el harness.
+- `glot` v0.9.0: **creación y registro** (L5) con `new` (un verbo y dos modos,
+  decididos por dato: ejecuta el inicializador del lenguaje, construye el
+  esqueleto manual o lo aplaza al agente, y normaliza lo que deja el
+  inicializador) y `save` (commit guiado cuyo mensaje sale del catálogo y que
+  nunca hace push), con 361 comprobaciones en el harness.
+- La tabla de inicialización de `scripts/data/languages.tsv` pasa de 5 a 8
+  columnas: la leyenda de la guía (✅ verificado · 🔧 ecosistema · ✍️ manual) se
+  recupera como dato y se añaden el comando y la normalización, verificados
+  ejecutando cada inicializador en un directorio temporal con la entrada
+  cerrada: 22 lenguajes con herramienta, 21 de estructura manual y 7 aplazados.
+- El catálogo `scripts/data/commits.tsv` pone la tabla de mensajes del sprint en
+  datos, y el harness comprueba la deriva entre las dos y que cada alias sea un
+  encargo registrado.
+- La plantilla `scaffold` se divide: `scaffold` (paso 4a) ajusta el esqueleto a
+  lo que exige el módulo y `suite` (paso 4b) escribe la suite desde la
+  especificación, con dos commits por paso.
 - Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
   `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
   estados, método reproducible y plan de cierre.

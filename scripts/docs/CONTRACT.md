@@ -36,11 +36,11 @@
 
 ---
 
-## 🧰 Verbos de la versión viva (v0.6.0) / Verbs in the live version
+## 🧰 Verbos de la versión viva (v0.9.0) / Verbs in the live version
 
 | Verbo | Comportamiento | Código |
 |-------|----------------|:------:|
-| `version`, `--version` | `glot 0.5.0` | 0 |
+| `version`, `--version` | `glot 0.9.0` | 0 |
 | `help`, `-h`, `--help`, `help <verbo>` | Ayuda general o de un verbo | 0 |
 | `doctor` | Diagnóstico: bash, git, raíz del monorepo, directorio y fichero de estado, y número de claves | 0 / 1 |
 | `greet [nombre]` | `Hello, <nombre>!` con el nombre por argumento o por stdin | 0 / 2 |
@@ -59,6 +59,8 @@
 | `verify [lenguaje] [fase/módulo]` | Ejecuta el verificador (sintaxis/formato) del lenguaje; imprime `skipped` si aún no tiene uno | 0 / 1 / 2 / 3 / **4** |
 | `prompt [encargo] [lenguaje] [fase/módulo]` | Sin encargo, lista el registro; con encargo, imprime el encargo armado (estado del sprint + plantilla expandida) | 0 / 1 / 2 / 3 |
 | `ask <encargo> [lenguaje] [fase/módulo]` | Arma el encargo y lo envía a `GLOT_DELEGATE` por stdin; su salida va a stdout | 0 / 1 / 2 / 3 |
+| `new [lenguaje] [fase/módulo]` | Inicializa el lenguaje y crea el esqueleto mecánico del módulo: con `tool` ejecuta el comando del catálogo; con `manual` crea las carpetas; con `deferred` informa e imprime `skipped`. Normaliza lo que deja el inicializador. No escribe la suite | 0 / 1 / 2 / **4** |
+| `save <paso\|alias> [lenguaje] [fase/módulo]` | Confirma en el submódulo con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. Sin push ni puntero. Sin paso, publica el catálogo en stdout | 0 / 1 / 2 / 3 / **4** |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
 
 ---
@@ -223,6 +225,57 @@
 
 ---
 
+## 🛠️ Creación y registro (L5, v0.9.0) / Creation and recording
+
+**ES:** `new` **construye** el esqueleto del módulo y `save` **confirma** con la convención del repositorio. Son los dos verbos que hasta la v0.8.0 se hacían a mano.
+
+**EN:** `new` **builds** the module skeleton and `save` **commits** with the repository convention. They are the two steps that were done by hand until v0.8.0.
+
+### `new` — el esqueleto / the skeleton
+
+**ES:** La parte mecánica sale del catálogo de datos, no del script. La columna 6 de [`data/languages.tsv`](../data/languages.tsv) decide qué hace:
+
+| Tipo / Kind | Qué hace `new` / what `new` does |
+|-------------|-----------------------------------|
+| `tool` | Ejecuta el comando de la columna 7 **en el directorio del módulo** y después aplica la normalización de la columna 8 |
+| `manual` | Ejecuta la creación de carpetas de la columna 7 (el esqueleto manual del lenguaje) |
+| `deferred` | **No ejecuta nada**: informa, remite al encargo `scaffold` y imprime `skipped` |
+
+**EN:** The mechanical part comes from the data catalogue, not from the script. Column 6 of [`data/languages.tsv`](../data/languages.tsv) decides what it does: `tool` runs column 7 in the module directory and then applies column 8; `manual` runs the folder creation of column 7; `deferred` **runs nothing**, points at the `scaffold` request and prints `skipped`.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Directorio / Directory | El del módulo, que prepara `use`. Si no existe, `new` **no lo inventa**: error `1` con la sugerencia de `use` |
+| Normalización / Normalisation | `flat:<sub>` sube el contenido de `<sub>` y lo borra; `rm:<ruta>` elimina (tolerante). Separadas por `;` y en orden |
+| Nido / Nesting | Los inicializadores que crean un proyecto hijo se ejecutan en el directorio del módulo y se aplanan: sin `flat` el módulo quedaría anidado dos veces |
+| Repositorios anidados / Nested repositories | `crystal` y `gleam` crean un `.git` propio; `new` lo borra antes de aplanar, porque un repositorio dentro de un submódulo no es válido |
+| Contenido previo / Existing content | Con el directorio no vacío **no se pisa nada**: aviso por stderr, imprime la ruta y devuelve `0` |
+| Alcance / Scope | **No** escribe la suite (encargo `suite`), **no** implementa, **no** añade al índice y **no** confirma nada |
+| `-n/--dry-run` | Imprime `cd <dir> && <comando>`, la normalización ya expandida y la ruta; no toca el disco |
+
+**ES:** La normalización **no adivina**: si un lenguaje no tiene operación declarada en el catálogo, no se toca nada. Lo que el inicializador deja y el módulo no usa —runners de ejemplo, nombres predefinidos— lo ajusta el encargo `scaffold`, que sí puede leer la especificación.
+
+**EN:** Normalisation **does not guess**: if a language has no declared operation in the catalogue, nothing is touched. What the initializer leaves and the module does not use —sample runners, predefined names— is adjusted by the `scaffold` request, which can read the specification.
+
+### `save` — el registro / the recording
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** (`4a`, `4b`, `5`, `7`, `8`) o por **alias del encargo** (`scaffold`, `suite`, `implement`, `docs-module`, `docs-language`). Nunca se escribe a mano |
+| Marcadores / Placeholders | `{lang}`, `{phase}`, `{module}`, `{Module}`: los mismos del resto del tooling, resueltos con el estado del sprint |
+| Índice / Index | `git add -A` del **submódulo** completo. Si hay cambios fuera del módulo, se nombran por stderr antes de confirmar |
+| Rama / Branch | Si la rama activa no es la del estado del sprint, se avisa (no se bloquea) |
+| Ámbito / Scope | Solo los pasos con ámbito `submodule`. Los del monorepo (puntero y roadmap) se rechazan con `1` y remiten a `close` (v0.10.0) y `pointer` (v0.11.0) |
+| Salida / Output | El **SHA corto** del commit; `nothing` si el árbol ya estaba limpio |
+| Push | **Nunca**. La rama la publica `use`; subir el trabajo es del autor |
+| `-n/--dry-run` | Imprime el `git add` y el `git commit -m` con el mensaje ya resuelto. Con el árbol ya limpio no hay plan que enseñar: imprime `nothing`, igual que la ejecución real |
+
+**ES:** `save` no inventa convenciones: si el paso no está en el catálogo, no hay commit. La tabla del sprint ([`SPRINT.md`](SPRINT.md)) es la fuente y el catálogo es la copia que lee el verbo; el harness comprueba la **deriva** entre las dos, y que cada alias sea un encargo registrado.
+
+**EN:** `save` does not invent conventions: if the step is not in the catalogue, there is no commit. The sprint table ([`SPRINT.md`](SPRINT.md)) is the source and the catalogue is the copy the verb reads; the harness checks the **drift** between the two, and that every alias is a registered request.
+
+---
+
 ## 🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
 
 ```bash
@@ -267,6 +320,6 @@ glot use <fase>/<módulo> [tipo]                # dentro del submódulo, deduce 
 | Lenguaje fuera de `.gitmodules` · especificación ausente · submódulo sin inicializar · cambios sin confirmar **fuera** del directorio del módulo · la ruta del módulo existe y no es un directorio · rama no creable o no publicable | `1` |
 | Estado no escribible (el módulo y la rama ya estarían preparados: se avisa por stderr) | `3` |
 
-**ES:** **No hace:** commits, `git add`, correr el inicializador, generar esqueleto (`src/`, `test/` y el contrato de pruebas son de `new`, v0.9.0), tocar la rama del monorepo ni el puntero del submódulo. **Con trabajo sin confirmar nunca crea ni cambia de rama**: reanudar es su caso principal, no un error. **El `cd` real no llega hasta la v1.0.0** (capa cargable): hasta entonces, `cd "$(glot use …)"`.
+**ES:** **No hace:** commits, `git add`, correr el inicializador, generar esqueleto (`src/`, `test/` y el contrato de pruebas son de `new` y del encargo `suite`, v0.9.0), tocar la rama del monorepo ni el puntero del submódulo. **Con trabajo sin confirmar nunca crea ni cambia de rama**: reanudar es su caso principal, no un error. **El `cd` real no llega hasta la v1.0.0** (capa cargable): hasta entonces, `cd "$(glot use …)"`.
 
-**EN:** **It does not:** commit, `git add`, run the initializer, scaffold (`src/`, `test/` and the test contract belong to `new`, v0.9.0), touch the monorepo branch or the submodule pointer. **With uncommitted work it never creates or switches branches**: resuming is its main case, not an error. **The real `cd` arrives in v1.0.0** (loadable layer): until then, `cd "$(glot use …)"`.
+**EN:** **It does not:** commit, `git add`, run the initializer, scaffold (`src/`, `test/` and the test contract belong to `new` and the `suite` request, v0.9.0), touch the monorepo branch or the submodule pointer. **With uncommitted work it never creates or switches branches**: resuming is its main case, not an error. **The real `cd` arrives in v1.0.0** (loadable layer): until then, `cd "$(glot use …)"`.

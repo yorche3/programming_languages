@@ -45,7 +45,7 @@
 | L2.5 | Catálogo (`langs`, `modules`, `progress`), comandos nativos y autocompletado | 0.6.0 ✅ |
 | L3 | Ejecución: `test` y `verify` | 0.7.0 ✅ |
 | L4 | Delegación: `prompt` (encargos de IA) y `ask` (envío al delegado) | 0.8.0 ✅ |
-| L5 | Creación y registro: `new`, `save` | 0.9.0 |
+| L5 | Creación y registro: `new`, `save` | 0.9.0 ✅ |
 | L6 | Evidencia y cierre: `evidence`, `close`, `validate` | 0.10.0 |
 | L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.11.0 |
 | L8 | Instalación: `install`, función cargable, `doctor` completo | 1.0.0 |
@@ -62,7 +62,7 @@
 | 0.6.0 | L2.5 | apoyo a todos | `langs`, `modules`, `progress` y `completion`: el **conversor de nombres** (id canónico → documento, rama, commit y carpeta), los comandos nativos por lenguaje en `data/languages.tsv` y el autocompletado de bash y zsh con completado dinámico | Los datos ya existen; el autocompletado los necesita, y `use` deja de depender de un heurístico de nombres |
 | 0.7.0 | L3 | 5–7 | `test` (suite del módulo asignado, con el comando nativo del lenguaje) y `verify` (sintaxis/formato), desde cualquier directorio, con el código `4` de verificación fallida y los marcadores `{modulo}`/`{Modulo}`/`{suite}` resueltos contra el módulo real | Primer consumo real del catálogo y del estado; la tabla de comandos se corrige contra los módulos ya homologados
 | 0.8.0 | L4 | 4–8 | `prompt`/`ask`: arma el encargo para el agente con las plantillas **versionadas** de `scripts/prompts/`, con el estado del sprint expandido y `GLOT_DELEGATE` como estrategia enchufable | **Solo imprime texto** (o lo envía): no muta nada, así que va antes que la capa que sí muta |
-| 0.9.0 | L5 | 4 | `new`/`scaffold` (inicializador del lenguaje, esqueleto y contrato de pruebas) y `save` (commit guiado con la convención del repo) | Reutiliza catálogo y estado; elimina el andamiaje manual repetido |
+| 0.9.0 | L5 | 4 | `new` (un verbo, dos modos: ejecuta el inicializador o construye el esqueleto manual, y normaliza lo que el inicializador deja) y `save` (commit guiado desde el catálogo de commits); tabla de inicialización ampliada con tipo/comando/normalización y el encargo `suite` separado de `scaffold` | Reutiliza catálogo y estado; elimina el andamiaje y el commit manual repetidos. Lo que exige leer la especificación (runners de ejemplo, nombres predefinidos) sigue siendo del agente |
 | 0.10.0 | L6 | 7–8 | `evidence` (salidas reales), `close` (checklist + roadmap) y `validate` (validador automático con Copilot CLI) | El cierre documental requiere validación: la ejecuta el agente, el script la encarga y la comprueba |
 | 0.11.0 | L7 | 1, 9 | `status` (submódulos, ramas, punteros), `pointer` (actualiza el puntero del submódulo en el monorepo), `clean` de artefactos y `submodule sync` | Ops diaria; primero solo lectura, las mutaciones con `-n` |
 | 1.0.0 | L8 | todos | `install`/`uninstall` (`.bashrc` + completions), **capa cargable** (`use` hace el `cd` real), `doctor` completo y retirada de `hello` | 1.0 = objetivo original cumplido |
@@ -73,8 +73,11 @@
 | Deuda | Cuándo se paga |
 |-------|----------------|
 | Hasta la v1.0.0 el `cd` no es real: se usa `cd "$(glot use …)"` | v1.0.0 (`install` + capa cargable) |
-| Hasta la v0.9.0 los commits se hacen con `git` a mano | v0.9.0 (`save`) |
 | Hasta la v0.11.0 el puntero del submódulo en el monorepo se actualiza a mano | v0.11.0 (`pointer`) |
+
+**ES:** Pagadas: los commits a mano se acabaron en la v0.9.0 (`save`).
+
+**EN:** Paid: hand-made commits ended in v0.9.0 (`save`).
 
 ---
 
@@ -85,6 +88,22 @@
 **EN:** `glot` is the **orchestrator**: it resolves catalog and state, runs terminal commands (git, branches, initialization, tests, lint), captures **real outputs** and prepares the request. The documentation part (creating or modifying READMEs, checklist and roadmap) is executed by the **VS Code agent**, because it needs validation and judgement. Delegation is a pluggable strategy: by default the request is printed to `stdout` (ready to paste into the chat) and, when the environment allows it, it is piped to a command set in `GLOT_DELEGATE`. Verified in this environment: `code chat` is **not available** and `code agent` answers `The 'agent' command is not supported by the remote CLI`, so the default is printing.
 
 La política del validador automático (invocación, modelo y coste, advertencias) está en [`VALIDATION.md`](VALIDATION.md).
+
+---
+
+### Decisiones cerradas de la v0.9.0 / Closed decisions for v0.9.0
+
+**ES:** Las decisiones que la L5 tenía abiertas se resolvieron el 2026-09-22, antes de escribir código.
+
+**EN:** The decisions L5 had pending were resolved on 2026-09-22, before writing any code.
+
+| Tema | Decisión |
+|------|----------|
+| `new` y `scaffold` | **No hay verbo nuevo**: `new` es el verbo del script, con dos modos (`tool` ejecuta la herramienta, `manual` construye el esqueleto). `scaffold` sigue siendo el **encargo de IA** que ajusta lo que exige leer la especificación |
+| Datos del inicializador | La leyenda de la guía (✅ verificado · 🔧 ecosistema · ✍️ manual) se **recupera como dato**: tipo, comando y normalización son columnas del catálogo, verificadas ejecutando cada inicializador en un directorio temporal y con la entrada cerrada. **Un caso que no se pudo verificar no se añade** |
+| Alcance de `new` | Esqueleto y normalización, **sin la suite**: las pruebas son del encargo `suite` (paso 4b). El directorio del módulo lo prepara `use`; `new` no lo inventa y no pisa contenido existente |
+| Paso 4 en dos commits | `4a` esqueleto (`chore({phase}): add scaffold for {module}`) y `4b` suite (`chore({phase}): add suite for {module}`) |
+| `save` | El mensaje sale del **catálogo de commits** (paso o alias del encargo), nunca escrito a mano; añade el submódulo completo; confirma **solo** en el submódulo; **nunca** hace push. Los pasos del monorepo esperan a `close` y `pointer` |
 
 ---
 

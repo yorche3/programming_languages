@@ -9,7 +9,7 @@
 
 _glot_zsh() {
     local glot="${GLOT_CMD:-glot}"
-    local -a verbs fases modulos lenguajes encargos
+    local -a verbs fases modulos lenguajes encargos pasos
 
     verbs=(
         'version:versión instalada'
@@ -20,6 +20,8 @@ _glot_zsh() {
         'progress:estado del roadmap'
         'completion:imprime el autocompletado'
         'use:sitúa el trabajo del sprint'
+        'new:inicializa el lenguaje y crea el esqueleto'
+        'save:confirma con la convención del repositorio'
         'test:ejecuta la suite del módulo asignado'
         'verify:ejecuta el verificador del lenguaje'
         'prompt:arma el encargo del sprint'
@@ -41,8 +43,20 @@ _glot_zsh() {
             fases=(${(f)"$("$glot" modules 2>/dev/null | cut -f2 | LC_ALL=C sort -u)"})
             _describe 'fase' fases
             ;;
-        use)
+        use | new)
             if ((CURRENT == 3)); then
+                lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
+                _describe 'lenguaje' lenguajes
+            else
+                modulos=(${(f)"$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"})
+                _describe 'módulo' modulos
+            fi
+            ;;
+        save)
+            if ((CURRENT == 3)); then
+                pasos=(${(f)"$({ "$glot" save || true; } 2>/dev/null | cut -f1,2 | tr '\t' '\n')"})
+                _describe 'paso' pasos
+            elif ((CURRENT == 4)); then
                 lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
                 _describe 'lenguaje' lenguajes
             else

@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v0.8.0** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v0.9.0** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -15,7 +15,8 @@ Versión viva / Live version: **v0.8.0** en [`glot.sh`](glot.sh).
 | Resolver catálogo y estado | Lenguaje, fase, módulo, rama y especificación del trabajo en curso |
 | Preparar el entorno | Directorio del módulo, rama de trabajo y, desde L9, la toolchain esperada |
 | Ejecutar y verificar | Comandos nativos del lenguaje desde cualquier directorio, leyendo el estado |
-| Preparar los encargos de IA | Arma el encargo para el agente con las plantillas de `.github/prompts`; no lo ejecuta por su cuenta |
+| Crear el esqueleto | Inicializador del lenguaje y normalización de lo que deja (aplanar el nido, quitar el `.git` anidado), por dato y no por heurístico |
+| Preparar los encargos de IA | Arma el encargo para el agente con las plantillas versionadas de [`prompts/`](prompts/); no lo ejecuta por su cuenta |
 | Registrar la evidencia | Salidas reales, checklist de cierre, roadmap y puntero del submódulo |
 
 **No-objetivos / Non-goals:** no es un módulo del roadmap ni toca `.gitmodules` o los contadores; no escribe documentación (la encarga y la valida); no sustituye al agente de VS Code; no publica nada que no se le pida explícitamente; no instala toolchains antes de L9; no es un gestor de proyectos.
@@ -35,6 +36,9 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh progress
 ./scripts/glot.sh test php algorithms/naive_sort    # suite del módulo / module suite
 ./scripts/glot.sh verify php algorithms/naive_sort  # sintaxis/lint del lenguaje
+./scripts/glot.sh -n new php algorithms/naive_sort   # esqueleto: plan sin tocar nada
+./scripts/glot.sh new php algorithms/naive_sort      # inicializador + normalización
+./scripts/glot.sh prompt suite                        # encargo de la suite (paso 4b)
 ./scripts/glot.sh set lang php && ./scripts/glot.sh get lang
 source <(./scripts/glot.sh completion bash)   # autocompletado / completion
 ```
@@ -60,18 +64,20 @@ source <(./scripts/glot.sh completion bash)   # autocompletado / completion
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                   # Versión viva / live version (v0.8.0)
+├── glot.sh                   # Versión viva / live version (v0.9.0)
 ├── completions/              # Autocompletado por shell (se imprime en stdout)
 │   ├── glot.bash
 │   └── glot.zsh
 ├── prompts/                  # Plantillas de encargo, versionadas
-│   ├── scaffold.prompt.md        # Paso 4
+│   ├── scaffold.prompt.md        # Paso 4a · esqueleto
+│   ├── suite.prompt.md           # Paso 4b · suite de pruebas
 │   ├── implement.prompt.md       # Paso 5
 │   ├── docs-module.prompt.md     # Paso 7
 │   └── docs-language.prompt.md   # Paso 8
 ├── data/                     # Catálogo de datos del tooling
 │   ├── README.md
-│   └── languages.tsv         # Un lenguaje por fila: init, manifiestos, pruebas y verificador
+│   ├── languages.tsv         # Un lenguaje por fila: init, manifiestos, pruebas, verificador e inicialización
+│   └── commits.tsv           # Un paso de sprint por fila: alias, ámbito y mensaje de commit
 ├── docs/                     # Documentación del tooling
 │   ├── ROADMAP.md
 │   ├── SPRINT.md

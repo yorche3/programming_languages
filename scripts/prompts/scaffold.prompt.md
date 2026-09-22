@@ -1,18 +1,19 @@
 ---
 name: scaffold
-step: 4
-description: Genera el esqueleto del módulo y sus pruebas unitarias para un lenguaje del monorepo
+step: 4a
+description: Ajusta el esqueleto del módulo a lo que exige el lenguaje y el módulo, sin escribir la suite
 mode: agent
 ---
 
-# Delegación — Esqueleto del módulo + pruebas unitarias
+# Delegación — Esqueleto del módulo
 
 ## Rol
 
 Eres un ingeniero de software senior del monorepo `yorche3/programming_languages`. Cada lenguaje
-homologado es un submódulo Git con su propio `main`. Tu entrega es exclusivamente:
-**(a)** el esqueleto del módulo y **(b)** las pruebas unitarias. La implementación del
-algoritmo **no** es tu tarea.
+homologado es un submódulo Git con su propio `main`. Tu entrega es exclusivamente el
+**esqueleto del módulo**: la estructura de compilación y de pruebas que el lenguaje exige,
+ajustada a lo que el módulo realmente necesita. **No** escribes las pruebas unitarias (eso es
+el encargo `suite`, paso 4b) y **no** implementas el algoritmo (paso 5).
 
 ---
 
@@ -26,18 +27,37 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
 ## Fuentes de verdad (en este orden de prioridad)
 
-1. **`{spec}`** — contrato del módulo: funciones expuestas, casos de prueba
-   obligatorios y criterios de aceptación.
-2. **`docs/core/00_Project_Initialization_Guide.md`** — comando de inicialización y comando
+1. **`{spec}`** — contrato del módulo: funciones expuestas, casos de prueba y criterios.
+2. **`scripts/data/languages.tsv`** — para `{lang}`: tipo de inicialización (`tool`, `manual`,
+   `deferred`), comando de inicialización y normalización ya aplicada por `glot new`.
+3. **`docs/core/00_Project_Initialization_Guide.md`** — comando de inicialización y comando
    nativo de pruebas para `{lang}`. Respeta su leyenda:
    ✅ verificado en este repo · 🔧 estándar del ecosistema · ✍️ estructura manual.
-3. **`AGENTS.md`** — límites de actuación y flujo de cierre.
-4. **Módulos ya homologados del mismo lenguaje** — `{lang}/core/foundations/numbers/` y
-   cualquier `{lang}/core/{phase}/*/`. Definen la convención real: framework de pruebas,
-   naming (`snake_case`, `camelCase`, `PascalCase`), layout de `test/`, runner y `.gitignore`.
+4. **`AGENTS.md`** — límites de actuación y flujo de cierre.
+5. **Módulos ya homologados del mismo lenguaje** — `{lang}/core/foundations/numbers/` y
+   cualquier `{lang}/core/{phase}/*/`. Definen la convención real: layout, nombres de archivo,
+   manifiesto y `.gitignore`.
 
 **Resolución de conflictos:** si la guía de inicialización y un módulo existente difieren,
 **gana el módulo existente**, porque es código ya verificado y ejecutado.
+
+---
+
+## Punto de partida
+
+`glot new` **ya hizo la parte mecánica**: con `tool` ejecutó el inicializador y normalizó el
+resultado (aplanó el nido, quitó el `.git` anidado, descartó el vendoring que el repositorio
+rechaza); con `manual` creó las carpetas del esqueleto. Los lenguajes marcados `deferred` no
+tienen inicializador validado: ahí el esqueleto lo construyes tú.
+
+## Contrato del encargo / Deliverable
+
+| Aspecto | Detalle |
+|---|---|
+| **Entrada** | El directorio del módulo con lo que dejó `glot new`, la especificación, la fila de `{lang}` en `scripts/data/languages.tsv` y los módulos homologados del lenguaje |
+| **Salida** | Un esqueleto que compila, resuelve o instala, y cuyo runner de pruebas **arranca**; `.gitignore` verificado; sin runners de ejemplo ni nombres que no encajen |
+| **Fuera de alcance** | La suite (encargo `suite`, paso 4b), la implementación (paso 5), el README (paso 7) y los commits (`glot save`) |
+| **Evidencia** | La salida real del comando nativo de pruebas y de `git check-ignore -v`, pegadas sin editar |
 
 ---
 
@@ -48,19 +68,28 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 ### 1. Reconocimiento (no escribas nada todavía)
 
 - `git status --short` y `git submodule status` en la raíz del monorepo.
-- Inspecciona: la especificación, la carpeta del módulo (si existe) y el módulo `numbers/`
-  del mismo lenguaje.
-- Determina y anota: framework de pruebas idiomático, si existe `run_tests` propio, y si el
-  tipo de array admite nulos.
+- `git -C {repo} status --short` para ver exactamente qué dejó `glot new`.
+- Inspecciona: la especificación, la carpeta del módulo y el módulo `numbers/` del mismo lenguaje.
+- Anota el layout que usa el lenguaje en este repositorio (`src`+`test`, `lib`+`t`, `source`, …)
+  y los nombres de archivo que espera el runner.
 
-### 2. Esqueleto
+### 2. Ajustar el esqueleto a lo que el módulo requiere
 
-- Ejecuta el comando de inicialización que indica la guía para `{lang}`.
-- Si la guía marca **✍️**, replica la estructura manual de esa sección (`mkdir -p` + manifiesto).
-- **No escribas la implementación.**
-- **No dejes un `main`/`app` de ejemplo** si el módulo es una biblioteca: rompe el runner de
-  pruebas generado por la herramienta (casos reales: `dub test` en D, `dotnet test` en C#).
-- Conserva lo que genere la herramienta; modifícalo solo si la especificación lo exige.
+El inicializador deja cosas que el módulo no usa. Esto es lo que sí es tu tarea, y así se
+detecta cada caso:
+
+| Resto / Leftover | Cómo se detecta | Qué se hace |
+|------------------|-----------------|-------------|
+| **Runner de ejemplo**: un punto de entrada `main`/`app`/`example` en lo que es una biblioteca | El inicializador generó un ejecutable y el módulo expone funciones | Quitarlo: rompe el runner de pruebas de la herramienta (casos reales: `dub test` en D, `dotnet test` en C#, `zig build test` con `src/main.zig`) |
+| **Nombres predefinidos** que no encajan | Un archivo o manifiesto se llama como la plantilla (`MyLib.hs`, `<dir>_spec.<ext>`, `library.cabal`) y no como el módulo | Renombrar a la convención del módulo y ajustar el manifiesto (nombre, versión, descripción) para que concuerde con `{module}` / `{Module}` |
+| **Layout divergente** | El inicializador creó `bin/`+`lib/` y este repositorio usa `src/`+`test/` en ese lenguaje, o al revés | Dejar **una** disposición: la que ya usan los módulos homologados |
+| **Andamiaje de otro fin** | CI propia del inicializador, *samples*, `example/`, utilidades que el módulo no usa | Conservar si el repositorio también lo conserva en otros módulos del lenguaje; quitar solo lo que rompe o contradice la convención, y decirlo |
+| **Lenguaje `deferred`** | La columna 6 del catálogo dice `deferred` y `glot new` imprimió `skipped` | Construir el esqueleto completo (`mkdir -p` + manifiesto) según la guía y los módulos existentes |
+
+**Regla de conservación:** lo que el inicializador haga bien se queda (estructura de pruebas,
+manifiesto, `LICENSE`, el `README` generado si el módulo no tiene el suyo). Solo se cambia lo
+que **contradice** al módulo o al repositorio, y cada cambio se justifica en una línea.
+**No** escribas la implementación ni la suite.
 
 ### 3. `.gitignore` del módulo
 
@@ -73,74 +102,18 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 > Si un artefacto ya estaba **rastreado** antes de crear el `.gitignore`, no lo destrackees:
 > reporta la ruta y el comando `git rm -r --cached` para que lo decida el autor.
 
-### 4. Pruebas unitarias
+### 4. Verificación
 
-Implementa el contrato de pruebas descrito más abajo, en el directorio que use el lenguaje
-(`test/`, `tests/`, `spec/`, `t/`). Si el framework no incluye runner propio, añade el archivo
-de ejecución que pida la especificación.
+- El proyecto debe compilar, resolver o instalar sin warnings ni errores.
+- Ejecuta el comando nativo de pruebas: debe poder **arrancar** aunque todavía no haya casos
+  (la suite llega en el paso 4b). Copia la salida real, sin editar y sin resumir.
+- Si el runner no arranca por falta de la suite, dilo con la salida real y sigue: no escribas
+  la suite para «arreglarlo».
 
-### 5. Verificación
-
-Ejecuta el comando nativo de pruebas y **copia la salida real** (sin editar, sin resumir).
-El build no debe producir warnings ni errores.
-
-### 6. Contra-verificación (obligatoria)
-
-Rompe a propósito **una** comparación del algoritmo o de un helper y confirma que la suite
-falla señalando el test correcto. Después **revierte** el cambio y vuelve a verificar que todo
-pasa. Sin este paso no puedes declarar la tarea terminada.
-
-### 7. Cierre
+### 5. Cierre
 
 Reporta en el formato de salida. **No** generes ni actualices READMEs, índices ni roadmap:
 eso corresponde a otra delegación.
-
----
-
-## Contrato de las pruebas
-
-### Casos obligatorios
-
-Toma la lista **autoritativa** de la especificación (sección «Casos de prueba»). Para
-`naive_sort` son estos 7, idénticos para cada algoritmo:
-
-| # | Caso | Entrada | Salida esperada |
-|---|------|---------|-----------------|
-| 1 | Array estándar desordenado | `[5, 2, 9, 1, 5, 6]` | `[1, 2, 5, 5, 6, 9]` |
-| 2 | Array ya ordenado | `[1, 2, 3, 4, 5]` | `[1, 2, 3, 4, 5]` |
-| 3 | Array en orden inverso | `[5, 4, 3, 2, 1]` | `[1, 2, 3, 4, 5]` |
-| 4 | Elementos idénticos | `[7, 7, 7, 7]` | `[7, 7, 7, 7]` |
-| 5 | Con números negativos | `[3, -1, 4, -5, 0]` | `[-5, -1, 0, 3, 4]` |
-| 6 | Un solo elemento | `[42]` | `[42]` |
-| 7 | Array vacío | `[]` | `[]` |
-
-### Caso nulo
-
-- **Si el tipo admite `null`/`nil`/`None`/`()`** → añade un caso controlado que verifique el
-  indicador de fallo del lenguaje. **No** lances ni esperes una excepción.
-- **Si el tipo no admite nulos** → omite el caso y documenta en una línea por qué.
-
-### Patrón obligatorio
-
-1. **Constantes nombradas**: una por cada entrada y salida
-   (`standardInput`, `standardOutput`, `reverseInput`, `reverseOutput`, …).
-2. **Un helper compartido** que reciba la función a probar y el nombre del algoritmo, y
-   ejecute todos los casos con mensajes descriptivos. Evita repetir las aserciones N veces.
-3. **Un test por cada función** de la especificación, que llame al helper con la función
-   correspondiente.
-4. **Mensajes de aserción** con el formato `"<algorithm> should sort an unsorted array"`,
-   en el idioma que ya use el módulo (revisa `numbers/`).
-5. **Aislamiento**: si el algoritmo ordena *in-place*, cada caso debe operar sobre una copia
-   de la constante; nunca sobre el fixture compartido.
-
-### Convenciones idiomáticas
-
-| Aspecto | Regla |
-|---------|-------|
-| Framework | El estándar del lenguaje; el mismo que use `{lang}/core/foundations/numbers/` |
-| Naming | Convención del lenguaje (`snake_case`, `camelCase`, `PascalCase`, `kebab-case`) |
-| Aserciones | Las del framework (`assertEqual`, `is`, `Assert`, `expect`, …) |
-| Dependencias | Solo las estándar del lenguaje o las ya presentes en `numbers/` |
 
 ---
 
@@ -148,19 +121,18 @@ Toma la lista **autoritativa** de la especificación (sección «Casos de prueba
 
 **DEBES**
 
-- Resolver las variables del Paso 0 antes de tocar nada.
-- Ejecutar los tests con el comando nativo y pegar la salida real.
-- Hacer la contra-verificación del paso 6.
-- Dejar el `.gitignore` cubriendo los artefactos generados.
+- Resolver las variables antes de tocar nada.
+- Partir de lo que dejó `glot new` y respetar la convención de los módulos homologados.
+- Pegar la salida real del comando nativo de pruebas.
+- Dejar el `.gitignore` cubriendo los artefactos generados y verificado con `git check-ignore -v`.
 
 **NO DEBES**
 
-- Modificar la implementación (`src/`, `lib/`, `source/`): si existe, se deja tal cual.
-- Escribir el código de la implementación del pseudocódigo.
-- Modificar la especificación ni el roadmap.
+- Escribir pruebas unitarias: son del encargo `suite` (paso 4b).
+- Escribir el código de la implementación del pseudocódigo ni modificar `src/` con lógica.
+- Modificar la especificación, el roadmap ni `scripts/data/`.
 - Generar documentación, READMEs ni índices.
 - Introducir dependencias externas no estándar del lenguaje.
-- Lanzar excepciones para el caso nulo: se retorna el indicador de fallo como valor.
 - Ejecutar `git add`, `git commit` ni `git push`.
 
 ---
@@ -168,19 +140,19 @@ Toma la lista **autoritativa** de la especificación (sección «Casos de prueba
 ## Definition of Done
 
 - [ ] Variables resueltas y confirmadas con evidencia del repositorio.
-- [ ] Esqueleto creado con el comando que marca la guía, sin `main` de ejemplo.
+- [ ] Esqueleto ajustado a lo que el módulo requiere, sin runners de ejemplo ni nombres que no encajen.
+- [ ] Layout igual al de los módulos homologados del mismo lenguaje.
+- [ ] Manifiesto con el nombre del módulo (`{module}` / `{Module}`).
+- [ ] Cada ajuste justificado en una línea; lo que ya estaba bien, intacto.
 - [ ] `.gitignore` verificado con `git check-ignore -v`.
-- [ ] Todos los casos de la especificación cubiertos por cada función.
-- [ ] Caso nulo incluido (si el tipo lo admite) o justificado en una línea.
-- [ ] Comando nativo de pruebas ejecutado con salida real y sin warnings.
-- [ ] Contra-verificación hecha y revertida.
-- [ ] Sin cambios en `src/`, especificación, roadmap ni READMEs.
+- [ ] Comando nativo de pruebas ejecutado, con salida real, aunque la suite esté pendiente.
+- [ ] Sin suite escrita, sin implementación y sin cambios en la especificación ni el roadmap.
 
 ---
 
 ## Formato de salida
 
-- **Si todo pasa:** máximo 4 líneas — archivos creados, comando ejecutado, resultado.
+- **Si todo pasa:** máximo 4 líneas — qué se ajustó, comando ejecutado y resultado.
 - **Si hay un bloqueo:** indica el archivo y la línea, la causa concreta y la mitigación
   propuesta, y **detente**. No apliques la mitigación sin autorización.
 - Prohibido: resúmenes extensos, notas explicativas, documentación, tablas de «antes y
