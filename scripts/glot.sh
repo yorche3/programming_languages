@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# glot 0.8.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2),
-# catálogo (L2.5), ejecución (L3) y delegación (L4): `prompt` y `ask`.
+# glot 0.9.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2),
+# catálogo (L2.5), ejecución (L3), delegación (L4) y creación (L5): `new` y `save`.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -14,6 +14,8 @@
 #   ./scripts/glot.sh modules algorithms
 #   ./scripts/glot.sh progress
 #   ./scripts/glot.sh use php algorithms/naive_sort
+#   ./scripts/glot.sh new
+#   ./scripts/glot.sh save 4a
 #   ./scripts/glot.sh set lang php
 #   ./scripts/glot.sh get lang
 #   ./scripts/glot.sh list
@@ -21,10 +23,12 @@
 
 set -euo pipefail
 
-GLOT_VERSION="0.8.0"
+GLOT_VERSION="0.9.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
-# Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible.
+# Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
+# · 4 lo ejecutado falló (la suite en rojo, el verificador con hallazgos o el
+#   inicializador sin poder crear el esqueleto).
 
 _glot_error() { printf 'glot: error: %s\n' "$*" >&2; }
 _glot_warn() { printf 'glot: aviso / warning: %s\n' "$*" >&2; }
@@ -315,6 +319,9 @@ _glot_cmd_doctor() {
     local registered=0
     local covered=0
     local verifiers=0
+    local runnable=0
+    local deferred=0
+    local commits=""
     local prompts=""
     local data=""
     if root="$(_glot_repo_root)"; then
@@ -325,12 +332,25 @@ _glot_cmd_doctor() {
             printf 'native_commands: %s de / of %s\n' "$covered" "$registered"
             verifiers="$(awk -F'\t' '$5 != "-"' "$data" | wc -l | tr -d ' ')"
             printf 'verify_commands: %s de / of %s\n' "$verifiers" "$registered"
+            runnable="$(awk -F'\t' '$6 == "tool" || $6 == "manual"' "$data" | wc -l | tr -d ' ')"
+            deferred="$(awk -F'\t' '$6 == "deferred"' "$data" | wc -l | tr -d ' ')"
+            printf 'new_commands: %s de / of %s (deferred: %s)\n' "$runnable" "$registered" "$deferred"
             if ((covered != registered)); then
                 _glot_warn 'el catálogo de datos no cubre los lenguajes registrados / the data catalogue does not cover the registered languages'
                 status=1
             fi
         else
             printf 'data_file: (no encontrado / not found)\n'
+            status=1
+        fi
+
+        if commits="$(_glot_commits_file)"; then
+            printf 'commits_file: %s\n' "$commits"
+            printf 'commit_steps: %s de / of which %s son del submódulo / are submodule ones\n' \
+                "$(_glot_commits_list | wc -l | tr -d ' ')" \
+                "$(_glot_commits_list | awk -F'\t' '$3 == "submodule"' | wc -l | tr -d ' ')"
+        else
+            printf 'commits_file: (no encontrado / not found)\n'
             status=1
         fi
 
@@ -1045,6 +1065,292 @@ _glot_cmd_ask() {
     return 0
 }
 
+# --- creación y registro (L5) ------------------------------------------------
+
+# _glot_init_flat <directorio> <sub> — sube al directorio del módulo el contenido de
+# `<sub>` (incluidos los archivos ocultos) y borra `<sub>`. Es la normalización de los
+# inicializadores que crean el proyecto como hijo del directorio donde se ejecutan
+# (`crystal init lib {module}` dentro de `{module}/` anida dos veces).
+_glot_init_flat() {
+    local dir="$1"
+    local sub="$2"
+    local entry=""
+    local rc=0
+
+    [[ -d "$dir/$sub" ]] || return 0
+
+    shopt -s dotglob nullglob
+    for entry in "$dir/$sub"/*; do
+        if ! mv -f -- "$entry" "$dir/"; then
+            rc=1
+            break
+        fi
+    done
+    shopt -u dotglob nullglob
+
+    ((rc == 0)) || return 1
+    rmdir -- "$dir/$sub" 2>/dev/null || true
+    return 0
+}
+
+# _glot_init_normalise <directorio> <módulo> <operaciones> — aplica la normalización
+# declarada en el catálogo, en orden. Cada operación admite `{module}` y `{Module}`.
+# Ninguna adivina: si el catálogo no la trae, no se toca nada.
+_glot_init_normalise() {
+    local dir="$1"
+    local module="$2"
+    local ops="$3"
+    local op=""
+    local path=""
+    local sub=""
+    local IFS=';'
+
+    for op in $ops; do
+        [[ -n "$op" ]] || continue
+        op="$(_glot_expand_command "$dir" "$module" "$op")" || return 1
+
+        case "$op" in
+            flat:*)
+                sub="${op#flat:}"
+                _glot_info "normalizar / normalise: flat $sub"
+                _glot_init_flat "$dir" "$sub" || {
+                    _glot_error "no se pudo aplanar / cannot flatten: $dir/$sub"
+                    return 1
+                }
+                ;;
+            rm:*)
+                path="${op#rm:}"
+                _glot_info "normalizar / normalise: rm $path"
+                rm -rf -- "$dir/$path" 2>/dev/null || true
+                ;;
+            *)
+                _glot_error "operación de normalización desconocida / unknown normalisation operation: $op"
+                _glot_info 'solo valen flat:<sub> y rm:<ruta> / only flat:<sub> and rm:<path> are valid'
+                return 1
+                ;;
+        esac
+    done
+
+    return 0
+}
+
+# _glot_cmd_new [lenguaje] [fase/módulo] — inicializador y esqueleto mecánico del
+# módulo. Ejecuta el comando del catálogo en el directorio del módulo cuando el
+# lenguaje tiene herramienta (`tool`), crea la estructura de carpetas cuando el
+# esqueleto es manual (`manual`) y normaliza lo que deja la herramienta (aplanar el
+# nido, quitar el `.git` anidado, descartar el vendoring que el repositorio rechaza).
+# No escribe la suite —eso es el encargo `suite`— y no confirma nada: eso es `save`.
+# El directorio del módulo lo prepara `use`; si no está, `new` no lo inventa.
+# Códigos: 0 correcto (o `skipped`) · 1 entorno · 2 uso · 4 el inicializador falló.
+_glot_cmd_new() {
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local root=""
+    local dir=""
+    local kind=""
+    local run=""
+    local fix=""
+    local cmd=""
+    local rc=0
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    kind="$(_glot_init_kind "$lang")" || {
+        _glot_error "lenguaje fuera del catálogo de datos / language missing from the data catalogue: $lang"
+        _glot_info 'revisa / check: glot doctor'
+        return 1
+    }
+
+    dir="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    if [[ ! -d "$dir" ]]; then
+        _glot_error "el módulo no existe / module not found: $dir"
+        _glot_info "sitúalo primero / place it first: glot use $lang $phase/$module"
+        return 1
+    fi
+
+    # El tipo manda: sin inicializador validado no se adivina nada.
+    case "$kind" in
+        tool | manual) ;;
+        deferred)
+            _glot_info "sin inicializador validado para $lang / no verified initializer for $lang"
+            _glot_info "lo escribe el agente / the agent writes it: glot prompt scaffold $lang $phase/$module"
+            printf 'skipped\n'
+            return 0
+            ;;
+        *)
+            _glot_error "tipo de inicialización desconocido / unknown initialisation kind: $kind ($lang)"
+            return 1
+            ;;
+    esac
+
+    run="$(_glot_init_run "$lang")" || run="-"
+    fix="$(_glot_init_fix "$lang")" || fix="-"
+    if [[ "$run" == "-" || -z "$run" ]]; then
+        _glot_error "el catálogo no trae comando de inicialización / no initialisation command in the catalogue: $lang"
+        _glot_info 'revisa / check: scripts/data/languages.tsv'
+        return 1
+    fi
+
+    cmd="$(_glot_expand_command "$dir" "$module" "$run")" || return 1
+
+    # Ensayo: el plan, sin tocar el disco.
+    if ((_glot_dry_run)); then
+        printf 'cd %s && %s\n' "$dir" "$cmd"
+        [[ "$fix" != "-" ]] && printf '# normalizar / normalise: %s\n' "$(_glot_expand_command "$dir" "$module" "$fix")"
+        [[ "$kind" == "manual" ]] && printf '# el manifiesto y la suite son del encargo / manifest and suite belong to the request\n'
+        printf '%s\n' "$dir"
+        return 0
+    fi
+
+    # El directorio del módulo lo deja vacío `use`. Con contenido, el esqueleto ya
+    # está hecho: no se pisa nada (misma política que `use` con un módulo existente).
+    if [[ -n "$(ls -A -- "$dir" 2>/dev/null)" ]]; then
+        _glot_warn "el módulo ya tiene contenido, no se genera esqueleto / module already has content, no scaffolding: $dir"
+        printf '%s\n' "$dir"
+        return 0
+    fi
+
+    _glot_info "new: $cmd"
+    (cd -- "$dir" && eval "$cmd") </dev/null || rc=$?
+
+    if ((rc != 0)); then
+        _glot_warn "new falló / failed: $lang $phase/$module (código / code $rc)"
+        _glot_info "el directorio queda como está / the directory is left as it is: $dir"
+        return 4
+    fi
+
+    if [[ "$fix" != "-" && -n "$fix" ]]; then
+        if ! _glot_init_normalise "$dir" "$module" "$fix"; then
+            _glot_warn "new falló al normalizar / failed while normalising: $lang $phase/$module"
+            return 4
+        fi
+    fi
+
+    if [[ "$kind" == "manual" ]]; then
+        _glot_info "estructura manual creada / manual layout created: $dir"
+        _glot_info "el manifiesto y la suite son del encargo / manifest and suite belong to the request: glot prompt scaffold $lang $phase/$module"
+    fi
+
+    printf '%s\n' "$dir"
+    return 0
+}
+
+# _glot_cmd_save <paso|alias> [lenguaje] [fase/módulo] — commit guiado con la
+# convención del repositorio. El mensaje no se escribe a mano: sale del catálogo de
+# commits (`data/commits.tsv`), que es la tabla del sprint puesta en datos. Añade el
+# submódulo completo al índice y confirma en el submódulo. No hace push, no toca el
+# puntero del monorepo ni el roadmap (eso es `pointer`, v0.11.0, y `close`, v0.10.0).
+# Códigos: 0 confirmado (o `nothing`) · 1 entorno · 2 uso · 3 no se pudo escribir.
+_glot_cmd_save() {
+    local step="${1:-}"
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local root=""
+    local sub=""
+    local folder=""
+    local scope=""
+    local msg=""
+    local porcelain=""
+    local outside=""
+    local branch=""
+    local state_branch=""
+    local sha=""
+
+    if [[ -z "$step" ]]; then
+        _glot_error 'falta el paso del sprint / missing sprint step'
+        _glot_info 'uso / usage: glot save <paso|alias> [lenguaje] [fase/módulo]'
+        # Dato para el autor y para el autocompletado: los pasos que sí se confirman aquí.
+        _glot_commits_list 2>/dev/null | awk -F'\t' '$3 == "submodule"' || true
+        return 2
+    fi
+    shift
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    if ! _glot_commit_line "$step" >/dev/null; then
+        _glot_error "paso desconocido / unknown step: $step"
+        _glot_info 'mira el catálogo / check the catalogue: scripts/data/commits.tsv'
+        return 2
+    fi
+
+    scope="$(_glot_commit_field "$step" 3)"
+    if [[ "$scope" != "submodule" ]]; then
+        _glot_error "ese paso se confirma en el monorepo / that step is committed in the monorepo: $step"
+        _glot_info "llega con close (v0.10.0) y pointer (v0.11.0) / it arrives with close (v0.10.0) and pointer (v0.11.0)"
+        return 1
+    fi
+
+    msg="$(_glot_expand_state "$lang" "$phase" "$module" "$(_glot_commit_field "$step" 4)")" || return $?
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    sub="$root/$lang"
+    if [[ ! -e "$sub/.git" ]]; then
+        _glot_error "submódulo sin inicializar / submodule not initialised: $lang"
+        _glot_info "prueba / try: git submodule update --init -- $lang"
+        return 1
+    fi
+
+    porcelain="$(git -C "$sub" status --porcelain 2>/dev/null || true)"
+    if [[ -z "$porcelain" ]]; then
+        _glot_warn "no hay nada que confirmar / nothing to commit: $lang"
+        printf 'nothing\n'
+        return 0
+    fi
+
+    # Hallazgos del estado sucio: se nombran antes de confirmar, sin bloquear.
+    folder="$(_glot_module_folder "$root" "$lang" "$phase" "$module" || printf '%s' "$module")"
+    outside="$(printf '%s\n' "$porcelain" | grep -vE "core/$phase/$folder(/|\$)" || true)"
+    if [[ -n "$outside" ]]; then
+        _glot_warn "hay cambios fuera del módulo que también entran / there are changes outside the module that go in too"
+        printf '%s\n' "$outside" | sed 's/^/  /' >&2
+    fi
+
+    branch="$(git -C "$sub" symbolic-ref --short -q HEAD || true)"
+    state_branch="$(_glot_state_get branch 2>/dev/null || true)"
+    if [[ -n "$state_branch" && -n "$branch" && "$state_branch" != "$branch" ]]; then
+        _glot_warn "la rama del sprint no es la activa / the sprint branch is not the active one"
+        _glot_info "estado / state: $state_branch; activa / active: $branch"
+    fi
+
+    if ((_glot_dry_run)); then
+        printf 'git -C %s add -A\n' "$sub"
+        printf "git -C %s commit -m '%s'\n" "$sub" "$msg"
+        return 0
+    fi
+
+    _glot_info "save: $msg"
+
+    if ! git -C "$sub" add -A 2>/dev/null; then
+        _glot_error "no se pudo preparar el índice / cannot stage: $sub"
+        return 3
+    fi
+
+    if ! git -C "$sub" commit -q -m "$msg" 2>/dev/null; then
+        _glot_error "no se pudo confirmar / cannot commit: $lang $phase/$module"
+        return 4
+    fi
+
+    sha="$(git -C "$sub" rev-parse --short HEAD)"
+    printf '%s\n' "$sha"
+    _glot_info "sin push y sin tocar el puntero del monorepo / no push and the monorepo pointer is untouched"
+    return 0
+}
+
 _glot_usage() {
     cat <<'EOF'
 glot — CLI del monorepo / monorepo CLI
@@ -1101,6 +1407,19 @@ Verbos / Verbs:
                      it with upstream; with uncommitted work it only reports (if you
                      are already on the branch, it republishes it). Stores state and
                      prints the module path
+  new [lenguaje] [fase/módulo]
+                     Inicializa el lenguaje y crea el esqueleto mecánico del módulo:
+                     ejecuta el inicializador del catálogo (o crea las carpetas si el
+                     esqueleto es manual) y normaliza lo que deja. No escribe la suite
+                     Initialises the language and creates the module's mechanical
+                     skeleton: runs the catalogue initializer (or creates the folders
+                     when the skeleton is manual) and normalises what it leaves. It
+                     does not write the suite
+  save <paso|alias> [lenguaje] [fase/módulo]
+                     Confirma con el mensaje de la convención del repositorio, que sale
+                     del catálogo de commits. Sin push y sin tocar el monorepo
+                     Commits with the message from the repository convention, taken
+                     from the commit catalogue. No push and the monorepo is untouched
 
 Opciones globales / Global options:
   -q, --quiet        Silencia el diagnóstico de stderr / silence stderr diagnostics
@@ -1217,6 +1536,32 @@ _glot_help_verb() {
             printf 'Con el módulo ya cerrado hay que indicar el tipo / with a closed module the type must be given\n'
             printf 'Desde dentro de un submódulo se puede omitir el lenguaje / the language can be omitted inside a submodule\n'
             ;;
+        new)
+            printf 'glot new [lenguaje] [fase/módulo] — inicializador y esqueleto del módulo\n'
+            printf 'glot new [language] [phase/module] — initializer and module skeleton\n'
+            printf 'Ejecuta el comando del catálogo en el directorio del módulo (que prepara\n'
+            printf '`use`), crea las carpetas si el lenguaje no tiene herramienta y normaliza\n'
+            printf 'lo que deja (aplanar el nido, quitar el .git anidado, descartar el vendoring\n'
+            printf 'que el repositorio rechaza). No escribe la suite: eso es `glot prompt suite`\n'
+            printf 'Runs the catalogue command in the module directory (prepared by `use`),\n'
+            printf 'creates the folders when the language has no tool and normalises what it\n'
+            printf 'leaves (flatten the nest, drop the nested .git, discard the vendoring the\n'
+            printf 'repository rejects). It does not write the suite: that is `glot prompt suite`\n'
+            printf 'Tipos / kinds: tool (ejecuta / runs), manual (carpetas / folders), deferred (agente / agent)\n'
+            printf 'Códigos / codes: 0 correcto o skipped · 1 entorno · 4 el inicializador falló\n'
+            ;;
+        save)
+            printf 'glot save <paso|alias> [lenguaje] [fase/módulo] — commit guiado\n'
+            printf 'glot save <step|alias> [language] [phase/module] — guided commit\n'
+            printf 'El mensaje sale del catálogo de commits (la tabla del sprint en datos); no\n'
+            printf 'se escribe a mano. Añade el submódulo al índice y confirma en el submódulo\n'
+            printf 'The message comes from the commit catalogue (the sprint table in data); it\n'
+            printf 'is not written by hand. It stages the submodule and commits in it\n'
+            printf 'Pasos / steps: 4a (andamiaje/scaffold) · 4b (suite) · 5 (implementación) · 7 · 8\n'
+            printf 'Los commits del monorepo (puntero y roadmap) llegan con close y pointer\n'
+            printf 'Monorepo commits (pointer and roadmap) arrive with close and pointer\n'
+            printf 'No hace push / it does not push; `-n` imprime el plan / prints the plan\n'
+            ;;
         *)
             _glot_error "verbo desconocido / unknown verb: $1"
             _glot_hint
@@ -1311,6 +1656,83 @@ _glot_lang_field() {
 # _glot_native_test <lenguaje> — comando nativo de pruebas, que consume `test` (L3).
 _glot_native_test() {
     _glot_lang_field "$1" 4
+}
+
+# _glot_init_kind <lenguaje> — tipo de inicialización (columna 6 del catálogo):
+#   tool     — hay herramienta y su comando se ejecuta tal cual
+#   manual   — no hay herramienta; se crean las carpetas del esqueleto
+#   deferred — sin inicializador validado: lo escribe el agente (nunca se adivina)
+_glot_init_kind() {
+    _glot_lang_field "$1" 6
+}
+
+# _glot_init_run <lenguaje> — comando que ejecuta `new` (columna 7). En modo manual es
+# la creación de carpetas; `-` cuando el tipo es `deferred`.
+_glot_init_run() {
+    _glot_lang_field "$1" 7
+}
+
+# _glot_init_fix <lenguaje> — normalización posterior a la herramienta (columna 8):
+# operaciones separadas por `;`, `-` si no hace falta ninguna.
+#   flat:<sub>        — sube el contenido de <sub> al directorio del módulo y lo borra
+#   rm:<ruta>         — elimina (tolerante: si no está, no pasa nada)
+_glot_init_fix() {
+    _glot_lang_field "$1" 8
+}
+
+# _glot_commits_file — convención de mensajes de commit del repositorio, en datos y
+# no dentro del script: una deriva entre la tabla del sprint y el catálogo se detecta
+# en el harness, no en el commit.
+_glot_commits_file() {
+    local dir=""
+
+    for dir in "$GLOT_SCRIPT_DIR/data" "$GLOT_SCRIPT_DIR/../data"; do
+        if [[ -r "$dir/commits.tsv" ]]; then
+            printf '%s\n' "$dir/commits.tsv"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# _glot_commits_list — pasos del catálogo tal cual: paso<TAB>alias<TAB>ámbito<TAB>mensaje.
+_glot_commits_list() {
+    local file=""
+    local line=""
+
+    file="$(_glot_commits_file)" || return 1
+
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        [[ -z "$line" || "$line" == '#'* ]] && continue
+        printf '%s\n' "$line"
+    done <"$file"
+}
+
+# _glot_commit_line <paso|alias> — línea del catálogo de commits. El paso del sprint
+# (`4a`) y el nombre del encargo (`suite`) son la misma cosa vista desde dos sitios.
+_glot_commit_line() {
+    local want="$1"
+    local line=""
+    local step=""
+    local alias=""
+
+    while IFS= read -r line; do
+        step="${line%%$'\t'*}"
+        alias="$(printf '%s\n' "$line" | cut -f2)"
+        if [[ "$step" == "$want" || "$alias" == "$want" ]]; then
+            printf '%s\n' "$line"
+            return 0
+        fi
+    done < <(_glot_commits_list)
+
+    return 1
+}
+
+# _glot_commit_field <paso|alias> <campo> — campo del catálogo de commits:
+# 1 paso · 2 alias (encargo) · 3 ámbito (submodule|monorepo) · 4 mensaje.
+_glot_commit_field() {
+    _glot_commit_line "$1" | cut -f"$2"
 }
 
 # _glot_lang_from_path <raíz> — lenguaje deducido del directorio actual, si estamos
@@ -2039,6 +2461,14 @@ glot() {
         use)
             # Sitúa el trabajo del sprint / Locates the sprint work
             _glot_cmd_use "$@"
+            ;;
+        new)
+            # Inicializa el lenguaje y crea el esqueleto / initialises the language and creates the skeleton
+            _glot_cmd_new "$@"
+            ;;
+        save)
+            # Confirma con la convención del repositorio / commits with the repository convention
+            _glot_cmd_save "$@"
             ;;
         -*)
             # Maneja las opciones desconocidas / Handle unknown options
