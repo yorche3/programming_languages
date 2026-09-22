@@ -20,7 +20,7 @@
 | Preparar los encargos de IA | Arma el encargo para el agente con las plantillas de `.github/prompts`; no lo ejecuta por su cuenta |
 | Registrar la evidencia | Salidas reales, checklist de cierre, roadmap y puntero del submódulo |
 
-**No-objetivos / Non-goals:** no es un módulo del roadmap ni toca `.gitmodules` o los contadores `X/49`; no escribe documentación (la encarga y la valida); no sustituye al agente de VS Code; no publica nada que no se le pida explícitamente; no instala toolchains antes de L9; no es un gestor de proyectos.
+**No-objetivos / Non-goals:** no es un módulo del roadmap ni toca `.gitmodules` o los contadores `X/50`; no escribe documentación (la encarga y la valida); no sustituye al agente de VS Code; no publica nada que no se le pida explícitamente; no instala toolchains antes de L9; no es un gestor de proyectos.
 
 ---
 
