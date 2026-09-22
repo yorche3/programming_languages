@@ -384,6 +384,10 @@ _glot_cmd_doctor() {
             printf 'roadmap_modules: (no reconocido / not recognised)\n'
             status=1
         fi
+
+        printf 'evidence_dir: %s\n' "$root/docs/evidence"
+        printf 'evidence_files: %s\n' \
+            "$(find "$root/docs/evidence" -mindepth 3 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')"
     fi
 
     return "$status"
@@ -1362,6 +1366,504 @@ _glot_cmd_save() {
     return 0
 }
 
+# --- evidencia y cierre (L6) -------------------------------------------------
+
+# _glot_evidence_dir <raíz> <fase> <módulo> — carpeta de la evidencia del sprint.
+# Vive en el monorepo, junto al checklist y al roadmap que cierra `close`: el acta es
+# el registro del cierre, no un artefacto del lenguaje.
+_glot_evidence_dir() {
+    printf '%s/docs/evidence/%s/%s\n' "$1" "$2" "$3"
+}
+
+# _glot_evidence_file <raíz> <fase> <módulo> <lenguaje> — acta de evidencia del sprint.
+_glot_evidence_file() {
+    printf '%s/%s.md\n' "$(_glot_evidence_dir "$1" "$2" "$3")" "$4"
+}
+
+# _glot_evidence_field <archivo> <clave> — campo del bloque de máquina del acta. El
+# bloque es un comentario HTML: no se ve al renderizar y se lee con una línea de grep,
+# así que `close` comprueba la evidencia sin interpretar markdown.
+_glot_evidence_field() {
+    local file="$1"
+    local key="$2"
+    local line=""
+
+    [[ -r "$file" ]] || return 1
+
+    while IFS= read -r line; do
+        if [[ "$line" == "$key="* ]]; then
+            printf '%s\n' "${line#"$key"=}"
+            return 0
+        fi
+    done <"$file"
+
+    return 1
+}
+
+# _glot_cmd_evidence [lenguaje] [fase/módulo] — ejecuta la suite del módulo y su
+# verificador y deja el **acta** con lo que pasó de verdad: la fecha, la rama, el
+# commit del submódulo, si el árbol estaba sucio, el comando de cada uno, su salida
+# tal cual y su código de salida. No interpreta ni resume: el acta es la evidencia, y
+# se escribe aunque la suite esté en rojo (entonces devuelve `4`).
+# Códigos: 0 verde · 1 entorno · 2 uso · 3 no se pudo escribir el acta · 4 en rojo.
+_glot_cmd_evidence() {
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local root=""
+    local sub=""
+    local dir=""
+    local spec=""
+    local file=""
+    local template=""
+    local verify_template=""
+    local cmd=""
+    local verify_cmd=""
+    local out_test=""
+    local out_verify=""
+    local test_rc=0
+    local verify_rc=0
+    local verdict="green"
+    local branch=""
+    local commit=""
+    local dirty="no"
+    local stamp=""
+    local status=0
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    sub="$root/$lang"
+    dir="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    if [[ ! -d "$dir" ]]; then
+        _glot_error "el módulo no existe / module not found: $dir"
+        _glot_info "sitúalo primero / place it first: glot use $lang $phase/$module"
+        return 1
+    fi
+
+    template="$(_glot_lang_field "$lang" 4)" || {
+        _glot_error "lenguaje fuera del catálogo de datos / language missing from the data catalogue: $lang"
+        return 1
+    }
+    verify_template="$(_glot_lang_field "$lang" 5)" || verify_template="-"
+
+    cmd="$(_glot_expand_command "$dir" "$module" "$template")" || return 1
+    if [[ "$verify_template" != "-" ]]; then
+        verify_cmd="$(_glot_expand_command "$dir" "$module" "$verify_template")" || return 1
+    fi
+
+    file="$(_glot_evidence_file "$root" "$phase" "$module" "$lang")"
+    spec="$(_glot_spec_path "$root" "$phase" "$module" || true)"
+
+    # Ensayo: el plan (dónde queda el acta y qué se ejecuta), sin tocar nada.
+    if ((_glot_dry_run)); then
+        printf 'cd %s && %s\n' "$dir" "$cmd"
+        [[ -n "$verify_cmd" ]] && printf 'cd %s && %s\n' "$dir" "$verify_cmd"
+        printf '# acta / record: %s\n' "$file"
+        printf '%s\n' "$file"
+        return 0
+    fi
+
+    branch="$(git -C "$sub" symbolic-ref --short -q HEAD || true)"
+    commit="$(git -C "$sub" rev-parse --short HEAD 2>/dev/null || true)"
+    if [[ -n "$(git -C "$sub" status --porcelain 2>/dev/null || true)" ]]; then
+        dirty="yes"
+    fi
+    stamp="$(date -Iseconds)"
+
+    _glot_info "evidence: $cmd"
+    out_test="$( (cd -- "$dir" && eval "$cmd") 2>&1 )" || test_rc=$?
+    if ((test_rc != 0)); then
+        verdict="red"
+        status=4
+        _glot_warn "la suite está en rojo / the suite is red: $lang $phase/$module (código / code $test_rc)"
+    fi
+
+    if [[ -n "$verify_cmd" ]]; then
+        _glot_info "evidence: $verify_cmd"
+        out_verify="$( (cd -- "$dir" && eval "$verify_cmd") 2>&1 )" || verify_rc=$?
+        if ((verify_rc != 0)); then
+            verdict="red"
+            status=4
+            _glot_warn "el verificador tiene hallazgos / the verifier has findings: $lang (código / code $verify_rc)"
+        fi
+    fi
+
+    if [[ "$dirty" == "yes" ]]; then
+        _glot_warn 'el acta se escribe con el árbol sucio: la evidencia apunta al commit, no a lo que hay sin confirmar'
+    fi
+
+    if ! mkdir -p -- "$(_glot_evidence_dir "$root" "$phase" "$module")"; then
+        _glot_error "no se pudo crear la carpeta de evidencia / cannot create the evidence directory"
+        return 3
+    fi
+
+    if ! {
+        printf '# Evidencia — %s %s/%s\n\n' "$lang" "$phase" "$module"
+        printf '<!-- glot:evidence\n'
+        printf 'lang=%s\n' "$lang"
+        printf 'phase=%s\n' "$phase"
+        printf 'module=%s\n' "$module"
+        printf 'branch=%s\n' "${branch:-detached}"
+        printf 'commit=%s\n' "${commit:--}"
+        printf 'dirty=%s\n' "$dirty"
+        printf 'date=%s\n' "$stamp"
+        printf 'test_exit=%s\n' "$test_rc"
+        printf 'test_cmd=%s\n' "$cmd"
+        printf 'verify_exit=%s\n' "$([[ -n "$verify_cmd" ]] && printf '%s' "$verify_rc" || printf '-')"
+        [[ -n "$verify_cmd" ]] && printf 'verify_cmd=%s\n' "$verify_cmd"
+        printf 'verdict=%s\n' "$verdict"
+        printf '%s\n\n' '-->'
+        printf '| Dato | Valor |\n|------|-------|\n'
+        printf '| Lenguaje / Language | `%s` |\n' "$lang"
+        printf '| Fase y módulo / Phase and module | `%s/%s` |\n' "$phase" "$module"
+        printf '| Especificación / Specification | `%s` |\n' "${spec:--}"
+        printf '| Rama / Branch | `%s` |\n' "${branch:-detached}"
+        printf '| Commit del submódulo / Submodule commit | `%s` |\n' "${commit:--}"
+        printf '| Árbol / Tree | %s |\n' "$([[ "$dirty" == "yes" ]] && printf 'sucio / dirty' || printf 'limpio / clean')"
+        printf '| Fecha / Date | `%s` |\n' "$stamp"
+        printf '\n## Suite de pruebas / Test suite\n\n'
+        printf '````text\n$ %s\n%s\n````\n' "$cmd" "${out_test:-(sin salida / no output)}"
+        printf '\n## Verificador / Verifier\n\n'
+        if [[ -n "$verify_cmd" ]]; then
+            printf '````text\n$ %s\n%s\n````\n' "$verify_cmd" "${out_verify:-(sin salida / no output)}"
+        else
+            printf 'Sin verificador para `%s` / no verifier for `%s`.\n' "$lang" "$lang"
+        fi
+        printf '\n## Veredicto / Verdict\n\n'
+        printf '**%s** — `test` en `%s`' "$([[ "$verdict" == "green" ]] && printf 'verde / green' || printf 'rojo / red')" "$test_rc"
+        if [[ -n "$verify_cmd" ]]; then
+            printf ' y `verify` en `%s`' "$verify_rc"
+        fi
+        printf '.\n'
+    } >"$file"; then
+        _glot_error "no se pudo escribir el acta / cannot write the record: $file"
+        return 3
+    fi
+
+    printf '%s\n' "$file"
+    _glot_info "acta escrita / record written: $verdict"
+    return "$status"
+}
+
+# _glot_display_file — tabla lenguaje → nombre de presentación, que es el que usa el
+# roadmap (`php` → `PHP`, `tcl-tk` → `Tcl/Tk`) y el que fija el orden de sus listas.
+_glot_display_file() {
+    local dir=""
+
+    for dir in "$GLOT_SCRIPT_DIR/data" "$GLOT_SCRIPT_DIR/../data"; do
+        if [[ -r "$dir/display.tsv" ]]; then
+            printf '%s\n' "$dir/display.tsv"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# _glot_display_name <lenguaje> — nombre de presentación del roadmap.
+_glot_display_name() {
+    local file=""
+    local line=""
+
+    file="$(_glot_display_file)" || return 1
+
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        if [[ "${line%%$'\t'*}" == "$1" ]]; then
+            printf '%s\n' "${line#*$'\t'}"
+            return 0
+        fi
+    done <"$file"
+
+    return 1
+}
+
+# _glot_display_sort <tabla> — ordena los nombres que llegan por stdin en el orden del
+# roadmap. La tabla se recorre una vez: su número de línea es la posición.
+_glot_display_sort() {
+    awk -F'\t' 'NR == FNR { pos[$2] = NR; next } $0 in pos { print pos[$0] "\t" $0 }' \
+        "$1" - | LC_ALL=C sort -n | cut -f2-
+}
+
+# _glot_roadmap_module_line <raíz> <fase> <módulo> — línea del módulo en el roadmap.
+_glot_roadmap_module_line() {
+    local file="$1/docs/ROADMAP.md"
+    local line=""
+
+    [[ -r "$file" ]] || return 1
+
+    line="$(grep -m1 -E "^core\\.$2\\.$3([[:space:]]|$)" "$file" || true)"
+    [[ -n "$line" ]] || return 1
+
+    printf '%s\n' "$line"
+}
+
+# _glot_replace_line <archivo> <vieja> <nueva> — reescribe la primera línea que coincida
+# exactamente. Se hace sobre un temporal del mismo directorio y se mueve encima, para
+# que un fallo a mitad no deje el archivo roto.
+_glot_replace_line() {
+    local file="$1"
+    local old="$2"
+    local new="$3"
+    local tmp=""
+
+    tmp="$(mktemp --tmpdir="$(dirname -- "$file")" .glot-line.XXXXXX)" || return 1
+
+    if ! awk -v old="$old" -v new="$new" '
+        !done && $0 == old { print new; done = 1; next }
+        { print }
+        END { exit(done ? 0 : 1) }' "$file" >"$tmp"; then
+        rm -f -- "$tmp"
+        return 1
+    fi
+
+    if ! mv -f -- "$tmp" "$file"; then
+        rm -f -- "$tmp"
+        return 1
+    fi
+
+    return 0
+}
+
+# _glot_close_roadmap_line <tabla> <línea> <nombre> — línea del roadmap con el lenguaje
+# sumado. Conserva el formato que ya tiene la línea (identificador, marca, contador y
+# lista) y solo suma: no inventa columnas ni reordena lo que no entiende. Si el nombre
+# ya está en la lista devuelve la línea tal cual, que es lo que hace idempotente al
+# cierre.
+_glot_close_roadmap_line() {
+    local table="$1"
+    local line="$2"
+    local name="$3"
+    local id=""
+    local rest=""
+    local mark=""
+    local x="0"
+    local n=""
+    local inside=""
+    local joined=""
+    local found=0
+    local part=""
+    local -a names=()
+
+    id="${line%%[[:space:]]*}"
+    rest="${line#"$id"}"
+    rest="${rest#"${rest%%[![:space:]]*}"}"
+    mark="${rest%% *}"
+
+    if [[ "$rest" =~ ([0-9]+)/([0-9]+) ]]; then
+        x="${BASH_REMATCH[1]}"
+        n="${BASH_REMATCH[2]}"
+    else
+        n="$(wc -l <"$table" | tr -d ' ')"
+    fi
+
+    if [[ "$rest" == *"("*")"* ]]; then
+        inside="${rest#*(}"
+        inside="${inside%%)*}"
+        local IFS=','
+        for part in $inside; do
+            part="${part#"${part%%[![:space:]]*}"}"
+            [[ -n "$part" ]] && names+=("$part")
+        done
+        unset IFS
+    fi
+
+    for part in ${names[@]+"${names[@]}"}; do
+        [[ "$part" == "$name" ]] && found=1
+    done
+
+    if ((found)); then
+        printf '%s\n' "$line"
+        return 0
+    fi
+
+    names+=("$name")
+    x=$((x + 1))
+
+    # bytes a propósito: el emoji no depende de que el editor lo conserve
+    mark=$'\xf0\x9f\x94\x84'
+    if ((x >= n)); then
+        x="$n"
+        mark=$'\xe2\x9c\x85'
+    fi
+
+    joined="$(printf '%s\n' "${names[@]}" |
+        _glot_display_sort "$table" |
+        awk 'NR > 1 { printf ", " } { printf "%s", $0 }')"
+
+    if [[ -n "$joined" ]]; then
+        printf '%-38s%s %s/%s (%s)\n' "$id" "$mark" "$x" "$n" "$joined"
+    else
+        printf '%-38s%s %s/%s\n' "$id" "$mark" "$x" "$n"
+    fi
+}
+
+# _glot_cmd_close [lenguaje] [fase/módulo] — cierre del módulo en un lenguaje: comprueba
+# los requisitos que el script puede comprobar (el acta de evidencia en verde, el README
+# del módulo y el de la fase), registra la entrada en el checklist y sube el contador y
+# la lista del roadmap. **No confirma**: el commit es del autor, y la revisión cualitativa
+# (pseudocódigo, divergencias idiomáticas) la sigue haciendo una persona.
+# Códigos: 0 registrado (o ya estaba) · 1 entorno o dato ausente · 2 uso · 3 no se pudo
+# escribir · 4 los requisitos del cierre no se cumplen.
+_glot_cmd_close() {
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local root=""
+    local sub=""
+    local dir=""
+    local table=""
+    local display=""
+    local roadmap=""
+    local checklist=""
+    local acta=""
+    local rel_acta=""
+    local verdict=""
+    local commit=""
+    local test_cmd=""
+    local test_rc=""
+    local verify_cmd=""
+    local verify_rc=""
+    local line=""
+    local newline=""
+    local stamp=""
+    local entry=""
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    sub="$root/$lang"
+    dir="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    roadmap="$root/docs/ROADMAP.md"
+    checklist="$root/docs/ROADMAP_UPDATE_CHECKLIST.md"
+
+    table="$(_glot_display_file)" || {
+        _glot_error 'no se encontró la tabla de nombres / display table not found: data/display.tsv'
+        return 1
+    }
+    display="$(_glot_display_name "$lang")" || {
+        _glot_error "lenguaje sin nombre de presentación / language without a display name: $lang"
+        return 1
+    }
+
+    line="$(_glot_roadmap_module_line "$root" "$phase" "$module")" || {
+        _glot_error "el módulo no está en el roadmap / module missing from the roadmap: core.$phase.$module"
+        _glot_info 'revisa / check: docs/ROADMAP.md'
+        return 1
+    }
+    [[ -r "$checklist" ]] || {
+        _glot_error "no se encontró el checklist / checklist not found: docs/ROADMAP_UPDATE_CHECKLIST.md"
+        return 1
+    }
+
+    newline="$(_glot_close_roadmap_line "$table" "$line" "$display")" || return 1
+
+    # Idempotente: si el lenguaje ya cuenta, no hay nada que cerrar y no se le pide
+    # la evidencia otra vez.
+    if [[ "$newline" == "$line" ]]; then
+        _glot_warn "el módulo ya cuenta con $display / the module already counts $display"
+        _glot_info "línea / line: $line"
+        printf '%s\n' "$line"
+        return 0
+    fi
+
+    # 1. evidencia: el código y sus tests, ejecutados y en verde
+    acta="$(_glot_evidence_file "$root" "$phase" "$module" "$lang")"
+    rel_acta="${acta#"$root"/}"
+    if [[ ! -f "$acta" ]]; then
+        _glot_error "falta la evidencia del sprint / the sprint evidence is missing: $rel_acta"
+        _glot_info "genérala primero / generate it first: glot evidence $lang $phase/$module"
+        return 1
+    fi
+    verdict="$(_glot_evidence_field "$acta" verdict || true)"
+    if [[ "$verdict" != "green" ]]; then
+        _glot_error "la evidencia no está en verde / the evidence is not green: $rel_acta (verdict=${verdict:-?})"
+        _glot_info "vuelve a generarla con la suite en verde / regenerate it with the suite green: glot evidence $lang $phase/$module"
+        return 4
+    fi
+
+    # 2 y 3. documentación del módulo y de la fase (el README del lenguaje es del paso 8)
+    if [[ ! -f "$dir/README.md" ]]; then
+        _glot_error "falta el README del módulo / the module README is missing: ${dir#"$root"/}/README.md"
+        _glot_info "lo encarga el paso 7 / step 7 requests it: glot prompt docs-module $lang $phase/$module"
+        return 4
+    fi
+    if [[ ! -f "$sub/core/$phase/README.md" ]]; then
+        _glot_error "falta el README de la fase / the phase README is missing: $lang/core/$phase/README.md"
+        _glot_info "lo encarga el paso 8 / step 8 requests it: glot prompt docs-language $lang $phase/$module"
+        return 4
+    fi
+
+    # la evidencia trae los comandos y sus códigos: el cierre no los reinterpreta
+    commit="$(_glot_evidence_field "$acta" commit || true)"
+    test_cmd="$(_glot_evidence_field "$acta" test_cmd || true)"
+    test_rc="$(_glot_evidence_field "$acta" test_exit || true)"
+    verify_cmd="$(_glot_evidence_field "$acta" verify_cmd || true)"
+    verify_rc="$(_glot_evidence_field "$acta" verify_exit || true)"
+
+    stamp="$(date -Iseconds)"
+
+    # Ensayo: el diff exacto que se aplicaría, sin escribir nada.
+    if ((_glot_dry_run)); then
+        printf -- '-%s\n' "$line"
+        printf -- '+%s\n' "$newline"
+        printf '# checklist: docs/ROADMAP_UPDATE_CHECKLIST.md\n'
+        printf '%s\n' "$lang"
+        return 0
+    fi
+
+    if ! _glot_replace_line "$roadmap" "$line" "$newline"; then
+        _glot_error 'no se pudo actualizar el roadmap / cannot update the roadmap: docs/ROADMAP.md'
+        return 3
+    fi
+
+    entry="$({
+        printf 'Fecha / Date: %s\n' "$stamp"
+        printf 'Fase / Phase: core.%s\n' "$phase"
+        printf 'Módulo(s) / Module(s): core.%s.%s\n' "$phase" "$module"
+        printf 'Lenguaje(s) / Language(s): %s\n' "$lang"
+        printf 'Código verificado / Code verified: yes (acta de evidencia / evidence record: `%s`, commit `%s`)\n' \
+            "$rel_acta" "${commit:--}"
+        printf 'Tests y comandos / Tests and commands:\n'
+        printf -- '- `%s` -> código `%s`\n' "$test_cmd" "$test_rc"
+        if [[ -n "$verify_cmd" ]]; then
+            printf -- '- `%s` -> código `%s`\n' "$verify_cmd" "$verify_rc"
+        fi
+        printf 'README(s) verificado(s) / README(s) verified: yes (`%s/README.md` y `%s/core/%s/README.md`)\n' \
+            "${dir#"$root"/}" "$lang" "$phase"
+        printf 'Cambio en ROADMAP.md / ROADMAP.md change: `%s` -> `%s`\n' "$line" "$newline"
+        printf 'Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.\n'
+    })"
+
+    if ! printf '\n%s\n' "$entry" >>"$checklist"; then
+        _glot_error 'no se pudo escribir la entrada del checklist / cannot append the checklist entry'
+        return 3
+    fi
+
+    printf '%s\n' "$newline"
+    _glot_info "cierre registrado / closure recorded: $lang $phase/$module"
+    _glot_info "sin confirmar / not committed: el commit es tuyo / the commit is yours"
+
+    if ! (cd -- "$root" && git diff --check >/dev/null 2>&1); then
+        _glot_warn 'git diff --check informa de espacios / reports whitespace issues'
+    fi
+
+    return 0
+}
+
 _glot_usage() {
     cat <<'EOF'
 glot — CLI del monorepo / monorepo CLI
@@ -1398,6 +1900,20 @@ Verbos / Verbs:
                      el lenguaje aún no tiene uno
                      Runs the language verifier (syntax/lint); `skipped` when the
                      language has none yet
+  evidence [lenguaje] [fase/módulo]
+                     Ejecuta la suite y el verificador y deja el acta con la salida real
+                     en `docs/evidence/`; con algo en rojo escribe el acta igual y
+                     devuelve 4
+                     Runs the suite and the verifier and writes the record with the real
+                     output under `docs/evidence/`; when something is red it writes the
+                     record anyway and returns 4
+  close [lenguaje] [fase/módulo]
+                     Cierra el módulo: comprueba la evidencia en verde y los README,
+                     registra la entrada del checklist y sube el contador y la lista
+                     del roadmap. No confirma: el commit es del autor
+                     Closes the module: checks the green evidence and the READMEs,
+                     records the checklist entry and raises the roadmap counter and
+                     list. It does not commit: the commit is the author's
   prompt [encargo] [lenguaje] [fase/módulo]
                      Sin encargo, lista el registro; con encargo, imprime el encargo
                      armado con el estado del sprint. No muta nada
@@ -1510,6 +2026,40 @@ _glot_help_verb() {
             printf 'Sintaxis o formato, con la herramienta del propio lenguaje; `skipped` si no hay\n'
             printf 'Syntax or formatting, with the language own tool; `skipped` when there is none\n'
             printf 'Códigos / codes: 0 correcto · 4 hallazgos / findings\n'
+            ;;
+        evidence)
+            printf 'glot evidence [lenguaje] [fase/módulo] — deja el acta del sprint\n'
+            printf 'glot evidence [language] [phase/module] — writes the sprint record\n'
+            printf 'Ejecuta la suite y el verificador del módulo y guarda en docs/evidence/\n'
+            printf 'lo que pasó de verdad: fecha, rama, commit del submódulo, los comandos,\n'
+            printf 'su salida tal cual y su código de salida. El acta se escribe aunque la\n'
+            printf 'suite esté en rojo, y entonces el verbo devuelve 4\n'
+            printf 'Runs the module suite and verifier and keeps under docs/evidence/ what\n'
+            printf 'actually happened: date, branch, submodule commit, the commands, their\n'
+            printf 'output as is and their exit code. The record is written even when the\n'
+            printf 'suite is red, and then the verb returns 4\n'
+            printf 'El acta es del monorepo y apunta al commit del submódulo: el commit lo\n'
+            printf 'haces tú / the record belongs to the monorepo and points at the submodule\n'
+            printf 'commit: committing it is your call\n'
+            printf 'Códigos / codes: 0 verde · 1 entorno · 2 uso · 3 no se pudo escribir · 4 en rojo\n'
+            ;;
+        close)
+            printf 'glot close [lenguaje] [fase/módulo] — cierra el módulo en ese lenguaje\n'
+            printf 'glot close [language] [phase/module] — closes the module for that language\n'
+            printf 'Comprueba lo que el script puede comprobar: el acta de `glot evidence` en\n'
+            printf 'verde, el README del módulo y el de la fase. Después registra la entrada\n'
+            printf 'en el checklist y sube el contador y la lista del roadmap, con el nombre\n'
+            printf 'de presentación del lenguaje\n'
+            printf 'Checks what the script can check: the `glot evidence` record in green, the\n'
+            printf 'module README and the phase README. Then it records the checklist entry\n'
+            printf 'and raises the roadmap counter and list, with the language display name\n'
+            printf 'Lo que no comprueba: la revisión cualitativa (pseudocódigo, divergencias\n'
+            printf 'idiomáticas). Y lo que no hace: confirmar, eso es tuyo\n'
+            printf 'What it does not check: the qualitative review (pseudocode, idiomatic\n'
+            printf 'divergences). And what it does not do: commit, that is yours\n'
+            printf 'Es idempotente: si el lenguaje ya está en la lista, no suma dos veces\n'
+            printf 'It is idempotent: if the language is already listed, it does not count twice\n'
+            printf 'Códigos / codes: 0 registrado o ya estaba · 1 falta un dato · 2 uso · 3 no se pudo escribir · 4 requisitos sin cumplir\n'
             ;;
         prompt)
             printf 'glot prompt [encargo] [lenguaje] [fase/módulo]\n'
@@ -2452,6 +3002,14 @@ glot() {
         verify)
             # Ejecuta el verificador del lenguaje / Runs the language verifier
             _glot_cmd_verify "$@"
+            ;;
+        evidence)
+            # Deja el acta de la salida real del sprint / writes the sprint record with the real output
+            _glot_cmd_evidence "$@"
+            ;;
+        close)
+            # Registra el cierre del módulo en el checklist y el roadmap / records the module closure in the checklist and the roadmap
+            _glot_cmd_close "$@"
             ;;
         prompt)
             # Arma el encargo del sprint / Builds the sprint request
