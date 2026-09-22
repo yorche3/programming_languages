@@ -328,11 +328,12 @@ glot_run_from() {
     rc_last="$rc"
 }
 
-# glot_run_no_home [args...] — ejecuta glot sin HOME, sin XDG_STATE_HOME y sin
-# GLOT_STATE_FILE, para comprobar que el estado falla con un mensaje propio.
+# glot_run_no_home [args...] — ejecuta glot sin HOME, sin XDG_STATE_HOME, sin
+# GLOT_STATE_FILE y sin GLOT_STATE_DIR, para comprobar que el estado falla con un
+# mensaje propio aunque la sesión tenga las variables exportadas.
 glot_run_no_home() {
     local rc=0
-    out="$(cd -- "$WORK_DIR" && env -u HOME -u XDG_STATE_HOME -u GLOT_STATE_FILE -u GLOT_ROOT \
+    out="$(cd -- "$WORK_DIR" && env -u HOME -u XDG_STATE_HOME -u GLOT_STATE_FILE -u GLOT_STATE_DIR -u GLOT_ROOT \
         "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
     err="$(cat -- "$WORK_DIR/stderr")"
     rc_last="$rc"
@@ -873,6 +874,39 @@ while IFS=$'\t' read -r step alias scope message; do
 done < <(awk -F'\t' '{print $1"\t"$2"\t"$3"\t"$4}' "$DATA_DIR/commits.tsv")
 assert_eq 'catálogo de commits: alias registrados como encargo' '' "$orphans"
 assert_eq 'catálogo de commits: los pasos del monorepo' '9 10 ' "$monorepo_steps"
+
+# las plantillas son genéricas: los casos y los nombres salen de la especificación y de los
+# módulos homologados, nunca del módulo que se estaba trabajando al escribir la plantilla
+PROMPTS_DIR="$TESTS_DIR/../prompts"
+assert_eq 'plantillas: sin los casos del módulo 05 dentro' '0' \
+    "$(grep -rl '5, 2, 9, 1, 5, 6' "$PROMPTS_DIR" | wc -l | tr -d ' ')"
+assert_eq 'plantillas: sin el id de un módulo concreto' '0' \
+    "$(grep -rl 'naive_sort' "$PROMPTS_DIR" | wc -l | tr -d ' ')"
+assert_eq 'plantillas: sin un nombre de módulo en PascalCase' '0' \
+    "$(grep -rl 'NaiveSort' "$PROMPTS_DIR" | wc -l | tr -d ' ')"
+
+# el encargo de la suite tiene que decir de dónde salen los casos y cómo se traducen
+suite_prompt="$(cat -- "$PROMPTS_DIR/suite.prompt.md")"
+assert_contains 'suite: extrae los casos de la especificación' 'Casos de prueba' "$suite_prompt"
+assert_contains 'suite: la especificación es la autoridad de los casos' 'autoridad única de los casos' "$suite_prompt"
+assert_contains 'suite: decide el tipo de secuencia del lenguaje' 'Tipo de secuencia' "$suite_prompt"
+assert_contains 'suite: prohíbe inventar los casos' 'sustituyas por una lista inventada' "$suite_prompt"
+assert_contains 'suite: declara las adaptaciones' 'La adaptación se declara' "$suite_prompt"
+
+# el encargo del esqueleto declara su contrato y parte de lo que dejó `new`
+scaffold_prompt="$(cat -- "$PROMPTS_DIR/scaffold.prompt.md")"
+assert_contains 'scaffold: declara la entrada' '**Entrada**' "$scaffold_prompt"
+assert_contains 'scaffold: declara lo que queda fuera' '**Fuera de alcance**' "$scaffold_prompt"
+assert_contains 'scaffold: parte de lo que dejó new' 'glot new' "$scaffold_prompt"
+assert_contains 'scaffold: no escribe la suite' 'encargo `suite`' "$scaffold_prompt"
+
+# el autocompletado completa los pasos de `save` y no solo los verbos. La llamada
+# va en su propio shell: el listado de pasos sale de un verbo que devuelve 2 (es
+# la firma de `save` sin paso), y con `set -e` y `pipefail` no puede tumbar aquí.
+save_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot save ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_contains 'completion bash: pasos de save' '4a' "$save_comp"
+assert_contains 'completion bash: alias de los pasos' 'scaffold' "$save_comp"
+assert_eq 'completion bash: un candidato por línea' '10' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
 
 # new: con herramienta, el plan es el comando del catálogo y el directorio del módulo
 glot_run -n new php algorithms/naive_sort
