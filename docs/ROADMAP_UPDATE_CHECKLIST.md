@@ -35,6 +35,25 @@ Añadir aquí una entrada cuando una delegación termina la implementación y la
 generación de documentación, antes de actualizar el estado correspondiente en
 `ROADMAP.md`.
 
+```text
+Fecha / Date: 2026-09-21
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort
+Lenguaje(s) / Language(s): 50 (auditados); arreglos en racket, cpp, csharp y ya aplicados en clojure, swift, tcl-tk
+Código verificado / Code verified: yes (auditoría en docs/audits/05_Naive_Sort.md)
+Tests y comandos / Tests and commands:
+- `raco make ... && racket test/run_tests.rkt` en `racket/` -> `3 success(es) 0 failure(s) 0 error(s) 3 test(s) run` tras el refactor a vectores
+- `bazelisk test //:naive_sort_tests --test_output=summary` en `cpp/` -> `PASSED in 0.0s`, `Executed 1 out of 1 test: 1 test passes` tras añadir el guardia `min_idx != i`
+- `dotnet test NaiveSort.slnx` en `csharp/` -> `Passed! - Failed: 0, Passed: 3, Skipped: 0, Total: 3` tras clonar los fixtures
+- `clojure -T:build test` en `clojure/` -> `Ran 6 tests containing 48 assertions. 0 failures, 0 errors.` (valida el arreglo pendiente de commit)
+- `TCLLIBPATH="$(cd ../src && pwd)" tclsh9.0 naive_sort.test` en `tcl-tk/test` -> `Total 21 Passed 21 Skipped 0 Failed 0` (valida el arreglo pendiente de commit)
+- `swift test` en `swift/` -> `Executed 3 tests, with 0 failures (0 unexpected)` (valida el arreglo pendiente de commit)
+- Barrido léxico en los 50 lenguajes (solo archivos rastreados por git) -> 0 invocaciones de ordenamiento de biblioteca y 0 retornos monádicos o excepciones como contrato
+README(s) verificado(s) / README(s) verified: yes (50/50 con las tres secciones obligatorias de `README_Template.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: Foundations 49/49 -> 50/50; `core.algorithms.naive_sort` 49/49 -> 50/50; leyenda y contadores `X/49` -> `X/50`; `php` añadido a la lista de lenguajes del módulo
+Observaciones / Notes: `php` entra en el contador como quincuagésimo submódulo (cierra la decisión abierta del cierre anterior del 2026-09-20). Los tres arreglos de `clojure`, `swift` y `tcl-tk` están aplicados en el árbol de trabajo y verificados con su suite, pero **sin commit** en sus submódulos; los de `racket`, `cpp` y `csharp` tampoco están commiteados. Queda pendiente: commit y push en cada submódulo, integración en su `main` y actualización del puntero del monorepo.
+```
+
 ## Historial / History
 
 <!-- Las entradas cerradas se conservan debajo con su fecha y evidencia. -->
