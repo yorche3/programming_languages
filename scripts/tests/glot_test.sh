@@ -1038,6 +1038,213 @@ assert_contains 'el estado manda sobre el directorio' 'ruby/core/algorithms/naiv
 glot_run_from "$SANDBOX/php" -n test php algorithms/naive_sort
 assert_contains 'el argumento manda sobre el estado' 'php/core/algorithms/naive_sort' "$out"
 
+# evidence: el acta con la salida real, escrita también cuando la suite está en rojo.
+# Los comandos del lenguaje se sustituyen por dos dobles en el PATH, así que el caso
+# es determinista y no depende de ninguna toolchain.
+sandbox_make
+mkdir -p -- "$SANDBOX/ruby/core/algorithms/naive_sort/src" "$SANDBOX/stub"
+
+cat >"$SANDBOX/stub/bundle" <<'STUB'
+#!/usr/bin/env bash
+printf 'stub bundle: %s\n' "$*"
+exit "${STUB_TEST_EXIT:-0}"
+STUB
+cat >"$SANDBOX/stub/ruby" <<'STUB'
+#!/usr/bin/env bash
+printf 'stub ruby: %s\n' "$*"
+exit "${STUB_VERIFY_EXIT:-0}"
+STUB
+chmod +x -- "$SANDBOX/stub/bundle" "$SANDBOX/stub/ruby"
+
+# glot_run_evidence [-n|...] [args...] — ejecuta `evidence` con los dobles por delante
+# en el PATH; los flags globales se colocan antes del verbo, como manda el contrato.
+glot_run_evidence() {
+    local -a flags=()
+    local rc=0
+
+    while [[ "${1:-}" == -* ]]; do
+        flags+=("$1")
+        shift
+    done
+
+    out="$(GLOT_ROOT="$SANDBOX" PATH="$SANDBOX/stub:$PATH" "$GLOT_SH" "${flags[@]}" evidence "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+ACTA="$SANDBOX/docs/evidence/algorithms/naive_sort/ruby.md"
+
+# en verde: el acta queda con la salida real, el commit y el veredicto
+glot_run_evidence ruby algorithms/naive_sort
+assert_eq 'evidence en verde: código' '0' "$rc_last"
+assert_eq 'evidence en verde: dato = ruta del acta' "$ACTA" "$out"
+assert_eq 'evidence en verde: el acta está escrita' 'si' "$([[ -f "$ACTA" ]] && echo si || echo no)"
+assert_contains 'evidence: bloque de máquina con el veredicto' 'verdict=green' "$(cat -- "$ACTA")"
+assert_contains 'evidence: código de la suite' 'test_exit=0' "$(cat -- "$ACTA")"
+assert_contains 'evidence: código del verificador' 'verify_exit=0' "$(cat -- "$ACTA")"
+assert_contains 'evidence: salida real de la suite' 'stub bundle: exec rspec' "$(cat -- "$ACTA")"
+assert_contains 'evidence: salida real del verificador' 'stub ruby: -c src/naive_sort.rb' "$(cat -- "$ACTA")"
+assert_contains 'evidence: apunta al commit del submódulo' 'commit=' "$(cat -- "$ACTA")"
+assert_contains 'evidence: árbol limpio' 'dirty=no' "$(cat -- "$ACTA")"
+assert_contains 'evidence: el bloque de máquina se cierra' "$(printf '%s\n' '-->')" "$(cat -- "$ACTA")"
+
+# en rojo: el acta se escribe igual y el verbo devuelve 4
+STUB_TEST_EXIT=1 glot_run_evidence ruby algorithms/naive_sort
+assert_eq 'evidence en rojo: código' '4' "$rc_last"
+assert_eq 'evidence en rojo: dato = ruta del acta' "$ACTA" "$out"
+assert_contains 'evidence en rojo: veredicto' 'verdict=red' "$(cat -- "$ACTA")"
+assert_contains 'evidence en rojo: código de la suite' 'test_exit=1' "$(cat -- "$ACTA")"
+assert_contains 'evidence en rojo: el verificador sigue verde' 'verify_exit=0' "$(cat -- "$ACTA")"
+assert_contains 'evidence en rojo: avisa' 'the suite is red' "$err"
+
+# con el árbol sucio el acta lo dice, porque la evidencia apunta al commit
+printf 'x\n' >"$SANDBOX/ruby/core/algorithms/naive_sort/src/x.rb"
+glot_run_evidence ruby algorithms/naive_sort
+assert_contains 'evidence con árbol sucio: lo marca' 'dirty=yes' "$(cat -- "$ACTA")"
+assert_contains 'evidence con árbol sucio: avisa' 'sucio' "$err"
+
+# sin verificador en el catálogo, solo se ejecuta la suite
+sandbox_make
+mkdir -p -- "$SANDBOX/stub"
+glot_run -n evidence java algorithms/naive_sort
+assert_eq 'evidence -n sin verificador: solo la suite' '1' "$(printf '%s\n' "$out" | grep -c '^cd ')"
+glot_run -n evidence php algorithms/naive_sort
+assert_eq 'evidence -n con verificador: suite y verificador' '2' "$(printf '%s\n' "$out" | grep -c '^cd ')"
+assert_contains 'evidence -n: enseña dónde queda el acta' '/docs/evidence/algorithms/naive_sort/php.md' "$out"
+
+# -n no ejecuta ni escribe el acta
+sandbox_make
+mkdir -p -- "$SANDBOX/ruby/core/algorithms/naive_sort/src" "$SANDBOX/stub"
+glot_run_evidence -n ruby algorithms/naive_sort
+assert_eq 'evidence -n: código' '0' "$rc_last"
+assert_contains 'evidence -n: enseña el acta' '/docs/evidence/algorithms/naive_sort/ruby.md' "$out"
+assert_eq 'evidence -n: no escribe' 'no' "$([[ -f "$SANDBOX/docs/evidence/algorithms/naive_sort/ruby.md" ]] && echo si || echo no)"
+
+# errores del objetivo y de los argumentos
+glot_run_evidence ruby algorithms/nope
+assert_eq 'evidence con módulo desconocido: código' '1' "$rc_last"
+glot_run_evidence nope algorithms/naive_sort
+assert_eq 'evidence con lenguaje fuera de .gitmodules: código' '1' "$rc_last"
+glot_run_evidence ruby algorithms/naive_sort extra
+assert_eq 'evidence con demasiados argumentos: código' '2' "$rc_last"
+
+# la tabla de nombres de presentación: es la que fija el nombre y el orden de las listas
+# del roadmap, así que la deriva se comprueba en los dos sentidos
+assert_eq 'display: 2 columnas por fila' '0' \
+    "$(awk -F'\t' 'NF != 2' "$DATA_DIR/display.tsv" | wc -l | tr -d ' ')"
+assert_eq 'display: un nombre por lenguaje registrado' '0' \
+    "$(diff <(cut -f1 "$DATA_DIR/display.tsv" | LC_ALL=C sort) \
+        <(git config --file "$REPO/.gitmodules" --get-regexp '\.path$' | awk '{print $NF}' | LC_ALL=C sort) | wc -l | tr -d ' ')"
+display_names="$(cut -f2 "$DATA_DIR/display.tsv" | LC_ALL=C sort)"
+roadmap_names="$(grep -m1 '50/50 (' "$REPO/docs/ROADMAP.md" | sed 's/.*(//; s/)$//' |
+    tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | LC_ALL=C sort)"
+assert_eq 'display: 50 nombres' '50' "$(printf '%s\n' "$display_names" | wc -l | tr -d ' ')"
+assert_eq 'display: los nombres son los del roadmap' "$roadmap_names" "$display_names"
+
+# close: cierre del módulo. Se monta un roadmap y un checklist de mentira en el
+# sandbox, con el módulo a medio cerrar, y se comprueban la línea nueva, la entrada
+# del checklist, la idempotencia y las negativas. La marca inicial es texto ASCII a
+# propósito: el análisis no depende de que el emoji sobreviva al editor, y así el
+# fixture tampoco.
+sandbox_make
+mkdir -p -- "$SANDBOX/ruby/core/algorithms/naive_sort/src" "$SANDBOX/stub"
+
+cat >"$SANDBOX/stub/bundle" <<'STUB'
+#!/usr/bin/env bash
+printf 'stub bundle: %s\n' "$*"
+exit "${STUB_TEST_EXIT:-0}"
+STUB
+cat >"$SANDBOX/stub/ruby" <<'STUB'
+#!/usr/bin/env bash
+printf 'stub ruby: %s\n' "$*"
+exit "${STUB_VERIFY_EXIT:-0}"
+STUB
+chmod +x -- "$SANDBOX/stub/bundle" "$SANDBOX/stub/ruby"
+
+# close_fixture [contador] — deja la línea del módulo a medio cerrar.
+close_fixture() {
+    printf 'core.algorithms.naive_sort            pending %s (Ada)\n' "${1:-1/50}" >"$SANDBOX/docs/ROADMAP.md"
+    printf '# Registro de cierre\n' >"$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md"
+}
+
+RB="$SANDBOX/ruby/core/algorithms/naive_sort"
+printf '# naive sort (ruby)\n' >"$RB/README.md"
+printf '# algorithms (ruby)\n' >"$SANDBOX/ruby/core/algorithms/README.md"
+close_fixture
+
+# sin evidencia, el cierre no pasa
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close sin evidencia: código' '1' "$rc_last"
+assert_contains 'close sin evidencia: remite a evidence' 'glot evidence' "$err"
+
+# con la evidencia en rojo tampoco
+STUB_TEST_EXIT=1 glot_run_evidence ruby algorithms/naive_sort
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close con evidencia roja: código' '4' "$rc_last"
+assert_contains 'close con evidencia roja: lo dice' 'not green' "$err"
+
+# en verde: se registra el cierre
+glot_run_evidence ruby algorithms/naive_sort
+glot_run_sandbox -n close ruby algorithms/naive_sort
+assert_eq 'close -n: código' '0' "$rc_last"
+assert_contains 'close -n: la línea vieja' '-core.algorithms.naive_sort' "$out"
+assert_contains 'close -n: la línea nueva' '+core.algorithms.naive_sort' "$out"
+assert_contains 'close -n: el contador y la lista' '2/50 (Ada, Ruby)' "$out"
+assert_contains 'close -n: el roadmap no se toca' '1/50 (Ada)' "$(cat -- "$SANDBOX/docs/ROADMAP.md")"
+
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close: código' '0' "$rc_last"
+assert_contains 'close: dato = la línea nueva' '2/50 (Ada, Ruby)' "$out"
+assert_contains 'close: el roadmap queda actualizado' '2/50 (Ada, Ruby)' "$(cat -- "$SANDBOX/docs/ROADMAP.md")"
+assert_eq 'close: la marca pasa a en curso' 'si' \
+    "$(grep -q $'\xf0\x9f\x94\x84' "$SANDBOX/docs/ROADMAP.md" && echo si || echo no)"
+assert_contains 'close: la entrada del checklist' 'Lenguaje(s) / Language(s): ruby' "$(cat -- "$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md")"
+assert_contains 'close: la entrada cita la evidencia' 'acta de evidencia' "$(cat -- "$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md")"
+assert_contains 'close: la entrada cita el cambio del roadmap' '2/50 (Ada, Ruby)' "$(cat -- "$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md")"
+assert_contains 'close: no confirma' 'the commit is yours' "$err"
+
+# idempotente: repetirlo no suma dos veces ni vuelve a pedir la evidencia
+entries_before="$(grep -c 'Fecha / Date:' "$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md")"
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close repetido: código' '0' "$rc_last"
+assert_contains 'close repetido: avisa' 'already counts' "$err"
+assert_contains 'close repetido: la línea no cambia' '2/50 (Ada, Ruby)' "$out"
+assert_eq 'close repetido: sin segunda entrada' "$entries_before" \
+    "$(grep -c 'Fecha / Date:' "$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md")"
+
+# al llegar al total, la línea queda marcada como hecha
+close_fixture '1/2'
+glot_run_evidence ruby algorithms/naive_sort
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_contains 'close: al llegar al total' '2/2 (Ada, Ruby)' "$out"
+assert_eq 'close: la marca es la de hecho' 'si' \
+    "$(printf '%s' "$out" | grep -q $'\xe2\x9c\x85' && echo si || echo no)"
+
+# negativas de documentación y de roadmap
+close_fixture
+rm -f -- "$RB/README.md"
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close sin README del módulo: código' '4' "$rc_last"
+assert_contains 'close sin README del módulo: remite al paso 7' 'docs-module' "$err"
+printf '# naive sort (ruby)\n' >"$RB/README.md"
+
+rm -f -- "$SANDBOX/ruby/core/algorithms/README.md"
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close sin README de la fase: código' '4' "$rc_last"
+assert_contains 'close sin README de la fase: remite al paso 8' 'docs-language' "$err"
+printf '# algorithms (ruby)\n' >"$SANDBOX/ruby/core/algorithms/README.md"
+
+printf '# sin el módulo\n' >"$SANDBOX/docs/ROADMAP.md"
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close sin la línea del roadmap: código' '1' "$rc_last"
+assert_contains 'close sin la línea del roadmap: lo dice' 'missing from the roadmap' "$err"
+
+close_fixture
+glot_run_sandbox close ruby algorithms/nope
+assert_eq 'close con módulo desconocido: código' '1' "$rc_last"
+glot_run_sandbox close ruby algorithms/naive_sort extra
+assert_eq 'close con demasiados argumentos: código' '2' "$rc_last"
+
 # --- puerta de entrada al archivo de versiones -------------------------------
 
 # La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:

@@ -76,6 +76,10 @@
 
 **EN:** A step is not done until it leaves its evidence. Evidence is the command's **real output**, copied without editing or summarising; if a command has not been run, there is no evidence and the step stays open.
 
+**ES:** Desde la v0.10.0 esa evidencia tiene casa y forma: `glot evidence` ejecuta la suite y el verificador y deja el **acta** en `docs/evidence/{fase}/{módulo}/{lenguaje}.md`, con la fecha, el commit del submódulo que la respalda y la salida real tal cual. El acta se escribe **también cuando algo está en rojo**, porque la evidencia es lo que pasó y no lo que se desea.
+
+**EN:** Since v0.10.0 that evidence has a home and a shape: `glot evidence` runs the suite and the verifier and writes the **record** to `docs/evidence/{phase}/{module}/{language}.md`, with the date, the submodule commit backing it and the real output as is. The record is written **even when something is red**, because evidence is what happened and not what is wished for.
+
 1. **Cierre del módulo:** código + pruebas ejecutadas + README de Nivel 3 + entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) + actualización de [`ROADMAP.md`](ROADMAP.md), **en el mismo cambio**.
 2. **Cierre de fase:** solo cuando **todos** los módulos requeridos cumplen el ciclo completo. Un README no cierra un módulo, y un módulo no cierra una fase.
 3. **Nada se marca `✅` sin evidencia verificable.**
@@ -89,6 +93,7 @@
 - [ ] Rama `{tipo}/{fase}/{módulo}` publicada con su upstream.
 - [ ] Esqueleto y `.gitignore` del módulo puestos, sin `main` de ejemplo si el módulo es una biblioteca.
 - [ ] Suite ejecutada con salida real; sin warnings ni errores.
+- [ ] Acta de evidencia escrita con `glot evidence`, con la suite en verde (desde la v0.10.0).
 - [ ] Divergencias respecto al pseudocódigo clasificadas como idiomáticas (documentadas) o como defecto (reportadas).
 - [ ] README de Nivel 3 generado desde la plantilla, bilingüe y con salidas reales.
 - [ ] Índices de Nivel 1–3 actualizados (o creados si faltaban).

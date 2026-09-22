@@ -16,13 +16,7 @@ copilot -C "$MODULE_DIR" -p "<instrucciones de validación>" \
         -s --output-format json \
         --reasoning-effort low --max-ai-credits 30 \
         --allow-all-tools --deny-tool 'write' \
-        --share "$EVIDENCE_DIR/validate-<modulo>.md"
-```
-
-| Flag | Por qué |
-|------|---------|
-| `-C <dir>` | Se ejecuta en el directorio del módulo, así que el validador ve su README y sus fuentes |
-| `-p` + `-s` | Una sola corrida y solo la respuesta, sin estadísticas: listo para parsear |
+        --share "docs/evidence/{fase}/{modulo}/{lenguaje}.validate.md"
 | `--output-format json` | JSONL, un objeto por línea: `glot` lee el veredicto sin interpretar texto libre |
 | `--allow-all-tools` | Obligatorio en modo no interactivo |
 | `--deny-tool 'write'` | Deja el validador en solo lectura: las denegaciones tienen prioridad sobre `--allow-all-tools` |
@@ -45,6 +39,14 @@ copilot -C "$MODULE_DIR" -p "<instrucciones de validación>" \
 
 ---
 
+## 🧩 Proveedor propio (BYOK): fuera del alcance / Bring your own key: out of scope
+
+**ES:** El CLI admite un proveedor propio (`copilot help providers`): se activa con `COPILOT_PROVIDER_BASE_URL` y acepta endpoints compatibles con OpenAI, Azure y Anthropic, con la clave en `COPILOT_PROVIDER_API_KEY`, en `COPILOT_PROVIDER_BEARER_TOKEN`, o impresa en cada petición por `COPILOT_PROVIDER_API_KEY_COMMAND` (la forma en la que una clave no tiene que vivir en el repositorio ni en el entorno visible). **`glot` no lo gestiona**: no lee, no guarda y no pide claves, y no elige proveedor. La configuración de modelos por encargo (L6.5, v0.11.0) se hará **solo con los modelos que ofrece Copilot**, ajustando esfuerzo y tope de créditos. Queda escrito aquí por si algún día se quiere enchufar un proveedor externo: se hace exportando esas variables antes de `glot ask` o `glot validate`, sin tocar el repositorio.
+
+**EN:** The CLI supports a custom provider (`copilot help providers`): it is activated with `COPILOT_PROVIDER_BASE_URL` and accepts OpenAI-compatible endpoints, Azure and Anthropic, with the key in `COPILOT_PROVIDER_API_KEY`, in `COPILOT_PROVIDER_BEARER_TOKEN`, or printed per request by `COPILOT_PROVIDER_API_KEY_COMMAND` (the way a key does not have to live in the repository or in the visible environment). **`glot` does not manage it**: it neither reads, stores nor asks for keys, and it does not pick a provider. The per-request model configuration (L6.5, v0.11.0) will use **only the models Copilot offers**, tuning reasoning effort and credit caps. It stays documented here in case an external provider is ever wanted: it is done by exporting those variables before `glot ask` or `glot validate`, without touching the repository.
+
+---
+
 ## ⚠️ Advertencias / Warnings
 
 - **No** exportar `COPILOT_ALLOW_ALL=true` en `.bashrc`: con el valor exacto `"true"` además confía en el directorio de trabajo y carga sus skills y hooks, que pueden ejecutar shell. Mejor `--allow-all-tools` por corrida.
@@ -58,6 +60,7 @@ copilot -C "$MODULE_DIR" -p "<instrucciones de validación>" \
 | Aspecto | Detalle |
 |---------|---------|
 | stdout | Hallazgos (`clave: valor` o viñetas) |
-| Evidencia | `--share` con la sesión completa en markdown, bajo el directorio de evidencia del sprint |
-| Códigos | `0` sin hallazgos · `1` con hallazgos o validador ausente · `2` uso incorrecto · `3` no se pudo ejecutar |
+| Evidencia | `--share` con la sesión completa en markdown, en la carpeta de evidencia del sprint: `docs/evidence/{fase}/{modulo}/{lenguaje}.validate.md` |
+| Códigos | `0` sin hallazgos · **`4` con hallazgos** · `1` validador ausente o entorno · `2` uso incorrecto · `3` no se pudo ejecutar |
 | Entrada | El estado del sprint (`lang`, `phase`, `module`, `spec`) o una ruta explícita |
+| Enchufe | La orden sale de `GLOT_VALIDATOR`, como el delegado de `ask`: el harness la prueba con un sustituto y el autor cambia de modelo o de proveedor sin tocar el script |

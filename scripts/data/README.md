@@ -3,14 +3,14 @@
 **ES:** `languages.tsv` es la fuente **máquina** de los comandos e inicializadores
 por lenguaje que consume `glot`: `langs` y `test`/`verify` (v0.7.0) hoy, y `new`
 (v0.9.0). `commits.tsv` es la tabla de mensajes de commit que consume `save`
-(v0.9.0). Una fila por lenguaje o por paso, **separada por tabuladores**, sin
+(v0.9.0) y `display.tsv` la de nombres de presentación que consume `close`
+(v0.10.0). Una fila por lenguaje o por paso, **separada por tabuladores**, sin
 cabecera, ordenada.
 
 **EN:** `languages.tsv` is the **machine** source of the per-language commands and
 initializers that `glot` consumes: `langs` and `test`/`verify` (v0.7.0) today, and
 `new` (v0.9.0). `commits.tsv` is the commit-message table that `save` (v0.9.0)
 consumes. One row per language or per step, **tab-separated**, no header, sorted.
-
 | Columna / Column | Contenido / Content | Ejemplo / Example |
 |:---:|---|---|
 | 1 | Lenguaje, tal como aparece en `.gitmodules` | `php` |
@@ -126,6 +126,17 @@ from the sprint state. The harness checks for **drift in both directions**: ever
 catalogue message must exist in the sprint table, every alias must be a request
 registered in `prompts/`, and the two `monorepo`-scope steps (pointer and roadmap)
 must be the ones waiting for `pointer` (v0.11.0) and `close` (v0.10.0).
+
+## 🏷️ `display.tsv` — nombres de presentación / display names
+
+| Columna / Column | Contenido / Content | Ejemplo / Example |
+|:---:|---|---|
+| 1 | Lenguaje, como en `.gitmodules` | `tcl-tk` |
+| 2 | Nombre de presentación, el que usa el roadmap | `Tcl/Tk` |
+
+**ES:** El roadmap escribe los lenguajes con su nombre de presentación (`C#`, `C++`, `Tcl/Tk`) y **el número de línea de esta tabla es la posición** dentro de sus listas. `glot close` la usa para las dos cosas: para escribir el nombre que va a la lista y para insertarlo en su sitio, en vez de inventar un orden en el script. Se mantiene a mano, y el harness comprueba la deriva **en los dos sentidos**: los lenguajes tienen que ser los de `.gitmodules` y los nombres tienen que ser, ni más ni menos, los de una lista ya cerrada del roadmap.
+
+**EN:** The roadmap spells languages with their display name (`C#`, `C++`, `Tcl/Tk`) and **this table's line number is the position** inside its lists. `glot close` uses it for both: to write the name that goes into the list and to insert it in place, instead of inventing an order in the script. It is maintained by hand, and the harness checks drift **in both directions**: the languages must be `.gitmodules`' and the names must be, no more and no less, those of an already closed list in the roadmap.
 
 ## 🔁 Regeneración / Regeneration
 

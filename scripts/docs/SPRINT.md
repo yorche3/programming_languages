@@ -20,7 +20,7 @@
 | 4a | Esqueleto | `glot new` (0.9.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas, sin runners de ejemplo; `.gitignore` verificado | script + **agente** |
 | 4b | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4b` (0.9.0) | Suite unitaria derivada de la especificación, con salida real | **agente** |
 | 5 | Implementación | `glot prompt implement` (0.8.0) + `glot test` (0.7.0) | `feat(algorithms): add naive sort implementation`; suite en verde | autor / **agente** |
-| 6 | Verificación | `glot test`, `glot verify` (0.7.0) · `glot prompt validate` (0.10.0) | Salida real de la suite y del analizador, sin warnings **nuevos** | script + **agente** |
+| 6 | Verificación | `glot test`, `glot verify` (0.7.0) · `glot evidence` (0.10.0) · `glot prompt validate` (0.10.0) | Acta en `docs/evidence/{fase}/{módulo}/{lenguaje}.md` con la salida real de la suite y del analizador, sin warnings **nuevos** | script + **agente** |
 | 7 | Cierre documental del módulo | `glot prompt docs-module` (0.8.0) → README de Nivel 3 desde [`README_Template.md`](../../docs/README_Template.md) | `docs(naive-sort): add README for naive sort module` | **agente** |
 
 **ES:** Al terminar la Fase A, el cambio del submódulo se integra en **su** `main` y se anota el commit resultante.
@@ -32,7 +32,7 @@
 | # | Paso | Comando | Evidencia / artefacto | Quién |
 |:-:|------|---------|-----------------------|-------|
 | 8 | Puntero y cierre del lenguaje | `glot pointer` (0.11.0) en rama `chore/{fase}/{módulo}-pointer` · `glot prompt docs-language` (0.8.0) | `chore(submodule): update php pointer`; readmes faltantes e índices N1/N2/N3 | script + **agente** |
-| 9 | Registro del cierre | `glot close` (0.10.0) | Entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](../../docs/ROADMAP_UPDATE_CHECKLIST.md) y contador de [`ROADMAP.md`](../../docs/ROADMAP.md) al día | **agente** |
+| 9 | Registro del cierre | `glot close` (0.10.0) | Entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](../../docs/ROADMAP_UPDATE_CHECKLIST.md) y contador de [`ROADMAP.md`](../../docs/ROADMAP.md) al día, a partir del acta de evidencia | script + **agente** |
 
 ---
 
