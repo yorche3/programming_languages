@@ -716,6 +716,30 @@ assert_eq 'doctor: código' '0' "$rc_last"
 assert_contains 'doctor: cobertura de verificadores' 'verify_commands: ' "$out"
 assert_contains 'doctor: hay verificadores' 'verify_commands: 14 de / of 50' "$out"
 
+# --- puerta de entrada al archivo de versiones -------------------------------
+
+# La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:
+# es la regla que evita que una versión se cierre sin dejar su foto congelada. El
+# salto 0.x -> 1.0.0 se salta la comprobación (la versión anterior no se deduce).
+live_version="$(sed -n 's/^GLOT_VERSION="\(.*\)"$/\1/p' "$GLOT_SH")"
+assert_eq 'puerta de entrada: la versión viva se lee del script' 'si' "$([[ -n "$live_version" ]] && echo si || echo no)"
+
+major="${live_version%%.*}"
+rest="${live_version#*.}"
+minor="${rest%%.*}"
+patch="${rest#*.}"
+previous=""
+if ((patch > 0)); then
+    previous="$major.$minor.$((patch - 1))"
+elif ((minor > 0)); then
+    previous="$major.$((minor - 1)).0"
+fi
+
+if [[ -n "$previous" ]]; then
+    assert_eq 'puerta de entrada: el snapshot de la versión anterior está archivado' \
+        'si' "$([[ -f "$TESTS_DIR/../versions/glot_$previous.sh" ]] && echo si || echo no)"
+fi
+
 # --- resumen -----------------------------------------------------------------
 
 printf '\nglot tests: %d passed, %d failed\n' "$passed" "$failed"
