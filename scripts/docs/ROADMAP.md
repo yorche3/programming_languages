@@ -42,8 +42,8 @@
 | L0 | Contrato de verbos y dispatcher | 0.3.0 ✅ |
 | L1 | Almacén de estado clave/valor | 0.4.0 ✅ |
 | L2 | Asignación: situar el trabajo (`use`) | 0.5.0 ✅ |
-| L2.5 | Catálogo (`langs`, `modules`, `progress`), comandos nativos y autocompletado | 0.6.0 🔄 |
-| L3 | Ejecución: `test` y `verify` | 0.7.0 |
+| L2.5 | Catálogo (`langs`, `modules`, `progress`), comandos nativos y autocompletado | 0.6.0 ✅ |
+| L3 | Ejecución: `test` y `verify` | 0.7.0 🔄 |
 | L4 | Delegación: `prompt` (encargos de IA) | 0.8.0 |
 | L5 | Creación y registro: `new`, `save` | 0.9.0 |
 | L6 | Evidencia y cierre: `evidence`, `close`, `validate` | 0.10.0 |
@@ -60,7 +60,7 @@
 | 0.4.0 | L1 | — | `set`, `get`, `unset`, `list`, `path` en XDG | Cimiento que consumen `use`, `test` y el progreso |
 | 0.5.0 | L2 | 2–3 | `use <lenguaje> <fase>/<módulo> [tipo]`: valida contra `.gitmodules` y sitúa el trabajo según cuatro estados (nuevo, en curso, reanudar, cerrado): activa o crea la rama desde `main`, la publica con upstream, crea la carpeta si falta y no toca nada cuando hay trabajo sin confirmar. Guarda el estado e imprime la ruta | Es el paso que sitúa el trabajo; el `cd` real que lo completa llega con la capa cargable |
 | 0.6.0 | L2.5 | apoyo a todos | `langs`, `modules`, `progress` y `completion`: el **conversor de nombres** (id canónico → documento, rama, commit y carpeta), los comandos nativos por lenguaje en `data/languages.tsv` y el autocompletado de bash y zsh con completado dinámico | Los datos ya existen; el autocompletado los necesita, y `use` deja de depender de un heurístico de nombres |
-| 0.7.0 | L3 | 5–7 | `test` (comando nativo del asignado) y `verify` (sintaxis/lint), desde cualquier directorio | Primer consumo real del catálogo y del estado |
+| 0.7.0 | L3 | 5–7 | `test` (suite del módulo asignado, con el comando nativo del lenguaje) y `verify` (sintaxis/formato), desde cualquier directorio, con el código `4` de verificación fallida y los marcadores `{modulo}`/`{Modulo}`/`{suite}` resueltos contra el módulo real | Primer consumo real del catálogo y del estado; la tabla de comandos se corrige contra los módulos ya homologados
 | 0.8.0 | L4 | 4–8 | `prompt`/`ask`: arma el encargo para el agente con las plantillas de `.github/prompts`, con `GLOT_DELEGATE` como estrategia enchufable | **Solo imprime texto**: no muta nada, así que va antes que la capa que sí muta |
 | 0.9.0 | L5 | 4 | `new`/`scaffold` (inicializador del lenguaje, esqueleto y contrato de pruebas) y `save` (commit guiado con la convención del repo) | Reutiliza catálogo y estado; elimina el andamiaje manual repetido |
 | 0.10.0 | L6 | 7–8 | `evidence` (salidas reales), `close` (checklist + roadmap) y `validate` (validador automático con Copilot CLI) | El cierre documental requiere validación: la ejecuta el agente, el script la encarga y la comprueba |

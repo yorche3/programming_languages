@@ -58,13 +58,13 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 
 | Lenguaje | Comando de inicialización | Manifiesto / archivos clave | Pruebas |
 |----------|---------------------------|-----------------------------|---------|
-| **ada** | ✅ `alr init --lib {modulo}` | `alire.toml`, `{modulo}.gpr`, `config/` | ✅ `alr -C tests run` |
+| **ada** | ✅ `alr init --lib {modulo}` | `alire.toml`, `{modulo}.gpr`, `config/` | ✅ `alr -C test run` |
 | **assembly** | ✍️ `mkdir -p src test` + `Makefile` | `Makefile` | ✅ `make run` |
 | **ballerina** | 🔧 `bal new {modulo}` | `Ballerina.toml`, `{modulo}.bal`, `tests/` | ✅ `bal test` |
 | **c** | ✍️ `mkdir -p include src test` + `Makefile` | `include/{modulo}.h`, `Makefile` | ✅ `make test` |
 | **clojure** | ✅ `clojure -T:build new` | `deps.edn`, `build.clj` | ✅ `clojure -T:build test` |
 | **cobol** | ✍️ `mkdir -p src/copybooks src/lib test` | `Makefile`, `run_tests` | ✅ `make test` |
-| **common-lisp** | ✍️ `mkdir -p src tests` | `{modulo}.asd`, `run-tests.lisp` | ✅ `ros run --load run-tests.lisp` |
+| **common-lisp** | ✍️ `mkdir -p src tests` | `{modulo}.asd`, `run-tests.lisp` | ✅ `ros run --load run-tests.lisp --eval '(uiop:quit)'` |
 | **cpp** | ✅ Configuración manual de Bazel (`MODULE.bazel`, `WORKSPACE`, targets en `BUILD`) | `BUILD`, `MODULE.bazel`, `.bazelversion` | ✅ `bazelisk test //...` |
 | **crystal** | 🔧 `crystal init lib {modulo}` | `shard.yml` | ✅ `crystal spec` |
 | **csharp** | ✅ `dotnet new classlib -n {Modulo} -o src/{Modulo}` | `{Modulo}.slnx`, `src/{Modulo}/{Modulo}.csproj` | ✅ `dotnet test {Modulo}.slnx` |
@@ -84,13 +84,13 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **java** | 🔧 `mvn archetype:generate -DgroupId=com.example -DartifactId={modulo} -DarchetypeGroupId=org.apache.maven.archetypes -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false` | `pom.xml` | ✅ `mvn test` |
 | **javascript** | 🔧 `npm init -y` | `package.json`, `jest.config.js` | ✅ `npm test` |
 | **julia** | ✍️ `mkdir -p src test` + `Project.toml` | `Project.toml`, `Manifest.toml` | ✅ `julia --project=. test/run_tests.jl` |
-| **kotlin** | 🔧 `gradle init --type kotlin-library` | `build.gradle.kts`, `settings.gradle.kts` | ✅ `./gradlew test` |
+| **kotlin** | 🔧 `gradle init --type kotlin-library` | `build.gradle.kts`, `settings.gradle.kts` | ✅ `gradle test` |
 | **lua** | 🔧 `luarocks init` | `{modulo}.rockspec`, `.busted` | ✅ `busted` |
-| **nim** | 🔧 `nimble init` | `{modulo}.nimble`, `test/config.nims` | ✅ `nimble test` · ✅ `nim c -r test/{suite}.nim` |
+| **nim** | 🔧 `nimble init` | `{modulo}.nimble`, `test/config.nims` | ✅ `nimble test` |
 | **ocaml** | 🔧 `dune init proj {modulo}` | `dune-project`, `src/dune`, `test/dune` | ✅ `dune runtest` |
 | **perl** | ✍️ `mkdir -p src test` | — | ✅ `prove --ext=.pl test/` |
 | **php** | ✍️ `mkdir -p src test` + `composer require --dev phpunit/phpunit` | `composer.json`, `phpunit.xml`, `.gitignore` | ✅ `composer test` |
-| **prolog** | ✍️ `mkdir -p src test` | — | ✅ `swipl -q -f {suite}.pl -t halt` |
+| **prolog** | ✍️ `mkdir -p src test` | — | ✅ `cd test && swipl -q -f {suite}.pl -t halt` |
 | **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `spago test` |
 | **python** | 🔧 `uv init --lib` | `pyproject.toml`, `conftest.py` | ✅ `pytest` |
 | **r** | ✅ `mkdir -p src test` | — | ✅ `Rscript test/run_tests.R` |
@@ -100,13 +100,13 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **rexx** | ✅ `mkdir -p src test` | — | ✅ `rexx test/{suite}.rexx` |
 | **ruby** | ✅ `mkdir -p src test` | `Gemfile`, `.rspec` | ✅ `bundle exec rspec` |
 | **rust** | ✅ `cargo init --lib` | `Cargo.toml` | ✅ `cargo test` |
-| **scala** | ✅ `mkdir -p src/main/scala src/test/scala project` | `build.sbt`, `project/build.properties` | ✅ `sbt test` |
-| **scheme** | ✍️ `mkdir -p src test` | — | ✅ `guile -s test/{suite}.scm` |
+| **scala** | ✅ `mkdir -p src/main/scala src/test/scala project` | `build.sbt`, `project/build.properties` | ✅ `sbt -batch -no-colors test` |
+| **scheme** | ✍️ `mkdir -p src test` | — | ✅ `cd test && guile --no-auto-compile -s {suite}_guile.scm` |
 | **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Modulo}/` | ✅ `swift test` |
-| **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ `tclsh9.0 {suite}.test` |
+| **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ `cd test && TCLLIBPATH="$(cd ../src && pwd)" tclsh9.0 {suite}.test` |
 | **typescript** | ✅ `npm init -y` | `package.json`, `tsconfig.json`, `jest.config.cjs` | ✅ `npm test` |
 | **v** | ✍️ `mkdir -p src test` + `v.mod` | `v.mod` | ✅ `v test .` |
-| **vala** | ✍️ `mkdir -p src test` | — | ✅ `valac src/{modulo}.vala test/{suite}.vala -o /tmp/{modulo}` |
+| **vala** | ✍️ `mkdir -p src test` | — | ✅ `valac src/{modulo}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{modulo}-tests && /tmp/{modulo}-tests` |
 | **zig** | ✅ `zig init` | `build.zig` | ✅ `zig build test` |
 
 ---

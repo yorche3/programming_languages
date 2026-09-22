@@ -85,13 +85,13 @@ glot_run_in() {
 
 # version
 glot_run version
-assert_eq 'version: salida' 'glot 0.6.0' "$out"
+assert_eq 'version: salida' 'glot 0.7.0' "$out"
 assert_eq 'version: código' '0' "$rc_last"
 assert_eq 'version: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 
 # --version
 glot_run --version
-assert_eq '--version: salida' 'glot 0.6.0' "$out"
+assert_eq '--version: salida' 'glot 0.7.0' "$out"
 assert_eq '--version: código' '0' "$rc_last"
 
 # help general y por verbo
@@ -152,7 +152,7 @@ assert_contains 'nombre suelto: sugiere greet' 'glot greet Ada' "$err"
 # doctor dentro del monorepo
 glot_run doctor
 assert_eq 'doctor dentro: código' '0' "$rc_last"
-assert_contains 'doctor dentro: versión' 'version: 0.6.0' "$out"
+assert_contains 'doctor dentro: versión' 'version: 0.7.0' "$out"
 assert_contains 'doctor dentro: script_dir' 'script_dir:' "$out"
 assert_contains 'doctor dentro: raíz detectada' 'root: /' "$out"
 assert_contains 'doctor dentro: ruta del estado' 'state_file:' "$out"
@@ -642,6 +642,79 @@ assert_contains 'sin HOME: mensaje propio' 'define GLOT_STATE_DIR' "$err"
 
 glot_run_no_home get lang
 assert_eq 'sin HOME: get devuelve 3' '3' "$rc_last"
+
+# --- casos de la especificación v0.7.0 (L3, ejecución) ----------------------
+
+# la plantilla del catálogo se expande con el módulo real: {modulo}, {Modulo} y {suite}
+glot_run -n test php algorithms/naive_sort
+assert_eq 'test -n: código' '0' "$rc_last"
+assert_eq 'test -n: un plan y solo uno' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_contains 'test -n: cambia al directorio del módulo' '/php/core/algorithms/naive_sort && ' "$out"
+assert_contains 'test -n: comando nativo del lenguaje' 'composer test' "$out"
+
+glot_run -n test csharp algorithms/naive_sort
+assert_contains 'test -n: {Modulo} en PascalCase' 'dotnet test NaiveSort.slnx' "$out"
+
+glot_run -n test prolog algorithms/naive_sort
+assert_contains 'test -n: {suite} del sufijo del patrón' 'naive_sort_tests.pl' "$out"
+assert_contains 'test -n: respeta el cd del comando' '&& cd test && ' "$out"
+
+glot_run -n test scheme algorithms/naive_sort
+assert_contains 'test -n: sufijo fijo tras {suite}' 'naive_sort_tests_guile.scm' "$out"
+
+glot_run -n test vala algorithms/naive_sort
+assert_contains 'test -n: {suite} dentro de una ruta' 'test/naive_sort_tests.vala' "$out"
+assert_contains 'test -n: {modulo} en el binario' '/tmp/naive_sort-tests' "$out"
+
+glot_run -n test tcl-tk algorithms/naive_sort
+assert_contains 'test -n: suite con extensión .test' 'naive_sort.test' "$out"
+
+glot_run -n test ada algorithms/naive_sort
+assert_contains 'test -n: comando corregido de ada' 'alr -C test run' "$out"
+
+# el estado del sprint completa lo que no llega por argumento
+glot_run set lang php
+glot_run set phase algorithms
+glot_run set module naive_sort
+glot_run -n test
+assert_eq 'test sin argumentos: código' '0' "$rc_last"
+assert_contains 'test sin argumentos: usa el estado' 'composer test' "$out"
+glot_run unset lang
+glot_run unset phase
+glot_run unset module
+glot_run test
+assert_eq 'test sin estado: código' '1' "$rc_last"
+assert_contains 'test sin estado: sugiere use' 'glot use' "$err"
+
+# errores de la capa de ejecución
+glot_run -n test php algorithms/nope
+assert_eq 'test con módulo desconocido: código' '1' "$rc_last"
+glot_run -n test php nope/naive_sort
+assert_eq 'test con fase inexistente: código' '1' "$rc_last"
+glot_run -n test nope algorithms/naive_sort
+assert_eq 'test con lenguaje fuera de .gitmodules: código' '1' "$rc_last"
+glot_run -n test php algorithms/naive_sort extra mas
+assert_eq 'test con demasiados argumentos: código' '2' "$rc_last"
+glot_run -n test php algorithms/naive_sort -x
+assert_eq 'test con opción desconocida: código' '2' "$rc_last"
+
+# verify: sin verificador se informa y no falla; con él, imprime el comando
+glot_run verify ada algorithms/naive_sort
+assert_eq 'verify sin verificador: código' '0' "$rc_last"
+assert_eq 'verify sin verificador: dato' 'skipped' "$out"
+assert_contains 'verify sin verificador: aviso' 'sin verificador' "$err"
+
+glot_run -n verify php algorithms/naive_sort
+assert_contains 'verify -n: comando del catálogo' 'php -l src/NaiveSort.php' "$out"
+
+glot_run -n verify rust algorithms/naive_sort
+assert_contains 'verify -n: verificador sin marcadores' 'cargo fmt --check' "$out"
+
+# el catálogo de verificadores se informa en doctor
+glot_run doctor
+assert_eq 'doctor: código' '0' "$rc_last"
+assert_contains 'doctor: cobertura de verificadores' 'verify_commands: ' "$out"
+assert_contains 'doctor: hay verificadores' 'verify_commands: 14 de / of 50' "$out"
 
 # --- resumen -----------------------------------------------------------------
 

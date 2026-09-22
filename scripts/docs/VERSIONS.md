@@ -11,7 +11,8 @@
 | 0.3.0 | 2026-09-20 | [`versions/glot_0.3.0.sh`](../versions/glot_0.3.0.sh) | **Contrato y dispatcher** (L0): `version`, `help`, `doctor`, `greet`, `hello`, sin rutas del usuario, más harness de pruebas propio | ✅ cerrada |
 | 0.4.0 | 2026-09-21 | [`versions/glot_0.4.0.sh`](../versions/glot_0.4.0.sh) | **Almacén clave/valor** (L1): `set`, `get`, `unset`, `list`, `path`, en XDG, atómico bajo `flock` y con `-n/--dry-run` | ✅ cerrada |
 | 0.5.0 | 2026-09-22 | [`versions/glot_0.5.0.sh`](../versions/glot_0.5.0.sh) | **Asignación** (L2): `use <lenguaje> <fase>/<módulo> [tipo]`, que sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado) | ✅ cerrada |
-| 0.6.0 | 2026-09-22 | [`glot.sh`](../glot.sh) | **Catálogo** (L2.5): `langs`, `modules`, `progress` y `completion`, con el conversor de nombres y los comandos nativos por lenguaje | 🔄 viva |
+| 0.6.0 | 2026-09-22 | [`versions/glot_0.6.0.sh`](../versions/glot_0.6.0.sh) | **Catálogo** (L2.5): `langs`, `modules`, `progress` y `completion`, con el conversor de nombres y los comandos nativos por lenguaje | ✅ cerrada |
+| 0.7.0 | 2026-09-22 | [`glot.sh`](../glot.sh) | **Ejecución** (L3): `test` y `verify`, con el código `4` de verificación fallida, los marcadores de la tabla de comandos y la cobertura de verificadores | 🔄 viva |
 
 ---
 
@@ -68,7 +69,18 @@
 - **Autocompletado:** `completions/glot.bash` y `completions/glot.zsh`, con completado **dinámico** de lenguajes, fases y módulos preguntando al catálogo. Se imprimen con `glot completion <shell>`; **no** se instalan (eso es `install`, v1.0.0).
 - **Contrato:** `langs` devuelve `lenguaje<TAB>prueba nativa`; `modules` devuelve `id<TAB>fase<TAB>módulo<TAB>especificación`; `progress` devuelve `clave=valor` sin fase y TSV con fase. Los estados del roadmap se traducen a `done`/`in_progress`/`planned`/`pending`: ASCII, sin emoji en la salida.
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 227 passed, 0 failed` (rc `0`); incluye la deriva guía ↔ `data/languages.tsv`, la resolución de los nombres divergentes en el sandbox, el autocompletado de bash de punta a punta y, cuando `zsh` está instalado, su sintaxis y su `compdef` (verificado con `zsh 5.9.2`).
-- **Snapshot:** se archivará en `versions/glot_0.6.0.sh` al abrir la v0.7.0 (ver la puerta de entrada).
+- **Snapshot:** [`versions/glot_0.6.0.sh`](../versions/glot_0.6.0.sh), archivado al abrir la v0.7.0; su contenido es el que tenía `main` en el cierre de la versión.
+
+## 0.7.0 — 2026-09-22 (viva)
+
+- **Añade:** la **ejecución** (L3) con `test` (suite del módulo asignado, con el comando nativo del lenguaje) y `verify` (sintaxis/formato), los dos desde cualquier directorio: el objetivo se resuelve con los argumentos y, lo que falte, con el estado del sprint (`lang`, `phase`, `module`).
+- **Contrato:** se estrena el código `4` (**verificación fallida**), para que un CI distinga «no pude ejecutar» (`1`) de «ejecuté y está en rojo» (`4`). `-n/--dry-run` imprime el plan (`cd <módulo> && <comando>`) sin ejecutar nada, también aquí.
+- **Marcadores de la tabla de comandos:** `{modulo}` → id (`naive_sort`), `{Modulo}` → PascalCase (`NaiveSort`) y `{suite}` → archivo de suite, que se deduce del propio patrón (prefijo y sufijo del token, buscados en el directorio efectivo del comando) y exige una única coincidencia: cero o varias son un error, nunca una elección silenciosa.
+- **Corrige la tabla de comandos:** nueve filas no eran ejecutables como estaban. `ada` apuntaba a `tests` (el directorio real es `test`), `kotlin` usaba un envoltorio que no existe, `scala` necesita `-batch -no-colors` para no quedarse esperando, `prolog` y `tcl-tk` requieren `cd test` (tcl-tk además `TCLLIBPATH`), `vala` necesita `--pkg glib-2.0` y ejecutar el binario, `scheme` usa `--no-auto-compile` con la suite de Guile, `common-lisp` necesita el `--eval '(uiop:quit)'` y `nim` va con `nimble test`. Se corrigen en la guía de inicialización y en el catálogo, con lo que documentan y ejecutan los módulos.
+- **Columna nueva `verify`:** 14 de los 50 lenguajes tienen verificador **verificado** (crystal, dart, elixir, go, julia, nim, perl, php, python, r, ruby, rust, v, zig). El resto imprime `skipped` y `doctor` informa de la cobertura: `verify_commands: 14 de / of 50`.
+- **Hallazgo declarado:** el verificador encuentra hallazgos de formato **preexistentes** en tres módulos ya homologados (V, Rust y Crystal). No se tocan en esta versión: quedan visibles como deuda.
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 256 passed, 0 failed` (rc `0`). Ejecuciones reales sobre el monorepo: `test` en `php` (`OK (3 tests, 21 assertions)`), `prolog` (3 subtests passed), `vala` (`ok 1..3`) y `tcl-tk` (`Total 21 Passed 21 Failed 0`) → rc `0`; `verify php` → `No syntax errors detected` rc `0`; `verify v` y `verify rust` → rc `4` con los hallazgos preexistentes; `verify ada` → `skipped` rc `0`.
+- **Snapshot:** se archivará en `versions/glot_0.7.0.sh` al abrir la v0.8.0 (ver la puerta de entrada).
 
 ---
 
@@ -78,7 +90,7 @@
 - **Puerta de entrada:** ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`. Si falta, se copia `glot.sh` con el sufijo de su versión y solo después se reanuda la implementación de la nueva.
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh) y [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh).
+- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh) y [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh).
 - Cada versión se cierra en su propia rama `chore/repo/glot-v0.X` antes de fusionarla en `main` (ver [`README.md`](../README.md)).
 
 ---
@@ -104,6 +116,7 @@
 | coreutils y util-linux | Desde v0.4.0: el almacén usa `mktemp`, `mv`, `chmod` y `flock`; `doctor` lo comprueba desde v0.6.0 | `mktemp --version`, `flock --version` |
 | GNU coreutils (`stat -c`) | Solo para el harness: comprueba los permisos `600`/`700` | `stat --version` |
 | zsh 5.9 (opcional) | Solo para verificar el autocompletado de `completions/glot.zsh`; el harness se salta sus dos comprobaciones si no está | `zsh --version` |
+| Toolchains de cada lenguaje | Desde v0.7.0, `test` y `verify` ejecutan el comando nativo del lenguaje: la toolchain que falte se detecta al ejecutar (código `1`), y `doctor` informa de la cobertura del catálogo de verificadores | p. ej. `composer --version`, `swipl --version` |
 | GitHub Copilot CLI 1.0.86 (opcional) | Validador automático de `validate` (v0.10.0) | `copilot --version` |
 
 ---
@@ -112,12 +125,15 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo y códigos (227 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución y códigos (256 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
 ./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
 ./scripts/glot.sh modules           # catálogo de módulos con su especificación
 ./scripts/glot.sh progress          # contadores del roadmap
 ./scripts/glot.sh completion bash   # autocompletado en stdout
+./scripts/glot.sh -n test php algorithms/naive_sort   # plan: cd al módulo y comando nativo
+./scripts/glot.sh test php algorithms/naive_sort     # ejecuta la suite (salida real)
+./scripts/glot.sh verify php algorithms/naive_sort   # verificador del lenguaje
 ./scripts/glot.sh -n use php algorithms/naive_sort   # ensayo de `use`: plan sin tocar nada
 
 # Estado en un directorio propio, sin tocar el del usuario / state in its own dir
