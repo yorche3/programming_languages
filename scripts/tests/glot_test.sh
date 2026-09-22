@@ -85,13 +85,13 @@ glot_run_in() {
 
 # version
 glot_run version
-assert_eq 'version: salida' 'glot 0.8.0' "$out"
+assert_eq 'version: salida' 'glot 0.9.0' "$out"
 assert_eq 'version: código' '0' "$rc_last"
 assert_eq 'version: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 
 # --version
 glot_run --version
-assert_eq '--version: salida' 'glot 0.8.0' "$out"
+assert_eq '--version: salida' 'glot 0.9.0' "$out"
 assert_eq '--version: código' '0' "$rc_last"
 
 # help general y por verbo
@@ -152,7 +152,7 @@ assert_contains 'nombre suelto: sugiere greet' 'glot greet Ada' "$err"
 # doctor dentro del monorepo
 glot_run doctor
 assert_eq 'doctor dentro: código' '0' "$rc_last"
-assert_contains 'doctor dentro: versión' 'version: 0.8.0' "$out"
+assert_contains 'doctor dentro: versión' 'version: 0.9.0' "$out"
 assert_contains 'doctor dentro: script_dir' 'script_dir:' "$out"
 assert_contains 'doctor dentro: raíz detectada' 'root: /' "$out"
 assert_contains 'doctor dentro: ruta del estado' 'state_file:' "$out"
@@ -267,8 +267,13 @@ sandbox_make() {
 [submodule "php"]
 	path = php
 	url = ../remote/php.git
+[submodule "ruby"]
+        path = ruby
+        url = ../remote/ruby.git
+[submodule "python"]
+        path = python
+        url = ../remote/python.git
 EOF
-
     git -C "$SANDBOX" init -q
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
@@ -285,6 +290,24 @@ EOF
     git -C "$SANDBOX/php" commit -q -m 'chore: base'
     git -C "$SANDBOX/php" remote add origin "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/php" push -q -u origin main
+
+    # `new` necesita más de un tipo de inicialización: `ruby` es manual (crea
+    # carpetas) y `python` es deferred (sin inicializador validado).
+    local extra=""
+    for extra in ruby python; do
+        mkdir -p -- "$SANDBOX/$extra/core/algorithms"
+        git init -q --bare "$SANDBOX/remote/$extra.git"
+        git -C "$SANDBOX/remote/$extra.git" symbolic-ref HEAD refs/heads/main
+        git -C "$SANDBOX/$extra" init -q -b main
+        git -C "$SANDBOX/$extra" config user.email 'glot@test'
+        git -C "$SANDBOX/$extra" config user.name 'glot test'
+        printf '# %s\n' "$extra" >"$SANDBOX/$extra/README.md"
+        printf '# algorithms\n' >"$SANDBOX/$extra/core/algorithms/README.md"
+        git -C "$SANDBOX/$extra" add -A
+        git -C "$SANDBOX/$extra" commit -q -m 'chore: base'
+        git -C "$SANDBOX/$extra" remote add origin "$SANDBOX/remote/$extra.git"
+        git -C "$SANDBOX/$extra" push -q -u origin main
+    done
 }
 
 # glot_run_sandbox [args...] — ejecuta glot con GLOT_ROOT apuntando al sandbox.
@@ -741,7 +764,7 @@ assert_contains 'doctor: hay verificadores' 'verify_commands: 14 de / of 50' "$o
 # registro de encargos: nombre<TAB>paso<TAB>descripción, leído del frontmatter
 glot_run prompt
 assert_eq 'prompt: código' '0' "$rc_last"
-assert_eq 'prompt: cuatro encargos' '4' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'prompt: cinco encargos' '5' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 assert_eq 'prompt: tres columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=3')"
 assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
 assert_contains 'prompt: docs-language en el paso 8' "$(printf 'docs-language\t8')" "$out"
@@ -795,8 +818,160 @@ assert_contains 'ask -n: imprime el plan sin enviar' 'cat >/dev/null' "$out"
 # doctor informa de las plantillas y del delegado
 glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
-assert_contains 'doctor: registro de encargos' 'prompts_ok: 4 encargos / requests' "$out"
+assert_contains 'doctor: registro de encargos' 'prompts_ok: 5 encargos / requests' "$out"
 assert_contains 'doctor: delegado sin configurar' 'delegate: (sin configurar / not configured)' "$out"
+
+# --- casos de la especificación v0.9.0 (L5, creación y registro) -------------
+
+DATA_DIR="$TESTS_DIR/../data"
+
+# el catálogo de inicialización es dato, y el dato tiene que cuadrar
+assert_eq 'catálogo de inicialización: 8 columnas por fila' '0' \
+    "$(awk -F'\t' 'NF != 8' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
+assert_eq 'catálogo de inicialización: tipos válidos' '0' \
+    "$(awk -F'\t' '$6 != "tool" && $6 != "manual" && $6 != "deferred"' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
+assert_eq 'catálogo de inicialización: deferred sin comando' '0' \
+    "$(awk -F'\t' '$6 == "deferred" && $7 != "-"' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
+assert_eq 'catálogo de inicialización: los demás con comando' '0' \
+    "$(awk -F'\t' '$6 != "deferred" && $7 == "-"' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
+assert_eq 'catálogo de inicialización: operaciones conocidas' '0' \
+    "$(awk -F'\t' '{n = split($8, ops, ";"); for (i = 1; i <= n; i++) if (ops[i] != "-" && ops[i] !~ /^(flat|rm):[^:]+$/) print $1}' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
+
+# el catálogo de commits: paso, alias, ámbito y mensaje
+assert_eq 'catálogo de commits: 4 columnas por fila' '0' \
+    "$(awk -F'\t' 'NF != 4' "$DATA_DIR/commits.tsv" | wc -l | tr -d ' ')"
+assert_eq 'catálogo de commits: ámbitos válidos' '0' \
+    "$(awk -F'\t' '$3 != "submodule" && $3 != "monorepo"' "$DATA_DIR/commits.tsv" | wc -l | tr -d ' ')"
+assert_eq 'catálogo de commits: mensajes en Conventional Commits' '0' \
+    "$(awk -F'\t' '$4 !~ /^(feat|fix|docs|chore|refactor|test)\(/ && $4 !~ /^(feat|fix|docs|chore|refactor|test):/' "$DATA_DIR/commits.tsv" | wc -l | tr -d ' ')"
+
+# deriva: cada mensaje del catálogo tiene que estar en la tabla del sprint
+# (la tabla es la fuente; el catálogo, la copia que usa `save`)
+drift=0
+drift_lines=""
+while IFS=$'\t' read -r step alias scope message; do
+    if ! grep -qF -- "\`$message\`" "$TESTS_DIR/../docs/SPRINT.md"; then
+        drift=$((drift + 1))
+        drift_lines+="$step "
+    fi
+done < <(awk -F'\t' '{print $1"\t"$2"\t"$3"\t"$4}' "$DATA_DIR/commits.tsv")
+assert_eq 'catálogo de commits: deriva con la tabla del sprint' '0' "$drift"
+assert_eq 'catálogo de commits: sin mensajes huérfanos' '' "$drift_lines"
+
+# deriva: cada alias de un paso del submódulo tiene que ser un encargo registrado,
+# y los pasos del monorepo tienen que ser los que aún no se confirman aquí
+orphans=""
+monorepo_steps=""
+while IFS=$'\t' read -r step alias scope message; do
+    if [[ "$scope" == "monorepo" ]]; then
+        monorepo_steps+="$step "
+        continue
+    fi
+    [[ "$alias" == "-" ]] && continue
+    glot_run prompt
+    printf '%s\n' "$out" | cut -f1 | grep -qx -- "$alias" || orphans+="$step:$alias "
+done < <(awk -F'\t' '{print $1"\t"$2"\t"$3"\t"$4}' "$DATA_DIR/commits.tsv")
+assert_eq 'catálogo de commits: alias registrados como encargo' '' "$orphans"
+assert_eq 'catálogo de commits: los pasos del monorepo' '9 10 ' "$monorepo_steps"
+
+# new: con herramienta, el plan es el comando del catálogo y el directorio del módulo
+glot_run -n new php algorithms/naive_sort
+assert_eq 'new tool -n: código' '0' "$rc_last"
+assert_contains 'new tool -n: comando del catálogo' 'mkdir -p src test && composer require --dev phpunit/phpunit' "$out"
+assert_contains 'new tool -n: en el directorio del módulo' '/php/core/algorithms/naive_sort && ' "$out"
+assert_contains 'new tool -n: imprime la ruta como dato' '/php/core/algorithms/naive_sort' "$out"
+
+# new: la normalización declarada se enseña en el plan
+glot_run -n new crystal algorithms/naive_sort
+assert_contains 'new -n: normalización en el plan' 'rm:naive_sort/.git;flat:naive_sort' "$out"
+glot_run -n new erlang algorithms/naive_sort
+assert_contains 'new -n: aplanar el nido' 'rebar3 new lib naive_sort' "$out"
+
+# new: sin inicializador validado no se inventa nada: skipped, como verify
+glot_run new python algorithms/naive_sort
+assert_eq 'new deferred: código' '0' "$rc_last"
+assert_eq 'new deferred: dato' 'skipped' "$out"
+assert_contains 'new deferred: lo escribe el agente' 'no verified initializer' "$err"
+assert_contains 'new deferred: encargo sugerido' 'glot prompt scaffold' "$err"
+
+# new: errores de objetivo y de argumentos
+glot_run -n new php algorithms/nope
+assert_eq 'new con módulo desconocido: código' '1' "$rc_last"
+glot_run -n new nope algorithms/naive_sort
+assert_eq 'new con lenguaje fuera de .gitmodules: código' '1' "$rc_last"
+glot_run -n new php algorithms/naive_sort extra
+assert_eq 'new con demasiados argumentos: código' '2' "$rc_last"
+glot_run -n new php algorithms/naive_sort -x
+assert_eq 'new con opción desconocida: código' '2' "$rc_last"
+
+# new: ejecución real en el sandbox, en modo manual (crea carpetas, no suite)
+sandbox_make
+glot_run_sandbox use ruby algorithms/naive_sort
+assert_eq 'sandbox new: use deja el módulo' '0' "$rc_last"
+
+RB="$SANDBOX/ruby/core/algorithms/naive_sort"
+glot_run_sandbox new ruby algorithms/naive_sort
+assert_eq 'sandbox new manual: código' '0' "$rc_last"
+assert_eq 'sandbox new manual: dato = ruta del módulo' "$RB" "$out"
+assert_eq 'sandbox new manual: crea src' 'si' "$([[ -d "$RB/src" ]] && echo si || echo no)"
+assert_eq 'sandbox new manual: crea test' 'si' "$([[ -d "$RB/test" ]] && echo si || echo no)"
+assert_eq 'sandbox new manual: no escribe la suite' '0' "$(find "$RB/test" -type f | wc -l | tr -d ' ')"
+assert_contains 'sandbox new manual: remite al encargo' 'glot prompt scaffold' "$err"
+
+# con contenido, el esqueleto ya está hecho: no se pisa nada
+glot_run_sandbox new ruby algorithms/naive_sort
+assert_eq 'sandbox new repetido: código' '0' "$rc_last"
+assert_eq 'sandbox new repetido: dato = ruta del módulo' "$RB" "$out"
+assert_contains 'sandbox new repetido: avisa' 'no scaffolding' "$err"
+
+# save: mensaje del catálogo, índice completo y confirmación en el submódulo
+printf 'x\n' >"$RB/src/x.rb"
+glot_run_sandbox -n save 4a ruby algorithms/naive_sort
+assert_eq 'save -n: código' '0' "$rc_last"
+assert_contains 'save -n: añade el submódulo' "git -C $SANDBOX/ruby add -A" "$out"
+assert_contains 'save -n: mensaje de la tabla' "commit -m 'chore(algorithms): add scaffold for naive_sort'" "$out"
+assert_eq 'save -n: no confirma nada' '' "$(git -C "$SANDBOX/ruby" log --oneline main..HEAD 2>/dev/null)"
+
+glot_run_sandbox save 4a ruby algorithms/naive_sort
+assert_eq 'save: código' '0' "$rc_last"
+assert_eq 'save: dato = SHA corto' '7' "${#out}"
+assert_eq 'save: asunto del commit' 'chore(algorithms): add scaffold for naive_sort' \
+    "$(git -C "$SANDBOX/ruby" log -1 --format=%s)"
+assert_eq 'save: confirma en el submódulo' 'si' \
+    "$(git -C "$SANDBOX/ruby" log -1 --format=%s | grep -q '^chore' && echo si || echo no)"
+assert_eq 'save: no hace push' 'no' \
+    "$([[ "$(git -C "$SANDBOX/remote/ruby.git" rev-parse feat/algorithms/naive-sort)" == "$(git -C "$SANDBOX/ruby" rev-parse HEAD)" ]] && echo si || echo no)"
+
+# save: el alias del encargo es el mismo paso
+glot_run_sandbox save suite ruby algorithms/naive_sort
+assert_eq 'save con alias y nada que confirmar: código' '0' "$rc_last"
+assert_eq 'save con alias y nada que confirmar: dato' 'nothing' "$out"
+
+# save -n con el árbol ya limpio: no hay plan que enseñar, y lo dice como la ejecución real
+glot_run_sandbox -n save 4b ruby algorithms/naive_sort
+assert_eq 'save -n con árbol limpio: código' '0' "$rc_last"
+assert_eq 'save -n con árbol limpio: dato' 'nothing' "$out"
+assert_contains 'save -n con árbol limpio: avisa' 'nothing to commit' "$err"
+
+# save: los pasos del monorepo todavía no se confirman aquí
+glot_run_sandbox save 9 ruby algorithms/naive_sort
+assert_eq 'save de un paso del monorepo: código' '1' "$rc_last"
+assert_contains 'save de un paso del monorepo: lo dice' 'monorepo' "$err"
+glot_run_sandbox save pointer ruby algorithms/naive_sort
+assert_eq 'save del alias del monorepo: código' '1' "$rc_last"
+
+glot_run_sandbox save nope ruby algorithms/naive_sort
+assert_eq 'save con paso desconocido: código' '2' "$rc_last"
+glot_run_sandbox save
+assert_eq 'save sin paso: código' '2' "$rc_last"
+
+# doctor informa del catálogo de inicialización y del de commits
+glot_run doctor
+assert_contains 'doctor: cobertura de inicializadores' 'new_commands: ' "$out"
+assert_contains 'doctor: inicializadores verificados' 'new_commands: 43 de / of 50' "$out"
+assert_contains 'doctor: catalogadas las aplazadas' '(deferred: 7)' "$out"
+assert_contains 'doctor: catálogo de commits' 'commits_file: ' "$out"
+assert_contains 'doctor: pasos de commit' 'commit_steps: 7 de / of which 5 son del submódulo' "$out"
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 
