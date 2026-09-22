@@ -44,6 +44,7 @@ programming_languages/
 │   ├── index.md                   # Portada / Landing page
 │   ├── ROADMAP.md                 # Plan de desarrollo / Development roadmap
 │   ├── WORKFLOW.md                # Ciclo de trabajo de un módulo / Module work cycle
+│   ├── audits/                    # Registro de deuda técnica por módulo / Per-module technical debt log
 │   └── core/
 │       ├── README.md              # Índice general / Main core index
 │       ├── foundations/           # Fase 0 (01_ a 04_)

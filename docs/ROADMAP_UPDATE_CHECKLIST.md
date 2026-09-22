@@ -31,16 +31,18 @@ Observaciones / Notes:
 
 ## Pendientes / Pending closures
 
-Añadir aquí una entrada cuando una delegación termina la implementación y la
-generación de documentación, antes de actualizar el estado correspondiente en
-`ROADMAP.md`.
+Sin pendientes a 2026-09-21: la implementación, la documentación y el registro de cierre de `core.algorithms.naive_sort` están completos en los 50 lenguajes.
+
+## Historial / History
+
+<!-- Las entradas cerradas se conservan debajo con su fecha y evidencia. -->
 
 ```text
 Fecha / Date: 2026-09-21
 Fase / Phase: core.algorithms
 Módulo(s) / Module(s): core.algorithms.naive_sort
-Lenguaje(s) / Language(s): 50 (auditados); arreglos en racket, cpp, csharp y ya aplicados en clojure, swift, tcl-tk
-Código verificado / Code verified: yes (auditoría en docs/audits/05_Naive_Sort.md)
+Lenguaje(s) / Language(s): 50 (auditados); 6 arreglos de fidelidad o de tests (racket, cpp, csharp, clojure, swift, tcl-tk) y 8 de comentarios (java, dart, haskell, elm, erlang, haxe, common-lisp, cpp)
+Código verificado / Code verified: yes (auditoría en docs/audits/05_Audited_Naive_Sort.md)
 Tests y comandos / Tests and commands:
 - `raco make ... && racket test/run_tests.rkt` en `racket/` -> `3 success(es) 0 failure(s) 0 error(s) 3 test(s) run` tras el refactor a vectores
 - `bazelisk test //:naive_sort_tests --test_output=summary` en `cpp/` -> `PASSED in 0.0s`, `Executed 1 out of 1 test: 1 test passes` tras añadir el guardia `min_idx != i`
@@ -50,13 +52,13 @@ Tests y comandos / Tests and commands:
 - `swift test` en `swift/` -> `Executed 3 tests, with 0 failures (0 unexpected)` (valida el arreglo pendiente de commit)
 - Barrido léxico en los 50 lenguajes (solo archivos rastreados por git) -> 0 invocaciones de ordenamiento de biblioteca y 0 retornos monádicos o excepciones como contrato
 README(s) verificado(s) / README(s) verified: yes (50/50 con las tres secciones obligatorias de `README_Template.md`)
+- Integración: `git -C <lenguaje> log --oneline -2` y `git submodule status cpp csharp racket swift tcl-tk clojure` -> merges `refactor/naive-sort` en el `main` de los 6 submódulos y punteros del monorepo apuntando a ellos
+- Criterio 4 (comentarios): 8 lenguajes corregidos y verificados -> `mvn test` en `java/` -> `Tests run: 3, Failures: 0, Errors: 0` y `BUILD SUCCESS`; `dart test` en `dart/` -> `+3: All tests passed!`; `elm-test` en `elm/` -> `TEST RUN PASSED`, `Passed: 21`, `Failed: 0`; `cabal test --test-show-details=direct` en `haskell/` -> `21 examples, 0 failures`; `rebar3 eunit` en `erlang/` -> `21 tests, 0 failures`; `haxe build.hxml` en `haxe/` -> `results: ALL TESTS OK (success: true)`; `ros run --load run-tests.lisp --eval '(uiop:quit)'` en `common-lisp/` -> `Pass: 24 (100%)`, `Fail: 0 ( 0%)`; `bazelisk test //:naive_sort_tests --nocache_test_results` en `cpp/` -> `PASSED`, `1 test passes`
+- Generadores formales tras la corrección: `grep` en los 9 archivos tocados -> 0 coincidencias (`@param`, `{@code}`, `///`, `/**`, `-- \|`, `{- \|`)
+- Ada (tras restaurar `alr` con `~/temp/fix-alr.sh`): `alr -C test run` en `ada/` -> `Total Tests Run: 3`, `Successful Tests: 3`, `Failed Assertions: 0`, `Unexpected Errors: 0`
 Cambio en ROADMAP.md / ROADMAP.md change: Foundations 49/49 -> 50/50; `core.algorithms.naive_sort` 49/49 -> 50/50; leyenda y contadores `X/49` -> `X/50`; `php` añadido a la lista de lenguajes del módulo
-Observaciones / Notes: `php` entra en el contador como quincuagésimo submódulo (cierra la decisión abierta del cierre anterior del 2026-09-20). Los tres arreglos de `clojure`, `swift` y `tcl-tk` están aplicados en el árbol de trabajo y verificados con su suite, pero **sin commit** en sus submódulos; los de `racket`, `cpp` y `csharp` tampoco están commiteados. Queda pendiente: commit y push en cada submódulo, integración en su `main` y actualización del puntero del monorepo.
+Observaciones / Notes: `php` entra en el contador como quincuagésimo submódulo (cierra la decisión abierta del cierre anterior del 2026-09-20) y `core.algorithms.naive_sort` queda cerrado en 50/50. Los seis arreglos de fidelidad o de tests y los ocho de comentarios (criterio 4) están aplicados y verificados con la suite de cada lenguaje, y el resto de suites del módulo se ejecutó el 2026-09-21 (42 más, todas en verde, incluida la de Ada con `alr -C test run` tras restaurar el binario con `~/temp/fix-alr.sh`). El detalle vive en `docs/audits/05_Audited_Naive_Sort.md`.
 ```
-
-## Historial / History
-
-<!-- Las entradas cerradas se conservan debajo con su fecha y evidencia. -->
 
 Fecha / Date: 2026-09-11
 Fase / Phase: core.algorithms

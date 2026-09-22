@@ -11,10 +11,10 @@
 ```text
 docs/audits/
 ├── README.md                  # Esta guía y el índice / This guide and the index
-└── {NN}_{Modulo}.md           # Un registro por módulo / One record per module
+└── {NN}_Audited_{Modulo}.md   # Un registro por módulo / One record per module
 ```
 
-- El nombre del registro es el de la **especificación** (`05_Naive_Sort` → `05_Naive_Sort.md`), para que el enlace entre ambos sea inmediato.
+- **El nombre del registro no repite el de la especificación**: `05_Naive_Sort.md` es la especificación y `05_Audited_Naive_Sort.md` su registro. Así se distinguen por el nombre y no solo por la carpeta.
 - Un registro por módulo, no por lenguaje: los lenguajes son filas del estado.
 - Cuando el módulo cierra del todo (todos los lenguajes en 🟢) el registro se conserva como histórico; el cierre se anota en [`ROADMAP_UPDATE_CHECKLIST.md`](../ROADMAP_UPDATE_CHECKLIST.md).
 - El ciclo con el que se corrige cada lenguaje es el de [`WORKFLOW.md`](../WORKFLOW.md).
@@ -91,4 +91,4 @@ done
 
 | Módulo | Estado global | Registro |
 |--------|---------------|----------|
-| `core.algorithms.naive_sort` | 🟢 39 · 🔵 3 · 🟡 8 · 🔴 0 | [`05_Naive_Sort.md`](05_Naive_Sort.md) |
+| `core.algorithms.naive_sort` | 🟢 50 · 🟡 0 · 🔴 0 | [`05_Audited_Naive_Sort.md`](05_Audited_Naive_Sort.md) |
