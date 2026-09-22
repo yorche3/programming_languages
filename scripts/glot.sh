@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# glot 0.7.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2),
-# catálogo (L2.5) y ejecución (L3): `test` y `verify`.
+# glot 0.8.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2),
+# catálogo (L2.5), ejecución (L3) y delegación (L4): `prompt` y `ask`.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -21,7 +21,7 @@
 
 set -euo pipefail
 
-GLOT_VERSION="0.7.0"
+GLOT_VERSION="0.8.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible.
@@ -315,6 +315,7 @@ _glot_cmd_doctor() {
     local registered=0
     local covered=0
     local verifiers=0
+    local prompts=""
     local data=""
     if root="$(_glot_repo_root)"; then
         registered="$(_glot_langs | wc -l | tr -d ' ')"
@@ -331,6 +332,20 @@ _glot_cmd_doctor() {
         else
             printf 'data_file: (no encontrado / not found)\n'
             status=1
+        fi
+
+        if prompts="$(_glot_prompts_dir)"; then
+            printf 'prompts: %s\n' "$prompts"
+            printf 'prompts_ok: %s encargos / requests\n' "$(_glot_prompts_list | wc -l | tr -d ' ')"
+        else
+            printf 'prompts: (no encontrado / not found)\n'
+            status=1
+        fi
+
+        if [[ -n "${GLOT_DELEGATE:-}" ]]; then
+            printf 'delegate: %s\n' "$GLOT_DELEGATE"
+        else
+            printf 'delegate: (sin configurar / not configured)\n'
         fi
 
         local shell=""
@@ -795,6 +810,241 @@ _glot_cmd_verify() {
     _glot_cmd_run verify "$@"
 }
 
+# --- delegación (L4) ---------------------------------------------------------
+
+# _glot_prompts_dir — carpeta de las plantillas versionadas del tooling.
+_glot_prompts_dir() {
+    local dir=""
+
+    for dir in "$GLOT_SCRIPT_DIR/prompts" "$GLOT_SCRIPT_DIR/../prompts"; do
+        if [[ -d "$dir" ]]; then
+            printf '%s\n' "$dir"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# _glot_prompt_file <encargo> — plantilla del encargo. Manda la versionada y, si no
+# está, se acepta la del banco local con un aviso: esa no viaja en el repositorio.
+_glot_prompt_file() {
+    local name="$1"
+    local dir=""
+    local local_dir=""
+
+    if dir="$(_glot_prompts_dir)" && [[ -r "$dir/$name.prompt.md" ]]; then
+        printf '%s\n' "$dir/$name.prompt.md"
+        return 0
+    fi
+
+    local_dir="$(_glot_repo_root 2>/dev/null || true)/.github/prompts"
+    if [[ -r "$local_dir/$name.prompt.md" ]]; then
+        _glot_warn "plantilla local y no versionada / local, unversioned template: $local_dir/$name.prompt.md"
+        printf '%s\n' "$local_dir/$name.prompt.md"
+        return 0
+    fi
+
+    return 1
+}
+
+# _glot_prompt_field <archivo> <campo> — campo del frontmatter de la plantilla.
+_glot_prompt_field() {
+    local file="$1"
+    local field="$2"
+    local line=""
+    local seen=0
+
+    while IFS= read -r line; do
+        if ((seen < 2)) && [[ "$line" == "---" ]]; then
+            seen=$((seen + 1))
+            continue
+        fi
+        ((seen >= 2)) && break
+        if [[ "$line" == "$field: "* ]]; then
+            printf '%s\n' "${line#"$field: "}"
+            return 0
+        fi
+    done <"$file"
+
+    return 1
+}
+
+# _glot_prompt_body <archivo> — la plantilla sin el frontmatter de VS Code, que al
+# pegar el encargo solo estorba.
+_glot_prompt_body() {
+    local file="$1"
+    local line=""
+    local seen=0
+
+    while IFS= read -r line; do
+        if ((seen < 2)) && [[ "$line" == "---" ]]; then
+            seen=$((seen + 1))
+            continue
+        fi
+        ((seen >= 2)) && printf '%s\n' "$line"
+    done <"$file"
+}
+
+# _glot_prompts_list — registro de encargos: nombre<TAB>paso<TAB>descripción.
+_glot_prompts_list() {
+    local dir=""
+    local file=""
+    local name=""
+    local step=""
+    local desc=""
+
+    dir="$(_glot_prompts_dir)" || {
+        _glot_error "no hay carpeta de plantillas / no prompts directory"
+        return 1
+    }
+
+    for file in "$dir/"*.prompt.md; do
+        [[ -e "$file" ]] || continue
+        name="$(_glot_prompt_field "$file" name)" || name="$(basename -- "$file" .prompt.md)"
+        step="$(_glot_prompt_field "$file" step)" || step="-"
+        desc="$(_glot_prompt_field "$file" description)" || desc="-"
+        printf '%s\t%s\t%s\n' "$name" "$step" "$desc"
+    done
+}
+
+# _glot_expand_state <lenguaje> <fase> <módulo> <texto> — resuelve los marcadores con
+# las claves del estado del sprint, más `{Module}` (PascalCase) y `{module_dir}`.
+# Un marcador que no se pueda resolver es un error: nunca texto literal escondido.
+_glot_expand_state() {
+    local lang="$1"
+    local phase="$2"
+    local module="$3"
+    local text="$4"
+    local root=""
+    local spec=""
+    local branch=""
+    local marker=""
+
+    root="$(_glot_repo_root)" || return 1
+    spec="$(_glot_spec_path "$root" "$phase" "$module" || true)"
+    branch="$(git -C "$root/$lang" symbolic-ref --short -q HEAD || true)"
+
+    text="${text//\{lang\}/$lang}"
+    text="${text//\{phase\}/$phase}"
+    text="${text//\{module\}/$module}"
+    text="${text//\{Module\}/$(_glot_pascal "$module")}"
+    text="${text//\{repo\}/$lang}"
+    text="${text//\{branch\}/$branch}"
+    text="${text//\{spec\}/$spec}"
+    text="${text//\{module_dir\}/$(_glot_module_dir "$root" "$lang" "$phase" "$module")}"
+
+    if [[ "$text" =~ \{[A-Za-z_][A-Za-z_0-9]*\} ]]; then
+        marker="${BASH_REMATCH[0]}"
+        _glot_error "marcador sin resolver / unresolved placeholder: $marker"
+        _glot_info "en la plantilla solo valen lang, phase, module, Module, repo, branch, spec y module_dir"
+        _glot_info "only lang, phase, module, Module, repo, branch, spec and module_dir are valid in a template"
+        return 1
+    fi
+
+    printf '%s\n' "$text"
+}
+
+# _glot_prompt_build <encargo> [lenguaje] [fase/módulo] — encargo completo: cabecera
+# con el estado del sprint y la plantilla expandida. Es el dato de `prompt`.
+_glot_prompt_build() {
+    local name="$1"
+    local file=""
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local body=""
+    local root=""
+    local branch=""
+    local spec=""
+
+    shift
+
+    if ! file="$(_glot_prompt_file "$name")"; then
+        _glot_error "encargo desconocido / unknown request: $name"
+        _glot_info "disponibles / available: glot prompt"
+        return 1
+    fi
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    root="$(_glot_repo_root)" || return 1
+    branch="$(git -C "$root/$lang" symbolic-ref --short -q HEAD || true)"
+    spec="$(_glot_spec_path "$root" "$phase" "$module" || true)"
+
+    if ! body="$(_glot_prompt_body "$file")"; then
+        _glot_error "no se pudo leer la plantilla / cannot read the template: $file"
+        return 1
+    fi
+    if ! body="$(_glot_expand_state "$lang" "$phase" "$module" "$body")"; then
+        return 1
+    fi
+
+    printf '# Encargo `%s` — %s %s/%s\n\n' "$name" "$lang" "$phase" "$module"
+    printf '| Clave | Valor |\n|-------|-------|\n'
+    printf '| lang | %s |\n' "$lang"
+    printf '| phase | %s |\n' "$phase"
+    printf '| module | %s |\n' "$module"
+    printf '| branch | %s |\n' "${branch:-detached}"
+    printf '| spec | %s |\n' "${spec:--}"
+    printf '| repo | %s |\n' "$lang"
+    printf '| module_dir | %s |\n' "$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    printf '\n---\n\n%s\n' "$body"
+}
+
+# _glot_cmd_prompt [encargo] [lenguaje] [fase/módulo] — sin encargo, lista el
+# registro; con encargo, imprime el encargo armado en stdout. No muta nada.
+_glot_cmd_prompt() {
+    local name="${1:-}"
+
+    if [[ -z "$name" ]]; then
+        _glot_prompts_list
+        return $?
+    fi
+
+    _glot_prompt_build "$name" "${@:2}"
+}
+
+# _glot_cmd_ask <encargo> [lenguaje] [fase/módulo] — arma el mismo encargo y lo envía
+# a `GLOT_DELEGATE` por stdin. Sin delegado configurado no hay nada que hacer: 1.
+_glot_cmd_ask() {
+    local name="${1:-}"
+    local request=""
+    local rc=0
+
+    if [[ -z "$name" ]]; then
+        _glot_error 'falta el encargo / missing request'
+        _glot_error 'uso / usage: glot ask <encargo> [lenguaje] [fase/módulo]'
+        _glot_info 'disponibles / available: glot prompt'
+        return 2
+    fi
+
+    request="$(_glot_prompt_build "$name" "${@:2}")" || return $?
+
+    if [[ -z "${GLOT_DELEGATE:-}" ]]; then
+        _glot_error 'no hay delegado configurado / no delegate configured'
+        _glot_info 'define GLOT_DELEGATE o imprime el encargo / set GLOT_DELEGATE or print it: glot prompt '"$name"
+        return 1
+    fi
+
+    if ((_glot_dry_run)); then
+        printf '<encargo de %s> | %s\n' "$name" "$GLOT_DELEGATE"
+        return 0
+    fi
+
+    _glot_info "delegado / delegate: $GLOT_DELEGATE"
+    printf '%s\n' "$request" | eval "$GLOT_DELEGATE" || rc=$?
+
+    if ((rc != 0)); then
+        _glot_error "el delegado falló / the delegate failed: código / code $rc"
+        return 1
+    fi
+
+    return 0
+}
+
 _glot_usage() {
     cat <<'EOF'
 glot — CLI del monorepo / monorepo CLI
@@ -833,6 +1083,14 @@ Verbos / Verbs:
                      el lenguaje aún no tiene uno
                      Runs the language verifier (syntax/lint); `skipped` when the
                      language has none yet
+  prompt [encargo] [lenguaje] [fase/módulo]
+                     Sin encargo, lista el registro; con encargo, imprime el encargo
+                     armado con el estado del sprint. No muta nada
+                     With no request it lists the registry; with one it prints the
+                     request built from the sprint state. It mutates nothing
+  ask <encargo> [lenguaje] [fase/módulo]
+                     Arma el encargo y lo envía a GLOT_DELEGATE por stdin
+                     Builds the request and pipes it to GLOT_DELEGATE
   use <lenguaje> <fase>/<módulo> [tipo]
                      Sitúa el trabajo: valida y, con el árbol limpio, activa o crea
                      la rama {tipo}/{fase}/{módulo} desde main y la publica con
@@ -924,6 +1182,23 @@ _glot_help_verb() {
             printf 'Sintaxis o formato, con la herramienta del propio lenguaje; `skipped` si no hay\n'
             printf 'Syntax or formatting, with the language own tool; `skipped` when there is none\n'
             printf 'Códigos / codes: 0 correcto · 4 hallazgos / findings\n'
+            ;;
+        prompt)
+            printf 'glot prompt [encargo] [lenguaje] [fase/módulo]\n'
+            printf 'Sin encargo lista el registro de plantillas de scripts/prompts\n'
+            printf 'With no request it lists the template registry in scripts/prompts\n'
+            printf 'Con encargo imprime el encargo armado: estado del sprint + plantilla expandida\n'
+            printf 'With a request it prints the built request: sprint state + expanded template\n'
+            printf 'Marcadores / placeholders: lang, phase, module, Module, repo, branch, spec, module_dir\n'
+            printf 'No muta nada y no necesita -n / it mutates nothing and does not need -n\n'
+            ;;
+        ask)
+            printf 'glot ask <encargo> [lenguaje] [fase/módulo] — envía el encargo al delegado\n'
+            printf 'glot ask <request> [language] [phase/module] — pipes the request to the delegate\n'
+            printf 'El encargo va por stdin a la orden de GLOT_DELEGATE y su salida va a stdout\n'
+            printf 'The request goes to the GLOT_DELEGATE command over stdin and its output to stdout\n'
+            printf 'Sin GLOT_DELEGATE devuelve 1; `-n` imprime el plan sin enviar nada\n'
+            printf 'With no GLOT_DELEGATE it returns 1; `-n` prints the plan without sending anything\n'
             ;;
         use)
             printf 'glot use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint\n'
@@ -1183,7 +1458,7 @@ _glot_pascal() {
 }
 
 # _glot_expand_command <directorio> <id> <plantilla> — resuelve los marcadores de la
-# plantilla: `{modulo}` (id), `{Modulo}` (PascalCase) y `{suite}` (archivo de suite).
+# plantilla: `{module}` (id), `{Module}` (PascalCase) y `{suite}` (archivo de suite).
 # `{suite}` se deduce del propio patrón: del token que lo contiene se toman el prefijo
 # y el sufijo (`test/{suite}.vala` -> `test/*.vala`, `{suite}_guile.scm` ->
 # `*_guile.scm`), se busca en el directorio efectivo —el del `cd` inicial, si lo hay—
@@ -1203,8 +1478,8 @@ _glot_expand_command() {
     local -a hits=()
     local -a named=()
 
-    cmd="${cmd//\{modulo\}/$id}"
-    cmd="${cmd//\{Modulo\}/$(_glot_pascal "$id")}"
+    cmd="${cmd//\{module\}/$id}"
+    cmd="${cmd//\{Module\}/$(_glot_pascal "$id")}"
 
     [[ "$cmd" == *'{suite}'* ]] || {
         printf '%s\n' "$cmd"
@@ -1752,6 +2027,14 @@ glot() {
         verify)
             # Ejecuta el verificador del lenguaje / Runs the language verifier
             _glot_cmd_verify "$@"
+            ;;
+        prompt)
+            # Arma el encargo del sprint / Builds the sprint request
+            _glot_cmd_prompt "$@"
+            ;;
+        ask)
+            # Envía el encargo al delegado / Sends the request to the delegate
+            _glot_cmd_ask "$@"
             ;;
         use)
             # Sitúa el trabajo del sprint / Locates the sprint work
