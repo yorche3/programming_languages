@@ -105,7 +105,7 @@
 | Documento | Qué manda |
 |-----------|-----------|
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Ramas, Conventional Commits, alcances y el orden del puntero del submódulo |
-| [`ROADMAP.md`](ROADMAP.md) | Estados, contadores `X/49` y cierre de fases |
+| [`ROADMAP.md`](ROADMAP.md) | Estados, contadores `X/50` y cierre de fases |
 | [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) | Plantilla y registro del cierre |
 | [`README_Template.md`](README_Template.md) | Estructura obligatoria del README de Nivel 3 |
 | [`AGENT_Template.md`](AGENT_Template.md) | Cómo genera documentación el agente |

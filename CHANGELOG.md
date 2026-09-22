@@ -20,12 +20,17 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   monorepo en `docs/WORKFLOW.md`, y la documentación de `glot` se dividió en
   `scripts/README.md` (índice) más `scripts/docs/`: roadmap por capas L0–L9,
   sprint, contrato de verbos, tripas del script, log de versiones y validación.
+- Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
+  `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
+  estados, método reproducible y plan de cierre.
 - Se abrió la fase `Algorithms Pure` como siguiente fase del roadmap.
 - Se estableció el flujo de cierre documental y actualización del roadmap.
 
 ### Changed
 
-- El roadmap reconoce los 49 submódulos registrados en `.gitmodules`.
+- El roadmap reconoce los **50** submódulos registrados en `.gitmodules`: `php`
+  entra en el contador y Foundations y `core.algorithms.naive_sort` pasan a
+  `50/50`.
 - Las plantillas de documentación usan nombres en inglés terminados en
   `_Template`.
 

@@ -49,12 +49,12 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 | Módulo | Estado | Lenguajes | Especificación | Notas |
 |--------|--------|-----------|----------------|-------|
-| `core.foundations.hello_world` | ✅ | 49/49 | [`📄 01_Hello_World.md`](core/foundations/01_Hello_World.md) | Base mínima del lenguaje |
-| `core.foundations.hello_user` | ✅ | 49/49 | [`📄 02_Hello_User.md`](core/foundations/02_Hello_User.md) | Entrada/salida interactiva |
-| `core.foundations.unit_test` | ✅ | 49/49 | [`📄 03_Unit_Test_Calculator.md`](core/foundations/03_Unit_Test_Calculator.md) | Operaciones aritméticas básicas con unit tests |
-| `core.foundations.numbers` | ✅ | 49/49 | [`📄 04_Numbers.md`](core/foundations/04_Numbers.md) | Algoritmos numéricos recursivos e iterativos |
+| `core.foundations.hello_world` | ✅ | 50/50 | [`📄 01_Hello_World.md`](core/foundations/01_Hello_World.md) | Base mínima del lenguaje |
+| `core.foundations.hello_user` | ✅ | 50/50 | [`📄 02_Hello_User.md`](core/foundations/02_Hello_User.md) | Entrada/salida interactiva |
+| `core.foundations.unit_test` | ✅ | 50/50 | [`📄 03_Unit_Test_Calculator.md`](core/foundations/03_Unit_Test_Calculator.md) | Operaciones aritméticas básicas con unit tests |
+| `core.foundations.numbers` | ✅ | 50/50 | [`📄 04_Numbers.md`](core/foundations/04_Numbers.md) | Algoritmos numéricos recursivos e iterativos |
 
-> **ES:** Los **49 submódulos registrados en `.gitmodules`** tienen los cuatro módulos de Foundations homologados y documentados. Foundations queda cerrada; la siguiente fase visible es Algorithms Pure.
+> **ES:** Los **50 submódulos registrados en `.gitmodules`** tienen los cuatro módulos de Foundations homologados y documentados. Foundations queda cerrada; la siguiente fase visible es Algorithms Pure.
 > **EN:** All **49 submodules registered in `.gitmodules`** have the four Foundations modules standardized and documented. Foundations is complete; Algorithms Pure is the next visible phase.
 
 ---
@@ -67,11 +67,11 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 | Módulo | Estado | Lenguajes | Algoritmos | Especificación |
 |--------|--------|-----------|------------|----------------|
-| `core.algorithms.naive_sort` | ✅ | 49/49 | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
-| `core.algorithms.data_structures` | 📋 | 0/49 | construcción y contrato de stack, queue, linked_list, tree y graph sobre arrays | [`📄 06_Data_Structures.md`](core/algorithms/06_Data_Structures.md) |
-| `core.algorithms.efficient_sort` | 📋 | 0/49 | quick, merge, heap; puede usar ADTs optimizados del lenguaje salvo `sort()` | [`📄 07_Efficient_Sort.md`](core/algorithms/07_Efficient_Sort.md) |
-| `core.algorithms.distributed_sort` | 📋 | 0/49 | radix, bucket, shell, counting | [`📄 08_Distributed_Sort.md`](core/algorithms/08_Distributed_Sort.md) |
-| `core.algorithms.searching` | 📋 | 0/49 | linear sobre arrays numéricos; binary, jump e interpolation con precondición de array ordenado | [`📄 09_Searching.md`](core/algorithms/09_Searching.md) |
+| `core.algorithms.naive_sort` | ✅ | 50/50 | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
+| `core.algorithms.data_structures` | 📋 | 0/50 | construcción y contrato de stack, queue, linked_list, tree y graph sobre arrays | [`📄 06_Data_Structures.md`](core/algorithms/06_Data_Structures.md) |
+| `core.algorithms.efficient_sort` | 📋 | 0/50 | quick, merge, heap; puede usar ADTs optimizados del lenguaje salvo `sort()` | [`📄 07_Efficient_Sort.md`](core/algorithms/07_Efficient_Sort.md) |
+| `core.algorithms.distributed_sort` | 📋 | 0/50 | radix, bucket, shell, counting | [`📄 08_Distributed_Sort.md`](core/algorithms/08_Distributed_Sort.md) |
+| `core.algorithms.searching` | 📋 | 0/50 | linear sobre arrays numéricos; binary, jump e interpolation con precondición de array ordenado | [`📄 09_Searching.md`](core/algorithms/09_Searching.md) |
 
 ### Ejes de progresión / Progression axes
 
@@ -280,31 +280,31 @@ A medida que se avanza a proyectos más complejos (a partir de `ui.cliapp`), los
 
 ## Resumen de progreso / Progress Summary
 
-> **ES:** Los contadores `X/49` indican cuántos de los **49 submódulos registrados en `.gitmodules`** tienen el módulo implementado y homologado bajo `core/`. Los lenguajes legacy, copias de respaldo, `_experimental/` y lenguajes eliminados como `seed7` no forman parte del denominador.
-> **EN:** The `X/49` counters indicate how many of the **49 submodules registered in `.gitmodules`** have the module implemented and standardized under `core/`. Legacy languages, backups, `_experimental/`, and removed languages such as `seed7` are excluded from the denominator.
+> **ES:** Los contadores `X/50` indican cuántos de los **50 submódulos registrados en `.gitmodules`** tienen el módulo implementado y homologado bajo `core/`. Los lenguajes legacy, copias de respaldo, `_experimental/` y lenguajes eliminados como `seed7` no forman parte del denominador.
+> **EN:** The `X/50` counters indicate how many of the **50 submodules registered in `.gitmodules`** have the module implemented and standardized under `core/`. Legacy languages, backups, `_experimental/`, and removed languages such as `seed7` are excluded from the denominator.
 
 ```text
-## Fase 0 — Foundations ✅ (completos: 49/49 submódulos)
-core.foundations.hello_world          ✅ 49/49
-core.foundations.hello_user           ✅ 49/49
-core.foundations.unit_test            ✅ 49/49
-core.foundations.numbers              ✅ 49/49
+## Fase 0 — Foundations ✅ (completos: 50/50 submódulos)
+core.foundations.hello_world          ✅ 50/50
+core.foundations.hello_user           ✅ 50/50
+core.foundations.unit_test            ✅ 50/50
+core.foundations.numbers              ✅ 50/50
 
-## Fase 1 — Algorithms Pure 🔄 (fase abierta; implementados: 1/49)
-core.algorithms.naive_sort            ✅ 49/49 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript, V, Vala, Zig)
+## Fase 1 — Algorithms Pure 🔄 (fase abierta; implementados: 1/50)
+core.algorithms.naive_sort            ✅ 50/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript, V, Vala, Zig)
 core.algorithms.data_structures       📋
 core.algorithms.efficient_sort        📋
 core.algorithms.distributed_sort      📋
 core.algorithms.searching             📋
 
-## Fase 2 — Contiguous Processing 📋 (refactorizados: 0/49)
+## Fase 2 — Contiguous Processing 📋 (refactorizados: 0/50)
 core.text.transformations             🔄 (refactor pendiente)
 core.text.patterns                    📋
 core.text.substr                      📋
 core.text.input_output                📋
 core.text.etl_basico                  📋
 
-## Fase 3 — Algorithms on Structures 📋 (implementados: 0/49)
+## Fase 3 — Algorithms on Structures 📋 (implementados: 0/50)
 core.structures.graph_algorithms      📋
 core.structures.backtracking          📋
 core.structures.dynamic_programming   📋
