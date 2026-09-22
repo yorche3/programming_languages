@@ -182,7 +182,10 @@ monorepo. Estos cambios no requieren modificar un submódulo.
 Las herramientas de [`scripts/`](https://github.com/yorche3/programming_languages/tree/main/scripts)
 siguen la misma regla con el módulo `glot` (ramas `chore/repo/glot-v0.X`). Cada
 versión se cierra copiando `glot.sh` a `scripts/versions/` antes de fusionar la
-rama en `main`, de modo que `main` siempre contenga una versión terminada.
+rama en `main`, de modo que `main` siempre contenga una versión terminada. De ahí
+la **puerta de entrada**: no se empieza a implementar una versión nueva sin el
+snapshot de la anterior en `versions/`; si falta, se copia primero y después se
+reanuda la implementación.
 
 ## ✅ Cierre de documentación y roadmap / Documentation and roadmap closure
 

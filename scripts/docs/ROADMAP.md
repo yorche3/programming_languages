@@ -27,10 +27,11 @@
 ## 📐 Criterios de orden / Ordering rules
 
 1. **Primero leer, después mutar.** Los verbos que solo consultan llegan antes que los que escriben.
-2. **El autocompletado acompaña al catálogo**, no llega al final: los datos (`.gitmodules`, la guía de inicialización, el roadmap) son lo que el autocompletado necesita.
+2. **El autocompletado acompaña al catálogo**, no llega al final: los datos (`.gitmodules`, el bloque de contadores de `docs/ROADMAP.md`, la guía de inicialización y `data/languages.tsv`) son lo que el autocompletado necesita. El catálogo de datos no sustituye a la guía: la guía manda y el harness comprueba que los dos no se separan.
 3. **Todo verbo que muta trae `-n/--dry-run` desde el día uno** y nunca pregunta: el dato llega por argumento o por stdin.
 4. **La capa de shell entra con la instalación.** `glot` se **ejecuta** hasta la v1.0.0; la función cargable con `source` (la única forma de que `use` pueda hacer `cd`) llega con `install`, que es quien toca `.bashrc`.
 5. **Ninguna versión existe sin un paso del sprint detrás.** Cada capa cubre pasos concretos de [`SPRINT.md`](SPRINT.md).
+6. **Puerta de entrada al archivo.** Ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`; si falta, se copia `glot.sh` con el sufijo de su versión y solo después se reanuda la implementación.
 
 ---
 
@@ -40,8 +41,8 @@
 |:----:|---------------------|:-----------------:|
 | L0 | Contrato de verbos y dispatcher | 0.3.0 ✅ |
 | L1 | Almacén de estado clave/valor | 0.4.0 ✅ |
-| L2 | Asignación: situar el trabajo (`use`) | 0.5.0 🔄 |
-| L2.5 | Catálogo (`langs`, `modules`, `progress`) y autocompletado | 0.6.0 |
+| L2 | Asignación: situar el trabajo (`use`) | 0.5.0 ✅ |
+| L2.5 | Catálogo (`langs`, `modules`, `progress`), comandos nativos y autocompletado | 0.6.0 🔄 |
 | L3 | Ejecución: `test` y `verify` | 0.7.0 |
 | L4 | Delegación: `prompt` (encargos de IA) | 0.8.0 |
 | L5 | Creación y registro: `new`, `save` | 0.9.0 |
@@ -58,7 +59,7 @@
 |---------|:----:|:----------------:|-------|-------------------------|
 | 0.4.0 | L1 | — | `set`, `get`, `unset`, `list`, `path` en XDG | Cimiento que consumen `use`, `test` y el progreso |
 | 0.5.0 | L2 | 2–3 | `use <lenguaje> <fase>/<módulo> [tipo]`: valida contra `.gitmodules` y sitúa el trabajo según cuatro estados (nuevo, en curso, reanudar, cerrado): activa o crea la rama desde `main`, la publica con upstream, crea la carpeta si falta y no toca nada cuando hay trabajo sin confirmar. Guarda el estado e imprime la ruta | Es el paso que sitúa el trabajo; el `cd` real que lo completa llega con la capa cargable |
-| 0.6.0 | L2.5 | apoyo a todos | `langs`, `modules`, `progress`, comando nativo por lenguaje y autocompletado v1 | Los datos ya existen; el autocompletado los necesita |
+| 0.6.0 | L2.5 | apoyo a todos | `langs`, `modules`, `progress` y `completion`: el **conversor de nombres** (id canónico → documento, rama, commit y carpeta), los comandos nativos por lenguaje en `data/languages.tsv` y el autocompletado de bash y zsh con completado dinámico | Los datos ya existen; el autocompletado los necesita, y `use` deja de depender de un heurístico de nombres |
 | 0.7.0 | L3 | 5–7 | `test` (comando nativo del asignado) y `verify` (sintaxis/lint), desde cualquier directorio | Primer consumo real del catálogo y del estado |
 | 0.8.0 | L4 | 4–8 | `prompt`/`ask`: arma el encargo para el agente con las plantillas de `.github/prompts`, con `GLOT_DELEGATE` como estrategia enchufable | **Solo imprime texto**: no muta nada, así que va antes que la capa que sí muta |
 | 0.9.0 | L5 | 4 | `new`/`scaffold` (inicializador del lenguaje, esqueleto y contrato de pruebas) y `save` (commit guiado con la convención del repo) | Reutiliza catálogo y estado; elimina el andamiaje manual repetido |

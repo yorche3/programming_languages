@@ -1,15 +1,15 @@
 # 🔍 Cómo funciona por dentro / How it works internally
 
-**ES:** Recorrido de [`glot.sh`](../glot.sh) en su versión viva (v0.5.0), del argumento al código de salida. No es documentación línea a línea: solo lo necesario para leerlo, entender las decisiones raras y extenderlo. El contrato está en [`CONTRACT.md`](CONTRACT.md).
+**ES:** Recorrido de [`glot.sh`](../glot.sh) en su versión viva (v0.6.0), del argumento al código de salida. No es documentación línea a línea: solo lo necesario para leerlo, entender las decisiones raras y extenderlo. El contrato está en [`CONTRACT.md`](CONTRACT.md).
 
-**EN:** A walkthrough of [`glot.sh`](../glot.sh) at its live version (v0.5.0), from argument to exit code. It is not line-by-line documentation: just what is needed to read it, understand the odd decisions and extend it. The contract is in [`CONTRACT.md`](CONTRACT.md).
+**EN:** A walkthrough of [`glot.sh`](../glot.sh) at its live version (v0.6.0), from argument to exit code. It is not line-by-line documentation: just what is needed to read it, understand the odd decisions and extend it. The contract is in [`CONTRACT.md`](CONTRACT.md).
 
 ---
 
 ## 1. Arranque y localización / Startup and self-location
 
 1. `set -euo pipefail` al principio: como el archivo se **ejecuta**, cualquier orden que falle detiene el script y el `return` de un verbo se convierte en su código de salida. Esta línea desaparecerá cuando el archivo se cargue con `source` (v1.0.0), porque ahí no puede tocar las opciones del shell.
-2. `GLOT_VERSION="0.5.0"` es la única constante propia; el resto de funciones y variables internas llevan el prefijo `_glot_` para poder cargarse más adelante sin contaminar el entorno.
+2. `GLOT_VERSION="0.6.0"` es la única constante propia; el resto de funciones y variables internas llevan el prefijo `_glot_` para poder cargarse más adelante sin contaminar el entorno.
 3. `GLOT_SCRIPT_DIR` se obtiene de `BASH_SOURCE[0]`, resolviendo enlaces simbólicos con `readlink` y normalizando con `cd … && pwd -P`. Es lo que permite invocar el script desde cualquier directorio (o desde un enlace) sin rutas fijas.
 
 ## 2. Lectura de argumentos / Argument parsing
@@ -30,6 +30,8 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `greet`, `hello` | `_glot_cmd_greet "$@"` | Saludo; `hello` es el alias de compatibilidad v0.2.0 |
 | `set`, `get`, `unset`, `list` | `_glot_cmd_<verbo> "$@"` | Operan sobre el almacén de estado (L1) |
 | `path` | `_glot_cmd_path` | Ruta del fichero de estado, sin leerlo |
+| `use` | `_glot_cmd_use "$@"` | Sitúa el trabajo del sprint (L2): catálogo, ramas y estado del sprint |
+| `langs`, `modules`, `progress`, `completion` | `_glot_cmd_<verbo> "$@"` | Catálogo, estado del roadmap y autocompletado (L2.5) |
 | otra opción (`-*`) | error de uso | `2` y mensaje en `stderr` |
 | cualquier otra cosa | error de verbo | `2`, sugiere `glot greet <algo>` y `glot help` |
 
@@ -50,7 +52,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 
 | Verbo | Lee | Decide | Escribe | Devuelve |
 |-------|-----|--------|---------|:--------:|
-| `version` | — | — | `glot 0.5.0` en stdout | `0` |
+| `version` | — | — | `glot 0.6.0` en stdout | `0` |
 | `help [verbo]` | El verbo opcional | Si hay verbo, ayuda corta; si no, tabla general | stdout | `0`, o `2` si el verbo no existe |
 | `doctor` | bash, git, raíz del monorepo, estado | Marca `1` si falta bash 4+, git o la raíz | `clave: valor` en stdout; encabezado y avisos en stderr | `0` o `1` |
 | `greet [nombre]` | El argumento; si no hay, una línea de stdin | Si stdin es terminal falla sin bloquearse; descarta el CRLF final | `Hello, <nombre>!` en stdout | `0`, o `2` sin nombre |
@@ -59,6 +61,11 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `unset <clave>` | El fichero de estado | Es idempotente: borrar lo que no está no es error | Confirmación por stderr | `0`, `2` o `3` |
 | `list` | El fichero de estado | Ordena por clave en `LC_ALL=C` | `clave=valor` en stdout | `0` o `3` |
 | `path` | Las variables de entorno | — | La ruta del estado en stdout | `0` |
+| `use <lenguaje> <fase>/<módulo> [tipo]` | `.gitmodules`, la fase, la especificación, el estado del árbol, las ramas y el estado del sprint | Clasifica el estado en nuevo, en curso, reanudar o cerrado | Las seis claves del sprint por stderr y la ruta del módulo en stdout | `0`, `1`, `2` o `3` |
+| `langs` | `.gitmodules` y `data/languages.tsv` | Cruza los lenguajes registrados con su comando nativo de pruebas | `lenguaje<TAB>prueba` ordenado en `LC_ALL=C` | `0` o `1` |
+| `modules [fase]` | El roadmap y `docs/core/` | Filtra por fase y resuelve la especificación de cada módulo | `id<TAB>fase<TAB>módulo<TAB>especificación` | `0`, `1` o `2` |
+| `progress [fase]` | El roadmap y `.gitmodules` | Agrega contadores; avisa si el contador contradice la lista o el denominador | `clave=valor`, o `modulo<TAB>estado<TAB>hechos<TAB>total` | `0`, `1` o `2` |
+| `completion [shell]` | `completions/glot.<shell>` | Comprueba el shell soportado | El guion completo en stdout | `0`, `1` o `2` |
 
 ### Detalles no evidentes / Non-obvious details
 
@@ -91,13 +98,23 @@ Finally it writes the six state keys and prints the absolute path. With `-n` it 
 
 **ES:** Detalles no evidentes: el directorio del módulo **no** cuenta como suciedad, así que un sprint a medias (fin de jornada, corte de luz, implementación incompleta) no bloquea `use`; `current == branch` implica que el `push -u` es seguro porque `push` no toca el árbol de trabajo; y si el estado no se puede escribir devuelve `3` avisando de que el módulo y la rama ya quedaron preparados.
 
-## 7. Salida y códigos / Output and exit codes
+## 7. El catálogo / The catalogue (L2.5)
+
+**ES:** El catálogo son funciones de lectura y un conversor, y la idea que lo sostiene es que **los nombres se convierten, no se adivinan**. `_glot_title`, `_glot_doc_stem` y `_glot_kebab` proyectan un id canónico (`data_structures`) a nombre legible (`Data Structures`), nombre del documento (`Data_Structures`), rama (`data-structures`) y nombre de commit (`data structures`); `_glot_spec_path` busca `docs/core/{fase}/{NN}_{Nombre}.md`, **lee el prefijo `NN` del disco** y compara en minúsculas, así que `etl_basico` encuentra `14_ETL_Basico.md`, y exige exactamente una coincidencia (cero es documento ausente; dos, nombre ambiguo). `_glot_canon_module` acepta lo que escriba el autor (`helloworld`, `hello_world` o `unit_test/calculator`) y devuelve el id del roadmap, y `_glot_module_folder` sondea las carpetas de la forma más específica a la más general (`unit_test/calculator` antes que `unit_test`). Las tres divergencias legacy están declaradas en el código con el motivo al lado.
+
+**EN:** The catalogue is read-only functions plus a converter, and the idea behind it is that **names are converted, not guessed**. `_glot_title`, `_glot_doc_stem` and `_glot_kebab` project a canonical id (`data_structures`) into a readable name (`Data Structures`), document name (`Data_Structures`), branch (`data-structures`) and commit name (`data structures`); `_glot_spec_path` looks up `docs/core/{phase}/{NN}_{Name}.md`, **reads the `NN` prefix from disk** and compares in lowercase, so `etl_basico` finds `14_ETL_Basico.md`, and requires exactly one match (zero is a missing document; two, an ambiguous name). `_glot_canon_module` accepts whatever the author writes (`helloworld`, `hello_world` or `unit_test/calculator`) and returns the roadmap id, and `_glot_module_folder` probes folders from the most specific to the most general (`unit_test/calculator` before `unit_test`). The three legacy divergences are declared in the code with the reason next to them.
+
+**ES:** Fuentes: `.gitmodules` para los lenguajes (el denominador), `docs/ROADMAP.md` para los módulos y su estado (la fuente de verdad), `docs/core/` para las especificaciones y `data/languages.tsv` para los comandos nativos. `modules` y `progress` **no recuentan el árbol: leen el roadmap**, y `progress` avisa cuando el contador no cuadra con la lista entre paréntesis o con los lenguajes registrados. Si el roadmap no se entiende, se devuelve `1`: un recuento inventado sería peor que un error. Las marcas de estado se reconocen **por bytes** (`$'\xe2\x9c\x85'`, `$'\xf0\x9f\x94\x84'`, …) para que el parser no dependa de que el emoji sobreviva a un editor, y se traducen a palabras ASCII (`done`, `in_progress`, `planned`, `pending`) porque stdout es dato, no presentación.
+
+**EN:** Sources: `.gitmodules` for the languages (the denominator), `docs/ROADMAP.md` for the modules and their state (the source of truth), `docs/core/` for the specifications and `data/languages.tsv` for the native commands. `modules` and `progress` **do not count the tree: they read the roadmap**, and `progress` warns when the counter disagrees with the parenthesised list or with the registered languages. If the roadmap cannot be understood, it returns `1`: an invented count would be worse than an error. Status marks are recognised **by bytes** (`$'\xe2\x9c\x85'`, `$'\xf0\x9f\x94\x84'`, …) so the parser does not depend on the emoji surviving an editor, and they are translated into ASCII words (`done`, `in_progress`, `planned`, `pending`) because stdout is data, not presentation.
+
+## 8. Salida y códigos / Output and exit codes
 
 1. Los verbos escriben **solo datos** en stdout; los errores salen por `_glot_error` y los avisos por `_glot_warn`, ambos a stderr. `set`/`unset` confirman por stderr: su stdout solo lleva datos si `-n` está activo.
-2. `_glot_info` escribe en stderr salvo que se haya pasado `-q/--quiet`; de ahí que `doctor -q` deje stdout parseable.
+2. `_glot_info` escribe en stderr salvo que se haya pasado `-q/--quiet`. Los flags globales se leen **antes** del verbo, así que la forma silenciosa y parseable es `glot -q doctor`, no `doctor -q` (ahí el flag llega como argumento del verbo y se ignora).
 3. El código final del script es el del verbo: la última orden del archivo es `glot "$@"`, y con `set -e` un `return 2` dentro de un verbo termina el script con `2`.
 4. `3` está reservado al estado: no se pudo leer, crear o escribir. Los errores de uso siguen siendo `2` y los de entorno `1`.
 
-## 8. Lo que todavía no hace / What it does not do yet
+## 9. Lo que todavía no hace / What it does not do yet
 
-No hay catálogo ni comando nativo por lenguaje: eso es L2.5 (v0.6.0). La asignación ya existe (L2, v0.5.0): `use` escribe las seis claves reservadas y sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado), sin crear ni cambiar ramas cuando hay trabajo sin confirmar.
+El catálogo ya existe (L2.5, v0.6.0): `langs`, `modules`, `progress` y `completion`. Lo que falta es su consumo real: `test` y `verify` ejecutan los comandos nativos (L3, v0.7.0), la delegación de encargos llega en L4 (v0.8.0) y la instalación del autocompletado en L8 (v1.0.0), que es donde `use` hará el `cd` de verdad.

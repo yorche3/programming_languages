@@ -14,7 +14,7 @@
 
 | # | Paso | Comando | Evidencia / artefacto | Quién |
 |:-:|------|---------|-----------------------|-------|
-| 1 | Reconocimiento | `git status --short`, `git submodule status`, `glot status` (0.11.0) | — | autor / script |
+| 1 | Reconocimiento | `git status --short`, `git submodule status`, `glot progress` (0.6.0), `glot status` (0.11.0) | — | autor / script |
 | 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo, estado `lang/phase/module/branch/spec/repo`, ruta en `stdout` | script |
 | 3 | Rama publicada | incluido en `use`: `git push -u origin feat/algorithms/naive-sort` | Rama `feat/{fase}/{módulo}` con upstream | script |
 | 4 | Esqueleto y tests | `glot prompt scaffold` (0.8.0) → plantilla local `scaffold-and-unit-tests.prompt.md` · `glot new` (0.9.0) · `glot save` (0.9.0) | `chore(algorithms): add scaffold and tests for naive sort` | **agente** + script |

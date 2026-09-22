@@ -30,6 +30,13 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   vocabulario: **registrado** es la pertenencia técnica a `.gitmodules` (el
   denominador, 50) y **homologado** el estado «finalizado|concluido» de un
   módulo en un lenguaje (el numerador).
+- `glot` v0.6.0: **catálogo** (L2.5) con `langs`, `modules`, `progress` y
+  `completion`, más el conversor que proyecta el id canónico de un módulo
+  (`data_structures`) a su nombre legible, su documento, su rama, su commit y su
+  carpeta; los comandos nativos por lenguaje viven en
+  `scripts/data/languages.tsv`, con test de deriva contra la guía de
+  inicialización, y el autocompletado de bash y zsh (dinámico) se imprime con
+  `glot completion`, con 227 comprobaciones en el harness.
 - Se documentó el alcance real de `.github/prompts/` (plantillas locales que
   `.gitignore` no versiona y que se normalizarán en la L4) en
   `scripts/docs/ROADMAP.md`, `scripts/docs/SPRINT.md` y `docs/WORKFLOW.md`.
@@ -49,6 +56,10 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- `glot use` no resolvía los módulos cuyo nombre de carpeta o de documento no
+  sigue el id del roadmap: `foundations/helloworld` y `foundations/unit_test`
+  devolvían `1` (especificación ausente) por un heurístico sobre el nombre del
+  archivo. Ahora el catálogo resuelve el id canónico y sondea la carpeta.
 - Los contadores `X/49` que quedaban en la documentación pasan a `X/50`
   (Foundations, fase de texto y guía de inicialización, que además incorpora la
   fila y la estructura de `php`).
