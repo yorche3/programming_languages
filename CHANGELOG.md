@@ -65,6 +65,14 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 - La plantilla `scaffold` se divide: `scaffold` (paso 4a) ajusta el esqueleto a
   lo que exige el módulo y `suite` (paso 4b) escribe la suite desde la
   especificación, con dos commits por paso.
+- `glot` v0.10.0 (en curso): **evidencia y cierre** (L6) con `evidence` (acta de
+  las salidas reales), `close` (comprobación del flujo de cierre, registro en el
+  checklist y contador del roadmap) y `validate` (validador automático con
+  Copilot CLI, enchufable por variable de entorno).
+- El harness cierra el círculo del archivado: comprueba que **toda versión
+  marcada como cerrada en el log tiene su snapshot** en `scripts/versions/`, y
+  que no sobra ninguno. El olvido se ve al confirmar el cierre y no al arrancar
+  la versión siguiente, que es como se detectó en las v0.5.0 y v0.6.0.
 - Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
   `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
   estados, método reproducible y plan de cierre.
@@ -76,6 +84,13 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- `test`, `verify`, `new` y `save` resuelven el lenguaje **desde el directorio**
+  cuando no lo traen ni los argumentos ni el estado del sprint: `cd php && glot
+  test algorithms/naive_sort` ya funciona sin `use` previo. La precedencia es
+  argumentos → estado → directorio, y el estado manda sobre el directorio a
+  propósito.
+- El aviso de verbo desconocido ya solo sugiere `glot help`: la sugerencia del
+  saludo era legado de la v0.2.0.
 - Los marcadores de las plantillas y del catálogo de datos pasan a un solo
   vocabulario anclado al estado del sprint: `{modulo}`/`{Modulo}` se renombran a
   `{module}`/`{Module}` en la guía de inicialización (87 ocurrencias) y en
@@ -86,6 +101,12 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   `50/50`.
 - Las plantillas de documentación usan nombres en inglés terminados en
   `_Template`.
+
+### Removed
+
+- El verbo `hello`, alias de compatibilidad de la v0.2.0 que el contrato situaba
+  en la v1.0.0: se retira en la v0.10.0 y devuelve `2` como cualquier verbo
+  desconocido.
 
 ### Fixed
 

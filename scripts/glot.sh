@@ -23,7 +23,7 @@
 
 set -euo pipefail
 
-GLOT_VERSION="0.9.0"
+GLOT_VERSION="0.10.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -699,6 +699,17 @@ _glot_exec_target() {
         fi
     fi
 
+    # Dentro de un submódulo el lenguaje es evidente: se deduce del directorio, igual
+    # que hace `use`. Los argumentos mandan siempre y el estado del sprint manda
+    # sobre el directorio; esto es solo el último recurso, para que
+    # `cd php && glot test algorithms/naive_sort` funcione sin `use` previo.
+    if [[ -z "$lang" ]]; then
+        root="$(_glot_repo_root || true)"
+        if [[ -n "$root" ]]; then
+            lang="$(_glot_lang_from_path "$root" || true)"
+        fi
+    fi
+
     if [[ -z "$target" ]]; then
         phase="$(_glot_state_get phase 2>/dev/null || true)"
         module="$(_glot_state_get module 2>/dev/null || true)"
@@ -1364,8 +1375,6 @@ Verbos / Verbs:
   doctor             Diagnóstico del entorno y del repositorio / environment check
   greet [nombre]     Saludo; el nombre llega por argumento o stdin
                      Greeting; the name comes as an argument or from stdin
-  hello [nombre]     Igual que greet (compatibilidad v0.2.0, se retira en v1.0.0)
-                     Same as greet (v0.2.0 compatibility, removed in v1.0.0)
   set <clave> <valor> Guarda una clave del estado / stores a state key
   get <clave>        Imprime el valor de la clave / prints the key value
   unset <clave>      Elimina la clave / removes the key
@@ -2400,12 +2409,6 @@ glot() {
             # Saluda al usuario / Greet the user
             _glot_cmd_greet "$@"
             ;;
-        hello)
-            # Compatibilidad v0.2.0: saludo con el nombre de v0.2 sin verbo.
-            # Se retira en v1.0.0.
-            # Greet the user (deprecated)
-            _glot_cmd_greet "$@"
-            ;;
         set)
             # Guarda una clave en el estado / Store a state key
             _glot_cmd_set "$@"
@@ -2479,7 +2482,6 @@ glot() {
         *)
             # Maneja los verbos desconocidos / Handle unknown verbs
             _glot_error "verbo desconocido / unknown verb: $cmd"
-            _glot_info "si querías el saludo / if you meant the greeting: glot greet $cmd"
             _glot_hint
             return 2
             ;;

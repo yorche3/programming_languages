@@ -36,15 +36,14 @@
 
 ---
 
-## 🧰 Verbos de la versión viva (v0.9.0) / Verbs in the live version
+## 🧰 Verbos de la versión viva (v0.10.0) / Verbs in the live version
 
 | Verbo | Comportamiento | Código |
 |-------|----------------|:------:|
-| `version`, `--version` | `glot 0.9.0` | 0 |
+| `version`, `--version` | `glot 0.10.0` | 0 |
 | `help`, `-h`, `--help`, `help <verbo>` | Ayuda general o de un verbo | 0 |
 | `doctor` | Diagnóstico: bash, git, raíz del monorepo, directorio y fichero de estado, y número de claves | 0 / 1 |
 | `greet [nombre]` | `Hello, <nombre>!` con el nombre por argumento o por stdin | 0 / 2 |
-| `hello [nombre]` | Igual que `greet`; compatibilidad con v0.2.0, se retira en v1.0.0 | 0 / 2 |
 | `set <clave> <valor>` | Guarda la clave; confirma por stderr; con `-n`, imprime `clave=valor` y no escribe | 0 / 2 / 3 |
 | `get <clave>` | Imprime el valor en stdout | 0 / 1 / 2 |
 | `unset <clave>` | Borra la clave; repetirlo no es error | 0 / 2 / 3 |
@@ -175,6 +174,10 @@
 **ES:** `test` y `verify` son la capa que **ejecuta** el trabajo: leen el catálogo, resuelven el objetivo y corren el comando del lenguaje en el directorio del módulo. La salida del runner va a **stdout tal cual** (es el dato y la evidencia del sprint); los avisos y el comando elegido van a stderr.
 
 **EN:** `test` and `verify` are the layer that **executes** the work: they read the catalogue, resolve the target and run the language command in the module directory. The runner output goes to **stdout as is** (it is the datum and the sprint evidence); warnings and the chosen command go to stderr.
+
+**ES:** El objetivo se resuelve en este orden: **argumentos** → **estado del sprint** → **directorio actual**. Lo último es lo que hace que `cd php && glot test algorithms/naive_sort` funcione sin pasar por `use`: dentro de un submódulo el lenguaje es evidente. El estado manda sobre el directorio a propósito: el sprint en curso es el que decide, y desde cualquier directorio `glot test` sigue apuntando a él.
+
+**EN:** The target is resolved in this order: **arguments** → **sprint state** → **current directory**. The last one is what makes `cd php && glot test algorithms/naive_sort` work without going through `use`: inside a submodule the language is obvious. The state wins over the directory on purpose: the sprint in progress is what decides, and from any directory `glot test` keeps pointing at it.
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|

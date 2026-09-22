@@ -85,13 +85,13 @@ glot_run_in() {
 
 # version
 glot_run version
-assert_eq 'version: salida' 'glot 0.9.0' "$out"
+assert_eq 'version: salida' 'glot 0.10.0' "$out"
 assert_eq 'version: código' '0' "$rc_last"
 assert_eq 'version: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 
 # --version
 glot_run --version
-assert_eq '--version: salida' 'glot 0.9.0' "$out"
+assert_eq '--version: salida' 'glot 0.10.0' "$out"
 assert_eq '--version: código' '0' "$rc_last"
 
 # help general y por verbo
@@ -138,21 +138,26 @@ glot_run_stdin '' greet
 assert_eq 'greet sin nombre: código' '2' "$rc_last"
 assert_eq 'greet sin nombre: stdout vacío' '' "$out"
 
-# compatibilidad v0.2.0: verbo hello
-glot_run hello Ada
-assert_eq 'compatibilidad hello: salida' 'Hello, Ada!' "$out"
-assert_eq 'compatibilidad hello: código' '0' "$rc_last"
+# `hello` se retiró en la v0.10.0: el alias de compatibilidad de la v0.2.0 ya no existe
+# y el aviso de verbo desconocido ya no ofrece el saludo
 
-# un nombre suelto ya no es un nombre: falla rápido y sugiere el verbo
+glot_run hello Ada
+assert_eq 'hello retirado: código' '2' "$rc_last"
+assert_eq 'hello retirado: sin saludo' '' "$out"
+assert_contains 'hello retirado: error' 'unknown verb: hello' "$err"
+assert_contains 'hello retirado: sugiere la ayuda' 'glot help' "$err"
+assert_eq 'hello retirado: sin sugerencia de greet' '0' "$(printf '%s\n' "$err" | grep -c 'greet' || true)"
+
+# un nombre suelto ya no es un nombre: falla rápido y sugiere la ayuda
 glot_run Ada
 assert_eq 'nombre suelto: código' '2' "$rc_last"
 assert_eq 'nombre suelto: stdout vacío' '' "$out"
-assert_contains 'nombre suelto: sugiere greet' 'glot greet Ada' "$err"
+assert_contains 'nombre suelto: sugiere la ayuda' 'glot help' "$err"
 
 # doctor dentro del monorepo
 glot_run doctor
 assert_eq 'doctor dentro: código' '0' "$rc_last"
-assert_contains 'doctor dentro: versión' 'version: 0.9.0' "$out"
+assert_contains 'doctor dentro: versión' 'version: 0.10.0' "$out"
 assert_contains 'doctor dentro: script_dir' 'script_dir:' "$out"
 assert_contains 'doctor dentro: raíz detectada' 'root: /' "$out"
 assert_contains 'doctor dentro: ruta del estado' 'state_file:' "$out"
@@ -1007,6 +1012,32 @@ assert_contains 'doctor: catalogadas las aplazadas' '(deferred: 7)' "$out"
 assert_contains 'doctor: catálogo de commits' 'commits_file: ' "$out"
 assert_contains 'doctor: pasos de commit' 'commit_steps: 7 de / of which 5 son del submódulo' "$out"
 
+# --- casos de la especificación v0.10.0 (L6, evidencia y cierre) -------------
+
+# el lenguaje se deduce del directorio cuando no lo traen ni los argumentos ni el
+# estado: dentro de un submódulo es evidente, igual que en `use`
+sandbox_make
+mkdir -p -- "$SANDBOX/php/core/algorithms/naive_sort"
+glot_run_sandbox unset lang
+glot_run_sandbox unset phase
+glot_run_sandbox unset module
+glot_run_from "$SANDBOX/php" -n test algorithms/naive_sort
+assert_eq 'lenguaje desde el directorio: código' '0' "$rc_last"
+assert_contains 'lenguaje desde el directorio: usa el del submódulo actual' '/php/core/algorithms/naive_sort && ' "$out"
+
+glot_run_from "$SANDBOX/docs" -n test algorithms/naive_sort
+assert_eq 'fuera de un submódulo: sigue faltando el lenguaje' '1' "$rc_last"
+assert_contains 'fuera de un submódulo: sugiere use' 'glot use' "$err"
+
+# el estado del sprint manda sobre el directorio: el argumento siempre gana
+glot_run_sandbox use ruby algorithms/naive_sort
+assert_eq 'estado del sprint preparado: código' '0' "$rc_last"
+glot_run_from "$SANDBOX/php" -n test algorithms/naive_sort
+assert_contains 'el estado manda sobre el directorio' 'ruby/core/algorithms/naive_sort' "$out"
+
+glot_run_from "$SANDBOX/php" -n test php algorithms/naive_sort
+assert_contains 'el argumento manda sobre el estado' 'php/core/algorithms/naive_sort' "$out"
+
 # --- puerta de entrada al archivo de versiones -------------------------------
 
 # La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:
@@ -1030,6 +1061,23 @@ if [[ -n "$previous" ]]; then
     assert_eq 'puerta de entrada: el snapshot de la versión anterior está archivado' \
         'si' "$([[ -f "$TESTS_DIR/../versions/glot_$previous.sh" ]] && echo si || echo no)"
 fi
+
+# La puerta se comprueba también hacia atrás: toda versión que el log marca como
+# cerrada tiene que tener su snapshot, y ningún snapshot puede sobrar. Así el olvido
+# se ve al confirmar el cierre, no al arrancar la versión siguiente, que es como se
+# detectó en las v0.5.0 y v0.6.0.
+closed_versions="$(awk -F'|' '/^\| [0-9]+\.[0-9]+\.[0-9]+ / {v = $2; gsub(/[ \t]/, "", v); s = $(NF - 1); if (s ~ /cerrada/) print v}' "$TESTS_DIR/../docs/VERSIONS.md")"
+assert_eq 'archivado: el log de versiones se lee' 'si' "$([[ -n "$closed_versions" ]] && echo si || echo no)"
+
+missing_snapshots=""
+while IFS= read -r v; do
+    [[ -n "$v" ]] || continue
+    [[ -f "$TESTS_DIR/../versions/glot_$v.sh" ]] || missing_snapshots+="$v "
+done <<<"$closed_versions"
+assert_eq 'archivado: cada versión cerrada tiene su snapshot' '' "$missing_snapshots"
+assert_eq 'archivado: el log y la carpeta cuadran' \
+    "$(printf '%s\n' "$closed_versions" | wc -l | tr -d ' ')" \
+    "$(ls -1 "$TESTS_DIR/../versions"/glot_*.sh | wc -l | tr -d ' ')"
 
 # --- resumen -----------------------------------------------------------------
 

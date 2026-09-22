@@ -15,6 +15,7 @@
 | 0.7.0 | 2026-09-22 | [`versions/glot_0.7.0.sh`](../versions/glot_0.7.0.sh) | **Ejecución** (L3): `test` y `verify`, con el código `4` de verificación fallida, los marcadores de la tabla de comandos y la cobertura de verificadores | ✅ cerrada |
 | 0.8.0 | 2026-09-22 | [`versions/glot_0.8.0.sh`](../versions/glot_0.8.0.sh) | **Delegación** (L4): `prompt` y `ask`, con las cuatro plantillas versionadas de `scripts/prompts/` y un solo vocabulario de marcadores | ✅ cerrada |
 | 0.9.0 | 2026-09-22 | [`versions/glot_0.9.0.sh`](../versions/glot_0.9.0.sh) | **Creación y registro** (L5): `new` (inicializador del lenguaje, esqueleto y normalización) y `save` (commit guiado desde el catálogo `data/commits.tsv`), con la tabla de inicialización ampliada | ✅ cerrada |
+| 0.10.0 | 2026-09-22 | — (viva / live) | **Evidencia y cierre** (L6): `evidence`, `close` y `validate` con validador enchufable, más la retirada de `hello` y el objetivo resuelto por directorio | 🔄 en curso / in progress |
 
 ---
 
@@ -109,6 +110,16 @@
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 361 passed, 0 failed` (rc `0`), con la **deriva** entre `data/commits.tsv` y la tabla del sprint, la coherencia del catálogo de inicialización (tipos válidos, comando obligatorio salvo en `deferred`, operaciones conocidas), el ciclo completo `use` → `new` → `save` en el sandbox sobre `ruby` (manual) y `python` (deferred), y la **genericidad de las plantillas** (ninguna lleva casos ni nombres de un módulo concreto).
 - **Snapshot:** [`versions/glot_0.9.0.sh`](../versions/glot_0.9.0.sh), archivado al cerrar la versión y **antes** de fusionar la rama en `main`; su contenido es el que tenía `glot.sh` en el cierre, y no se edita.
 
+## 0.10.0 — 2026-09-22 (viva)
+
+- **En curso:** la **evidencia y el cierre** (L6) con `evidence` (acta de las salidas reales), `close` (flujo de cierre, checklist y contador del roadmap) y `validate` (validador automático con Copilot CLI, enchufable).
+- **Ya hecho en esta versión:**
+  - **Retira** el verbo `hello` (alias de compatibilidad de la v0.2.0), que el contrato situaba en la v1.0.0: devuelve `2` como cualquier verbo desconocido. El aviso de verbo desconocido ya solo sugiere `glot help`.
+  - **El objetivo se resuelve por directorio:** `test`, `verify`, `new` y `save` deducen el lenguaje del directorio cuando no lo traen ni los argumentos ni el estado del sprint, así que `cd php && glot test algorithms/naive_sort` funciona sin `use` previo. El estado manda sobre el directorio a propósito.
+  - **El harness cierra el círculo del archivado:** toda versión marcada como cerrada en este log tiene que tener su snapshot, y ningún snapshot puede sobrar.
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 374 passed, 0 failed` (rc `0`). Con la versión abierta, el número crece con cada capa.
+- **Snapshot:** pendiente: se archiva como `versions/glot_0.10.0.sh` **antes** de fusionar la rama en `main`.
+
 ---
 
 ## 🔖 Convención de archivado / Archiving convention
@@ -154,7 +165,7 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, plantillas y códigos (361 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, plantillas, archivado y códigos (374 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
 ./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
 ./scripts/glot.sh modules           # catálogo de módulos con su especificación
