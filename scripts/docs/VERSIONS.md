@@ -14,7 +14,7 @@
 | 0.6.0 | 2026-09-22 | [`versions/glot_0.6.0.sh`](../versions/glot_0.6.0.sh) | **Catálogo** (L2.5): `langs`, `modules`, `progress` y `completion`, con el conversor de nombres y los comandos nativos por lenguaje | ✅ cerrada |
 | 0.7.0 | 2026-09-22 | [`versions/glot_0.7.0.sh`](../versions/glot_0.7.0.sh) | **Ejecución** (L3): `test` y `verify`, con el código `4` de verificación fallida, los marcadores de la tabla de comandos y la cobertura de verificadores | ✅ cerrada |
 | 0.8.0 | 2026-09-22 | [`versions/glot_0.8.0.sh`](../versions/glot_0.8.0.sh) | **Delegación** (L4): `prompt` y `ask`, con las cuatro plantillas versionadas de `scripts/prompts/` y un solo vocabulario de marcadores | ✅ cerrada |
-| 0.9.0 | 2026-09-22 | — (viva / live) | **Creación y registro** (L5): `new` (inicializador del lenguaje, esqueleto y normalización) y `save` (commit guiado desde el catálogo `data/commits.tsv`), con la tabla de inicialización ampliada | 🔄 en curso / in progress |
+| 0.9.0 | 2026-09-22 | [`versions/glot_0.9.0.sh`](../versions/glot_0.9.0.sh) | **Creación y registro** (L5): `new` (inicializador del lenguaje, esqueleto y normalización) y `save` (commit guiado desde el catálogo `data/commits.tsv`), con la tabla de inicialización ampliada | ✅ cerrada |
 
 ---
 
@@ -95,7 +95,7 @@
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 286 passed, 0 failed` (rc `0`). Reproducción real: `glot prompt` → 4 encargos con su paso; `glot prompt scaffold php algorithms/naive_sort` → cabecera con `spec` y `module_dir` y plantilla sin frontmatter y sin marcadores; `GLOT_DELEGATE='wc -l' glot ask implement php algorithms/naive_sort` → el encargo completo (115 líneas) por stdin, rc `0`; sin delegado → rc `1`; delegado que falla → rc `1`.
 - **Snapshot:** [`versions/glot_0.8.0.sh`](../versions/glot_0.8.0.sh), archivado **antes** de fusionar la rama en `main` y antes de abrir la v0.9.0, para que la puerta de entrada no bloquee el arranque de la siguiente versión.
 
-## 0.9.0 — 2026-09-22 (viva)
+## 0.9.0 — 2026-09-22 (cerrada)
 
 - **Añade:** la **creación y el registro** (L5) con `new` (inicializador del lenguaje y esqueleto mecánico del módulo) y `save` (commit guiado con la convención del repositorio), los dos verbos que hasta la v0.8.0 se hacían a mano.
 - **`new` tiene dos modos, decididos por dato:** con `tool` ejecuta el inicializador del lenguaje en el directorio del módulo; con `manual` crea las carpetas del esqueleto; con `deferred` no ejecuta nada, informa, remite al encargo `scaffold` e imprime `skipped` (como `verify` sin verificador). No escribe la suite: eso es el encargo `suite` (paso 4b).
@@ -107,7 +107,7 @@
 - **Hallazgos que no bloquean, nombrados antes de confirmar:** cambios fuera del módulo (que entran igual, porque `add -A` es del submódulo) y una rama activa que no es la del estado del sprint.
 - **`doctor`:** informa de la cobertura de inicializadores (`new_commands: 43 de / of 50 (deferred: 7)`) y del catálogo de commits (`commit_steps: 7 de / of which 5 son del submódulo`).
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 361 passed, 0 failed` (rc `0`), con la **deriva** entre `data/commits.tsv` y la tabla del sprint, la coherencia del catálogo de inicialización (tipos válidos, comando obligatorio salvo en `deferred`, operaciones conocidas), el ciclo completo `use` → `new` → `save` en el sandbox sobre `ruby` (manual) y `python` (deferred), y la **genericidad de las plantillas** (ninguna lleva casos ni nombres de un módulo concreto).
-- **Snapshot:** pendiente: se archiva como `versions/glot_0.9.0.sh` **antes** de fusionar la rama en `main` y de abrir la v0.10.0, para que la puerta de entrada no bloquee el arranque de la siguiente versión.
+- **Snapshot:** [`versions/glot_0.9.0.sh`](../versions/glot_0.9.0.sh), archivado al cerrar la versión y **antes** de fusionar la rama en `main`; su contenido es el que tenía `glot.sh` en el cierre, y no se edita.
 
 ---
 
@@ -117,7 +117,7 @@
 - **Puerta de entrada:** ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`. Si falta, se copia `glot.sh` con el sufijo de su versión y solo después se reanuda la implementación de la nueva.
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh) y [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh).
+- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh), [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh) y [`glot_0.9.0.sh`](../versions/glot_0.9.0.sh).
 - El harness **comprueba la puerta de entrada**: exige el snapshot de la versión anterior a la viva, así que no se puede empezar una versión nueva sin haber archivado la anterior.
 - Cada versión se cierra en su propia rama `chore/repo/glot-v0.X` antes de fusionarla en `main` (ver [`README.md`](../README.md)).
 
