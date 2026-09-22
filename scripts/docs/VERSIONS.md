@@ -9,7 +9,8 @@
 | 0.1.0 | 2026-09-20 | [`versions/glot_0.1.0.sh`](../versions/glot_0.1.0.sh) | Hello World en Bash (`echo "Hello World! from Bash!"`) | ✅ cerrada |
 | 0.2.0 | 2026-09-20 | [`versions/glot_0.2.0.sh`](../versions/glot_0.2.0.sh) | Nombre por argumento o por entrada estándar y saludo `Hello, <nombre>!` (equivalente a `hellouser`) | ✅ cerrada |
 | 0.3.0 | 2026-09-20 | [`versions/glot_0.3.0.sh`](../versions/glot_0.3.0.sh) | **Contrato y dispatcher** (L0): `version`, `help`, `doctor`, `greet`, `hello`, sin rutas del usuario, más harness de pruebas propio | ✅ cerrada |
-| 0.4.0 | 2026-09-21 | [`glot.sh`](../glot.sh) | **Almacén clave/valor** (L1): `set`, `get`, `unset`, `list`, `path`, en XDG, atómico bajo `flock` y con `-n/--dry-run` | 🔄 viva |
+| 0.4.0 | 2026-09-21 | [`versions/glot_0.4.0.sh`](../versions/glot_0.4.0.sh) | **Almacén clave/valor** (L1): `set`, `get`, `unset`, `list`, `path`, en XDG, atómico bajo `flock` y con `-n/--dry-run` | ✅ cerrada |
+| 0.5.0 | 2026-09-21 | [`glot.sh`](../glot.sh) | **Asignación** (L2): `use <lenguaje> <fase>/<módulo> [tipo]`, que valida, crea el directorio del módulo, prepara y publica la rama, guarda el estado del sprint e imprime la ruta | 🔄 viva |
 
 ---
 
@@ -38,13 +39,21 @@
 - **Snapshot:** [`versions/glot_0.3.0.sh`](../versions/glot_0.3.0.sh), archivado al abrir la v0.4.0.
 - **Notas:** al pasar a v0.4.0 se ajustó un detalle del contrato: las confirmaciones de `set`/`unset` van a `stderr` (antes se mezclaban con el dato en stdout de los verbos de estado) y se estrenó el código `3` para el estado ilegible.
 
-## 0.4.0 — 2026-09-21 (viva)
+## 0.4.0 — 2026-09-21 (cerrada)
 
 - **Añade:** el **almacén de estado** (L1) con `set`, `get`, `unset`, `list` y `path`; escritura atómica (`mktemp` + `mv -f`) bajo `flock`, permisos `600` del fichero y `700` del directorio, `-n/--dry-run` en los verbos que mutan, y `doctor` ampliado con `state_dir`, `state_file` y `state_file_ok`.
 - **Contrato:** se estrena el código `3` (estado ilegible o no escribible) y se documenta el formato `clave=valor` con clave `[A-Za-z0-9_.-]` y valor sin saltos de línea.
 - **Sin rutas del usuario:** el estado se resuelve con `GLOT_STATE_DIR` → `XDG_STATE_HOME` → `~/.local/state/glot`, y `GLOT_STATE_FILE` gana a todo; el harness se aísla con esa variable.
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 71 passed, 0 failed` (rc `0`); `get` de clave ausente → `1`; clave inválida y valor con salto de línea → `2`; `unset` repetido → `0`; `-n set lang lua` imprime `lang=lua` y no escribe; `stat -c '%a'` → `600` el fichero y `700` el directorio.
-- **Snapshot:** se archivará en `versions/glot_0.4.0.sh` al cerrar la versión.
+- **Snapshot:** [`versions/glot_0.4.0.sh`](../versions/glot_0.4.0.sh), archivado al abrir la v0.5.0.
+
+## 0.5.0 — 2026-09-21 (viva)
+
+- **Añade:** la **asignación** (L2) con `use <lenguaje> <fase>/<módulo> [tipo]`, que **sitúa el trabajo**: valida lenguaje, fase, módulo, tipo y árbol **sin tocar nada**, resuelve la especificación `docs/core/{fase}/{NN}_{Nombre}.md`, crea `{lenguaje}/core/{fase}/{módulo}` si falta (vacío), prepara la rama `{tipo}/{fase}/{módulo}` (`checkout` o `checkout -b`, idempotente si ya está activa), la publica con `push -u origin`, escribe las seis claves del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`) e imprime la ruta absoluta del módulo en stdout.
+- **Contrato:** `2` para uso incorrecto (argumentos, tipo no permitido, opción desconocida), `1` para entorno o dato ausente (lenguaje fuera de `.gitmodules`, especificación ausente, submódulo sin inicializar, árbol con cambios ajenos al módulo) y `3` si el estado no se puede escribir (avisando de que la rama ya quedó preparada). No hace commits, ni `git add`, ni esqueleto, ni toca el monorepo.
+- **`-n/--dry-run`:** imprime el plan completo (comandos de git y claves del estado) y no toca ni el repositorio ni el estado.
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 112 passed, 0 failed` (rc `0`), con un sandbox de git propio (monorepo falso con `.gitmodules`, especificación y un submódulo `php` con remoto desnudo) para que `use` prepare y publique la rama sin salir del directorio temporal ni tocar la red. Ensayo real sobre el monorepo: `./scripts/glot.sh -n use php algorithms/naive_sort` → plan correcto y estado intacto.
+- **Snapshot:** se archivará en `versions/glot_0.5.0.sh` al cerrar la versión.
 
 ---
 
@@ -86,8 +95,9 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado y códigos (71 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, use y códigos (112 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno
+./scripts/glot.sh -n use php algorithms/naive_sort   # ensayo de `use`: plan sin tocar nada
 
 # Estado en un directorio propio, sin tocar el del usuario / state in its own dir
 export GLOT_STATE_DIR=$(mktemp -d)

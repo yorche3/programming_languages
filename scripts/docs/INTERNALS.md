@@ -1,15 +1,15 @@
 # 🔍 Cómo funciona por dentro / How it works internally
 
-**ES:** Recorrido de [`glot.sh`](../glot.sh) en su versión viva (v0.4.0), del argumento al código de salida. No es documentación línea a línea: solo lo necesario para leerlo, entender las decisiones raras y extenderlo. El contrato está en [`CONTRACT.md`](CONTRACT.md).
+**ES:** Recorrido de [`glot.sh`](../glot.sh) en su versión viva (v0.5.0), del argumento al código de salida. No es documentación línea a línea: solo lo necesario para leerlo, entender las decisiones raras y extenderlo. El contrato está en [`CONTRACT.md`](CONTRACT.md).
 
-**EN:** A walkthrough of [`glot.sh`](../glot.sh) at its live version (v0.4.0), from argument to exit code. It is not line-by-line documentation: just what is needed to read it, understand the odd decisions and extend it. The contract is in [`CONTRACT.md`](CONTRACT.md).
+**EN:** A walkthrough of [`glot.sh`](../glot.sh) at its live version (v0.5.0), from argument to exit code. It is not line-by-line documentation: just what is needed to read it, understand the odd decisions and extend it. The contract is in [`CONTRACT.md`](CONTRACT.md).
 
 ---
 
 ## 1. Arranque y localización / Startup and self-location
 
 1. `set -euo pipefail` al principio: como el archivo se **ejecuta**, cualquier orden que falle detiene el script y el `return` de un verbo se convierte en su código de salida. Esta línea desaparecerá cuando el archivo se cargue con `source` (v1.0.0), porque ahí no puede tocar las opciones del shell.
-2. `GLOT_VERSION="0.4.0"` es la única constante propia; el resto de funciones y variables internas llevan el prefijo `_glot_` para poder cargarse más adelante sin contaminar el entorno.
+2. `GLOT_VERSION="0.5.0"` es la única constante propia; el resto de funciones y variables internas llevan el prefijo `_glot_` para poder cargarse más adelante sin contaminar el entorno.
 3. `GLOT_SCRIPT_DIR` se obtiene de `BASH_SOURCE[0]`, resolviendo enlaces simbólicos con `readlink` y normalizando con `cd … && pwd -P`. Es lo que permite invocar el script desde cualquier directorio (o desde un enlace) sin rutas fijas.
 
 ## 2. Lectura de argumentos / Argument parsing
@@ -50,7 +50,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 
 | Verbo | Lee | Decide | Escribe | Devuelve |
 |-------|-----|--------|---------|:--------:|
-| `version` | — | — | `glot 0.4.0` en stdout | `0` |
+| `version` | — | — | `glot 0.5.0` en stdout | `0` |
 | `help [verbo]` | El verbo opcional | Si hay verbo, ayuda corta; si no, tabla general | stdout | `0`, o `2` si el verbo no existe |
 | `doctor` | bash, git, raíz del monorepo, estado | Marca `1` si falta bash 4+, git o la raíz | `clave: valor` en stdout; encabezado y avisos en stderr | `0` o `1` |
 | `greet [nombre]` | El argumento; si no hay, una línea de stdin | Si stdin es terminal falla sin bloquearse; descarta el CRLF final | `Hello, <nombre>!` en stdout | `0`, o `2` sin nombre |
@@ -69,13 +69,21 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 - **`_glot_state_dir`/`_glot_state_file`** resuelven las rutas en el orden descrito en la sección 4; `doctor` informa de cuáles se han usado, de si el directorio existe y de cuántas claves hay.
 - **`cmd || rc=$?`** aparece donde una orden puede fallar (`flock`, `mv`) porque el archivo se ejecuta con `set -e`: hay que capturar el código antes de que el shell aborte y decidir después si eso es `1`, `2` o `3`.
 
-## 6. Salida y códigos / Output and exit codes
+## 6. El verbo `use` / The `use` verb (L2)
+
+**ES:** `_glot_cmd_use` hace ocho pasos y **todas las validaciones ocurren antes de tocar nada**: lee los argumentos (el lenguaje se puede omitir si estás dentro del submódulo y el `tipo` por defecto es `feat`), comprueba el lenguaje contra `.gitmodules`, que el submódulo esté inicializado, que la fase exista, que la especificación exista (`_glot_spec_for` compara el nombre del módulo con `docs/core/{fase}/{NN}_{Nombre}.md`) y que el árbol no tenga cambios ajenos al directorio del módulo. Después crea el directorio vacío, prepara la rama (`checkout` o `checkout -b`, según exista ya), la publica con `push -u origin`, escribe las seis claves del estado e imprime la ruta absoluta. Con `-n` imprime el mismo plan sin ejecutarlo.
+
+**EN:** `_glot_cmd_use` runs eight steps and **every validation happens before touching anything**: it reads the arguments (the language may be omitted inside a submodule and the default `tipo` is `feat`), checks the language against `.gitmodules`, that the submodule is initialised, that the phase exists, that the specification exists (`_glot_spec_for` matches the module name against `docs/core/{phase}/{NN}_{Name}.md`) and that the tree has no changes outside the module directory. Then it creates the empty directory, prepares the branch (`checkout` or `checkout -b`, depending on whether it exists), publishes it with `push -u origin`, writes the six state keys and prints the absolute path. With `-n` it prints the same plan without running it.
+
+**ES:** Detalles no evidentes: el directorio del módulo **no** cuenta como suciedad (por eso `use` se puede repetir sin fallar), y si el estado no se puede escribir devuelve `3` avisando de que la rama ya quedó preparada.
+
+## 7. Salida y códigos / Output and exit codes
 
 1. Los verbos escriben **solo datos** en stdout; los errores salen por `_glot_error` y los avisos por `_glot_warn`, ambos a stderr. `set`/`unset` confirman por stderr: su stdout solo lleva datos si `-n` está activo.
 2. `_glot_info` escribe en stderr salvo que se haya pasado `-q/--quiet`; de ahí que `doctor -q` deje stdout parseable.
 3. El código final del script es el del verbo: la última orden del archivo es `glot "$@"`, y con `set -e` un `return 2` dentro de un verbo termina el script con `2`.
 4. `3` está reservado al estado: no se pudo leer, crear o escribir. Los errores de uso siguen siendo `2` y los de entorno `1`.
 
-## 7. Lo que todavía no hace / What it does not do yet
+## 8. Lo que todavía no hace / What it does not do yet
 
-No hay catálogo ni asignación de lenguaje/módulo: eso es L2.5 (v0.6.0) y L2 (v0.5.0). Las claves reservadas (`lang`, `phase`, `module`, `branch`, `spec`, `repo`) están documentadas y el almacén ya las admite, pero hasta la v0.5.0 ningún verbo las escribe.
+No hay catálogo ni comando nativo por lenguaje: eso es L2.5 (v0.6.0). La asignación ya existe (L2, v0.5.0): `use` escribe las seis claves reservadas, crea el directorio del módulo y prepara y publica la rama.

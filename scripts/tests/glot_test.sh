@@ -83,13 +83,13 @@ glot_run_in() {
 
 # version
 glot_run version
-assert_eq 'version: salida' 'glot 0.4.0' "$out"
+assert_eq 'version: salida' 'glot 0.5.0' "$out"
 assert_eq 'version: código' '0' "$rc_last"
 assert_eq 'version: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 
 # --version
 glot_run --version
-assert_eq '--version: salida' 'glot 0.4.0' "$out"
+assert_eq '--version: salida' 'glot 0.5.0' "$out"
 assert_eq '--version: código' '0' "$rc_last"
 
 # help general y por verbo
@@ -150,7 +150,7 @@ assert_contains 'nombre suelto: sugiere greet' 'glot greet Ada' "$err"
 # doctor dentro del monorepo
 glot_run doctor
 assert_eq 'doctor dentro: código' '0' "$rc_last"
-assert_contains 'doctor dentro: versión' 'version: 0.4.0' "$out"
+assert_contains 'doctor dentro: versión' 'version: 0.5.0' "$out"
 assert_contains 'doctor dentro: script_dir' 'script_dir:' "$out"
 assert_contains 'doctor dentro: raíz detectada' 'root: /' "$out"
 assert_contains 'doctor dentro: ruta del estado' 'state_file:' "$out"
@@ -244,6 +244,149 @@ assert_eq 'permisos del directorio' '700' "$(stat -c '%a' "$(dirname -- "$GLOT_S
 glot_run doctor
 assert_contains 'doctor: ruta del estado aislado' "state_file: $GLOT_STATE_FILE" "$out"
 assert_contains 'doctor: estado legible' 'state_file_ok: yes' "$out"
+
+# --- asignación `use` (v0.5.0) ----------------------------------------------
+
+SANDBOX="$WORK_DIR/sandbox"
+
+# sandbox_make — monorepo de mentira: .gitmodules, especificación y un submódulo
+# `php` con su propio repo y un remoto desnudo, para que `use` prepare y publique
+# la rama sin salir de $WORK_DIR ni tocar la red.
+sandbox_make() {
+    rm -rf -- "$SANDBOX"
+    mkdir -p -- "$SANDBOX/docs/core/algorithms" "$SANDBOX/remote"
+    printf '# 05 — Naive Sort\n' >"$SANDBOX/docs/core/algorithms/05_Naive_Sort.md"
+
+    cat >"$SANDBOX/.gitmodules" <<'EOF'
+[submodule "php"]
+	path = php
+	url = ../remote/php.git
+EOF
+
+    git -C "$SANDBOX" init -q
+    git init -q --bare "$SANDBOX/remote/php.git"
+    git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
+
+    mkdir -p -- "$SANDBOX/php/core/algorithms"
+    git -C "$SANDBOX/php" init -q -b main
+    git -C "$SANDBOX/php" config user.email 'glot@test'
+    git -C "$SANDBOX/php" config user.name 'glot test'
+    printf '# php\n' >"$SANDBOX/php/README.md"
+    printf '# algorithms\n' >"$SANDBOX/php/core/algorithms/README.md"
+    git -C "$SANDBOX/php" add -A
+    git -C "$SANDBOX/php" commit -q -m 'chore: base'
+    git -C "$SANDBOX/php" remote add origin "$SANDBOX/remote/php.git"
+    git -C "$SANDBOX/php" push -q -u origin main
+}
+
+# glot_run_sandbox [args...] — ejecuta glot con GLOT_ROOT apuntando al sandbox.
+glot_run_sandbox() {
+    local rc=0
+    out="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+# glot_run_from <directorio> [args...] — igual, pero desde otro directorio.
+glot_run_from() {
+    local dir="$1"
+    shift
+    local rc=0
+    out="$(cd -- "$dir" && GLOT_ROOT="$SANDBOX" "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+sandbox_make
+
+# sitúa el trabajo: directorio, rama, publicación y estado
+glot_run_sandbox use php algorithms/naive_sort
+assert_eq 'use: código' '0' "$rc_last"
+assert_eq 'use: ruta del módulo en stdout' "$SANDBOX/php/core/algorithms/naive_sort" "$out"
+assert_eq 'use: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'use: rama activa' 'feat/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+assert_eq 'use: rama publicada con upstream' 'feat/algorithms/naive-sort' "$(git -C "$SANDBOX/php" rev-parse --abbrev-ref --symbolic-full-name '@{u}' | sed 's|^origin/||')"
+assert_eq 'use: la rama existe en el remoto' 'feat/algorithms/naive-sort' "$(git -C "$SANDBOX/remote/php.git" rev-parse --verify --quiet refs/heads/feat/algorithms/naive-sort >/dev/null && echo feat/algorithms/naive-sort)"
+
+glot_run get lang
+assert_eq 'use: estado lang' 'php' "$out"
+glot_run get phase
+assert_eq 'use: estado phase' 'algorithms' "$out"
+glot_run get module
+assert_eq 'use: estado module' 'naive_sort' "$out"
+glot_run get branch
+assert_eq 'use: estado branch' 'feat/algorithms/naive-sort' "$out"
+glot_run get spec
+assert_eq 'use: estado spec' 'docs/core/algorithms/05_Naive_Sort.md' "$out"
+glot_run get repo
+assert_eq 'use: estado repo' 'php' "$out"
+
+# idempotente: el directorio que ya creó no cuenta como árbol sucio
+glot_run_sandbox use php algorithms/naive_sort
+assert_eq 'use repetido: código' '0' "$rc_last"
+assert_eq 'use repetido: ruta' "$SANDBOX/php/core/algorithms/naive_sort" "$out"
+
+# ensayo con la rama ya creada: el plan no la vuelve a crear
+glot_run_sandbox -n use php algorithms/naive_sort
+assert_eq 'use -n con rama existente: código' '0' "$rc_last"
+assert_contains 'use -n con rama existente: checkout sin -b' 'git -C '"$SANDBOX"'/php checkout feat/algorithms/naive-sort' "$out"
+
+# ensayo: imprime el plan y no toca ni git ni el estado
+git -C "$SANDBOX/php" checkout -q main
+git -C "$SANDBOX/php" branch -q -D feat/algorithms/naive-sort
+rm -rf -- "$SANDBOX/php/core/algorithms/naive_sort"
+glot_run unset branch
+glot_run_sandbox -n use php algorithms/naive_sort
+assert_eq 'use -n: código' '0' "$rc_last"
+assert_contains 'use -n: plan de rama' 'checkout -b feat/algorithms/naive-sort' "$out"
+assert_contains 'use -n: plan de publicación' 'push -u origin feat/algorithms/naive-sort' "$out"
+assert_contains 'use -n: plan de estado' 'branch=feat/algorithms/naive-sort' "$out"
+assert_eq 'use -n: no crea el directorio' 'no' "$([[ -e "$SANDBOX/php/core/algorithms/naive_sort" ]] && echo si || echo no)"
+assert_eq 'use -n: sigue en main' 'main' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+glot_run get branch
+assert_eq 'use -n: no escribe el estado' '1' "$rc_last"
+
+# tipo explícito
+glot_run_sandbox use php algorithms/naive_sort docs
+assert_eq 'use docs: código' '0' "$rc_last"
+assert_eq 'use docs: rama activa' 'docs/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+
+# desde dentro del submódulo se puede omitir el lenguaje
+glot_run_from "$SANDBOX/php" use algorithms/naive_sort fix
+assert_eq 'use sin lenguaje dentro del submódulo: código' '0' "$rc_last"
+assert_eq 'use sin lenguaje dentro del submódulo: rama' 'fix/algorithms/naive-sort' "$(git -C "$SANDBOX/php" symbolic-ref --short HEAD)"
+
+# errores de uso
+glot_run_sandbox use
+assert_eq 'use sin argumentos: código' '2' "$rc_last"
+glot_run_sandbox use php
+assert_eq 'use con un solo argumento: código' '2' "$rc_last"
+glot_run_sandbox use php algorithms/naive_sort malo
+assert_eq 'use con tipo no permitido: código' '2' "$rc_last"
+assert_contains 'use con tipo no permitido: error' 'tipo no permitido' "$err"
+glot_run_sandbox use php algorithms/naive_sort feat extra
+assert_eq 'use con demasiados argumentos: código' '2' "$rc_last"
+glot_run_sandbox use php algorithms/naive_sort --force
+assert_eq 'use con opción desconocida: código' '2' "$rc_last"
+
+# errores de entorno o de datos
+glot_run_sandbox use nope algorithms/naive_sort
+assert_eq 'use con lenguaje desconocido: código' '1' "$rc_last"
+assert_contains 'use con lenguaje desconocido: error' 'no registrado en .gitmodules' "$err"
+glot_run_sandbox use php algorithms/nope
+assert_eq 'use con módulo sin especificación: código' '1' "$rc_last"
+assert_contains 'use con módulo sin especificación: error' 'especificación ausente' "$err"
+glot_run_sandbox use php nope/naive_sort
+assert_eq 'use con fase inexistente: código' '1' "$rc_last"
+assert_contains 'use con fase inexistente: error' 'fase inexistente' "$err"
+
+# árbol sucio: un cambio ajeno al directorio del módulo lo bloquea
+git -C "$SANDBOX/php" checkout -q main
+printf 'x\n' >>"$SANDBOX/php/README.md"
+glot_run_sandbox use php algorithms/naive_sort
+assert_eq 'use con árbol sucio: código' '1' "$rc_last"
+assert_contains 'use con árbol sucio: error' 'sin confirmar' "$err"
+git -C "$SANDBOX/php" checkout -q -- .
 
 # --- resumen -----------------------------------------------------------------
 

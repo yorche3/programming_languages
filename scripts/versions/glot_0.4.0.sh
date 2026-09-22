@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# glot 0.5.0 — contrato, dispatcher, almacén de estado (L1) y asignación (L2).
+# glot 0.4.0 — contrato, dispatcher de verbos y almacén de estado (L1).
 #
-# Versión viva del script: las versiones cerradas se archivan en versions/.
+# Snapshot archivado: versión cerrada el 2026-09-21. No se edita; el código es
+# el mismo que tenía la versión viva en su cierre.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
 # monorepo se resuelve con GLOT_ROOT, el superproyecto o la raíz de git.
 # El estado vive fuera del repositorio (XDG) y se puede redirigir con GLOT_STATE_FILE.
 #
 # Uso / Usage:
-#   ./scripts/glot.sh help
+#   ./versions/glot_0.4.0.sh help
 #   ./scripts/glot.sh doctor
-#   ./scripts/glot.sh use php algorithms/naive_sort
 #   ./scripts/glot.sh set lang php
 #   ./scripts/glot.sh get lang
 #   ./scripts/glot.sh list
@@ -17,7 +17,7 @@
 
 set -euo pipefail
 
-GLOT_VERSION="0.5.0"
+GLOT_VERSION="0.4.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible.
@@ -383,15 +383,10 @@ Verbos / Verbs:
   unset <clave>      Elimina la clave / removes the key
   list                Lista el estado como clave=valor / lists state as key=value
   path                Imprime la ruta del archivo de estado / prints the state file path
-  use <lenguaje> <fase>/<módulo> [tipo]
-                     Sitúa el trabajo: valida, crea el directorio del módulo,
-                     prepara y publica la rama, guarda el estado e imprime la ruta
-                     Locates the work: validates, creates the module directory,
-                     prepares and publishes the branch, stores state, prints the path
 
 Opciones globales / Global options:
   -q, --quiet        Silencia el diagnóstico de stderr / silence stderr diagnostics
-  -n, --dry-run      No escribe ni toca git: muestra el plan / writes nothing and touches no git: shows the plan
+  -n, --dry-run      No escribe el estado: muestra lo que haría / do not write state: show the plan
   -h, --help         Igual que help / same as help
   --version          Igual que version / same as version
 EOF
@@ -434,16 +429,6 @@ _glot_help_verb() {
             printf 'glot path — imprime la ruta del archivo de estado\n'
             printf 'glot path — prints the state file path\n'
             ;;
-        use)
-            printf 'glot use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint\n'
-            printf '  valida contra .gitmodules, crea el directorio del módulo, prepara y publica\n'
-            printf '  la rama {tipo}/{fase}/{módulo}, guarda el estado e imprime la ruta del módulo\n'
-            printf 'glot use <language> <phase>/<module> [type] — locates the sprint work\n'
-            printf '  validates against .gitmodules, creates the module directory, prepares and\n'
-            printf '  publishes the {type}/{phase}/{module} branch, stores the state, prints the path\n'
-            printf 'Tipos / types: feat (por defecto/default), fix, docs, chore, refactor, test\n'
-            printf 'Desde dentro de un submódulo se puede omitir el lenguaje / the language can be omitted inside a submodule\n'
-            ;;
         *)
             _glot_error "verbo desconocido / unknown verb: $1"
             _glot_hint
@@ -458,256 +443,6 @@ _glot_cmd_help() {
         return 0
     fi
     _glot_help_verb "$1"
-}
-
-# --- asignación (L2) --------------------------------------------------------
-
-_glot_kebab() { printf '%s\n' "${1//_/-}"; }
-
-# _glot_gitmodules_list — lenguajes registrados en .gitmodules, una ruta por línea.
-_glot_gitmodules_list() {
-    local root=""
-
-    root="$(_glot_repo_root)" || return 1
-    [[ -f "$root/.gitmodules" ]] || return 1
-
-    git -C "$root" config --file "$root/.gitmodules" --get-regexp '\.path$' 2>/dev/null |
-        awk '{print $NF}'
-}
-
-# _glot_lang_from_path <raíz> — lenguaje deducido del directorio actual, si estamos
-# dentro de un submódulo del monorepo.
-_glot_lang_from_path() {
-    local root="$1"
-    local rel=""
-
-    rel="${PWD#"$root"/}"
-    [[ "$rel" != "$PWD" ]] || return 1
-    printf '%s\n' "${rel%%/*}"
-}
-
-# _glot_spec_for <raíz> <fase> <módulo> — ruta relativa de la especificación del
-# módulo, buscando docs/core/{fase}/{NN}_{Nombre}.md y comparando por nombre.
-_glot_spec_for() {
-    local root="$1"
-    local phase="$2"
-    local module="$3"
-    local dir="$root/docs/core/$phase"
-    local file=""
-    local stem=""
-
-    [[ -d "$dir" ]] || return 1
-
-    for file in "$dir"/*.md; do
-        [[ -e "$file" ]] || continue
-        stem="$(basename -- "$file")"
-        stem="${stem#[0-9][0-9]_}"
-        stem="${stem%.md}"
-        stem="${stem,,}"
-        stem="${stem// /_}"
-        if [[ "$stem" == "${module,,}" ]]; then
-            printf 'docs/core/%s/%s\n' "$phase" "$(basename -- "$file")"
-            return 0
-        fi
-    done
-
-    return 1
-}
-
-# _glot_cmd_use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint:
-# valida, crea el directorio del módulo, prepara y publica la rama, guarda el estado
-# e imprime la ruta absoluta del módulo. No implementa, no genera esqueleto y no
-# toca el monorepo.
-_glot_cmd_use() {
-    local -a pos=()
-    local arg=""
-    local lang=""
-    local target=""
-    local kind="feat"
-    local phase=""
-    local module=""
-    local root=""
-    local sub=""
-    local module_dir=""
-    local spec=""
-    local branch=""
-    local current=""
-    local dirty=""
-    local pair=""
-    local branch_exists=0
-
-    # 1. Argumentos: rechaza opciones y decide qué es cada posición.
-    for arg in "$@"; do
-        case "$arg" in
-            -*)
-                _glot_error "opción desconocida / unknown option: $arg"
-                _glot_hint
-                return 2
-                ;;
-        esac
-        pos+=("$arg")
-    done
-
-    case "${#pos[@]}" in
-        1)
-            [[ "${pos[0]}" == */* ]] || {
-                _glot_error "faltan argumentos / missing arguments"
-                _glot_error "uso / usage: glot use <lenguaje> <fase>/<módulo> [tipo]"
-                _glot_hint
-                return 2
-            }
-            target="${pos[0]}"
-            ;;
-        2)
-            if [[ "${pos[0]}" == */* ]]; then
-                target="${pos[0]}"
-                kind="${pos[1]}"
-            else
-                lang="${pos[0]}"
-                target="${pos[1]}"
-            fi
-            ;;
-        3)
-            lang="${pos[0]}"
-            target="${pos[1]}"
-            kind="${pos[2]}"
-            ;;
-        *)
-            _glot_error "uso / usage: glot use <lenguaje> <fase>/<módulo> [tipo]"
-            _glot_hint
-            return 2
-            ;;
-    esac
-
-    case "$kind" in
-        feat | fix | docs | chore | refactor | test) ;;
-        *)
-            _glot_error "tipo no permitido / type not allowed: $kind"
-            _glot_info "permitidos / allowed: feat, fix, docs, chore, refactor, test"
-            return 2
-            ;;
-    esac
-
-    phase="${target%%/*}"
-    module="${target#*/}"
-    if [[ -z "$phase" || -z "$module" || "$phase" == "$target" ]]; then
-        _glot_error "fase/módulo mal formados / malformed phase/module: $target"
-        _glot_info "formato esperado / expected format: algorithms/naive_sort"
-        return 2
-    fi
-
-    # 2. Entorno y catálogo: todo se valida antes de tocar nada.
-    root="$(_glot_repo_root)" || {
-        _glot_error "no se detectó la raíz del monorepo / monorepo root not detected"
-        return 1
-    }
-
-    if [[ -z "$lang" ]]; then
-        lang="$(_glot_lang_from_path "$root")" || {
-            _glot_error "no estás dentro de un submódulo; indica el lenguaje / not inside a submodule; name the language"
-            return 1
-        }
-    fi
-
-    if ! _glot_gitmodules_list | grep -qx -- "$lang"; then
-        _glot_error "lenguaje no registrado en .gitmodules / language not in .gitmodules: $lang"
-        return 1
-    fi
-
-    sub="$root/$lang"
-    if [[ ! -e "$sub/.git" ]]; then
-        _glot_error "submódulo sin inicializar / submodule not initialised: $lang"
-        _glot_info "prueba / try: git submodule update --init -- $lang"
-        return 1
-    fi
-
-    if [[ ! -d "$sub/core/$phase" ]]; then
-        _glot_error "fase inexistente / missing phase: $phase"
-        return 1
-    fi
-
-    spec="$(_glot_spec_for "$root" "$phase" "$module")" || {
-        _glot_error "especificación ausente / missing specification: docs/core/$phase/…_${module}.md"
-        return 1
-    }
-
-    module_dir="$sub/core/$phase/$module"
-    branch="$kind/$phase/$(_glot_kebab "$module")"
-    current="$(git -C "$sub" symbolic-ref --short -q HEAD || true)"
-    if git -C "$sub" show-ref --verify --quiet "refs/heads/$branch"; then
-        branch_exists=1
-    fi
-
-    # El propio directorio del módulo no cuenta como suciedad: use lo puede crear.
-    dirty="$(git -C "$sub" status --porcelain 2>/dev/null | grep -vE "core/$phase/$module(/|\$)" || true)"
-    if [[ -n "$dirty" ]]; then
-        _glot_error "el submódulo tiene cambios sin confirmar / submodule has uncommitted changes"
-        _glot_info "$dirty"
-        return 1
-    fi
-
-    # 3. Ensayo: imprime el plan y no toca ni git ni el estado.
-    if ((_glot_dry_run)); then
-        printf 'mkdir -p %s\n' "$module_dir"
-        if ((branch_exists)); then
-            printf 'git -C %s checkout %s\n' "$sub" "$branch"
-        else
-            printf 'git -C %s checkout -b %s\n' "$sub" "$branch"
-        fi
-        printf 'git -C %s push -u origin %s\n' "$sub" "$branch"
-        printf 'lang=%s\n' "$lang"
-        printf 'phase=%s\n' "$phase"
-        printf 'module=%s\n' "$module"
-        printf 'branch=%s\n' "$branch"
-        printf 'spec=%s\n' "$spec"
-        printf 'repo=%s\n' "$lang"
-        return 0
-    fi
-
-    # 4. Directorio del módulo (vacío: el esqueleto llega con `new`, v0.9.0).
-    if ! mkdir -p -- "$module_dir"; then
-        _glot_error "no se pudo crear el directorio / cannot create directory: $module_dir"
-        return 1
-    fi
-
-    # 5. Rama: idempotente si ya está activa.
-    if [[ "$current" == "$branch" ]]; then
-        _glot_info "rama ya activa / branch already active: $branch"
-    elif ((branch_exists)); then
-        if ! git -C "$sub" checkout -q -- "$branch"; then
-            _glot_error "no se pudo cambiar de rama / cannot switch branch: $branch"
-            return 1
-        fi
-        _glot_info "rama / branch: $branch"
-    else
-        if ! git -C "$sub" checkout -q -b "$branch"; then
-            _glot_error "no se pudo crear la rama / cannot create branch: $branch"
-            return 1
-        fi
-        _glot_info "rama creada / branch created: $branch"
-    fi
-
-    # 6. Publicación: la rama siempre se publica (decisión del autor).
-    if ! git -C "$sub" push -q -u origin "$branch" 2>/dev/null; then
-        _glot_error "no se pudo publicar la rama / cannot publish branch: $branch"
-        _glot_info "la rama local existe; revisa el remoto / the local branch exists; check the remote"
-        return 1
-    fi
-    _glot_info "publicada / published: origin/$branch"
-
-    # 7. Estado del sprint: si falla, la rama ya estaría preparada y se avisa.
-    for pair in "lang=$lang" "phase=$phase" "module=$module" "branch=$branch" "spec=$spec" "repo=$lang"; do
-        if ! _glot_state_rewrite set "${pair%%=*}" "${pair#*=}"; then
-            _glot_error "la rama ya está preparada, pero no se pudo guardar el estado / the branch is ready, but the state could not be saved"
-            return 3
-        fi
-    done
-
-    # 8. Dato para stdout: la ruta absoluta del módulo.
-    printf '%s\n' "$module_dir"
-    _glot_info "recuerda / remember: cd \"\$(glot use $lang $target $kind)\" (el cd real llega en v1.0.0)"
-
-    return 0
 }
 
 # --- dispatcher --------------------------------------------------------------
@@ -788,10 +523,6 @@ glot() {
         path)
             # Imprime la ruta del archivo de estado / Print the state file path
             _glot_cmd_path
-            ;;
-        use)
-            # Sitúa el trabajo del sprint / Locates the sprint work
-            _glot_cmd_use "$@"
             ;;
         -*)
             # Maneja las opciones desconocidas / Handle unknown options

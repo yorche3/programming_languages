@@ -35,11 +35,11 @@
 
 ---
 
-## 🧰 Verbos de la versión viva (v0.4.0) / Verbs in the live version
+## 🧰 Verbos de la versión viva (v0.5.0) / Verbs in the live version
 
 | Verbo | Comportamiento | Código |
 |-------|----------------|:------:|
-| `version`, `--version` | `glot 0.4.0` | 0 |
+| `version`, `--version` | `glot 0.5.0` | 0 |
 | `help`, `-h`, `--help`, `help <verbo>` | Ayuda general o de un verbo | 0 |
 | `doctor` | Diagnóstico: bash, git, raíz del monorepo, directorio y fichero de estado, y número de claves | 0 / 1 |
 | `greet [nombre]` | `Hello, <nombre>!` con el nombre por argumento o por stdin | 0 / 2 |
@@ -49,6 +49,7 @@
 | `unset <clave>` | Borra la clave; repetirlo no es error | 0 / 2 / 3 |
 | `list` | Todas las entradas `clave=valor`, ordenadas por clave en `LC_ALL=C` | 0 / 3 |
 | `path` | Ruta del fichero de estado | 0 |
+| `use <lenguaje> <fase>/<módulo> [tipo]` | Sitúa el trabajo: valida, crea el directorio del módulo, prepara y publica la rama, guarda el estado del sprint; imprime la ruta del módulo | 0 / 1 / 2 / 3 |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
 
 ---
@@ -77,9 +78,9 @@
 | `spec` | Ruta de la especificación (`docs/core/algorithms/05_Naive_Sort.md`) | `use` (v0.5.0) |
 | `repo` | Ruta del submódulo dentro del monorepo | `use` (v0.5.0) |
 
-**ES:** Hasta la v0.4.0 el almacén solo guarda y devuelve texto: no interpreta ninguna clave. La v0.5.0 empieza a escribir estas seis.
+**ES:** Hasta la v0.4.0 el almacén solo guardaba y devolvía texto: no interpretaba ninguna clave. Desde la v0.5.0 las escribe `use`.
 
-**EN:** Up to v0.4.0 the store only saves and returns text: it interprets no key. v0.5.0 starts writing these six.
+**EN:** Up to v0.4.0 the store only saved and returned text: it interpreted no key. Since v0.5.0, `use` writes them.
 
 ---
 
@@ -111,7 +112,7 @@
 
 ---
 
-## 🧾 Especificación de `use` (v0.5.0) / `use` specification
+## 🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
 
 ```bash
 glot use <lenguaje> <fase>/<módulo> [tipo]     # tipo por defecto: feat
