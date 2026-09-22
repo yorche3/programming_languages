@@ -19,7 +19,7 @@
 | 3 | Rama publicada | incluido en `use`: `git push -u origin feat/algorithms/naive-sort` | Rama `feat/{fase}/{módulo}` con upstream | script |
 | 4 | Esqueleto y tests | `glot prompt scaffold` (0.8.0) → plantilla local `scaffold-and-unit-tests.prompt.md` · `glot new` (0.9.0) · `glot save` (0.9.0) | `chore(algorithms): add scaffold and tests for naive sort` | **agente** + script |
 | 5 | Implementación | `glot prompt implement` (0.8.0) + `glot test` (0.7.0) | `feat(algorithms): add naive sort implementation`; suite en verde | autor / **agente** |
-| 6 | Verificación | `glot test`, `glot verify` (0.7.0) · `glot prompt validate` (0.8.0) | Salida real de la suite y del analizador, sin warnings | script + **agente** |
+| 6 | Verificación | `glot test`, `glot verify` (0.7.0) · `glot prompt validate` (0.10.0) | Salida real de la suite y del analizador, sin warnings **nuevos** | script + **agente** |
 | 7 | Cierre documental del módulo | `glot prompt docs-module` (0.8.0) → README de Nivel 3 desde [`README_Template.md`](../../docs/README_Template.md) | `docs(naive-sort): add README for naive sort module` | **agente** |
 
 **ES:** Al terminar la Fase A, el cambio del submódulo se integra en **su** `main` y se anota el commit resultante.
@@ -54,17 +54,17 @@
 
 ## 🤖 Los pasos con IA, y por qué / The AI-assisted steps, and why
 
-**ES:** Los pasos 4, 5, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Cada encargo se arma con la plantilla de `.github/prompts` correspondiente y el estado del sprint, y el veredicto se guarda como evidencia. Esas plantillas **no se versionan** (`.gitignore` excluye `.github/prompts/`): son locales del autor y se normalizarán para `glot` en la L4 (v0.8.0).
+**ES:** Los pasos 4, 5, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/). El banco local de `.github/prompts/` sigue ahí como taller del autor y `glot` lo acepta como respaldo, avisando de que no viaja en el repositorio.
 
-**EN:** Steps 4, 5, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Each request is built from the matching `.github/prompts` template plus the sprint state, and the verdict is stored as evidence. Those templates are **not versioned** (`.gitignore` excludes `.github/prompts/`): they are local to the author and will be normalised for `glot` in L4 (v0.8.0).
+**EN:** Steps 4, 5, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Since v0.8.0 the request is built by `glot prompt <request>` from the sprint state, and the templates are **versioned** in [`scripts/prompts/`](../../scripts/prompts/). The local bank in `.github/prompts/` remains the author's workshop and `glot` accepts it as a fallback, warning that it does not travel with the repository.
 
-| Encargo previsto | Plantilla (local, no versionada) | Estado |
-|------------------|----------------------------------|:------:|
-| `scaffold` | `scaffold-and-unit-tests.prompt.md` | ✅ existe |
-| `implement` | — | ⏳ por escribir |
-| `docs-module` | `module-readme.prompt.md` (a dividir) | ⏳ dividir |
-| `docs-language` | idem | ⏳ dividir |
-| `validate` | — | ⏳ por escribir |
+| Encargo previsto | Plantilla versionada | Paso |
+|------------------|----------------------|:----:|
+| `scaffold` | [`scaffold.prompt.md`](../../scripts/prompts/scaffold.prompt.md) | 4 |
+| `implement` | [`implement.prompt.md`](../../scripts/prompts/implement.prompt.md) | 5 |
+| `docs-module` | [`docs-module.prompt.md`](../../scripts/prompts/docs-module.prompt.md) | 7 |
+| `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 |
+| `validate` | — (llega con `validate`, v0.10.0) | 6 |
 
 ---
 

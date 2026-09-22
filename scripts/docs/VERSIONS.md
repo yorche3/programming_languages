@@ -13,6 +13,7 @@
 | 0.5.0 | 2026-09-22 | [`versions/glot_0.5.0.sh`](../versions/glot_0.5.0.sh) | **Asignación** (L2): `use <lenguaje> <fase>/<módulo> [tipo]`, que sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado) | ✅ cerrada |
 | 0.6.0 | 2026-09-22 | [`versions/glot_0.6.0.sh`](../versions/glot_0.6.0.sh) | **Catálogo** (L2.5): `langs`, `modules`, `progress` y `completion`, con el conversor de nombres y los comandos nativos por lenguaje | ✅ cerrada |
 | 0.7.0 | 2026-09-22 | [`versions/glot_0.7.0.sh`](../versions/glot_0.7.0.sh) | **Ejecución** (L3): `test` y `verify`, con el código `4` de verificación fallida, los marcadores de la tabla de comandos y la cobertura de verificadores | ✅ cerrada |
+| 0.8.0 | 2026-09-22 | [`glot.sh`](../glot.sh) | **Delegación** (L4): `prompt` y `ask`, con las cuatro plantillas versionadas de `scripts/prompts/` y un solo vocabulario de marcadores | 🔄 viva |
 
 ---
 
@@ -82,6 +83,17 @@
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 258 passed, 0 failed` (rc `0`). Ejecuciones reales sobre el monorepo: `test` en `php` (`OK (3 tests, 21 assertions)`), `prolog` (3 subtests passed), `vala` (`ok 1..3`) y `tcl-tk` (`Total 21 Passed 21 Failed 0`) → rc `0`; `verify php` → `No syntax errors detected` rc `0`; `verify v` y `verify rust` → rc `4` con los hallazgos preexistentes; `verify ada` → `skipped` rc `0`.
 - **Snapshot:** [`versions/glot_0.7.0.sh`](../versions/glot_0.7.0.sh), archivado **antes** de fusionar la rama en `main` y antes de abrir la v0.8.0, para que la puerta de entrada no bloquee el arranque de la siguiente versión.
 
+## 0.8.0 — 2026-09-22 (viva)
+
+- **Añade:** la **delegación** (L4) con `prompt` (sin argumentos lista el registro; con encargo imprime la cabecera del estado del sprint y la plantilla expandida) y `ask` (el mismo encargo, enviado a `GLOT_DELEGATE` por stdin). Ninguno de los dos ejecuta el trabajo ni escribe en el repositorio.
+- **Plantillas versionadas:** cuatro encargos en `scripts/prompts/` — `scaffold` (paso 4), `implement` (5), `docs-module` (7) y `docs-language` (8) — normalizados desde el banco local de `.github/prompts/`. El registro no está codificado: `glot prompt` recorre `*.prompt.md` y lee `name`, `step` y `description` del frontmatter, así que añadir un encargo es añadir un archivo.
+- **Un solo vocabulario de marcadores**, anclado a las claves del estado: `{lang}`, `{phase}`, `{module}`, `{Module}`, `{repo}`, `{branch}`, `{spec}`, `{suite}` y `{module_dir}`. Se renombran en la guía de inicialización y en el catálogo de datos (`{modulo}`/`{Modulo}` → `{module}`/`{Module}`, 110 ocurrencias).
+- **Contrato:** un marcador sin resolver es un error `1` que lo nombra, nunca texto literal; `prompt` no necesita `-n` (imprimir es su función) y `ask -n` imprime el plan; sin `GLOT_DELEGATE`, `ask` devuelve `1`; un delegado que falla devuelve `1`, no `4`.
+- **`doctor`:** informa de la carpeta de plantillas, del número de encargos y de si hay delegado configurado.
+- **Corrige:** la clave reservada `repo` se documentaba como «ruta del submódulo dentro del monorepo» cuando `use` guarda el **nombre** del submódulo; la tabla del contrato ya dice lo que hace el código.
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 286 passed, 0 failed` (rc `0`). Reproducción real: `glot prompt` → 4 encargos con su paso; `glot prompt scaffold php algorithms/naive_sort` → cabecera con `spec` y `module_dir` y plantilla sin frontmatter y sin marcadores; `GLOT_DELEGATE='wc -l' glot ask implement php algorithms/naive_sort` → el encargo completo (115 líneas) por stdin, rc `0`; sin delegado → rc `1`; delegado que falla → rc `1`.
+- **Snapshot:** se archivará en `versions/glot_0.8.0.sh` al abrir la v0.9.0 (ver la puerta de entrada).
+
 ---
 
 ## 🔖 Convención de archivado / Archiving convention
@@ -127,7 +139,7 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución y códigos (258 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación y códigos (286 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
 ./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
 ./scripts/glot.sh modules           # catálogo de módulos con su especificación
@@ -136,6 +148,9 @@ bash -n scripts/glot.sh              # sintaxis
 ./scripts/glot.sh -n test php algorithms/naive_sort   # plan: cd al módulo y comando nativo
 ./scripts/glot.sh test php algorithms/naive_sort     # ejecuta la suite (salida real)
 ./scripts/glot.sh verify php algorithms/naive_sort   # verificador del lenguaje
+./scripts/glot.sh prompt                             # registro de encargos
+./scripts/glot.sh prompt scaffold php algorithms/naive_sort   # encargo armado
+GLOT_DELEGATE='cat' ./scripts/glot.sh ask implement php algorithms/naive_sort
 ./scripts/glot.sh -n use php algorithms/naive_sort   # ensayo de `use`: plan sin tocar nada
 
 # Estado en un directorio propio, sin tocar el del usuario / state in its own dir

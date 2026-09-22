@@ -33,6 +33,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `use` | `_glot_cmd_use "$@"` | Sitúa el trabajo del sprint (L2): catálogo, ramas y estado del sprint |
 | `langs`, `modules`, `progress`, `completion` | `_glot_cmd_<verbo> "$@"` | Catálogo, estado del roadmap y autocompletado (L2.5) |
 | `test`, `verify` | `_glot_cmd_<verbo> "$@"` → `_glot_cmd_run` | Ejecución (L3): resuelven el objetivo y corren el comando del lenguaje |
+| `prompt`, `ask` | `_glot_cmd_<verbo> "$@"` | Delegación (L4): arman el encargo y, en `ask`, lo envían al delegado |
 | otra opción (`-*`) | error de uso | `2` y mensaje en `stderr` |
 | cualquier otra cosa | error de verbo | `2`, sugiere `glot greet <algo>` y `glot help` |
 
@@ -69,6 +70,8 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `completion [shell]` | `completions/glot.<shell>` | Comprueba el shell soportado | El guion completo en stdout | `0`, `1` o `2` |
 | `test [lenguaje] [fase/módulo]` | El estado del sprint, el catálogo de datos y el directorio del módulo | Resuelve el objetivo, expande los marcadores y ejecuta | La salida del runner, tal cual, en stdout | `0`, `1`, `2`, `3` o `4` |
 | `verify [lenguaje] [fase/módulo]` | Igual, con la columna 5 | Si el lenguaje no tiene verificador, imprime `skipped` y no falla | La salida del verificador en stdout | `0`, `1`, `2`, `3` o `4` |
+| `prompt [encargo] [lenguaje] [fase/módulo]` | El registro de plantillas y el estado del sprint | Sin encargo lista; con encargo, expande los marcadores | El encargo completo en stdout | `0`, `1`, `2` o `3` |
+| `ask <encargo> [lenguaje] [fase/módulo]` | Igual, más `GLOT_DELEGATE` | Sin delegado configurado devuelve `1` | La salida del delegado en stdout | `0`, `1`, `2` o `3` |
 
 ### Detalles no evidentes / Non-obvious details
 
@@ -121,13 +124,23 @@ Finally it writes the six state keys and prints the absolute path. With `-n` it 
 
 **EN:** Execution is `(cd -- "$dir" && eval "$cmd")` in a subshell: the command's own `cd` is honoured and the calling shell's working tree is untouched. The runner output is neither touched nor filtered —it goes to stdout— because it is the sprint's datum and evidence, and the chosen command is announced on stderr. The runner's code is translated: `0` green, `4` verification failed; using `1` would mix "I could not run it" with "it is red". With `-n` the whole plan (`cd <module> && <command>`) is printed without running anything, and `verify` with column 5 set to `-` prints `skipped` and returns `0`: having no verifier is not a failure, and `doctor` reports how many languages have one.
 
-## 9. Salida y códigos / Output and exit codes
+## 9. La delegación / Delegation (L4)
+
+**ES:** `prompt` y `ask` comparten `_glot_prompt_build`. `_glot_prompts_dir` localiza las plantillas versionadas (`prompts/`, junto al script vivo o un nivel arriba) y `_glot_prompt_file` acepta como respaldo una plantilla del banco local, **avisando** de que no viaja en el repositorio. El registro no está codificado: `_glot_prompts_list` recorre `prompts/*.prompt.md` y lee `name`, `step` y `description` del frontmatter con `_glot_prompt_field`, así que añadir un encargo es añadir un archivo.
+
+**EN:** `prompt` and `ask` share `_glot_prompt_build`. `_glot_prompts_dir` locates the versioned templates (`prompts/`, next to the live script or one level up) and `_glot_prompt_file` accepts a template from the local bank as a fallback, **warning** that it does not travel with the repository. The registry is not hardcoded: `_glot_prompts_list` walks `prompts/*.prompt.md` and reads `name`, `step` and `description` from the frontmatter with `_glot_prompt_field`, so adding a request is adding a file.
+
+**ES:** `_glot_prompt_body` quita el frontmatter —al pegar el encargo solo estorba— y `_glot_expand_state` sustituye los marcadores con las claves del estado más `{Module}` y `{module_dir}`; después **busca el primer `{…}` que haya quedado** y falla con `1` nombrándolo: un marcador sin resolver es un error, nunca texto literal que el agente pueda malinterpretar. La cabecera del encargo lleva el estado del sprint en una tabla, con la rama **leída de git** (`symbolic-ref`), no de la memoria. `ask` añade una sola cosa: si `GLOT_DELEGATE` está definido, el encargo va por stdin a esa orden y su salida directa a stdout; con `-n` se imprime el plan.
+
+**EN:** `_glot_prompt_body` strips the frontmatter —when pasting the request it only gets in the way— and `_glot_expand_state` replaces the placeholders with the state keys plus `{Module}` and `{module_dir}`; then it **looks for the first remaining `{…}`** and fails with `1` naming it: an unresolved placeholder is an error, never literal text the agent could misread. The request header carries the sprint state in a table, with the branch **read from git** (`symbolic-ref`), not from memory. `ask` adds one thing: if `GLOT_DELEGATE` is set, the request goes over stdin to that command and its output straight to stdout; with `-n` the plan is printed.
+
+## 10. Salida y códigos / Output and exit codes
 
 1. Los verbos escriben **solo datos** en stdout; los errores salen por `_glot_error` y los avisos por `_glot_warn`, ambos a stderr. `set`/`unset` confirman por stderr: su stdout solo lleva datos si `-n` está activo.
 2. `_glot_info` escribe en stderr salvo que se haya pasado `-q/--quiet`. Los flags globales se leen **antes** del verbo, así que la forma silenciosa y parseable es `glot -q doctor`, no `doctor -q` (ahí el flag llega como argumento del verbo y se ignora).
 3. El código final del script es el del verbo: la última orden del archivo es `glot "$@"`, y con `set -e` un `return 2` dentro de un verbo termina el script con `2`.
 4. `3` está reservado al estado: no se pudo leer, crear o escribir. Los errores de uso siguen siendo `2` y los de entorno `1`.
 
-## 10. Lo que todavía no hace / What it does not do yet
+## 11. Lo que todavía no hace / What it does not do yet
 
-El catálogo (L2.5, v0.6.0) y la ejecución (L3, v0.7.0) ya existen. Lo que falta: los encargos de IA (L4, v0.8.0), el andamiaje y los commits guiados (L5, v0.9.0), la evidencia y el cierre (L6, v0.10.0), la higiene de punteros (L7, v0.11.0) y la instalación con la función cargable (L8, v1.0.0), que es donde `use` hará el `cd` de verdad y el autocompletado se instalará solo. Tampoco hay barrido por lenguaje: `test` actúa sobre el objetivo asignado, uno cada vez.
+El catálogo (L2.5, v0.6.0), la ejecución (L3, v0.7.0) y la delegación (L4, v0.8.0) ya existen. Lo que falta: el andamiaje y los commits guiados (L5, v0.9.0), la evidencia y el cierre (L6, v0.10.0), la higiene de punteros (L7, v0.11.0) y la instalación con la función cargable (L8, v1.0.0), que es donde `use` hará el `cd` de verdad y el autocompletado se instalará solo. Tampoco hay barrido por lenguaje: `test` actúa sobre el objetivo asignado, uno cada vez.
