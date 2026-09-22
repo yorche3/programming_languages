@@ -88,7 +88,8 @@ scripts/
     ├── glot_0.4.0.sh
     ├── glot_0.5.0.sh
     ├── glot_0.6.0.sh
-    └── glot_0.7.0.sh
+    ├── glot_0.7.0.sh
+    └── glot_0.8.0.sh
 ```
 
 ---

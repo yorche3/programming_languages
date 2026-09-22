@@ -13,7 +13,7 @@
 | 0.5.0 | 2026-09-22 | [`versions/glot_0.5.0.sh`](../versions/glot_0.5.0.sh) | **Asignación** (L2): `use <lenguaje> <fase>/<módulo> [tipo]`, que sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado) | ✅ cerrada |
 | 0.6.0 | 2026-09-22 | [`versions/glot_0.6.0.sh`](../versions/glot_0.6.0.sh) | **Catálogo** (L2.5): `langs`, `modules`, `progress` y `completion`, con el conversor de nombres y los comandos nativos por lenguaje | ✅ cerrada |
 | 0.7.0 | 2026-09-22 | [`versions/glot_0.7.0.sh`](../versions/glot_0.7.0.sh) | **Ejecución** (L3): `test` y `verify`, con el código `4` de verificación fallida, los marcadores de la tabla de comandos y la cobertura de verificadores | ✅ cerrada |
-| 0.8.0 | 2026-09-22 | [`glot.sh`](../glot.sh) | **Delegación** (L4): `prompt` y `ask`, con las cuatro plantillas versionadas de `scripts/prompts/` y un solo vocabulario de marcadores | 🔄 viva |
+| 0.8.0 | 2026-09-22 | [`versions/glot_0.8.0.sh`](../versions/glot_0.8.0.sh) | **Delegación** (L4): `prompt` y `ask`, con las cuatro plantillas versionadas de `scripts/prompts/` y un solo vocabulario de marcadores | ✅ cerrada |
 
 ---
 
@@ -92,7 +92,7 @@
 - **`doctor`:** informa de la carpeta de plantillas, del número de encargos y de si hay delegado configurado.
 - **Corrige:** la clave reservada `repo` se documentaba como «ruta del submódulo dentro del monorepo» cuando `use` guarda el **nombre** del submódulo; la tabla del contrato ya dice lo que hace el código.
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 286 passed, 0 failed` (rc `0`). Reproducción real: `glot prompt` → 4 encargos con su paso; `glot prompt scaffold php algorithms/naive_sort` → cabecera con `spec` y `module_dir` y plantilla sin frontmatter y sin marcadores; `GLOT_DELEGATE='wc -l' glot ask implement php algorithms/naive_sort` → el encargo completo (115 líneas) por stdin, rc `0`; sin delegado → rc `1`; delegado que falla → rc `1`.
-- **Snapshot:** se archivará en `versions/glot_0.8.0.sh` al abrir la v0.9.0 (ver la puerta de entrada).
+- **Snapshot:** [`versions/glot_0.8.0.sh`](../versions/glot_0.8.0.sh), archivado **antes** de fusionar la rama en `main` y antes de abrir la v0.9.0, para que la puerta de entrada no bloquee el arranque de la siguiente versión.
 
 ---
 
@@ -102,7 +102,7 @@
 - **Puerta de entrada:** ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`. Si falta, se copia `glot.sh` con el sufijo de su versión y solo después se reanuda la implementación de la nueva.
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh) y [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh).
+- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh) y [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh).
 - El harness **comprueba la puerta de entrada**: exige el snapshot de la versión anterior a la viva, así que no se puede empezar una versión nueva sin haber archivado la anterior.
 - Cada versión se cierra en su propia rama `chore/repo/glot-v0.X` antes de fusionarla en `main` (ver [`README.md`](../README.md)).
 

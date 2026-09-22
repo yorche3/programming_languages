@@ -44,7 +44,7 @@
 | L2 | Asignación: situar el trabajo (`use`) | 0.5.0 ✅ |
 | L2.5 | Catálogo (`langs`, `modules`, `progress`), comandos nativos y autocompletado | 0.6.0 ✅ |
 | L3 | Ejecución: `test` y `verify` | 0.7.0 ✅ |
-| L4 | Delegación: `prompt` (encargos de IA) y `ask` (envío al delegado) | 0.8.0 🔄 |
+| L4 | Delegación: `prompt` (encargos de IA) y `ask` (envío al delegado) | 0.8.0 ✅ |
 | L5 | Creación y registro: `new`, `save` | 0.9.0 |
 | L6 | Evidencia y cierre: `evidence`, `close`, `validate` | 0.10.0 |
 | L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.11.0 |
