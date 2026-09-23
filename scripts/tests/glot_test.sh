@@ -1003,12 +1003,8 @@ assert_eq 'save -n con árbol limpio: código' '0' "$rc_last"
 assert_eq 'save -n con árbol limpio: dato' 'nothing' "$out"
 assert_contains 'save -n con árbol limpio: avisa' 'nothing to commit' "$err"
 
-# save: los pasos del monorepo todavía no se confirman aquí
-glot_run_sandbox save 9 ruby algorithms/naive_sort
-assert_eq 'save de un paso del monorepo: código' '1' "$rc_last"
-assert_contains 'save de un paso del monorepo: lo dice' 'monorepo' "$err"
-glot_run_sandbox save pointer ruby algorithms/naive_sort
-assert_eq 'save del alias del monorepo: código' '1' "$rc_last"
+# save: los pasos del monorepo (9 y 10) se comprueban en la fixture de L7, que tiene
+# submódulos de verdad: el sandbox no registra gitlinks.
 
 glot_run_sandbox save nope ruby algorithms/naive_sort
 assert_eq 'save con paso desconocido: código' '2' "$rc_last"
@@ -1468,6 +1464,162 @@ if command -v copilot >/dev/null 2>&1; then
     done <"$MODELS_TSV"
     assert_eq 'modelos: los tres están en la lista del CLI instalado' '3' "$available"
 fi
+
+# --- casos de la especificación v0.12.0 (L7, higiene y punteros) --------------
+
+# El sandbox nace sin monorepo: hasta L7 ningún verbo necesitaba un gitlink. Aquí se
+# crea el commit base con `.gitmodules` y el puntero de `php` (un gitlink de verdad), la
+# rama `main` y un remoto, que es lo que `pointer` publica.
+git -C "$SANDBOX" config user.email 'glot@test'
+git -C "$SANDBOX" config user.name 'glot test'
+printf 'remote/\n' >"$SANDBOX/.gitignore"
+git -C "$SANDBOX" add -A 2>/dev/null
+git -C "$SANDBOX" update-index --add --cacheinfo "160000,$(git -C "$SANDBOX/php" rev-parse HEAD),php"
+git -C "$SANDBOX" commit -q -m 'chore: monorepo base'
+git -C "$SANDBOX" branch -M main
+git init -q --bare "$SANDBOX/remote/repo.git"
+git -C "$SANDBOX/remote/repo.git" symbolic-ref HEAD refs/heads/main
+git -C "$SANDBOX" remote add origin "$SANDBOX/remote/repo.git"
+git -C "$SANDBOX" push -q -u origin main
+
+# status: una línea por lenguaje registrado, solo lectura
+glot_run_sandbox status
+assert_eq 'status: código' '0' "$rc_last"
+assert_eq 'status: cuatro columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=4')"
+assert_eq 'status: un lenguaje limpio está `ok` y `clean`' 'php main ok clean' \
+    "$(printf '%s\n' "$out" | awk -F'\t' '$1 == "php" {print $1, $2, $3, $4}')"
+
+# un commit en el submódulo que el monorepo todavía no apunta, y un fichero sin confirmar
+printf '# work\n' >"$SANDBOX/php/core/algorithms/notas.md"
+git -C "$SANDBOX/php" add -A
+git -C "$SANDBOX/php" commit -q -m 'feat(algorithms): add notes'
+glot_run_sandbox status php
+assert_contains 'status: el puntero que no coincide se ve' "$(printf 'php\tmain\tdiffers\tclean')" "$out"
+
+# con el árbol del submódulo sucio, además se ve
+printf '# wip\n' >"$SANDBOX/php/core/algorithms/wip.md"
+glot_run_sandbox status php
+assert_contains 'status: el árbol sucio se ve' "$(printf 'differs\tdirty')" "$out"
+rm -f -- "$SANDBOX/php/core/algorithms/wip.md"
+
+# el submódulo apunta a un commit que el monorepo ya registra: `ok`
+git -C "$SANDBOX" add -- php
+git -C "$SANDBOX" commit -q -m 'chore(submodule): update php pointer'
+glot_run_sandbox status php
+assert_contains 'status: puntero al día' "$(printf 'ok\t')" "$out"
+
+# submódulo registrado sin clonar: no hay rama ni árbol que mirar
+printf '[submodule "zig"]\n\tpath = zig\n\turl = ../remote/zig.git\n' >>"$SANDBOX/.gitmodules"
+glot_run_sandbox status zig
+assert_contains 'status: submódulo sin inicializar' "$(printf 'zig\t-\tuninitialised\t-')" "$out"
+git -C "$SANDBOX" checkout -q -- .gitmodules
+
+glot_run_sandbox status nope
+assert_eq 'status de un lenguaje no registrado: código' '1' "$rc_last"
+
+# status no muta nada: ni el gitlink, ni la rama, ni el árbol
+before="$(git -C "$SANDBOX/php" rev-parse HEAD)$(git -C "$SANDBOX" symbolic-ref --short HEAD)"
+glot_run_sandbox status
+after="$(git -C "$SANDBOX/php" rev-parse HEAD)$(git -C "$SANDBOX" symbolic-ref --short HEAD)"
+assert_eq 'status: no muta nada' "$before" "$after"
+
+# clean: borra lo que el propio .gitignore declara y nada más
+mkdir -p -- "$SANDBOX/php/core/algorithms/naive_sort/vendor"
+printf 'vendor/\n' >"$SANDBOX/php/core/algorithms/naive_sort/.gitignore"
+printf 'x\n' >"$SANDBOX/php/core/algorithms/naive_sort/vendor/lib.txt"
+printf 'sin ignorar\n' >"$SANDBOX/php/core/algorithms/naive_sort/nota.txt"
+git -C "$SANDBOX/php" add -A
+git -C "$SANDBOX/php" commit -q -m 'chore(algorithms): add module skeleton'
+
+glot_run_sandbox -n clean php algorithms/naive_sort
+assert_eq 'clean -n: código' '0' "$rc_last"
+assert_contains 'clean -n: el borrado' 'clean -Xfd' "$out"
+assert_contains 'clean -n: la sincronización' 'submodule sync' "$out"
+assert_eq 'clean -n: no borra nada' 'si' "$([[ -f "$SANDBOX/php/core/algorithms/naive_sort/vendor/lib.txt" ]] && echo si || echo no)"
+
+glot_run_sandbox clean php algorithms/naive_sort
+assert_eq 'clean: código' '0' "$rc_last"
+assert_eq 'clean: borra lo ignorado' 'no' "$([[ -e "$SANDBOX/php/core/algorithms/naive_sort/vendor" ]] && echo si || echo no)"
+assert_eq 'clean: respeta lo no ignorado' 'si' "$([[ -f "$SANDBOX/php/core/algorithms/naive_sort/nota.txt" ]] && echo si || echo no)"
+assert_contains 'clean: stdout lleva lo borrado' 'vendor' "$out"
+
+glot_run_sandbox clean php algorithms/naive_sort
+assert_eq 'clean sin artefactos: dato' 'nothing' "$out"
+assert_eq 'clean sin artefactos: código' '0' "$rc_last"
+
+# pointer: la regla de CONTRIBUTING.md como comprobación, no como prosa
+git -C "$SANDBOX/php" switch -q -c feat/algorithms/pointer-test
+printf '# branch\n' >>"$SANDBOX/php/README.md"
+git -C "$SANDBOX/php" add -A
+git -C "$SANDBOX/php" commit -q -m 'feat: branch work'
+glot_run_sandbox pointer php algorithms/naive_sort
+assert_eq 'pointer con rama de trabajo: código' '1' "$rc_last"
+assert_contains 'pointer con rama de trabajo: lo dice' 'no se apunta a una rama de trabajo' "$err"
+
+# integrado pero sin publicar: el HEAD no es el de origin/main
+git -C "$SANDBOX/php" switch -q main
+glot_run_sandbox pointer php algorithms/naive_sort
+assert_eq 'pointer sin publicar: código' '1' "$rc_last"
+assert_contains 'pointer sin publicar: lo dice' 'no es el de origin/main' "$err"
+
+# integrado y publicado: prepara la rama del monorepo, publica y deja el gitlink añadido
+git -C "$SANDBOX/php" push -q origin main
+monorepo_before="$(git -C "$SANDBOX" rev-parse HEAD)"
+glot_run_sandbox pointer php algorithms/naive_sort
+assert_eq 'pointer: código' '0' "$rc_last"
+assert_eq 'pointer: stdout es el SHA corto del submódulo' "$(git -C "$SANDBOX/php" rev-parse --short HEAD)" "$out"
+assert_eq 'pointer: rama del monorepo' 'chore/algorithms/naive-sort-pointer' "$(git -C "$SANDBOX" symbolic-ref --short HEAD)"
+assert_eq 'pointer: la rama está en el remoto' 'si' \
+    "$(git -C "$SANDBOX/remote/repo.git" show-ref --verify --quiet refs/heads/chore/algorithms/naive-sort-pointer && echo si || echo no)"
+assert_contains 'pointer: el gitlink queda añadido' 'php' "$(git -C "$SANDBOX" diff --cached --name-only)"
+assert_eq 'pointer: no confirma el monorepo' "$monorepo_before" "$(git -C "$SANDBOX" rev-parse HEAD)"
+assert_contains 'pointer: dice el siguiente paso' 'glot save 9' "$err"
+
+# pointer -n no toca nada
+git -C "$SANDBOX" reset -q
+monorepo_before="$(git -C "$SANDBOX" rev-parse HEAD)"
+glot_run_sandbox -n pointer php algorithms/naive_sort
+assert_eq 'pointer -n: código' '0' "$rc_last"
+assert_eq 'pointer -n: no toca el monorepo' "$monorepo_before" "$(git -C "$SANDBOX" rev-parse HEAD)"
+
+# save 9: el commit del monorepo lo confirma `save`, con el mensaje del catálogo
+git -C "$SANDBOX" add -- php
+glot_run_sandbox save 9 php algorithms/naive_sort
+assert_eq 'save 9: código' '0' "$rc_last"
+assert_eq 'save 9: asunto del commit' 'chore(submodule): update php pointer' \
+    "$(git -C "$SANDBOX" log -1 --pretty=%s)"
+assert_eq 'save 9: solo el submódulo en el commit' 'php' "$(git -C "$SANDBOX" show --pretty=format: --name-only HEAD)"
+assert_contains 'save 9: sin push' 'no push' "$err"
+
+# save 10: el cierre añade el roadmap, el checklist y la evidencia de ese módulo
+rm -rf -- "$SANDBOX/docs/evidence/algorithms/naive_sort"
+mkdir -p -- "$SANDBOX/docs/evidence/algorithms/naive_sort"
+printf '# evidencia\n' >"$SANDBOX/docs/evidence/algorithms/naive_sort/ruby.md"
+printf '# roadmap\n' >"$SANDBOX/docs/ROADMAP.md"
+printf '# checklist\n' >"$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md"
+glot_run_sandbox save 10 ruby algorithms/naive_sort
+assert_eq 'save 10: código' '0' "$rc_last"
+assert_eq 'save 10: asunto del commit' 'docs(roadmap): close algorithms/naive_sort for ruby' \
+    "$(git -C "$SANDBOX" log -1 --pretty=%s)"
+staged="$(git -C "$SANDBOX" show --pretty=format: --name-only HEAD)"
+assert_contains 'save 10: el roadmap entra' 'docs/ROADMAP.md' "$staged"
+assert_contains 'save 10: el checklist entra' 'docs/ROADMAP_UPDATE_CHECKLIST.md' "$staged"
+assert_contains 'save 10: la evidencia del módulo entra' 'docs/evidence/algorithms/naive_sort/ruby.md' "$staged"
+assert_contains 'save 10: nada de fuera del cierre' 'no' "$(case "$staged" in *php/core/*) echo si ;; *) echo no ;; esac)"
+
+glot_run_sandbox save 10 ruby algorithms/naive_sort
+assert_eq 'save 10 sin cambios: dato' 'nothing' "$out"
+assert_eq 'save 10 sin cambios: código' '0' "$rc_last"
+
+# la ayuda: los tres verbos nuevos están en el listado y tienen ayuda propia
+glot_run help
+assert_eq 'help: los tres verbos de L7 en el listado general' '3' \
+    "$(printf '%s\n' "$out" | grep -cE '^  (status|pointer|clean)')"
+for l7_verb in status pointer clean; do
+    glot_run help "$l7_verb"
+    assert_eq "help $l7_verb: código" '0' "$rc_last"
+    assert_contains "help $l7_verb: se describe" "$l7_verb" "$out"
+done
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 

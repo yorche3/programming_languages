@@ -48,7 +48,7 @@
 | L5 | Creación y registro: `new`, `save` | 0.9.0 ✅ |
 | L6 | Evidencia y cierre: `evidence`, `close`, `validate` | 0.10.0 ✅ |
 | L6.5 | Perfiles de modelo por encargo: `model:` en cada plantilla y catálogo de perfiles con los modelos de Copilot | 0.11.0 🔄 |
-| L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.12.0 |
+| L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.12.0 ✅ |
 | L8 | Instalación: `install`, función cargable, `doctor` completo | 1.0.0 |
 | L9 | Toolchains por lenguaje (`mise`, `nvm`, `pyenv`) | después |
 
@@ -66,7 +66,7 @@
 | 0.9.0 | L5 | 4 | `new` (un verbo, dos modos: ejecuta el inicializador o construye el esqueleto manual, y normaliza lo que el inicializador deja) y `save` (commit guiado desde el catálogo de commits); tabla de inicialización ampliada con tipo/comando/normalización y el encargo `suite` separado de `scaffold` | Reutiliza catálogo y estado; elimina el andamiaje y el commit manual repetidos. Lo que exige leer la especificación (runners de ejemplo, nombres predefinidos) sigue siendo del agente |
 | 0.10.0 | L6 | 7–8 | `evidence` (salidas reales), `close` (checklist + roadmap) y `validate` (validador automático con Copilot CLI) | El cierre documental requiere validación: la ejecuta el agente, el script la encarga y la comprueba |
 | 0.11.0 | L6.5 | 4–8 | **Perfiles de modelo por encargo**: `model:` en el frontmatter de cada plantilla y un catálogo de perfiles **con los modelos que ofrece Copilot** —uno económico con esfuerzo bajo para validar y documentar, y el más capaz para implementar—, con tope de créditos por corrida | La delegación y la validación ya existen; el modelo es la palanca de calidad y de coste, y va después de tenerlas |
-| 0.12.0 | L7 | 1, 9 | `status` (submódulos, ramas, punteros), `pointer` (actualiza el puntero del submódulo en el monorepo), `clean` de artefactos y `submodule sync` | Ops diaria; primero solo lectura, las mutaciones con `-n` |
+| 0.12.0 | L7 | 1, 8 | `status` (submódulos, ramas, punteros), `pointer` (actualiza el puntero del submódulo en el monorepo) y `clean` de artefactos con `submodule sync`, que es **apoyo a los pasos 5–6** y no un paso por sí mismo | Ops diaria; primero solo lectura, las mutaciones con `-n` |
 | 1.0.0 | L8 | todos | `install`/`uninstall` (`.bashrc` + completions), **capa cargable** (`use` hace el `cd` real) y `doctor` completo | 1.0 = objetivo original cumplido |
 | ⏳ | L9 | — | Versión esperada por lenguaje y comprobación/instalación | Segunda acepción de «manejador de versiones»; llega después del ciclo del roadmap |
 
@@ -75,9 +75,10 @@
 | Deuda | Cuándo se paga |
 |-------|----------------|
 | Hasta la v1.0.0 el `cd` no es real: se usa `cd "$(glot use …)"` | v1.0.0 (`install` + capa cargable) |
-| Hasta la v0.12.0 el puntero del submódulo en el monorepo se actualiza a mano | v0.12.0 (`pointer`) |
+| El **estado del sprint es global** (XDG), sin clave de repositorio: dos monorepos comparten `lang/phase/module`, así que un sprint en un banco de pruebas pisa el del trabajo real. Medido el 2026-09-23 ejecutando un sprint completo en un laboratorio aparte, que hubo que aislar con `GLOT_STATE_DIR` | v1.0.0 (`install` + capa cargable): clave por raíz del monorepo |
+| Los **encargos citan rutas y nombres del monorepo real** (`docs/core/00_Project_Initialization_Guide.md`, `AGENTS.md`, los módulos homologados del lenguaje y el nombre `yorche3/programming_languages` en prosa) y no comprueban que existan. Medido el 2026-09-23: en el laboratorio faltaban y hubo que añadirlas a mano | v1.0.0: raíz del monorepo como marcador del encargo y comprobación de fuentes |
 
-**ES:** Pagadas: los commits a mano se acabaron en la v0.9.0 (`save`).
+**ES:** Pagadas: los commits a mano se acabaron en la v0.9.0 (`save`), y el puntero del submódulo dejó de actualizarse a mano en la v0.12.0 (`pointer` prepara y `save 9` confirma).
 
 **EN:** Paid: hand-made commits ended in v0.9.0 (`save`).
 
@@ -146,6 +147,23 @@ La política del validador automático (invocación, modelo y coste, advertencia
 | Modelo fuera del catálogo | Un `model:` que no está en `data/models.tsv` es un **dato que falta**: código `1`, como un marcador sin resolver. Un perfil pedido por argumento que no existe sería **uso**: código `2` |
 | Anti-envejecimiento | La lista de modelos la manda el CLI instalado (`copilot help config`). `doctor` informa de la cobertura del catálogo y de si cada modelo de los perfiles sigue en la lista del CLI, para que una fila vieja se vea antes de usarla |
 | Sin BYOK | Confirmado: solo modelos de Copilot. El proveedor propio exige variables de entorno y `glot` no gestiona claves ni proveedores; el mecanismo queda documentado en [`VALIDATION.md`](VALIDATION.md) por si algún día se quiere enchufar |
+
+---
+
+### Decisiones cerradas de la v0.12.0 / Closed decisions for v0.12.0
+
+**ES:** Las decisiones de la L7 se resolvieron el 2026-09-23, antes de escribir código.
+
+**EN:** The L7 decisions were resolved on 2026-09-23, before writing any code.
+
+| Tema | Decisión |
+|------|----------|
+| `pointer` y el commit | `pointer` **prepara** (verifica la integración, lleva el submódulo al commit integrado, crea y publica la rama `chore/{fase}/{módulo}-pointer` y hace `git add`) y **no confirma**: confirma `save 9`, que es el mismo verbo que confirma el resto del sprint |
+| `save` en el monorepo | Se habilita para los pasos de ámbito `monorepo`: `9` añade **solo el submódulo** y `10` añade las rutas del cierre (roadmap, checklist y la evidencia de ese módulo). Sigue **sin hacer push**: eso es del autor |
+| Qué apunta `pointer` | Solo a un commit **integrado** en el `main` del submódulo: `fetch` explícito de `origin/main` y `merge-base --is-ancestor`, porque el ref local puede estar viejo y dar un falso OK. La regla de [`CONTRIBUTING.md`](../../docs/CONTRIBUTING.md) —nunca apuntar a una rama de trabajo— pasa de prosa a comprobación. El gitlink se lee con `git ls-tree HEAD -- <lenguaje>` o `git rev-parse HEAD:<lenguaje>`: `git rev-parse <ruta>` devuelve la **ruta**, no el SHA |
+| Contrato de `status` | Una línea por lenguaje registrado y **solo lectura**: `lang<TAB>branch<TAB>pointer<TAB>worktree`, con `pointer` ∈ `ok` (el gitlink coincide con el HEAD del submódulo), `differs`, `uninitialised` o `unknown`, y `worktree` ∈ `clean` o `dirty`. Filtrable por lenguaje y **sin resumen**: para contadores ya está `progress` |
+| Alcance de `clean` | `git clean -Xfd` —solo lo que el propio `.gitignore` del lenguaje declara como artefacto— en el **directorio del módulo**, más `git submodule sync` del lenguaje. Nunca el monorepo y nunca `docs/`. Borra también lo que el lenguaje ignore aunque parezca útil (`php` ignora `composer.lock`): el dato lo pone su `.gitignore`, no `glot` |
+| `clean` y la regla 5 | `clean` no cubre ningún paso del sprint, así que se declara **apoyo a los pasos 5–6** (artefactos viejos fuera antes de verificar) y se dice en la fila de la versión, en vez de relajar la regla |
 
 ---
 

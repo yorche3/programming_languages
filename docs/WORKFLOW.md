@@ -34,7 +34,7 @@
 
 | # | Paso | Objetivo | Artefacto obligatorio |
 |:-:|------|----------|-----------------------|
-| 8 | Puntero y cierre del lenguaje | Que el monorepo apunte al commit integrado y que el lenguaje quede cerrado | Puntero actualizado en rama `chore/{fase}/{módulo}-pointer`; readmes faltantes e índices de Nivel 1–3 al día |
+| 8 | Puntero y cierre del lenguaje | Que el monorepo apunte al commit integrado y que el lenguaje quede cerrado | `glot pointer` deja la rama `chore/{fase}/{módulo}-pointer` preparada y publicada, con el gitlink añadido, y `glot save 9` la confirma; readmes faltantes e índices de Nivel 1–3 al día |
 | 9 | Registro del cierre | Dejar constancia verificable | Entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) y contador de [`ROADMAP.md`](ROADMAP.md) al día, en el mismo cambio |
 
 **ES:** El puntero se actualiza **después** de integrar en el `main` del submódulo y **antes** de integrar la rama del monorepo. Nunca se apunta a una rama de trabajo no integrada.

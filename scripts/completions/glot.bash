@@ -13,7 +13,7 @@ _glot_complete() {
     local glot="${GLOT_CMD:-glot}"
     local words=""
     local keys="lang phase module branch spec repo"
-    local verbs="version help doctor greet langs modules progress completion use new save test verify evidence close validate prompt ask set get unset list path"
+    local verbs="version help doctor greet langs modules progress completion use new save test verify evidence close validate prompt ask status pointer clean set get unset list path"
 
     if ((COMP_CWORD == 1)); then
         COMPREPLY=($(compgen -W "$verbs -q --quiet -n --dry-run -h --help --version" -- "$cur"))

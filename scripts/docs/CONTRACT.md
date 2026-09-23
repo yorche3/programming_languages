@@ -36,7 +36,7 @@
 
 ---
 
-## 🧰 Verbos de la versión viva (v0.10.0) / Verbs in the live version
+## 🧰 Verbos de la versión viva (v0.12.0) / Verbs in the live version
 
 | Verbo | Comportamiento | Código |
 |-------|----------------|:------:|
@@ -59,10 +59,13 @@
 | `prompt [encargo] [lenguaje] [fase/módulo]` | Sin encargo, lista el registro —`nombre<TAB>paso<TAB>modelo<TAB>descripción`—; con encargo, imprime el encargo armado (estado del sprint + plantilla expandida) | 0 / 1 / 2 / 3 |
 | `ask <encargo> [lenguaje] [fase/módulo]` | Arma el encargo y lo envía a `GLOT_DELEGATE` por stdin; su salida va a stdout. El modelo del perfil del encargo viaja por entorno (`COPILOT_MODEL`, y el tier de auto si el perfil lo declara) | 0 / 1 / 2 / 3 |
 | `new [lenguaje] [fase/módulo]` | Inicializa el lenguaje y crea el esqueleto mecánico del módulo: con `tool` ejecuta el comando del catálogo; con `manual` crea las carpetas; con `deferred` informa e imprime `skipped`. Normaliza lo que deja el inicializador. No escribe la suite | 0 / 1 / 2 / **4** |
-| `save <paso\|alias> [lenguaje] [fase/módulo]` | Confirma en el submódulo con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. Sin push ni puntero. Sin paso, publica el catálogo en stdout | 0 / 1 / 2 / 3 / **4** |
+| `save <paso\|alias> [lenguaje] [fase/módulo]` | Confirma con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. Los pasos del submódulo añaden el submódulo; los del monorepo (`9`, `10`) añaden **solo las rutas del paso**. Sin push | 0 / 1 / 2 / 3 / **4** |
 | `evidence [lenguaje] [fase/módulo]` | Ejecuta la suite y el verificador y deja el acta con la salida real en `docs/evidence/`; la escribe también cuando algo está en rojo | 0 / 1 / 2 / 3 / **4** |
 | `close [lenguaje] [fase/módulo]` | Cierra el módulo: exige la evidencia en verde y los README, registra la entrada del checklist y sube el contador y la lista del roadmap; idempotente. Imprime la línea nueva | 0 / 1 / 2 / 3 / **4** |
 | `validate [lenguaje] [fase/módulo]` | Pasa el encargo `validate` al validador automático (opcional) y guarda su informe como registro del sprint. Sin validador, avisa y devuelve `1` | 0 / 1 / 2 / 3 / **4** |
+| `status [lenguaje]` | **Solo lectura**: una línea por lenguaje registrado —`lang<TAB>branch<TAB>pointer<TAB>worktree`— con el puntero en `ok`, `differs`, `uninitialised` o `unknown` | 0 / 1 / 2 |
+| `pointer [lenguaje] [fase/módulo]` | Deja el puntero del submódulo **preparado y sin confirmar**: exige que el submódulo esté en su `main` y que ese commit sea el de `origin/main`, prepara y publica la rama `chore/{fase}/{módulo}-pointer` y añade el gitlink. Imprime el SHA corto o `nothing` | 0 / 1 / 2 / 3 |
+| `clean [lenguaje] [fase/módulo]` | Borra lo que el propio `.gitignore` del lenguaje declara como artefacto, **solo dentro del directorio del módulo**, y sincroniza el submódulo. Imprime las rutas borradas o `nothing` | 0 / 1 / 2 |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
 
 ---
@@ -354,6 +357,23 @@
 | Dato que falta / Missing datum | `model:` ausente en la plantilla, o un modelo que el catálogo no reconoce: **`1`**, como un marcador sin resolver. Nunca se inventan esfuerzo ni créditos |
 | Anti-envejecimiento | `doctor` informa de `model_profiles` (encargos con perfil reconocido) y de `model_available` (modelos del catálogo que siguen en la lista del CLI instalado) |
 | Qué **no** hace / What it does **not** | No gestiona proveedores ni claves (BYOK fuera de alcance) y no tiene override por corrida: manda el `model:` de la plantilla, que es el dato versionado |
+
+---
+
+## 🧹 Higiene y punteros (L7, v0.12.0) / Hygiene and pointers
+
+**ES:** La capa de ops diaria: `status` para mirar, `pointer` para dejar el puntero listo y `clean` para quitar artefactos. Ninguno confirma nada: el commit del monorepo lo hace `save 9` o `save 10`.
+
+**EN:** The daily-ops layer: `status` to look, `pointer` to get the pointer ready and `clean` to drop artefacts. None of them commits: the monorepo commit is made by `save 9` or `save 10`.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| `pointer` no confirma | **Prepara**: verifica, deja el submódulo en el commit integrado, prepara la rama `chore/{fase}/{módulo}-pointer`, la publica con upstream y hace `git add <lenguaje>`. El commit lo hace `save 9`, que es el mismo verbo que confirma el resto del sprint |
+| La regla, como comprobación | `pointer` hace `fetch` explícito de `origin/main` del submódulo y exige que su HEAD **sea** ese commit: nunca se apunta a una rama de trabajo sin integrar. Con el ref local, la comprobación podría mentir |
+| Idempotencia | Si el monorepo ya apunta a ese commit, imprime `nothing` y no toca ramas |
+| `status` sin resumen | Cuatro columnas y un lenguaje por línea: el resumen de contadores es de `progress`, y `status` no muta nada, así que no necesita `-n` |
+| Alcance de `clean` | `git clean -Xfd` en el **directorio del módulo** (lo que el `.gitignore` del lenguaje declara como artefacto) más `git submodule sync` del lenguaje. Nunca `-x`: lo no rastreado y no ignorado es trabajo del autor. Nunca el monorepo ni `docs/` |
+| Qué **no** hace / What it does **not** | No hace `push` del monorepo (`pointer` solo publica su rama), no confirma, y no borra nada que el lenguaje no haya declarado ignorado |
 
 ---
 
