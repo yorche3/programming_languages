@@ -85,13 +85,13 @@ glot_run_in() {
 
 # version
 glot_run version
-assert_eq 'version: salida' 'glot 0.9.0' "$out"
+assert_eq 'version: salida' 'glot 0.10.0' "$out"
 assert_eq 'version: código' '0' "$rc_last"
 assert_eq 'version: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 
 # --version
 glot_run --version
-assert_eq '--version: salida' 'glot 0.9.0' "$out"
+assert_eq '--version: salida' 'glot 0.10.0' "$out"
 assert_eq '--version: código' '0' "$rc_last"
 
 # help general y por verbo
@@ -138,21 +138,26 @@ glot_run_stdin '' greet
 assert_eq 'greet sin nombre: código' '2' "$rc_last"
 assert_eq 'greet sin nombre: stdout vacío' '' "$out"
 
-# compatibilidad v0.2.0: verbo hello
-glot_run hello Ada
-assert_eq 'compatibilidad hello: salida' 'Hello, Ada!' "$out"
-assert_eq 'compatibilidad hello: código' '0' "$rc_last"
+# `hello` se retiró en la v0.10.0: el alias de compatibilidad de la v0.2.0 ya no existe
+# y el aviso de verbo desconocido ya no ofrece el saludo
 
-# un nombre suelto ya no es un nombre: falla rápido y sugiere el verbo
+glot_run hello Ada
+assert_eq 'hello retirado: código' '2' "$rc_last"
+assert_eq 'hello retirado: sin saludo' '' "$out"
+assert_contains 'hello retirado: error' 'unknown verb: hello' "$err"
+assert_contains 'hello retirado: sugiere la ayuda' 'glot help' "$err"
+assert_eq 'hello retirado: sin sugerencia de greet' '0' "$(printf '%s\n' "$err" | grep -c 'greet' || true)"
+
+# un nombre suelto ya no es un nombre: falla rápido y sugiere la ayuda
 glot_run Ada
 assert_eq 'nombre suelto: código' '2' "$rc_last"
 assert_eq 'nombre suelto: stdout vacío' '' "$out"
-assert_contains 'nombre suelto: sugiere greet' 'glot greet Ada' "$err"
+assert_contains 'nombre suelto: sugiere la ayuda' 'glot help' "$err"
 
 # doctor dentro del monorepo
 glot_run doctor
 assert_eq 'doctor dentro: código' '0' "$rc_last"
-assert_contains 'doctor dentro: versión' 'version: 0.9.0' "$out"
+assert_contains 'doctor dentro: versión' 'version: 0.10.0' "$out"
 assert_contains 'doctor dentro: script_dir' 'script_dir:' "$out"
 assert_contains 'doctor dentro: raíz detectada' 'root: /' "$out"
 assert_contains 'doctor dentro: ruta del estado' 'state_file:' "$out"
@@ -765,7 +770,7 @@ assert_contains 'doctor: hay verificadores' 'verify_commands: 14 de / of 50' "$o
 # registro de encargos: nombre<TAB>paso<TAB>descripción, leído del frontmatter
 glot_run prompt
 assert_eq 'prompt: código' '0' "$rc_last"
-assert_eq 'prompt: cinco encargos' '5' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'prompt: seis encargos' '6' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 assert_eq 'prompt: tres columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=3')"
 assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
 assert_contains 'prompt: docs-language en el paso 8' "$(printf 'docs-language\t8')" "$out"
@@ -819,7 +824,7 @@ assert_contains 'ask -n: imprime el plan sin enviar' 'cat >/dev/null' "$out"
 # doctor informa de las plantillas y del delegado
 glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
-assert_contains 'doctor: registro de encargos' 'prompts_ok: 5 encargos / requests' "$out"
+assert_contains 'doctor: registro de encargos' 'prompts_ok: 6 encargos / requests' "$out"
 assert_contains 'doctor: delegado sin configurar' 'delegate: (sin configurar / not configured)' "$out"
 
 # --- casos de la especificación v0.9.0 (L5, creación y registro) -------------
@@ -899,6 +904,12 @@ assert_contains 'scaffold: declara la entrada' '**Entrada**' "$scaffold_prompt"
 assert_contains 'scaffold: declara lo que queda fuera' '**Fuera de alcance**' "$scaffold_prompt"
 assert_contains 'scaffold: parte de lo que dejó new' 'glot new' "$scaffold_prompt"
 assert_contains 'scaffold: no escribe la suite' 'encargo `suite`' "$scaffold_prompt"
+
+# la plantilla de validación define el contrato del veredicto que `validate` lee
+validate_prompt="$(cat -- "$PROMPTS_DIR/validate.prompt.md")"
+assert_contains 'validate: la plantilla exige el veredicto legible' 'glot:validate verdict=clean findings=0' "$validate_prompt"
+assert_contains 'validate: la plantilla exige la otra forma' 'glot:validate verdict=findings findings=' "$validate_prompt"
+assert_contains 'validate: la plantilla se declara de solo lectura' 'solo lectura' "$validate_prompt"
 
 # el autocompletado completa los pasos de `save` y no solo los verbos. La llamada
 # va en su propio shell: el listado de pasos sale de un verbo que devuelve 2 (es
@@ -1007,6 +1018,361 @@ assert_contains 'doctor: catalogadas las aplazadas' '(deferred: 7)' "$out"
 assert_contains 'doctor: catálogo de commits' 'commits_file: ' "$out"
 assert_contains 'doctor: pasos de commit' 'commit_steps: 7 de / of which 5 son del submódulo' "$out"
 
+# --- casos de la especificación v0.10.0 (L6, evidencia y cierre) -------------
+
+# el lenguaje se deduce del directorio cuando no lo traen ni los argumentos ni el
+# estado: dentro de un submódulo es evidente, igual que en `use`
+sandbox_make
+mkdir -p -- "$SANDBOX/php/core/algorithms/naive_sort"
+glot_run_sandbox unset lang
+glot_run_sandbox unset phase
+glot_run_sandbox unset module
+glot_run_from "$SANDBOX/php" -n test algorithms/naive_sort
+assert_eq 'lenguaje desde el directorio: código' '0' "$rc_last"
+assert_contains 'lenguaje desde el directorio: usa el del submódulo actual' '/php/core/algorithms/naive_sort && ' "$out"
+
+glot_run_from "$SANDBOX/docs" -n test algorithms/naive_sort
+assert_eq 'fuera de un submódulo: sigue faltando el lenguaje' '1' "$rc_last"
+assert_contains 'fuera de un submódulo: sugiere use' 'glot use' "$err"
+
+# el estado del sprint manda sobre el directorio: el argumento siempre gana
+glot_run_sandbox use ruby algorithms/naive_sort
+assert_eq 'estado del sprint preparado: código' '0' "$rc_last"
+glot_run_from "$SANDBOX/php" -n test algorithms/naive_sort
+assert_contains 'el estado manda sobre el directorio' 'ruby/core/algorithms/naive_sort' "$out"
+
+glot_run_from "$SANDBOX/php" -n test php algorithms/naive_sort
+assert_contains 'el argumento manda sobre el estado' 'php/core/algorithms/naive_sort' "$out"
+
+# evidence: el acta con la salida real, escrita también cuando la suite está en rojo.
+# Los comandos del lenguaje se sustituyen por dos dobles en el PATH, así que el caso
+# es determinista y no depende de ninguna toolchain.
+sandbox_make
+mkdir -p -- "$SANDBOX/ruby/core/algorithms/naive_sort/src" "$SANDBOX/stub"
+
+cat >"$SANDBOX/stub/bundle" <<'STUB'
+#!/usr/bin/env bash
+printf 'stub bundle: %s\n' "$*"
+exit "${STUB_TEST_EXIT:-0}"
+STUB
+cat >"$SANDBOX/stub/ruby" <<'STUB'
+#!/usr/bin/env bash
+printf 'stub ruby: %s\n' "$*"
+exit "${STUB_VERIFY_EXIT:-0}"
+STUB
+chmod +x -- "$SANDBOX/stub/bundle" "$SANDBOX/stub/ruby"
+
+# glot_run_evidence [-n|...] [args...] — ejecuta `evidence` con los dobles por delante
+# en el PATH; los flags globales se colocan antes del verbo, como manda el contrato.
+glot_run_evidence() {
+    local -a flags=()
+    local rc=0
+
+    while [[ "${1:-}" == -* ]]; do
+        flags+=("$1")
+        shift
+    done
+
+    out="$(GLOT_ROOT="$SANDBOX" PATH="$SANDBOX/stub:$PATH" "$GLOT_SH" "${flags[@]}" evidence "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+ACTA="$SANDBOX/docs/evidence/algorithms/naive_sort/ruby.md"
+
+# en verde: el acta queda con la salida real, el commit y el veredicto
+glot_run_evidence ruby algorithms/naive_sort
+assert_eq 'evidence en verde: código' '0' "$rc_last"
+assert_eq 'evidence en verde: dato = ruta del acta' "$ACTA" "$out"
+assert_eq 'evidence en verde: el acta está escrita' 'si' "$([[ -f "$ACTA" ]] && echo si || echo no)"
+assert_contains 'evidence: bloque de máquina con el veredicto' 'verdict=green' "$(cat -- "$ACTA")"
+assert_contains 'evidence: código de la suite' 'test_exit=0' "$(cat -- "$ACTA")"
+assert_contains 'evidence: código del verificador' 'verify_exit=0' "$(cat -- "$ACTA")"
+assert_contains 'evidence: salida real de la suite' 'stub bundle: exec rspec' "$(cat -- "$ACTA")"
+assert_contains 'evidence: salida real del verificador' 'stub ruby: -c src/naive_sort.rb' "$(cat -- "$ACTA")"
+assert_contains 'evidence: apunta al commit del submódulo' 'commit=' "$(cat -- "$ACTA")"
+assert_contains 'evidence: árbol limpio' 'dirty=no' "$(cat -- "$ACTA")"
+assert_contains 'evidence: el bloque de máquina se cierra' "$(printf '%s\n' '-->')" "$(cat -- "$ACTA")"
+
+# en rojo: el acta se escribe igual y el verbo devuelve 4
+STUB_TEST_EXIT=1 glot_run_evidence ruby algorithms/naive_sort
+assert_eq 'evidence en rojo: código' '4' "$rc_last"
+assert_eq 'evidence en rojo: dato = ruta del acta' "$ACTA" "$out"
+assert_contains 'evidence en rojo: veredicto' 'verdict=red' "$(cat -- "$ACTA")"
+assert_contains 'evidence en rojo: código de la suite' 'test_exit=1' "$(cat -- "$ACTA")"
+assert_contains 'evidence en rojo: el verificador sigue verde' 'verify_exit=0' "$(cat -- "$ACTA")"
+assert_contains 'evidence en rojo: avisa' 'the suite is red' "$err"
+
+# con el árbol sucio el acta lo dice, porque la evidencia apunta al commit
+printf 'x\n' >"$SANDBOX/ruby/core/algorithms/naive_sort/src/x.rb"
+glot_run_evidence ruby algorithms/naive_sort
+assert_contains 'evidence con árbol sucio: lo marca' 'dirty=yes' "$(cat -- "$ACTA")"
+assert_contains 'evidence con árbol sucio: avisa' 'sucio' "$err"
+
+# sin verificador en el catálogo, solo se ejecuta la suite
+sandbox_make
+mkdir -p -- "$SANDBOX/stub"
+glot_run -n evidence java algorithms/naive_sort
+assert_eq 'evidence -n sin verificador: solo la suite' '1' "$(printf '%s\n' "$out" | grep -c '^cd ')"
+glot_run -n evidence php algorithms/naive_sort
+assert_eq 'evidence -n con verificador: suite y verificador' '2' "$(printf '%s\n' "$out" | grep -c '^cd ')"
+assert_contains 'evidence -n: enseña dónde queda el acta' '/docs/evidence/algorithms/naive_sort/php.md' "$out"
+
+# -n no ejecuta ni escribe el acta
+sandbox_make
+mkdir -p -- "$SANDBOX/ruby/core/algorithms/naive_sort/src" "$SANDBOX/stub"
+glot_run_evidence -n ruby algorithms/naive_sort
+assert_eq 'evidence -n: código' '0' "$rc_last"
+assert_contains 'evidence -n: enseña el acta' '/docs/evidence/algorithms/naive_sort/ruby.md' "$out"
+assert_eq 'evidence -n: no escribe' 'no' "$([[ -f "$SANDBOX/docs/evidence/algorithms/naive_sort/ruby.md" ]] && echo si || echo no)"
+
+# errores del objetivo y de los argumentos
+glot_run_evidence ruby algorithms/nope
+assert_eq 'evidence con módulo desconocido: código' '1' "$rc_last"
+glot_run_evidence nope algorithms/naive_sort
+assert_eq 'evidence con lenguaje fuera de .gitmodules: código' '1' "$rc_last"
+glot_run_evidence ruby algorithms/naive_sort extra
+assert_eq 'evidence con demasiados argumentos: código' '2' "$rc_last"
+
+# la tabla de nombres de presentación: es la que fija el nombre y el orden de las listas
+# del roadmap, así que la deriva se comprueba en los dos sentidos
+assert_eq 'display: 2 columnas por fila' '0' \
+    "$(awk -F'\t' 'NF != 2' "$DATA_DIR/display.tsv" | wc -l | tr -d ' ')"
+assert_eq 'display: un nombre por lenguaje registrado' '0' \
+    "$(diff <(cut -f1 "$DATA_DIR/display.tsv" | LC_ALL=C sort) \
+        <(git config --file "$REPO/.gitmodules" --get-regexp '\.path$' | awk '{print $NF}' | LC_ALL=C sort) | wc -l | tr -d ' ')"
+display_names="$(cut -f2 "$DATA_DIR/display.tsv" | LC_ALL=C sort)"
+roadmap_names="$(grep -m1 '50/50 (' "$REPO/docs/ROADMAP.md" | sed 's/.*(//; s/)$//' |
+    tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | LC_ALL=C sort)"
+assert_eq 'display: 50 nombres' '50' "$(printf '%s\n' "$display_names" | wc -l | tr -d ' ')"
+assert_eq 'display: los nombres son los del roadmap' "$roadmap_names" "$display_names"
+
+# close: cierre del módulo. Se monta un roadmap y un checklist de mentira en el
+# sandbox, con el módulo a medio cerrar, y se comprueban la línea nueva, la entrada
+# del checklist, la idempotencia y las negativas. La marca inicial es texto ASCII a
+# propósito: el análisis no depende de que el emoji sobreviva al editor, y así el
+# fixture tampoco.
+sandbox_make
+mkdir -p -- "$SANDBOX/ruby/core/algorithms/naive_sort/src" "$SANDBOX/stub"
+
+cat >"$SANDBOX/stub/bundle" <<'STUB'
+#!/usr/bin/env bash
+printf 'stub bundle: %s\n' "$*"
+exit "${STUB_TEST_EXIT:-0}"
+STUB
+cat >"$SANDBOX/stub/ruby" <<'STUB'
+#!/usr/bin/env bash
+printf 'stub ruby: %s\n' "$*"
+exit "${STUB_VERIFY_EXIT:-0}"
+STUB
+chmod +x -- "$SANDBOX/stub/bundle" "$SANDBOX/stub/ruby"
+
+# close_fixture [contador] — deja la línea del módulo a medio cerrar.
+close_fixture() {
+    printf 'core.algorithms.naive_sort            pending %s (Ada)\n' "${1:-1/50}" >"$SANDBOX/docs/ROADMAP.md"
+    printf '# Registro de cierre\n' >"$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md"
+}
+
+RB="$SANDBOX/ruby/core/algorithms/naive_sort"
+printf '# naive sort (ruby)\n' >"$RB/README.md"
+printf '# algorithms (ruby)\n' >"$SANDBOX/ruby/core/algorithms/README.md"
+close_fixture
+
+# sin evidencia, el cierre no pasa
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close sin evidencia: código' '1' "$rc_last"
+assert_contains 'close sin evidencia: remite a evidence' 'glot evidence' "$err"
+
+# con la evidencia en rojo tampoco
+STUB_TEST_EXIT=1 glot_run_evidence ruby algorithms/naive_sort
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close con evidencia roja: código' '4' "$rc_last"
+assert_contains 'close con evidencia roja: lo dice' 'not green' "$err"
+
+# en verde: se registra el cierre
+glot_run_evidence ruby algorithms/naive_sort
+glot_run_sandbox -n close ruby algorithms/naive_sort
+assert_eq 'close -n: código' '0' "$rc_last"
+assert_contains 'close -n: la línea vieja' '-core.algorithms.naive_sort' "$out"
+assert_contains 'close -n: la línea nueva' '+core.algorithms.naive_sort' "$out"
+assert_contains 'close -n: el contador y la lista' '2/50 (Ada, Ruby)' "$out"
+assert_contains 'close -n: el roadmap no se toca' '1/50 (Ada)' "$(cat -- "$SANDBOX/docs/ROADMAP.md")"
+
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close: código' '0' "$rc_last"
+assert_contains 'close: dato = la línea nueva' '2/50 (Ada, Ruby)' "$out"
+assert_contains 'close: el roadmap queda actualizado' '2/50 (Ada, Ruby)' "$(cat -- "$SANDBOX/docs/ROADMAP.md")"
+assert_eq 'close: la marca pasa a en curso' 'si' \
+    "$(grep -q $'\xf0\x9f\x94\x84' "$SANDBOX/docs/ROADMAP.md" && echo si || echo no)"
+assert_contains 'close: la entrada del checklist' 'Lenguaje(s) / Language(s): ruby' "$(cat -- "$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md")"
+assert_contains 'close: la entrada cita la evidencia' 'acta de evidencia' "$(cat -- "$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md")"
+assert_contains 'close: la entrada cita el cambio del roadmap' '2/50 (Ada, Ruby)' "$(cat -- "$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md")"
+assert_contains 'close: no confirma' 'the commit is yours' "$err"
+
+# idempotente: repetirlo no suma dos veces ni vuelve a pedir la evidencia
+entries_before="$(grep -c 'Fecha / Date:' "$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md")"
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close repetido: código' '0' "$rc_last"
+assert_contains 'close repetido: avisa' 'already counts' "$err"
+assert_contains 'close repetido: la línea no cambia' '2/50 (Ada, Ruby)' "$out"
+assert_eq 'close repetido: sin segunda entrada' "$entries_before" \
+    "$(grep -c 'Fecha / Date:' "$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md")"
+
+# al llegar al total, la línea queda marcada como hecha
+close_fixture '1/2'
+glot_run_evidence ruby algorithms/naive_sort
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_contains 'close: al llegar al total' '2/2 (Ada, Ruby)' "$out"
+assert_eq 'close: la marca es la de hecho' 'si' \
+    "$(printf '%s' "$out" | grep -q $'\xe2\x9c\x85' && echo si || echo no)"
+
+# negativas de documentación y de roadmap
+close_fixture
+rm -f -- "$RB/README.md"
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close sin README del módulo: código' '4' "$rc_last"
+assert_contains 'close sin README del módulo: remite al paso 7' 'docs-module' "$err"
+printf '# naive sort (ruby)\n' >"$RB/README.md"
+
+rm -f -- "$SANDBOX/ruby/core/algorithms/README.md"
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close sin README de la fase: código' '4' "$rc_last"
+assert_contains 'close sin README de la fase: remite al paso 8' 'docs-language' "$err"
+printf '# algorithms (ruby)\n' >"$SANDBOX/ruby/core/algorithms/README.md"
+
+printf '# sin el módulo\n' >"$SANDBOX/docs/ROADMAP.md"
+glot_run_sandbox close ruby algorithms/naive_sort
+assert_eq 'close sin la línea del roadmap: código' '1' "$rc_last"
+assert_contains 'close sin la línea del roadmap: lo dice' 'missing from the roadmap' "$err"
+
+close_fixture
+glot_run_sandbox close ruby algorithms/nope
+assert_eq 'close con módulo desconocido: código' '1' "$rc_last"
+glot_run_sandbox close ruby algorithms/naive_sort extra
+assert_eq 'close con demasiados argumentos: código' '2' "$rc_last"
+
+# validate: el validador es enchufable y opcional. El sustituto lee el encargo por
+# stdin y emite el veredicto que la plantilla exige, así que el caso no depende de
+# Copilot ni gasta créditos.
+sandbox_make
+mkdir -p -- "$SANDBOX/php/core/algorithms/naive_sort" "$SANDBOX/stub"
+
+cat >"$SANDBOX/stub/validador" <<'STUB'
+#!/usr/bin/env bash
+cat >"${VALIDATOR_INBOX:-/dev/null}"
+if [[ -n "${VALIDATOR_BREAK:-}" ]]; then
+    exit "${VALIDATOR_EXIT:-1}"
+fi
+if [[ -z "${VALIDATOR_SILENT:-}" ]]; then
+    case "${VALIDATOR_VERDICT:-clean}" in
+        clean) printf 'Sin hallazgos.\nglot:validate verdict=clean findings=0\n' ;;
+        findings) printf -- '- [media] src/x.php:3 — falta el caso nulo\nglot:validate verdict=findings findings=1\n' ;;
+        *) printf 'algo raro\nglot:validate verdict=no-se\n' ;;
+    esac
+fi
+STUB
+chmod +x -- "$SANDBOX/stub/validador"
+
+# glot_run_validate [-n|...] [args...] — ejecuta `validate` con ese validador; los
+# flags globales van antes del verbo, como manda el contrato.
+glot_run_validate() {
+    local -a flags=()
+    local rc=0
+
+    while [[ "${1:-}" == -* ]]; do
+        flags+=("$1")
+        shift
+    done
+
+    out="$(GLOT_ROOT="$SANDBOX" GLOT_VALIDATOR="$SANDBOX/stub/validador" "$GLOT_SH" "${flags[@]}" validate "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+RECORD="$SANDBOX/docs/evidence/algorithms/naive_sort/php.validate.md"
+
+# sin hallazgos: cero, informe por stdout y registro con bloque de máquina
+VALIDATOR_INBOX="$SANDBOX/encargo.txt" glot_run_validate php algorithms/naive_sort
+assert_eq 'validate limpio: código' '0' "$rc_last"
+assert_contains 'validate: el informe va a stdout' 'verdict=clean' "$out"
+assert_eq 'validate limpio: el registro está' 'si' "$([[ -f "$RECORD" ]] && echo si || echo no)"
+assert_contains 'validate: el registro lleva el bloque de máquina' 'verdict=clean' "$(cat -- "$RECORD")"
+assert_contains 'validate: el registro guarda el informe' 'Sin hallazgos.' "$(cat -- "$RECORD")"
+assert_contains 'validate: el registro dice quién validó' 'validator=' "$(cat -- "$RECORD")"
+assert_contains 'validate: el encargo llega por stdin' '# Encargo `validate`' "$(cat -- "$SANDBOX/encargo.txt")"
+assert_contains 'validate: el encargo trae el estado del sprint' '| module | naive_sort |' "$(cat -- "$SANDBOX/encargo.txt")"
+
+# con hallazgos: cuatro y el registro lo dice
+VALIDATOR_VERDICT=findings glot_run_validate php algorithms/naive_sort
+assert_eq 'validate con hallazgos: código' '4' "$rc_last"
+assert_contains 'validate con hallazgos: el registro' 'verdict=findings' "$(cat -- "$RECORD")"
+assert_contains 'validate con hallazgos: avisa' 'has findings' "$err"
+
+# el veredicto se lee; no se adivina
+VALIDATOR_VERDICT=raro glot_run_validate php algorithms/naive_sort
+assert_eq 'validate con veredicto inesperado: código' '3' "$rc_last"
+assert_contains 'validate con veredicto inesperado: lo dice' 'unexpected verdict' "$err"
+
+VALIDATOR_SILENT=1 glot_run_validate php algorithms/naive_sort
+assert_eq 'validate sin línea de veredicto: código' '3' "$rc_last"
+assert_contains 'validate sin línea de veredicto: la exige' 'glot:validate verdict=clean findings=0' "$err"
+
+VALIDATOR_BREAK=1 glot_run_validate php algorithms/naive_sort
+assert_eq 'validate con validador que falla: código' '3' "$rc_last"
+assert_contains 'validate con validador que falla: lo dice' 'the validator failed' "$err"
+
+# sin validador configurado y sin Copilot en el PATH: opcional, devuelve 1
+rc_last=0
+out="$(cd -- "$SANDBOX/php" && GLOT_ROOT="$SANDBOX" PATH="/usr/bin:/bin" "$GLOT_SH" validate php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_eq 'validate sin validador: código' '1' "$rc_last"
+assert_contains 'validate sin validador: lo dice' 'no validator configured' "$err"
+assert_contains 'validate sin validador: es opcional' 'optional' "$err"
+
+# -n: el plan (el comando y dónde queda el registro) sin ejecutar ni escribir
+rm -f -- "$RECORD"
+glot_run_validate -n php algorithms/naive_sort
+assert_eq 'validate -n: código' '0' "$rc_last"
+assert_contains 'validate -n: el comando del validador' "$SANDBOX/stub/validador" "$out"
+assert_contains 'validate -n: el registro' '/docs/evidence/algorithms/naive_sort/php.validate.md' "$out"
+assert_eq 'validate -n: no escribe' 'no' "$([[ -f "$RECORD" ]] && echo si || echo no)"
+
+# la invocación por defecto: sin GLOT_VALIDATOR se usa Copilot CLI. Con un `copilot` de
+# mentira en el PATH se comprueba la composición entera —el encargo por `-p`, el
+# directorio del módulo y el modo solo lectura— sin depender del CLI real
+cat >"$SANDBOX/stub/copilot" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >"${COPILOT_ARGS:-/dev/null}"
+printf 'Sin hallazgos.\nglot:validate verdict=clean findings=0\n'
+STUB
+chmod +x -- "$SANDBOX/stub/copilot"
+
+out="$(GLOT_ROOT="$SANDBOX" PATH="$SANDBOX/stub:$PATH" "$GLOT_SH" -n validate php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+assert_eq 'validate sin GLOT_VALIDATOR -n: código' '0' "$rc_last"
+assert_contains 'validate -n: el CLI por defecto' 'copilot -C ' "$out"
+assert_contains 'validate -n: el encargo en lugar del prompt' '<encargo>' "$out"
+
+rm -f -- "$RECORD"
+out="$(GLOT_ROOT="$SANDBOX" PATH="$SANDBOX/stub:$PATH" COPILOT_ARGS="$SANDBOX/copilot-args.txt" "$GLOT_SH" validate php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+assert_eq 'validate por defecto: código' '0' "$rc_last"
+assert_contains 'validate por defecto: el registro' 'verdict=clean' "$(cat -- "$RECORD")"
+copilot_args="$(cat -- "$SANDBOX/copilot-args.txt")"
+assert_contains 'validate por defecto: el directorio del módulo' "-C $SANDBOX/php/core/algorithms/naive_sort" "$copilot_args"
+assert_contains 'validate por defecto: el encargo por -p' '# Encargo `validate`' "$copilot_args"
+assert_contains 'validate por defecto: modo solo lectura' '--deny-tool write' "$copilot_args"
+assert_contains 'validate por defecto: tope de créditos' '--max-ai-credits 30' "$copilot_args"
+
+# errores de objetivo y de argumentos
+glot_run_validate php algorithms/nope
+assert_eq 'validate con módulo desconocido: código' '1' "$rc_last"
+glot_run_validate php algorithms/naive_sort extra
+assert_eq 'validate con demasiados argumentos: código' '2' "$rc_last"
+
+# doctor informa del validador configurado y del CLI disponible
+glot_run doctor
+assert_contains 'doctor: validador' 'validator: ' "$out"
+assert_contains 'doctor: el CLI del validador' 'copilot: ' "$out"
+
 # --- puerta de entrada al archivo de versiones -------------------------------
 
 # La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:
@@ -1030,6 +1396,23 @@ if [[ -n "$previous" ]]; then
     assert_eq 'puerta de entrada: el snapshot de la versión anterior está archivado' \
         'si' "$([[ -f "$TESTS_DIR/../versions/glot_$previous.sh" ]] && echo si || echo no)"
 fi
+
+# La puerta se comprueba también hacia atrás: toda versión que el log marca como
+# cerrada tiene que tener su snapshot, y ningún snapshot puede sobrar. Así el olvido
+# se ve al confirmar el cierre, no al arrancar la versión siguiente, que es como se
+# detectó en las v0.5.0 y v0.6.0.
+closed_versions="$(awk -F'|' '/^\| [0-9]+\.[0-9]+\.[0-9]+ / {v = $2; gsub(/[ \t]/, "", v); s = $(NF - 1); if (s ~ /cerrada/) print v}' "$TESTS_DIR/../docs/VERSIONS.md")"
+assert_eq 'archivado: el log de versiones se lee' 'si' "$([[ -n "$closed_versions" ]] && echo si || echo no)"
+
+missing_snapshots=""
+while IFS= read -r v; do
+    [[ -n "$v" ]] || continue
+    [[ -f "$TESTS_DIR/../versions/glot_$v.sh" ]] || missing_snapshots+="$v "
+done <<<"$closed_versions"
+assert_eq 'archivado: cada versión cerrada tiene su snapshot' '' "$missing_snapshots"
+assert_eq 'archivado: el log y la carpeta cuadran' \
+    "$(printf '%s\n' "$closed_versions" | wc -l | tr -d ' ')" \
+    "$(ls -1 "$TESTS_DIR/../versions"/glot_*.sh | wc -l | tr -d ' ')"
 
 # --- resumen -----------------------------------------------------------------
 

@@ -15,6 +15,7 @@
 | 0.7.0 | 2026-09-22 | [`versions/glot_0.7.0.sh`](../versions/glot_0.7.0.sh) | **Ejecución** (L3): `test` y `verify`, con el código `4` de verificación fallida, los marcadores de la tabla de comandos y la cobertura de verificadores | ✅ cerrada |
 | 0.8.0 | 2026-09-22 | [`versions/glot_0.8.0.sh`](../versions/glot_0.8.0.sh) | **Delegación** (L4): `prompt` y `ask`, con las cuatro plantillas versionadas de `scripts/prompts/` y un solo vocabulario de marcadores | ✅ cerrada |
 | 0.9.0 | 2026-09-22 | [`versions/glot_0.9.0.sh`](../versions/glot_0.9.0.sh) | **Creación y registro** (L5): `new` (inicializador del lenguaje, esqueleto y normalización) y `save` (commit guiado desde el catálogo `data/commits.tsv`), con la tabla de inicialización ampliada | ✅ cerrada |
+| 0.10.0 | 2026-09-22 | [`versions/glot_0.10.0.sh`](../versions/glot_0.10.0.sh) | **Evidencia y cierre** (L6): `evidence`, `close` y `validate` con validador enchufable, más la retirada de `hello` y el objetivo resuelto por directorio | ✅ cerrada |
 
 ---
 
@@ -109,6 +110,20 @@
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 361 passed, 0 failed` (rc `0`), con la **deriva** entre `data/commits.tsv` y la tabla del sprint, la coherencia del catálogo de inicialización (tipos válidos, comando obligatorio salvo en `deferred`, operaciones conocidas), el ciclo completo `use` → `new` → `save` en el sandbox sobre `ruby` (manual) y `python` (deferred), y la **genericidad de las plantillas** (ninguna lleva casos ni nombres de un módulo concreto).
 - **Snapshot:** [`versions/glot_0.9.0.sh`](../versions/glot_0.9.0.sh), archivado al cerrar la versión y **antes** de fusionar la rama en `main`; su contenido es el que tenía `glot.sh` en el cierre, y no se edita.
 
+## 0.10.0 — 2026-09-22 (cerrada)
+
+- **Añade:** la **evidencia y el cierre** (L6) completos: `evidence`, `close` y `validate`.
+- **En detalle:**
+  - **`validate`:** pasa el encargo `validate` (paso 6, **versionado** en `prompts/validate.prompt.md`) al validador automático y guarda su informe en `docs/evidence/{fase}/{módulo}/{lenguaje}.validate.md`. La orden sale de `GLOT_VALIDATOR` y, sin ella, de la invocación verificada de Copilot CLI en solo lectura; el **veredicto se lee** de la línea que la plantilla exige (`glot:validate verdict=clean|findings findings=N`) y no se adivina. Es **opcional**: sin validador avisa y devuelve `1`.
+  - **`close`:** registra el cierre de un módulo en un lenguaje. Exige el acta de `evidence` **en verde** y los README del módulo y de la fase; escribe la entrada del checklist con los comandos y sus códigos leídos del acta, y sube el contador y la lista del roadmap con el nombre de presentación (`data/display.tsv` fija el nombre y el orden). Es idempotente, enseña el diff exacto con `-n` y **no confirma**.
+  - **`evidence`:** ejecuta la suite y el verificador del módulo y deja el **acta** con la salida real en `docs/evidence/{fase}/{módulo}/{lenguaje}.md` —fecha, rama, commit del submódulo, árbol sucio o limpio, los comandos, su salida tal cual y sus códigos—, más un bloque de máquina que `close` leerá sin interpretar markdown. La escribe **también cuando algo está en rojo**, y entonces devuelve `4`.
+  - **Retira** el verbo `hello` (alias de compatibilidad de la v0.2.0), que el contrato situaba en la v1.0.0: devuelve `2` como cualquier verbo desconocido. El aviso de verbo desconocido ya solo sugiere `glot help`.
+  - **El objetivo se resuelve por directorio:** `test`, `verify`, `new` y `save` deducen el lenguaje del directorio cuando no lo traen ni los argumentos ni el estado del sprint, así que `cd php && glot test algorithms/naive_sort` funciona sin `use` previo. El estado manda sobre el directorio a propósito.
+  - **El harness cierra el círculo del archivado:** toda versión marcada como cerrada en este log tiene que tener su snapshot, y ningún snapshot puede sobrar.
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 477 passed, 0 failed` (rc `0`), incluida la **puerta de entrada del archivado** en las dos direcciones: 10 versiones cerradas en el log y 10 snapshots en `versions/`.
+- **Snapshot:** [`versions/glot_0.10.0.sh`](../versions/glot_0.10.0.sh), archivado al cerrar la versión y **antes** de fusionar la rama en `main`; su contenido es el que tenía `glot.sh` en el cierre, y no se edita.
+- **Lo que deja abierto:** `pointer` y `status` llegan con L7 (0.12.0) y el reparto de modelos por encargo con L6.5 (0.11.0), **solo con los modelos que ofrece Copilot**; la cabecera de fase del roadmap y su contador siguen esperando un formato único entre fases.
+
 ---
 
 ## 🔖 Convención de archivado / Archiving convention
@@ -117,7 +132,7 @@
 - **Puerta de entrada:** ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`. Si falta, se copia `glot.sh` con el sufijo de su versión y solo después se reanuda la implementación de la nueva.
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh), [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh) y [`glot_0.9.0.sh`](../versions/glot_0.9.0.sh).
+- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh), [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh) [`glot_0.9.0.sh`](../versions/glot_0.9.0.sh) y [`glot_0.10.0.sh`](../versions/glot_0.10.0.sh).
 - El harness **comprueba la puerta de entrada**: exige el snapshot de la versión anterior a la viva, así que no se puede empezar una versión nueva sin haber archivado la anterior.
 - Cada versión se cierra en su propia rama `chore/repo/glot-v0.X` antes de fusionarla en `main` (ver [`README.md`](../README.md)).
 
@@ -146,7 +161,7 @@
 | GNU coreutils (`stat -c`) | Solo para el harness: comprueba los permisos `600`/`700` | `stat --version` |
 | zsh 5.9 (opcional) | Solo para verificar el autocompletado de `completions/glot.zsh`; el harness se salta sus dos comprobaciones si no está | `zsh --version` |
 | Toolchains de cada lenguaje | Desde v0.7.0, `test` y `verify` ejecutan el comando nativo del lenguaje: la toolchain que falte se detecta al ejecutar (código `1`), y `doctor` informa de la cobertura del catálogo de verificadores | p. ej. `composer --version`, `swipl --version` |
-| GitHub Copilot CLI 1.0.86 (opcional) | Validador automático de `validate` (v0.10.0) | `copilot --version` |
+| GitHub Copilot CLI 1.0.88 (opcional) | Validador automático de `validate` (v0.10.0) | `copilot --version` |
 
 ---
 
@@ -154,7 +169,7 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, plantillas y códigos (361 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, evidencia, cierre, validación, plantillas, archivado y códigos (477 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
 ./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
 ./scripts/glot.sh modules           # catálogo de módulos con su especificación

@@ -36,15 +36,14 @@
 
 ---
 
-## 🧰 Verbos de la versión viva (v0.9.0) / Verbs in the live version
+## 🧰 Verbos de la versión viva (v0.10.0) / Verbs in the live version
 
 | Verbo | Comportamiento | Código |
 |-------|----------------|:------:|
-| `version`, `--version` | `glot 0.9.0` | 0 |
+| `version`, `--version` | `glot 0.10.0` | 0 |
 | `help`, `-h`, `--help`, `help <verbo>` | Ayuda general o de un verbo | 0 |
 | `doctor` | Diagnóstico: bash, git, raíz del monorepo, directorio y fichero de estado, y número de claves | 0 / 1 |
 | `greet [nombre]` | `Hello, <nombre>!` con el nombre por argumento o por stdin | 0 / 2 |
-| `hello [nombre]` | Igual que `greet`; compatibilidad con v0.2.0, se retira en v1.0.0 | 0 / 2 |
 | `set <clave> <valor>` | Guarda la clave; confirma por stderr; con `-n`, imprime `clave=valor` y no escribe | 0 / 2 / 3 |
 | `get <clave>` | Imprime el valor en stdout | 0 / 1 / 2 |
 | `unset <clave>` | Borra la clave; repetirlo no es error | 0 / 2 / 3 |
@@ -61,6 +60,9 @@
 | `ask <encargo> [lenguaje] [fase/módulo]` | Arma el encargo y lo envía a `GLOT_DELEGATE` por stdin; su salida va a stdout | 0 / 1 / 2 / 3 |
 | `new [lenguaje] [fase/módulo]` | Inicializa el lenguaje y crea el esqueleto mecánico del módulo: con `tool` ejecuta el comando del catálogo; con `manual` crea las carpetas; con `deferred` informa e imprime `skipped`. Normaliza lo que deja el inicializador. No escribe la suite | 0 / 1 / 2 / **4** |
 | `save <paso\|alias> [lenguaje] [fase/módulo]` | Confirma en el submódulo con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. Sin push ni puntero. Sin paso, publica el catálogo en stdout | 0 / 1 / 2 / 3 / **4** |
+| `evidence [lenguaje] [fase/módulo]` | Ejecuta la suite y el verificador y deja el acta con la salida real en `docs/evidence/`; la escribe también cuando algo está en rojo | 0 / 1 / 2 / 3 / **4** |
+| `close [lenguaje] [fase/módulo]` | Cierra el módulo: exige la evidencia en verde y los README, registra la entrada del checklist y sube el contador y la lista del roadmap; idempotente. Imprime la línea nueva | 0 / 1 / 2 / 3 / **4** |
+| `validate [lenguaje] [fase/módulo]` | Pasa el encargo `validate` al validador automático (opcional) y guarda su informe como registro del sprint. Sin validador, avisa y devuelve `1` | 0 / 1 / 2 / 3 / **4** |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
 
 ---
@@ -176,6 +178,10 @@
 
 **EN:** `test` and `verify` are the layer that **executes** the work: they read the catalogue, resolve the target and run the language command in the module directory. The runner output goes to **stdout as is** (it is the datum and the sprint evidence); warnings and the chosen command go to stderr.
 
+**ES:** El objetivo se resuelve en este orden: **argumentos** → **estado del sprint** → **directorio actual**. Lo último es lo que hace que `cd php && glot test algorithms/naive_sort` funcione sin pasar por `use`: dentro de un submódulo el lenguaje es evidente. El estado manda sobre el directorio a propósito: el sprint en curso es el que decide, y desde cualquier directorio `glot test` sigue apuntando a él.
+
+**EN:** The target is resolved in this order: **arguments** → **sprint state** → **current directory**. The last one is what makes `cd php && glot test algorithms/naive_sort` work without going through `use`: inside a submodule the language is obvious. The state wins over the directory on purpose: the sprint in progress is what decides, and from any directory `glot test` keeps pointing at it.
+
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
 | Objetivo / Target | `glot <verbo> [lenguaje] [fase/módulo]`; lo que no llegue por argumento se completa con el **estado del sprint** (`lang`, `phase`, `module`) |
@@ -273,6 +279,63 @@
 **ES:** `save` no inventa convenciones: si el paso no está en el catálogo, no hay commit. La tabla del sprint ([`SPRINT.md`](SPRINT.md)) es la fuente y el catálogo es la copia que lee el verbo; el harness comprueba la **deriva** entre las dos, y que cada alias sea un encargo registrado.
 
 **EN:** `save` does not invent conventions: if the step is not in the catalogue, there is no commit. The sprint table ([`SPRINT.md`](SPRINT.md)) is the source and the catalogue is the copy the verb reads; the harness checks the **drift** between the two, and that every alias is a registered request.
+
+---
+
+## 🧾 Evidencia, cierre y validación (L6, v0.10.0) / Evidence, closure and validation
+
+**ES:** `evidence` **deja el acta** de lo que pasó de verdad y `close` (más adelante en esta misma versión) comprueba los requisitos del cierre y registra el cambio en el checklist y en el roadmap. La evidencia es del **monorepo** —`docs/evidence/{fase}/{módulo}/{lenguaje}.md`— y apunta al commit del submódulo que la respalda: el acta es el registro del cierre, no un artefacto del lenguaje.
+
+**EN:** `evidence` **writes the record** of what actually happened and `close` (later in this same version) checks the closure requirements and registers the change in the checklist and the roadmap. The evidence belongs to the **monorepo** —`docs/evidence/{phase}/{module}/{language}.md`— and points at the submodule commit backing it: the record is the closure's log, not a language artefact.
+
+### `evidence` — el acta / the record
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Qué ejecuta / What it runs | La suite (columna 4 del catálogo) y el verificador (columna 5), en el directorio del módulo, con **stdout y stderr juntos** |
+| Qué escribe / What it writes | El acta en `docs/evidence/{fase}/{módulo}/{lenguaje}.md`: fecha, rama, commit del submódulo, si el árbol está sucio, el comando de cada uno, su salida tal cual y su código de salida |
+| Bloque de máquina / Machine block | Un comentario HTML `<!-- glot:evidence … -->` con `lang`, `phase`, `module`, `branch`, `commit`, `dirty`, `date`, `test_exit`, `verify_exit` y `verdict`: invisible al renderizar y legible con una línea de grep, para que `close` no tenga que interpretar markdown |
+| Salida / Output | La **ruta del acta** por stdout; el veredicto y los avisos por stderr |
+| Códigos / Codes | `0` verde · `1` entorno · `2` uso · `3` no se pudo escribir el acta · **`4` en rojo** |
+| En rojo / When red | **Escribe el acta igual**: la evidencia es lo que pasó, no lo que se desea. Devuelve `4` para que un CI lo note |
+| Árbol sucio / Dirty tree | Se marca (`dirty=yes`) y se avisa: la evidencia apunta al commit, así que lo que no está confirmado no queda respaldado |
+| Sin verificador / No verifier | Con la columna 5 en `-` solo se ejecuta la suite, y el acta lo dice (`verify_exit=-`) |
+| `-n/--dry-run` | Enseña los comandos y dónde queda el acta, sin ejecutar ni escribir |
+| Qué **no** hace / What it does **not** | No confirma (el commit es del autor), no toca el submódulo ni el roadmap, y no resume ni interpreta la salida |
+
+### `close` — el cierre / the closure
+
+**ES:** `close` registra el cierre de **un módulo en un lenguaje**. Comprueba lo que el script puede comprobar y no finge el resto: la revisión cualitativa (pseudocódigo, divergencias idiomáticas) sigue siendo de una persona.
+
+**EN:** `close` records the closure of **one module in one language**. It checks what the script can check and does not fake the rest: the qualitative review (pseudocode, idiomatic divergences) is still a person's job.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Comprueba / It checks | El acta de evidencia **en verde** (`verdict=green`), el README del módulo y el README de la fase. Sin acta, `1` con la orden que la genera; con el acta en rojo o un README ausente, `4` |
+| Registra / It records | Una entrada en `docs/ROADMAP_UPDATE_CHECKLIST.md` con la plantilla del repositorio: fecha, fase, módulo, lenguaje, evidencia, comandos y sus códigos (leídos del acta), READMEs y el cambio del roadmap |
+| Actualiza / It updates | La línea del módulo en `docs/ROADMAP.md`: contador `X/50`, marca (`🔄` en curso, `✅` al llegar al total) y lista entre paréntesis, con el **nombre de presentación** (`php` → `PHP`, `tcl-tk` → `Tcl/Tk`) y el orden canónico de [`data/display.tsv`](../data/display.tsv) |
+| No adivina / It does not guess | Conserva el formato que ya tiene la línea; si no entiende el contador, usa el número de lenguajes registrados como total. Una línea que no se encuentra es `1` |
+| Idempotente / Idempotent | Si el lenguaje ya está en la lista, avisa, imprime la línea y devuelve `0` sin tocar nada ni volver a pedir la evidencia |
+| Salida / Output | La **línea nueva del roadmap** por stdout |
+| `-n/--dry-run` | Imprime el **diff exacto** que aplicaría (`-` línea vieja, `+` línea nueva) y no escribe nada |
+| Qué **no** hace / What it does **not** | **No confirma**: el commit es del autor, como el resto de los cambios del monorepo. Tampoco cuenta el cierre en la cabecera de la fase, cuyo formato aún no es único entre fases |
+
+### `validate` — la validación / validation
+
+**ES:** `validate` **encarga** la validación automática del módulo. No valida él: pasa el encargo al validador y traduce lo que responde. Es **opcional** —el validador necesita el CLI de Copilot y la suscripción del autor, que no son dependencias del repositorio—, así que el cierre no lo exige.
+
+**EN:** `validate` **requests** the module's automatic validation. It does not validate itself: it hands the request to the validator and translates the answer. It is **optional** —the validator needs the Copilot CLI and the author's subscription, which are not repository dependencies—, so the closure does not require it.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Encargo / Request | **El mismo que imprime `glot prompt validate`** (paso 6): una sola verdad entre lo que se lee y lo que se envía. Va por **stdin** |
+| Orden / Command | `GLOT_VALIDATOR`, con `ask` como precedente. Sin la variable, la invocación verificada de Copilot CLI en **solo lectura** (`--deny-tool write`), con esfuerzo bajo y tope de créditos |
+| Registro / Record | `docs/evidence/{fase}/{módulo}/{lenguaje}.validate.md`: bloque de máquina (`verdict`, `findings`, `validator`, `commit`, `dirty`, `date`) más el informe del validador tal cual. Lo escribe `glot`, así que vale también para un validador propio |
+| Veredicto / Verdict | Se **lee**, no se adivina: la plantilla exige una última línea `glot:validate verdict=clean\|findings findings=N`. Sin ella, o con un valor que no sea `clean` ni `findings`, devuelve `3` |
+| Salida / Output | El informe del validador por stdout (JSONL con el CLI), y el veredicto y la ruta del registro por stderr |
+| Códigos / Codes | `0` sin hallazgos · `1` sin validador o entorno · `2` uso · `3` no se pudo ejecutar o no se pudo leer el veredicto · **`4` con hallazgos** |
+| `-n/--dry-run` | Enseña el comando que se lanzaría —con el encargo en lugar del prompt— y la ruta del registro, sin ejecutar ni escribir |
+| Qué **no** hace / What it does **not** | No corrige nada, no confirma, y no sustituye a la revisión humana: el validador puede equivocarse en las dos direcciones |
 
 ---
 

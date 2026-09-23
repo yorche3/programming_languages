@@ -65,6 +65,26 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 - La plantilla `scaffold` se divide: `scaffold` (paso 4a) ajusta el esqueleto a
   lo que exige el módulo y `suite` (paso 4b) escribe la suite desde la
   especificación, con dos commits por paso.
+- `glot` v0.10.0: **evidencia y cierre** (L6) con `evidence`, que
+  ejecuta la suite y el verificador del módulo y deja el acta con la salida real
+  en `docs/evidence/{fase}/{modulo}/{lenguaje}.md` —fecha, rama, commit del
+  submódulo, árbol sucio o limpio, comandos, salida tal cual y códigos—, escrita
+  también cuando algo está en rojo.
+- El harness cierra el círculo del archivado: comprueba que **toda versión
+  marcada como cerrada en el log tiene su snapshot** en `scripts/versions/`, y
+  que no sobra ninguno. El olvido se ve al confirmar el cierre y no al arrancar
+  la versión siguiente, que es como se detectó en las v0.5.0 y v0.6.0.
+- `glot` v0.10.0: `close`, que registra el cierre de un módulo en un
+  lenguaje —exige la evidencia en verde y los README del módulo y de la fase,
+  escribe la entrada del checklist y sube el contador y la lista del roadmap con
+  el nombre de presentación—, con `data/display.tsv` como tabla de nombres y
+  orden, idempotente, con el diff exacto en `-n` y sin confirmar nada.
+- `glot` v0.10.0: `validate`, que pasa el encargo `validate` (paso 6,
+  ya versionado) al validador automático y guarda su informe en
+  `docs/evidence/…/{lenguaje}.validate.md`. La orden sale de `GLOT_VALIDATOR` y,
+  sin ella, de la invocación de Copilot CLI en solo lectura; el veredicto se lee
+  de la línea que la plantilla exige y no se adivina. Es opcional: sin validador
+  avisa y devuelve `1`, y con hallazgos devuelve `4`.
 - Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
   `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
   estados, método reproducible y plan de cierre.
@@ -76,6 +96,13 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- `test`, `verify`, `new` y `save` resuelven el lenguaje **desde el directorio**
+  cuando no lo traen ni los argumentos ni el estado del sprint: `cd php && glot
+  test algorithms/naive_sort` ya funciona sin `use` previo. La precedencia es
+  argumentos → estado → directorio, y el estado manda sobre el directorio a
+  propósito.
+- El aviso de verbo desconocido ya solo sugiere `glot help`: la sugerencia del
+  saludo era legado de la v0.2.0.
 - Los marcadores de las plantillas y del catálogo de datos pasan a un solo
   vocabulario anclado al estado del sprint: `{modulo}`/`{Modulo}` se renombran a
   `{module}`/`{Module}` en la guía de inicialización (87 ocurrencias) y en
@@ -86,6 +113,12 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   `50/50`.
 - Las plantillas de documentación usan nombres en inglés terminados en
   `_Template`.
+
+### Removed
+
+- El verbo `hello`, alias de compatibilidad de la v0.2.0 que el contrato situaba
+  en la v1.0.0: se retira en la v0.10.0 y devuelve `2` como cualquier verbo
+  desconocido.
 
 ### Fixed
 
