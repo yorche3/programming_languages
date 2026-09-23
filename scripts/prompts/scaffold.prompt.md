@@ -1,6 +1,7 @@
 ---
 name: scaffold
 step: 4a
+model: gpt-5.6-terra
 description: Ajusta el esqueleto del módulo a lo que exige el lenguaje y el módulo, sin escribir la suite
 mode: agent
 ---

@@ -1,6 +1,7 @@
 ---
 name: validate
 step: 6
+model: gemini-3.8-flash
 description: Comprueba el módulo terminado contra su especificación y su README y emite un veredicto legible por máquina
 mode: agent
 ---

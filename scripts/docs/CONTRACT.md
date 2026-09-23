@@ -56,8 +56,8 @@
 | `completion [bash\|zsh]` | Imprime el guion de autocompletado en stdout; **no** lo instala | 0 / 1 / 2 |
 | `test [lenguaje] [fase/módulo]` | Ejecuta la suite del módulo asignado en su directorio, con el comando nativo del lenguaje; la salida del runner va a stdout | 0 / 1 / 2 / 3 / **4** |
 | `verify [lenguaje] [fase/módulo]` | Ejecuta el verificador (sintaxis/formato) del lenguaje; imprime `skipped` si aún no tiene uno | 0 / 1 / 2 / 3 / **4** |
-| `prompt [encargo] [lenguaje] [fase/módulo]` | Sin encargo, lista el registro; con encargo, imprime el encargo armado (estado del sprint + plantilla expandida) | 0 / 1 / 2 / 3 |
-| `ask <encargo> [lenguaje] [fase/módulo]` | Arma el encargo y lo envía a `GLOT_DELEGATE` por stdin; su salida va a stdout | 0 / 1 / 2 / 3 |
+| `prompt [encargo] [lenguaje] [fase/módulo]` | Sin encargo, lista el registro —`nombre<TAB>paso<TAB>modelo<TAB>descripción`—; con encargo, imprime el encargo armado (estado del sprint + plantilla expandida) | 0 / 1 / 2 / 3 |
+| `ask <encargo> [lenguaje] [fase/módulo]` | Arma el encargo y lo envía a `GLOT_DELEGATE` por stdin; su salida va a stdout. El modelo del perfil del encargo viaja por entorno (`COPILOT_MODEL`, y el tier de auto si el perfil lo declara) | 0 / 1 / 2 / 3 |
 | `new [lenguaje] [fase/módulo]` | Inicializa el lenguaje y crea el esqueleto mecánico del módulo: con `tool` ejecuta el comando del catálogo; con `manual` crea las carpetas; con `deferred` informa e imprime `skipped`. Normaliza lo que deja el inicializador. No escribe la suite | 0 / 1 / 2 / **4** |
 | `save <paso\|alias> [lenguaje] [fase/módulo]` | Confirma en el submódulo con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. Sin push ni puntero. Sin paso, publica el catálogo en stdout | 0 / 1 / 2 / 3 / **4** |
 | `evidence [lenguaje] [fase/módulo]` | Ejecuta la suite y el verificador y deja el acta con la salida real en `docs/evidence/`; la escribe también cuando algo está en rojo | 0 / 1 / 2 / 3 / **4** |
@@ -218,7 +218,7 @@
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
-| Registro / Registry | `prompts/*.prompt.md`; el `name`, el `step` y la `description` salen de su frontmatter, así que añadir un encargo es añadir un archivo |
+| Registro / Registry | `prompts/*.prompt.md`; el `name`, el `step`, el `model` y la `description` salen de su frontmatter, así que añadir un encargo es añadir un archivo. El **modelo es la clave del perfil** que fija esfuerzo y tope de créditos en [`data/models.tsv`](../data/models.tsv) (v0.11.0) |
 | Salida de `prompt` / `prompt` output | Cabecera con el estado del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `module_dir`) + la plantilla sin frontmatter y con los marcadores resueltos |
 | `-n/--dry-run` | `prompt` no lo necesita (imprimir es su función); `ask -n` imprime el plan sin enviar nada |
 | Delegado / Delegate | `GLOT_DELEGATE`: el encargo va por **stdin** y su salida va a **stdout**. Sin la variable, `ask` devuelve `1` |
@@ -271,7 +271,7 @@
 | Marcadores / Placeholders | `{lang}`, `{phase}`, `{module}`, `{Module}`: los mismos del resto del tooling, resueltos con el estado del sprint |
 | Índice / Index | `git add -A` del **submódulo** completo. Si hay cambios fuera del módulo, se nombran por stderr antes de confirmar |
 | Rama / Branch | Si la rama activa no es la del estado del sprint, se avisa (no se bloquea) |
-| Ámbito / Scope | Solo los pasos con ámbito `submodule`. Los del monorepo (puntero y roadmap) se rechazan con `1` y remiten a `close` (v0.10.0) y `pointer` (v0.11.0) |
+| Ámbito / Scope | Solo los pasos con ámbito `submodule`. Los del monorepo (puntero y roadmap) se rechazan con `1` y remiten a `close` (v0.10.0) y `pointer` (v0.12.0) |
 | Salida / Output | El **SHA corto** del commit; `nothing` si el árbol ya estaba limpio |
 | Push | **Nunca**. La rama la publica `use`; subir el trabajo es del autor |
 | `-n/--dry-run` | Imprime el `git add` y el `git commit -m` con el mensaje ya resuelto. Con el árbol ya limpio no hay plan que enseñar: imprime `nothing`, igual que la ejecución real |
@@ -329,13 +329,31 @@
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
 | Encargo / Request | **El mismo que imprime `glot prompt validate`** (paso 6): una sola verdad entre lo que se lee y lo que se envía. Va por **stdin** |
-| Orden / Command | `GLOT_VALIDATOR`, con `ask` como precedente. Sin la variable, la invocación verificada de Copilot CLI en **solo lectura** (`--deny-tool write`), con esfuerzo bajo y tope de créditos |
+| Orden / Command | `GLOT_VALIDATOR`, con `ask` como precedente. Sin la variable, la invocación verificada de Copilot CLI en **solo lectura** (`--deny-tool write`), con el modelo, el esfuerzo y el tope de créditos del **perfil del encargo** (v0.11.0) |
 | Registro / Record | `docs/evidence/{fase}/{módulo}/{lenguaje}.validate.md`: bloque de máquina (`verdict`, `findings`, `validator`, `commit`, `dirty`, `date`) más el informe del validador tal cual. Lo escribe `glot`, así que vale también para un validador propio |
 | Veredicto / Verdict | Se **lee**, no se adivina: la plantilla exige una última línea `glot:validate verdict=clean\|findings findings=N`. Sin ella, o con un valor que no sea `clean` ni `findings`, devuelve `3` |
 | Salida / Output | El informe del validador por stdout (JSONL con el CLI), y el veredicto y la ruta del registro por stderr |
 | Códigos / Codes | `0` sin hallazgos · `1` sin validador o entorno · `2` uso · `3` no se pudo ejecutar o no se pudo leer el veredicto · **`4` con hallazgos** |
 | `-n/--dry-run` | Enseña el comando que se lanzaría —con el encargo en lugar del prompt— y la ruta del registro, sin ejecutar ni escribir |
 | Qué **no** hace / What it does **not** | No corrige nada, no confirma, y no sustituye a la revisión humana: el validador puede equivocarse en las dos direcciones |
+
+---
+
+## 🤖 Perfiles de modelo (L6.5, v0.11.0) / Model profiles
+
+**ES:** Cada encargo declara **su modelo** en el frontmatter de su plantilla (`model:`, con el id real que ofrece Copilot) y el catálogo [`data/models.tsv`](../data/models.tsv) fija el esfuerzo, el tope de créditos y el tier de auto de ese modelo. El **modelo es la clave del perfil**: no hay una clave `profile:` que pueda derivar del modelo declarado.
+
+**EN:** Every request declares **its model** in its template frontmatter (`model:`, with the real id Copilot offers) and the [`data/models.tsv`](../data/models.tsv) catalogue fixes the effort, the credit cap and the auto tier for that model. The **model is the profile key**: there is no `profile:` key that could drift from the declared model.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Dónde se declara / Where | `model:` en el frontmatter de la plantilla, que `glot prompt` (sin encargo) enseña como **tercera columna** del registro |
+| Qué añade el catálogo | Esfuerzo (`--reasoning-effort`), tope de créditos (`--max-ai-credits`) y tier de auto (`--auto-tier`, solo si el modelo es `auto`). El mínimo de créditos que acepta el CLI es **30** |
+| `ask` | Exporta `COPILOT_MODEL` —y `COPILOT_AUTO_TIER` si el perfil lo declara— antes del `eval` del delegado: a un delegado cualquiera se le da entorno, no flags |
+| `validate` | Compone además su invocación por defecto con `--model`, `--reasoning-effort` y `--max-ai-credits` del perfil |
+| Dato que falta / Missing datum | `model:` ausente en la plantilla, o un modelo que el catálogo no reconoce: **`1`**, como un marcador sin resolver. Nunca se inventan esfuerzo ni créditos |
+| Anti-envejecimiento | `doctor` informa de `model_profiles` (encargos con perfil reconocido) y de `model_available` (modelos del catálogo que siguen en la lista del CLI instalado) |
+| Qué **no** hace / What it does **not** | No gestiona proveedores ni claves (BYOK fuera de alcance) y no tiene override por corrida: manda el `model:` de la plantilla, que es el dato versionado |
 
 ---
 

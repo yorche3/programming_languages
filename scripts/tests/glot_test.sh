@@ -16,6 +16,10 @@ GUIDE="$REPO/docs/core/00_Project_Initialization_Guide.md"
 WORK_DIR="$(mktemp -d)"
 trap 'rm -rf -- "$WORK_DIR"' EXIT
 
+# La versión esperada se lee del script: una versión nueva no debería obligar a tocar
+# el harness, que es justo lo que se olvida al abrirla.
+LIVE_VERSION="$(sed -n 's/^GLOT_VERSION="\(.*\)"$/\1/p' "$GLOT_SH")"
+
 # Estado aislado: ningún caso toca el estado real del usuario.
 export GLOT_STATE_FILE="$WORK_DIR/state"
 
@@ -85,13 +89,13 @@ glot_run_in() {
 
 # version
 glot_run version
-assert_eq 'version: salida' 'glot 0.10.0' "$out"
+assert_eq 'version: salida' "glot $LIVE_VERSION" "$out"
 assert_eq 'version: código' '0' "$rc_last"
 assert_eq 'version: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 
 # --version
 glot_run --version
-assert_eq '--version: salida' 'glot 0.10.0' "$out"
+assert_eq '--version: salida' "glot $LIVE_VERSION" "$out"
 assert_eq '--version: código' '0' "$rc_last"
 
 # help general y por verbo
@@ -157,7 +161,7 @@ assert_contains 'nombre suelto: sugiere la ayuda' 'glot help' "$err"
 # doctor dentro del monorepo
 glot_run doctor
 assert_eq 'doctor dentro: código' '0' "$rc_last"
-assert_contains 'doctor dentro: versión' 'version: 0.10.0' "$out"
+assert_contains 'doctor dentro: versión' "version: $LIVE_VERSION" "$out"
 assert_contains 'doctor dentro: script_dir' 'script_dir:' "$out"
 assert_contains 'doctor dentro: raíz detectada' 'root: /' "$out"
 assert_contains 'doctor dentro: ruta del estado' 'state_file:' "$out"
@@ -771,9 +775,10 @@ assert_contains 'doctor: hay verificadores' 'verify_commands: 14 de / of 50' "$o
 glot_run prompt
 assert_eq 'prompt: código' '0' "$rc_last"
 assert_eq 'prompt: seis encargos' '6' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
-assert_eq 'prompt: tres columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=3')"
+assert_eq 'prompt: cuatro columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=4')"
 assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
 assert_contains 'prompt: docs-language en el paso 8' "$(printf 'docs-language\t8')" "$out"
+assert_contains 'prompt: el modelo sale del catálogo' "$(printf 'validate\t6\tgemini-3.8-flash')" "$out"
 
 # el encargo lleva la cabecera con el estado del sprint y la plantilla expandida
 glot_run prompt scaffold php algorithms/naive_sort
@@ -1361,6 +1366,8 @@ assert_contains 'validate por defecto: el directorio del módulo' "-C $SANDBOX/p
 assert_contains 'validate por defecto: el encargo por -p' '# Encargo `validate`' "$copilot_args"
 assert_contains 'validate por defecto: modo solo lectura' '--deny-tool write' "$copilot_args"
 assert_contains 'validate por defecto: tope de créditos' '--max-ai-credits 30' "$copilot_args"
+assert_contains 'validate por defecto: el modelo del perfil' '--model gemini-3.8-flash' "$copilot_args"
+assert_contains 'validate por defecto: el esfuerzo del perfil' '--reasoning-effort low' "$copilot_args"
 
 # errores de objetivo y de argumentos
 glot_run_validate php algorithms/nope
@@ -1373,12 +1380,101 @@ glot_run doctor
 assert_contains 'doctor: validador' 'validator: ' "$out"
 assert_contains 'doctor: el CLI del validador' 'copilot: ' "$out"
 
+# --- casos de la especificación v0.11.0 (L6.5, perfiles de modelo) ------------
+
+MODELS_TSV="$TESTS_DIR/../data/models.tsv"
+
+# el catálogo: una fila por perfil, con el modelo como clave
+assert_eq 'modelos: el catálogo existe' 'si' "$([[ -f "$MODELS_TSV" ]] && echo si || echo no)"
+assert_eq 'modelos: seis columnas por fila' '' "$(awk -F'\t' 'NF!=6' "$MODELS_TSV")"
+assert_eq 'modelos: perfiles únicos' '3' "$(cut -f1 -- "$MODELS_TSV" | sort -u | wc -l | tr -d ' ')"
+assert_eq 'modelos: modelos únicos (el modelo es la clave)' '3' "$(cut -f2 -- "$MODELS_TSV" | sort -u | wc -l | tr -d ' ')"
+assert_eq 'modelos: esfuerzo válido para el CLI' '' \
+    "$(awk -F'\t' '$3 !~ /^(none|minimal|low|medium|high|xhigh|max)$/' "$MODELS_TSV")"
+# 30 es el mínimo que acepta `--max-ai-credits`: un tope menor no es un ahorro, es un error
+assert_eq 'modelos: tope de créditos numérico y sobre el mínimo del CLI' '' \
+    "$(awk -F'\t' '$4 !~ /^[0-9]+$/ || $4 < 30' "$MODELS_TSV")"
+assert_eq 'modelos: tier de auto válido' '' \
+    "$(awk -F'\t' '$5 !~ /^(-|efficiency|balance|intelligence|fast)$/' "$MODELS_TSV")"
+
+# cada plantilla declara su modelo en el frontmatter y el catálogo lo reconoce
+missing_model=""
+unknown_model=""
+for prompt_file in "$PROMPTS_DIR"/*.prompt.md; do
+    prompt_name="$(sed -n 's/^name: \(.*\)$/\1/p' "$prompt_file")"
+    prompt_model="$(sed -n 's/^model: \(.*\)$/\1/p' "$prompt_file")"
+    if [[ -z "$prompt_model" ]]; then
+        missing_model+="$prompt_name "
+        continue
+    fi
+    cut -f2 -- "$MODELS_TSV" | grep -qxF -- "$prompt_model" || unknown_model+="$prompt_name "
+done
+assert_eq 'modelos: toda plantilla declara su modelo' '' "$missing_model"
+assert_eq 'modelos: el modelo declarado está en el catálogo' '' "$unknown_model"
+
+# deriva en los dos sentidos: la columna de encargos de cada perfil tiene que ser
+# exactamente el conjunto de plantillas que declaran ese modelo
+models_drift=""
+while IFS=$'\t' read -r profile model effort credits tier requests; do
+    declared="$(for prompt_file in "$PROMPTS_DIR"/*.prompt.md; do
+        if [[ "$(sed -n 's/^model: \(.*\)$/\1/p' "$prompt_file")" == "$model" ]]; then
+            sed -n 's/^name: \(.*\)$/\1/p' "$prompt_file"
+        fi
+    done | sort | tr '\n' ' ')"
+    listed="$(printf '%s\n' "$requests" | tr -d ' ' | tr ',' '\n' | sort | tr '\n' ' ')"
+    [[ "$declared" == "$listed" ]] || models_drift+="$profile "
+done <"$MODELS_TSV"
+assert_eq 'modelos: deriva entre el catálogo y las plantillas' '' "$models_drift"
+
+# el modelo viaja por entorno al delegado: es lo único que una orden cualquiera puede
+# leer sin que haya que inyectarle flags
+glot_run_delegate 'cat >/dev/null; printf "%s\n" "$COPILOT_MODEL"' ask implement php algorithms/naive_sort
+assert_eq 'ask: código con delegado' '0' "$rc_last"
+assert_eq 'ask: el modelo del perfil llega por entorno' 'claude-sonnet-5' "$out"
+assert_contains 'ask: anuncia el perfil' 'profile: deep' "$err"
+
+glot_run_delegate 'cat >/dev/null' -n ask validate php algorithms/naive_sort
+assert_eq 'ask -n: código' '0' "$rc_last"
+assert_contains 'ask -n: el modelo en el plan' 'COPILOT_MODEL=gemini-3.8-flash' "$out"
+
+# sin modelo en la plantilla y con un modelo que el catálogo no conoce: los dos son un
+# dato que falta (1), y en ningún caso se inventan esfuerzo ni créditos
+fake_glot="$WORK_DIR/glot-sin-perfil"
+mkdir -p -- "$fake_glot/prompts"
+cp -- "$GLOT_SH" "$fake_glot/glot.sh"
+cp -R -- "$TESTS_DIR/../data" "$fake_glot/data"
+cp -R -- "$PROMPTS_DIR/." "$fake_glot/prompts/"
+
+sed -i '/^model: /d' "$fake_glot/prompts/suite.prompt.md"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_DELEGATE='cat >/dev/null' "$fake_glot/glot.sh" ask suite php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+assert_eq 'plantilla sin modelo: código' '1' "$rc_last"
+assert_contains 'plantilla sin modelo: lo dice' 'no declara modelo' "$(cat -- "$WORK_DIR/stderr")"
+
+sed -i '/^step: /a model: modelo-que-no-existe' "$fake_glot/prompts/suite.prompt.md"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_DELEGATE='cat >/dev/null' "$fake_glot/glot.sh" ask suite php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+assert_eq 'modelo fuera del catálogo: código' '1' "$rc_last"
+assert_contains 'modelo fuera del catálogo: lo dice' 'sin perfil en el catálogo' "$(cat -- "$WORK_DIR/stderr")"
+
+# doctor informa de la cobertura del catálogo y del envejecimiento contra el CLI
+glot_run doctor
+assert_contains 'doctor: catálogo de modelos' 'models_file: ' "$out"
+assert_contains 'doctor: cobertura de perfiles' 'model_profiles: 6 de / of 6' "$out"
+if command -v copilot >/dev/null 2>&1; then
+    assert_contains 'doctor: los modelos siguen en el CLI' 'model_available: 3 de / of 3' "$out"
+    cli_models="$(copilot help config 2>/dev/null || true)"
+    available=0
+    while IFS=$'\t' read -r _ model _rest; do
+        [[ "$cli_models" == *"\"$model\""* ]] && available=$((available + 1))
+    done <"$MODELS_TSV"
+    assert_eq 'modelos: los tres están en la lista del CLI instalado' '3' "$available"
+fi
+
 # --- puerta de entrada al archivo de versiones -------------------------------
 
 # La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:
 # es la regla que evita que una versión se cierre sin dejar su foto congelada. El
 # salto 0.x -> 1.0.0 se salta la comprobación (la versión anterior no se deduce).
-live_version="$(sed -n 's/^GLOT_VERSION="\(.*\)"$/\1/p' "$GLOT_SH")"
+live_version="$LIVE_VERSION"
 assert_eq 'puerta de entrada: la versión viva se lee del script' 'si' "$([[ -n "$live_version" ]] && echo si || echo no)"
 
 major="${live_version%%.*}"

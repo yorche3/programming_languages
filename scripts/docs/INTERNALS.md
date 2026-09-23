@@ -164,6 +164,12 @@ Finally it writes the six state keys and prints the absolute path. With `-n` it 
 
 **EN:** `validate` composes the request with `_glot_prompt_build validate`, the same one `glot prompt validate` prints: what you read and what is sent are the same thing. The text goes over **stdin** and the command comes from `GLOT_VALIDATOR` —the `ask` pattern—, or from the default Copilot CLI invocation, which is built with the module directory and reads the request with `-p "$(cat)"`: the `$(cat)` is left literal so `eval` expands it with the pipeline's stdin, which makes any validator that reads its request from stdin work. The **verdict is not guessed**: the shape `glot:validate verdict=… findings=…` is looked up in the output and only `clean` and `findings` are valid; anything else, absence included, is `3`. The record is written by `glot` —machine block plus the report— and does not rely on `--share`, so it works with a custom validator too, which would have no reason to know how to write sessions.
 
+## 11.5 Los perfiles de modelo / Model profiles (L6.5)
+
+**ES:** El **modelo es la clave del perfil**: cada plantilla declara `model:` en su frontmatter —el id real que ofrece Copilot, no un alias, porque `model:` es clave nativa de los `.prompt.md` de VS Code— y `_glot_prompt_profile` busca esa fila en `data/models.tsv`, que es donde viven el esfuerzo, el tope de créditos y el tier de auto. **No hay `profile:` en el frontmatter a propósito**: repetir el modelo en dos sitios sería una deriva esperando, y así el catálogo se audita solo (la columna de encargos y las plantillas que declaran cada modelo se comprueban en los dos sentidos). Un `model:` ausente o desconocido es un **dato que falta** (`1`), como un marcador sin resolver: `glot` nunca inventa esfuerzo ni créditos. `ask` exporta `COPILOT_MODEL` —y `COPILOT_AUTO_TIER` cuando el perfil lo declara— antes del `eval` del delegado, porque inyectarle flags rompería un `GLOT_DELEGATE='wc -l'`; `validate` compone además su invocación por defecto con `--model`, `--reasoning-effort` y `--max-ai-credits` sacados de esa misma fila, así que en el script no queda ningún literal de modelo. `doctor` mide la cobertura (`model_profiles`) y compara el catálogo con la lista del CLI instalado (`model_available`): la lista de modelos la manda el CLI, no el repositorio.
+
+**EN:** The **model is the profile key**: each template declares `model:` in its frontmatter —the real id Copilot offers, not an alias, because `model:` is a native key of VS Code `.prompt.md` files— and `_glot_prompt_profile` looks that row up in `data/models.tsv`, where the effort, the credit cap and the auto tier live. **There is deliberately no `profile:` in the frontmatter**: repeating the model in two places would be drift waiting to happen, and this way the catalogue audits itself (the requests column and the templates declaring each model are checked in both directions). A missing or unknown `model:` is a **missing datum** (`1`), like an unresolved placeholder: `glot` never invents effort or credits. `ask` exports `COPILOT_MODEL` —and `COPILOT_AUTO_TIER` when the profile declares it— before evaluating the delegate, because injecting flags would break `GLOT_DELEGATE='wc -l'`; `validate` also composes its default invocation with `--model`, `--reasoning-effort` and `--max-ai-credits` taken from that same row, so no model literal is left in the script. `doctor` measures coverage (`model_profiles`) and compares the catalogue with the installed CLI's list (`model_available`): the model list is owned by the CLI, not by the repository.
+
 ## 12. Salida y códigos / Output and exit codes
 
 1. Los verbos escriben **solo datos** en stdout; los errores salen por `_glot_error` y los avisos por `_glot_warn`, ambos a stderr. `set`/`unset` confirman por stderr: su stdout solo lleva datos si `-n` está activo.
@@ -173,4 +179,14 @@ Finally it writes the six state keys and prints the absolute path. With `-n` it 
 
 ## 13. Lo que todavía no hace / What it does not do yet
 
-El catálogo (L2.5, v0.6.0), la ejecución (L3, v0.7.0), la delegación (L4, v0.8.0) y la creación y el registro (L5, v0.9.0) ya existen. Lo que falta: la evidencia y el cierre (L6, v0.10.0), la higiene de punteros (L7, v0.11.0) y la instalación con la función cargable (L8, v1.0.0), que es donde `use` hará el `cd` de verdad y el autocompletado se instalará solo. En L5 queda fuera, a propósito, lo que exige **leer** la especificación: adaptar runners de ejemplo y nombres predefinidos lo hace el encargo `scaffold`, no el script. Tampoco hay barrido por lenguaje: `test` actúa sobre el objetivo asignado, uno cada vez.
+El catálogo (L2.5, v0.6.0), la ejecución (L3, v0.7.0), la delegación (L4, v0.8.0),
+la creación y el registro (L5, v0.9.0), la evidencia y el cierre (L6, v0.10.0) y los
+perfiles de modelo (L6.5, v0.11.0) ya existen. Lo que falta: la higiene de punteros
+(L7, v0.12.0) y la instalación con la función cargable (L8, v1.0.0), que es donde
+`use` hará el `cd` de verdad y el autocompletado se instalará solo. En L5 queda
+fuera, a propósito, lo que exige **leer** la especificación: adaptar runners de
+ejemplo y nombres predefinidos lo hace el encargo `scaffold`, no el script. Tampoco
+hay barrido por lenguaje: `test` actúa sobre el objetivo asignado, uno cada vez. Y en
+L6.5 no hay **override por corrida**: manda el `model:` de la plantilla, que es el
+dato versionado del encargo; si algún día hace falta, será una variable propia
+(`GLOT_MODEL`) con su fila de decisión, no un flag escondido.

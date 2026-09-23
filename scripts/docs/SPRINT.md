@@ -14,7 +14,7 @@
 
 | # | Paso | Comando | Evidencia / artefacto | Quién |
 |:-:|------|---------|-----------------------|-------|
-| 1 | Reconocimiento | `git status --short`, `git submodule status`, `glot progress` (0.6.0), `glot status` (0.11.0) | — | autor / script |
+| 1 | Reconocimiento | `git status --short`, `git submodule status`, `glot progress` (0.6.0), `glot status` (0.12.0) | — | autor / script |
 | 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo, estado `lang/phase/module/branch/spec/repo`, ruta en `stdout` | script |
 | 3 | Rama publicada | incluido en `use`: `git push -u origin feat/algorithms/naive-sort` | Rama `feat/{fase}/{módulo}` con upstream | script |
 | 4a | Esqueleto | `glot new` (0.9.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas, sin runners de ejemplo; `.gitignore` verificado | script + **agente** |
@@ -31,7 +31,7 @@
 
 | # | Paso | Comando | Evidencia / artefacto | Quién |
 |:-:|------|---------|-----------------------|-------|
-| 8 | Puntero y cierre del lenguaje | `glot pointer` (0.11.0) en rama `chore/{fase}/{módulo}-pointer` · `glot prompt docs-language` (0.8.0) | `chore(submodule): update php pointer`; readmes faltantes e índices N1/N2/N3 | script + **agente** |
+| 8 | Puntero y cierre del lenguaje | `glot pointer` (0.12.0) en rama `chore/{fase}/{módulo}-pointer` · `glot prompt docs-language` (0.8.0) | `chore(submodule): update php pointer`; readmes faltantes e índices N1/N2/N3 | script + **agente** |
 | 9 | Registro del cierre | `glot close` (0.10.0) | Entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](../../docs/ROADMAP_UPDATE_CHECKLIST.md) y contador de [`ROADMAP.md`](../../docs/ROADMAP.md) al día, a partir del acta de evidencia | script + **agente** |
 
 ---
@@ -64,14 +64,18 @@
 
 **EN:** Steps 4a, 4b, 5, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Since v0.8.0 the request is built by `glot prompt <request>` from the sprint state, and the templates are **versioned** in [`scripts/prompts/`](../../scripts/prompts/). The local bank in `.github/prompts/` remains the author's workshop and `glot` accepts it as a fallback, warning that it does not travel with the repository.
 
-| Encargo previsto | Plantilla versionada | Paso |
-|------------------|----------------------|:----:|
-| `scaffold` | [`scaffold.prompt.md`](../../scripts/prompts/scaffold.prompt.md) | 4a |
-| `suite` | [`suite.prompt.md`](../../scripts/prompts/suite.prompt.md) | 4b |
-| `implement` | [`implement.prompt.md`](../../scripts/prompts/implement.prompt.md) | 5 |
-| `docs-module` | [`docs-module.prompt.md`](../../scripts/prompts/docs-module.prompt.md) | 7 |
-| `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 |
-| `validate` | [`validate.prompt.md`](../../scripts/prompts/validate.prompt.md) | 6 |
+| Encargo previsto | Plantilla versionada | Paso | Modelo (v0.11.0) |
+|------------------|----------------------|:----:|-----------------|
+| `scaffold` | [`scaffold.prompt.md`](../../scripts/prompts/scaffold.prompt.md) | 4a | `gpt-5.6-terra` |
+| `suite` | [`suite.prompt.md`](../../scripts/prompts/suite.prompt.md) | 4b | `gpt-5.6-terra` |
+| `implement` | [`implement.prompt.md`](../../scripts/prompts/implement.prompt.md) | 5 | `claude-sonnet-5` |
+| `docs-module` | [`docs-module.prompt.md`](../../scripts/prompts/docs-module.prompt.md) | 7 | `gemini-3.8-flash` |
+| `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 | `gemini-3.8-flash` |
+| `validate` | [`validate.prompt.md`](../../scripts/prompts/validate.prompt.md) | 6 | `gemini-3.8-flash` |
+
+**ES:** Desde la v0.11.0 cada plantilla **declara su modelo** en el frontmatter (`model:`, con el id real que ofrece Copilot) y el catálogo [`data/models.tsv`](../../scripts/data/models.tsv) fija el esfuerzo, el tope de créditos y el tier de auto de ese modelo. El **modelo es la clave del perfil**: no hay una clave `profile:` que pueda derivar. Las plantillas siguen siendo **genéricas**: el modelo es política de coste, no dato de un módulo.
+
+**EN:** Since v0.11.0 every template **declares its model** in the frontmatter (`model:`, with the real id Copilot offers) and the [`data/models.tsv`](../../scripts/data/models.tsv) catalogue states the effort, the credit cap and the auto tier for that model. The **model is the profile key**: there is no `profile:` key that could drift. Templates stay **generic**: the model is cost policy, not module data.
 
 **ES:** Las plantillas son **genéricas**: no llevan datos de ningún módulo concreto (ni casos de prueba ni nombres de archivo). Cada encargo **lee** lo que necesita de la especificación del módulo y de los módulos ya homologados del lenguaje; el harness comprueba que ninguna plantilla vuelva a llevar datos de un módulo.
 

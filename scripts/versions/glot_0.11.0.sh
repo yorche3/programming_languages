@@ -4,13 +4,14 @@
 # cierre (L6) y perfiles de modelo por encargo (L6.5): `model:` en cada plantilla y
 # `data/models.tsv` decidiendo el esfuerzo y el tope de créditos de cada encargo.
 #
-# Versión viva del script: las versiones cerradas se archivan en versions/.
+# Snapshot archivado: versión cerrada el 2026-09-22. No se edita; el código es
+# el mismo que tenía la versión viva en su cierre.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
 # monorepo se resuelve con GLOT_ROOT, el superproyecto o la raíz de git.
 # El estado vive fuera del repositorio (XDG) y se puede redirigir con GLOT_STATE_FILE.
 #
 # Uso / Usage:
-#   ./scripts/glot.sh help
+#   ./versions/glot_0.11.0.sh help
 #   ./scripts/glot.sh doctor
 #   ./scripts/glot.sh langs
 #   ./scripts/glot.sh modules algorithms

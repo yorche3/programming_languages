@@ -1,6 +1,7 @@
 ---
 name: docs-language
 step: 8
+model: gemini-3.8-flash
 description: Actualiza los índices del lenguaje y registra el cierre del módulo en el roadmap
 mode: agent
 ---

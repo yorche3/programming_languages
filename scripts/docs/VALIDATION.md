@@ -12,16 +12,22 @@
 
 ```bash
 # lo que ejecuta `glot validate` cuando no hay GLOT_VALIDATOR: el encargo (el mismo
-# que imprime `glot prompt validate`) llega por stdin y entra por `-p`
+# que imprime `glot prompt validate`) llega por stdin y entra por `-p`, y el modelo,
+# el esfuerzo y el tope de créditos salen del perfil del encargo (v0.11.0)
 copilot -C "$MODULE_DIR" -p "<encargo validate>" \
         -s --output-format json \
-        --reasoning-effort low --max-ai-credits 30 \
+        --model "$PROFILE_MODEL" --reasoning-effort "$PROFILE_EFFORT" \
+        --max-ai-credits "$PROFILE_CREDITS" \
         --allow-all-tools --deny-tool write
 ```
 
-**ES:** El modelo no se fija aquí: lo elige la configuración del CLI (`COPILOT_MODEL`, `--model` o `~/.copilot/settings.json`), y la política de coste de más abajo es la recomendación para validar. No se usa `--share`: el registro lo escribe `glot` en `docs/evidence/{fase}/{modulo}/{lenguaje}.validate.md` —bloque de máquina más el informe—, así que la sesión no se duplica y **también vale con un validador propio**, que no tendría por qué saber escribir sesiones.
+**ES:** Desde la v0.11.0 el modelo **no** lo elige la configuración del CLI para `validate`: sale del perfil del encargo (`model:` en la plantilla + [`data/models.tsv`](../data/models.tsv)), que fija modelo, esfuerzo y tope de créditos, y `glot` los pasa como flags explícitos. Además exporta `COPILOT_MODEL` (y `COPILOT_AUTO_TIER` si el perfil lo declara) para que un validador propio los lea del entorno. La configuración del CLI sigue mandando en cualquier otra invocación interactiva.
 
-**EN:** The model is not fixed here: the CLI configuration picks it (`COPILOT_MODEL`, `--model` or `~/.copilot/settings.json`), and the cost policy below is the recommendation for validating. `--share` is not used: the record is written by `glot` into `docs/evidence/{phase}/{module}/{language}.validate.md` —machine block plus the report—, so the session is not duplicated and it **works with a custom validator too**, which would have no reason to know how to write sessions.
+**EN:** Since v0.11.0 the model is **not** picked by the CLI configuration for `validate`: it comes from the request's profile (`model:` in the template + [`data/models.tsv`](../data/models.tsv)), which fixes model, effort and credit cap, and `glot` passes them as explicit flags. It also exports `COPILOT_MODEL` (and `COPILOT_AUTO_TIER` when the profile declares it) so a custom validator can read them from the environment. The CLI configuration still rules in any other interactive invocation.
+
+**ES:** No se usa `--share`: el registro lo escribe `glot` en `docs/evidence/{fase}/{modulo}/{lenguaje}.validate.md` —bloque de máquina más el informe—, así que la sesión no se duplica y **también vale con un validador propio**, que no tendría por qué saber escribir sesiones.
+
+**EN:** `--share` is not used: the record is written by `glot` into `docs/evidence/{phase}/{module}/{language}.validate.md` —machine block plus the report—, so the session is not duplicated and it **works with a custom validator too**, which would have no reason to know how to write sessions.
 
 | Flag | Qué hace / What it does |
 |------|-------------------------|
@@ -29,9 +35,12 @@ copilot -C "$MODULE_DIR" -p "<encargo validate>" \
 | `-p ...` | El encargo en modo no interactivo: `glot` se lo pasa por **stdin** |
 | `-s` | Silencia el preámbulo, para que stdout sea solo el informe |
 | `--output-format json` | JSONL, un objeto por línea: es lo que se guarda como registro |
+| `--model <id>` | El modelo del perfil del encargo; `auto` es válido y entonces manda `--auto-tier` |
+| `--reasoning-effort <nivel>` | `low`, `medium` o `high` según el perfil; el CLI acepta `none`, `minimal`, `low`, `medium`, `high`, `xhigh` y `max` |
+| `--auto-tier <perfil>` | Solo cuando el perfil lo declara (el modelo es `auto`): `efficiency`, `balance`, `intelligence` o `fast` |
+| `--max-ai-credits <n>` | Cap blando de gasto en una corrida desatendida; **el mínimo que acepta el CLI es 30** |
 | `--allow-all-tools` | Obligatorio en modo no interactivo |
 | `--deny-tool write` | Deja el validador en solo lectura: las denegaciones tienen prioridad sobre `--allow-all-tools` |
-| `--max-ai-credits 30` | Cap blando de gasto en una corrida desatendida |
 | `--share <ruta>` | Se midió y **no se usa**: duplicaría el registro que ya escribe `glot` |
 
 ---
@@ -46,7 +55,7 @@ copilot -C "$MODULE_DIR" -p "<encargo validate>" \
 | Contexto | `--context default` | `long_context` es el tier de pago por contexto y no hace falta para validar un README |
 | Coste | `/model` muestra el coste relativo por token y `copilot help billing` explica los AI credits | El gasto de una corrida se acota con `--max-ai-credits` |
 
-**Recomendado para `validate`:** `auto` con `efficiency`, o un modelo pequeño fijo (`gpt-5-mini`, `gpt-5.4-mini`, `claude-haiku-4.5`), siempre con `--reasoning-effort low`. Los modelos grandes se reservan al trabajo interactivo. La lista de modelos la manda el CLI instalado (`copilot help config`, clave `model`), no este documento.
+**Recomendado para `validate`:** el perfil `economy` del catálogo (`gemini-3.8-flash`, `low`, 30), que es el que ya aplica `glot`. Para trabajo interactivo o para un módulo grande, `auto` con `efficiency`, o un modelo pequeño fijo (`gpt-5-mini`, `gpt-5.4-mini`, `claude-haiku-4.5`), siempre con `--reasoning-effort low`. La lista de modelos la manda el CLI instalado (`copilot help config`, clave `model`), no este documento; `doctor` avisa de cuántos modelos del catálogo siguen en esa lista.
 
 ---
 

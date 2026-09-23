@@ -1,6 +1,7 @@
 ---
 name: suite
 step: 4b
+model: gpt-5.6-terra
 description: Escribe la suite de pruebas unitarias del módulo desde su especificación
 mode: agent
 ---

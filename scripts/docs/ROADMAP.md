@@ -47,7 +47,7 @@
 | L4 | Delegación: `prompt` (encargos de IA) y `ask` (envío al delegado) | 0.8.0 ✅ |
 | L5 | Creación y registro: `new`, `save` | 0.9.0 ✅ |
 | L6 | Evidencia y cierre: `evidence`, `close`, `validate` | 0.10.0 ✅ |
-| L6.5 | Perfiles de modelo por encargo: `model:` en cada plantilla y catálogo de perfiles con los modelos de Copilot | 0.11.0 |
+| L6.5 | Perfiles de modelo por encargo: `model:` en cada plantilla y catálogo de perfiles con los modelos de Copilot | 0.11.0 🔄 |
 | L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.12.0 |
 | L8 | Instalación: `install`, función cargable, `doctor` completo | 1.0.0 |
 | L9 | Toolchains por lenguaje (`mise`, `nvm`, `pyenv`) | después |
@@ -65,7 +65,7 @@
 | 0.8.0 | L4 | 4–8 | `prompt`/`ask`: arma el encargo para el agente con las plantillas **versionadas** de `scripts/prompts/`, con el estado del sprint expandido y `GLOT_DELEGATE` como estrategia enchufable | **Solo imprime texto** (o lo envía): no muta nada, así que va antes que la capa que sí muta |
 | 0.9.0 | L5 | 4 | `new` (un verbo, dos modos: ejecuta el inicializador o construye el esqueleto manual, y normaliza lo que el inicializador deja) y `save` (commit guiado desde el catálogo de commits); tabla de inicialización ampliada con tipo/comando/normalización y el encargo `suite` separado de `scaffold` | Reutiliza catálogo y estado; elimina el andamiaje y el commit manual repetidos. Lo que exige leer la especificación (runners de ejemplo, nombres predefinidos) sigue siendo del agente |
 | 0.10.0 | L6 | 7–8 | `evidence` (salidas reales), `close` (checklist + roadmap) y `validate` (validador automático con Copilot CLI) | El cierre documental requiere validación: la ejecuta el agente, el script la encarga y la comprueba |
-| 0.11.0 | L6.5 | 4–6 | **Perfiles de modelo por encargo**: `model:` en el frontmatter de cada plantilla y un catálogo de perfiles **con los modelos que ofrece Copilot** —uno económico con esfuerzo bajo para validar y documentar, y el más capaz para implementar—, con tope de créditos por corrida | La delegación y la validación ya existen; el modelo es la palanca de calidad y de coste, y va después de tenerlas |
+| 0.11.0 | L6.5 | 4–8 | **Perfiles de modelo por encargo**: `model:` en el frontmatter de cada plantilla y un catálogo de perfiles **con los modelos que ofrece Copilot** —uno económico con esfuerzo bajo para validar y documentar, y el más capaz para implementar—, con tope de créditos por corrida | La delegación y la validación ya existen; el modelo es la palanca de calidad y de coste, y va después de tenerlas |
 | 0.12.0 | L7 | 1, 9 | `status` (submódulos, ramas, punteros), `pointer` (actualiza el puntero del submódulo en el monorepo), `clean` de artefactos y `submodule sync` | Ops diaria; primero solo lectura, las mutaciones con `-n` |
 | 1.0.0 | L8 | todos | `install`/`uninstall` (`.bashrc` + completions), **capa cargable** (`use` hace el `cd` real) y `doctor` completo | 1.0 = objetivo original cumplido |
 | ⏳ | L9 | — | Versión esperada por lenguaje y comprobación/instalación | Segunda acepción de «manejador de versiones»; llega después del ciclo del roadmap |
@@ -75,7 +75,7 @@
 | Deuda | Cuándo se paga |
 |-------|----------------|
 | Hasta la v1.0.0 el `cd` no es real: se usa `cd "$(glot use …)"` | v1.0.0 (`install` + capa cargable) |
-| Hasta la v0.11.0 el puntero del submódulo en el monorepo se actualiza a mano | v0.11.0 (`pointer`) |
+| Hasta la v0.12.0 el puntero del submódulo en el monorepo se actualiza a mano | v0.12.0 (`pointer`) |
 
 **ES:** Pagadas: los commits a mano se acabaron en la v0.9.0 (`save`).
 
@@ -126,6 +126,26 @@ La política del validador automático (invocación, modelo y coste, advertencia
 | Perfiles de modelo | Versión propia: **L6.5 → 0.11.0**, con L7 desplazada a la 0.12.0. Se configurarán **solo los modelos que ofrece Copilot**, con esfuerzo y tope de créditos ajustados por encargo. El proveedor propio (BYOK) **queda fuera**: exige variables de entorno y `glot` no gestiona claves ni proveedores; el mecanismo queda documentado en [`VALIDATION.md`](VALIDATION.md) por si algún día se quiere enchufar |
 | Veredicto de `validate` | Se **lee**, no se interpreta: la plantilla `validate` exige una última línea `glot:validate verdict=clean\|findings findings=N` y `glot` solo acepta esos dos valores. Sin línea, o con otro, devuelve `3` en vez de suponer un resultado |
 | Evidencia de la validación | El registro lo escribe `glot` (`docs/evidence/{fase}/{módulo}/{lenguaje}.validate.md`) y **no** se usa `--share`: así funciona también con un validador propio, que no tiene por qué saber escribir sesiones |
+
+---
+
+### Decisiones cerradas de la v0.11.0 / Closed decisions for v0.11.0
+
+**ES:** Las decisiones de la L6.5 se resolvieron el 2026-09-22, antes de escribir código.
+
+**EN:** The L6.5 decisions were resolved on 2026-09-22, before writing any code.
+
+| Tema | Decisión |
+|------|----------|
+| Qué lleva `model:` | El **id real** del modelo que ofrece Copilot (`gemini-3.8-flash`, `gpt-5.6-terra`, `claude-sonnet-5`…), **no** un alias de perfil: `model:` es clave nativa de los `.prompt.md` de VS Code, así que la plantilla sigue valiendo en el chat del IDE y se lee sin traductor. El alias se descartó por eso |
+| El modelo es la clave | La plantilla declara **solo** `model:`; [`data/models.tsv`](../data/models.tsv) fija el esfuerzo, el tope de créditos y el tier de auto. No hay `profile:` en el frontmatter: repetir el mismo dato en dos sitios es una deriva esperando, y el catálogo se audita solo |
+| Perfiles | Tres, con nombre de política: `economy` (`gemini-3.8-flash`, esfuerzo `low`, 30 créditos), `balanced` (`gpt-5.6-terra`, `medium`, 90) y `deep` (`claude-sonnet-5`, `high`, 120). El tope del económico es el **mínimo que acepta el CLI** (30): no se puede bajar |
+| Reparto por encargo | `economy` para `validate`, `docs-module` y `docs-language`; `balanced` para `scaffold` y `suite`, porque los dos siguen estructuras ya homologadas del lenguaje; `deep` solo para `implement` |
+| Cómo llega al delegado | `glot` exporta `COPILOT_MODEL` y `COPILOT_AUTO_TIER` —variables que el CLI sí reconoce— antes del `eval` del delegado, y pasa `--model`, `--reasoning-effort` y `--max-ai-credits` **explícitos** solo en la invocación por defecto de `validate`. A un `GLOT_DELEGATE` propio se le da entorno, no flags: inyectárselos rompería `GLOT_DELEGATE='wc -l'` |
+| Precedencia | Manda la **plantilla**, que es el dato versionado del encargo. El override por corrida no se añade en esta versión: si hiciera falta, será una variable propia (`GLOT_MODEL`) y una fila de decisión, no un flag escondido |
+| Modelo fuera del catálogo | Un `model:` que no está en `data/models.tsv` es un **dato que falta**: código `1`, como un marcador sin resolver. Un perfil pedido por argumento que no existe sería **uso**: código `2` |
+| Anti-envejecimiento | La lista de modelos la manda el CLI instalado (`copilot help config`). `doctor` informa de la cobertura del catálogo y de si cada modelo de los perfiles sigue en la lista del CLI, para que una fila vieja se vea antes de usarla |
+| Sin BYOK | Confirmado: solo modelos de Copilot. El proveedor propio exige variables de entorno y `glot` no gestiona claves ni proveedores; el mecanismo queda documentado en [`VALIDATION.md`](VALIDATION.md) por si algún día se quiere enchufar |
 
 ---
 

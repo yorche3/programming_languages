@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v0.10.0** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v0.11.0** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -38,10 +38,11 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh verify php algorithms/naive_sort  # sintaxis/lint del lenguaje
 ./scripts/glot.sh evidence php algorithms/naive_sort  # acta con la salida real
 ./scripts/glot.sh -n close php algorithms/naive_sort   # cierre: diff exacto del roadmap
-./scripts/glot.sh validate php algorithms/naive_sort    # validador automático (opcional)
+./scripts/glot.sh validate php algorithms/naive_sort    # validador automático (opcional; usa el perfil `economy`)
 ./scripts/glot.sh -n new php algorithms/naive_sort   # esqueleto: plan sin tocar nada
 ./scripts/glot.sh new php algorithms/naive_sort      # inicializador + normalización
 ./scripts/glot.sh prompt suite                        # encargo de la suite (paso 4b)
+./scripts/glot.sh prompt                              # registro: nombre, paso, modelo y descripción
 ./scripts/glot.sh set lang php && ./scripts/glot.sh get lang
 source <(./scripts/glot.sh completion bash)   # autocompletado / completion
 ```
@@ -67,7 +68,7 @@ source <(./scripts/glot.sh completion bash)   # autocompletado / completion
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v0.10.0)
+├── glot.sh                  # Versión viva / live version (v0.11.0)
 ├── completions/              # Autocompletado por shell (se imprime en stdout)
 │   ├── glot.bash
 │   └── glot.zsh
@@ -82,7 +83,8 @@ scripts/
 │   ├── README.md
 │   ├── languages.tsv         # Un lenguaje por fila: init, manifiestos, pruebas, verificador e inicialización
 │   ├── commits.tsv           # Un paso de sprint por fila: alias, ámbito y mensaje de commit
-│   └── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
+│   ├── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
+│   └── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos
 ├── docs/                     # Documentación del tooling
 │   ├── ROADMAP.md
 │   ├── SPRINT.md
@@ -102,7 +104,8 @@ scripts/
     ├── glot_0.7.0.sh
     ├── glot_0.8.0.sh
     ├── glot_0.9.0.sh
-    └── glot_0.10.0.sh
+    ├── glot_0.10.0.sh
+    └── glot_0.11.0.sh
 ```
 
 ---
