@@ -80,6 +80,12 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   escribe la entrada del checklist y sube el contador y la lista del roadmap con
   el nombre de presentación—, con `data/display.tsv` como tabla de nombres y
   orden, idempotente, con el diff exacto en `-n` y sin confirmar nada.
+- `glot` v0.10.0 (en curso): `validate`, que pasa el encargo `validate` (paso 6,
+  ya versionado) al validador automático y guarda su informe en
+  `docs/evidence/…/{lenguaje}.validate.md`. La orden sale de `GLOT_VALIDATOR` y,
+  sin ella, de la invocación de Copilot CLI en solo lectura; el veredicto se lee
+  de la línea que la plantilla exige y no se adivina. Es opcional: sin validador
+  avisa y devuelve `1`, y con hallazgos devuelve `4`.
 - Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
   `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
   estados, método reproducible y plan de cierre.

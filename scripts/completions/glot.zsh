@@ -26,6 +26,7 @@ _glot_zsh() {
         'verify:ejecuta el verificador del lenguaje'
         'evidence:deja el acta del sprint con la salida real'
         'close:cierra el módulo: checklist y roadmap'
+        'validate:valida el módulo con el validador automático'
         'prompt:arma el encargo del sprint'
         'ask:envía el encargo al delegado'
         'set:guarda una clave del estado'
@@ -66,7 +67,7 @@ _glot_zsh() {
                 _describe 'módulo' modulos
             fi
             ;;
-        test | verify | evidence | close)
+        test | verify | evidence | close | validate)
             if ((CURRENT == 3)); then
                 lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
                 _describe 'lenguaje' lenguajes

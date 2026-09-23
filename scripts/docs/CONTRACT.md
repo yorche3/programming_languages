@@ -62,6 +62,7 @@
 | `save <paso\|alias> [lenguaje] [fase/módulo]` | Confirma en el submódulo con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. Sin push ni puntero. Sin paso, publica el catálogo en stdout | 0 / 1 / 2 / 3 / **4** |
 | `evidence [lenguaje] [fase/módulo]` | Ejecuta la suite y el verificador y deja el acta con la salida real en `docs/evidence/`; la escribe también cuando algo está en rojo | 0 / 1 / 2 / 3 / **4** |
 | `close [lenguaje] [fase/módulo]` | Cierra el módulo: exige la evidencia en verde y los README, registra la entrada del checklist y sube el contador y la lista del roadmap; idempotente. Imprime la línea nueva | 0 / 1 / 2 / 3 / **4** |
+| `validate [lenguaje] [fase/módulo]` | Pasa el encargo `validate` al validador automático (opcional) y guarda su informe como registro del sprint. Sin validador, avisa y devuelve `1` | 0 / 1 / 2 / 3 / **4** |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
 
 ---
@@ -281,7 +282,7 @@
 
 ---
 
-## 🧾 Evidencia y cierre (L6, v0.10.0) / Evidence and closure
+## 🧾 Evidencia, cierre y validación (L6, v0.10.0) / Evidence, closure and validation
 
 **ES:** `evidence` **deja el acta** de lo que pasó de verdad y `close` (más adelante en esta misma versión) comprueba los requisitos del cierre y registra el cambio en el checklist y en el roadmap. La evidencia es del **monorepo** —`docs/evidence/{fase}/{módulo}/{lenguaje}.md`— y apunta al commit del submódulo que la respalda: el acta es el registro del cierre, no un artefacto del lenguaje.
 
@@ -318,6 +319,23 @@
 | Salida / Output | La **línea nueva del roadmap** por stdout |
 | `-n/--dry-run` | Imprime el **diff exacto** que aplicaría (`-` línea vieja, `+` línea nueva) y no escribe nada |
 | Qué **no** hace / What it does **not** | **No confirma**: el commit es del autor, como el resto de los cambios del monorepo. Tampoco cuenta el cierre en la cabecera de la fase, cuyo formato aún no es único entre fases |
+
+### `validate` — la validación / validation
+
+**ES:** `validate` **encarga** la validación automática del módulo. No valida él: pasa el encargo al validador y traduce lo que responde. Es **opcional** —el validador necesita el CLI de Copilot y la suscripción del autor, que no son dependencias del repositorio—, así que el cierre no lo exige.
+
+**EN:** `validate` **requests** the module's automatic validation. It does not validate itself: it hands the request to the validator and translates the answer. It is **optional** —the validator needs the Copilot CLI and the author's subscription, which are not repository dependencies—, so the closure does not require it.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Encargo / Request | **El mismo que imprime `glot prompt validate`** (paso 6): una sola verdad entre lo que se lee y lo que se envía. Va por **stdin** |
+| Orden / Command | `GLOT_VALIDATOR`, con `ask` como precedente. Sin la variable, la invocación verificada de Copilot CLI en **solo lectura** (`--deny-tool write`), con esfuerzo bajo y tope de créditos |
+| Registro / Record | `docs/evidence/{fase}/{módulo}/{lenguaje}.validate.md`: bloque de máquina (`verdict`, `findings`, `validator`, `commit`, `dirty`, `date`) más el informe del validador tal cual. Lo escribe `glot`, así que vale también para un validador propio |
+| Veredicto / Verdict | Se **lee**, no se adivina: la plantilla exige una última línea `glot:validate verdict=clean\|findings findings=N`. Sin ella, o con un valor que no sea `clean` ni `findings`, devuelve `3` |
+| Salida / Output | El informe del validador por stdout (JSONL con el CLI), y el veredicto y la ruta del registro por stderr |
+| Códigos / Codes | `0` sin hallazgos · `1` sin validador o entorno · `2` uso · `3` no se pudo ejecutar o no se pudo leer el veredicto · **`4` con hallazgos** |
+| `-n/--dry-run` | Enseña el comando que se lanzaría —con el encargo en lugar del prompt— y la ruta del registro, sin ejecutar ni escribir |
+| Qué **no** hace / What it does **not** | No corrige nada, no confirma, y no sustituye a la revisión humana: el validador puede equivocarse en las dos direcciones |
 
 ---
 

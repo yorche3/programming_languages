@@ -46,7 +46,7 @@
 | L3 | Ejecución: `test` y `verify` | 0.7.0 ✅ |
 | L4 | Delegación: `prompt` (encargos de IA) y `ask` (envío al delegado) | 0.8.0 ✅ |
 | L5 | Creación y registro: `new`, `save` | 0.9.0 ✅ |
-| L6 | Evidencia y cierre: `evidence`, `close`, `validate` | 0.10.0 🔄 |
+| L6 | Evidencia y cierre: `evidence`, `close`, `validate` | 0.10.0 ✅ |
 | L6.5 | Perfiles de modelo por encargo: `model:` en cada plantilla y catálogo de perfiles con los modelos de Copilot | 0.11.0 |
 | L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.12.0 |
 | L8 | Instalación: `install`, función cargable, `doctor` completo | 1.0.0 |
@@ -124,6 +124,8 @@ La política del validador automático (invocación, modelo y coste, advertencia
 | Lenguaje por directorio | El objetivo se resuelve **argumentos → estado → directorio**. El estado manda sobre el directorio a propósito; el directorio es el último recurso, para que `cd php && glot test …` no exija `use` |
 | `hello` | Se retira en la **v0.10.0**, antes de lo previsto (el contrato decía v1.0.0), y el aviso de verbo desconocido deja de ofrecer el saludo |
 | Perfiles de modelo | Versión propia: **L6.5 → 0.11.0**, con L7 desplazada a la 0.12.0. Se configurarán **solo los modelos que ofrece Copilot**, con esfuerzo y tope de créditos ajustados por encargo. El proveedor propio (BYOK) **queda fuera**: exige variables de entorno y `glot` no gestiona claves ni proveedores; el mecanismo queda documentado en [`VALIDATION.md`](VALIDATION.md) por si algún día se quiere enchufar |
+| Veredicto de `validate` | Se **lee**, no se interpreta: la plantilla `validate` exige una última línea `glot:validate verdict=clean\|findings findings=N` y `glot` solo acepta esos dos valores. Sin línea, o con otro, devuelve `3` en vez de suponer un resultado |
+| Evidencia de la validación | El registro lo escribe `glot` (`docs/evidence/{fase}/{módulo}/{lenguaje}.validate.md`) y **no** se usa `--share`: así funciona también con un validador propio, que no tiene por qué saber escribir sesiones |
 
 ---
 

@@ -112,14 +112,15 @@
 
 ## 0.10.0 — 2026-09-22 (viva)
 
-- **En curso:** el **cierre** (L6) con `validate` (validador automático con Copilot CLI, enchufable por variable de entorno).
+- **Añade:** la **evidencia y el cierre** (L6) completos: `evidence`, `close` y `validate`.
 - **Ya hecho en esta versión:**
+  - **`validate`:** pasa el encargo `validate` (paso 6, **versionado** en `prompts/validate.prompt.md`) al validador automático y guarda su informe en `docs/evidence/{fase}/{módulo}/{lenguaje}.validate.md`. La orden sale de `GLOT_VALIDATOR` y, sin ella, de la invocación verificada de Copilot CLI en solo lectura; el **veredicto se lee** de la línea que la plantilla exige (`glot:validate verdict=clean|findings findings=N`) y no se adivina. Es **opcional**: sin validador avisa y devuelve `1`.
   - **`close`:** registra el cierre de un módulo en un lenguaje. Exige el acta de `evidence` **en verde** y los README del módulo y de la fase; escribe la entrada del checklist con los comandos y sus códigos leídos del acta, y sube el contador y la lista del roadmap con el nombre de presentación (`data/display.tsv` fija el nombre y el orden). Es idempotente, enseña el diff exacto con `-n` y **no confirma**.
   - **`evidence`:** ejecuta la suite y el verificador del módulo y deja el **acta** con la salida real en `docs/evidence/{fase}/{módulo}/{lenguaje}.md` —fecha, rama, commit del submódulo, árbol sucio o limpio, los comandos, su salida tal cual y sus códigos—, más un bloque de máquina que `close` leerá sin interpretar markdown. La escribe **también cuando algo está en rojo**, y entonces devuelve `4`.
   - **Retira** el verbo `hello` (alias de compatibilidad de la v0.2.0), que el contrato situaba en la v1.0.0: devuelve `2` como cualquier verbo desconocido. El aviso de verbo desconocido ya solo sugiere `glot help`.
   - **El objetivo se resuelve por directorio:** `test`, `verify`, `new` y `save` deducen el lenguaje del directorio cuando no lo traen ni los argumentos ni el estado del sprint, así que `cd php && glot test algorithms/naive_sort` funciona sin `use` previo. El estado manda sobre el directorio a propósito.
   - **El harness cierra el círculo del archivado:** toda versión marcada como cerrada en este log tiene que tener su snapshot, y ningún snapshot puede sobrar.
-- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 433 passed, 0 failed` (rc `0`). Con la versión abierta, el número crece con cada capa.
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 477 passed, 0 failed` (rc `0`). Con la versión abierta, el número crece con cada capa.
 - **Snapshot:** pendiente: se archiva como `versions/glot_0.10.0.sh` **antes** de fusionar la rama en `main`.
 
 ---
@@ -167,7 +168,7 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, evidencia, cierre, plantillas, archivado y códigos (433 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, evidencia, cierre, validación, plantillas, archivado y códigos (477 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
 ./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
 ./scripts/glot.sh modules           # catálogo de módulos con su especificación
