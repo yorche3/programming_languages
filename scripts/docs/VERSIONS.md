@@ -16,7 +16,7 @@
 | 0.8.0 | 2026-09-22 | [`versions/glot_0.8.0.sh`](../versions/glot_0.8.0.sh) | **Delegación** (L4): `prompt` y `ask`, con las cuatro plantillas versionadas de `scripts/prompts/` y un solo vocabulario de marcadores | ✅ cerrada |
 | 0.9.0 | 2026-09-22 | [`versions/glot_0.9.0.sh`](../versions/glot_0.9.0.sh) | **Creación y registro** (L5): `new` (inicializador del lenguaje, esqueleto y normalización) y `save` (commit guiado desde el catálogo `data/commits.tsv`), con la tabla de inicialización ampliada | ✅ cerrada |
 | 0.10.0 | 2026-09-22 | [`versions/glot_0.10.0.sh`](../versions/glot_0.10.0.sh) | **Evidencia y cierre** (L6): `evidence`, `close` y `validate` con validador enchufable, más la retirada de `hello` y el objetivo resuelto por directorio | ✅ cerrada |
-| 0.11.0 | 2026-09-22 | — (viva / live) | **Perfiles de modelo por encargo** (L6.5): `model:` en el frontmatter de las seis plantillas y `data/models.tsv` fijando esfuerzo y tope de créditos por encargo, con los modelos que ofrece Copilot | 🔄 en curso / in progress |
+| 0.11.0 | 2026-09-22 | [`versions/glot_0.11.0.sh`](../versions/glot_0.11.0.sh) | **Perfiles de modelo por encargo** (L6.5): `model:` en el frontmatter de las seis plantillas y `data/models.tsv` fijando esfuerzo y tope de créditos por encargo, con los modelos que ofrece Copilot | ✅ cerrada |
 
 ---
 
@@ -127,11 +127,12 @@
 
 ---
 
-## 0.11.0 — 2026-09-22 (viva)
+## 0.11.0 — 2026-09-22 (cerrada)
 
 - **Añade:** los **perfiles de modelo por encargo** (L6.5): `model:` en el frontmatter de las seis plantillas —con el **id real** del modelo, que es clave nativa de los `.prompt.md` de VS Code— y el catálogo [`data/models.tsv`](../data/models.tsv), que fija el esfuerzo y el tope de créditos de cada perfil.
 - **Decisiones cerradas antes de codificar:** en [`ROADMAP.md`](ROADMAP.md). El modelo es la **clave del perfil** (no hay `profile:` que pueda derivar), el delegado recibe el modelo por entorno (`COPILOT_MODEL` y `COPILOT_AUTO_TIER`, que el CLI sí reconoce) y el tope de créditos del perfil económico es el **mínimo que acepta el CLI** (30).
-- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 503 passed, 0 failed` (rc `0`), con 26 comprobaciones nuevas del catálogo, las plantillas y los códigos. Los límites del CLI (1.0.88) se midieron de verdad: `--reasoning-effort bogus` → `error: invalid value 'bogus' for '--reasoning-effort <level>' [possible values: none, minimal, low, medium, high, xhigh, max]` y `--max-ai-credits 20` → `error: Invalid value for --max-ai-credits: "20". Use at least 30 AI credits.`, que es de dónde sale el suelo de 30 del perfil económico. Las tres corridas de modelo contra la API quedan **pendientes de autenticación**: en este entorno `copilot` responde `Error: No authentication information found.` y el token que hay en `gh` es un PAT clásico (`ghp_`), que Copilot rechaza: `Error: Classic Personal Access Tokens (ghp_) are not supported by Copilot.`
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 503 passed, 0 failed` (rc `0`), con 26 comprobaciones nuevas del catálogo, las plantillas y los códigos. Los límites del CLI (1.0.88) se midieron de verdad: `--reasoning-effort bogus` → `error: invalid value 'bogus' for '--reasoning-effort <level>' [possible values: none, minimal, low, medium, high, xhigh, max]` y `--max-ai-credits 20` → `error: Invalid value for --max-ai-credits: "20". Use at least 30 AI credits.`, que es de dónde sale el suelo de 30 del perfil económico. Los **tres perfiles se probaron contra la API real** —`copilot -C <dir temporal> -p 'Responde solo con la palabra OK.' -s --model <modelo> --reasoning-effort <esfuerzo> --max-ai-credits <créditos> --allow-all-tools --deny-tool write`— y los tres respondieron `OK` con código `0`: `gemini-3.8-flash`/`low`/30, `gpt-5.6-terra`/`medium`/90 y `claude-sonnet-5`/`high`/120.
+- **Snapshot:** [`versions/glot_0.11.0.sh`](../versions/glot_0.11.0.sh), archivado al cerrar la versión y **antes** de fusionar la rama en `main`; su contenido es el que tenía `glot.sh` en el cierre, y no se edita.
 
 ## 🔖 Convención de archivado / Archiving convention
 
@@ -139,7 +140,7 @@
 - **Puerta de entrada:** ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`. Si falta, se copia `glot.sh` con el sufijo de su versión y solo después se reanuda la implementación de la nueva.
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh), [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh) [`glot_0.9.0.sh`](../versions/glot_0.9.0.sh) y [`glot_0.10.0.sh`](../versions/glot_0.10.0.sh).
+- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh), [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh), [`glot_0.9.0.sh`](../versions/glot_0.9.0.sh), [`glot_0.10.0.sh`](../versions/glot_0.10.0.sh) y [`glot_0.11.0.sh`](../versions/glot_0.11.0.sh).
 - El harness **comprueba la puerta de entrada**: exige el snapshot de la versión anterior a la viva, así que no se puede empezar una versión nueva sin haber archivado la anterior.
 - Cada versión se cierra en su propia rama `chore/repo/glot-v0.X` antes de fusionarla en `main` (ver [`README.md`](../README.md)).
 

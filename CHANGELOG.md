@@ -85,7 +85,7 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   sin ella, de la invocación de Copilot CLI en solo lectura; el veredicto se lee
   de la línea que la plantilla exige y no se adivina. Es opcional: sin validador
   avisa y devuelve `1`, y con hallazgos devuelve `4`.
-- `glot` v0.11.0 (en curso): **perfiles de modelo por encargo** (L6.5). Cada
+- `glot` v0.11.0: **perfiles de modelo por encargo** (L6.5). Cada
   plantilla de `scripts/prompts/` declara su modelo en el frontmatter (`model:`,
   con el id real que ofrece Copilot, que es clave nativa de los `.prompt.md` de
   VS Code) y [`scripts/data/models.tsv`](scripts/data/models.tsv) fija el
