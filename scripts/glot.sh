@@ -368,6 +368,18 @@ _glot_cmd_doctor() {
             printf 'delegate: (sin configurar / not configured)\n'
         fi
 
+        if [[ -n "${GLOT_VALIDATOR:-}" ]]; then
+            printf 'validator: %s\n' "$GLOT_VALIDATOR"
+        else
+            printf 'validator: (sin configurar; Copilot CLI por defecto / not configured; Copilot CLI by default)\n'
+        fi
+
+        if command -v copilot >/dev/null 2>&1; then
+            printf 'copilot: %s\n' "$("$(command -v copilot)" --version 2>/dev/null | head -1 || printf 'instalado / installed')"
+        else
+            printf 'copilot: (no encontrado / not found)\n'
+        fi
+
         local shell=""
         for shell in bash zsh; do
             if _glot_completion_file "$shell" >/dev/null; then
@@ -1864,6 +1876,158 @@ _glot_cmd_close() {
     return 0
 }
 
+# _glot_validate_file <raíz> <fase> <módulo> <lenguaje> — registro de la validación del
+# sprint, en la misma carpeta de evidencia que el acta: lo que se ejecutó y lo que el
+# validador informó viven juntos.
+_glot_validate_file() {
+    printf '%s/%s.validate.md\n' "$(_glot_evidence_dir "$1" "$2" "$3")" "$4"
+}
+
+# _glot_cmd_validate [lenguaje] [fase/módulo] — pasa el encargo `validate` (paso 6) al
+# validador automático y guarda su informe como registro del sprint. La orden sale de
+# `GLOT_VALIDATOR` —el encargo llega por stdin, como en `ask`— y, sin esa variable, es la
+# invocación verificada de Copilot CLI en **solo lectura**: `--deny-tool write` y sin
+# `--share`, porque el registro ya lo escribe `glot` y no se duplica.
+# El validador es **opcional**: sin él, el verbo avisa y devuelve `1`.
+# Códigos: 0 sin hallazgos · 1 sin validador o entorno · 2 uso · 3 no se pudo ejecutar o
+# no se pudo leer el veredicto · 4 con hallazgos.
+_glot_cmd_validate() {
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local root=""
+    local sub=""
+    local dir=""
+    local request=""
+    local record=""
+    local rel_record=""
+    local cmd=""
+    local response=""
+    local rc=0
+    local status=0
+    local verdict=""
+    local findings=""
+    local stamp=""
+    local branch=""
+    local commit=""
+    local dirty="no"
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    sub="$root/$lang"
+    dir="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    if [[ ! -d "$dir" ]]; then
+        _glot_error "el módulo no existe / module not found: $dir"
+        _glot_info "sitúalo primero / place it first: glot use $lang $phase/$module"
+        return 1
+    fi
+
+    # El encargo es el mismo que imprime `glot prompt validate`: una sola verdad.
+    request="$(_glot_prompt_build validate "$lang" "$phase/$module")" || return $?
+
+    if [[ -n "${GLOT_VALIDATOR:-}" ]]; then
+        cmd="$GLOT_VALIDATOR"
+    else
+        if ! command -v copilot >/dev/null 2>&1; then
+            _glot_error 'no hay validador / no validator configured'
+            _glot_info 'define GLOT_VALIDATOR o instala Copilot CLI / set GLOT_VALIDATOR or install Copilot CLI'
+            _glot_info 'el validador es opcional; mira / the validator is optional; see: glot help validate'
+            return 1
+        fi
+        cmd="copilot -C \"$dir\" -p \"\$(cat)\" -s --output-format json --reasoning-effort low --max-ai-credits 30 --allow-all-tools --deny-tool write"
+    fi
+
+    record="$(_glot_validate_file "$root" "$phase" "$module" "$lang")"
+    rel_record="${record#"$root"/}"
+
+    if ((_glot_dry_run)); then
+        printf '%s\n' "${cmd//\$(cat)/<encargo>}"
+        printf '# registro / record: %s\n' "$rel_record"
+        printf '%s\n' "$record"
+        return 0
+    fi
+
+    _glot_info "validate: $cmd"
+    response="$(printf '%s\n' "$request" | eval "$cmd")" || rc=$?
+
+    if ((rc != 0)); then
+        _glot_error "el validador falló / the validator failed: código / code $rc"
+        return 3
+    fi
+
+    # El veredicto se lee, no se adivina: la plantilla exige una última línea con la forma
+    # `glot:validate verdict=… findings=…`. Un valor que no sea uno de los dos esperados es
+    # un error, no una interpretación.
+    verdict="$(printf '%s\n' "$response" | grep -o 'glot:validate verdict=[a-zA-Z]*' | tail -1 | sed 's/.*=//' || true)"
+    findings="$(printf '%s\n' "$response" | grep -o 'glot:validate verdict=[a-zA-Z]* findings=[0-9]*' | tail -1 | sed 's/.*findings=//' || true)"
+
+    case "$verdict" in
+        clean | findings) ;;
+        "")
+            _glot_error 'no se pudo leer el veredicto del validador / cannot read the validator verdict'
+            _glot_info 'la plantilla exige una última línea / the template requires a final line: glot:validate verdict=clean findings=0'
+            return 3
+            ;;
+        *)
+            _glot_error "veredicto inesperado / unexpected verdict: $verdict"
+            _glot_info 'solo valen clean y findings / only clean and findings are valid'
+            return 3
+            ;;
+    esac
+
+    if [[ "$verdict" == "clean" ]]; then
+        status=0
+        _glot_info 'validación sin hallazgos / validation with no findings'
+    else
+        status=4
+        _glot_warn "la validación tiene hallazgos / validation has findings: ${findings:-?}"
+    fi
+
+    branch="$(git -C "$sub" symbolic-ref --short -q HEAD || true)"
+    commit="$(git -C "$sub" rev-parse --short HEAD 2>/dev/null || true)"
+    if [[ -n "$(git -C "$sub" status --porcelain 2>/dev/null || true)" ]]; then
+        dirty="yes"
+    fi
+    stamp="$(date -Iseconds)"
+
+    if ! mkdir -p -- "$(_glot_evidence_dir "$root" "$phase" "$module")"; then
+        _glot_error 'no se pudo crear la carpeta de evidencia / cannot create the evidence directory'
+        return 3
+    fi
+
+    if ! {
+        printf '# Validación — %s %s/%s\n\n' "$lang" "$phase" "$module"
+        printf '<!-- glot:validate\n'
+        printf 'lang=%s\n' "$lang"
+        printf 'phase=%s\n' "$phase"
+        printf 'module=%s\n' "$module"
+        printf 'branch=%s\n' "${branch:-detached}"
+        printf 'commit=%s\n' "${commit:--}"
+        printf 'dirty=%s\n' "$dirty"
+        printf 'date=%s\n' "$stamp"
+        printf 'validator=%s\n' "${cmd//$'\n'/ }"
+        printf 'verdict=%s\n' "$verdict"
+        printf 'findings=%s\n' "${findings:-0}"
+        printf '%s\n\n' '-->'
+        printf '## Informe del validador / Validator report\n\n'
+        printf '````text\n%s\n````\n' "${response:-(sin salida / no output)}"
+    } >"$record"; then
+        _glot_error "no se pudo escribir el registro / cannot write the record: $rel_record"
+        return 3
+    fi
+
+    printf '%s\n' "$response"
+    _glot_info "registro escrito / record written: $rel_record"
+    return "$status"
+}
+
 _glot_usage() {
     cat <<'EOF'
 glot — CLI del monorepo / monorepo CLI
@@ -1914,6 +2078,13 @@ Verbos / Verbs:
                      Closes the module: checks the green evidence and the READMEs,
                      records the checklist entry and raises the roadmap counter and
                      list. It does not commit: the commit is the author's
+  validate [lenguaje] [fase/módulo]
+                     Pasa el encargo `validate` al validador automático y guarda su
+                     informe como registro del sprint; devuelve 4 si hay hallazgos y 1
+                     si no hay validador. El validador es opcional
+                     Hands the `validate` request to the automatic validator and keeps
+                     its report as the sprint record; returns 4 with findings and 1 with
+                     no validator. The validator is optional
   prompt [encargo] [lenguaje] [fase/módulo]
                      Sin encargo, lista el registro; con encargo, imprime el encargo
                      armado con el estado del sprint. No muta nada
@@ -2060,6 +2231,25 @@ _glot_help_verb() {
             printf 'Es idempotente: si el lenguaje ya está en la lista, no suma dos veces\n'
             printf 'It is idempotent: if the language is already listed, it does not count twice\n'
             printf 'Códigos / codes: 0 registrado o ya estaba · 1 falta un dato · 2 uso · 3 no se pudo escribir · 4 requisitos sin cumplir\n'
+            ;;
+        validate)
+            printf 'glot validate [lenguaje] [fase/módulo] — valida el módulo con el validador\n'
+            printf 'glot validate [language] [phase/module] — validates the module with the validator\n'
+            printf 'Pasa el encargo `validate` (el mismo que imprime `glot prompt validate`) al\n'
+            printf 'validador y guarda su informe en `docs/evidence/{fase}/{modulo}/{lenguaje}.validate.md`\n'
+            printf 'Hands the `validate` request (the one `glot prompt validate` prints) to the\n'
+            printf 'validator and keeps its report in `docs/evidence/{phase}/{module}/{language}.validate.md`\n'
+            printf 'La orden sale de GLOT_VALIDATOR y el encargo llega por stdin, como en `ask`\n'
+            printf 'The command comes from GLOT_VALIDATOR and the request arrives over stdin, as in `ask`\n'
+            printf 'Sin GLOT_VALIDATOR se usa la invocación verificada de Copilot CLI en solo\n'
+            printf 'lectura. El validador es opcional: sin él se avisa y se devuelve 1\n'
+            printf 'Without GLOT_VALIDATOR the verified Copilot CLI invocation is used, read-only.\n'
+            printf 'The validator is optional: with none it warns and returns 1\n'
+            printf 'El veredicto se lee de la última línea del informe, que la plantilla exige:\n'
+            printf '`glot:validate verdict=clean|findings findings=N`. Sin ella no se adivina nada\n'
+            printf 'The verdict is read from the report last line, which the template requires:\n'
+            printf '`glot:validate verdict=clean|findings findings=N`. Without it nothing is guessed\n'
+            printf 'Códigos / codes: 0 sin hallazgos · 1 sin validador · 2 uso · 3 no se pudo ejecutar · 4 con hallazgos\n'
             ;;
         prompt)
             printf 'glot prompt [encargo] [lenguaje] [fase/módulo]\n'
@@ -3010,6 +3200,10 @@ glot() {
         close)
             # Registra el cierre del módulo en el checklist y el roadmap / records the module closure in the checklist and the roadmap
             _glot_cmd_close "$@"
+            ;;
+        validate)
+            # Pasa el encargo `validate` al validador automático / hands the `validate` request to the automatic validator
+            _glot_cmd_validate "$@"
             ;;
         prompt)
             # Arma el encargo del sprint / Builds the sprint request

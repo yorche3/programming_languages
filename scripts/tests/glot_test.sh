@@ -770,7 +770,7 @@ assert_contains 'doctor: hay verificadores' 'verify_commands: 14 de / of 50' "$o
 # registro de encargos: nombre<TAB>paso<TAB>descripción, leído del frontmatter
 glot_run prompt
 assert_eq 'prompt: código' '0' "$rc_last"
-assert_eq 'prompt: cinco encargos' '5' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'prompt: seis encargos' '6' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 assert_eq 'prompt: tres columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=3')"
 assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
 assert_contains 'prompt: docs-language en el paso 8' "$(printf 'docs-language\t8')" "$out"
@@ -824,7 +824,7 @@ assert_contains 'ask -n: imprime el plan sin enviar' 'cat >/dev/null' "$out"
 # doctor informa de las plantillas y del delegado
 glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
-assert_contains 'doctor: registro de encargos' 'prompts_ok: 5 encargos / requests' "$out"
+assert_contains 'doctor: registro de encargos' 'prompts_ok: 6 encargos / requests' "$out"
 assert_contains 'doctor: delegado sin configurar' 'delegate: (sin configurar / not configured)' "$out"
 
 # --- casos de la especificación v0.9.0 (L5, creación y registro) -------------
@@ -904,6 +904,12 @@ assert_contains 'scaffold: declara la entrada' '**Entrada**' "$scaffold_prompt"
 assert_contains 'scaffold: declara lo que queda fuera' '**Fuera de alcance**' "$scaffold_prompt"
 assert_contains 'scaffold: parte de lo que dejó new' 'glot new' "$scaffold_prompt"
 assert_contains 'scaffold: no escribe la suite' 'encargo `suite`' "$scaffold_prompt"
+
+# la plantilla de validación define el contrato del veredicto que `validate` lee
+validate_prompt="$(cat -- "$PROMPTS_DIR/validate.prompt.md")"
+assert_contains 'validate: la plantilla exige el veredicto legible' 'glot:validate verdict=clean findings=0' "$validate_prompt"
+assert_contains 'validate: la plantilla exige la otra forma' 'glot:validate verdict=findings findings=' "$validate_prompt"
+assert_contains 'validate: la plantilla se declara de solo lectura' 'solo lectura' "$validate_prompt"
 
 # el autocompletado completa los pasos de `save` y no solo los verbos. La llamada
 # va en su propio shell: el listado de pasos sale de un verbo que devuelve 2 (es
@@ -1244,6 +1250,128 @@ glot_run_sandbox close ruby algorithms/nope
 assert_eq 'close con módulo desconocido: código' '1' "$rc_last"
 glot_run_sandbox close ruby algorithms/naive_sort extra
 assert_eq 'close con demasiados argumentos: código' '2' "$rc_last"
+
+# validate: el validador es enchufable y opcional. El sustituto lee el encargo por
+# stdin y emite el veredicto que la plantilla exige, así que el caso no depende de
+# Copilot ni gasta créditos.
+sandbox_make
+mkdir -p -- "$SANDBOX/php/core/algorithms/naive_sort" "$SANDBOX/stub"
+
+cat >"$SANDBOX/stub/validador" <<'STUB'
+#!/usr/bin/env bash
+cat >"${VALIDATOR_INBOX:-/dev/null}"
+if [[ -n "${VALIDATOR_BREAK:-}" ]]; then
+    exit "${VALIDATOR_EXIT:-1}"
+fi
+if [[ -z "${VALIDATOR_SILENT:-}" ]]; then
+    case "${VALIDATOR_VERDICT:-clean}" in
+        clean) printf 'Sin hallazgos.\nglot:validate verdict=clean findings=0\n' ;;
+        findings) printf -- '- [media] src/x.php:3 — falta el caso nulo\nglot:validate verdict=findings findings=1\n' ;;
+        *) printf 'algo raro\nglot:validate verdict=no-se\n' ;;
+    esac
+fi
+STUB
+chmod +x -- "$SANDBOX/stub/validador"
+
+# glot_run_validate [-n|...] [args...] — ejecuta `validate` con ese validador; los
+# flags globales van antes del verbo, como manda el contrato.
+glot_run_validate() {
+    local -a flags=()
+    local rc=0
+
+    while [[ "${1:-}" == -* ]]; do
+        flags+=("$1")
+        shift
+    done
+
+    out="$(GLOT_ROOT="$SANDBOX" GLOT_VALIDATOR="$SANDBOX/stub/validador" "$GLOT_SH" "${flags[@]}" validate "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+RECORD="$SANDBOX/docs/evidence/algorithms/naive_sort/php.validate.md"
+
+# sin hallazgos: cero, informe por stdout y registro con bloque de máquina
+VALIDATOR_INBOX="$SANDBOX/encargo.txt" glot_run_validate php algorithms/naive_sort
+assert_eq 'validate limpio: código' '0' "$rc_last"
+assert_contains 'validate: el informe va a stdout' 'verdict=clean' "$out"
+assert_eq 'validate limpio: el registro está' 'si' "$([[ -f "$RECORD" ]] && echo si || echo no)"
+assert_contains 'validate: el registro lleva el bloque de máquina' 'verdict=clean' "$(cat -- "$RECORD")"
+assert_contains 'validate: el registro guarda el informe' 'Sin hallazgos.' "$(cat -- "$RECORD")"
+assert_contains 'validate: el registro dice quién validó' 'validator=' "$(cat -- "$RECORD")"
+assert_contains 'validate: el encargo llega por stdin' '# Encargo `validate`' "$(cat -- "$SANDBOX/encargo.txt")"
+assert_contains 'validate: el encargo trae el estado del sprint' '| module | naive_sort |' "$(cat -- "$SANDBOX/encargo.txt")"
+
+# con hallazgos: cuatro y el registro lo dice
+VALIDATOR_VERDICT=findings glot_run_validate php algorithms/naive_sort
+assert_eq 'validate con hallazgos: código' '4' "$rc_last"
+assert_contains 'validate con hallazgos: el registro' 'verdict=findings' "$(cat -- "$RECORD")"
+assert_contains 'validate con hallazgos: avisa' 'has findings' "$err"
+
+# el veredicto se lee; no se adivina
+VALIDATOR_VERDICT=raro glot_run_validate php algorithms/naive_sort
+assert_eq 'validate con veredicto inesperado: código' '3' "$rc_last"
+assert_contains 'validate con veredicto inesperado: lo dice' 'unexpected verdict' "$err"
+
+VALIDATOR_SILENT=1 glot_run_validate php algorithms/naive_sort
+assert_eq 'validate sin línea de veredicto: código' '3' "$rc_last"
+assert_contains 'validate sin línea de veredicto: la exige' 'glot:validate verdict=clean findings=0' "$err"
+
+VALIDATOR_BREAK=1 glot_run_validate php algorithms/naive_sort
+assert_eq 'validate con validador que falla: código' '3' "$rc_last"
+assert_contains 'validate con validador que falla: lo dice' 'the validator failed' "$err"
+
+# sin validador configurado y sin Copilot en el PATH: opcional, devuelve 1
+rc_last=0
+out="$(cd -- "$SANDBOX/php" && GLOT_ROOT="$SANDBOX" PATH="/usr/bin:/bin" "$GLOT_SH" validate php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_eq 'validate sin validador: código' '1' "$rc_last"
+assert_contains 'validate sin validador: lo dice' 'no validator configured' "$err"
+assert_contains 'validate sin validador: es opcional' 'optional' "$err"
+
+# -n: el plan (el comando y dónde queda el registro) sin ejecutar ni escribir
+rm -f -- "$RECORD"
+glot_run_validate -n php algorithms/naive_sort
+assert_eq 'validate -n: código' '0' "$rc_last"
+assert_contains 'validate -n: el comando del validador' "$SANDBOX/stub/validador" "$out"
+assert_contains 'validate -n: el registro' '/docs/evidence/algorithms/naive_sort/php.validate.md' "$out"
+assert_eq 'validate -n: no escribe' 'no' "$([[ -f "$RECORD" ]] && echo si || echo no)"
+
+# la invocación por defecto: sin GLOT_VALIDATOR se usa Copilot CLI. Con un `copilot` de
+# mentira en el PATH se comprueba la composición entera —el encargo por `-p`, el
+# directorio del módulo y el modo solo lectura— sin depender del CLI real
+cat >"$SANDBOX/stub/copilot" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >"${COPILOT_ARGS:-/dev/null}"
+printf 'Sin hallazgos.\nglot:validate verdict=clean findings=0\n'
+STUB
+chmod +x -- "$SANDBOX/stub/copilot"
+
+out="$(GLOT_ROOT="$SANDBOX" PATH="$SANDBOX/stub:$PATH" "$GLOT_SH" -n validate php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+assert_eq 'validate sin GLOT_VALIDATOR -n: código' '0' "$rc_last"
+assert_contains 'validate -n: el CLI por defecto' 'copilot -C ' "$out"
+assert_contains 'validate -n: el encargo en lugar del prompt' '<encargo>' "$out"
+
+rm -f -- "$RECORD"
+out="$(GLOT_ROOT="$SANDBOX" PATH="$SANDBOX/stub:$PATH" COPILOT_ARGS="$SANDBOX/copilot-args.txt" "$GLOT_SH" validate php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+assert_eq 'validate por defecto: código' '0' "$rc_last"
+assert_contains 'validate por defecto: el registro' 'verdict=clean' "$(cat -- "$RECORD")"
+copilot_args="$(cat -- "$SANDBOX/copilot-args.txt")"
+assert_contains 'validate por defecto: el directorio del módulo' "-C $SANDBOX/php/core/algorithms/naive_sort" "$copilot_args"
+assert_contains 'validate por defecto: el encargo por -p' '# Encargo `validate`' "$copilot_args"
+assert_contains 'validate por defecto: modo solo lectura' '--deny-tool write' "$copilot_args"
+assert_contains 'validate por defecto: tope de créditos' '--max-ai-credits 30' "$copilot_args"
+
+# errores de objetivo y de argumentos
+glot_run_validate php algorithms/nope
+assert_eq 'validate con módulo desconocido: código' '1' "$rc_last"
+glot_run_validate php algorithms/naive_sort extra
+assert_eq 'validate con demasiados argumentos: código' '2' "$rc_last"
+
+# doctor informa del validador configurado y del CLI disponible
+glot_run doctor
+assert_contains 'doctor: validador' 'validator: ' "$out"
+assert_contains 'doctor: el CLI del validador' 'copilot: ' "$out"
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 

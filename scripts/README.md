@@ -38,6 +38,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh verify php algorithms/naive_sort  # sintaxis/lint del lenguaje
 ./scripts/glot.sh evidence php algorithms/naive_sort  # acta con la salida real
 ./scripts/glot.sh -n close php algorithms/naive_sort   # cierre: diff exacto del roadmap
+./scripts/glot.sh validate php algorithms/naive_sort    # validador automático (opcional)
 ./scripts/glot.sh -n new php algorithms/naive_sort   # esqueleto: plan sin tocar nada
 ./scripts/glot.sh new php algorithms/naive_sort      # inicializador + normalización
 ./scripts/glot.sh prompt suite                        # encargo de la suite (paso 4b)
@@ -74,6 +75,7 @@ scripts/
 │   ├── scaffold.prompt.md        # Paso 4a · esqueleto
 │   ├── suite.prompt.md           # Paso 4b · suite de pruebas
 │   ├── implement.prompt.md       # Paso 5
+│   ├── validate.prompt.md        # Paso 6 · informe del validador
 │   ├── docs-module.prompt.md     # Paso 7
 │   └── docs-language.prompt.md   # Paso 8
 ├── data/                     # Catálogo de datos del tooling
