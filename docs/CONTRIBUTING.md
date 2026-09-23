@@ -166,7 +166,9 @@ Flujo operativo:
 3. Vuelve a la raíz, cambia el submódulo al commit integrado y verifica
 	`git submodule status`.
 4. Crea una rama `chore/<phase>/<module>-pointer` en el monorepo, añade el
-	puntero y actualiza documentación o roadmap si corresponde.
+	puntero y actualiza documentación o roadmap si corresponde. El paso del puntero
+	lo hace `glot pointer` (verifica que el commit está integrado, prepara y publica
+	la rama y añade el gitlink) y lo confirma `glot save 9`.
 5. Revisa y fusiona primero el cambio del submódulo; después revisa y fusiona
 	el cambio del puntero en el `main` del monorepo.
 

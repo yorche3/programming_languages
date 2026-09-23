@@ -85,6 +85,15 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   sin ella, de la invocación de Copilot CLI en solo lectura; el veredicto se lee
   de la línea que la plantilla exige y no se adivina. Es opcional: sin validador
   avisa y devuelve `1`, y con hallazgos devuelve `4`.
+- `glot` v0.12.0 (en curso): **higiene y punteros** (L7). `status` informa, por
+  lenguaje y sin tocar nada, de la rama del submódulo, de si el puntero del
+  monorepo coincide con su HEAD y de si el árbol está sucio; `pointer` lleva el
+  submódulo al commit integrado en su `main` (con `fetch` explícito y la regla de
+  `CONTRIBUTING.md` como comprobación), prepara la rama
+  `chore/{fase}/{módulo}-pointer` y deja el gitlink añadido, sin confirmar; y
+  `clean` borra lo que el propio `.gitignore` del lenguaje declara como artefacto
+  en el directorio del módulo y sincroniza el submódulo. El commit del monorepo
+  pasa a `save 9` y `save 10`, cada uno con sus rutas.
 - `glot` v0.11.0: **perfiles de modelo por encargo** (L6.5). Cada
   plantilla de `scripts/prompts/` declara su modelo en el frontmatter (`model:`,
   con el id real que ofrece Copilot, que es clave nativa de los `.prompt.md` de

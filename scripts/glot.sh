@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# glot 0.11.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2),
+# glot 0.12.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2),
 # catálogo (L2.5), ejecución (L3), delegación (L4), creación (L5), evidencia y
-# cierre (L6) y perfiles de modelo por encargo (L6.5): `model:` en cada plantilla y
-# `data/models.tsv` decidiendo el esfuerzo y el tope de créditos de cada encargo.
+# cierre (L6), perfiles de modelo por encargo (L6.5) e higiene y punteros (L7):
+# `status`, `pointer` y `clean`, con el commit del monorepo en manos de `save`.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -32,7 +32,7 @@
 
 set -euo pipefail
 
-GLOT_VERSION="0.11.0"
+GLOT_VERSION="0.12.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -1235,6 +1235,271 @@ _glot_prompt_profile() {
     printf '%s\n' "$row"
 }
 
+# --- higiene y punteros (L7) -------------------------------------------------
+
+# _glot_gitlink <raíz> <lenguaje> — SHA que el monorepo registra para ese submódulo. Se
+# lee del árbol (`HEAD:<ruta>`) y no con `git rev-parse <ruta>`, que en la raíz devuelve
+# la **ruta**, no el SHA. Es el mismo dato que mueve `git add <lenguaje>`.
+_glot_gitlink() {
+    git -C "$1" rev-parse -q --verify "HEAD:$2" 2>/dev/null || return 1
+}
+
+# _glot_cmd_status [lenguaje] — solo lectura: una línea por lenguaje registrado, con la
+# rama del submódulo, el estado del puntero y el del árbol de trabajo. Sin resumen a
+# propósito: los contadores son de `progress`, y `status` no muta nada ni necesita `-n`.
+# Códigos: 0 siempre que se pueda leer; 1 si el lenguaje pedido no está registrado.
+_glot_cmd_status() {
+    local want="${1:-}"
+    local root=""
+    local lang=""
+    local sub=""
+    local branch=""
+    local worktree=""
+    local pointer=""
+    local link=""
+    local head=""
+    local found=0
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    while IFS= read -r lang; do
+        [[ -n "$lang" ]] || continue
+        [[ -n "$want" && "$lang" != "$want" ]] && continue
+        found=1
+        sub="$root/$lang"
+
+        # Sin clonar: el submódulo está registrado pero no inicializado (`-` en
+        # `git submodule status`). No hay rama ni árbol que mirar.
+        if [[ ! -e "$sub/.git" ]]; then
+            printf '%s\t-\tuninitialised\t-\n' "$lang"
+            continue
+        fi
+
+        branch="$(git -C "$sub" symbolic-ref --short -q HEAD || true)"
+        worktree="clean"
+        if [[ -n "$(git -C "$sub" status --porcelain 2>/dev/null || true)" ]]; then
+            worktree="dirty"
+        fi
+
+        link="$(_glot_gitlink "$root" "$lang" || true)"
+        head="$(git -C "$sub" rev-parse -q --verify HEAD 2>/dev/null || true)"
+        if [[ -z "$link" ]]; then
+            pointer="unknown"
+        elif [[ -z "$head" ]]; then
+            pointer="unknown"
+        elif [[ "$link" == "$head" ]]; then
+            pointer="ok"
+        else
+            pointer="differs"
+        fi
+
+        printf '%s\t%s\t%s\t%s\n' "$lang" "${branch:--}" "$pointer" "$worktree"
+    done < <(_glot_gitmodules_list)
+
+    if [[ -n "$want" && "$found" -eq 0 ]]; then
+        _glot_error "lenguaje no registrado en .gitmodules / language not in .gitmodules: $want"
+        return 1
+    fi
+
+    return 0
+}
+
+# _glot_cmd_clean [lenguaje] [fase/módulo] — artefactos del módulo y `submodule sync`.
+# Borra **solo** lo que el propio `.gitignore` del lenguaje declara como artefacto
+# (`git clean -Xfd`, nunca `-x`: lo no rastreado y no ignorado es trabajo del autor) y
+# solo dentro del directorio del módulo, así que no toca el monorepo ni `docs/`. Muta:
+# `-n` es obligatorio y enseña exactamente qué se borraría. Apoyo a los pasos 5–6.
+_glot_cmd_clean() {
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local root=""
+    local sub=""
+    local dir=""
+    local dirty=""
+    local removed=""
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    sub="$root/$lang"
+    if [[ ! -e "$sub/.git" ]]; then
+        _glot_error "submódulo sin inicializar / submodule not initialised: $lang"
+        _glot_info "prueba / try: git submodule update --init -- $lang"
+        return 1
+    fi
+
+    dir="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    if [[ ! -d "$dir" ]]; then
+        _glot_error "el módulo no existe / module not found: $dir"
+        _glot_info "sitúalo primero / place it first: glot use $lang $phase/$module"
+        return 1
+    fi
+
+    if ((_glot_dry_run)); then
+        printf 'git -C %s clean -Xfd\n' "$dir"
+        printf 'git -C %s submodule sync -- %s\n' "$root" "$lang"
+        return 0
+    fi
+
+    _glot_info "artefactos ignorados del módulo / ignored artefacts of the module: ${dir#"$root"/}"
+    removed="$(git -C "$dir" clean -Xfd 2>&1 | sed 's/^Removing //' || true)"
+    _glot_info "submódulo / submodule: git submodule sync -- $lang"
+    git -C "$root" submodule sync -q -- "$lang" >/dev/null 2>&1 || _glot_warn 'git submodule sync falló / failed'
+
+    if [[ -z "$removed" ]]; then
+        printf 'nothing\n'
+    else
+        printf '%s\n' "$removed"
+    fi
+
+    return 0
+}
+
+# _glot_cmd_pointer [lenguaje] [fase/módulo] — deja el puntero del submódulo listo para
+# confirmar con `save 9`. **Prepara y no confirma**: comprueba que el commit está
+# integrado en el `main` del submódulo (`fetch` explícito de `origin/main` y comparación
+# con su punta, porque la regla del repositorio es no apuntar nunca a una rama de
+# trabajo), lleva el monorepo a la rama `chore/{fase}/{módulo}-pointer`, la publica con
+# upstream como `use` y deja el gitlink añadido. Idempotente: si el puntero ya apunta a
+# ese commit imprime `nothing`. Códigos: 0 listo (o `nothing`) · 1 entorno o regla · 2 uso.
+_glot_cmd_pointer() {
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local root=""
+    local sub=""
+    local branch=""
+    local current=""
+    local link=""
+    local head=""
+    local dirty=""
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    sub="$root/$lang"
+    if [[ ! -e "$sub/.git" ]]; then
+        _glot_error "submódulo sin inicializar / submodule not initialised: $lang"
+        _glot_info "prueba / try: git submodule update --init -- $lang"
+        return 1
+    fi
+
+    branch="chore/$phase/$(_glot_kebab "$module")-pointer"
+    link="$(_glot_gitlink "$root" "$lang" || true)"
+    head="$(git -C "$sub" rev-parse -q --verify HEAD 2>/dev/null || true)"
+
+    if [[ -z "$head" ]]; then
+        _glot_error "no se pudo leer el HEAD del submódulo / cannot read the submodule HEAD: $lang"
+        return 1
+    fi
+
+    # Idempotencia primero, y sin red: si el monorepo ya apunta a ese commit no hay nada
+    # que preparar, ni rama que abrir.
+    if [[ "$link" == "$head" ]]; then
+        _glot_info "el puntero ya apunta a ese commit / the pointer already points at that commit: ${head:0:7}"
+        printf 'nothing\n'
+        return 0
+    fi
+
+    if ((_glot_dry_run)); then
+        printf 'git -C %s fetch -q origin main\n' "$sub"
+        printf '# el HEAD del submódulo tiene que ser el de origin/main (regla de CONTRIBUTING.md)\n'
+        printf '# the submodule HEAD must be the origin/main one (CONTRIBUTING.md rule)\n'
+        printf 'git -C %s switch -c %s main\n' "$root" "$branch"
+        printf 'git -C %s push -u origin %s\n' "$root" "$branch"
+        printf 'git -C %s add -- %s\n' "$root" "$lang"
+        printf '# después / then: glot save 9 %s %s/%s\n' "$lang" "$phase" "$module"
+        return 0
+    fi
+
+    _glot_info "integrado / integrated: git -C $sub fetch -q origin main"
+    if ! git -C "$sub" fetch -q origin main 2>/dev/null; then
+        _glot_error "no se pudo consultar origin/main del submódulo / cannot reach the submodule origin/main"
+        _glot_info "el puntero solo apunta a lo integrado / the pointer only records integrated work"
+        return 1
+    fi
+
+    current="$(git -C "$sub" symbolic-ref --short -q HEAD || true)"
+    if [[ "$current" != "main" ]]; then
+        _glot_error "el submódulo no está en main / the submodule is not on main: ${current:-detached}"
+        _glot_info "no se apunta a una rama de trabajo / a working branch is never pointed at"
+        _glot_info "integra tu trabajo primero / integrate your work first: git -C $sub switch main"
+        return 1
+    fi
+    if [[ "$head" != "$(git -C "$sub" rev-parse -q --verify FETCH_HEAD 2>/dev/null || true)" ]]; then
+        _glot_error "el commit del submódulo no es el de origin/main / the submodule commit is not the origin/main one"
+        _glot_info "ponte al día antes de apuntar / catch up before pointing: git -C $sub pull --ff-only"
+        return 1
+    fi
+    if [[ -n "$(git -C "$sub" status --porcelain 2>/dev/null || true)" ]]; then
+        _glot_warn "el submódulo tiene trabajo sin confirmar / the submodule has uncommitted work"
+        _glot_info "el commit apuntado es el integrado / the recorded commit is the integrated one"
+    fi
+
+    # El propio gitlink del submódulo cambiado no es suciedad: es justo el cambio que
+    # este verbo viene a preparar. Cualquier otra cosa sí bloquea el cambio de rama.
+    current="$(git -C "$root" symbolic-ref --short -q HEAD || true)"
+    if [[ "$current" != "$branch" ]]; then
+        dirty="$(git -C "$root" status --porcelain 2>/dev/null | grep -vE "^.. $lang\$" || true)"
+        if [[ -n "$dirty" ]]; then
+            _glot_error 'el monorepo tiene cambios sin confirmar / the monorepo has uncommitted changes'
+            _glot_info "$dirty"
+            _glot_info "pointer no cambia de rama con trabajo a medias / pointer does not switch branches with work in progress"
+            return 1
+        fi
+        if git -C "$root" show-ref --verify --quiet "refs/heads/$branch"; then
+            git -C "$root" switch -q "$branch" 2>/dev/null || {
+                _glot_error "no se pudo activar la rama / cannot switch to branch: $branch"
+                return 1
+            }
+            _glot_info "rama activada / branch activated: $branch"
+        elif git -C "$root" switch -q -c "$branch" main 2>/dev/null; then
+            _glot_info "rama creada desde main / branch created from main: $branch"
+        elif git -C "$root" switch -q -c "$branch" 2>/dev/null; then
+            _glot_warn "no hay rama main; la rama nace de ${current:-HEAD} / no main branch; branch created from ${current:-HEAD}"
+        else
+            _glot_error "no se pudo crear la rama / cannot create branch: $branch"
+            return 1
+        fi
+        if ! git -C "$root" push -q -u origin "$branch" 2>/dev/null; then
+            _glot_error "no se pudo publicar la rama / cannot publish branch: $branch"
+            return 1
+        fi
+        _glot_info "publicada / published: origin/$branch"
+    fi
+
+    if ! git -C "$root" add -- "$lang" 2>/dev/null; then
+        _glot_error "no se pudo añadir el puntero / cannot stage the pointer: $lang"
+        return 1
+    fi
+
+    if ! _glot_state_rewrite set branch "$branch"; then
+        _glot_error "el puntero está preparado, pero no se pudo guardar el estado / the pointer is ready, but the state could not be saved"
+        return 3
+    fi
+
+    _glot_info "puntero preparado / pointer staged: ${head:0:7}"
+    _glot_info "confirma con / commit with: glot save 9 $lang $phase/$module"
+    printf '%s\n' "${head:0:7}"
+    return 0
+}
+
 # --- creación y registro (L5) ------------------------------------------------
 
 # _glot_init_flat <directorio> <sub> — sube al directorio del módulo el contenido de
@@ -1272,6 +1537,8 @@ _glot_init_normalise() {
     local ops="$3"
     local op=""
     local path=""
+    local stage_err=""
+    local commit_err=""
     local sub=""
     local IFS=';'
 
@@ -1415,9 +1682,10 @@ _glot_cmd_new() {
 
 # _glot_cmd_save <paso|alias> [lenguaje] [fase/módulo] — commit guiado con la
 # convención del repositorio. El mensaje no se escribe a mano: sale del catálogo de
-# commits (`data/commits.tsv`), que es la tabla del sprint puesta en datos. Añade el
-# submódulo completo al índice y confirma en el submódulo. No hace push, no toca el
-# puntero del monorepo ni el roadmap (eso es `pointer`, v0.12.0, y `close`, v0.10.0).
+# commits (`data/commits.tsv`), que es la tabla del sprint puesta en datos. El ámbito
+# del paso decide dónde y **qué** se añade (L7): el submódulo completo para los pasos
+# del submódulo, y solo las rutas del paso —el submódulo del puntero; roadmap,
+# checklist y evidencia del cierre— para los del monorepo. No hace push.
 # Códigos: 0 confirmado (o `nothing`) · 1 entorno · 2 uso · 3 no se pudo escribir.
 _glot_cmd_save() {
     local step="${1:-}"
@@ -1426,7 +1694,7 @@ _glot_cmd_save() {
     local phase=""
     local module=""
     local root=""
-    local sub=""
+    local repo=""
     local folder=""
     local scope=""
     local msg=""
@@ -1435,6 +1703,11 @@ _glot_cmd_save() {
     local branch=""
     local state_branch=""
     local sha=""
+    local path=""
+    local stage_err=""
+    local commit_err=""
+    local paths=""
+    local -a add=()
 
     if [[ -z "$step" ]]; then
         _glot_error 'falta el paso del sprint / missing sprint step'
@@ -1455,11 +1728,6 @@ _glot_cmd_save() {
     fi
 
     scope="$(_glot_commit_field "$step" 3)"
-    if [[ "$scope" != "submodule" ]]; then
-        _glot_error "ese paso se confirma en el monorepo / that step is committed in the monorepo: $step"
-        _glot_info "llega con close (v0.10.0) y pointer (v0.12.0) / it arrives with close (v0.10.0) and pointer (v0.12.0)"
-        return 1
-    fi
 
     msg="$(_glot_expand_state "$lang" "$phase" "$module" "$(_glot_commit_field "$step" 4)")" || return $?
 
@@ -1468,56 +1736,104 @@ _glot_cmd_save() {
         return 1
     }
 
-    sub="$root/$lang"
-    if [[ ! -e "$sub/.git" ]]; then
-        _glot_error "submódulo sin inicializar / submodule not initialised: $lang"
-        _glot_info "prueba / try: git submodule update --init -- $lang"
-        return 1
+    # Ámbito (L7): los pasos del monorepo también se confirman aquí, y cada uno añade
+    # **solo sus rutas** —el submódulo del puntero, o el roadmap, el checklist y la
+    # evidencia del cierre— en vez de un `add -A` en la raíz, que barrería el trabajo de
+    # otros sprints. `save` sigue **sin hacer push**: eso es del autor.
+    if [[ "$scope" == "submodule" ]]; then
+        repo="$root/$lang"
+        if [[ ! -e "$repo/.git" ]]; then
+            _glot_error "submódulo sin inicializar / submodule not initialised: $lang"
+            _glot_info "prueba / try: git submodule update --init -- $lang"
+            return 1
+        fi
+        add=(-A)
+        branch="$(git -C "$repo" symbolic-ref --short -q HEAD || true)"
+        state_branch="$(_glot_state_get branch 2>/dev/null || true)"
+        if [[ -n "$state_branch" && -n "$branch" && "$state_branch" != "$branch" ]]; then
+            _glot_warn "la rama del sprint no es la activa / the sprint branch is not the active one"
+            _glot_info "estado / state: $state_branch; activa / active: $branch"
+        fi
+    else
+        repo="$root"
+        case "$step" in
+            9 | pointer)
+                paths=" $lang"
+                ;;
+            10 | close)
+                paths=" docs/ROADMAP.md docs/ROADMAP_UPDATE_CHECKLIST.md docs/evidence/$phase/$module"
+                ;;
+            *)
+                _glot_error "paso del monorepo sin rutas declaradas / monorepo step with no declared paths: $step"
+                _glot_info 'mira el catálogo / check the catalogue: scripts/data/commits.tsv'
+                return 1
+                ;;
+        esac
+        # Solo las rutas que existen: un pathspec inexistente hace fallar `git add`. El
+        # `--` va una sola vez, delante de todas.
+        add=(--)
+        for path in $paths; do
+            [[ -e "$root/$path" ]] && add+=("$path")
+        done
+        if [[ "${#add[@]}" -le 1 ]]; then
+            _glot_warn "no hay nada que confirmar / nothing to commit: $step"
+            printf 'nothing\n'
+            return 0
+        fi
     fi
 
-    porcelain="$(git -C "$sub" status --porcelain 2>/dev/null || true)"
+    # El estado sucio se lee sobre lo que el paso va a añadir: el submódulo entero, o las
+    # rutas del monorepo. (`-A` es una opción de `git add`, no un pathspec: al leer el
+    # estado del submódulo se pregunta por todo el repositorio.)
+    if [[ "$scope" == "submodule" ]]; then
+        porcelain="$(git -C "$repo" status --porcelain 2>/dev/null || true)"
+    else
+        porcelain="$(git -C "$repo" status --porcelain -- "${add[@]}" 2>/dev/null || true)"
+    fi
     if [[ -z "$porcelain" ]]; then
-        _glot_warn "no hay nada que confirmar / nothing to commit: $lang"
+        _glot_warn "no hay nada que confirmar / nothing to commit: ${lang:-$step}"
         printf 'nothing\n'
         return 0
     fi
 
-    # Hallazgos del estado sucio: se nombran antes de confirmar, sin bloquear.
-    folder="$(_glot_module_folder "$root" "$lang" "$phase" "$module" || printf '%s' "$module")"
-    outside="$(printf '%s\n' "$porcelain" | grep -vE "core/$phase/$folder(/|\$)" || true)"
-    if [[ -n "$outside" ]]; then
-        _glot_warn "hay cambios fuera del módulo que también entran / there are changes outside the module that go in too"
-        printf '%s\n' "$outside" | sed 's/^/  /' >&2
-    fi
-
-    branch="$(git -C "$sub" symbolic-ref --short -q HEAD || true)"
-    state_branch="$(_glot_state_get branch 2>/dev/null || true)"
-    if [[ -n "$state_branch" && -n "$branch" && "$state_branch" != "$branch" ]]; then
-        _glot_warn "la rama del sprint no es la activa / the sprint branch is not the active one"
-        _glot_info "estado / state: $state_branch; activa / active: $branch"
+    # Hallazgos del estado sucio: se nombran antes de confirmar, sin bloquear. En el
+    # submódulo se avisa de lo que entra de fuera del módulo; en el monorepo, de lo que
+    # entra de fuera de las rutas del paso.
+    if [[ "$scope" == "submodule" ]]; then
+        folder="$(_glot_module_folder "$root" "$lang" "$phase" "$module" || printf '%s' "$module")"
+        outside="$(printf '%s\n' "$porcelain" | grep -vE "core/$phase/$folder(/|\$)" || true)"
+        if [[ -n "$outside" ]]; then
+            _glot_warn "hay cambios fuera del módulo que también entran / there are changes outside the module that go in too"
+            printf '%s\n' "$outside" | sed 's/^/  /' >&2
+        fi
+    else
+        _glot_info "entra / goes in:"
+        printf '%s\n' "$porcelain" | sed 's/^/  /' >&2
     fi
 
     if ((_glot_dry_run)); then
-        printf 'git -C %s add -A\n' "$sub"
-        printf "git -C %s commit -m '%s'\n" "$sub" "$msg"
+        printf 'git -C %s add %s\n' "$repo" "${add[*]}"
+        printf "git -C %s commit -m '%s'\n" "$repo" "$msg"
         return 0
     fi
 
     _glot_info "save: $msg"
 
-    if ! git -C "$sub" add -A 2>/dev/null; then
-        _glot_error "no se pudo preparar el índice / cannot stage: $sub"
+    if ! stage_err="$(git -C "$repo" add "${add[@]}" 2>&1)"; then
+        _glot_error "no se pudo preparar el índice / cannot stage: $repo"
+        [[ -n "$stage_err" ]] && _glot_info "$stage_err"
         return 3
     fi
 
-    if ! git -C "$sub" commit -q -m "$msg" 2>/dev/null; then
+    if ! commit_err="$(git -C "$repo" commit -q -m "$msg" 2>&1)"; then
         _glot_error "no se pudo confirmar / cannot commit: $lang $phase/$module"
+        [[ -n "$commit_err" ]] && _glot_info "$commit_err"
         return 4
     fi
 
-    sha="$(git -C "$sub" rev-parse --short HEAD)"
+    sha="$(git -C "$repo" rev-parse --short HEAD)"
     printf '%s\n' "$sha"
-    _glot_info "sin push y sin tocar el puntero del monorepo / no push and the monorepo pointer is untouched"
+    _glot_info "sin push / no push"
     return 0
 }
 
@@ -2486,8 +2802,9 @@ _glot_help_verb() {
             printf 'The message comes from the commit catalogue (the sprint table in data); it\n'
             printf 'is not written by hand. It stages the submodule and commits in it\n'
             printf 'Pasos / steps: 4a (andamiaje/scaffold) · 4b (suite) · 5 (implementación) · 7 · 8\n'
-            printf 'Los commits del monorepo (puntero y roadmap) llegan con close y pointer\n'
-            printf 'Monorepo commits (pointer and roadmap) arrive with close and pointer\n'
+            printf 'Del monorepo / monorepo steps: 9 (puntero/pointer) · 10 (cierre/close), cada uno\n'
+            printf 'con sus rutas: el submódulo, o roadmap + checklist + evidencia del módulo\n'
+            printf 'Each with its own paths: the submodule, or roadmap + checklist + module evidence\n'
             printf 'No hace push / it does not push; `-n` imprime el plan / prints the plan\n'
             ;;
         *)
@@ -3403,6 +3720,18 @@ glot() {
         save)
             # Confirma con la convención del repositorio / commits with the repository convention
             _glot_cmd_save "$@"
+            ;;
+        status)
+            # Informa de submódulos, ramas y punteros, sin tocar nada / reports submodules, branches and pointers, touching nothing
+            _glot_cmd_status "$@"
+            ;;
+        pointer)
+            # Prepara el puntero del submódulo para confirmarlo / prepares the submodule pointer to be committed
+            _glot_cmd_pointer "$@"
+            ;;
+        clean)
+            # Borra los artefactos del módulo y sincroniza el submódulo / removes the module artefacts and syncs the submodule
+            _glot_cmd_clean "$@"
             ;;
         -*)
             # Maneja las opciones desconocidas / Handle unknown options
