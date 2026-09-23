@@ -1611,6 +1611,16 @@ glot_run_sandbox save 10 ruby algorithms/naive_sort
 assert_eq 'save 10 sin cambios: dato' 'nothing' "$out"
 assert_eq 'save 10 sin cambios: código' '0' "$rc_last"
 
+# la ayuda: los tres verbos nuevos están en el listado y tienen ayuda propia
+glot_run help
+assert_eq 'help: los tres verbos de L7 en el listado general' '3' \
+    "$(printf '%s\n' "$out" | grep -cE '^  (status|pointer|clean)')"
+for l7_verb in status pointer clean; do
+    glot_run help "$l7_verb"
+    assert_eq "help $l7_verb: código" '0' "$rc_last"
+    assert_contains "help $l7_verb: se describe" "$l7_verb" "$out"
+done
+
 # --- puerta de entrada al archivo de versiones -------------------------------
 
 # La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:

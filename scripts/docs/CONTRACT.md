@@ -36,7 +36,7 @@
 
 ---
 
-## 🧰 Verbos de la versión viva (v0.10.0) / Verbs in the live version
+## 🧰 Verbos de la versión viva (v0.12.0) / Verbs in the live version
 
 | Verbo | Comportamiento | Código |
 |-------|----------------|:------:|

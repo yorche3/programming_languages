@@ -98,8 +98,7 @@ scripts/
 ├── tests/
 │   └── glot_test.sh          # Harness de pruebas, sin dependencias
 └── versions/                 # Snapshots de versiones cerradas
-    ├── glot_0.1.0.sh
-    ├── glot_0.2.0.sh
+    ├── glot_0.1.0.sh    └── glot_0.12.0.sh    ├── glot_0.2.0.sh
     ├── glot_0.3.0.sh
     ├── glot_0.4.0.sh
     ├── glot_0.5.0.sh

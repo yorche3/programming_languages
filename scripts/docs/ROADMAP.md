@@ -48,7 +48,7 @@
 | L5 | Creación y registro: `new`, `save` | 0.9.0 ✅ |
 | L6 | Evidencia y cierre: `evidence`, `close`, `validate` | 0.10.0 ✅ |
 | L6.5 | Perfiles de modelo por encargo: `model:` en cada plantilla y catálogo de perfiles con los modelos de Copilot | 0.11.0 🔄 |
-| L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.12.0 🔄 |
+| L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.12.0 ✅ |
 | L8 | Instalación: `install`, función cargable, `doctor` completo | 1.0.0 |
 | L9 | Toolchains por lenguaje (`mise`, `nvm`, `pyenv`) | después |
 
@@ -75,6 +75,8 @@
 | Deuda | Cuándo se paga |
 |-------|----------------|
 | Hasta la v1.0.0 el `cd` no es real: se usa `cd "$(glot use …)"` | v1.0.0 (`install` + capa cargable) |
+| El **estado del sprint es global** (XDG), sin clave de repositorio: dos monorepos comparten `lang/phase/module`, así que un sprint en un banco de pruebas pisa el del trabajo real. Medido el 2026-09-23 ejecutando un sprint completo en un laboratorio aparte, que hubo que aislar con `GLOT_STATE_DIR` | v1.0.0 (`install` + capa cargable): clave por raíz del monorepo |
+| Los **encargos citan rutas y nombres del monorepo real** (`docs/core/00_Project_Initialization_Guide.md`, `AGENTS.md`, los módulos homologados del lenguaje y el nombre `yorche3/programming_languages` en prosa) y no comprueban que existan. Medido el 2026-09-23: en el laboratorio faltaban y hubo que añadirlas a mano | v1.0.0: raíz del monorepo como marcador del encargo y comprobación de fuentes |
 
 **ES:** Pagadas: los commits a mano se acabaron en la v0.9.0 (`save`), y el puntero del submódulo dejó de actualizarse a mano en la v0.12.0 (`pointer` prepara y `save 9` confirma).
 

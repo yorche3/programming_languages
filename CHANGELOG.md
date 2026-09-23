@@ -85,7 +85,7 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   sin ella, de la invocación de Copilot CLI en solo lectura; el veredicto se lee
   de la línea que la plantilla exige y no se adivina. Es opcional: sin validador
   avisa y devuelve `1`, y con hallazgos devuelve `4`.
-- `glot` v0.12.0 (en curso): **higiene y punteros** (L7). `status` informa, por
+- `glot` v0.12.0: **higiene y punteros** (L7). `status` informa, por
   lenguaje y sin tocar nada, de la rama del submódulo, de si el puntero del
   monorepo coincide con su HEAD y de si el árbol está sucio; `pointer` lleva el
   submódulo al commit integrado en su `main` (con `fetch` explícito y la regla de

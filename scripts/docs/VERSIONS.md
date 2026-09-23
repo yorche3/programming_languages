@@ -17,7 +17,7 @@
 | 0.9.0 | 2026-09-22 | [`versions/glot_0.9.0.sh`](../versions/glot_0.9.0.sh) | **Creación y registro** (L5): `new` (inicializador del lenguaje, esqueleto y normalización) y `save` (commit guiado desde el catálogo `data/commits.tsv`), con la tabla de inicialización ampliada | ✅ cerrada |
 | 0.10.0 | 2026-09-22 | [`versions/glot_0.10.0.sh`](../versions/glot_0.10.0.sh) | **Evidencia y cierre** (L6): `evidence`, `close` y `validate` con validador enchufable, más la retirada de `hello` y el objetivo resuelto por directorio | ✅ cerrada |
 | 0.11.0 | 2026-09-22 | [`versions/glot_0.11.0.sh`](../versions/glot_0.11.0.sh) | **Perfiles de modelo por encargo** (L6.5): `model:` en el frontmatter de las seis plantillas y `data/models.tsv` fijando esfuerzo y tope de créditos por encargo, con los modelos que ofrece Copilot | ✅ cerrada |
-| 0.12.0 | 2026-09-23 | — (viva / live) | **Higiene y punteros** (L7): `status` (submódulos, ramas y punteros), `pointer` (deja el puntero del submódulo listo y publicado en el monorepo) y `clean` (artefactos del módulo y `submodule sync`), con el commit del monorepo en manos de `save` | 🔄 en curso / in progress |
+| 0.12.0 | 2026-09-23 | [`versions/glot_0.12.0.sh`](../versions/glot_0.12.0.sh) | **Higiene y punteros** (L7): `status` (submódulos, ramas y punteros), `pointer` (deja el puntero del submódulo listo y publicado en el monorepo) y `clean` (artefactos del módulo y `submodule sync`), con el commit del monorepo en manos de `save` | ✅ cerrada |
 
 ---
 
@@ -135,7 +135,7 @@
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 503 passed, 0 failed` (rc `0`), con 26 comprobaciones nuevas del catálogo, las plantillas y los códigos. Los límites del CLI (1.0.88) se midieron de verdad: `--reasoning-effort bogus` → `error: invalid value 'bogus' for '--reasoning-effort <level>' [possible values: none, minimal, low, medium, high, xhigh, max]` y `--max-ai-credits 20` → `error: Invalid value for --max-ai-credits: "20". Use at least 30 AI credits.`, que es de dónde sale el suelo de 30 del perfil económico. Los **tres perfiles se probaron contra la API real** —`copilot -C <dir temporal> -p 'Responde solo con la palabra OK.' -s --model <modelo> --reasoning-effort <esfuerzo> --max-ai-credits <créditos> --allow-all-tools --deny-tool write`— y los tres respondieron `OK` con código `0`: `gemini-3.8-flash`/`low`/30, `gpt-5.6-terra`/`medium`/90 y `claude-sonnet-5`/`high`/120.
 - **Snapshot:** [`versions/glot_0.11.0.sh`](../versions/glot_0.11.0.sh), archivado al cerrar la versión y **antes** de fusionar la rama en `main`; su contenido es el que tenía `glot.sh` en el cierre, y no se edita.
 
-## 0.12.0 — 2026-09-23 (viva)
+## 0.12.0 — 2026-09-23 (cerrada)
 
 - **Añade:** la **higiene y los punteros** (L7): `status`, `pointer` y `clean`, con el commit del monorepo en manos de `save`.
 - **El puntero deja de ser manual:** `pointer` comprueba con `fetch` explícito de `origin/main` que el commit del submódulo está **integrado** —la regla de [`CONTRIBUTING.md`](../../docs/CONTRIBUTING.md) pasa de prosa a comprobación—, prepara y publica la rama `chore/{fase}/{módulo}-pointer` y deja el gitlink añadido; el commit lo hace `save 9`. Es idempotente: si el monorepo ya apunta a ese commit, imprime `nothing` y no toca ramas.
@@ -143,8 +143,8 @@
 - **`clean` declara su alcance:** `git clean -Xfd` en el directorio del módulo —lo que el propio `.gitignore` del lenguaje declara como artefacto, aunque parezca útil: `php` ignora `composer.lock`— más `submodule sync` del lenguaje. Nunca `-x`, nunca el monorepo y nunca `docs/`. Se declara **apoyo a los pasos 5–6**, porque no es un paso por sí mismo.
 - **`save` confirma el monorepo:** los pasos `9` y `10` añaden solo sus rutas (el submódulo del puntero; roadmap, checklist y evidencia del cierre), y siguen sin hacer push.
 - **Decisiones cerradas antes de codificar:** en [`ROADMAP.md`](ROADMAP.md).
-- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 544 passed, 0 failed` (rc `0`), con 41 comprobaciones nuevas sobre una fixture con **submódulos reales** (gitlink, remoto y rama `main`), porque el sandbox anterior no tenía punteros que mover.
-- **Snapshot:** pendiente: se archiva como `versions/glot_0.12.0.sh` **antes** de fusionar la rama en `main`.
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 551 passed, 0 failed` (rc `0`), con 48 comprobaciones nuevas sobre una fixture con **submódulos reales** (gitlink, remoto y rama `main`), porque el sandbox anterior no tenía punteros que mover. Las últimas siete guardan la **ayuda por verbo** de los tres verbos nuevos, que se había quedado sin escribir.
+- **Snapshot:** [`versions/glot_0.12.0.sh`](../versions/glot_0.12.0.sh), archivado al cerrar la versión y **antes** de fusionar la rama en `main`; su contenido es el que tenía `glot.sh` en el cierre, y no se edita.
 
 ---
 
@@ -153,7 +153,7 @@
 - **Puerta de entrada:** ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`. Si falta, se copia `glot.sh` con el sufijo de su versión y solo después se reanuda la implementación de la nueva.
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh), [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh), [`glot_0.9.0.sh`](../versions/glot_0.9.0.sh), [`glot_0.10.0.sh`](../versions/glot_0.10.0.sh) y [`glot_0.11.0.sh`](../versions/glot_0.11.0.sh).
+- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh), [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh), [`glot_0.9.0.sh`](../versions/glot_0.9.0.sh), [`glot_0.10.0.sh`](../versions/glot_0.10.0.sh), [`glot_0.11.0.sh`](../versions/glot_0.11.0.sh) y [`glot_0.12.0.sh`](../versions/glot_0.12.0.sh).
 - El harness **comprueba la puerta de entrada**: exige el snapshot de la versión anterior a la viva, así que no se puede empezar una versión nueva sin haber archivado la anterior.
 - Cada versión se cierra en su propia rama `chore/repo/glot-v0.X` antes de fusionarla en `main` (ver [`README.md`](../README.md)).
 
@@ -190,7 +190,7 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, evidencia, cierre, validación, perfiles de modelo, higiene y punteros, plantillas, archivado y códigos (544 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, evidencia, cierre, validación, perfiles de modelo, higiene y punteros, plantillas, archivado y códigos (551 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
 ./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
 ./scripts/glot.sh modules           # catálogo de módulos con su especificación
