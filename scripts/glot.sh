@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# glot 0.10.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2),
-# catálogo (L2.5), ejecución (L3), delegación (L4), creación (L5) y evidencia,
-# cierre y validación (L6): `evidence`, `close` y `validate`.
+# glot 0.11.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2),
+# catálogo (L2.5), ejecución (L3), delegación (L4), creación (L5), evidencia y
+# cierre (L6) y perfiles de modelo por encargo (L6.5): `model:` en cada plantilla y
+# `data/models.tsv` decidiendo el esfuerzo y el tope de créditos de cada encargo.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -31,7 +32,7 @@
 
 set -euo pipefail
 
-GLOT_VERSION="0.10.0"
+GLOT_VERSION="0.11.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -257,7 +258,6 @@ _glot_cmd_doctor() {
     local root=""
     local state_dir=""
     local state_file=""
-
     _glot_info 'glot doctor — diagnóstico / diagnostics'
 
     printf 'version: %s\n' "$GLOT_VERSION"
@@ -367,6 +367,45 @@ _glot_cmd_doctor() {
             printf 'prompts_ok: %s encargos / requests\n' "$(_glot_prompts_list | wc -l | tr -d ' ')"
         else
             printf 'prompts: (no encontrado / not found)\n'
+            status=1
+        fi
+
+        # Perfiles de modelo (L6.5): la cobertura se mide como en `verify_commands` —
+        # encargos con un `model:` que el catálogo reconoce — y, si el CLI está, se
+        # comprueba que los modelos del catálogo siguen en la lista del CLI instalado:
+        # así una fila vieja se ve antes de usar el perfil, no cuando ya se usó.
+        if models="$(_glot_models_file)"; then
+            printf 'models_file: %s\n' "$models"
+            local profile_templates=0
+            local model_rows=0
+            local prompts_dir=""
+            local template=""
+            local model=""
+            local cli_models=""
+            prompts_dir="$(_glot_prompts_dir || true)"
+            for template in "$prompts_dir"/*.prompt.md; do
+                [[ -e "$template" ]] || continue
+                if _glot_prompt_profile "$template" >/dev/null 2>&1; then
+                    profile_templates=$((profile_templates + 1))
+                fi
+            done
+            printf 'model_profiles: %s de / of %s encargos con perfil / requests with a profile\n' \
+                "$profile_templates" "$(_glot_prompts_list | wc -l | tr -d ' ')"
+            if command -v copilot >/dev/null 2>&1; then
+                cli_models="$(copilot help config 2>/dev/null || true)"
+                while IFS= read -r model; do
+                    [[ -z "$model" ]] && continue
+                    if [[ "$cli_models" == *"\"$model\""* ]]; then
+                        model_rows=$((model_rows + 1))
+                    fi
+                done < <(_glot_models_list | cut -f2)
+                printf 'model_available: %s de / of %s en el CLI / in the CLI\n' \
+                    "$model_rows" "$(_glot_models_list | wc -l | tr -d ' ')"
+            else
+                printf 'model_available: (sin Copilot CLI / no Copilot CLI)\n'
+            fi
+        else
+            printf 'models_file: (no encontrado / not found)\n'
             status=1
         fi
 
@@ -941,12 +980,14 @@ _glot_prompt_body() {
     done <"$file"
 }
 
-# _glot_prompts_list — registro de encargos: nombre<TAB>paso<TAB>descripción.
+# _glot_prompts_list — registro de encargos:
+# nombre<TAB>paso<TAB>modelo<TAB>descripción.
 _glot_prompts_list() {
     local dir=""
     local file=""
     local name=""
     local step=""
+    local model=""
     local desc=""
 
     dir="$(_glot_prompts_dir)" || {
@@ -958,8 +999,9 @@ _glot_prompts_list() {
         [[ -e "$file" ]] || continue
         name="$(_glot_prompt_field "$file" name)" || name="$(basename -- "$file" .prompt.md)"
         step="$(_glot_prompt_field "$file" step)" || step="-"
+        model="$(_glot_prompt_field "$file" model)" || model="-"
         desc="$(_glot_prompt_field "$file" description)" || desc="-"
-        printf '%s\t%s\t%s\n' "$name" "$step" "$desc"
+        printf '%s\t%s\t%s\t%s\n' "$name" "$step" "$model" "$desc"
     done
 }
 
@@ -1064,9 +1106,22 @@ _glot_cmd_prompt() {
 
 # _glot_cmd_ask <encargo> [lenguaje] [fase/módulo] — arma el mismo encargo y lo envía
 # a `GLOT_DELEGATE` por stdin. Sin delegado configurado no hay nada que hacer: 1.
+# El modelo del encargo (perfil del catálogo, resuelto desde el `model:` de la plantilla)
+# viaja por **entorno** (`COPILOT_MODEL`, y el tier de auto si el perfil lo declara): es lo
+# único que un delegado cualquiera puede leer sin que haya que inyectarle flags, que
+# romperían un `GLOT_DELEGATE='wc -l'`.
 _glot_cmd_ask() {
     local name="${1:-}"
     local request=""
+    local template=""
+    local profile=""
+    local pname=""
+    local pmodel=""
+    local effort=""
+    local credits=""
+    local tier=""
+    local requests=""
+    local env_prefix=""
     local rc=0
 
     if [[ -z "$name" ]]; then
@@ -1084,11 +1139,23 @@ _glot_cmd_ask() {
         return 1
     fi
 
+    template="$(_glot_prompt_file "$name")" || return 1
+    profile="$(_glot_prompt_profile "$template")" || return $?
+    IFS=$'\t' read -r pname pmodel effort credits tier requests <<<"$profile"
+
+    export COPILOT_MODEL="$pmodel"
+    env_prefix="COPILOT_MODEL=$pmodel"
+    if [[ "$tier" != "-" ]]; then
+        export COPILOT_AUTO_TIER="$tier"
+        env_prefix+=" COPILOT_AUTO_TIER=$tier"
+    fi
+
     if ((_glot_dry_run)); then
-        printf '<encargo de %s> | %s\n' "$name" "$GLOT_DELEGATE"
+        printf '%s <encargo de %s> | %s\n' "$env_prefix" "$name" "$GLOT_DELEGATE"
         return 0
     fi
 
+    _glot_info "perfil / profile: $pname ($pmodel, esfuerzo / effort $effort, $credits créditos / credits)"
     _glot_info "delegado / delegate: $GLOT_DELEGATE"
     printf '%s\n' "$request" | eval "$GLOT_DELEGATE" || rc=$?
 
@@ -1098,6 +1165,74 @@ _glot_cmd_ask() {
     fi
 
     return 0
+}
+
+# --- perfiles de modelo por encargo (L6.5) -----------------------------------
+
+# _glot_models_file — catálogo de perfiles: una fila por perfil, con el modelo como
+# clave. Es el que decide el esfuerzo y el tope de créditos de cada encargo.
+_glot_models_file() {
+    local dir=""
+
+    for dir in "$GLOT_SCRIPT_DIR/data" "$GLOT_SCRIPT_DIR/../data"; do
+        if [[ -r "$dir/models.tsv" ]]; then
+            printf '%s\n' "$dir/models.tsv"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# _glot_models_list — perfiles tal cual: perfil<TAB>modelo<TAB>esfuerzo<TAB>créditos<TA
+# B>tier de auto<TAB>encargos.
+_glot_models_list() {
+    local file=""
+    local line=""
+
+    file="$(_glot_models_file)" || return 1
+
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        [[ -z "$line" || "$line" == '#'* ]] && continue
+        printf '%s\n' "$line"
+    done <"$file"
+}
+
+# _glot_profile_line <modelo|perfil> — fila del catálogo. El **modelo es la clave**: la
+# plantilla declara el modelo en su frontmatter y el catálogo dice qué esfuerzo y qué
+# tope de créditos le tocan, así que no hay un `profile:` que pueda derivar del modelo.
+# El nombre del perfil (`economy`) es la etiqueta legible de esa fila.
+_glot_profile_line() {
+    local want="$1"
+
+    _glot_models_list | awk -F'\t' -v want="$want" '$1 == want || $2 == want { print; exit }'
+}
+
+# _glot_prompt_profile <archivo> — fila del perfil que declara el frontmatter de la
+# plantilla (`model:`), resuelta contra el catálogo. Un modelo que no esté en el catálogo
+# es un **dato que falta** (`1`), como un marcador sin resolver: nunca se inventa un
+# esfuerzo ni un tope de créditos.
+_glot_prompt_profile() {
+    local file="$1"
+    local model=""
+    local row=""
+
+    if ! model="$(_glot_prompt_field "$file" model)"; then
+        _glot_error "la plantilla no declara modelo / the template declares no model: $(basename -- "$file")"
+        _glot_info 'añade `model: <id de Copilot>` al frontmatter / add `model: <Copilot id>` to the frontmatter'
+        _glot_info 'mira el catálogo / check the catalogue: scripts/data/models.tsv'
+        return 1
+    fi
+
+    row="$(_glot_profile_line "$model")"
+    if [[ -z "$row" ]]; then
+        _glot_error "modelo sin perfil en el catálogo / model with no profile in the catalogue: $model"
+        _glot_info 'mira el catálogo / check the catalogue: scripts/data/models.tsv'
+        _glot_info 'cobertura / coverage: glot doctor'
+        return 1
+    fi
+
+    printf '%s\n' "$row"
 }
 
 # --- creación y registro (L5) ------------------------------------------------
@@ -1282,7 +1417,7 @@ _glot_cmd_new() {
 # convención del repositorio. El mensaje no se escribe a mano: sale del catálogo de
 # commits (`data/commits.tsv`), que es la tabla del sprint puesta en datos. Añade el
 # submódulo completo al índice y confirma en el submódulo. No hace push, no toca el
-# puntero del monorepo ni el roadmap (eso es `pointer`, v0.11.0, y `close`, v0.10.0).
+# puntero del monorepo ni el roadmap (eso es `pointer`, v0.12.0, y `close`, v0.10.0).
 # Códigos: 0 confirmado (o `nothing`) · 1 entorno · 2 uso · 3 no se pudo escribir.
 _glot_cmd_save() {
     local step="${1:-}"
@@ -1322,7 +1457,7 @@ _glot_cmd_save() {
     scope="$(_glot_commit_field "$step" 3)"
     if [[ "$scope" != "submodule" ]]; then
         _glot_error "ese paso se confirma en el monorepo / that step is committed in the monorepo: $step"
-        _glot_info "llega con close (v0.10.0) y pointer (v0.11.0) / it arrives with close (v0.10.0) and pointer (v0.11.0)"
+        _glot_info "llega con close (v0.10.0) y pointer (v0.12.0) / it arrives with close (v0.10.0) and pointer (v0.12.0)"
         return 1
     fi
 
@@ -1896,6 +2031,9 @@ _glot_validate_file() {
 # `GLOT_VALIDATOR` —el encargo llega por stdin, como en `ask`— y, sin esa variable, es la
 # invocación verificada de Copilot CLI en **solo lectura**: `--deny-tool write` y sin
 # `--share`, porque el registro ya lo escribe `glot` y no se duplica.
+# El **modelo, el esfuerzo y el tope de créditos salen del perfil** de la plantilla
+# (`model:` + `data/models.tsv`, L6.5); el modelo viaja además por entorno para que un
+# validador propio pueda leerlo.
 # El validador es **opcional**: sin él, el verbo avisa y devuelve `1`.
 # Códigos: 0 sin hallazgos · 1 sin validador o entorno · 2 uso · 3 no se pudo ejecutar o
 # no se pudo leer el veredicto · 4 con hallazgos.
@@ -1910,6 +2048,14 @@ _glot_cmd_validate() {
     local request=""
     local record=""
     local rel_record=""
+    local template=""
+    local profile=""
+    local pname=""
+    local pmodel=""
+    local effort=""
+    local credits=""
+    local tier=""
+    local requests=""
     local cmd=""
     local response=""
     local rc=0
@@ -1940,6 +2086,17 @@ _glot_cmd_validate() {
     # El encargo es el mismo que imprime `glot prompt validate`: una sola verdad.
     request="$(_glot_prompt_build validate "$lang" "$phase/$module")" || return $?
 
+    # El perfil sale del `model:` de la plantilla y del catálogo: aquí no hay literales de
+    # modelo, esfuerzo ni créditos que se puedan quedar viejos por su cuenta.
+    template="$(_glot_prompt_file validate)" || return 1
+    profile="$(_glot_prompt_profile "$template")" || return $?
+    IFS=$'\t' read -r pname pmodel effort credits tier requests <<<"$profile"
+
+    export COPILOT_MODEL="$pmodel"
+    if [[ "$tier" != "-" ]]; then
+        export COPILOT_AUTO_TIER="$tier"
+    fi
+
     if [[ -n "${GLOT_VALIDATOR:-}" ]]; then
         cmd="$GLOT_VALIDATOR"
     else
@@ -1949,7 +2106,11 @@ _glot_cmd_validate() {
             _glot_info 'el validador es opcional; mira / the validator is optional; see: glot help validate'
             return 1
         fi
-        cmd="copilot -C \"$dir\" -p \"\$(cat)\" -s --output-format json --reasoning-effort low --max-ai-credits 30 --allow-all-tools --deny-tool write"
+        cmd="copilot -C \"$dir\" -p \"\$(cat)\" -s --output-format json --model $pmodel --reasoning-effort $effort --max-ai-credits $credits"
+        if [[ "$tier" != "-" ]]; then
+            cmd+=" --auto-tier $tier"
+        fi
+        cmd+=" --allow-all-tools --deny-tool write"
     fi
 
     record="$(_glot_validate_file "$root" "$phase" "$module" "$lang")"
@@ -2249,6 +2410,10 @@ _glot_help_verb() {
             printf 'validator and keeps its report in `docs/evidence/{phase}/{module}/{language}.validate.md`\n'
             printf 'La orden sale de GLOT_VALIDATOR y el encargo llega por stdin, como en `ask`\n'
             printf 'The command comes from GLOT_VALIDATOR and the request arrives over stdin, as in `ask`\n'
+            printf 'El modelo, el esfuerzo y el tope de créditos salen del perfil del encargo\n'
+            printf '(`model:` en la plantilla y scripts/data/models.tsv); el modelo va además en COPILOT_MODEL\n'
+            printf 'The model, the effort and the credit cap come from the request profile\n'
+            printf '(`model:` in the template and scripts/data/models.tsv); the model also travels in COPILOT_MODEL\n'
             printf 'Sin GLOT_VALIDATOR se usa la invocación verificada de Copilot CLI en solo\n'
             printf 'lectura. El validador es opcional: sin él se avisa y se devuelve 1\n'
             printf 'Without GLOT_VALIDATOR the verified Copilot CLI invocation is used, read-only.\n'
@@ -2263,6 +2428,8 @@ _glot_help_verb() {
             printf 'glot prompt [encargo] [lenguaje] [fase/módulo]\n'
             printf 'Sin encargo lista el registro de plantillas de scripts/prompts\n'
             printf 'With no request it lists the template registry in scripts/prompts\n'
+            printf 'El registro lleva nombre, paso, modelo y descripción\n'
+            printf 'The registry carries name, step, model and description\n'
             printf 'Con encargo imprime el encargo armado: estado del sprint + plantilla expandida\n'
             printf 'With a request it prints the built request: sprint state + expanded template\n'
             printf 'Marcadores / placeholders: lang, phase, module, Module, repo, branch, spec, module_dir\n'
@@ -2275,6 +2442,10 @@ _glot_help_verb() {
             printf 'The request goes to the GLOT_DELEGATE command over stdin and its output to stdout\n'
             printf 'Sin GLOT_DELEGATE devuelve 1; `-n` imprime el plan sin enviar nada\n'
             printf 'With no GLOT_DELEGATE it returns 1; `-n` prints the plan without sending anything\n'
+            printf 'El modelo del perfil del encargo se exporta como COPILOT_MODEL (y COPILOT_AUTO_TIER\n'
+            printf 'si el perfil lo declara): al delegado se le da entorno, no flags\n'
+            printf 'The request profile model is exported as COPILOT_MODEL (and COPILOT_AUTO_TIER when the\n'
+            printf 'profile declares it): the delegate gets environment, not flags\n'
             ;;
         use)
             printf 'glot use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint\n'

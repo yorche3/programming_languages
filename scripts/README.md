@@ -38,10 +38,11 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh verify php algorithms/naive_sort  # sintaxis/lint del lenguaje
 ./scripts/glot.sh evidence php algorithms/naive_sort  # acta con la salida real
 ./scripts/glot.sh -n close php algorithms/naive_sort   # cierre: diff exacto del roadmap
-./scripts/glot.sh validate php algorithms/naive_sort    # validador automático (opcional)
+./scripts/glot.sh validate php algorithms/naive_sort    # validador automático (opcional; usa el perfil `economy`)
 ./scripts/glot.sh -n new php algorithms/naive_sort   # esqueleto: plan sin tocar nada
 ./scripts/glot.sh new php algorithms/naive_sort      # inicializador + normalización
 ./scripts/glot.sh prompt suite                        # encargo de la suite (paso 4b)
+./scripts/glot.sh prompt                              # registro: nombre, paso, modelo y descripción
 ./scripts/glot.sh set lang php && ./scripts/glot.sh get lang
 source <(./scripts/glot.sh completion bash)   # autocompletado / completion
 ```
@@ -82,7 +83,8 @@ scripts/
 │   ├── README.md
 │   ├── languages.tsv         # Un lenguaje por fila: init, manifiestos, pruebas, verificador e inicialización
 │   ├── commits.tsv           # Un paso de sprint por fila: alias, ámbito y mensaje de commit
-│   └── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
+│   ├── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
+│   └── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos
 ├── docs/                     # Documentación del tooling
 │   ├── ROADMAP.md
 │   ├── SPRINT.md

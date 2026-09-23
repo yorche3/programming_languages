@@ -16,6 +16,7 @@
 | 0.8.0 | 2026-09-22 | [`versions/glot_0.8.0.sh`](../versions/glot_0.8.0.sh) | **Delegación** (L4): `prompt` y `ask`, con las cuatro plantillas versionadas de `scripts/prompts/` y un solo vocabulario de marcadores | ✅ cerrada |
 | 0.9.0 | 2026-09-22 | [`versions/glot_0.9.0.sh`](../versions/glot_0.9.0.sh) | **Creación y registro** (L5): `new` (inicializador del lenguaje, esqueleto y normalización) y `save` (commit guiado desde el catálogo `data/commits.tsv`), con la tabla de inicialización ampliada | ✅ cerrada |
 | 0.10.0 | 2026-09-22 | [`versions/glot_0.10.0.sh`](../versions/glot_0.10.0.sh) | **Evidencia y cierre** (L6): `evidence`, `close` y `validate` con validador enchufable, más la retirada de `hello` y el objetivo resuelto por directorio | ✅ cerrada |
+| 0.11.0 | 2026-09-22 | — (viva / live) | **Perfiles de modelo por encargo** (L6.5): `model:` en el frontmatter de las seis plantillas y `data/models.tsv` fijando esfuerzo y tope de créditos por encargo, con los modelos que ofrece Copilot | 🔄 en curso / in progress |
 
 ---
 
@@ -102,7 +103,7 @@
 - **`new` tiene dos modos, decididos por dato:** con `tool` ejecuta el inicializador del lenguaje en el directorio del módulo; con `manual` crea las carpetas del esqueleto; con `deferred` no ejecuta nada, informa, remite al encargo `scaffold` e imprime `skipped` (como `verify` sin verificador). No escribe la suite: eso es el encargo `suite` (paso 4b).
 - **Tabla de inicialización ampliada** en [`data/languages.tsv`](../data/languages.tsv): de 5 a 8 columnas, con el **tipo** (columna 6, la leyenda ✅/🔧/✍️ de la guía recuperada como dato), el **comando** (7) y la **normalización** (8). Resultado: **22 lenguajes con herramienta**, **21 de estructura manual** y **7 aplazados** al agente.
 - **Normalización declarada, no adivinada:** `flat:<sub>` sube el contenido del proyecto hijo (los inicializadores que anidan, como `crystal init lib` o `dart create`) y `rm:<ruta>` limpia. `crystal` y `gleam` crean además un `.git` propio: se borra **antes** de aplanar, porque un repositorio dentro de un submódulo no es válido. Un lenguaje sin operación declarada no se toca.
-- **Tabla paso → mensaje, en datos:** [`data/commits.tsv`](../data/commits.tsv) (`paso`, `alias`, `ámbito`, `mensaje`). `save` acepta el paso (`4a`, `4b`, `5`, `7`, `8`) o el nombre del encargo (`scaffold`, `suite`, `implement`, `docs-module`, `docs-language`). Los pasos del monorepo (puntero y roadmap) se rechazan con `1` y remiten a `close` (v0.10.0) y `pointer` (v0.11.0).
+- **Tabla paso → mensaje, en datos:** [`data/commits.tsv`](../data/commits.tsv) (`paso`, `alias`, `ámbito`, `mensaje`). `save` acepta el paso (`4a`, `4b`, `5`, `7`, `8`) o el nombre del encargo (`scaffold`, `suite`, `implement`, `docs-module`, `docs-language`). Los pasos del monorepo (puntero y roadmap) se rechazan con `1` y remiten a `close` (v0.10.0) y `pointer` (v0.12.0).
 - **Encargo nuevo:** `suite` (paso 4b) con el contrato de pruebas unitarias, que estaba dentro de `scaffold`. El paso 4 del sprint se parte en **4a** (esqueleto, `glot new` + `glot prompt scaffold`) y **4b** (suite, `glot prompt suite`), con dos commits: `chore({phase}): add scaffold for {module}` y `chore({phase}): add suite for {module}`.
 - **Contrato:** `new` devuelve `4` si el inicializador falla y `0` con `skipped` si el esqueleto está aplazado; `save` devuelve el **SHA corto** por stdout o `nothing` si no hay nada que confirmar, **nunca hace push** y solo confirma en el submódulo. Los dos respetan `-n/--dry-run`, obligatorio por mutar.
 - **Hallazgos que no bloquean, nombrados antes de confirmar:** cambios fuera del módulo (que entran igual, porque `add -A` es del submódulo) y una rama activa que no es la del estado del sprint.
@@ -125,6 +126,12 @@
 - **Lo que deja abierto:** `pointer` y `status` llegan con L7 (0.12.0) y el reparto de modelos por encargo con L6.5 (0.11.0), **solo con los modelos que ofrece Copilot**; la cabecera de fase del roadmap y su contador siguen esperando un formato único entre fases.
 
 ---
+
+## 0.11.0 — 2026-09-22 (viva)
+
+- **Añade:** los **perfiles de modelo por encargo** (L6.5): `model:` en el frontmatter de las seis plantillas —con el **id real** del modelo, que es clave nativa de los `.prompt.md` de VS Code— y el catálogo [`data/models.tsv`](../data/models.tsv), que fija el esfuerzo y el tope de créditos de cada perfil.
+- **Decisiones cerradas antes de codificar:** en [`ROADMAP.md`](ROADMAP.md). El modelo es la **clave del perfil** (no hay `profile:` que pueda derivar), el delegado recibe el modelo por entorno (`COPILOT_MODEL` y `COPILOT_AUTO_TIER`, que el CLI sí reconoce) y el tope de créditos del perfil económico es el **mínimo que acepta el CLI** (30).
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 503 passed, 0 failed` (rc `0`), con 26 comprobaciones nuevas del catálogo, las plantillas y los códigos. Los límites del CLI (1.0.88) se midieron de verdad: `--reasoning-effort bogus` → `error: invalid value 'bogus' for '--reasoning-effort <level>' [possible values: none, minimal, low, medium, high, xhigh, max]` y `--max-ai-credits 20` → `error: Invalid value for --max-ai-credits: "20". Use at least 30 AI credits.`, que es de dónde sale el suelo de 30 del perfil económico. Las tres corridas de modelo contra la API quedan **pendientes de autenticación**: en este entorno `copilot` responde `Error: No authentication information found.` y el token que hay en `gh` es un PAT clásico (`ghp_`), que Copilot rechaza: `Error: Classic Personal Access Tokens (ghp_) are not supported by Copilot.`
 
 ## 🔖 Convención de archivado / Archiving convention
 
@@ -169,7 +176,7 @@
 
 ```bash
 bash -n scripts/glot.sh              # sintaxis
-./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, evidencia, cierre, validación, plantillas, archivado y códigos (477 comprobaciones)
+./scripts/tests/glot_test.sh        # contrato, verbos, estado, catálogo, ejecución, delegación, creación, evidencia, cierre, validación, perfiles de modelo, plantillas, archivado y códigos (503 comprobaciones)
 ./scripts/glot.sh doctor            # diagnóstico del entorno, del catálogo y del roadmap
 ./scripts/glot.sh langs             # catálogo de lenguajes y su comando de pruebas
 ./scripts/glot.sh modules           # catálogo de módulos con su especificación

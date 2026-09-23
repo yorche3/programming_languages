@@ -85,6 +85,13 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   sin ella, de la invocación de Copilot CLI en solo lectura; el veredicto se lee
   de la línea que la plantilla exige y no se adivina. Es opcional: sin validador
   avisa y devuelve `1`, y con hallazgos devuelve `4`.
+- `glot` v0.11.0 (en curso): **perfiles de modelo por encargo** (L6.5). Cada
+  plantilla de `scripts/prompts/` declara su modelo en el frontmatter (`model:`,
+  con el id real que ofrece Copilot, que es clave nativa de los `.prompt.md` de
+  VS Code) y [`scripts/data/models.tsv`](scripts/data/models.tsv) fija el
+  esfuerzo, el tope de créditos y el tier de auto de cada perfil: `economy`,
+  `balanced` y `deep`. El modelo es la clave del perfil, así que el catálogo se
+  audita solo y no puede derivar del frontmatter.
 - Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
   `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
   estados, método reproducible y plan de cierre.

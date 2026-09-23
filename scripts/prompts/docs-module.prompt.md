@@ -1,6 +1,7 @@
 ---
 name: docs-module
 step: 7
+model: gemini-3.8-flash
 description: Verifica el módulo terminado y genera su README de Nivel 3 más los índices superiores
 mode: agent
 ---

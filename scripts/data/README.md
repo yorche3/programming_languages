@@ -117,7 +117,7 @@ no declared operation is untouched: it is a data decision, not the script's.
 estado del sprint. El harness comprueba **deriva en los dos sentidos**: cada mensaje
 del catálogo tiene que estar en la tabla del sprint, cada alias tiene que ser un
 encargo registrado en `prompts/`, y los dos pasos de ámbito `monorepo` (puntero y
-roadmap) tienen que ser los que esperan a `pointer` (v0.11.0) y `close` (v0.10.0).
+roadmap) tienen que ser los que esperan a `pointer` (v0.12.0) y `close` (v0.10.0).
 
 **EN:** It is the sprint table ([`SPRINT.md`](../docs/SPRINT.md)) turned into data:
 `save` reads from here, not from the script. The placeholders (`{lang}`, `{phase}`,
@@ -125,10 +125,9 @@ roadmap) tienen que ser los que esperan a `pointer` (v0.11.0) y `close` (v0.10.0
 from the sprint state. The harness checks for **drift in both directions**: every
 catalogue message must exist in the sprint table, every alias must be a request
 registered in `prompts/`, and the two `monorepo`-scope steps (pointer and roadmap)
-must be the ones waiting for `pointer` (v0.11.0) and `close` (v0.10.0).
+must be the ones waiting for `pointer` (v0.12.0) and `close` (v0.10.0).
 
 ## 🏷️ `display.tsv` — nombres de presentación / display names
-
 | Columna / Column | Contenido / Content | Ejemplo / Example |
 |:---:|---|---|
 | 1 | Lenguaje, como en `.gitmodules` | `tcl-tk` |
@@ -137,6 +136,47 @@ must be the ones waiting for `pointer` (v0.11.0) and `close` (v0.10.0).
 **ES:** El roadmap escribe los lenguajes con su nombre de presentación (`C#`, `C++`, `Tcl/Tk`) y **el número de línea de esta tabla es la posición** dentro de sus listas. `glot close` la usa para las dos cosas: para escribir el nombre que va a la lista y para insertarlo en su sitio, en vez de inventar un orden en el script. Se mantiene a mano, y el harness comprueba la deriva **en los dos sentidos**: los lenguajes tienen que ser los de `.gitmodules` y los nombres tienen que ser, ni más ni menos, los de una lista ya cerrada del roadmap.
 
 **EN:** The roadmap spells languages with their display name (`C#`, `C++`, `Tcl/Tk`) and **this table's line number is the position** inside its lists. `glot close` uses it for both: to write the name that goes into the list and to insert it in place, instead of inventing an order in the script. It is maintained by hand, and the harness checks drift **in both directions**: the languages must be `.gitmodules`' and the names must be, no more and no less, those of an already closed list in the roadmap.
+
+## 🤖 `models.tsv` — perfiles de modelo por encargo / per-request model profiles
+
+**ES:** Una fila por **perfil**, con el **modelo como clave**: la plantilla declara su
+modelo en el frontmatter (`model:`) y esta tabla dice qué esfuerzo y qué tope de créditos
+le tocan, más para qué encargos está pensado el perfil. El nombre del perfil (`economy`)
+es la etiqueta legible de la fila; **no hay una clave `profile:` en la plantilla**, para
+que el modelo y su presupuesto no puedan derivar el uno del otro.
+
+| Columna / Column | Contenido / Content | Ejemplo / Example |
+|:---:|---|---|
+| 1 | Perfil, nombre de política | `economy` |
+| 2 | Modelo de Copilot, **id real** de la lista del CLI instalado | `gemini-3.8-flash` |
+| 3 | Esfuerzo de razonamiento, que `glot` pasa como `--reasoning-effort` | `low` |
+| 4 | Tope de créditos, que `glot` pasa como `--max-ai-credits`; **30 es el mínimo que acepta el CLI** | `30` |
+| 5 | Tier de auto (`--auto-tier`), o `-` cuando el modelo es fijo | `-` |
+| 6 | Encargos que usan el perfil, separados por coma | `validate, docs-module, docs-language` |
+
+**EN:** One row per **profile**, with the **model as the key**: the template declares its
+model in the frontmatter (`model:`) and this table states the effort and the credit cap it
+gets, plus which requests the profile is meant for. The profile name (`economy`) is the
+readable label of the row; there is **no `profile:` key in the template**, so the model and
+its budget cannot drift apart.
+
+**ES:** La lista de modelos la manda el **CLI instalado** (`copilot help config`), no este
+documento: `doctor` informa de la cobertura (`model_profiles`) y de cuántos modelos del
+catálogo siguen apareciendo en el CLI (`model_available`), y el harness comprueba la deriva
+en los dos sentidos entre la columna 6 y las plantillas que declaran cada modelo. Un
+`model:` que no esté aquí es un **dato que falta** (`1`), nunca un perfil inventado.
+
+**EN:** The model list is owned by the **installed CLI** (`copilot help config`), not by
+this document: `doctor` reports coverage (`model_profiles`) and how many catalogue models
+are still listed by the CLI (`model_available`), and the harness checks drift in both
+directions between column 6 and the templates that declare each model. A `model:` missing
+here is a **missing datum** (`1`), never an invented profile.
+
+| Perfil / Profile | Modelo / Model | Esfuerzo / Effort | Créditos / Credits | Encargos / Requests |
+|---|---|---|:--:|---|
+| `economy` | `gemini-3.8-flash` | `low` | 30 | `validate`, `docs-module`, `docs-language` |
+| `balanced` | `gpt-5.6-terra` | `medium` | 90 | `scaffold`, `suite` |
+| `deep` | `claude-sonnet-5` | `high` | 120 | `implement` |
 
 ## 🔁 Regeneración / Regeneration
 
