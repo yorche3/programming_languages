@@ -65,22 +65,21 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 - La plantilla `scaffold` se divide: `scaffold` (paso 4a) ajusta el esqueleto a
   lo que exige el módulo y `suite` (paso 4b) escribe la suite desde la
   especificación, con dos commits por paso.
-- `glot` v0.10.0 (en curso): **evidencia y cierre** (L6). Ya está `evidence`, que
+- `glot` v0.10.0: **evidencia y cierre** (L6) con `evidence`, que
   ejecuta la suite y el verificador del módulo y deja el acta con la salida real
   en `docs/evidence/{fase}/{modulo}/{lenguaje}.md` —fecha, rama, commit del
   submódulo, árbol sucio o limpio, comandos, salida tal cual y códigos—, escrita
-  también cuando algo está en rojo. `close` (checklist y contador del roadmap) y
-  `validate` (validador automático con Copilot CLI, enchufable) están en camino.
+  también cuando algo está en rojo.
 - El harness cierra el círculo del archivado: comprueba que **toda versión
   marcada como cerrada en el log tiene su snapshot** en `scripts/versions/`, y
   que no sobra ninguno. El olvido se ve al confirmar el cierre y no al arrancar
   la versión siguiente, que es como se detectó en las v0.5.0 y v0.6.0.
-- `glot` v0.10.0 (en curso): `close`, que registra el cierre de un módulo en un
+- `glot` v0.10.0: `close`, que registra el cierre de un módulo en un
   lenguaje —exige la evidencia en verde y los README del módulo y de la fase,
   escribe la entrada del checklist y sube el contador y la lista del roadmap con
   el nombre de presentación—, con `data/display.tsv` como tabla de nombres y
   orden, idempotente, con el diff exacto en `-n` y sin confirmar nada.
-- `glot` v0.10.0 (en curso): `validate`, que pasa el encargo `validate` (paso 6,
+- `glot` v0.10.0: `validate`, que pasa el encargo `validate` (paso 6,
   ya versionado) al validador automático y guarda su informe en
   `docs/evidence/…/{lenguaje}.validate.md`. La orden sale de `GLOT_VALIDATOR` y,
   sin ella, de la invocación de Copilot CLI en solo lectura; el veredicto se lee
