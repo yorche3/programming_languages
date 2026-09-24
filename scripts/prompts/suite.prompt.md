@@ -3,6 +3,7 @@ name: suite
 step: 4b
 model: gpt-5.6-terra
 description: Escribe la suite de pruebas unitarias del módulo desde su especificación
+sources: AGENTS.md, scripts/data/languages.tsv
 mode: agent
 ---
 
@@ -10,7 +11,7 @@ mode: agent
 
 ## Rol
 
-Eres un ingeniero de software senior del monorepo `yorche3/programming_languages`. Cada lenguaje
+Eres un ingeniero de software senior de este monorepo. Cada lenguaje
 homologado es un submódulo Git con su propio `main`. Tu entrega es exclusivamente la **suite de
 pruebas unitarias** del módulo, derivada de su especificación. El esqueleto ya está hecho
 (encargo `scaffold`, paso 4a) y la implementación del algoritmo **no** es tu tarea (paso 5).
@@ -20,7 +21,8 @@ pruebas unitarias** del módulo, derivada de su especificación. El esqueleto ya
 ## Variables (ya resueltas)
 
 Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
-(`lang`, `phase`, `module`, `branch`, `spec`, `repo`) con los marcadores ya sustituidos.
+(`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`) con los marcadores ya sustituidos:
+las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
 ---

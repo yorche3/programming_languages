@@ -23,6 +23,13 @@ LIVE_VERSION="$(sed -n 's/^GLOT_VERSION="\(.*\)"$/\1/p' "$GLOT_SH")"
 # Estado aislado: ningún caso toca el estado real del usuario.
 export GLOT_STATE_FILE="$WORK_DIR/state"
 
+# El harness prueba **este** repositorio, así que no puede heredar el entorno del autor:
+# con `GLOT_ROOT` apuntando a otro monorepo (lo normal si se trabaja en un laboratorio)
+# todas las comprobaciones de catálogo y roadmap mirarían el repositorio equivocado. Las
+# variables se fijan por caso donde hacen falta (`glot_run_in`, `glot_run_state`…).
+unset GLOT_ROOT
+unset GLOT_TOOLCHAINS_FILE
+
 passed=0
 failed=0
 
@@ -1591,6 +1598,28 @@ assert_eq 'save 9: asunto del commit' 'chore(submodule): update php pointer' \
 assert_eq 'save 9: solo el submódulo en el commit' 'php' "$(git -C "$SANDBOX" show --pretty=format: --name-only HEAD)"
 assert_contains 'save 9: sin push' 'no push' "$err"
 
+# lo del propio sprint no bloquea a `pointer`: el gitlink lo prepara él y la evidencia la
+# confirma el paso de cierre (`save 10`), que va **después**. Se comprueba sobre el
+# escenario real: la rama del puntero se vuelve a preparar con la evidencia sin confirmar.
+git -C "$SANDBOX" switch -q main
+git -C "$SANDBOX" branch -q -D chore/algorithms/naive-sort-pointer
+mkdir -p -- "$SANDBOX/docs/evidence/algorithms/naive_sort"
+printf '# Evidencia — php algorithms/naive_sort\n' >"$SANDBOX/docs/evidence/algorithms/naive_sort/php.md"
+glot_run_sandbox pointer php algorithms/naive_sort
+assert_eq 'pointer con la evidencia del sprint sin confirmar: código' '0' "$rc_last"
+assert_eq 'pointer con la evidencia del sprint sin confirmar: solo entra el gitlink' 'php' \
+    "$(git -C "$SANDBOX" diff --cached --name-only)"
+
+# cualquier otra ruta sin confirmar sí bloquea, y se nombra
+git -C "$SANDBOX" reset -q
+git -C "$SANDBOX" switch -q main
+printf 'nota\n' >"$SANDBOX/docs/nota-suelta.md"
+glot_run_sandbox pointer php algorithms/naive_sort
+assert_eq 'pointer con trabajo ajeno sin confirmar: código' '1' "$rc_last"
+assert_contains 'pointer con trabajo ajeno sin confirmar: lo nombra' 'docs/nota-suelta.md' "$err"
+rm -f -- "$SANDBOX/docs/nota-suelta.md"
+rm -rf -- "$SANDBOX/docs/evidence"
+
 # save 10: el cierre añade el roadmap, el checklist y la evidencia de ese módulo
 rm -rf -- "$SANDBOX/docs/evidence/algorithms/naive_sort"
 mkdir -p -- "$SANDBOX/docs/evidence/algorithms/naive_sort"
@@ -1860,6 +1889,138 @@ assert_eq 'uninstall: repetido, dice que no había nada' 'nothing' "$out"
 glot_install doctor
 assert_contains 'doctor: sin instalación lo dice' 'install: no' "$out"
 assert_contains 'doctor: sin instalación, el bloque no está' 'install_rc: bash:no' "$out"
+
+# toolchains (v1.0.0): el dato declara una serie verificada por lenguaje y `doctor` informa
+# de la cobertura y de la presencia, y comprueba la serie del lenguaje del sprint en curso.
+TOOLCHAINS="$TESTS_DIR/../data/toolchains.tsv"
+INJECTED="$WORK_DIR/toolchains"
+mkdir -p -- "$INJECTED"
+
+assert_eq 'toolchains: el fichero de datos existe' 'si' "$([[ -r "$TOOLCHAINS" ]] && echo si || echo no)"
+assert_eq 'toolchains: tres columnas separadas por tabulador' 'ok' \
+    "$(awk -F'\t' 'NF != 3 { bad = 1 } END { print (bad ? "mal" : "ok") }' "$TOOLCHAINS")"
+assert_eq 'toolchains: la primera columna está ordenada' 'ok' \
+    "$(cut -f1 -- "$TOOLCHAINS" | LC_ALL=C sort -c >/dev/null 2>&1 && echo ok || echo mal)"
+assert_eq 'toolchains: sin lenguajes repetidos' \
+    "$(cut -f1 -- "$TOOLCHAINS" | wc -l | tr -d ' ')" \
+    "$(cut -f1 -- "$TOOLCHAINS" | LC_ALL=C sort -u | wc -l | tr -d ' ')"
+assert_eq 'toolchains: ninguna serie vacía' 'ok' \
+    "$(awk -F'\t' '$3 == "" { bad = 1 } END { print (bad ? "mal" : "ok") }' "$TOOLCHAINS")"
+
+git -C "$REPO" config --file "$REPO/.gitmodules" --get-regexp '\.path$' 2>/dev/null |
+    awk '{print $NF}' | LC_ALL=C sort >"$WORK_DIR/gitmodules-paths"
+unknown_rows=""
+while IFS=$'\t' read -r tc_lang _ _; do
+    [[ -n "$tc_lang" ]] || continue
+    grep -qx -- "$tc_lang" "$WORK_DIR/gitmodules-paths" || unknown_rows+="$tc_lang "
+done <"$TOOLCHAINS"
+assert_eq 'toolchains: ninguna fila fuera de .gitmodules' '' "$unknown_rows"
+
+# glot_run_tc <catálogo> [args...] — ejecuta glot con un catálogo de toolchains inyectado
+glot_run_tc() {
+    local file="$1"
+    shift
+    local rc=0
+    out="$(GLOT_TOOLCHAINS_FILE="$file" "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+glot_run doctor
+assert_contains 'doctor: el fichero de toolchains' 'toolchains_file: ' "$out"
+assert_contains 'doctor: la cobertura del catálogo' "toolchains: $(wc -l <"$TOOLCHAINS" | tr -d ' ') de / of " "$out"
+assert_contains 'doctor: la presencia de las declaradas' 'toolchains_present: ' "$out"
+
+# sin sprint no hay serie que comprobar: se dice con un estado que no existe
+out="$(GLOT_STATE_FILE="$WORK_DIR/state-sin-sprint" "$GLOT_SH" doctor 2>/dev/null || true)"
+assert_contains 'doctor: sin sprint no hay serie que comprobar' 'toolchain_sprint: -' "$out"
+
+# con sprint, se comprueba la serie de ese lenguaje: cualquiera de los tres estados vale,
+# porque una versión que avanza es información y no un fallo del entorno
+glot_run set lang ruby
+glot_run doctor
+assert_contains 'doctor: la serie del lenguaje del sprint' 'toolchain_ruby: ' "$out"
+assert_eq 'doctor: un sprint sin fila declarada no rompe' '0' "$rc_last"
+glot_run set lang ada
+glot_run doctor
+assert_eq 'doctor: sin serie declarada, código' '0' "$rc_last"
+assert_contains 'doctor: sin serie declarada, se dice' 'toolchain_ada: - (sin serie declarada' "$out"
+
+# inyectando el catálogo se prueban los tres estados sin tocar el dato del repositorio
+cp -f -- "$TOOLCHAINS" "$INJECTED/differs.tsv"
+sed -i 's/^ruby\truby --version\t.*/ruby\truby --version\t9.9/' "$INJECTED/differs.tsv"
+glot_run set lang ruby
+glot_run_tc "$INJECTED/differs.tsv" doctor
+assert_eq 'toolchains: una serie que no coincide no cambia el código' '0' "$rc_last"
+assert_contains 'toolchains: la serie que no coincide se informa' 'toolchain_ruby: differs (3.4.3 ≠ / vs 9.9)' "$out"
+
+cp -f -- "$TOOLCHAINS" "$INJECTED/missing.tsv"
+sed -i 's/^ruby\truby --version\t.*/ruby\tglot-no-existe --version\t3.4/' "$INJECTED/missing.tsv"
+glot_run_tc "$INJECTED/missing.tsv" doctor
+assert_eq 'toolchains: una herramienta que falta cambia el código' '1' "$rc_last"
+assert_contains 'toolchains: la herramienta que falta se nombra' 'toolchain_ruby: missing (no encontrado / not found: glot-no-existe)' "$out"
+
+cp -f -- "$TOOLCHAINS" "$INJECTED/unknown.tsv"
+printf 'klingon\tglot-no-existe --version\t1.0\n' >>"$INJECTED/unknown.tsv"
+glot_run_tc "$INJECTED/unknown.tsv" doctor
+assert_eq 'toolchains: una fila fuera de .gitmodules cambia el código' '1' "$rc_last"
+assert_contains 'toolchains: la fila fuera de .gitmodules se nombra' 'toolchain_klingon: unknown' "$out"
+
+glot_run_tc "$WORK_DIR/no-existe.tsv" doctor
+assert_eq 'toolchains: sin fichero de datos no es un fallo' '0' "$rc_last"
+assert_contains 'toolchains: sin fichero de datos se dice' 'toolchains_file: (no encontrado / not found)' "$out"
+
+# encargos (v1.0.0): las plantillas declaran sus fuentes y ya no nombran el monorepo
+PROMPTS="$TESTS_DIR/../prompts"
+assert_eq 'prompt: ninguna plantilla nombra el monorepo' '' \
+    "$(grep -l 'yorche3\|programming_languages' "$PROMPTS"/*.prompt.md 2>/dev/null | tr '\n' ' ')"
+assert_eq 'prompt: ninguna plantilla usa rutas que salen del monorepo' '' \
+    "$(grep -l '\.\./\.\.' "$PROMPTS"/*.prompt.md 2>/dev/null | tr '\n' ' ')"
+assert_eq 'prompt: todas las plantillas declaran sources' \
+    "$(ls -1 "$PROMPTS"/*.prompt.md | wc -l | tr -d ' ')" \
+    "$(grep -l '^sources: ' "$PROMPTS"/*.prompt.md | wc -l | tr -d ' ')"
+
+missing_sources=""
+for template in "$PROMPTS"/*.prompt.md; do
+    sources="$(sed -n 's/^sources: //p' "$template" | head -1)"
+    [[ -n "$sources" ]] || continue
+    IFS=',' read -r -a declared <<<"$sources"
+    for path in "${declared[@]}"; do
+        path="${path#"${path%%[![:space:]]*}"}"
+        path="${path%"${path##*[![:space:]]}"}"
+        [[ -e "$REPO/$path" ]] || missing_sources+="$(basename -- "$template"):$path "
+    done
+    unset IFS
+done
+assert_eq 'prompt: toda fuente declarada existe en el monorepo' '' "$missing_sources"
+
+# la cabecera del encargo lleva la raíz y las fuentes que faltan se avisan por stderr
+glot_run set lang php
+glot_run prompt suite
+assert_eq 'prompt: código' '0' "$rc_last"
+assert_contains 'prompt: la cabecera lleva la raíz del monorepo' "| root | $REPO |" "$out"
+assert_eq 'prompt: sin fuentes ausentes no avisa' 'no' "$([[ "$err" == *'fuente ausente'* ]] && echo si || echo no)"
+
+mkdir -p -- "$SANDBOX/.github/prompts"
+cat >"$SANDBOX/.github/prompts/fuentes-check.prompt.md" <<'EOF'
+---
+name: fuentes-check
+step: 4b
+model: gpt-5.6-terra
+description: prueba del aviso de fuentes
+sources: docs/core, docs/no-existe.md
+mode: agent
+---
+
+Cuerpo de prueba para {module}.
+EOF
+out="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" prompt fuentes-check php algorithms/data_structures 2>"$WORK_DIR/stderr")" || true
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_contains 'prompt: avisa de la fuente que falta' 'fuente ausente / missing source: docs/no-existe.md' "$err"
+assert_eq 'prompt: no avisa de la que sí está' 'no' "$([[ "$err" == *'missing source: docs/core'* ]] && echo si || echo no)"
+assert_eq 'prompt: el encargo se imprime igual' 'si' \
+    "$([[ "$out" == *'Cuerpo de prueba para data_structures'* ]] && echo si || echo no)"
+rm -rf -- "$SANDBOX/.github"
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 

@@ -3,6 +3,7 @@ name: docs-module
 step: 7
 model: gemini-3.8-flash
 description: Verifica el módulo terminado y genera su README de Nivel 3 más los índices superiores
+sources: AGENTS.md, docs/AGENT_Template.md, docs/README_Template.md, docs/ROADMAP.md, docs/ROADMAP_UPDATE_CHECKLIST.md
 mode: agent
 ---
 
@@ -10,7 +11,7 @@ mode: agent
 
 ## Rol
 
-Eres un *technical writer* y revisor de código del monorepo `yorche3/programming_languages`.
+Eres un *technical writer* y revisor de código de este monorepo.
 El autor considera **terminada** la implementación de un módulo. Tu trabajo es **verificarla**
 y, solo si pasa la verificación, **documentarla**. Si algo falla, tu trabajo es **reportarlo**,
 no arreglarlo.
@@ -20,7 +21,8 @@ no arreglarlo.
 ## Variables (ya resueltas)
 
 Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
-(`lang`, `phase`, `module`, `branch`, `spec`, `repo`) con los marcadores ya sustituidos.
+(`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`) con los marcadores ya sustituidos:
+las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
 ---
@@ -108,7 +110,7 @@ mismo cambio:
 
 1. Añade la entrada de cierre en `docs/ROADMAP_UPDATE_CHECKLIST.md` con: fecha, fase, módulo,
    lenguaje, comandos ejecutados con su resultado real, README verificado y el cambio de estado.
-2. Actualiza `docs/ROADMAP.md`: el contador `X/49` del módulo y la lista de lenguajes del
+2. Actualiza `docs/ROADMAP.md`: el contador `X/50` del módulo y la lista de lenguajes del
    resumen de progreso.
 3. No cierres la fase salvo que todos sus módulos requeridos cumplan el ciclo completo.
 

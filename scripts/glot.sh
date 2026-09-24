@@ -578,9 +578,113 @@ _glot_cmd_doctor() {
             printf 'shell_loaded: no (se ejecuta como programa / it runs as a program)\n'
         fi
 
+        # Toolchains (L9 se queda para instalarlas): aquí solo se comprueba el dato que
+        # declara una serie verificada por lenguaje.
+        if ! _glot_doctor_toolchains "$registered"; then
+            status=1
+        fi
+
         printf 'evidence_dir: %s\n' "$root/docs/evidence"
         printf 'evidence_files: %s\n' \
             "$(find "$root/docs/evidence" -mindepth 3 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')"
+    fi
+
+    return "$status"
+}
+
+# _glot_doctor_toolchains <registrados> — bloque `toolchains` del doctor. Informa de la
+# **cobertura** del catálogo y de cuántas de las filas declaradas están **presentes** en el
+# entorno, y comprueba la **serie** del lenguaje del sprint en curso: solo esa fila se
+# ejecuta, porque arrancar las 45 toolchains declaradas cuesta unos 5 segundos medidos
+# (kotlin 1,3 s, ballerina 0,5 s, groovy 0,4 s) y `doctor` se ejecuta a menudo. La cobertura
+# y la presencia cuestan un `command -v` por fila.
+# Estados de la fila comprobada: `ok` (coincide por prefijo), `differs` (hay versión y no
+# coincide: el dato se quedó atrás, se informa y **no** cambia el código), `missing` (el
+# comando no está) y `unknown` (fila fuera de .gitmodules o sin versión legible).
+# Códigos: 0 todo presente · 1 falta una herramienta declarada o el dato no cuadra.
+_glot_doctor_toolchains() {
+    local registered="$1"
+    local file=""
+    local langs=""
+    local sprint=""
+    local row=""
+    local lang=""
+    local cmd=""
+    local want=""
+    local tool=""
+    local out=""
+    local seen=""
+    local rows=0
+    local present=0
+    local missing=""
+    local status=0
+
+    if ! file="$(_glot_toolchains_file)" || [[ ! -r "$file" ]]; then
+        printf 'toolchains_file: (no encontrado / not found)\n'
+        printf 'toolchains: 0 de / of %s lenguajes con serie verificada / languages with a verified series\n' "$registered"
+        return 0
+    fi
+    printf 'toolchains_file: %s\n' "$file"
+
+    langs="$(_glot_langs || true)"
+    sprint="$(_glot_state_get lang 2>/dev/null || true)"
+
+    # El lenguaje del sprint solo cuenta si tiene fila declarada: la última vuelta de este
+    # mismo bucle lo comprueba.
+    while IFS=$'\t' read -r lang cmd want; do
+        [[ -n "$lang" ]] || continue
+        rows=$((rows + 1))
+
+        if [[ $'\n'"$langs"$'\n' != *$'\n'"$lang"$'\n'* ]]; then
+            printf 'toolchain_%s: unknown (fuera de .gitmodules / not in .gitmodules)\n' "$lang"
+            status=1
+            continue
+        fi
+
+        tool="$(_glot_tool_of "$cmd")"
+        if command -v "$tool" >/dev/null 2>&1; then
+            present=$((present + 1))
+        else
+            missing+="$lang "
+            printf 'toolchain_%s: missing (no encontrado / not found: %s)\n' "$lang" "$tool"
+        fi
+    done < <(_glot_toolchains_list)
+
+    if [[ -n "$missing" ]]; then
+        status=1
+    fi
+
+    printf 'toolchains: %s de / of %s lenguajes con serie verificada / languages with a verified series\n' "$rows" "$registered"
+    printf 'toolchains_present: %s de / of %s presentes / present\n' "$present" "$rows"
+
+    # La serie declarada se comprueba del lenguaje del sprint, que es el que se va a usar.
+    # Si esa fila falta o su comando no está, ya lo dice el bucle de arriba: aquí solo se
+    # comprueba la serie, que es lo que el bucle no mira.
+    if [[ -z "$sprint" ]]; then
+        printf 'toolchain_sprint: - (sin sprint en curso / no sprint in progress)\n'
+    else
+        row="$(_glot_toolchains_list | awk -F'\t' -v want="$sprint" '$1 == want { print; exit }')"
+        if [[ -z "$row" ]]; then
+            printf 'toolchain_%s: - (sin serie declarada / no declared series)\n' "$sprint"
+        else
+            cmd="$(printf '%s\n' "$row" | cut -f2)"
+            want="$(printf '%s\n' "$row" | cut -f3)"
+            tool="$(_glot_tool_of "$cmd")"
+            if ! command -v "$tool" >/dev/null 2>&1; then
+                status=1
+            else
+                out="$(eval "$cmd" 2>&1 | head -20 || true)"
+                seen="$(_glot_version_seen "$out")"
+                if [[ -z "$seen" ]]; then
+                    printf 'toolchain_%s: unknown (sin versión legible / no readable version)\n' "$sprint"
+                    status=1
+                elif [[ "$seen" == "$want"* ]]; then
+                    printf 'toolchain_%s: ok (%s = %s)\n' "$sprint" "$seen" "$want"
+                else
+                    printf 'toolchain_%s: differs (%s ≠ / vs %s)\n' "$sprint" "$seen" "$want"
+                fi
+            fi
+        fi
     fi
 
     return "$status"
@@ -1189,6 +1293,8 @@ _glot_prompt_build() {
     local root=""
     local branch=""
     local spec=""
+    local sources=""
+    local source=""
 
     shift
 
@@ -1213,6 +1319,20 @@ _glot_prompt_build() {
         return 1
     fi
 
+    # Las fuentes que la plantilla declara en su frontmatter (`sources:`) tienen que estar
+    # en el monorepo: si falta alguna, el encargo cita un documento que no existe y se avisa
+    # por stderr. El código no cambia: el encargo se imprime igual, que es lo que se pidió.
+    if sources="$(_glot_prompt_field "$file" sources)"; then
+        local IFS=','
+        for source in $sources; do
+            source="${source#"${source%%[![:space:]]*}"}"
+            source="${source%"${source##*[![:space:]]}"}"
+            [[ -n "$source" ]] || continue
+            [[ -e "$root/$source" ]] || _glot_warn "fuente ausente / missing source: $source"
+        done
+        unset IFS
+    fi
+
     printf '# Encargo `%s` — %s %s/%s\n\n' "$name" "$lang" "$phase" "$module"
     printf '| Clave | Valor |\n|-------|-------|\n'
     printf '| lang | %s |\n' "$lang"
@@ -1221,6 +1341,7 @@ _glot_prompt_build() {
     printf '| branch | %s |\n' "${branch:-detached}"
     printf '| spec | %s |\n' "${spec:--}"
     printf '| repo | %s |\n' "$lang"
+    printf '| root | %s |\n' "$root"
     printf '| module_dir | %s |\n' "$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
     printf '\n---\n\n%s\n' "$body"
 }
@@ -1499,13 +1620,34 @@ _glot_cmd_clean() {
     return 0
 }
 
+# _glot_sprint_path <lenguaje> <fase> <módulo> <ruta> — ¿la ruta es del propio sprint que se
+# está cerrando? Son dos: el **gitlink del lenguaje**, que es justo el cambio que `pointer`
+# viene a preparar, y la **evidencia del sprint**, que la confirma el paso de cierre (`save
+# 10`) y que por tanto todavía no lo está cuando se prepara el puntero. Ninguna de las dos
+# es «trabajo a medias» de otro sprint.
+_glot_sprint_path() {
+    local lang="$1"
+    local phase="$2"
+    local module="$3"
+    local path="$4"
+    local evidence="docs/evidence/$phase/$module"
+
+    [[ "$path" == "$lang" ]] && return 0
+    # git colapsa los directorios sin confirmar en su padre (`?? docs/evidence/`), así que
+    # valen la ruta de la evidencia, lo que hay debajo y cualquiera de sus padres.
+    [[ "$path" == "$evidence" || "$path" == "$evidence/"* || "$evidence" == "$path"* ]] && return 0
+
+    return 1
+}
+
 # _glot_cmd_pointer [lenguaje] [fase/módulo] — deja el puntero del submódulo listo para
 # confirmar con `save 9`. **Prepara y no confirma**: comprueba que el commit está
 # integrado en el `main` del submódulo (`fetch` explícito de `origin/main` y comparación
 # con su punta, porque la regla del repositorio es no apuntar nunca a una rama de
 # trabajo), lleva el monorepo a la rama `chore/{fase}/{módulo}-pointer`, la publica con
-# upstream como `use` y deja el gitlink añadido. Idempotente: si el puntero ya apunta a
-# ese commit imprime `nothing`. Códigos: 0 listo (o `nothing`) · 1 entorno o regla · 2 uso.
+# upstream como `use` y deja el gitlink añadido. Lo del propio sprint —el gitlink y la
+# evidencia del paso de cierre— no cuenta como trabajo a medias. Idempotente: si el puntero
+# ya apunta a ese commit imprime `nothing`. Códigos: 0 listo (o `nothing`) · 1 entorno o regla · 2 uso.
 _glot_cmd_pointer() {
     local target=""
     local lang=""
@@ -1590,7 +1732,11 @@ _glot_cmd_pointer() {
     # este verbo viene a preparar. Cualquier otra cosa sí bloquea el cambio de rama.
     current="$(git -C "$root" symbolic-ref --short -q HEAD || true)"
     if [[ "$current" != "$branch" ]]; then
-        dirty="$(git -C "$root" status --porcelain 2>/dev/null | grep -vE "^.. $lang\$" || true)"
+        # Lo del propio sprint no bloquea: el gitlink del lenguaje y su evidencia (pasos 9 y
+        # 10). Cualquier otra cosa sí: `pointer` no cambia de rama con trabajo a medias.
+        dirty="$(git -C "$root" status --porcelain 2>/dev/null | while IFS= read -r line; do
+            _glot_sprint_path "$lang" "$phase" "$module" "${line:3}" || printf '%s\n' "$line"
+        done)"
         if [[ -n "$dirty" ]]; then
             _glot_error 'el monorepo tiene cambios sin confirmar / the monorepo has uncommitted changes'
             _glot_info "$dirty"
@@ -2782,6 +2928,16 @@ _glot_help_verb() {
         doctor)
             printf 'glot doctor — diagnóstico: versión de bash, git, raíz del monorepo y ruta del estado\n'
             printf 'glot doctor — diagnostics: bash version, git, monorepo root and state path\n'
+            printf 'Comprueba además la instalación y las shells (install:, shell:, shell_loaded:),\n'
+            printf 'el estado resuelto (state_root:) y las toolchains declaradas (toolchains:)\n'
+            printf 'It also checks the installation and the shells (install:, shell:, shell_loaded:),\n'
+            printf 'the resolved state (state_root:) and the declared toolchains (toolchains:)\n'
+            printf 'De las toolchains informa la cobertura y la presencia de las declaradas, y\n'
+            printf 'comprueba la serie del lenguaje del sprint: una versión distinta se informa\n'
+            printf 'como differs y no cambia el código, pero una herramienta que falte sí\n'
+            printf 'Of the toolchains it reports the coverage and the presence of the declared ones,\n'
+            printf 'and checks the sprint language series: a differing version is reported as\n'
+            printf 'differs and does not change the code, but a missing tool does\n'
             ;;
         greet)
             printf 'glot greet [nombre] — saluda con el nombre dado o leído de stdin\n'
@@ -2911,6 +3067,10 @@ _glot_help_verb() {
             printf 'Con encargo imprime el encargo armado: estado del sprint + plantilla expandida\n'
             printf 'With a request it prints the built request: sprint state + expanded template\n'
             printf 'Marcadores / placeholders: lang, phase, module, Module, repo, branch, spec, module_dir\n'
+            printf 'La cabecera lleva además `root`, la raíz del monorepo, y las fuentes que la\n'
+            printf 'plantilla declara (`sources:`) se avisan por stderr si no están\n'
+            printf 'The header also carries `root`, the monorepo root, and the sources the template\n'
+            printf 'declares (`sources:`) are warned about on stderr when missing\n'
             printf 'No muta nada y no necesita -n / it mutates nothing and does not need -n\n'
             ;;
         ask)
@@ -3098,6 +3258,64 @@ _glot_completion_file() {
     done
 
     return 1
+}
+
+# _glot_toolchains_file — catálogo de toolchains: una fila por lenguaje con el comando que
+# imprime su versión y la **serie verificada** en este entorno. `GLOT_TOOLCHAINS_FILE` lo
+# sobreescribe, como el estado: sirve para probar el bloque de `doctor` sin tocar el dato.
+_glot_toolchains_file() {
+    local dir=""
+
+    if [[ -n "${GLOT_TOOLCHAINS_FILE:-}" ]]; then
+        printf '%s\n' "$GLOT_TOOLCHAINS_FILE"
+        return 0
+    fi
+
+    for dir in "$GLOT_SCRIPT_DIR/data" "$GLOT_SCRIPT_DIR/../data"; do
+        if [[ -r "$dir/toolchains.tsv" ]]; then
+            printf '%s\n' "$dir/toolchains.tsv"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# _glot_toolchains_list — filas del catálogo tal cual: lenguaje<TAB>comando<TAB>serie.
+_glot_toolchains_list() {
+    local file=""
+    local line=""
+
+    file="$(_glot_toolchains_file)" || return 1
+
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        [[ -z "$line" || "$line" == '#'* ]] && continue
+        printf '%s\n' "$line"
+    done <"$file"
+}
+
+# _glot_version_seen <texto> — primera versión que aparece en la salida de un comando:
+# dígitos y puntos (`3.4.3`, `2026.07`, `2201.13.4`) o solo dígitos cuando el ecosistema
+# numera así (`erlang` declara su OTP como `29`). Vacío si no hay ninguna.
+_glot_version_seen() {
+    printf '%s\n' "$1" | grep -oE '[0-9]+(\.[0-9]+)*' | head -1
+}
+
+# _glot_tool_of <comando> — ejecutable que hay que tener para que la fila valga: el primer
+# token y, si la fila usa una tubería, el comando que va detrás, que es la herramienta de
+# verdad (`echo 'puts $tcl_version' | tclsh` necesita `tclsh`, no `echo`).
+_glot_tool_of() {
+    local cmd="$1"
+    local tool=""
+
+    if [[ "$cmd" == *'|'* ]]; then
+        tool="${cmd##*|}"
+        tool="${tool#"${tool%%[![:space:]]*}"}"
+    else
+        tool="$cmd"
+    fi
+
+    printf '%s\n' "${tool%% *}"
 }
 
 # _glot_lang_field <lenguaje> <campo> — campo del catálogo de datos:

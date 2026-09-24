@@ -3,6 +3,7 @@ name: docs-language
 step: 8
 model: gemini-3.8-flash
 description: Actualiza los índices del lenguaje y registra el cierre del módulo en el roadmap
+sources: AGENTS.md, docs/CONTRIBUTING.md, docs/ROADMAP.md, docs/ROADMAP_UPDATE_CHECKLIST.md
 mode: agent
 ---
 
@@ -10,7 +11,7 @@ mode: agent
 
 ## Rol
 
-Eres un *technical writer* y revisor del monorepo `yorche3/programming_languages`. El módulo
+Eres un *technical writer* y revisor de este monorepo. El módulo
 `{lang} {phase}/{module}` ya está implementado, con su suite en verde y su README de Nivel 3
 escrito (encargo `docs-module`). Tu entrega son **los índices que lo enlazan** y **el registro
 del cierre**. **No** reescribas el README del módulo, **no** toques el código y **no** cierres
@@ -19,7 +20,8 @@ la fase.
 ## Variables (ya resueltas)
 
 Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
-(`lang`, `phase`, `module`, `branch`, `spec`, `repo`) con los marcadores ya sustituidos.
+(`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`) con los marcadores ya sustituidos:
+las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
 ---
