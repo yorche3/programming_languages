@@ -8,8 +8,8 @@
 
 ## 1. Arranque y localización / Startup and self-location
 
-1. `set -euo pipefail` al principio: como el archivo se **ejecuta**, cualquier orden que falle detiene el script y el `return` de un verbo se convierte en su código de salida. Esta línea desaparecerá cuando el archivo se cargue con `source` (v1.0.0), porque ahí no puede tocar las opciones del shell.
-2. `GLOT_VERSION="0.6.0"` es la única constante propia; el resto de funciones y variables internas llevan el prefijo `_glot_` para poder cargarse más adelante sin contaminar el entorno.
+1. **Un solo archivo, dos modos** (regla 15 del contrato): la guarda `"${BASH_SOURCE[0]}" == "$0"` decide al final del archivo. Como **programa** fija `set -euo pipefail` —las opciones son de este proceso y cualquier orden que falle detiene el script, convirtiendo el `return` de un verbo en su código de salida— y llama a `_glot_main`. **Cargado con `source`** no ejecuta nada, no toca las opciones del shell del usuario y define la función `glot`, que delega en el programa: mismo comportamiento y mismas opciones, porque se ejecuta como proceso aparte. La única diferencia es el `cd` real de `use` —lo único que solo puede hacer una función en la shell actual— y en ensayo (`-n`) tampoco, porque la salida es un plan y no una ruta.
+2. `GLOT_VERSION="1.0.0"` es la única constante propia; el resto de funciones y variables internas llevan el prefijo `_glot_` (y el dispatcher es `_glot_main`) para poder cargarse sin contaminar el entorno.
 3. `GLOT_SCRIPT_DIR` se obtiene de `BASH_SOURCE[0]`, resolviendo enlaces simbólicos con `readlink` y normalizando con `cd … && pwd -P`. Es lo que permite invocar el script desde cualquier directorio (o desde un enlace) sin rutas fijas.
 
 ## 2. Lectura de argumentos / Argument parsing
@@ -42,7 +42,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 
 ## 4. El almacén de estado / The state store (L1)
 
-1. **Dónde vive**: `GLOT_STATE_DIR` → `$XDG_STATE_HOME/glot` → `~/.local/state/glot`. El fichero es `<dir>/state`, salvo que se fije `GLOT_STATE_FILE`, que gana a todo (es lo que usa el harness para aislarse).
+1. **Dónde vive**: `GLOT_STATE_DIR` → `$XDG_STATE_HOME/glot` → `~/.local/state/glot`. Desde la **v1.0.0** el fichero es **por raíz de monorepo** (`_glot_state_file`): `<dir>/state.<clave>-<nombre de la raíz>`, con la clave de `cksum` sobre la ruta (POSIX y ya presente, así que no suma dependencia) y el nombre saneado por `_glot_state_slug`. Fuera de un repositorio se resuelve el `<dir>/state` global, y `GLOT_STATE_FILE` gana a todo lo demás (es lo que usa el harness para aislarse). El `state` global viejo **no se migra**: `_glot_state_legacy_notice` avisa **una vez** —con un centinela— y lo deja quieto.
 2. **Formato**: una línea `clave=valor` por entrada. Las claves solo admiten `[A-Za-z0-9_.-]` y los valores no pueden llevar salto de línea ni CR; lo que no cumple se rechaza con `2` antes de tocar el disco.
 3. **Escritura atómica**: `_glot_state_rewrite` escribe un temporal con `mktemp` en el mismo directorio, le pone `chmod 600`, lo mueve con `mv -f` (atómico dentro del mismo sistema de ficheros) y borra el temporal si algo falla; el directorio se crea con `chmod 700`. Un corte a mitad no deja el fichero a medias.
 4. **Concurrencia**: el ciclo leer-modificar-escribir va dentro de `flock 9` sobre `<fichero>.lock`, en un subshell, para que dos `set` simultáneos no se pisen. El `.lock` permanece en el directorio: es inocuo.
@@ -176,6 +176,16 @@ Finally it writes the six state keys and prints the absolute path. With `-n` it 
 
 **EN:** `pointer` **prepares and does not commit**, the same split as the rest of the layer: the monorepo commit is made by `save 9`. It verifies with an explicit `fetch` of the submodule's `origin/main` and requires its HEAD to **be** that commit —the `CONTRIBUTING.md` rule turned into a check, because with the local ref the verification could lie—, prepares and publishes the `chore/{phase}/{module}-pointer` branch and stages the gitlink. The gitlink is read by `_glot_gitlink` (`rev-parse HEAD:<path>`) and not by `rev-parse <path>`, which at the root returns the path. The monorepo dirt is measured ignoring the submodule's own line (` M php`), which is exactly the change the verb comes to prepare. `save` picks the scope from the step: with `submodule` it adds `-A` in the submodule; with `monorepo` it builds the step's path list with **a single** leading `--` (adding `--` per path made git read the second one as a pathspec) and a non-existent pathspec is filtered out beforehand. `status` mutates nothing, so it has no `-n`; `clean` deletes only what the language declares ignored, and only inside the module directory.
 
+## 11.7 La instalación y la capa cargable / Installation and the loadable layer (L8)
+
+**ES:** El reparto es: **`install` deja lo que hay que dejar, y el rc lo carga**. `install` copia `glot.sh` con `data/`, `prompts/` y `completions/` a `~/.local/share/glot/` —una **copia**, no un puntero al clon: así mover o borrar el repositorio no rompe nada—, deja el enlace `~/.local/bin/glot` y escribe en el rc un bloque entre `# >>> glot (install) >>>` y `# <<< glot (install) <<<` que carga la copia. Con bash la línea es `if [ -r "DIR/glot.sh" ]; then . "DIR/glot.sh"; fi`, y con zsh solo `fpath+=("DIR")`: el guion de bash no se puede cargar en zsh, así que a zsh se le da el completado y nada más. El bloque se escribe con **awk** que sustituye lo que hay entre las marcas, o lo añade al final si no está: el rc no se reescribe entero. Junto a la copia queda `install.meta` (versión, origen, fecha y `sha` del `glot.sh` copiado), que es lo que permite a `doctor` decir `install_stale:`: compara ese `sha` con el de la copia y con el del clon. **Lo ajeno no se pisa**: si en la ruta del enlace hay un fichero, o un enlace que no apunta a la copia, `install` falla con `1` antes de copiar nada; `uninstall` retira el enlace solo si es el suyo y, si no lo es, avisa y sigue con el resto.
+
+**EN:** The split is: **`install` leaves what has to be left, and the rc loads it**. `install` copies `glot.sh` plus `data/`, `prompts/` and `completions/` into `~/.local/share/glot/` —a **copy**, not a pointer to the clone, so moving or deleting the repository breaks nothing—, leaves the `~/.local/bin/glot` symlink and writes an rc block between `# >>> glot (install) >>>` and `# <<< glot (install) <<<` that loads the copy. With bash the line is `if [ -r "DIR/glot.sh" ]; then . "DIR/glot.sh"; fi`; with zsh it is only `fpath+=("DIR")`, because the bash script cannot be sourced by zsh, so zsh gets the completion and nothing else. The block is written by **awk** replacing whatever sits between the markers, or appending it at the end when missing: the rc is never rewritten wholesale. Next to the copy sits `install.meta` (version, origin, date and the `sha` of the copied `glot.sh`), which is what lets `doctor` report `install_stale:` by comparing that `sha` against the copy and against the clone. **Foreign things are never overwritten**: if the symlink path holds a file, or a symlink pointing elsewhere, `install` fails with `1` before copying anything; `uninstall` drops the symlink only when it is ours and, when it is not, warns and carries on with the rest.
+
+**ES:** La capa cargable es un `glot()` que delega en el **programa** (`"$BASH" "$_GLOT_SELF" "$@"`) y solo se aparta de esa regla en dos sitios: captura la ruta para hacer el `cd` real cuando el verbo es `use` sin `-n`, y exporta `GLOT_LOADED=1` al hijo, que es como `doctor` sabe que hay función delante. Esa variable se pasa **solo al proceso hijo**, no al shell del usuario: el entorno del autor no se ensucia porque se use `glot`.
+
+**EN:** The loadable layer is a `glot()` that delegates to the **program** (`"$BASH" "$_GLOT_SELF" "$@"`) and departs from that rule in only two places: it captures the path to perform the real `cd` when the verb is `use` without `-n`, and it exports `GLOT_LOADED=1` to the child, which is how `doctor` knows a function is in front. That variable is passed **only to the child process**, never to the user's shell: the author's environment is not polluted by using `glot`.
+
 ## 12. Salida y códigos / Output and exit codes
 
 1. Los verbos escriben **solo datos** en stdout; los errores salen por `_glot_error` y los avisos por `_glot_warn`, ambos a stderr. `set`/`unset` confirman por stderr: su stdout solo lleva datos si `-n` está activo.
@@ -186,10 +196,13 @@ Finally it writes the six state keys and prints the absolute path. With `-n` it 
 ## 13. Lo que todavía no hace / What it does not do yet
 
 El catálogo (L2.5, v0.6.0), la ejecución (L3, v0.7.0), la delegación (L4, v0.8.0),
-la creación y el registro (L5, v0.9.0), la evidencia y el cierre (L6, v0.10.0) y los
-perfiles de modelo (L6.5, v0.11.0) ya existen. Lo que falta: la higiene de punteros
-(L7, v0.12.0) y la instalación con la función cargable (L8, v1.0.0), que es donde
-`use` hará el `cd` de verdad y el autocompletado se instalará solo. En L5 queda
+la creación y el registro (L5, v0.9.0), la evidencia y el cierre (L6, v0.10.0), los
+perfiles de modelo (L6.5, v0.11.0), la higiene de punteros (L7, v0.12.0) y la
+instalación con la función cargable (L8, v1.0.0) ya existen: desde la 1.0.0, `use`
+hace el `cd` de verdad y el autocompletado se instala solo. Lo que falta: la capa
+L9, que **instala** versiones (mise, nvm, pyenv) y no las comprueba: la comprobación
+es del `doctor` de la v1.0.0, con el dato de `data/toolchains.tsv`.
+En L5 queda
 fuera, a propósito, lo que exige **leer** la especificación: adaptar runners de
 ejemplo y nombres predefinidos lo hace el encargo `scaffold`, no el script. Tampoco
 hay barrido por lenguaje: `test` actúa sobre el objetivo asignado, uno cada vez. Y en
