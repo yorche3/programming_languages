@@ -47,9 +47,9 @@
 | L4 | Delegación: `prompt` (encargos de IA) y `ask` (envío al delegado) | 0.8.0 ✅ |
 | L5 | Creación y registro: `new`, `save` | 0.9.0 ✅ |
 | L6 | Evidencia y cierre: `evidence`, `close`, `validate` | 0.10.0 ✅ |
-| L6.5 | Perfiles de modelo por encargo: `model:` en cada plantilla y catálogo de perfiles con los modelos de Copilot | 0.11.0 🔄 |
+| L6.5 | Perfiles de modelo por encargo: `model:` en cada plantilla y catálogo de perfiles con los modelos de Copilot | 0.11.0 ✅ |
 | L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.12.0 ✅ |
-| L8 | Instalación: `install`, función cargable, `doctor` completo | 1.0.0 |
+| L8 | Instalación: `install`, función cargable, `doctor` completo | 1.0.0 ✅ |
 | L9 | Instalación de toolchains por lenguaje (`mise`, `nvm`, `pyenv`): **instalar**, no comprobar (la comprobación entra en el `doctor` completo de la v1.0.0) | después |
 
 ---
@@ -67,7 +67,7 @@
 | 0.10.0 | L6 | 7–8 | `evidence` (salidas reales), `close` (checklist + roadmap) y `validate` (validador automático con Copilot CLI) | El cierre documental requiere validación: la ejecuta el agente, el script la encarga y la comprueba |
 | 0.11.0 | L6.5 | 4–8 | **Perfiles de modelo por encargo**: `model:` en el frontmatter de cada plantilla y un catálogo de perfiles **con los modelos que ofrece Copilot** —uno económico con esfuerzo bajo para validar y documentar, y el más capaz para implementar—, con tope de créditos por corrida | La delegación y la validación ya existen; el modelo es la palanca de calidad y de coste, y va después de tenerlas |
 | 0.12.0 | L7 | 1, 8 | `status` (submódulos, ramas, punteros), `pointer` (actualiza el puntero del submódulo en el monorepo) y `clean` de artefactos con `submodule sync`, que es **apoyo a los pasos 5–6** y no un paso por sí mismo | Ops diaria; primero solo lectura, las mutaciones con `-n` |
-| 1.0.0 | L8 | todos | `install`/`uninstall` (`.bashrc` + completions), **capa cargable** (`use` hace el `cd` real) y `doctor` completo | 1.0 = objetivo original cumplido |
+| 1.0.0 | L8 | todos | `install`/`uninstall` (copia estable, `.bashrc` + completions), **capa cargable** (`use` hace el `cd` real), estado **por raíz**, `doctor` completo (instalación, shells, toolchains) y encargos con `sources:` | 1.0 = objetivo original cumplido |
 | ⏳ | L9 | — | Versión esperada por lenguaje y comprobación/instalación | Segunda acepción de «manejador de versiones»; llega después del ciclo del roadmap |
 
 ### Deuda técnica declarada / Declared technical debt
@@ -164,7 +164,7 @@ La política del validador automático (invocación, modelo y coste, advertencia
 | `use` con `-n` no hace `cd` | La función solo cambia de directorio cuando el verbo es `use` y no hay `-n`: en ensayo la salida es un plan, no una ruta |
 | Estado **por raíz** | `<state_dir>/state.<hash8>-<basename>` calculado desde la raíz real del monorepo; `GLOT_STATE_FILE` sigue siendo el override absoluto y `glot path` imprime el fichero **resuelto**. El `state` global viejo no se migra: se avisa una vez y se deja quieto, para que dos monorepos no compartan sprint |
 | `doctor` completo | Añade `install:` (bloque presente, ruta que apunta y si existe → instalación rota o vieja), `shell:` (bash/zsh disponibles y si la capa cargable está activa en esta shell), `state_root:` (raíz y fichero resuelto) y `toolchains:` |
-| Toolchains: comprobar aquí, instalar en L9 | El **dato** vive en [`data/toolchains.tsv`](../data/toolchains.tsv) (`lang`, `comando`, `versión esperada`), que crece **solo con versiones verificadas** en este entorno; `doctor` informa de la cobertura. L9 queda para **instalar** versiones, no para comprobarlas (el roadmap se ajusta por esto) |
+| Toolchains: comprobar aquí, instalar en L9 | El **dato** vive en [`data/toolchains.tsv`](../data/toolchains.tsv) (`lang`, `comando`, `serie verificada`), que crece **solo con versiones verificadas** en este entorno (45 de los 50 lenguajes hoy); `doctor` informa de la cobertura y de la presencia y comprueba la **serie del lenguaje del sprint**, porque arrancar las 45 cuesta 5 s medidos y `doctor` se ejecuta a menudo. Un `differs` se informa y no cambia el código; un `missing` sí. L9 queda para **instalar** versiones (el roadmap se ajusta por esto) |
 | Encargos sin el nombre del monorepo | Las plantillas dejan de decir `yorche3/programming_languages` en prosa, declaran sus fuentes en el frontmatter (`sources:`) y `glot prompt` **avisa** por stderr si alguna falta; la cabecera del encargo gana la fila `root` |
 | Verificación de la 1.0.0 | En el laboratorio, con `HOME` desechable: `install`/`uninstall` sobre un `~` de prueba, `source` en bash real, y el ciclo del sprint en `ruby2`/`php2`/`python2`/`ada2`. Nada se toca en `programming_languages` ni en los 50 submódulos hasta verificarlo |
 

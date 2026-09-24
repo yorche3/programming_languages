@@ -18,7 +18,7 @@
 | 0.10.0 | 2026-09-22 | [`versions/glot_0.10.0.sh`](../versions/glot_0.10.0.sh) | **Evidencia y cierre** (L6): `evidence`, `close` y `validate` con validador enchufable, más la retirada de `hello` y el objetivo resuelto por directorio | ✅ cerrada |
 | 0.11.0 | 2026-09-22 | [`versions/glot_0.11.0.sh`](../versions/glot_0.11.0.sh) | **Perfiles de modelo por encargo** (L6.5): `model:` en el frontmatter de las seis plantillas y `data/models.tsv` fijando esfuerzo y tope de créditos por encargo, con los modelos que ofrece Copilot | ✅ cerrada |
 | 0.12.0 | 2026-09-23 | [`versions/glot_0.12.0.sh`](../versions/glot_0.12.0.sh) | **Higiene y punteros** (L7): `status` (submódulos, ramas y punteros), `pointer` (deja el puntero del submódulo listo y publicado en el monorepo) y `clean` (artefactos del módulo y `submodule sync`), con el commit del monorepo en manos de `save` | ✅ cerrada |
-| 1.0.0 | 2026-09-23 | — (viva / live) | **Instalación y capa cargable** (L8): `install`/`uninstall` con copia estable, bloque del rc y completado; `glot` como función de bash que hace el `cd` real de `use`; estado **por raíz** de monorepo y `doctor` completo (instalación, shell, estado y toolchains) | 🔄 en curso / in progress |
+| 1.0.0 | 2026-09-23 | [`versions/glot_1.0.0.sh`](../versions/glot_1.0.0.sh) | **Instalación y capa cargable** (L8): `install`/`uninstall` con copia estable, bloque del rc y completado; `glot` como función de bash que hace el `cd` real de `use`; estado **por raíz** de monorepo, `doctor` completo (instalación, shells, estado y toolchains) y encargos con sus fuentes declaradas | ✅ cerrada |
 
 ---
 
@@ -149,13 +149,14 @@
 
 ---
 
-## 1.0.0 — 2026-09-23 (viva)
+## 1.0.0 — 2026-09-23 (cerrada)
 
 - **Añade:** la **instalación y la capa cargable** (L8): `install`/`uninstall`, `glot` como función de bash y el `doctor` completo. Es la versión que cierra el objetivo original: `use` deja de necesitar `cd "$(glot use …)"`.
+- **Añade además:** el **catálogo de toolchains** ([`data/toolchains.tsv`](../data/toolchains.tsv), con la serie verificada de 45 de los 50 lenguajes) que `doctor` comprueba, y los **encargos con fuentes**: cada plantilla declara sus `sources:` en el frontmatter, la cabecera del encargo lleva `root` y `glot prompt` avisa de las fuentes que falten.
 - **Paga dos deudas declaradas:** el **estado por raíz** de monorepo (dos repos ya no comparten sprint) y los **encargos sin el nombre del monorepo**, con sus fuentes declaradas en el frontmatter y aviso si falta alguna.
-- **Decisiones cerradas antes de codificar:** en [`ROADMAP.md`](ROADMAP.md) (copia estable, bloque del rc, bash para la capa cargable, `-n` sin `cd`, nombre y ruta del fichero de estado, `doctor` y el ajuste de L9).
-- **Verificación:** pendiente: en el laboratorio con `HOME` desechable, más las comprobaciones nuevas del harness.
-- **Snapshot:** pendiente: se archiva como `versions/glot_1.0.0.sh` **antes** de fusionar la rama en `main`.
+- **Decisiones cerradas antes de codificar:** en [`ROADMAP.md`](ROADMAP.md) (copia estable, bloque del rc, bash para la capa cargable, `-n` sin `cd`, nombre y ruta del fichero de estado, `doctor`, toolchains y el ajuste de L9).
+- **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 666 passed, 0 failed` (rc `0`), 91 comprobaciones más que la v0.12.0: el estado por raíz, la instalación con `HOME` desechable, el catálogo de toolchains (con catálogo inyectado para probar `ok`, `differs`, `missing` y `unknown`), las fuentes de los encargos y las dos direcciones de `pointer`. En el **laboratorio**, con repos y remotos reales: ciclo completo del sprint en `ruby2` (4a→10, con puntero y cierre), hasta evidencia verde en `python2` (`pytest`, 24 pasados) y `php2` (`composer test`, 27 aserciones, con `new` en modo `tool`), y el **camino de fallo** en `ada2` (sin `gnat`: `test` en `4`, acta roja y `close` en `4` sin cerrar). Esa prueba encontró tres cosas, corregidas en la misma versión: `pointer` se detenía por la evidencia del propio sprint (que confirma `save 10`, después), el harness no era hermético (heredaba `GLOT_ROOT` del autor) y las plantillas nombraban el monorepo en prosa.
+- **Snapshot:** [`versions/glot_1.0.0.sh`](../versions/glot_1.0.0.sh), archivado al cerrar la versión y **antes** de fusionar la rama en `main`; su contenido es el que tenía `glot.sh` en el cierre, y no se edita.
 
 ---
 
@@ -164,7 +165,7 @@
 - **Puerta de entrada:** ninguna versión se empieza a implementar sin el snapshot de la anterior en `versions/`. Si falta, se copia `glot.sh` con el sufijo de su versión y solo después se reanuda la implementación de la nueva.
 - **Cierre de versión:** copiar `glot.sh` a `versions/glot_<versión>.sh`, marcar la fila del log como `✅` y empezar la versión siguiente en `glot.sh`.
 - Los snapshots de `versions/` **no se editan**: son la foto de cómo estaba el script en esa versión y permiten ver la progresión.
-- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh), [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh), [`glot_0.9.0.sh`](../versions/glot_0.9.0.sh), [`glot_0.10.0.sh`](../versions/glot_0.10.0.sh), [`glot_0.11.0.sh`](../versions/glot_0.11.0.sh) y [`glot_0.12.0.sh`](../versions/glot_0.12.0.sh).
+- `versions/` contiene [`glot_0.1.0.sh`](../versions/glot_0.1.0.sh), [`glot_0.2.0.sh`](../versions/glot_0.2.0.sh), [`glot_0.3.0.sh`](../versions/glot_0.3.0.sh), [`glot_0.4.0.sh`](../versions/glot_0.4.0.sh), [`glot_0.5.0.sh`](../versions/glot_0.5.0.sh), [`glot_0.6.0.sh`](../versions/glot_0.6.0.sh), [`glot_0.7.0.sh`](../versions/glot_0.7.0.sh), [`glot_0.8.0.sh`](../versions/glot_0.8.0.sh), [`glot_0.9.0.sh`](../versions/glot_0.9.0.sh), [`glot_0.10.0.sh`](../versions/glot_0.10.0.sh), [`glot_0.11.0.sh`](../versions/glot_0.11.0.sh), [`glot_0.12.0.sh`](../versions/glot_0.12.0.sh) y [`glot_1.0.0.sh`](../versions/glot_1.0.0.sh).
 - El harness **comprueba la puerta de entrada**: exige el snapshot de la versión anterior a la viva, así que no se puede empezar una versión nueva sin haber archivado la anterior.
 - Cada versión se cierra en su propia rama `chore/repo/glot-v0.X` antes de fusionarla en `main` (ver [`README.md`](../README.md)).
 

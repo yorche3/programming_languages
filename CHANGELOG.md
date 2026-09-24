@@ -85,7 +85,7 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   sin ella, de la invocación de Copilot CLI en solo lectura; el veredicto se lee
   de la línea que la plantilla exige y no se adivina. Es opcional: sin validador
   avisa y devuelve `1`, y con hallazgos devuelve `4`.
-- `glot` v1.0.0 (en curso): **instalación y capa cargable** (L8). `install` deja
+- `glot` v1.0.0: **instalación y capa cargable** (L8). `install` deja
   una copia estable (`~/.local/share/glot/` con `glot.sh`, `data/` y `prompts/`),
   el enlace en `~/.local/bin`, el completado y un bloque del `.bashrc` entre
   marcas del que `uninstall` lo quita todo; cargado con `source`, el archivo define la
