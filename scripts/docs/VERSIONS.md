@@ -18,6 +18,7 @@
 | 0.10.0 | 2026-09-22 | [`versions/glot_0.10.0.sh`](../versions/glot_0.10.0.sh) | **Evidencia y cierre** (L6): `evidence`, `close` y `validate` con validador enchufable, más la retirada de `hello` y el objetivo resuelto por directorio | ✅ cerrada |
 | 0.11.0 | 2026-09-22 | [`versions/glot_0.11.0.sh`](../versions/glot_0.11.0.sh) | **Perfiles de modelo por encargo** (L6.5): `model:` en el frontmatter de las seis plantillas y `data/models.tsv` fijando esfuerzo y tope de créditos por encargo, con los modelos que ofrece Copilot | ✅ cerrada |
 | 0.12.0 | 2026-09-23 | [`versions/glot_0.12.0.sh`](../versions/glot_0.12.0.sh) | **Higiene y punteros** (L7): `status` (submódulos, ramas y punteros), `pointer` (deja el puntero del submódulo listo y publicado en el monorepo) y `clean` (artefactos del módulo y `submodule sync`), con el commit del monorepo en manos de `save` | ✅ cerrada |
+| 1.0.0 | 2026-09-23 | — (viva / live) | **Instalación y capa cargable** (L8): `install`/`uninstall` con copia estable, bloque del rc y completado; `glot` como función de bash que hace el `cd` real de `use`; estado **por raíz** de monorepo y `doctor` completo (instalación, shell, estado y toolchains) | 🔄 en curso / in progress |
 
 ---
 
@@ -145,6 +146,16 @@
 - **Decisiones cerradas antes de codificar:** en [`ROADMAP.md`](ROADMAP.md).
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 551 passed, 0 failed` (rc `0`), con 48 comprobaciones nuevas sobre una fixture con **submódulos reales** (gitlink, remoto y rama `main`), porque el sandbox anterior no tenía punteros que mover. Las últimas siete guardan la **ayuda por verbo** de los tres verbos nuevos, que se había quedado sin escribir.
 - **Snapshot:** [`versions/glot_0.12.0.sh`](../versions/glot_0.12.0.sh), archivado al cerrar la versión y **antes** de fusionar la rama en `main`; su contenido es el que tenía `glot.sh` en el cierre, y no se edita.
+
+---
+
+## 1.0.0 — 2026-09-23 (viva)
+
+- **Añade:** la **instalación y la capa cargable** (L8): `install`/`uninstall`, `glot` como función de bash y el `doctor` completo. Es la versión que cierra el objetivo original: `use` deja de necesitar `cd "$(glot use …)"`.
+- **Paga dos deudas declaradas:** el **estado por raíz** de monorepo (dos repos ya no comparten sprint) y los **encargos sin el nombre del monorepo**, con sus fuentes declaradas en el frontmatter y aviso si falta alguna.
+- **Decisiones cerradas antes de codificar:** en [`ROADMAP.md`](ROADMAP.md) (copia estable, bloque del rc, bash para la capa cargable, `-n` sin `cd`, nombre y ruta del fichero de estado, `doctor` y el ajuste de L9).
+- **Verificación:** pendiente: en el laboratorio con `HOME` desechable, más las comprobaciones nuevas del harness.
+- **Snapshot:** pendiente: se archiva como `versions/glot_1.0.0.sh` **antes** de fusionar la rama en `main`.
 
 ---
 

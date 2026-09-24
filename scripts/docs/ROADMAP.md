@@ -50,7 +50,7 @@
 | L6.5 | Perfiles de modelo por encargo: `model:` en cada plantilla y catálogo de perfiles con los modelos de Copilot | 0.11.0 🔄 |
 | L7 | Higiene y punteros: `status`, `pointer`, `clean` | 0.12.0 ✅ |
 | L8 | Instalación: `install`, función cargable, `doctor` completo | 1.0.0 |
-| L9 | Toolchains por lenguaje (`mise`, `nvm`, `pyenv`) | después |
+| L9 | Instalación de toolchains por lenguaje (`mise`, `nvm`, `pyenv`): **instalar**, no comprobar (la comprobación entra en el `doctor` completo de la v1.0.0) | después |
 
 ---
 
@@ -147,6 +147,26 @@ La política del validador automático (invocación, modelo y coste, advertencia
 | Modelo fuera del catálogo | Un `model:` que no está en `data/models.tsv` es un **dato que falta**: código `1`, como un marcador sin resolver. Un perfil pedido por argumento que no existe sería **uso**: código `2` |
 | Anti-envejecimiento | La lista de modelos la manda el CLI instalado (`copilot help config`). `doctor` informa de la cobertura del catálogo y de si cada modelo de los perfiles sigue en la lista del CLI, para que una fila vieja se vea antes de usarla |
 | Sin BYOK | Confirmado: solo modelos de Copilot. El proveedor propio exige variables de entorno y `glot` no gestiona claves ni proveedores; el mecanismo queda documentado en [`VALIDATION.md`](VALIDATION.md) por si algún día se quiere enchufar |
+
+---
+
+### Decisiones cerradas de la v1.0.0 / Closed decisions for v1.0.0
+
+**ES:** Las decisiones de la L8 se resolvieron el 2026-09-23, antes de escribir código.
+
+**EN:** The L8 decisions were resolved on 2026-09-23, before writing any code.
+
+| Tema | Decisión |
+|------|----------|
+| Qué deja `install` | **Copia estable**, no un puntero al clon: `glot.sh` + `data/` + `prompts/` a `~/.local/share/glot/`, enlace `~/.local/bin/glot` y los guiones de completado donde cada shell los busca. El bloque del `.bashrc` carga la **copia**, así que mover o borrar el clon no rompe la instalación; `doctor` detecta si la copia quedó vieja respecto al clon |
+| Bloque del rc | Delimitado y quirúrgico: `# >>> glot (install) >>>` … `# <<< glot (install) <<<`. `install` y `uninstall` son idempotentes, admiten `-n` y **solo** tocan lo que está entre las dos marcas |
+| Capa cargable en bash, no en zsh | La regla 15 del contrato usa `BASH_SOURCE`, que zsh no tiene: la función `glot` (la que hace el `cd` real en `use`) es de bash. zsh conserva el **completado** y sigue usando `cd "$(glot use …)"`. Se dice en la documentación en vez de fingir paridad |
+| `use` con `-n` no hace `cd` | La función solo cambia de directorio cuando el verbo es `use` y no hay `-n`: en ensayo la salida es un plan, no una ruta |
+| Estado **por raíz** | `<state_dir>/state.<hash8>-<basename>` calculado desde la raíz real del monorepo; `GLOT_STATE_FILE` sigue siendo el override absoluto y `glot path` imprime el fichero **resuelto**. El `state` global viejo no se migra: se avisa una vez y se deja quieto, para que dos monorepos no compartan sprint |
+| `doctor` completo | Añade `install:` (bloque presente, ruta que apunta y si existe → instalación rota o vieja), `shell:` (bash/zsh disponibles y si la capa cargable está activa en esta shell), `state_root:` (raíz y fichero resuelto) y `toolchains:` |
+| Toolchains: comprobar aquí, instalar en L9 | El **dato** vive en [`data/toolchains.tsv`](../data/toolchains.tsv) (`lang`, `comando`, `versión esperada`), que crece **solo con versiones verificadas** en este entorno; `doctor` informa de la cobertura. L9 queda para **instalar** versiones, no para comprobarlas (el roadmap se ajusta por esto) |
+| Encargos sin el nombre del monorepo | Las plantillas dejan de decir `yorche3/programming_languages` en prosa, declaran sus fuentes en el frontmatter (`sources:`) y `glot prompt` **avisa** por stderr si alguna falta; la cabecera del encargo gana la fila `root` |
+| Verificación de la 1.0.0 | En el laboratorio, con `HOME` desechable: `install`/`uninstall` sobre un `~` de prueba, `source` en bash real, y el ciclo del sprint en `ruby2`/`php2`/`python2`/`ada2`. Nada se toca en `programming_languages` ni en los 50 submódulos hasta verificarlo |
 
 ---
 
