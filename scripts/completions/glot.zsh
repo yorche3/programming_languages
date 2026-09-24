@@ -32,6 +32,8 @@ _glot_zsh() {
         'status:submódulos, ramas y punteros'
         'pointer:prepara el puntero del submódulo'
         'clean:borra artefactos del módulo y sincroniza'
+        'install:copia estable, enlace, completado y bloque del rc'
+        'uninstall:deshace lo que dejó install'
         'set:guarda una clave del estado'
         'get:lee una clave del estado'
         'unset:borra una clave del estado'

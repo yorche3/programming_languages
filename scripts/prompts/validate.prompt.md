@@ -3,6 +3,7 @@ name: validate
 step: 6
 model: gemini-3.8-flash
 description: Comprueba el módulo terminado contra su especificación y su README y emite un veredicto legible por máquina
+sources: AGENTS.md, docs/README_Template.md, docs/WORKFLOW.md
 mode: agent
 ---
 
@@ -17,18 +18,19 @@ Eres un **validador**, no un autor. Compruebas y reportas: **no** escribes, **no
 ## Variables (ya resueltas)
 
 Este encargo lo arma `glot prompt validate`: el encabezado trae el **estado del sprint**
-(`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `module_dir`) con los marcadores ya
-sustituidos. Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
+(`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`, `module_dir`) con los marcadores ya
+sustituidos: las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
+Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
 ---
 
 ## Fuentes de verdad (en este orden de prioridad)
 
 1. **`{spec}`** — el contrato del módulo: funciones, casos de prueba y criterios de aceptación.
-2. **`{module_dir}/README.md`** — la documentación del módulo, que debe seguir [`docs/README_Template.md`](../../../docs/README_Template.md).
+2. **`{module_dir}/README.md`** — la documentación del módulo, que debe seguir `docs/README_Template.md`.
 3. **`{module_dir}`** — el código y la suite tal como están.
 4. **`docs/evidence/{phase}/{module}/{lang}.md`** — el acta del sprint, si existe: es la única prueba de que la suite se ejecutó, y sus salidas son las que hay que contrastar.
-5. **`AGENTS.md`** y **[`docs/WORKFLOW.md`](../../../docs/WORKFLOW.md)** — las reglas del cierre del módulo.
+5. **`AGENTS.md`** y **`docs/WORKFLOW.md`** — las reglas del cierre del módulo.
 
 ---
 

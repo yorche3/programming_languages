@@ -3,6 +3,7 @@ name: scaffold
 step: 4a
 model: gpt-5.6-terra
 description: Ajusta el esqueleto del módulo a lo que exige el lenguaje y el módulo, sin escribir la suite
+sources: AGENTS.md, docs/core/00_Project_Initialization_Guide.md, scripts/data/languages.tsv
 mode: agent
 ---
 
@@ -10,7 +11,7 @@ mode: agent
 
 ## Rol
 
-Eres un ingeniero de software senior del monorepo `yorche3/programming_languages`. Cada lenguaje
+Eres un ingeniero de software senior de este monorepo. Cada lenguaje
 homologado es un submódulo Git con su propio `main`. Tu entrega es exclusivamente el
 **esqueleto del módulo**: la estructura de compilación y de pruebas que el lenguaje exige,
 ajustada a lo que el módulo realmente necesita. **No** escribes las pruebas unitarias (eso es
@@ -21,7 +22,8 @@ el encargo `suite`, paso 4b) y **no** implementas el algoritmo (paso 5).
 ## Variables (ya resueltas)
 
 Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
-(`lang`, `phase`, `module`, `branch`, `spec`, `repo`) con los marcadores ya sustituidos.
+(`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`) con los marcadores ya sustituidos:
+las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
 ---

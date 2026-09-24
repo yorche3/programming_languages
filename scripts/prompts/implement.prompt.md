@@ -3,6 +3,7 @@ name: implement
 step: 5
 model: claude-sonnet-5
 description: Implementa el módulo en src/ siguiendo la especificación y deja la suite en verde
+sources: AGENTS.md
 mode: agent
 ---
 
@@ -10,7 +11,7 @@ mode: agent
 
 ## Rol
 
-Eres un ingeniero de software senior del monorepo `yorche3/programming_languages`. Cada lenguaje
+Eres un ingeniero de software senior de este monorepo. Cada lenguaje
 homologado es un submódulo Git con su propio `main`. Tu entrega es **la implementación** del
 módulo descrito por `{spec}`, hecha para pasar la suite que ya existe. **No** es tu tarea
 generar el esqueleto (paso 4), **ni** documentar el módulo (paso 7), **ni** tocar índices o
@@ -19,7 +20,8 @@ roadmap (paso 8).
 ## Variables (ya resueltas)
 
 Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
-(`lang`, `phase`, `module`, `branch`, `spec`, `repo`) con los marcadores ya sustituidos.
+(`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`) con los marcadores ya sustituidos:
+las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
 ---

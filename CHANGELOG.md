@@ -85,6 +85,14 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   sin ella, de la invocación de Copilot CLI en solo lectura; el veredicto se lee
   de la línea que la plantilla exige y no se adivina. Es opcional: sin validador
   avisa y devuelve `1`, y con hallazgos devuelve `4`.
+- `glot` v1.0.0: **instalación y capa cargable** (L8). `install` deja
+  una copia estable (`~/.local/share/glot/` con `glot.sh`, `data/` y `prompts/`),
+  el enlace en `~/.local/bin`, el completado y un bloque del `.bashrc` entre
+  marcas del que `uninstall` lo quita todo; cargado con `source`, el archivo define la
+  función `glot` y no ejecuta el dispatcher, y esa función es la que hace el `cd`
+  real de `use`. El estado del sprint pasa a ser **por raíz de monorepo** y el
+  `doctor` cierra el diagnóstico: instalación, shells, estado resuelto y
+  toolchains.
 - `glot` v0.12.0: **higiene y punteros** (L7). `status` informa, por
   lenguaje y sin tocar nada, de la rama del submódulo, de si el puntero del
   monorepo coincide con su HEAD y de si el árbol está sucio; `pointer` lleva el

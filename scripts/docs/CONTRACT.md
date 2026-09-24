@@ -36,11 +36,11 @@
 
 ---
 
-## 🧰 Verbos de la versión viva (v0.12.0) / Verbs in the live version
+## 🧰 Verbos de la versión viva (v1.0.0) / Verbs in the live version
 
 | Verbo | Comportamiento | Código |
 |-------|----------------|:------:|
-| `version`, `--version` | `glot 0.10.0` | 0 |
+| `version`, `--version` | `glot 1.0.0` | 0 |
 | `help`, `-h`, `--help`, `help <verbo>` | Ayuda general o de un verbo | 0 |
 | `doctor` | Diagnóstico: bash, git, raíz del monorepo, directorio y fichero de estado, y número de claves | 0 / 1 |
 | `greet [nombre]` | `Hello, <nombre>!` con el nombre por argumento o por stdin | 0 / 2 |
@@ -66,6 +66,8 @@
 | `status [lenguaje]` | **Solo lectura**: una línea por lenguaje registrado —`lang<TAB>branch<TAB>pointer<TAB>worktree`— con el puntero en `ok`, `differs`, `uninitialised` o `unknown` | 0 / 1 / 2 |
 | `pointer [lenguaje] [fase/módulo]` | Deja el puntero del submódulo **preparado y sin confirmar**: exige que el submódulo esté en su `main` y que ese commit sea el de `origin/main`, prepara y publica la rama `chore/{fase}/{módulo}-pointer` y añade el gitlink. Imprime el SHA corto o `nothing` | 0 / 1 / 2 / 3 |
 | `clean [lenguaje] [fase/módulo]` | Borra lo que el propio `.gitignore` del lenguaje declara como artefacto, **solo dentro del directorio del módulo**, y sincroniza el submódulo. Imprime las rutas borradas o `nothing` | 0 / 1 / 2 |
+| `install` | Deja la **copia estable** (`~/.local/share/glot/`), el enlace `~/.local/bin/glot`, el completado de cada shell presente y el bloque del rc entre marcas. Idempotente; imprime el directorio de instalación | 0 / 1 / 2 / 3 |
+| `uninstall` | Deshace lo de `install`: quita el bloque del rc, borra los completados, retira el enlace **solo si es el suyo** y la copia. Idempotente: sin nada instalado imprime `nothing` | 0 / 1 / 2 / 3 |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
 
 ---
@@ -74,7 +76,8 @@
 
 | Regla | Detalle |
 |-------|---------|
-| Ubicación | `GLOT_STATE_DIR` → `$XDG_STATE_HOME/glot` → `~/.local/state/glot`; el fichero es `<dir>/state`, salvo que `GLOT_STATE_FILE` lo sobreescriba (gana a todo; es lo que usa el harness para aislarse) |
+| Ubicación | `GLOT_STATE_DIR` → `$XDG_STATE_HOME/glot` → `~/.local/state/glot`. Desde la **v1.0.0** el fichero es **por raíz de monorepo**: `<dir>/state.<clave>-<nombre de la raíz>`, para que dos repositorios no compartan `lang/phase/module`; fuera de un repositorio se usa el `<dir>/state` global de antes, y `GLOT_STATE_FILE` sigue mandando sobre todo lo demás (es lo que usa el harness para aislarse) |
+| Estado global anterior | El `<dir>/state` de las versiones previas **no se migra**: se avisa una vez y se deja quieto. `doctor` lo nombra como `state_legacy:` y `path` imprime el fichero resuelto |
 | Formato | Texto plano, una línea `clave=valor` por entrada; clave `[A-Za-z0-9_.-]+`, valor sin `\n` ni `\r` |
 | Validación | Clave y valor se validan **antes** de tocar el disco; lo que no cumple falla con `2` |
 | Escritura | Atómica: temporal con `mktemp` en el mismo directorio, `chmod 600`, `mv -f`; el directorio se crea con `chmod 700` |
@@ -110,7 +113,7 @@
 4. **Idempotencia** cuando se repite el mismo efecto.
 5. **Inyectable para test**: raíz del repo y ruta del estado sobreescribibles por variable.
 6. **Mensajes bilingües ES/EN**; los datos de salida no se traducen.
-7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR` y `GLOT_STATE_FILE`.
+7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR`, `GLOT_STATE_FILE`, `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` y `GLOT_TOOLCHAINS_FILE` (esta última, como `GLOT_STATE_FILE`, es para pruebas y herramientas: apunta a otro catálogo de toolchains). `GLOT_LOADED` no se declara: la capa cargable la pone al delegar en el programa, para que `doctor` sepa que hay función
 
 ### Desde v0.4.0 — el almacén
 
@@ -125,6 +128,14 @@
 13. **Sin `exit`, sin tocar opciones globales del shell** (`set -e`, `IFS`) ni el directorio actual fuera de un verbo que lo pida explícitamente; todo sale con `return`. La única excepción es el subshell del almacén (`( … )` en `_glot_state_rewrite`), donde `exit` termina ese subshell y no el shell que haya cargado `glot`.
 14. **Raíz del monorepo**: `GLOT_ROOT` → superproyecto → raíz git, para que funcione también desde dentro de un submódulo.
 15. **Un solo archivo, dos modos**: la guarda `"${BASH_SOURCE[0]}" == "$0"` ejecuta el dispatcher solo cuando se invoca como programa; cargado con `source`, el archivo define la función y no ejecuta nada.
+
+### Desde v1.0.0 — la instalación
+
+16. **Copia estable, no puntero**: lo instalado es una copia de `glot.sh` con sus datos, no un enlace al clon. Mover o borrar el repositorio no rompe la instalación; `doctor` es quien avisa de que la copia quedó vieja.
+17. **Quirúrgico en el rc**: el bloque va entre `# >>> glot (install) >>>` y `# <<< glot (install) <<<`, y `install`/`uninstall` **solo** tocan lo que hay entre esas marcas. Nunca reescriben el rc entero ni lo crean si ya existe.
+18. **Lo ajeno no se pisa**: si en la ruta del enlace hay un fichero, o un enlace que no apunta a la copia instalada, `install` falla con `1` y no toca nada; `uninstall` deja ese fichero donde está y avisa.
+19. **Idempotencia y ensayo**: `install` repetido deja exactamente lo mismo (un solo bloque); `uninstall` sin nada instalado devuelve `0` con `nothing`. Los dos admiten `-n/--dry-run`.
+20. **Cargar no ejecuta**: `source glot.sh` define la función y no ejecuta el dispatcher; el `cd` de `use` ocurre solo cuando el verbo se invoca **a través** de la función.
 
 ---
 
@@ -222,7 +233,8 @@
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
 | Registro / Registry | `prompts/*.prompt.md`; el `name`, el `step`, el `model` y la `description` salen de su frontmatter, así que añadir un encargo es añadir un archivo. El **modelo es la clave del perfil** que fija esfuerzo y tope de créditos en [`data/models.tsv`](../data/models.tsv) (v0.11.0) |
-| Salida de `prompt` / `prompt` output | Cabecera con el estado del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `module_dir`) + la plantilla sin frontmatter y con los marcadores resueltos |
+| Salida de `prompt` / `prompt` output | Cabecera con el estado del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`, `module_dir`) + la plantilla sin frontmatter y con los marcadores resueltos. `root` es la raíz del monorepo, y es desde donde se leen las rutas de las fuentes |
+| Fuentes del encargo / Request sources | La plantilla declara en su frontmatter las fuentes del monorepo que necesita (`sources:`, rutas relativas a `root`, ordenadas y separadas por coma). `prompt` y `ask` **avisan** por stderr de cada una que falte y el encargo se imprime igual: el código no cambia, porque el aviso es para el autor. Las plantillas ya **no** nombran el monorepo en prosa: sus rutas son relativas a `root` |
 | `-n/--dry-run` | `prompt` no lo necesita (imprimir es su función); `ask -n` imprime el plan sin enviar nada |
 | Delegado / Delegate | `GLOT_DELEGATE`: el encargo va por **stdin** y su salida va a **stdout**. Sin la variable, `ask` devuelve `1` |
 | Plantilla local / Local template | Si solo existe en `.github/prompts/` (banco local del autor, no versionado), `prompt` la usa **avisando** |
@@ -373,11 +385,53 @@
 | Idempotencia | Si el monorepo ya apunta a ese commit, imprime `nothing` y no toca ramas |
 | `status` sin resumen | Cuatro columnas y un lenguaje por línea: el resumen de contadores es de `progress`, y `status` no muta nada, así que no necesita `-n` |
 | Alcance de `clean` | `git clean -Xfd` en el **directorio del módulo** (lo que el `.gitignore` del lenguaje declara como artefacto) más `git submodule sync` del lenguaje. Nunca `-x`: lo no rastreado y no ignorado es trabajo del autor. Nunca el monorepo ni `docs/` |
+| Lo del propio sprint no bloquea | `pointer` no se detiene por el **gitlink del lenguaje** (es el cambio que el verbo viene a preparar) ni por la **evidencia del sprint**, que confirma `save 10` *después* del puntero; cualquier otra ruta sin confirmar sí lo detiene y se nombra |
 | Qué **no** hace / What it does **not** | No hace `push` del monorepo (`pointer` solo publica su rama), no confirma, y no borra nada que el lenguaje no haya declarado ignorado |
 
 ---
 
-## 🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
+## 📦 Instalación y capa cargable (L8, v1.0.0) / Installation and the loadable layer
+
+**ES:** `install` es el único verbo que toca el `HOME` del usuario, y lo hace de forma declarada y reversible: copia el script con sus datos, deja el enlace en el `PATH`, el completado donde cada shell lo busca y un bloque del rc entre marcas. El bloque carga la **copia**, y esa copia es la que define la función `glot`: la única forma de que `use` haga el `cd` real, porque un proceso hijo no puede cambiar el directorio de su padre.
+
+**EN:** `install` is the only verb that touches the user's `HOME`, and it does so explicitly and reversibly: it copies the script along with its data, leaves the symlink in `PATH`, the completion where each shell looks for it and an rc block between markers. The block loads the **copy**, and that copy defines the `glot` function: the only way `use` can perform the real `cd`, because a child process cannot change its parent's directory.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Rutas por defecto | Copia `~/.local/share/glot/`, enlace `~/.local/bin/glot`, completado `~/.local/share/bash-completion/completions/glot` y `~/.zsh/completions/_glot`. Todas cambiables por variable: `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` |
+| Bloque del rc | Bash: `if [ -r "DIR/glot.sh" ]; then . "DIR/glot.sh"; fi`. Zsh: `fpath+=("DIR")`, que añade la carpeta del completado (el guion de bash no se puede cargar en zsh) |
+| Metadatos | `install.meta` junto a la copia, con `version`, `source`, `date` y `sha` (checksum del `glot.sh` copiado). Sin él, `doctor` no puede decir si la copia quedó vieja, así que no escribirlo es `3` |
+| `-n/--dry-run` | Imprime el plan (`mkdir`, `cp`, `ln`, bloque del rc) y **no** crea nada; la última línea es el directorio de instalación |
+| Idempotencia | Repetido deja lo mismo y un solo bloque por rc. Sirve también de actualización: reinstalar refresca la copia y el `sha` |
+| Enlace ajeno | Fichero o enlace que no apunta a la copia instalada: `1`, con el motivo por stderr, sin tocar nada |
+| `uninstall` | Quita el bloque, borra el completado (y la carpeta vacía que lo contenía), retira el enlace **solo si es el suyo** y la copia. Idempotente: `nothing` y `0` si no había nada |
+| Qué **no** hace / What it does **not** | No instala dependencias ni toolchains (L9), no toca el `PATH` de ningún rc, no modifica `.bashrc`/`.zshrc` fuera de sus marcas ni los crea si ya existen, y no confirma nada en git |
+
+**ES:** `doctor` da el estado de esta capa con cuatro líneas: `install:` (sí/no y ruta), `install_version:` e `install_source:` (de los metadatos), `install_stale:` (la copia o el clon cambiaron respecto al `sha` guardado), `install_rc:` (el bloque sigue en el rc de cada shell: `bash:yes zsh:no`), `install_path:` (la carpeta del enlace está en el `PATH`), `shell:` (bash y zsh presentes con su versión) y `shell_loaded:` (si esa shell cargó la función, que lo sabe porque la capa exporta `GLOT_LOADED` al delegar).
+
+**EN:** `doctor` reports this layer with four lines: `install:` (yes/no and path), `install_version:` and `install_source:` (from the metadata), `install_stale:` (copy or clone changed against the stored `sha`), `install_rc:` (the block is still in each shell's rc: `bash:yes zsh:no`), `install_path:` (the symlink directory is in `PATH`), `shell:` (bash and zsh present, with their version) and `shell_loaded:` (whether that shell loaded the function, known because the layer exports `GLOT_LOADED` when delegating).
+
+---
+
+## � Toolchains: el dato y la comprobación (v1.0.0) / Toolchains: the datum and the check
+
+**ES:** La L9 es **instalar** versiones; lo que entra en la v1.0.0 es el **dato** y su comprobación. El dato vive en [`data/toolchains.tsv`](../data/toolchains.tsv) (`lenguaje`, `comando`, `serie verificada`) y crece **solo con versiones verificadas en este entorno**, así que hay lenguajes sin fila: es un fichero que crece, no una lista que hay que completar.
+
+**EN:** L9 is about **installing** versions; what lands in v1.0.0 is the **datum** and its check. The datum lives in [`data/toolchains.tsv`](../data/toolchains.tsv) (`language`, `command`, `verified series`) and only grows **with versions verified in this environment**, so some languages have no row: it is a file that grows, not a list to be completed.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Qué informa `doctor` | `toolchains_file:`, la **cobertura** (`toolchains: N de / of M`) y la **presencia** de las filas declaradas (`toolchains_present:`). Cobertura y presencia son un `command -v` por fila |
+| Qué comprueba además | La **serie** del lenguaje del sprint en curso: `toolchain_<lenguaje>: ok (3.4.3 = 3.4)` |
+| Comparación | Por **prefijo** contra la primera versión que aparece en la salida del comando: `3.4` acepta `3.4.3`; un salto de serie es `differs` |
+| Códigos | `missing` (la herramienta no está) y `unknown` (fila fuera de `.gitmodules` o sin versión legible) dan `1`. `differs` **no** cambia el código: que una versión avance es información, no un fallo del entorno |
+| Por qué no se comprueban todas | Arrancar las 45 toolchains declaradas cuesta unos 5 segundos medidos, y `doctor` se ejecuta a menudo; el lenguaje del sprint es el que se va a usar |
+| Inyectable | `GLOT_TOOLCHAINS_FILE` apunta a otro catálogo, como `GLOT_STATE_FILE` con el estado |
+| Qué **no** hace / What it does **not** | No instala ni actualiza versiones (eso es L9), no escribe el catálogo y no adivina una serie que no esté declarada: sin fila, `toolchain_<lenguaje>: - (sin serie declarada)` |
+
+---
+
+## �🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
 
 ```bash
 glot use <lenguaje> <fase>/<módulo> [tipo]     # tipo por defecto: feat
@@ -421,6 +475,6 @@ glot use <fase>/<módulo> [tipo]                # dentro del submódulo, deduce 
 | Lenguaje fuera de `.gitmodules` · especificación ausente · submódulo sin inicializar · cambios sin confirmar **fuera** del directorio del módulo · la ruta del módulo existe y no es un directorio · rama no creable o no publicable | `1` |
 | Estado no escribible (el módulo y la rama ya estarían preparados: se avisa por stderr) | `3` |
 
-**ES:** **No hace:** commits, `git add`, correr el inicializador, generar esqueleto (`src/`, `test/` y el contrato de pruebas son de `new` y del encargo `suite`, v0.9.0), tocar la rama del monorepo ni el puntero del submódulo. **Con trabajo sin confirmar nunca crea ni cambia de rama**: reanudar es su caso principal, no un error. **El `cd` real no llega hasta la v1.0.0** (capa cargable): hasta entonces, `cd "$(glot use …)"`.
+**ES:** **No hace:** commits, `git add`, correr el inicializador, generar esqueleto (`src/`, `test/` y el contrato de pruebas son de `new` y del encargo `suite`, v0.9.0), tocar la rama del monorepo ni el puntero del submódulo. **Con trabajo sin confirmar nunca crea ni cambia de rama**: reanudar es su caso principal, no un error. **El `cd` real existe desde la v1.0.0**, pero solo con la capa cargable (`install`): ejecutado como programa, `use` imprime la ruta y hay que hacer `cd "$(glot use …)"`.
 
-**EN:** **It does not:** commit, `git add`, run the initializer, scaffold (`src/`, `test/` and the test contract belong to `new` and the `suite` request, v0.9.0), touch the monorepo branch or the submodule pointer. **With uncommitted work it never creates or switches branches**: resuming is its main case, not an error. **The real `cd` arrives in v1.0.0** (loadable layer): until then, `cd "$(glot use …)"`.
+**EN:** **It does not:** commit, `git add`, run the initializer, scaffold (`src/`, `test/` and the test contract belong to `new` and the `suite` request, v0.9.0), touch the monorepo branch or the submodule pointer. **With uncommitted work it never creates or switches branches**: resuming is its main case, not an error. **The real `cd` exists since v1.0.0**, but only with the loadable layer (`install`): run as a program, `use` prints the path and you have to do `cd "$(glot use …)"`.

@@ -3,14 +3,17 @@
 **ES:** `languages.tsv` es la fuente **máquina** de los comandos e inicializadores
 por lenguaje que consume `glot`: `langs` y `test`/`verify` (v0.7.0) hoy, y `new`
 (v0.9.0). `commits.tsv` es la tabla de mensajes de commit que consume `save`
-(v0.9.0) y `display.tsv` la de nombres de presentación que consume `close`
-(v0.10.0). Una fila por lenguaje o por paso, **separada por tabuladores**, sin
+(v0.9.0), `display.tsv` la de nombres de presentación que consume `close`
+(v0.10.0) y `toolchains.tsv` la de series verificadas que comprueba `doctor`
+(v1.0.0). Una fila por lenguaje o por paso, **separada por tabuladores**, sin
 cabecera, ordenada.
 
 **EN:** `languages.tsv` is the **machine** source of the per-language commands and
 initializers that `glot` consumes: `langs` and `test`/`verify` (v0.7.0) today, and
 `new` (v0.9.0). `commits.tsv` is the commit-message table that `save` (v0.9.0)
-consumes. One row per language or per step, **tab-separated**, no header, sorted.
+consumes, `display.tsv` the display-name table that `close` (v0.10.0) uses and
+`toolchains.tsv` the verified-series table that `doctor` checks (v1.0.0). One row per
+language or per step, **tab-separated**, no header, sorted.
 | Columna / Column | Contenido / Content | Ejemplo / Example |
 |:---:|---|---|
 | 1 | Lenguaje, tal como aparece en `.gitmodules` | `php` |
@@ -177,6 +180,56 @@ here is a **missing datum** (`1`), never an invented profile.
 | `economy` | `gemini-3.8-flash` | `low` | 30 | `validate`, `docs-module`, `docs-language` |
 | `balanced` | `gpt-5.6-terra` | `medium` | 90 | `scaffold`, `suite` |
 | `deep` | `claude-sonnet-5` | `high` | 120 | `implement` |
+
+## 🧰 `toolchains.tsv` — series verificadas / verified series
+
+| Columna / Column | Contenido / Content | Ejemplo / Example |
+|:---:|---|---|
+| 1 | Lenguaje, como en `.gitmodules` | `ruby` |
+| 2 | Comando que imprime su versión, como orden de shell | `ruby --version` |
+| 3 | Serie verificada **en este entorno**, que se compara por prefijo | `3.4` |
+
+**ES:** Es el dato de la L9 puesto en un fichero, del que la v1.0.0 solo usa la
+**comprobación**: `doctor` informa de la cobertura (`toolchains:`) y de cuántas de las
+declaradas están presentes (`toolchains_present:`), y comprueba la **serie** del lenguaje
+del sprint en curso (`toolchain_<lenguaje>: ok`, `differs`, `missing` o `unknown`). Crece
+**solo con versiones verificadas aquí**: una fila entra cuando el comando se ha ejecutado y
+su salida se ha leído. Por eso hay lenguajes sin fila: Ada no tiene `gnat` en este entorno,
+Common Lisp no tiene `sbcl`, ReScript no está instalado, `rexx` no tiene comando de versión
+y el `scala` instalado solo informa de la versión de su runner.
+
+**EN:** It is the L9 datum in a file, of which v1.0.0 only uses the **check**: `doctor`
+reports the coverage (`toolchains:`) and how many declared rows are present
+(`toolchains_present:`), and checks the **series** of the sprint's language
+(`toolchain_<language>: ok`, `differs`, `missing` or `unknown`). It only grows **with
+versions verified here**: a row goes in once the command has been run and its output read.
+That is why some languages have no row: Ada has no `gnat` in this environment, Common Lisp
+has no `sbcl`, ReScript is not installed, `rexx` has no version command, and the installed
+`scala` only reports its runner's version.
+
+**ES:** El comando puede ser cualquier orden de shell que imprima la versión
+(`elixir -e 'IO.puts System.version()'`, `echo 'puts $tcl_version' | tclsh`) y la
+columna 3 admite un número o una serie: se compara **por prefijo** contra la primera
+versión que aparezca en la salida, así que `3.4` acepta `3.4.3` y un salto de serie se
+informa como `differs` **sin** cambiar el código, porque que una versión avance es
+información y no un fallo del entorno. Lo que sí falla es que la herramienta no esté
+(`missing`) o que la fila no sea de un lenguaje registrado (`unknown`). Comprobar la
+serie de las 45 filas cuesta unos 5 segundos medidos (kotlin 1,3 s, ballerina 0,5 s,
+groovy 0,4 s): por eso `doctor` comprueba la del sprint y deja la cobertura y la
+presencia, que son un `command -v` por fila. `GLOT_TOOLCHAINS_FILE` apunta a otro
+catálogo, como `GLOT_STATE_FILE` con el estado.
+
+**EN:** The command can be any shell command printing the version (`elixir -e 'IO.puts
+System.version()'`, `echo 'puts $tcl_version' | tclsh`) and column 3 accepts a number or
+a series: it is compared **by prefix** against the first version in the output, so `3.4`
+accepts `3.4.3` and a series jump is reported as `differs` **without** changing the exit
+code, because a version moving forward is information and not an environment failure.
+What does fail is the tool being absent (`missing`) or the row not being a registered
+language (`unknown`). Checking the series of all 45 rows costs around 5 measured seconds
+(kotlin 1.3 s, ballerina 0.5 s, groovy 0.4 s): that is why `doctor` checks the sprint's
+one and keeps coverage and presence, which are one `command -v` per row.
+`GLOT_TOOLCHAINS_FILE` points at another catalogue, as `GLOT_STATE_FILE` does for the
+state.
 
 ## 🔁 Regeneración / Regeneration
 

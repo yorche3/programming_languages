@@ -1,0 +1,45 @@
+assembly	nasm -v	2.16
+ballerina	bal version	2201.13
+c	gcc --version	13.3
+clojure	clojure --version	1.12
+cobol	cobc --version	3.2
+cpp	g++ --version	13.3
+crystal	crystal --version	1.20
+csharp	dotnet --version	10.0
+d	dmd --version	2.112
+dart	dart --version	3.12
+elixir	elixir -e 'IO.puts System.version()'	1.20
+elm	elm --version	0.19
+erlang	erl -noshell -eval 'io:format("~s~n", [erlang:system_info(otp_release)]), halt().'	29
+forth	gforth --version	0.7
+fsharp	dotnet --version	10.0
+gleam	gleam --version	1.18
+go	go version	1.26
+grain	grain --version	0.7
+groovy	groovy --version	5.0
+haskell	ghc --version	9.10
+haxe	haxe --version	4.3
+java	java -version	25.0
+javascript	node --version	22.22
+julia	julia --version	1.12
+kotlin	kotlinc -version	2.4
+lua	lua -v	5.5
+nim	nim --version	2.2
+ocaml	ocaml -version	5.4
+perl	perl -e 'print $^V'	5.44
+php	php --version	8.5
+prolog	swipl --version	10.0
+purescript	purs --version	0.15
+python	python3 --version	3.12
+r	Rscript --version	4.3
+racket	racket --version	9.1
+raku	raku --version	2026.07
+ruby	ruby --version	3.4
+rust	rustc --version	1.98
+scheme	guile --version	3.0
+swift	swift --version	6.3
+tcl-tk	echo 'puts $tcl_version' | tclsh	8.6
+typescript	tsc --version	7.0
+v	v version	0.5
+vala	valac --version	0.56
+zig	zig version	0.16

@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v0.12.0** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v1.0.0** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -47,7 +47,9 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh -n pointer php algorithms/naive_sort  # puntero del submódulo: plan sin tocar nada
 ./scripts/glot.sh -n clean php algorithms/naive_sort    # artefactos del módulo: plan sin borrar
 ./scripts/glot.sh set lang php && ./scripts/glot.sh get lang
-source <(./scripts/glot.sh completion bash)   # autocompletado / completion
+./scripts/glot.sh -n install                  # copia estable + rc + completado: plan
+./scripts/glot.sh install                     # y de verdad, una sola vez
+source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```
 
 ---
@@ -71,8 +73,8 @@ source <(./scripts/glot.sh completion bash)   # autocompletado / completion
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v0.12.0)
-├── completions/              # Autocompletado por shell (se imprime en stdout)
+├── glot.sh                  # Versión viva / live version (v1.0.0)
+├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
 ├── prompts/                  # Plantillas de encargo, versionadas
@@ -87,7 +89,8 @@ scripts/
 │   ├── languages.tsv         # Un lenguaje por fila: init, manifiestos, pruebas, verificador e inicialización
 │   ├── commits.tsv           # Un paso de sprint por fila: alias, ámbito y mensaje de commit
 │   ├── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
-│   └── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos
+│   ├── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos
+│   └── toolchains.tsv        # Serie verificada por lenguaje: comando que imprime su versión
 ├── docs/                     # Documentación del tooling
 │   ├── ROADMAP.md
 │   ├── SPRINT.md
@@ -98,7 +101,8 @@ scripts/
 ├── tests/
 │   └── glot_test.sh          # Harness de pruebas, sin dependencias
 └── versions/                 # Snapshots de versiones cerradas
-    ├── glot_0.1.0.sh    └── glot_0.12.0.sh    ├── glot_0.2.0.sh
+    ├── glot_0.1.0.sh
+    ├── glot_0.2.0.sh
     ├── glot_0.3.0.sh
     ├── glot_0.4.0.sh
     ├── glot_0.5.0.sh
@@ -107,25 +111,34 @@ scripts/
     ├── glot_0.8.0.sh
     ├── glot_0.9.0.sh
     ├── glot_0.10.0.sh
-    └── glot_0.11.0.sh
+    ├── glot_0.11.0.sh
+    ├── glot_0.12.0.sh
+    └── glot_1.0.0.sh
 ```
 
 ---
 
 ## ⚙️ Seteo en `.bashrc` / Shell setup
 
-**Hasta v1.0.0:** no hace falta cargarlo, se ejecuta directamente. Por eso el script sí usa `set -euo pipefail`: no se carga con `source`.
+**ES:** Desde la v1.0.0 el archivo es **un solo archivo con dos modos**: ejecutado, se comporta como un programa (usa `set -euo pipefail` sin miedo, porque no se carga); cargado con `source`, define la función `glot` y no ejecuta nada. Cargarlo a mano sigue siendo posible, pero **lo normal es `install`**, que deja la copia estable, el bloque del rc entre marcas y el completado:
 
-**Desde v1.0.0:** `glot` será además una función cargable —es la única forma de que `use` haga el `cd` real— y `install` escribirá la línea por ti. Mientras tanto, si quieres adelantarlo, usa una variable en lugar de una ruta fija:
+**EN:** Since v1.0.0 the file is **one file with two modes**: executed, it behaves like a program (it can use `set -euo pipefail` because it is not sourced); sourced, it defines the `glot` function and runs nothing. Sourcing it by hand still works, but **the normal path is `install`**, which leaves the stable copy, the rc block between markers and the completion:
 
 ```bash
-# ~/.bashrc — ajusta REPO a la ruta de tu clon / point REPO at your clone
-REPO="${REPO:-$HOME/programming_languages}"
-source "$REPO/scripts/glot.sh"
+./scripts/glot.sh -n install   # plan, sin escribir nada / plan, writing nothing
+./scripts/glot.sh install      # copia estable, enlace, completado y bloque del rc
+./scripts/glot.sh uninstall    # lo deshace, idempotente / undoes it, idempotent
 ```
 
-> **ES:** Lo que esté en `glot.sh` es lo que cargará cada shell nuevo, así que la rama `main` debe quedar siempre en un estado cargable.
-> **EN:** Whatever `glot.sh` contains is what every new shell will load, so the `main` branch must always stay in a loadable state.
+| Qué deja / What it leaves | Dónde / Where |
+|---------------------------|---------------|
+| Copia estable (`glot.sh` + `data/` + `prompts/` + `completions/`) | `~/.local/share/glot/` |
+| Enlace en el `PATH` | `~/.local/bin/glot` |
+| Completado de bash · de zsh | `~/.local/share/bash-completion/completions/glot` · `~/.zsh/completions/_glot` |
+| Bloque del rc, entre `# >>> glot (install) >>>` y `# <<< glot (install) <<<` | `~/.bashrc` · `~/.zshrc` |
+
+> **ES:** El bloque carga la **copia**, no el clon: mover o borrar el repositorio no rompe la instalación, y `doctor` dice si la copia se quedó vieja (`install_stale:`) respecto al clon y si la capa está activa en esa shell (`shell_loaded:`). Lo instalado **solo** cambia cuando se repite `install`; por eso la rama `main` debe quedar siempre en un estado cargable.
+> **EN:** The block loads the **copy**, not the clone: moving or deleting the repository does not break the installation, and `doctor` reports whether the copy went stale (`install_stale:`) against the clone and whether the layer is active in that shell (`shell_loaded:`). What is installed **only** changes when `install` runs again; that is why `main` must always stay in a loadable state.
 
 ---
 
