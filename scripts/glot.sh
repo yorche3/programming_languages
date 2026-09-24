@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# glot 0.12.0 — contrato, dispatcher, almacén de estado (L1), asignación (L2),
-# catálogo (L2.5), ejecución (L3), delegación (L4), creación (L5), evidencia y
-# cierre (L6), perfiles de modelo por encargo (L6.5) e higiene y punteros (L7):
-# `status`, `pointer` y `clean`, con el commit del monorepo en manos de `save`.
+# glot 1.0.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
+# programa y se **carga** con `source` (capa cargable de la L8), donde `glot` es una
+# función de bash que hace el `cd` real de `use`. `install` deja la copia estable,
+# el bloque del rc y el completado; `doctor` cierra el diagnóstico del entorno.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -30,9 +30,16 @@
 #   ./scripts/glot.sh list
 #   ./scripts/glot.sh unset lang
 
-set -euo pipefail
+# Las opciones del shell **no** se tocan aquí (regla 13 del contrato): se fijan en la
+# rama de ejecución, al final del archivo, porque cargado con `source` este script no
+# puede tocar las del usuario. Toda la lógica vive en funciones que salen con `return`.
+#
+# Shell options are **not** touched here (contract rule 13): they are set in the
+# execution branch at the end of the file, because when loaded with `source` this
+# script must not change the user's ones. All the logic lives in functions using
+# `return`.
 
-GLOT_VERSION="0.12.0"
+GLOT_VERSION="1.0.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -94,9 +101,47 @@ _glot_state_dir() {
     printf '%s\n' "$base/glot"
 }
 
-# _glot_state_file — archivo del estado: GLOT_STATE_FILE > <dir>/state.
+# _glot_state_slug <texto> — nombre de fichero seguro: letras, dígitos, punto, guion y guion
+# bajo; el resto se sustituye. Se recorta para que una carpeta con nombre absurdo no genere
+# un fichero absurdo.
+_glot_state_slug() {
+    local text="$1"
+
+    text="${text//[^A-Za-z0-9._-]/_}"
+    printf '%s\n' "${text:0:40}"
+}
+
+# _glot_state_key <raíz> — sufijo estable y corto que identifica esa raíz. `cksum` es POSIX
+# y está en cualquier coreutils, así que no hace falta sumar una dependencia.
+_glot_state_key() {
+    printf '%s' "$1" | cksum | awk '{printf "%08d", $1}'
+}
+
+# _glot_state_legacy_notice <dir> — el `state` global de las versiones anteriores **no se
+# migra**: se avisa una vez (con centinela) y se deja quieto, para que nadie pierda sin
+# darse cuenta el sprint que tuviera ahí.
+_glot_state_legacy_notice() {
+    local dir="$1"
+    local sentinel="$dir/.legacy-warned"
+
+    [[ -s "$dir/state" ]] || return 0
+    [[ -e "$sentinel" ]] && return 0
+
+    _glot_warn "hay un estado global de versiones anteriores que no se migra / there is a global state from earlier versions that is not migrated: $dir/state"
+    _glot_info 'el sprint ahora vive por raíz de monorepo / the sprint now lives per monorepo root: glot path'
+    touch -- "$sentinel" 2>/dev/null || true
+    return 0
+}
+
+# _glot_state_file — archivo del estado del sprint, en este orden (v1.0.0):
+#   1. `GLOT_STATE_FILE`, que manda siempre (así se aísla en pruebas y en herramientas);
+#   2. **por raíz de monorepo**: `<state_dir>/state.<clave>-<nombre de la raíz>`, porque dos
+#      monorepos no pueden compartir `lang/phase/module`;
+#   3. sin raíz (fuera de un repositorio), el fichero global `<state_dir>/state`, que es
+#      donde vivía el sprint antes de esta versión.
 _glot_state_file() {
     local dir=""
+    local root=""
 
     if [[ -n "${GLOT_STATE_FILE:-}" ]]; then
         printf '%s\n' "$GLOT_STATE_FILE"
@@ -104,7 +149,16 @@ _glot_state_file() {
     fi
 
     dir="$(_glot_state_dir)" || return 1
-    printf '%s\n' "$dir/state"
+
+    root="$(_glot_repo_root 2>/dev/null || true)"
+    if [[ -z "$root" ]]; then
+        printf '%s\n' "$dir/state"
+        _glot_state_legacy_notice "$dir"
+        return 0
+    fi
+
+    printf '%s/state.%s-%s\n' "$dir" "$(_glot_state_key "$root")" "$(_glot_state_slug "$(basename -- "$root")")"
+    _glot_state_legacy_notice "$dir"
 }
 
 # _glot_key_valid — las claves solo admiten letras, dígitos, punto, guion y guion bajo.
@@ -279,7 +333,7 @@ _glot_cmd_doctor() {
     fi
 
     local tool=""
-    for tool in flock mktemp sort awk cat; do
+    for tool in flock mktemp sort awk cat cksum; do
         if command -v "$tool" >/dev/null 2>&1; then
             printf '%s: %s\n' "$tool" "$(command -v "$tool")"
         else
@@ -305,6 +359,17 @@ _glot_cmd_doctor() {
     else
         printf 'state_dir: (no resoluble / unresolvable)\n'
         status=1
+    fi
+
+    # El sprint vive por raíz de monorepo (v1.0.0): se dice con qué raíz se resolvió y, si
+    # sigue ahí el fichero global de antes, que no se migra.
+    if [[ -n "$root" ]]; then
+        printf 'state_root: %s\n' "$root"
+    else
+        printf 'state_root: - (fuera de un monorepo / outside a monorepo)\n'
+    fi
+    if [[ -n "$state_dir" && -s "$state_dir/state" ]]; then
+        printf 'state_legacy: %s (no se migra / not migrated)\n' "$state_dir/state"
     fi
 
     if state_file="$(_glot_state_file)"; then
@@ -442,6 +507,75 @@ _glot_cmd_doctor() {
         else
             printf 'roadmap_modules: (no reconocido / not recognised)\n'
             status=1
+        fi
+
+        # Instalación y shells (L8): dónde está la copia, si se quedó vieja respecto al
+        # clon, si su carpeta está en el PATH y si la capa cargable está activa en esta
+        # shell (lo sabe porque la función exporta `GLOT_LOADED` al delegar en el programa).
+        local install_dir=""
+        local install_meta=""
+        local install_sha=""
+        local install_version="-"
+        local install_source="-"
+        local install_stale="no"
+        local install_sha_now=""
+        local install_sha_src=""
+        local install_bin_dir=""
+        local install_rc=""
+        local install_rc_file=""
+        local shell_version=""
+        local shells_seen=""
+
+        install_dir="$(_glot_install_dir 2>/dev/null || true)"
+        if [[ -n "$install_dir" && -r "$install_dir/glot.sh" ]]; then
+            printf 'install: yes (%s)\n' "$install_dir"
+            install_meta="$(_glot_install_meta "$install_dir")"
+            if [[ -r "$install_meta" ]]; then
+                install_version="$(sed -n 's/^version=//p' "$install_meta" | head -1)"
+                install_source="$(sed -n 's/^source=//p' "$install_meta" | head -1)"
+                install_sha="$(sed -n 's/^sha=//p' "$install_meta" | head -1)"
+            fi
+            printf 'install_version: %s\n' "${install_version:--}"
+            printf 'install_source: %s\n' "${install_source:--}"
+            if [[ -n "$install_sha" && "$install_sha" != "-" ]]; then
+                install_sha_now="$(_glot_install_sha "$install_dir/glot.sh" || true)"
+                install_sha_src="$(_glot_install_sha "$install_source/glot.sh" || true)"
+                if [[ "$install_sha_now" != "$install_sha" || "$install_sha_src" != "$install_sha" ]]; then
+                    install_stale="yes"
+                fi
+            fi
+            printf 'install_stale: %s\n' "$install_stale"
+        else
+            printf 'install: no (%s)\n' "$install_dir"
+        fi
+
+        install_bin_dir="$(dirname -- "$(_glot_install_bin 2>/dev/null || printf '%s' -)")"
+        if [[ -n "$install_bin_dir" && ":$PATH:" == *":$install_bin_dir:"* ]]; then
+            printf 'install_path: yes (%s)\n' "$install_bin_dir"
+        else
+            printf 'install_path: no (%s no está en PATH / not in PATH)\n' "$install_bin_dir"
+        fi
+
+        for shell in bash zsh; do
+            command -v "$shell" >/dev/null 2>&1 || continue
+            install_rc_file="$(_glot_rc_file "$shell")"
+            if [[ -r "$install_rc_file" ]] && grep -qF '# >>> glot (install) >>>' "$install_rc_file" 2>/dev/null; then
+                install_rc+="$shell:yes "
+            else
+                install_rc+="$shell:no "
+            fi
+            case "$shell" in
+                bash) shell_version="$(bash --version 2>/dev/null | head -1 | sed 's/.*version \([0-9.]*\).*/\1/')" ;;
+                zsh) shell_version="$(zsh --version 2>/dev/null | awk '{print $2}')" ;;
+            esac
+            shells_seen+="$shell ${shell_version:--} "
+        done
+        printf 'shell: %s\n' "${shells_seen:-ninguno / none}"
+        printf 'install_rc: %s\n' "${install_rc:-ninguno / none}"
+        if [[ -n "${GLOT_LOADED:-}" ]]; then
+            printf 'shell_loaded: yes (capa cargable / loadable layer)\n'
+        else
+            printf 'shell_loaded: no (se ejecuta como programa / it runs as a program)\n'
         fi
 
         printf 'evidence_dir: %s\n' "$root/docs/evidence"
@@ -680,7 +814,7 @@ _glot_cmd_progress() {
 }
 
 # _glot_cmd_completion <shell> — imprime el guion de autocompletado en stdout. No lo
-# instala: eso es cosa de `install` (v1.0.0), que es quien toca el shell del usuario.
+# instala: eso es cosa de `install`, que es quien toca el shell del usuario.
 _glot_cmd_completion() {
     local shell="${1:-bash}"
     local file=""
@@ -2622,6 +2756,12 @@ Verbos / Verbs:
                      solo en el directorio del módulo, y sincroniza el submódulo
                      Removes what the language .gitignore declares as an artefact, only
                      inside the module directory, and syncs the submodule
+  install            Deja la copia estable (~/.local/share/glot), el enlace del PATH, el
+                     completado y el bloque del rc. Idempotente
+                     Leaves the stable copy, the PATH symlink, the completion and the rc
+                     block. Idempotent
+  uninstall          Deshace lo que dejó install. Idempotente
+                     Undoes what install left behind. Idempotent
 
 Opciones globales / Global options:
   -q, --quiet        Silencia el diagnóstico de stderr / silence stderr diagnostics
@@ -2688,7 +2828,8 @@ _glot_help_verb() {
         completion)
             printf 'glot completion [bash|zsh] — imprime el autocompletado en stdout\n'
             printf 'glot completion [bash|zsh] — prints the completion script to stdout\n'
-            printf 'No lo instala: eso es de install (v1.0.0) / it does not install it: that is install (v1.0.0)\n'
+            printf 'No lo instala: eso es de install, que es quien toca el shell del usuario\n'
+            printf 'It does not install it: that is install, which is what touches the user shell\n'
             ;;
         test)
             printf 'glot test [lenguaje] [fase/módulo] — ejecuta la suite del módulo asignado\n'
@@ -2864,6 +3005,29 @@ _glot_help_verb() {
             printf 'Imprime las rutas borradas o nothing. Apoyo a los pasos 5–6 del sprint\n'
             printf 'Prints the removed paths or nothing. Support for sprint steps 5–6\n'
             printf 'Códigos / codes: 0 · 1 entorno · 2 uso\n'
+            ;;
+        install)
+            printf 'glot install — copia estable, enlace, completado y bloque del rc\n'
+            printf 'glot install — stable copy, symlink, completion and rc block\n'
+            printf 'Copia `glot.sh`, `data/`, `prompts/` y `completions/` a ~/.local/share/glot,\n'
+            printf 'deja `~/.local/bin/glot`, instala el completado de cada shell presente y\n'
+            printf 'escribe un bloque del rc entre marcas (con bash, además, la capa cargable)\n'
+            printf 'It copies glot.sh, data/, prompts/ and completions/ to ~/.local/share/glot,\n'
+            printf 'leaves ~/.local/bin/glot, installs the completion of each shell present and\n'
+            printf 'writes an rc block between markers (with bash, the loadable layer as well)\n'
+            printf 'Idempotente y con -n. Rutas cambiables: GLOT_INSTALL_DIR, GLOT_INSTALL_BIN,\n'
+            printf 'BASH_COMPLETION_DIR, ZSH_COMPLETION_DIR\n'
+            printf 'Idempotent and -n aware. Paths can be changed with those variables\n'
+            printf 'Códigos / codes: 0 instalado · 1 entorno · 2 uso · 3 no se pudo escribir\n'
+            ;;
+        uninstall)
+            printf 'glot uninstall — deshace lo que dejó install\n'
+            printf 'glot uninstall — undoes what install left behind\n'
+            printf 'Quita el bloque de los rc, borra los completados, retira el enlace (solo si\n'
+            printf 'es el nuestro) y la copia. Idempotente: sin nada instalado devuelve 0\n'
+            printf 'It removes the rc blocks, deletes the completions, drops the symlink (only\n'
+            printf 'when it is ours) and the copy. Idempotent: with nothing installed it returns 0\n'
+            printf 'Códigos / codes: 0 · 1 entorno · 2 uso · 3 no se pudo borrar\n'
             ;;
         *)
             _glot_error "verbo desconocido / unknown verb: $1"
@@ -3645,14 +3809,375 @@ _glot_cmd_use() {
 
     # 8. Dato para stdout: la ruta absoluta del módulo.
     printf '%s\n' "$module_dir"
-    _glot_info "recuerda / remember: cd \"\$(glot use $lang $target $kind)\" (el cd real llega en v1.0.0)"
+    # El recordatorio del `cd` solo vale para el modo programa: con la capa cargable el
+    # `cd` ya lo ha hecho la función, y repetirlo ahí sería contradecirse.
+    if [[ -z "${GLOT_LOADED:-}" ]]; then
+        _glot_info "recuerda / remember: cd \"\$(glot use $lang $target $kind)\" — o carga la capa con \"glot install\" y el cd lo hace use / or load the layer with \"glot install\" and use does the cd"
+    fi
+
+    return 0
+}
+
+# --- instalación y capa cargable (L8) ----------------------------------------
+
+# _glot_home — HOME, con error propio si no está (contexto de cron o systemd). Se usa en
+# lugar de `$HOME` directo para no depender de `set -u` ni de un entorno completo.
+_glot_home() {
+    if [[ -z "${HOME:-}" ]]; then
+        _glot_error 'sin HOME: define HOME o usa GLOT_INSTALL_DIR / no HOME: set HOME or use GLOT_INSTALL_DIR'
+        return 1
+    fi
+    printf '%s\n' "$HOME"
+}
+
+# _glot_install_dir — dónde vive la **copia estable**: GLOT_INSTALL_DIR > ~/.local/share/glot.
+# La copia incluye `glot.sh`, `data/`, `prompts/` y `completions/`, porque el script los
+# busca a su lado (`_glot_data_file`, `_glot_prompts_dir`, `_glot_completion_file`).
+_glot_install_dir() {
+    printf '%s\n' "${GLOT_INSTALL_DIR:-$(_glot_home)/.local/share/glot}"
+}
+
+# _glot_install_bin — enlace del PATH: GLOT_INSTALL_BIN > ~/.local/bin/glot.
+_glot_install_bin() {
+    printf '%s\n' "${GLOT_INSTALL_BIN:-$(_glot_home)/.local/bin/glot}"
+}
+
+# _glot_install_completion <shell> — dónde busca cada shell su completado: el directorio de
+# bash-completion para bash, y el `fpath` de zsh para zsh.
+_glot_install_completion() {
+    local shell="$1"
+
+    case "$shell" in
+        bash) printf '%s\n' "${BASH_COMPLETION_DIR:-$(_glot_home)/.local/share/bash-completion/completions}/glot" ;;
+        zsh) printf '%s\n' "${ZSH_COMPLETION_DIR:-$(_glot_home)/.zsh/completions}/_glot" ;;
+        *) return 1 ;;
+    esac
+}
+
+# _glot_rc_file <shell> — archivo de arranque del shell.
+_glot_rc_file() {
+    case "$1" in
+        bash) printf '%s\n' "$(_glot_home)/.bashrc" ;;
+        zsh) printf '%s\n' "$(_glot_home)/.zshrc" ;;
+        *) return 1 ;;
+    esac
+}
+
+# _glot_install_sha <archivo> — huella corta del archivo instalado, para que `doctor`
+# detecte una copia vieja. `cksum` es POSIX y ya se usa para el estado.
+_glot_install_sha() {
+    [[ -r "$1" ]] || return 1
+    cksum <"$1" | awk '{printf "%08d", $1}'
+}
+
+# _glot_install_meta <dir> — metadatos de la instalación: `clave=valor` con la versión, el
+# clon del que salió, la fecha y la huella de `glot.sh`. Es lo que permite decir en
+# `doctor` si la copia instalada se quedó atrás.
+_glot_install_meta() {
+    printf '%s/install.meta\n' "$1"
+}
+
+# _glot_rc_block <dir> <shell> — el bloque que se escribe en el rc, con las dos marcas que
+# hacen que ponerlo y quitarlo sea quirúrgico. En bash carga la copia (define la función);
+# en zsh solo añade el directorio del completado, porque la capa cargable es de bash.
+_glot_rc_block() {
+    local dir="$1"
+    local shell="$2"
+    local comp=""
+
+    printf '# >>> glot (install) >>>\n'
+    case "$shell" in
+        bash)
+            printf '# capa cargable de glot: define la función y `use` hace el cd real / glot loadable layer\n'
+            printf 'if [ -r "%s/glot.sh" ]; then . "%s/glot.sh"; fi\n' "$dir" "$dir"
+            ;;
+        zsh)
+            comp="$(_glot_install_completion zsh)"
+            printf '# completado de glot: la capa cargable es de bash / glot completion: the loadable layer is bash only\n'
+            printf 'fpath+=("%s")\n' "${comp%/_glot}"
+            ;;
+    esac
+    printf '# <<< glot (install) <<<\n'
+}
+
+# _glot_rc_write <rc> <shell> — deja el bloque de ese shell en su rc sin duplicarlo: lo que
+# hubiera entre las marcas se sustituye y, si no hay marcas, el bloque se añade al final.
+_glot_rc_write() {
+    local rc="$1"
+    local shell="$2"
+    local block=""
+    local tmp=""
+
+    block="$(_glot_rc_block "$(_glot_install_dir)" "$shell")"
+
+    if [[ -f "$rc" ]]; then
+        tmp="$(mktemp --tmpdir="$(dirname -- "$rc")" .glot-rc.XXXXXX)" || return 1
+        if ! awk -v block="$block" '
+            $0 == "# >>> glot (install) >>>" { print block; skip = 1; next }
+            $0 == "# <<< glot (install) <<<" { skip = 0; next }
+            !skip { print }' "$rc" >"$tmp"; then
+            rm -f -- "$tmp"
+            return 1
+        fi
+        if ! grep -qF -- '# >>> glot (install) >>>' "$tmp"; then
+            printf '\n%s\n' "$block" >>"$tmp" || {
+                rm -f -- "$tmp"
+                return 1
+            }
+        fi
+        mv -f -- "$tmp" "$rc" || {
+            rm -f -- "$tmp"
+            return 1
+        }
+    else
+        printf '%s\n' "$block" >"$rc" || return 1
+    fi
+
+    return 0
+}
+
+# _glot_rc_remove <rc> — quita el bloque, dejando el resto del archivo intacto.
+_glot_rc_remove() {
+    local rc="$1"
+    local tmp=""
+
+    [[ -f "$rc" ]] || return 0
+    grep -qF -- '# >>> glot (install) >>>' "$rc" || return 0
+
+    tmp="$(mktemp --tmpdir="$(dirname -- "$rc")" .glot-rc.XXXXXX)" || return 1
+    if ! awk '
+        $0 == "# >>> glot (install) >>>" { skip = 1; next }
+        $0 == "# <<< glot (install) <<<" { skip = 0; next }
+        !skip { print }' "$rc" >"$tmp"; then
+        rm -f -- "$tmp"
+        return 1
+    fi
+    mv -f -- "$tmp" "$rc" || {
+        rm -f -- "$tmp"
+        return 1
+    }
+
+    return 0
+}
+
+# _glot_cmd_install — copia estable, enlace en el PATH, completados y bloque del rc.
+# Idempotente: repetirlo deja lo mismo. Muta: admite `-n`.
+# Códigos: 0 instalado · 1 entorno (HOME, fuente, enlace ajeno) · 2 uso · 3 no se pudo escribir.
+_glot_cmd_install() {
+    local src="$GLOT_SCRIPT_DIR"
+    local dir=""
+    local bin=""
+    local shell=""
+    local comp=""
+    local rc=""
+    local -a shells=()
+    local -a files=()
+
+    if [[ $# -gt 0 ]]; then
+        _glot_error "uso / usage: glot install"
+        _glot_hint
+        return 2
+    fi
+
+    dir="$(_glot_install_dir)" || return 1
+    bin="$(_glot_install_bin)" || return 1
+
+    for shell in bash zsh; do
+        command -v "$shell" >/dev/null 2>&1 && shells+=("$shell")
+    done
+
+    if ((_glot_dry_run)); then
+        printf 'mkdir -p %s\n' "$dir"
+        printf 'cp %s/glot.sh %s/glot.sh\n' "$src" "$dir"
+        for shell in data prompts completions; do
+            [[ -d "$src/$shell" ]] && printf 'cp -R %s/%s %s/%s\n' "$src" "$shell" "$dir" "$shell"
+        done
+        printf 'chmod +x %s/glot.sh\n' "$dir"
+        printf 'ln -sf %s/glot.sh %s\n' "$dir" "$bin"
+        for shell in ${shells[@]+"${shells[@]}"}; do
+            comp="$(_glot_install_completion "$shell")"
+            printf 'cp %s/completions/glot.%s %s\n' "$src" "$shell" "$comp"
+            printf '# bloque en / block in %s\n' "$(_glot_rc_file "$shell")"
+        done
+        printf '%s\n' "$dir"
+        return 0
+    fi
+
+    if [[ ! -r "$src/glot.sh" ]]; then
+        _glot_error "no se encuentra el script original / cannot find the original script: $src/glot.sh"
+        return 1
+    fi
+    if [[ -e "$bin" && ! -L "$bin" ]]; then
+        _glot_error "hay algo que no es un enlace en el PATH / there is a non-symlink in the PATH: $bin"
+        _glot_info 'quítalo tú o cambia GLOT_INSTALL_BIN / remove it yourself or set GLOT_INSTALL_BIN'
+        return 1
+    fi
+    if [[ -L "$bin" ]]; then
+        local current=""
+        current="$(readlink -f -- "$bin" 2>/dev/null || true)"
+        if [[ "$current" != "$dir/glot.sh" ]]; then
+            _glot_error "el enlace del PATH es de otro / the PATH symlink belongs to something else: $bin"
+            _glot_info "→ ${current:-?} · quítalo tú o cambia GLOT_INSTALL_BIN / remove it yourself or set GLOT_INSTALL_BIN"
+            return 1
+        fi
+    fi
+
+    mkdir -p -- "$dir" || {
+        _glot_error "no se pudo crear el directorio de instalación / cannot create the install directory: $dir"
+        return 3
+    }
+
+    files=(glot.sh)
+    for shell in data prompts completions; do
+        [[ -d "$src/$shell" ]] && files+=("$shell")
+    done
+
+    for shell in "${files[@]}"; do
+        if ! cp -Rf -- "$src/$shell" "$dir/" 2>/dev/null; then
+            _glot_error "no se pudo copiar / cannot copy: $src/$shell"
+            return 3
+        fi
+    done
+    chmod +x -- "$dir/glot.sh" 2>/dev/null || true
+    _glot_info "copia estable / stable copy: $dir"
+
+    # metadatos: con esto `doctor` puede decir si la copia se quedó vieja
+    {
+        printf 'version=%s\n' "$GLOT_VERSION"
+        printf 'source=%s\n' "$src"
+        printf 'date=%s\n' "$(date -Iseconds)"
+        printf 'sha=%s\n' "$(_glot_install_sha "$dir/glot.sh" || printf '%s' '-')"
+    } >"$(_glot_install_meta "$dir")" || {
+        _glot_error 'no se pudieron escribir los metadatos / cannot write the metadata'
+        return 3
+    }
+
+    mkdir -p -- "$(dirname -- "$bin")" || {
+        _glot_error "no se pudo crear la carpeta del enlace / cannot create the symlink directory: $(dirname -- "$bin")"
+        return 3
+    }
+    if ! ln -sfn -- "$dir/glot.sh" "$bin"; then
+        _glot_error "no se pudo crear el enlace / cannot create the symlink: $bin"
+        return 3
+    fi
+    _glot_info "enlace / symlink: $bin → $dir/glot.sh"
+
+    for shell in ${shells[@]+"${shells[@]}"}; do
+        comp="$(_glot_install_completion "$shell")"
+        if [[ -r "$src/completions/glot.$shell" ]]; then
+            mkdir -p -- "$(dirname -- "$comp")" || {
+                _glot_error "no se pudo crear la carpeta del completado / cannot create the completion directory"
+                return 3
+            }
+            if ! cp -f -- "$src/completions/glot.$shell" "$comp"; then
+                _glot_error "no se pudo instalar el completado / cannot install the completion: $comp"
+                return 3
+            fi
+            rm -f -- "$comp.gz" 2>/dev/null || true
+            _glot_info "completado / completion: $comp"
+        fi
+
+        rc="$(_glot_rc_file "$shell")"
+        [[ -e "$rc" ]] || _glot_info "no existía, se crea / did not exist, creating: $rc"
+        if ! _glot_rc_write "$rc" "$shell"; then
+            _glot_error "no se pudo escribir el bloque en el rc / cannot write the rc block: $rc"
+            return 3
+        fi
+        _glot_info "bloque / block: $rc"
+    done
+
+    printf '%s\n' "$dir"
+    _glot_info "abre una shell nueva, o recárgala / open a new shell, or reload it: . $(_glot_rc_file bash)"
+    return 0
+}
+
+# _glot_cmd_uninstall — deshace lo que dejó `install`: quita el bloque de los rc, borra los
+# completados, retira el enlace (solo si es el nuestro) y la copia. Idempotente: sin nada
+# instalado devuelve 0 y lo dice. Admite `-n`. Códigos: 0 · 1 entorno · 2 uso · 3 no se pudo borrar.
+_glot_cmd_uninstall() {
+    local dir=""
+    local bin=""
+    local shell=""
+    local comp=""
+    local rc=""
+    local -a shells=()
+    local found=0
+
+    if [[ $# -gt 0 ]]; then
+        _glot_error "uso / usage: glot uninstall"
+        _glot_hint
+        return 2
+    fi
+
+    dir="$(_glot_install_dir)" || return 1
+    bin="$(_glot_install_bin)" || return 1
+
+    for shell in bash zsh; do
+        command -v "$shell" >/dev/null 2>&1 && shells+=("$shell")
+    done
+
+    if ((_glot_dry_run)); then
+        for shell in ${shells[@]+"${shells[@]}"}; do
+            printf '# quitar el bloque de %s\n' "$(_glot_rc_file "$shell")"
+            printf 'rm -f %s\n' "$(_glot_install_completion "$shell")"
+        done
+        printf 'rm -f %s\n' "$bin"
+        printf 'rm -rf %s\n' "$dir"
+        return 0
+    fi
+
+    for shell in ${shells[@]+"${shells[@]}"}; do
+        rc="$(_glot_rc_file "$shell")"
+        if ! _glot_rc_remove "$rc"; then
+            _glot_error "no se pudo limpiar el rc / cannot clean the rc: $rc"
+            return 3
+        fi
+        comp="$(_glot_install_completion "$shell")"
+        if [[ -e "$comp" ]]; then
+            rm -f -- "$comp" || {
+                _glot_error "no se pudo borrar el completado / cannot remove the completion: $comp"
+                return 3
+            }
+            rmdir --ignore-fail-on-non-empty -- "$(dirname -- "$comp")" 2>/dev/null || true
+            found=1
+        fi
+    done
+
+    if [[ -L "$bin" ]]; then
+        rm -f -- "$bin" || {
+            _glot_error "no se pudo quitar el enlace / cannot remove the symlink: $bin"
+            return 3
+        }
+        found=1
+    elif [[ -e "$bin" ]]; then
+        _glot_warn "no es un enlace nuestro, se deja / it is not our symlink, leaving it: $bin"
+    fi
+
+    if [[ -d "$dir" ]]; then
+        rm -rf -- "$dir" || {
+            _glot_error "no se pudo borrar la copia / cannot remove the copy: $dir"
+            return 3
+        }
+        found=1
+    fi
+
+    if ((found == 0)); then
+        _glot_info 'no había nada instalado / nothing was installed'
+        printf 'nothing\n'
+    else
+        _glot_info 'instalación retirada / installation removed'
+        printf '%s\n' "$dir"
+    fi
 
     return 0
 }
 
 # --- dispatcher --------------------------------------------------------------
 
-glot() {
+# _glot_main — dispatcher: lee los flags globales, resuelve el verbo y lo ejecuta. Se
+# llama desde la rama de ejecución (programa), nunca desde la capa cargable, que delega
+# en el programa para no divergir en nada.
+_glot_main() {
     # Inicializa las variables de estado globales / Initialize global state variables
     local cmd=""
 
@@ -3791,6 +4316,14 @@ glot() {
             # Borra los artefactos del módulo y sincroniza el submódulo / removes the module artefacts and syncs the submodule
             _glot_cmd_clean "$@"
             ;;
+        install)
+            # Copia estable, enlace, completados y bloque del rc / stable copy, symlink, completions and the rc block
+            _glot_cmd_install "$@"
+            ;;
+        uninstall)
+            # Deshace lo que dejó install / undoes what install left behind
+            _glot_cmd_uninstall "$@"
+            ;;
         -*)
             # Maneja las opciones desconocidas / Handle unknown options
             _glot_error "opción desconocida / unknown option: $cmd"
@@ -3806,4 +4339,44 @@ glot() {
     esac
 }
 
-glot "$@"
+# Un solo archivo, dos modos (regla 15 del contrato):
+#   - **programa**: `./scripts/glot.sh <verbo>` fija las opciones del shell en este
+#     proceso y ejecuta el dispatcher;
+#   - **cargado**: `source glot.sh` define la función `glot` y **no ejecuta nada**. Esa
+#     función delega en el programa —mismas opciones, mismo comportamiento, cero
+#     divergencia— y la única diferencia es el `cd` real de `use`, que solo puede hacer
+#     una función en la shell actual. En ensayo (`-n`) no hay `cd`: la salida es un plan.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    set -euo pipefail
+    _glot_main "$@"
+else
+    _GLOT_SELF="${BASH_SOURCE[0]}"
+    glot() {
+        local arg=""
+        local verb=""
+        local dry=0
+        local path=""
+        local rc=0
+
+        for arg in "$@"; do
+            case "$arg" in
+                -n | --dry-run) dry=1 ;;
+            esac
+            if [[ -z "$verb" && "$arg" != -* ]]; then
+                verb="$arg"
+            fi
+        done
+
+        if [[ "$verb" == "use" && "$dry" -eq 0 ]]; then
+            path="$(GLOT_LOADED=1 "$BASH" "$_GLOT_SELF" "$@")" || rc=$?
+            ((rc == 0)) || return "$rc"
+            if [[ -n "$path" && -d "$path" ]]; then
+                cd -- "$path" || return $?
+            fi
+            printf '%s\n' "$path"
+            return 0
+        fi
+
+        GLOT_LOADED=1 "$BASH" "$_GLOT_SELF" "$@"
+    }
+fi

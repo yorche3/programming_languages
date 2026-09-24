@@ -1621,6 +1621,246 @@ for l7_verb in status pointer clean; do
     assert_contains "help $l7_verb: se describe" "$l7_verb" "$out"
 done
 
+# --- casos de la especificación v1.0.0 (L8, capa cargable) --------------------
+
+# glot_loaded <snippet> — ejecuta el snippet en un bash limpio, con el script en `$1` y la
+# raíz del sandbox en `$2`, para probar el modo cargado sin depender de la shell del harness.
+glot_loaded() {
+    local rc=0
+    out="$(env -u GLOT_ROOT "$BASH" -c "$1" _ "$GLOT_SH" "$SANDBOX" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+glot_loaded 'source "$1"'
+assert_eq 'cargado: no ejecuta nada' '' "$out"
+assert_eq 'cargado: código' '0' "$rc_last"
+
+glot_loaded 'source "$1"; type -t glot'
+assert_eq 'cargado: define la función glot' 'function' "$out"
+
+glot_loaded 'before="$(set -o | tr -d " \t")"; source "$1"; after="$(set -o | tr -d " \t")"; [[ "$before" == "$after" ]] && echo igual || echo distinto'
+assert_eq 'cargado: no toca las opciones del shell' 'igual' "$out"
+
+glot_loaded 'source "$1"; echo vivo'
+assert_contains 'cargado: no llama a exit' 'vivo' "$out"
+
+glot_loaded 'source "$1"; glot version'
+assert_eq 'cargado: version' "glot $LIVE_VERSION" "$out"
+
+out_program="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" langs)"
+glot_loaded 'source "$1"; GLOT_ROOT="$2" glot langs'
+assert_eq 'cargado: los otros verbos pasan igual que el programa' "$out_program" "$out"
+
+# el cd real es el único comportamiento que cambia al cargar el archivo
+printf '# 06 — Data Structures\n' >"$SANDBOX/docs/core/algorithms/06_Data_Structures.md"
+glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use php algorithms/data_structures >/dev/null; pwd'
+assert_eq 'cargado: use hace el cd real' "$SANDBOX/php/core/algorithms/data_structures" "$out"
+assert_eq 'cargado: sin recordatorio de cd, que ya lo hizo la función' 'no' \
+    "$([[ "$err" == *'recuerda / remember'* ]] && echo si || echo no)"
+
+glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot -n use php algorithms/data_structures >/dev/null; pwd'
+assert_eq 'cargado: use -n no cambia de directorio' '/tmp' "$out"
+
+glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use 2>/dev/null; echo "vivo"'
+assert_contains 'cargado: un use fallido no deja la shell rota' 'vivo' "$out"
+
+# el modo programa sí recuerda el `cd`: es el único caso en que hace falta
+out="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" use php algorithms/data_structures 2>"$WORK_DIR/stderr")" || true
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_contains 'programa: el recordatorio del cd menciona glot install' 'glot install' "$err"
+
+# estado por raíz de monorepo (v1.0.0): dos repos no comparten `lang/phase/module`
+STATE_DIR_V1="$WORK_DIR/state-v1"
+mkdir -p -- "$STATE_DIR_V1"
+mkdir -p -- "$WORK_DIR/otro"
+git -C "$WORK_DIR/otro" init -q
+
+# glot_run_state <raíz> [args...] — ejecuta glot sin GLOT_STATE_FILE, con estado por raíz
+glot_run_state() {
+    local rc=0
+    out="$(env -u GLOT_STATE_FILE -u GLOT_ROOT GLOT_ROOT="$1" GLOT_STATE_DIR="$STATE_DIR_V1" "$GLOT_SH" "${@:2}" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+glot_run_state "$SANDBOX" path
+assert_eq 'estado por raíz: código' '0' "$rc_last"
+assert_eq 'estado por raíz: el fichero lleva la raíz en el nombre' "$STATE_DIR_V1/glot/state.$(printf '%s' "$SANDBOX" | cksum | awk '{printf "%08d", $1}')-sandbox" "$out"
+assert_eq 'estado por raíz: no es el global' 'no' "$(case "$out" in */glot/state) echo si ;; *) echo no ;; esac)"
+
+glot_run_state "$SANDBOX" path
+same="$out"
+glot_run_state "$SANDBOX" path
+assert_eq 'estado por raíz: la misma raíz da el mismo fichero' "$same" "$out"
+
+glot_run_state "$WORK_DIR/otro" path
+other="$out"
+glot_run_state "$SANDBOX" path
+assert_eq 'estado por raíz: dos raíces, dos ficheros' 'distintos' \
+    "$([[ "$other" != "$out" ]] && echo distintos || echo iguales)"
+
+# el aislamiento de verdad: lo que se guarda en un monorepo no se ve en el otro
+glot_run_state "$SANDBOX" set lang php
+assert_eq 'estado por raíz: set en la raíz A' '0' "$rc_last"
+glot_run_state "$SANDBOX" get lang
+assert_eq 'estado por raíz: get en la raíz A' 'php' "$out"
+glot_run_state "$WORK_DIR/otro" get lang
+assert_eq 'estado por raíz: la raíz B no ve el sprint de A' '1' "$rc_last"
+
+# GLOT_STATE_FILE sigue mandando sobre todo lo anterior
+out="$(GLOT_STATE_FILE="$WORK_DIR/state" "$GLOT_SH" path)"
+assert_eq 'estado: GLOT_STATE_FILE manda' "$WORK_DIR/state" "$out"
+
+# sin raíz (fuera de un repositorio) se conserva el fichero global de antes
+out="$(cd -- "$WORK_DIR" && env -u GLOT_STATE_FILE -u GLOT_ROOT GLOT_STATE_DIR="$STATE_DIR_V1" "$GLOT_SH" path)"
+assert_eq 'estado: fuera de un repositorio, el global' "$STATE_DIR_V1/glot/state" "$out"
+
+# el `state` global viejo se avisa una vez y no se migra
+mkdir -p -- "$STATE_DIR_V1/glot"
+printf 'lang=php\n' >"$STATE_DIR_V1/glot/state"
+glot_run_state "$SANDBOX" path
+assert_contains 'estado viejo: avisa la primera vez' 'no se migra' "$err"
+glot_run_state "$SANDBOX" path
+assert_eq 'estado viejo: la segunda vez ya no avisa' '' "$err"
+
+glot_run_state "$SANDBOX" doctor
+assert_contains 'doctor: la raíz del estado' 'state_root: ' "$out"
+assert_contains 'doctor: el estado viejo se nombra' 'state_legacy: ' "$out"
+
+# instalación y capa cargable (v1.0.0): copia estable, enlace, completados y rc.
+# Todo ocurre en un HOME desechable: la instalación real del usuario no se toca.
+INSTALL_HOME="$WORK_DIR/home-install"
+mkdir -p -- "$INSTALL_HOME"
+INSTALL_DIR="$INSTALL_HOME/.local/share/glot"
+
+# glot_install [args...] — ejecuta glot con HOME desechable, sin estado ni raíz
+glot_install() {
+    local rc=0
+    out="$(env -u GLOT_STATE_FILE -u GLOT_ROOT GLOT_ROOT= HOME="$INSTALL_HOME" "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+# glot_in_home <código> — ejecuta código en un bash real con ese HOME desechable
+glot_in_home() {
+    local rc=0
+    out="$(HOME="$INSTALL_HOME" bash -c "$1" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+glot_install -n install
+assert_eq 'install -n: código' '0' "$rc_last"
+assert_contains 'install -n: enseña el plan' 'cp ' "$out"
+assert_contains 'install -n: enseña la copia estable' "$INSTALL_DIR" "$out"
+assert_contains 'install -n: enseña el bloque del rc' '.bashrc' "$out"
+assert_eq 'install -n: no crea nada' 'no' "$([[ -e "$INSTALL_DIR" ]] && echo si || echo no)"
+
+glot_install install
+assert_eq 'install: código' '0' "$rc_last"
+assert_eq 'install: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'install: la copia estable es la ruta que sale' "$INSTALL_DIR" "$out"
+assert_eq 'install: el script copiado existe' 'si' "$([[ -x "$INSTALL_DIR/glot.sh" ]] && echo si || echo no)"
+assert_eq 'install: los datos viajan con el script' 'si' "$([[ -d "$INSTALL_DIR/data" ]] && echo si || echo no)"
+assert_eq 'install: el enlace del PATH apunta a la copia' "$INSTALL_DIR/glot.sh" "$(readlink -- "$INSTALL_HOME/.local/bin/glot")"
+assert_eq 'install: los metadatos traen la versión' "version=$LIVE_VERSION" \
+    "$(sed -n 's/^version=/version=/p' "$INSTALL_DIR/install.meta")"
+assert_contains 'install: los metadatos traen el origen' 'source=' "$(cat -- "$INSTALL_DIR/install.meta")"
+assert_contains 'install: el bloque del rc lleva marca de inicio' '# >>> glot (install) >>>' "$(cat -- "$INSTALL_HOME/.bashrc")"
+assert_contains 'install: el bloque del rc lleva marca de fin' '# <<< glot (install) <<<' "$(cat -- "$INSTALL_HOME/.bashrc")"
+assert_eq 'install: el completado de bash queda instalado' 'si' \
+    "$([[ -r "$INSTALL_HOME/.local/share/bash-completion/completions/glot" ]] && echo si || echo no)"
+assert_eq 'install: el completado de zsh queda instalado' 'si' \
+    "$([[ -r "$INSTALL_HOME/.zsh/completions/_glot" ]] && echo si || echo no)"
+
+# idempotente: repetirlo deja lo mismo, con un solo bloque
+glot_install install
+assert_eq 'install: repetido, código' '0' "$rc_last"
+assert_eq 'install: repetido, un solo bloque' '1' "$(grep -c '# >>> glot (install) >>>' "$INSTALL_HOME/.bashrc")"
+
+# la copia estable funciona sola, aunque el clon se mueva o desaparezca
+glot_in_home '"$HOME/.local/bin/glot" version'
+assert_eq 'install: la copia del PATH funciona sola' "glot $LIVE_VERSION" "$out"
+
+# el bloque del rc carga la capa en un bash real: hay función y el cd de use llega
+glot_in_home 'source "$HOME/.bashrc"; echo "tipo=$(type -t glot)"; glot version'
+assert_contains 'install: el rc deja la función cargada' 'tipo=function' "$out"
+assert_contains 'install: la capa cargada responde version' "glot $LIVE_VERSION" "$out"
+glot_in_home 'source "$HOME/.bashrc"; glot doctor 2>/dev/null | grep "^shell_loaded"'
+assert_contains 'install: la capa cargada se anuncia a doctor' 'shell_loaded: yes' "$out"
+
+# doctor desde el programa: dice dónde está la copia, si es vieja y qué shells hay
+glot_install doctor
+assert_contains 'doctor: la instalación' "install: yes ($INSTALL_DIR)" "$out"
+assert_contains 'doctor: la versión instalada' "install_version: $LIVE_VERSION" "$out"
+assert_contains 'doctor: la copia no está vieja' 'install_stale: no' "$out"
+assert_contains 'doctor: el bloque del rc está' 'install_rc: bash:yes' "$out"
+assert_contains 'doctor: las shells se listan' 'shell: ' "$out"
+assert_contains 'doctor: sin capa cargada lo dice' 'shell_loaded: no' "$out"
+
+# la copia retocada a mano cuenta como vieja, y reinstalar la deja buena
+printf '\n# retoque local / local tweak\n' >>"$INSTALL_DIR/glot.sh"
+glot_install doctor
+assert_contains 'doctor: una copia retocada se marca vieja' 'install_stale: yes' "$out"
+glot_install install >/dev/null
+glot_install doctor
+assert_contains 'doctor: reinstalar deja la copia buena' 'install_stale: no' "$out"
+
+# lo ajeno no se pisa: ni un enlace de otro, ni un fichero
+rm -rf -- "$INSTALL_HOME/.local/bin"
+mkdir -p -- "$INSTALL_HOME/.local/bin"
+ln -s /bin/true "$INSTALL_HOME/.local/bin/glot"
+glot_install install
+assert_eq 'install: un enlace ajeno da código 1' '1' "$rc_last"
+assert_contains 'install: un enlace ajeno se explica' 'de otro' "$err"
+rm -f -- "$INSTALL_HOME/.local/bin/glot"
+printf '#!/bin/sh\n' >"$INSTALL_HOME/.local/bin/glot"
+chmod +x -- "$INSTALL_HOME/.local/bin/glot"
+glot_install install
+assert_eq 'install: un fichero ajeno da código 1' '1' "$rc_last"
+glot_install uninstall
+assert_eq 'uninstall: un fichero ajeno se respeta' 'si' \
+    "$([[ -x "$INSTALL_HOME/.local/bin/glot" ]] && echo si || echo no)"
+rm -f -- "$INSTALL_HOME/.local/bin/glot"
+
+glot_install install ahora
+assert_eq 'install: con argumentos da código 2' '2' "$rc_last"
+
+# help y completado conocen los verbos nuevos
+glot_run help
+assert_contains 'help: install aparece en la lista' 'install' "$out"
+glot_run help install
+assert_eq 'help install: código' '0' "$rc_last"
+assert_contains 'help install: explica la copia estable' 'copia estable' "$out"
+glot_run help uninstall
+assert_contains 'help uninstall: explica que deshace' 'deshace' "$out"
+assert_contains 'completado bash: conoce install' 'install uninstall' "$(cat -- "$TESTS_DIR/../completions/glot.bash")"
+assert_contains 'completado zsh: conoce install' "'install:" "$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
+
+# desinstalar deja el HOME como estaba: ni copia, ni enlace, ni completados, ni bloque
+# (se reinstala antes porque el caso del fichero ajeno ya retiró lo instalado)
+glot_install install >/dev/null
+glot_install uninstall
+assert_eq 'uninstall: código' '0' "$rc_last"
+assert_contains 'uninstall: dice qué retiró' 'instalación retirada' "$err"
+assert_eq 'uninstall: la copia desaparece' 'no' "$([[ -e "$INSTALL_DIR" ]] && echo si || echo no)"
+assert_eq 'uninstall: el enlace desaparece' 'no' "$([[ -e "$INSTALL_HOME/.local/bin/glot" ]] && echo si || echo no)"
+assert_eq 'uninstall: el completado de bash desaparece' 'no' \
+    "$([[ -e "$INSTALL_HOME/.local/share/bash-completion/completions/glot" ]] && echo si || echo no)"
+assert_eq 'uninstall: el de zsh también' 'no' "$([[ -e "$INSTALL_HOME/.zsh/completions/_glot" ]] && echo si || echo no)"
+assert_eq 'uninstall: el bloque del rc se va' '0' "$(grep -c 'glot (install)' "$INSTALL_HOME/.bashrc")"
+glot_in_home 'source "$HOME/.bashrc"; type -t glot || echo sin-funcion'
+assert_eq 'uninstall: ya no queda la función' 'sin-funcion' "$out"
+
+# idempotente al revés: sin nada instalado, avisa y devuelve 0
+glot_install uninstall
+assert_eq 'uninstall: repetido, código' '0' "$rc_last"
+assert_eq 'uninstall: repetido, dice que no había nada' 'nothing' "$out"
+glot_install doctor
+assert_contains 'doctor: sin instalación lo dice' 'install: no' "$out"
+assert_contains 'doctor: sin instalación, el bloque no está' 'install_rc: bash:no' "$out"
+
 # --- puerta de entrada al archivo de versiones -------------------------------
 
 # La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:
