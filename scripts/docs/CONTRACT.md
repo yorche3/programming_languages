@@ -113,7 +113,7 @@
 4. **Idempotencia** cuando se repite el mismo efecto.
 5. **Inyectable para test**: raíz del repo y ruta del estado sobreescribibles por variable.
 6. **Mensajes bilingües ES/EN**; los datos de salida no se traducen.
-7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR`, `GLOT_STATE_FILE`, `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR` y `ZSH_COMPLETION_DIR`. `GLOT_LOADED` no se declara: la capa cargable la pone al delegar en el programa, para que `doctor` sepa que hay función
+7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR`, `GLOT_STATE_FILE`, `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` y `GLOT_TOOLCHAINS_FILE` (esta última, como `GLOT_STATE_FILE`, es para pruebas y herramientas: apunta a otro catálogo de toolchains). `GLOT_LOADED` no se declara: la capa cargable la pone al delegar en el programa, para que `doctor` sepa que hay función
 
 ### Desde v0.4.0 — el almacén
 
@@ -233,7 +233,8 @@
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
 | Registro / Registry | `prompts/*.prompt.md`; el `name`, el `step`, el `model` y la `description` salen de su frontmatter, así que añadir un encargo es añadir un archivo. El **modelo es la clave del perfil** que fija esfuerzo y tope de créditos en [`data/models.tsv`](../data/models.tsv) (v0.11.0) |
-| Salida de `prompt` / `prompt` output | Cabecera con el estado del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `module_dir`) + la plantilla sin frontmatter y con los marcadores resueltos |
+| Salida de `prompt` / `prompt` output | Cabecera con el estado del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`, `module_dir`) + la plantilla sin frontmatter y con los marcadores resueltos. `root` es la raíz del monorepo, y es desde donde se leen las rutas de las fuentes |
+| Fuentes del encargo / Request sources | La plantilla declara en su frontmatter las fuentes del monorepo que necesita (`sources:`, rutas relativas a `root`, ordenadas y separadas por coma). `prompt` y `ask` **avisan** por stderr de cada una que falte y el encargo se imprime igual: el código no cambia, porque el aviso es para el autor. Las plantillas ya **no** nombran el monorepo en prosa: sus rutas son relativas a `root` |
 | `-n/--dry-run` | `prompt` no lo necesita (imprimir es su función); `ask -n` imprime el plan sin enviar nada |
 | Delegado / Delegate | `GLOT_DELEGATE`: el encargo va por **stdin** y su salida va a **stdout**. Sin la variable, `ask` devuelve `1` |
 | Plantilla local / Local template | Si solo existe en `.github/prompts/` (banco local del autor, no versionado), `prompt` la usa **avisando** |
@@ -384,6 +385,7 @@
 | Idempotencia | Si el monorepo ya apunta a ese commit, imprime `nothing` y no toca ramas |
 | `status` sin resumen | Cuatro columnas y un lenguaje por línea: el resumen de contadores es de `progress`, y `status` no muta nada, así que no necesita `-n` |
 | Alcance de `clean` | `git clean -Xfd` en el **directorio del módulo** (lo que el `.gitignore` del lenguaje declara como artefacto) más `git submodule sync` del lenguaje. Nunca `-x`: lo no rastreado y no ignorado es trabajo del autor. Nunca el monorepo ni `docs/` |
+| Lo del propio sprint no bloquea | `pointer` no se detiene por el **gitlink del lenguaje** (es el cambio que el verbo viene a preparar) ni por la **evidencia del sprint**, que confirma `save 10` *después* del puntero; cualquier otra ruta sin confirmar sí lo detiene y se nombra |
 | Qué **no** hace / What it does **not** | No hace `push` del monorepo (`pointer` solo publica su rama), no confirma, y no borra nada que el lenguaje no haya declarado ignorado |
 
 ---
@@ -411,7 +413,25 @@
 
 ---
 
-## 🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
+## � Toolchains: el dato y la comprobación (v1.0.0) / Toolchains: the datum and the check
+
+**ES:** La L9 es **instalar** versiones; lo que entra en la v1.0.0 es el **dato** y su comprobación. El dato vive en [`data/toolchains.tsv`](../data/toolchains.tsv) (`lenguaje`, `comando`, `serie verificada`) y crece **solo con versiones verificadas en este entorno**, así que hay lenguajes sin fila: es un fichero que crece, no una lista que hay que completar.
+
+**EN:** L9 is about **installing** versions; what lands in v1.0.0 is the **datum** and its check. The datum lives in [`data/toolchains.tsv`](../data/toolchains.tsv) (`language`, `command`, `verified series`) and only grows **with versions verified in this environment**, so some languages have no row: it is a file that grows, not a list to be completed.
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Qué informa `doctor` | `toolchains_file:`, la **cobertura** (`toolchains: N de / of M`) y la **presencia** de las filas declaradas (`toolchains_present:`). Cobertura y presencia son un `command -v` por fila |
+| Qué comprueba además | La **serie** del lenguaje del sprint en curso: `toolchain_<lenguaje>: ok (3.4.3 = 3.4)` |
+| Comparación | Por **prefijo** contra la primera versión que aparece en la salida del comando: `3.4` acepta `3.4.3`; un salto de serie es `differs` |
+| Códigos | `missing` (la herramienta no está) y `unknown` (fila fuera de `.gitmodules` o sin versión legible) dan `1`. `differs` **no** cambia el código: que una versión avance es información, no un fallo del entorno |
+| Por qué no se comprueban todas | Arrancar las 45 toolchains declaradas cuesta unos 5 segundos medidos, y `doctor` se ejecuta a menudo; el lenguaje del sprint es el que se va a usar |
+| Inyectable | `GLOT_TOOLCHAINS_FILE` apunta a otro catálogo, como `GLOT_STATE_FILE` con el estado |
+| Qué **no** hace / What it does **not** | No instala ni actualiza versiones (eso es L9), no escribe el catálogo y no adivina una serie que no esté declarada: sin fila, `toolchain_<lenguaje>: - (sin serie declarada)` |
+
+---
+
+## �🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
 
 ```bash
 glot use <lenguaje> <fase>/<módulo> [tipo]     # tipo por defecto: feat

@@ -89,7 +89,8 @@ scripts/
 │   ├── languages.tsv         # Un lenguaje por fila: init, manifiestos, pruebas, verificador e inicialización
 │   ├── commits.tsv           # Un paso de sprint por fila: alias, ámbito y mensaje de commit
 │   ├── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
-│   └── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos
+│   ├── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos
+│   └── toolchains.tsv        # Serie verificada por lenguaje: comando que imprime su versión
 ├── docs/                     # Documentación del tooling
 │   ├── ROADMAP.md
 │   ├── SPRINT.md
@@ -111,7 +112,8 @@ scripts/
     ├── glot_0.9.0.sh
     ├── glot_0.10.0.sh
     ├── glot_0.11.0.sh
-    └── glot_0.12.0.sh
+    ├── glot_0.12.0.sh
+    └── glot_1.0.0.sh
 ```
 
 ---
