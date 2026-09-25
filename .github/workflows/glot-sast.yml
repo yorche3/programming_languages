@@ -9,10 +9,10 @@ on:
     branches: [ "main" ]
     paths:
       - 'scripts/**'
-  workflow_dispatch:  # Permite ejecución manual desde la UI de GitHub
+  workflow_dispatch:  # Permite ejecución manual
 
 permissions:
-  security-events: write  # Requerido para subir SARIF a Code Scanning
+  security-events: write  # Requerido para subir SARIF
   contents: read
 
 jobs:
@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # Necesario para que Differential ShellCheck tenga historial completo[citation:3][citation:8]
 
       - name: Run ShellCheck
         id: shellcheck
@@ -31,13 +33,15 @@ jobs:
           scan-directory: 'scripts'
           exclude-path: |
             scripts/versions/**/*.sh
-          # Traduce workflow_dispatch a "manual", que es el valor que la acción espera
+          # Traduce workflow_dispatch a "manual"
           triggering-event: ${{ github.event_name == 'workflow_dispatch' && 'manual' || github.event_name }}
-          # severity: 'warning'  # Opcional: ajusta el nivel de severidad
+          # Para modo manual, establece base y head al mismo commit para forzar un escaneo completo
+          base: ${{ github.event_name == 'workflow_dispatch' && github.sha || '' }}
+          head: ${{ github.event_name == 'workflow_dispatch' && github.sha || '' }}
 
       - name: Upload SARIF results
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4  # Actualizado a v4
         with:
           sarif_file: ${{ steps.shellcheck.outputs.sarif }}
           category: "shellcheck-glot"
