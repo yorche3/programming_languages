@@ -86,6 +86,55 @@
 
 ---
 
+## ✅ Validación de la documentación / Documentation validation
+
+**ES:** Antes de cerrar un paso se comprueba el artefacto que ese paso produce. Cada punto se marca `Sí`, `No` (con motivo) o `No aplica` (con motivo); un `No` sin motivo es un incumplimiento. Esta sección comprueba lo que otras normas mandan, no lo repite.
+
+**EN:** Before closing a step, the artefact that step produces is checked. Each point is marked `Sí`, `No` (with a reason) or `No aplica` (with a reason); an unexplained `No` is a breach. This section checks what other policies mandate, it does not repeat them.
+
+### Especificación / Specification — `docs/core/{fase}/{NN}_{Modulo}.md`
+
+- [ ] **Objetivo y enunciado** bilingües, con lo que el módulo **no** es.
+- [ ] **Una fila por operación** con representación interna, operaciones clave y valor de fallo.
+- [ ] **Pseudocódigo completo**: cubre **todas** las operaciones de la tabla, sin `…` ni «etc.».
+- [ ] **Política donde hay ambigüedad**: orden de inserción, hueco vacío, qué devuelve una búsqueda, dirección de un grafo. Si falta, la especificación lo marca «pendiente de definir».
+- [ ] **Casos de prueba** con salida esperada, incluidos los de límite (vacío, lleno) y fallo.
+- [ ] **Criterios de aceptación** verificables y alineados con la fase, que incluyan el README y el acta de evidencia.
+- [ ] **Cláusula de adaptación**: qué hacer cuando el lenguaje no puede cumplir el pseudocódigo (ver [`AGENT_Template.md`](AGENT_Template.md)).
+- [ ] **Ubicación esperada** contrastada con [`core/00_Project_Initialization_Guide.md`](core/00_Project_Initialization_Guide.md).
+
+### README de módulo-lenguaje / Per-language module README
+
+- [ ] Sigue [`README_Template.md`](README_Template.md): **todas** sus secciones obligatorias están, o llevan `No aplica` con motivo.
+- [ ] Salidas de compilación y pruebas **reales**, coincidentes con el acta de evidencia.
+- [ ] Una fila por operación en _Algoritmos y operaciones_ y en _Indicadores de fallo_.
+- [ ] Una fila por caso de la especificación en _Cobertura de pruebas_, con `Omitido` y razón cuando no sea representable.
+- [ ] Cada desviación del pseudocódigo o de la ubicación esperada tiene su fila en _Adaptaciones idiomáticas_.
+- [ ] Bilingüe, con enlaces relativos que resuelven y sin rutas absolutas del autor ni credenciales.
+
+### Submódulo del lenguaje / Language submodule
+
+- [ ] Código y tests en la ubicación que declara la especificación, o con la desviación documentada.
+- [ ] Suite nativa ejecutada con el comando del catálogo y evidencia escrita en `docs/evidence/`.
+- [ ] Artefactos generados ignorados en `.gitignore`; el árbol queda limpio entre pasos.
+- [ ] READMEs de Nivel 1 y 2 con el módulo listado.
+- [ ] Puntero del monorepo apuntando a un commit **integrado** en el `main` del submódulo.
+
+### Cuándo se aplica / When it applies
+
+| Momento / Moment | Qué se comprueba / What is checked |
+|---|---|
+| Antes de implementar un módulo / Before implementing | La especificación, y con ella su cláusula de adaptación |
+| Al cerrar un módulo en un lenguaje / Closing a module | README del módulo y submódulo, más el acta de evidencia |
+| Al revisar un README ya escrito / Reviewing an existing README | El README, alineándolo con la plantilla vigente |
+| Al auditar un módulo homologado / Auditing a homologated module | Los criterios de [`audits/README.md`](audits/README.md) |
+
+**ES:** Este checklist **no** invalida los READMEs escritos antes de la plantilla vigente: se alinean al revisarlos, y esa deuda se anota en la auditoría del módulo.
+
+**EN:** This checklist does **not** invalidate READMEs written before the current template: they are brought in line when reviewed and that debt is noted in the module's audit.
+
+---
+
 ## ✅ Definition of Done del sprint / Sprint Definition of Done
 
 - [ ] Reconocimiento hecho: `git status --short` y `git submodule status` leídos.

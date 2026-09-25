@@ -18,6 +18,7 @@ docs/audits/
 - Un registro por módulo, no por lenguaje: los lenguajes son filas del estado.
 - Cuando el módulo cierra del todo (todos los lenguajes en 🟢) el registro se conserva como histórico; el cierre se anota en [`ROADMAP_UPDATE_CHECKLIST.md`](../ROADMAP_UPDATE_CHECKLIST.md).
 - El ciclo con el que se corrige cada lenguaje es el de [`WORKFLOW.md`](../WORKFLOW.md).
+- **Una auditoría se abre cuando el roadmap marca el módulo homologado en los 50 lenguajes** (`50/50`): antes de eso no hay deuda técnica que registrar, y los hallazgos sobre una especificación sin implementar se resuelven revisándola.
 
 ---
 
@@ -40,7 +41,7 @@ docs/audits/
 1. **Fidelidad algorítmica e idiomática.** La implementación refleja el pseudocódigo imperativo paso a paso (comparaciones e intercambios *in-place*). Solo un lenguaje **sin mutabilidad nativa razonable** puede sustituirlo por recursión, orden superior o copias, con el mismo principio temporal $O(n^2)$. **Prohibido** invocar cualquier rutina de ordenamiento o de **selección** de la biblioteca estándar (`sort`, `sorted`, `Arrays.sort`, `std::sort`, `qsort`, `lsort`, `lists:sort`, `min`, `max` para el paso de selección…).
 2. **Contrato de errores.** Entrada nula o inválida → indicador de fallo básico del lenguaje (`null`, `nil`, `#f`, `-1`, `None`). **Prohibido** `Option`/`Optional`/`Maybe`/`Result` y **prohibido** lanzar excepciones en esta fase. Si el tipo no admite `null`, se documenta la representación equivalente.
 3. **Aislamiento de tests.** Framework nativo/idiomático; un subconjunto de los 8 casos de la especificación (estándar, ordenado, inverso, idénticos, negativos, un elemento, vacío y nulo/inválido); **cada caso opera sobre una copia** del fixture cuando la función ordena *in-place*.
-4. **Documentación.** Comentarios simples de función (entrada y salida), sin generadores formales (JSDoc, Doxygen…). README del módulo basado en [`README_Template.md`](../README_Template.md) y, si hubo desviación del pseudocódigo, una **nota aclaratoria** que la justifique (el nombre exacto de la sección es libre).
+4. **Documentación.** Comentarios simples de función (entrada y salida), sin generadores formales (JSDoc, Doxygen…). README del módulo basado en [`README_Template.md`](../README_Template.md): se exigen sus secciones obligatorias y, si hubo desviación del pseudocódigo o de la ubicación esperada, la **nota aclaratoria** que la justifique.
 
 ---
 
