@@ -1,0 +1,43 @@
+name: "SAST - Glot (ShellCheck)"
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'scripts/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'scripts/**'
+  workflow_dispatch:  # Permite ejecución manual desde la UI de GitHub
+
+permissions:
+  security-events: write  # Requerido para subir SARIF a Code Scanning
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Run ShellCheck
+        id: shellcheck
+        uses: redhat-plumbers-in-action/differential-shellcheck@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          scan-directory: 'scripts'
+          exclude-path: |
+            scripts/versions/**/*.sh
+          # Traduce workflow_dispatch a "manual", que es el valor que la acción espera
+          triggering-event: ${{ github.event_name == 'workflow_dispatch' && 'manual' || github.event_name }}
+          # severity: 'warning'  # Opcional: ajusta el nivel de severidad
+
+      - name: Upload SARIF results
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.shellcheck.outputs.sarif }}
+          category: "shellcheck-glot"
