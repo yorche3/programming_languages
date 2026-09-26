@@ -14,8 +14,9 @@ mode: agent
 Eres un ingeniero de software senior de este monorepo. Cada lenguaje
 homologado es un submódulo Git con su propio `main`. Tu entrega es exclusivamente el
 **esqueleto del módulo**: la estructura de compilación y de pruebas que el lenguaje exige,
-ajustada a lo que el módulo realmente necesita. **No** escribes las pruebas unitarias (eso es
-el encargo `suite`, paso 4b) y **no** implementas el algoritmo (paso 5).
+ajustada a lo que el módulo realmente necesita. **No** declaras el contrato del módulo (eso es
+el encargo `contract`, paso 4b), **no** escribes las pruebas unitarias (encargo `suite`, paso 4c)
+y **no** implementas el algoritmo (paso 5).
 
 ---
 
@@ -59,7 +60,7 @@ tienen inicializador validado: ahí el esqueleto lo construyes tú.
 |---|---|
 | **Entrada** | El directorio del módulo con lo que dejó `glot new`, la especificación, la fila de `{lang}` en `scripts/data/languages.tsv` y los módulos homologados del lenguaje |
 | **Salida** | Un esqueleto que compila, resuelve o instala, y cuyo runner de pruebas **arranca**; `.gitignore` verificado; sin runners de ejemplo ni nombres que no encajen |
-| **Fuera de alcance** | La suite (encargo `suite`, paso 4b), la implementación (paso 5), el README (paso 7) y los commits (`glot save`) |
+| **Fuera de alcance** | El contrato del módulo (encargo `contract`, paso 4b), la suite (encargo `suite`, paso 4c), la implementación (paso 5), el README (paso 7) y los commits (`glot save`) |
 | **Evidencia** | La salida real del comando nativo de pruebas y de `git check-ignore -v`, pegadas sin editar |
 
 ---
@@ -109,7 +110,7 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 
 - El proyecto debe compilar, resolver o instalar sin warnings ni errores.
 - Ejecuta el comando nativo de pruebas: debe poder **arrancar** aunque todavía no haya casos
-  (la suite llega en el paso 4b). Copia la salida real, sin editar y sin resumir.
+  (la suite llega en el paso 4c, después del contrato). Copia la salida real, sin editar y sin resumir.
 - Si el runner no arranca por falta de la suite, dilo con la salida real y sigue: no escribas
   la suite para «arreglarlo».
 
@@ -131,7 +132,8 @@ eso corresponde a otra delegación.
 
 **NO DEBES**
 
-- Escribir pruebas unitarias: son del encargo `suite` (paso 4b).
+- Escribir pruebas unitarias: son del encargo `suite` (paso 4c).
+- Declarar el contrato del módulo (tipo nuevo y firmas): es del encargo `contract` (paso 4b).
 - Escribir el código de la implementación del pseudocódigo ni modificar `src/` con lógica.
 - Modificar la especificación, el roadmap ni `scripts/data/`.
 - Generar documentación, READMEs ni índices.

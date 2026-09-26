@@ -41,7 +41,8 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh validate php algorithms/naive_sort    # validador automático (opcional; usa el perfil `economy`)
 ./scripts/glot.sh -n new php algorithms/naive_sort   # esqueleto: plan sin tocar nada
 ./scripts/glot.sh new php algorithms/naive_sort      # inicializador + normalización
-./scripts/glot.sh prompt suite                        # encargo de la suite (paso 4b)
+./scripts/glot.sh prompt suite                        # encargo de la suite (paso 4c)
+./scripts/glot.sh prompt contract                     # encargo del contrato (paso 4b)
 ./scripts/glot.sh prompt                              # registro: nombre, paso, modelo y descripción
 ./scripts/glot.sh status                              # submódulos, ramas y punteros (solo lectura)
 ./scripts/glot.sh -n pointer php algorithms/naive_sort  # puntero del submódulo: plan sin tocar nada
@@ -79,7 +80,8 @@ scripts/
 │   └── glot.zsh
 ├── prompts/                  # Plantillas de encargo, versionadas
 │   ├── scaffold.prompt.md        # Paso 4a · esqueleto
-│   ├── suite.prompt.md           # Paso 4b · suite de pruebas
+│   ├── contract.prompt.md        # Paso 4b · contrato del módulo
+│   ├── suite.prompt.md           # Paso 4c · suite de pruebas
 │   ├── implement.prompt.md       # Paso 5
 │   ├── validate.prompt.md        # Paso 6 · informe del validador
 │   ├── docs-module.prompt.md     # Paso 7
@@ -87,6 +89,7 @@ scripts/
 ├── data/                     # Catálogo de datos del tooling
 │   ├── README.md
 │   ├── languages.tsv         # Un lenguaje por fila: init, manifiestos, pruebas, verificador e inicialización
+│   ├── init_sequences.tsv    # Secuencia de inicialización por paso: directorio, modo, comando y completado
 │   ├── commits.tsv           # Un paso de sprint por fila: alias, ámbito y mensaje de commit
 │   ├── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
 │   ├── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos

@@ -62,22 +62,28 @@ reviewed.
 **ES:** Estas tres columnas son la **leyenda de la guía convertida en dato**
 (✅ verificado en este repo · 🔧 estándar del ecosistema · ✍️ estructura manual) y se
 mantienen **a mano**, con una regla dura: **solo se añade lo que se pudo verificar
-ejecutando el inicializador** en un directorio temporal, con la entrada cerrada y
-con un tiempo máximo, y comprobando qué deja en el disco. Un caso que no se pudo
-verificar así **no se añade**: queda como `deferred` y lo escribe el agente. La
+ejecutando el inicializador** en un directorio temporal, con la entrada cerrada (o
+conducida con `expect`, R1) y con un tiempo máximo, comprobando qué deja en el
+disco. La columna 7 es el **comando único**: un lenguaje que necesita varios pasos,
+otro directorio de trabajo o un completado aparece en `init_sequences.tsv` con la
+columna 7 en `-`, para no tener dos fuentes. `deferred` sigue en el vocabulario (un
+lenguaje que no se pueda cerrar vuelve ahí), pero hoy no lo usa ninguno. La
 cobertura se informa en `doctor` como `new_commands` y `deferred: N`.
 
 **EN:** These three columns are the **guide's legend turned into data** (✅ verified
 in this repo · 🔧 ecosystem standard · ✍️ manual structure) and they are maintained
 **by hand**, with one hard rule: **only what could be verified by running the
-initializer** in a temporary directory, with stdin closed and a timeout, and by
-checking what it leaves on disk gets added. A case that could not be verified that
-way **is not added**: it stays `deferred` and the agent writes it. Coverage is
-reported by `doctor` as `new_commands` and `deferred: N`.
+initializer** in a temporary directory, with stdin closed (or driven by `expect`,
+R1) and a timeout, and by checking what it leaves on disk gets added. Column 7 is
+the **single command**: a language needing several steps, another working directory
+or a completion appears in `init_sequences.tsv` with column 7 set to `-`, so there
+is only one source. `deferred` stays in the vocabulary (a language that cannot be
+closed goes back there), but no language uses it today. Coverage is reported by
+`doctor` as `new_commands` and `deferred: N`.
 
-**ES:** Reparto **objetivo** de los 50 lenguajes tras la política R1–R6 (cerrada el 2026-09-26): **33 `tool`**, **17 `manual`** y **0 `deferred`**. Pasan a `tool` doce lenguajes —`ada`, `groovy`, `kotlin`, `clojure`, `nim` y `python` (eran `deferred`) más `julia`, `vala`, `perl`, `common-lisp`, `racket` y `v` (eran `manual`)—, `cpp` queda `manual` (C++ mantiene Bazel, decidido el 2026-09-26) y `java` baja a `manual` por R2 (el arquetipo `quickstart` trae `main`). **`languages.tsv` todavía declara 22 `tool` / 21 `manual` / 7 `deferred`**: el cambio de columnas 6 a 8 es el paso P3 de [`PLAN_v1.1.0.md`](../docs/PLAN_v1.1.0.md), junto con la secuencia de `init_sequences.tsv`.
+**ES:** Reparto de los 50 lenguajes tras la política R1–R6 (cerrada el 2026-09-26 y ya aplicada al dato): **33 `tool`**, **17 `manual`** y **0 `deferred`**. Pasan a `tool` doce lenguajes —`ada`, `groovy`, `kotlin`, `clojure`, `nim` y `python` (eran `deferred`) más `julia`, `vala`, `perl`, `common-lisp`, `racket` y `v` (eran `manual`)—, `cpp` queda `manual` (C++ mantiene Bazel, decidido el 2026-09-26) y `java` baja a `manual` por R2 (el arquetipo `quickstart` trae `main`). `doctor` lo informa como `new_commands: 50 de / of 50 (deferred: 0)`.
 
-**EN:** **Target** split of the 50 languages after policy R1–R6 (closed on 2026-09-26): **33 `tool`**, **17 `manual`** and **0 `deferred`**. Twelve languages move to `tool` —`ada`, `groovy`, `kotlin`, `clojure`, `nim` and `python` (were `deferred`) plus `julia`, `vala`, `perl`, `common-lisp`, `racket` and `v` (were `manual`)—, `cpp` stays `manual` (C++ keeps Bazel, decided on 2026-09-26) and `java` moves down to `manual` under R2 (the `quickstart` archetype ships `main`). **`languages.tsv` still declares 22 `tool` / 21 `manual` / 7 `deferred`**: changing columns 6 to 8 is step P3 of [`PLAN_v1.1.0.md`](../docs/PLAN_v1.1.0.md), together with the `init_sequences.tsv` sequence.
+**EN:** Split of the 50 languages after policy R1–R6 (closed on 2026-09-26 and already applied to the data): **33 `tool`**, **17 `manual`** and **0 `deferred`**. Twelve languages move to `tool` —`ada`, `groovy`, `kotlin`, `clojure`, `nim` and `python` (were `deferred`) plus `julia`, `vala`, `perl`, `common-lisp`, `racket` and `v` (were `manual`)—, `cpp` stays `manual` (C++ keeps Bazel, decided on 2026-09-26) and `java` moves down to `manual` under R2 (the `quickstart` archetype ships `main`). `doctor` reports it as `new_commands: 50 de / of 50 (deferred: 0)`.
 
 **ES:** Normalización declarada: `flat:<sub>` sube al directorio del módulo el
 contenido de `<sub>` (incluidos los archivos ocultos) y borra `<sub>`; `rm:<ruta>`
@@ -102,15 +108,15 @@ no declared operation is untouched: it is a data decision, not the script's.
 | 1 | Lenguaje, tal como aparece en `.gitmodules` | `ada` |
 | 2 | Orden del paso, desde `1` | `1` |
 | 3 | Directorio de trabajo del paso: `module` (la carpeta del módulo que crea `use`) o `phase` (cuando el generador crea la carpeta él mismo) | `module` |
-| 4 | Modo: `run` (se ejecuta), `expect` (se conduce con `expect`) o `print` (solo se imprime) | `run` |
+| 4 | Modo: `run` (se ejecuta) o `expect` (se conduce con `expect`) | `run` |
 | 5 | Comando con los marcadores del tooling (`{module}`, `{Module}`) | `alr -n init --lib --in-place {module}` |
 | 6 | Requisito del paso: `-`, `expect`, `network`, `env:PERL5LIB+PATH` o `tool:uv` | `-` |
 | 7 | Respuestas de `expect`, separadas por `|`; `-` en los demás modos | `library|<defecto>|<defecto>|<defecto>|<defecto>` |
 | 8 | Lo que hay que **completar a mano** después (el generador no lo crea); `-` si no falta nada | `borrar el .git que crea uv` |
 
-**ES:** Un lenguaje aparece aquí **solo** si su inicialización necesita **más de un paso**, **otro directorio de trabajo**, `expect` o un **completado posterior**; los que se resuelven con un único comando siguen en la columna 7 de `languages.tsv` y **no se duplican**. La consume `new` desde la v1.1.0 (paso P3/P4 de [`PLAN_v1.1.0.md`](../docs/PLAN_v1.1.0.md)) y está pensada también como **consulta humana**: es la lista que dice, lenguaje a lenguaje, qué se ejecuta y qué falta.
+**ES:** Un lenguaje aparece aquí **solo** si su inicialización necesita **más de un paso**, **otro directorio de trabajo**, `expect` o un **completado posterior**; los que se resuelven con un único comando siguen en la columna 7 de `languages.tsv` y **no se duplican**. La consume `new` (v1.1.0): construye el plan con estos pasos, lo imprime con `-n` (`cd <directorio> && <comando>` por paso, más `# completar / complete:`), lo ejecuta en orden y, si el paso declara `phase`, **retira la carpeta vacía** que dejó `use`, porque ese generador crea la carpeta él mismo (los tres que lo hacen —`julia`, `clojure` y `racket`— fallan si ya existe). Está pensada también como **consulta humana**: es la lista que dice, lenguaje a lenguaje, qué se ejecuta y qué falta. `GLOT_DATA_DIR` redirige el directorio del dato, para pruebas y laboratorio.
 
-**EN:** A language appears here **only** when its initialisation needs **more than one step**, **another working directory**, `expect` or a later **completion**; single-command languages stay in column 7 of `languages.tsv` and are **not duplicated**. It is consumed by `new` from v1.1.0 onwards (steps P3/P4 of [`PLAN_v1.1.0.md`](../docs/PLAN_v1.1.0.md)) and is also meant as a **human reference**: the per-language list of what runs and what is missing.
+**EN:** A language appears here **only** when its initialisation needs **more than one step**, **another working directory**, `expect` or a later **completion**; single-command languages stay in column 7 of `languages.tsv` and are **not duplicated**. It is consumed by `new` (v1.1.0): it builds the plan from these steps, prints it with `-n` (`cd <dir> && <command>` per step, plus `# completar / complete:`), runs it in order and, when a step declares `phase`, **removes the empty folder** left by `use`, because that generator creates the folder itself (the three that do —`julia`, `clojure` and `racket`— fail if it already exists). It is also meant as a **human reference**: the per-language list of what runs and what is missing. `GLOT_DATA_DIR` redirects the data directory, for tests and the lab.
 
 **ES:** Las filas están medidas ejecutando cada generador en el laboratorio el 2026-09-26 (ver la tabla de medición de [`ROADMAP.md`](../docs/ROADMAP.md)). La regla de la columna 3 se comprobó una a una: `uv init --lib .`, `module-starter --dir=.` y `quickproject` con nombre trabajan **en el sitio**, mientras que `Pkg.generate`, `deps-new` con destino, `raco pkg new` y `alr init` **crean la carpeta** — con `alr` se resuelve con `--in-place` y se queda en `module`.
 
@@ -120,7 +126,7 @@ no declared operation is untouched: it is a data decision, not the script's.
 
 | Columna / Column | Contenido / Content | Ejemplo / Example |
 |:---:|---|---|
-| 1 | Paso del sprint | `4b` |
+| 1 | Paso del sprint | `4c` |
 | 2 | Alias: el encargo que lo cubre, o `-` | `suite` |
 | 3 | Ámbito del commit: `submodule` o `monorepo` | `submodule` |
 | 4 | Mensaje, con los marcadores del tooling | `chore({phase}): add suite for {module}` |
@@ -132,6 +138,10 @@ estado del sprint. El harness comprueba **deriva en los dos sentidos**: cada men
 del catálogo tiene que estar en la tabla del sprint, cada alias tiene que ser un
 encargo registrado en `prompts/`, y los dos pasos de ámbito `monorepo` (puntero y
 roadmap) tienen que ser los que esperan a `pointer` (v0.12.0) y `close` (v0.10.0).
+
+**ES:** **Numeración de pasos:** cuando un paso entra **en medio**, toma el ordinal libre y **los siguientes se recorren** (v1.1.0: el contrato entra como `4b` y la suite pasa a `4c`). El ordinal es el mismo en esta tabla, en la tabla del sprint y en el `step:` de la plantilla del encargo, y se cambia en los tres sitios a la vez.
+
+**EN:** **Step numbering:** when a step goes **in the middle**, it takes the free ordinal and **the following ones shift** (v1.1.0: the contract comes in as `4b` and the suite moves to `4c`). The ordinal is the same in this table, in the sprint table and in the request template's `step:`, and the three change at once.
 
 **EN:** It is the sprint table ([`SPRINT.md`](../docs/SPRINT.md)) turned into data:
 `save` reads from here, not from the script. The placeholders (`{lang}`, `{phase}`,

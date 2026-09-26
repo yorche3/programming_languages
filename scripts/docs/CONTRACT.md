@@ -113,7 +113,7 @@
 4. **Idempotencia** cuando se repite el mismo efecto.
 5. **Inyectable para test**: raíz del repo y ruta del estado sobreescribibles por variable.
 6. **Mensajes bilingües ES/EN**; los datos de salida no se traducen.
-7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR`, `GLOT_STATE_FILE`, `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` y `GLOT_TOOLCHAINS_FILE` (esta última, como `GLOT_STATE_FILE`, es para pruebas y herramientas: apunta a otro catálogo de toolchains). `GLOT_LOADED` no se declara: la capa cargable la pone al delegar en el programa, para que `doctor` sepa que hay función
+7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR`, `GLOT_STATE_FILE`, `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` y `GLOT_TOOLCHAINS_FILE` (esta última, como `GLOT_STATE_FILE`, es para pruebas y herramientas: apunta a otro catálogo de toolchains) y `GLOT_DATA_DIR` (apunta a otro directorio de datos, para pruebas y laboratorio). `GLOT_LOADED` no se declara: la capa cargable la pone al delegar en el programa, para que `doctor` sepa que hay función
 
 ### Desde v0.4.0 — el almacén
 
@@ -282,7 +282,7 @@
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
-| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** (`4a`, `4b`, `5`, `7`, `8`) o por **alias del encargo** (`scaffold`, `suite`, `implement`, `docs-module`, `docs-language`). Nunca se escribe a mano |
+| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** (`4a`, `4b`, `4c`, `5`, `7`, `8`) o por **alias del encargo** (`scaffold`, `contract`, `suite`, `implement`, `docs-module`, `docs-language`). Nunca se escribe a mano |
 | Marcadores / Placeholders | `{lang}`, `{phase}`, `{module}`, `{Module}`: los mismos del resto del tooling, resueltos con el estado del sprint |
 | Índice / Index | `git add -A` del **submódulo** completo. Si hay cambios fuera del módulo, se nombran por stderr antes de confirmar |
 | Rama / Branch | Si la rama activa no es la del estado del sprint, se avisa (no se bloquea) |

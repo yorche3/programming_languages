@@ -1871,6 +1871,20 @@ _glot_cmd_new() {
     local fix=""
     local cmd=""
     local rc=0
+    local seq=""
+    local steps=""
+    local order=""
+    local workdir=""
+    local mode=""
+    local command=""
+    local answers=""
+    local complete=""
+    local step_dir=""
+    local step_mode=""
+    local step_cmd=""
+    local step_answers=""
+    local step_complete=""
+    local complete_note=""
 
     target="$(_glot_exec_target "$@")" || return $?
     IFS=$'\t' read -r lang phase module <<<"$target"
@@ -1908,20 +1922,49 @@ _glot_cmd_new() {
             ;;
     esac
 
-    run="$(_glot_init_run "$lang")" || run="-"
-    fix="$(_glot_init_fix "$lang")" || fix="-"
-    if [[ "$run" == "-" || -z "$run" ]]; then
-        _glot_error "el catálogo no trae comando de inicialización / no initialisation command in the catalogue: $lang"
-        _glot_info 'revisa / check: scripts/data/languages.tsv'
-        return 1
+    # La secuencia del dato manda cuando el lenguaje aparece en `init_sequences.tsv`;
+    # si no, se usa el comando único de la columna 7 con su normalización (columna 8).
+    seq="$(_glot_init_sequence "$lang")"
+    run=""
+    fix=""
+    if [[ -z "$seq" ]]; then
+        run="$(_glot_init_run "$lang")" || run="-"
+        fix="$(_glot_init_fix "$lang")" || fix="-"
+        if [[ "$run" == "-" || -z "$run" ]]; then
+            _glot_error "el catálogo no trae comando de inicialización / no initialisation command in the catalogue: $lang"
+            _glot_info 'revisa / check: scripts/data/languages.tsv'
+            return 1
+        fi
     fi
 
-    cmd="$(_glot_expand_command "$dir" "$module" "$run")" || return 1
+    # Plan: cada paso con su directorio de trabajo (`module` o `phase`), su modo y lo
+    # que queda por completar. Sin secuencia declarada el plan es un único paso.
+    if [[ -n "$seq" ]]; then
+        while IFS=$'\t' read -r order workdir mode command answers complete; do
+            [[ -n "$order" ]] || continue
+            step_dir="$dir"
+            [[ "$workdir" == "phase" ]] && step_dir="$root/$lang/core/$phase"
+            step_cmd="$(_glot_expand_command "$step_dir" "$module" "$command")" || return 1
+            steps+="$step_dir"$'\t'"$mode"$'\t'"$step_cmd"$'\t'"$answers"$'\t'"$complete"$'\n'
+        done <<<"$seq"
+    else
+        step_cmd="$(_glot_expand_command "$dir" "$module" "$run")" || return 1
+        steps="$dir"$'\t'"run"$'\t'"$step_cmd"$'\t'"-"$'\t'"-"$'\n'
+    fi
 
     # Ensayo: el plan, sin tocar el disco.
     if ((_glot_dry_run)); then
-        printf 'cd %s && %s\n' "$dir" "$cmd"
-        [[ "$fix" != "-" ]] && printf '# normalizar / normalise: %s\n' "$(_glot_expand_command "$dir" "$module" "$fix")"
+        while IFS=$'\t' read -r step_dir step_mode step_cmd step_answers step_complete; do
+            [[ -n "$step_dir" ]] || continue
+            printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
+            [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
+            if [[ -n "$step_complete" && "$step_complete" != "-" ]]; then
+                complete_note="${step_complete//\{module\}/$module}"
+                complete_note="${complete_note//\{Module\}/$(_glot_pascal "$module")}"
+                printf '# completar / complete: %s\n' "$complete_note"
+            fi
+        done <<<"$steps"
+        [[ -n "$fix" && "$fix" != "-" ]] && printf '# normalizar / normalise: %s\n' "$(_glot_expand_command "$dir" "$module" "$fix")"
         [[ "$kind" == "manual" ]] && printf '# el manifiesto y la suite son del encargo / manifest and suite belong to the request\n'
         printf '%s\n' "$dir"
         return 0
@@ -1935,16 +1978,44 @@ _glot_cmd_new() {
         return 0
     fi
 
-    _glot_info "new: $cmd"
-    (cd -- "$dir" && eval "$cmd") </dev/null || rc=$?
+    while IFS=$'\t' read -r step_dir step_mode step_cmd step_answers step_complete; do
+        [[ -n "$step_dir" ]] || continue
 
-    if ((rc != 0)); then
-        _glot_warn "new falló / failed: $lang $phase/$module (código / code $rc)"
-        _glot_info "el directorio queda como está / the directory is left as it is: $dir"
-        return 4
-    fi
+        # Un generador que crea la carpeta por su cuenta (directorio de trabajo =
+        # fase) choca con la carpeta vacía que dejó `use`: se retira antes.
+        if [[ "$step_dir" != "$dir" && -d "$dir" && -z "$(ls -A -- "$dir" 2>/dev/null)" ]]; then
+            rmdir -- "$dir" 2>/dev/null || true
+        fi
 
-    if [[ "$fix" != "-" && -n "$fix" ]]; then
+        _glot_info "new: $step_cmd"
+        rc=0
+        case "$step_mode" in
+            run)
+                (cd -- "$step_dir" && eval "$step_cmd") </dev/null || rc=$?
+                ;;
+            expect)
+                (cd -- "$step_dir" && _glot_expect_run "$step_cmd" "$step_answers") </dev/null || rc=$?
+                ;;
+            *)
+                _glot_error "modo de inicialización desconocido / unknown initialisation mode: $step_mode ($lang)"
+                return 1
+                ;;
+        esac
+
+        if ((rc != 0)); then
+            _glot_warn "new falló / failed: $lang $phase/$module (código / code $rc)"
+            _glot_info "el directorio queda como está / the directory is left as it is: $dir"
+            return 4
+        fi
+
+        if [[ -n "$step_complete" && "$step_complete" != "-" ]]; then
+            complete_note="${step_complete//\{module\}/$module}"
+            complete_note="${complete_note//\{Module\}/$(_glot_pascal "$module")}"
+            _glot_info "completar / complete: $complete_note"
+        fi
+    done <<<"$steps"
+
+    if [[ -n "$fix" && "$fix" != "-" ]]; then
         if ! _glot_init_normalise "$dir" "$module" "$fix"; then
             _glot_warn "new falló al normalizar / failed while normalising: $lang $phase/$module"
             return 4
@@ -3123,7 +3194,7 @@ _glot_help_verb() {
             printf 'se escribe a mano. Añade el submódulo al índice y confirma en el submódulo\n'
             printf 'The message comes from the commit catalogue (the sprint table in data); it\n'
             printf 'is not written by hand. It stages the submodule and commits in it\n'
-            printf 'Pasos / steps: 4a (andamiaje/scaffold) · 4b (suite) · 5 (implementación) · 7 · 8\n'
+            printf 'Pasos / steps: 4a (andamiaje/scaffold) · 4b (contrato/contract) · 4c (suite) · 5 (implementación) · 7 · 8\n'
             printf 'Del monorepo / monorepo steps: 9 (puntero/pointer) · 10 (cierre/close), cada uno\n'
             printf 'con sus rutas: el submódulo, o roadmap + checklist + evidencia del módulo\n'
             printf 'Each with its own paths: the submodule, or roadmap + checklist + module evidence\n'
@@ -3229,20 +3300,46 @@ _glot_langs() {
     _glot_gitmodules_list | LC_ALL=C sort
 }
 
-# _glot_data_file — catálogo de datos del tooling (una fila por lenguaje).
-# Se busca junto al script vivo y también un nivel arriba, para que un snapshot de
-# versions/ pueda imprimir el autocompletado junto al glot.sh que lo acompaña.
-_glot_data_file() {
+# _glot_data_dir — directorio del catálogo de datos. `GLOT_DATA_DIR` lo redirige,
+# como `GLOT_TOOLCHAINS_FILE` redirige el de toolchains: sirve para pruebas y para
+# el laboratorio, donde el dato se sustituye por uno sintético.
+_glot_data_dir() {
     local dir=""
+
+    if [[ -n "${GLOT_DATA_DIR:-}" && -d "$GLOT_DATA_DIR" ]]; then
+        printf '%s\n' "$GLOT_DATA_DIR"
+        return 0
+    fi
 
     for dir in "$GLOT_SCRIPT_DIR/data" "$GLOT_SCRIPT_DIR/../data"; do
         if [[ -r "$dir/languages.tsv" ]]; then
-            printf '%s\n' "$dir/languages.tsv"
+            printf '%s\n' "$dir"
             return 0
         fi
     done
 
     return 1
+}
+
+# _glot_data_file — catálogo de datos del tooling (una fila por lenguaje).
+# Se busca junto al script vivo y también un nivel arriba, para que un snapshot
+# de versions/ pueda imprimir el autocompletado junto al glot.sh que lo acompaña.
+_glot_data_file() {
+    local dir=""
+
+    dir="$(_glot_data_dir)" || return 1
+    printf '%s\n' "$dir/languages.tsv"
+}
+
+# _glot_sequences_file <lenguaje> — archivo de secuencias de inicialización
+# (v1.1.0): una fila por paso, en orden. Es la fuente de la secuencia cuando el
+# lenguaje aparece en él; `languages.tsv` (columna 7) queda para el comando único.
+_glot_sequences_file() {
+    local dir=""
+
+    dir="$(_glot_data_dir)" || return 1
+    [[ -r "$dir/init_sequences.tsv" ]] || return 1
+    printf '%s\n' "$dir/init_sequences.tsv"
 }
 
 # _glot_completion_file <shell> — guion de autocompletado de ese shell.
@@ -3363,6 +3460,81 @@ _glot_init_run() {
 #   rm:<ruta>         — elimina (tolerante: si no está, no pasa nada)
 _glot_init_fix() {
     _glot_lang_field "$1" 8
+}
+
+# _glot_init_sequence <lenguaje> — pasos de la secuencia de inicialización de ese
+# lenguaje, en orden, como `orden<TAB>directorio<TAB>modo<TAB>comando<TAB>respuestas<TAB>completado`.
+# Sale con 1 si el lenguaje no aparece: entonces manda la columna 7 de `languages.tsv`.
+_glot_init_sequence() {
+    local lang="$1"
+    local file=""
+
+    file="$(_glot_sequences_file)" || return 1
+    awk -F'\t' -v lang="$lang" '$1 == lang {print $2 "\t" $3 "\t" $4 "\t" $5 "\t" $7 "\t" $8}' "$file" | sort -n -k1,1
+}
+
+# _glot_init_sequence_has <lenguaje> — ¿el lenguaje tiene secuencia declarada?
+_glot_init_sequence_has() {
+    [[ -n "$(_glot_init_sequence "$1")" ]]
+}
+
+# _glot_expect_run <comando> <respuestas> — ejecuta un inicializador interactivo
+# conduciéndolo con `expect`. Las respuestas llegan separadas por `|` y en orden;
+# `-` o `<default>` pulsan Enter (aceptan el valor por defecto) y `-` en una
+# posición sin más respuestas también. Sin `expect` instalado no se adivina: error.
+# El comando debe ser simple (sin metacaracteres de shell); si no, se declara en
+# la normalización del lenguaje.
+_glot_expect_run() {
+    local cmd="$1"
+    local answers="$2"
+    local script=""
+    local token=""
+    local list=""
+
+    if ! command -v expect >/dev/null 2>&1; then
+        _glot_error "falta expect para conducir el inicializador / expect is required: $cmd"
+        _glot_info 'instálalo o escribe el esqueleto a mano / install it or write the scaffold by hand'
+        return 1
+    fi
+
+    script="$(mktemp "${TMPDIR:-/tmp}/glot-expect.XXXXXX")" || return 1
+
+    local IFS='|'
+    for token in $answers; do
+        case "$token" in
+            '-' | '<default>' | '<defecto>' | '<vacío>' | '<vacio>' | '<empty>' | '')
+                list+=' ""'
+                ;;
+            *)
+                token="${token//\\/\\\\}"
+                token="${token//\"/\\\"}"
+                list+=" \"$token\""
+                ;;
+        esac
+    done
+    unset IFS
+
+    {
+        printf 'set timeout 300\n'
+        printf 'set answers [list%s]\n' "$list"
+        printf 'set i 0\n'
+        printf 'spawn %s\n' "$cmd"
+        printf 'expect {\n'
+        printf '    -re {Choices:} { send "\\r"; exp_continue }\n'
+        printf '    -re {\\[[^]]*\\]\\s*$} { send "\\r"; exp_continue }\n'
+        printf '    -re {:\\s*$} { if {$i < [llength $answers]} { send "[lindex $answers $i]\\r"; incr i } else { send "\\r" }; exp_continue }\n'
+        printf '    timeout { puts "glot: expect timeout"; exit 1 }\n'
+        printf '    eof\n'
+        printf '}\n'
+    } >"$script" || {
+        rm -f -- "$script"
+        return 1
+    }
+
+    expect -f "$script"
+    local rc=$?
+    rm -f -- "$script"
+    return $rc
 }
 
 # _glot_commits_file — convención de mensajes de commit del repositorio, en datos y
