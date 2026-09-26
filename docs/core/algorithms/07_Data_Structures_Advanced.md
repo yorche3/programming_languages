@@ -18,30 +18,30 @@ grand_parent: Core
 |---|---|
 | Construir estructuras que requieren más de un enlace por nodo: un árbol binario de búsqueda y un grafo dirigido. | Build structures that require more than one link per node: a binary search tree and a directed graph. |
 
-Este módulo vuelve a declarar y verificar el contrato de `Node` en el contexto de múltiples referencias. No importa ni reutiliza código de `data_structures_basics`; la repetición es deliberada porque el objetivo es comparar cómo cambia el nodo cuando deja de ser lineal.
+Este módulo declara y verifica `TreeNode` y `GraphNode` en contextos distintos: enlaces izquierdo/derecho para el ABB y adyacencias dirigidas para el grafo. No importa ni reutiliza código de `data_structures_basics`; se reutiliza el concepto de nodo, no un tipo o una implementación compartidos.
 
-This module declares and verifies the `Node` contract again in the context of multiple references. It does not import or reuse code from `data_structures_basics`; the repetition is deliberate because the goal is to compare how a node changes when the structure is no longer linear.
+This module declares and verifies `TreeNode` and `GraphNode` in different contexts: left/right links for the BST and directed adjacency for the graph. It does not import or reuse code from `data_structures_basics`; it reuses the concept of a node, not a shared type or implementation.
 
 ## 📖 Concepto: múltiples referencias / Concept: multiple links
 
-Un nodo de árbol tiene `Value`, `Left` y `Right`. Un nodo de grafo tiene `Value` y una colección de enlaces a vecinos. El nombre y la representación concreta son idiomáticos, pero el valor, los enlaces y las invariantes son observables mediante la API definida.
+Un `TreeNode` tiene `Value`, `Left` y `Right`. Un `GraphNode` tiene una `Label` y su propia secuencia de etiquetas vecinas. El nombre y la representación concreta son idiomáticos, pero los valores, enlaces e invariantes se observan mediante la API de cada estructura.
 
-A tree node has `Value`, `Left` and `Right`. A graph node has `Value` and a collection of links to neighbours. The name and concrete representation are idiomatic, but the value, links and invariants are observable through the defined API.
+A `TreeNode` has `Value`, `Left` and `Right`. A `GraphNode` has a `Label` and its own sequence of neighbour labels. Names and concrete representations are idiomatic, but values, links and invariants are observed through each structure's API.
 
-La biblioteca estándar puede apoyar la representación interna de vecinos, índices o almacenamiento auxiliar. No puede sustituir la implementación de `BinaryTree` o `Graph`, ni convertir una operación del contrato en una llamada de alto nivel que oculte el aprendizaje.
+La `LinkedList<T>` de la biblioteca estándar puede almacenar la secuencia de vecinos de `GraphNode`; esa lista no sustituye al `Graph` ni cambia sus complejidades (`O(d(u))` para insertar, consultar o copiar vecinos). `BinaryTree` y las operaciones de `Graph` siguen siendo implementaciones propias; no se usan algoritmos de alto nivel que oculten el aprendizaje.
 
-The standard library may support the internal representation of neighbours, indices or auxiliary storage. It cannot replace the implementation of `BinaryTree` or `Graph`, or turn a contract operation into a high-level call that hides the learning objective.
+The standard library's `LinkedList<T>` may store `GraphNode`'s neighbour sequence; that list does not replace `Graph` or change its complexities (`O(d(u))` to insert, look up or copy neighbours). `BinaryTree` and `Graph` operations remain the implementation under study; no high-level algorithms may hide the learning objective.
 
 ## 📐 Contrato común y aislamiento / Common contract and isolation
 
-1. `Node` es un tipo nuevo o equivalente idiomático, con valor y múltiples referencias. Sus tests verifican creación, lectura del valor, enlaces ausentes y enlaces a hijos o vecinos.
-2. `BinaryTree` y `Graph` tienen tipos nuevos y constructores equivalentes a `init`. No importan `data_structures_basics` ni otras implementaciones de estructuras del proyecto.
+1. `TreeNode` es un tipo nuevo o equivalente idiomático con valor y enlaces `Left` y `Right`. `GraphNode` es un tipo nuevo con una etiqueta y su propia secuencia de adyacencia.
+2. `BinaryTree` y `Graph` tienen tipos nuevos y constructores equivalentes a `init`. `Graph` puede usar el `LinkedList<T>` de la biblioteca estándar como almacenamiento de vecinos, pero implementa manualmente sus propias operaciones e invariantes; la colección no sustituye al ADT `Graph`.
 3. Los indicadores de éxito y fallo son los valores representables y no ambiguos que declare el README de cada lenguaje. No se fuerza `-1`, `null`, `nil`, `Option` o `Result` cuando el lenguaje o la fase no los admiten.
 4. Los valores de prueba son enteros positivos o el subtipo entero equivalente que evite colisiones con los indicadores del lenguaje.
 5. Cada adaptación de mutabilidad, ausencia, índices, vecinos o capacidad se documenta como adaptación idiomática.
 
-1. `Node` is a new type or idiomatic equivalent, with a value and multiple links. Its tests verify creation, value access, absent links and links to children or neighbours.
-2. `BinaryTree` and `Graph` have new types and constructors equivalent to `init`. They do not import `data_structures_basics` or other project structure implementations.
+1. `TreeNode` is a new type or idiomatic equivalent with a value and `Left` and `Right` links. `GraphNode` is a new type with a label and its own adjacency sequence.
+2. `BinaryTree` and `Graph` have new types and constructors equivalent to `init`. `Graph` may use the standard library's `LinkedList<T>` as neighbour storage, but it manually implements its own operations and invariants; the collection does not replace the `Graph` ADT.
 3. Success and failure indicators are the representable, unambiguous values documented in each language README. `-1`, `null`, `nil`, `Option` or `Result` are not forced when the language or phase does not admit them.
 4. Test values are positive integers or the equivalent integer subtype that avoids collisions with the language's indicators.
 5. Every adaptation for mutability, absence, indices, neighbours or capacity is documented as an idiomatic adaptation.
@@ -50,13 +50,14 @@ The standard library may support the internal representation of neighbours, indi
 
 | Estructura / Structure | Operaciones / Operations | Contrato e invariantes / Contract and invariants | Complejidad / Complexity |
 |---|---|---|---|
-| `Node` | `init(value)`, `get_value()`, `get_left()`, `get_right()`, `set_left(node)`, `set_right(node)` | Un nodo puede enlazar hasta dos hijos; un enlace ausente representa un subárbol vacío. | `O(1)` |
-| `BinaryTree` | `init(capacity)`, `insert(value)`, `contains(value)`, `is_empty()`, `size()` | ABB: valores menores a la izquierda, mayores a la derecha; duplicados no aumentan el tamaño; capacidad máxima de nodos. `contains` es una consulta de pertenencia intrínseca a la invariante ABB, no un algoritmo de búsqueda: la búsqueda sobre secuencias indexables pertenece al módulo `searching`. | `O(h)` para insertar y comprobar pertenencia; `O(1)` para vacío y tamaño |
-| `Graph` | `init(capacity)`, `add_edge(u,v)`, `has_edge(u,v)`, `get_neighbors(u)`, `is_empty()`, `size()` | Dirigido; nodos identificados dentro de la capacidad; aristas distintas cuentan una vez; vecinos en orden creciente; `is_empty()` es verdadero cuando no hay aristas y `size()` cuenta aristas distintas, no nodos. | `O(1)` para acceso directo; `O(V)` para vecinos, según representación |
+| `TreeNode` | `init(value)`, `get_value()`, `get_left()`, `get_right()`, `set_left(node)`, `set_right(node)` | Nodo propio del ABB; un enlace ausente representa un subárbol vacío. | `O(1)` |
+| `BinaryTree` | `init(capacity)`, `insert(value)`, `contains(value)`, `is_empty()`, `size()` | ABB: valores menores a la izquierda y mayores a la derecha; duplicados no aumentan el tamaño; capacidad máxima de nodos. `contains` es pertenencia por la invariante del ABB, no búsqueda sobre secuencias (módulo `searching`). | `init`, vacío y tamaño: `O(1)`; insertar y pertenencia: `O(h)`, `h` = altura actual |
+| `GraphNode` | `init(label)` (interno a `Graph`) | Nodo propio del grafo; `label` identifica el vértice; conserva su secuencia de vecinos en orden creciente y sin duplicados. | `O(1)` |
+| `Graph` | `init(capacity)`, `add_edge(u,v)`, `has_edge(u,v)`, `get_neighbors(u)`, `is_empty()`, `size()` | Grafo dirigido con etiquetas `0 .. capacity - 1`; cuenta aristas dirigidas distintas; la adyacencia de cada vértice está ordenada. `is_empty()` significa que no hay aristas; `size()` cuenta aristas distintas, no vértices. | `init`: `O(V)`; `add_edge` y `has_edge`: `O(d(u))`; `get_neighbors`: `O(d(u))`; vacío y tamaño: `O(1)` |
 
-En este módulo `capacity` es el máximo de nodos del árbol o grafo. Una capacidad inválida (menor que 1 o no representable) deja la instancia **inutilizable**, y ese estado es observable: `is_empty()` devuelve verdadero, `size()` devuelve cero y toda operación devuelve el indicador de fallo del lenguaje. Una estructura dinámica que no pueda expresar overflow declara esa limitación y conserva el contrato observable que sí pueda representar.
+En este módulo `capacity` es el máximo de nodos del árbol o vértices del grafo. Una capacidad inválida (menor que 1 o no representable) deja la instancia **inutilizable**, y ese estado es observable: `is_empty()` devuelve verdadero, `size()` devuelve cero y las operaciones de consulta o mutación devuelven el indicador de fallo del lenguaje. Una capacidad agotada rechaza la creación de un valor nuevo o una arista nueva sin cambiar el estado. Un duplicado de ABB sigue siendo éxito aunque el árbol esté lleno, porque no crea un nodo.
 
-In this module `capacity` is the maximum number of tree or graph nodes. An invalid capacity (less than 1 or not representable) leaves the instance **unusable**, and that state is observable: `is_empty()` returns true, `size()` returns zero and every operation returns the language's failure indicator. A dynamic structure that cannot express overflow declares that limitation and preserves the observable contract it can represent.
+In this module `capacity` is the maximum number of tree nodes or graph vertices. An invalid capacity (less than 1 or not representable) leaves the instance **unusable**, and that state is observable: `is_empty()` returns true, `size()` returns zero and query or mutation operations return the language's failure indicator. An exhausted capacity rejects creation of a new value or edge without changing the state. A duplicate BST value still succeeds when the tree is full because it creates no node.
 
 ## 📋 Política de resultados / Result policy
 
@@ -67,12 +68,15 @@ In this module `capacity` is the maximum number of tree or graph nodes. An inval
 | Operación / Operation | Éxito / Success | Fallo / Failure | Efecto / Effect |
 |---|---|---|---|
 | `TreeNode.init(value)` | Nodo con `value` y ambos enlaces ausentes | No aplica | — |
-| `BinaryTree.insert(value)` | Éxito, también cuando el valor es un duplicado | Fallo si `size() == capacity` o la instancia es inutilizable | `size()` `+1` solo si el valor es nuevo |
+| `TreeNode.get_value`, `get_left`, `get_right` | Valor, nodo enlazado o representación nativa de ausencia | No aplica | No mutan |
+| `TreeNode.set_left`, `set_right` | Enlace actualizado, o nuevo nodo si el lenguaje es inmutable | No aplica | No cambia el tamaño del árbol contenedor |
+| `GraphNode.init(label)` | Nodo con la etiqueta indicada y secuencia de vecinos vacía; operación interna a `Graph` | No aplica | — |
+| `BinaryTree.insert(value)` | Éxito, también cuando el valor es un duplicado y el árbol está lleno | Fallo si la instancia es inutilizable o si el valor es nuevo y `size() == capacity` | `size()` `+1` solo si el valor es nuevo |
 | `BinaryTree.contains(value)` | Éxito si el valor está en el árbol | Fallo si no está o la instancia es inutilizable | No muta |
 | `BinaryTree.is_empty`, `size` | Verdadero o falso; número de nodos | No aplica: devuelve 0 en la instancia inutilizable | No mutan |
 | `Graph.add_edge(u,v)` | Éxito, también cuando la arista ya existe | Fallo si `u` o `v` está fuera del dominio de nodos o la instancia es inutilizable | `size()` `+1` solo si la arista es nueva |
 | `Graph.has_edge(u,v)` | Éxito si la arista dirigida existe | Fallo si no existe, si `u` o `v` está fuera de rango o la instancia es inutilizable | No muta |
-| `Graph.get_neighbors(u)` | Vecinos de `u` en orden creciente de etiqueta | Fallo si `u` está fuera de rango o la instancia es inutilizable | No muta |
+| `Graph.get_neighbors(u)` | Copia de los vecinos de `u` en orden creciente de etiqueta; secuencia vacía si no tiene vecinos | Fallo si `u` está fuera de rango o la instancia es inutilizable | No muta |
 | `Graph.is_empty`, `size` | Verdadero si no hay aristas; número de aristas distintas | No aplica: devuelve 0 en la instancia inutilizable | No mutan |
 
 ## 🔌 Declaración del contrato / Contract declaration
@@ -95,6 +99,18 @@ type TreeNode
         this.right = absent
         return this
 
+    get_value() = return this.value
+    get_left()  = return this.left
+    get_right() = return this.right
+
+    set_left(node)
+        this.left = node
+        return this
+
+    set_right(node)
+        this.right = node
+        return this
+
 type BinaryTree
     root = absent
     count = 0
@@ -111,9 +127,9 @@ type BinaryTree
     size()     = return count
 
     insert(value)
-        if not usable or count == capacity
-            return failure
+        if not usable return failure
         if root is absent
+            if count == capacity return failure
             root = TreeNode.init(value)
             count = count + 1
             return success
@@ -123,12 +139,14 @@ type BinaryTree
                 return success          # duplicado: no inserta ni cambia el tamaño
             if value < current.value
                 if current.left is absent
+                    if count == capacity return failure
                     current.left = TreeNode.init(value)
                     count = count + 1
                     return success
                 current = current.left
             else
                 if current.right is absent
+                    if count == capacity return failure
                     current.right = TreeNode.init(value)
                     count = count + 1
                     return success
@@ -146,13 +164,23 @@ type BinaryTree
                 current = current.right
         return failure
 
+type NeighborNode
+    label
+    next = absent
+
 type GraphNode
-    value
-    neighbours = empty collection
+    label
+    neighbours = absent
+
+    init(label)
+        this.label = label
+        this.neighbours = absent
+        return this
 
 type Graph
-    nodes = capacity-sized representation   # etiquetas 0 .. capacity - 1
+    nodes = array of GraphNode              # etiquetas 0 .. capacity - 1
     edges = 0
+    capacity
     usable = true
 
     init(capacity)
@@ -169,41 +197,101 @@ type Graph
     add_edge(u, v)
         if not usable or u or v is outside the node domain
             return failure
-        if v is not already in nodes[u].neighbours
-            add v
-            edges = edges + 1
+        previous = absent
+        current = nodes[u].neighbours.head
+        while current is not absent and current.label < v
+            previous = current
+            current = current.next
+        if current is not absent and current.label == v
+            return success
+        insert v between previous and current in nodes[u].neighbours
+        edges = edges + 1
         return success
 
     has_edge(u, v)
         if not usable or u or v is outside the node domain
             return failure
-        if v is in nodes[u].neighbours
+        current = nodes[u].neighbours.head
+        while current is not absent and current.label < v
+            current = current.next
+        if current is not absent and current.label == v
             return success
         return failure
 
     get_neighbors(u)
         if not usable or u is outside the node domain
             return failure
-        return neighbours of u in increasing label order
+        result = empty sequence
+        current = nodes[u].neighbours
+        while current is not absent
+            append current.label to result
+            current = current.next
+        return result
 ```
 
-El pseudocódigo cubre **todas** las operaciones de la tabla, incluidos `contains`, `has_edge`, `is_empty`, `size` y los límites de capacidad. La colección de vecinos puede ser una lista, un array, un mapa de conjuntos u otra representación del lenguaje; esa elección no elimina el contrato de `GraphNode` ni permite importar la implementación del módulo básico.
+El pseudocódigo cubre **todas** las operaciones de la tabla, incluidos `contains`, `has_edge`, `is_empty`, `size` y los límites de capacidad. `Graph` usa una secuencia de adyacencia enlazada y ordenada por etiqueta: la biblioteca estándar puede aportar su `LinkedList<T>`, o el lenguaje puede adaptar los nodos enlazados manualmente. La inserción ordenada y la consulta recorren como máximo los vecinos de `u`, por eso conservan `O(d(u))`; no se ordena en cada llamada a `get_neighbors`.
 
-The pseudocode covers **every** operation in the table, including `contains`, `has_edge`, `is_empty`, `size` and the capacity limits. The neighbour collection may be a list, array, set map or another language representation; that choice does not remove the `GraphNode` contract or permit importing the basic module's implementation.
+The pseudocode covers **every** operation in the table, including `contains`, `has_edge`, `is_empty`, `size` and capacity limits. `Graph` uses a linked adjacency sequence ordered by label: the standard library may provide its `LinkedList<T>`, or the language may adapt linked nodes manually. Ordered insertion and lookup scan at most `u`'s neighbours, so they preserve `O(d(u))`; `get_neighbors` does not sort on every call.
 
 ## 🧪 Casos de prueba / Test cases
 
-| Grupo / Group | Casos mínimos / Minimum cases |
-|---|---|
-| `Node` | Crear un nodo; leer su valor; verificar enlaces izquierdo y derecho ausentes; enlazar dos hijos; recorrer cada enlace; comprobar la adaptación inmutable si aplica. |
-| `BinaryTree` | Insertar raíz, menor y mayor; buscar existentes y ausentes; ignorar duplicado; rechazar inserción al agotar capacidad; tamaño y vacío; capacidad inválida; verificar la propiedad ABB. |
-| `Graph` | Crear capacidad válida e inválida; añadir aristas dirigidas; comprobar que la dirección inversa no aparece; ignorar arista duplicada; rechazar nodos fuera de rango; obtener vecinos ordenados; contar aristas y vacío. |
-| No representables | Registrar cada omisión y su causa en el README del lenguaje; no inventar centinelas para hacer pasar la prueba. |
+Los tests se agrupan por abstracción: primero `TreeNode`, después `BinaryTree` y `Graph`. Cada caso define **entrada y salida esperada** y se comprueba **solo con las operaciones del contrato**, sin leer la representación interna.
+
+Tests are grouped by abstraction: first `TreeNode`, then `BinaryTree` and `Graph`. Every case defines **input and expected output** and is checked **only with the contract's operations**, without reading the internal representation.
+
+**ES:** Los valores del ABB son enteros positivos (20, 30, 40, 50, 70) para no colisionar con el indicador de fallo. Las **etiquetas** del grafo no son esos valores: son índices `0 .. capacity - 1` y deben probarse por separado.
+
+**EN:** BST values are positive integers (20, 30, 40, 50, 70) so none collide with the failure indicator. Graph **labels** are not those values: they are indices `0 .. capacity - 1` and are tested separately.
+
+### `TreeNode`
+
+| Caso / Case | Entrada / Input | Salida esperada / Expected output |
+|---|---|---|
+| Crear un nodo de árbol<br>Create a tree node | `TreeNode.init(10)` | `get_value()` = `10` |
+| Enlaces iniciales ausentes<br>Absent initial links | `TreeNode.init(10)` | `get_left()` y `get_right()` = representación de ausencia<br>`get_left()` and `get_right()` = the absent representation |
+| Enlazar dos hijos<br>Link two children | `set_left(TreeNode.init(20))` y `set_right(TreeNode.init(30))` sobre el padre<br>`set_left(TreeNode.init(20))` and `set_right(TreeNode.init(30))` on the parent | `get_value(get_left())` = `20`; `get_value(get_right())` = `30` |
+| Recorrer cada enlace<br>Traverse each link | desde el padre, seguir `get_left()` y `get_right()` | los hijos llevan a `20` y `30`; los enlaces de los hijos son ausentes<br>children lead to `20` and `30`; the children's links are absent |
+| Adaptación inmutable (si aplica)<br>Immutable adaptation (if applicable) | `set_left` sobre un `TreeNode` inmutable | devuelve un nodo nuevo con el enlace; el original no cambia<br>returns a new node with the link; the original is unchanged |
+
+### `BinaryTree`
+
+| Caso / Case | Entrada / Input | Salida esperada / Expected output |
+|---|---|---|
+| Crear con capacidad válida<br>Create with valid capacity | `init(5)` | `is_empty()` = `true`; `size()` = `0` |
+| Capacidad inválida<br>Invalid capacity | `init(0)` y después `insert(50)` | instancia inutilizable: `is_empty()` = `true`, `size()` = `0` y la inserción falla<br>unusable instance: `is_empty()` = `true`, `size()` = `0` and the insertion fails |
+| Insertar la raíz<br>Insert the root | `init(5)`, `insert(50)` | éxito; `size()` = `1`; `contains(50)` = éxito<br>success |
+| Insertar menor y mayor<br>Insert lower and higher | `init(3)`, `insert(50)`, `insert(30)`, `insert(70)` | las tres inserciones tienen éxito; `size()` = `3`; `contains(30)` y `contains(70)` = éxito<br>all three insertions succeed; `size()` = `3` |
+| Propiedad ABB<br>BST property | `init(5)`; insertar `50`, `30`, `70`, `20`, `40` | las cinco inserciones tienen éxito; `contains` de cada valor tiene éxito; `size()` = `5`<br>all five insertions succeed; `contains` for each value succeeds; `size()` = `5` |
+| Valor ausente<br>Absent value | `init(3)`, `contains(99)` | falla<br>failure |
+| Duplicado con capacidad llena<br>Duplicate at full capacity | `init(1)`, `insert(50)`, `insert(50)` | ambas inserciones tienen éxito; `size()` = `1`; `contains(50)` = éxito<br>both insertions succeed; `size()` = `1` |
+| Capacidad agotada<br>Capacity exhausted | `init(3)`; insertar `50`, `30`, `70`, después `20` | las tres primeras tienen éxito; la cuarta falla; `size()` = `3`; `contains(20)` falla<br>first three succeed; the fourth fails; `size()` = `3` |
+| Tamaño y vacío<br>Size and emptiness | `insert(50)` | `size()` = `1`; `is_empty()` = `false` |
+
+### `Graph`
+
+| Caso / Case | Entrada / Input | Salida esperada / Expected output |
+|---|---|---|
+| Crear con capacidad válida<br>Create with valid capacity | `init(4)` | `is_empty()` = `true`; `size()` = `0` |
+| Capacidad inválida<br>Invalid capacity | `init(0)` y después `add_edge(0, 0)` | instancia inutilizable: `is_empty()` = `true`, `size()` = `0` y la arista falla<br>unusable instance: `is_empty()` = `true`, `size()` = `0` and the edge fails |
+| Arista dirigida<br>Directed edge | `init(4)`, `add_edge(0, 1)` | éxito; `has_edge(0, 1)` = éxito; `size()` = `1`<br>success |
+| Dirección inversa<br>Reverse direction | `init(4)`, `add_edge(0, 1)`, `has_edge(1, 0)` | insertar tiene éxito; consulta falla: la arista inversa no existe<br>insertion succeeds; query fails: the reverse edge does not exist |
+| Arista duplicada<br>Duplicate edge | `init(4)`, `add_edge(0, 1)` dos veces<br>`init(4)`, `add_edge(0, 1)` twice | éxito las dos veces; `size()` = `1`, las aristas distintas cuentan una vez<br>success both times; distinct edges count once |
+| Nodo fuera de rango<br>Out-of-range node | `init(4)`, `add_edge(0, 4)` | falla; `size()` = `0`<br>failure |
+| Vecinos en orden creciente<br>Neighbours in increasing order | `init(4)`, `add_edge(0, 3)`, `add_edge(0, 1)`, `add_edge(0, 2)` | cada arista tiene éxito; `get_neighbors(0)` = `1`, `2`, `3` en ese orden; `size()` = `3`<br>each edge succeeds; `get_neighbors(0)` = `1`, `2`, `3` in order; `size()` = `3` |
+| Nodo sin aristas<br>Node with no edges | `init(4)`, `get_neighbors(0)` | secuencia de vecinos vacía<br>empty neighbour sequence |
+| Vecinos de un nodo fuera de rango<br>Neighbours of an out-of-range node | `init(4)`, `get_neighbors(4)` | falla<br>failure |
+| Contar aristas y vacío<br>Count edges and emptiness | `init(4)`; `add_edge(0, 1)`, `add_edge(0, 2)`, `add_edge(1, 2)` | las tres tienen éxito; `size()` = `3`; `is_empty()` = `false`; en el grafo recién creado `is_empty()` = `true`<br>all three succeed; `size()` = `3`; `is_empty()` = `false`; it is `true` on the empty graph |
+
+### Casos no representables / Not representable cases
+
+**ES:** Cuando el lenguaje no pueda representar un caso (por ejemplo, una capacidad negativa, una etiqueta de nodo negativa o un retorno ausente), se omite y se registra con `Omitido` y su motivo en la tabla de cobertura del README; no se sustituye por otro caso ni se inventa un centinela.
+
+**EN:** When the language cannot represent a case (for example, a negative capacity, a negative node label or an absent return), it is omitted and recorded as `Omitted` with its reason in the README's coverage table; it is not replaced with another case nor is a sentinel invented.
 
 ## ✅ Criterios de aceptación / Acceptance criteria
 
-- [ ] `Node` se define y prueba de nuevo con múltiples referencias.
-- [ ] `BinaryTree` y `Graph` se implementan manualmente y no importan módulos previos.
+- [ ] `TreeNode` y `GraphNode` son tipos propios; `BinaryTree` y `Graph` mantienen sus nodos, estado y contratos independientes.
+- [ ] `Graph` puede usar `LinkedList<T>` de biblioteca solo para su adyacencia; el ADT y sus operaciones se implementan manualmente y conservan la complejidad declarada.
 - [ ] Los tests verifican el contrato del nodo, las invariantes y el comportamiento observable.
 - [ ] Cada operación declara su resultado de éxito y su resultado de fallo, y el pseudocódigo cubre todas las operaciones de la tabla, sin `…` ni «etc.».
 - [ ] Se documentan indicadores, adaptaciones y casos no representables por lenguaje.
