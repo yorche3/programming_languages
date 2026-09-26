@@ -48,9 +48,57 @@ plantillas paralelas con nombres distintos.
 | Fase / Phase | Concepto / Concept |
 |---|---|
 | 0 — Foundations | Recursión, acumulador, iteración y TCO |
-| 1 — Algorithms Pure | Indicadores de fallo compatibles, sin excepciones |
+| 1 — Algorithms Pure | Indicadores de fallo compatibles, sin excepciones; contrato explícito con una sola implementación |
 | 2 — Contiguous Processing | Validación y excepciones |
-| 3 — Abstraction & Persistence | Option/Result, Maybe/Either y modelado |
+| 3 — Algorithms on Structures | Contratos abstractos cuando un algoritmo consume estructuras intercambiables |
+| 4 — Abstraction & Persistence | Option/Result, Maybe/Either y modelado |
+| 5 — Math | Tipos numéricos y representación de matrices y vectores |
+| 6–7 — UI y Web | Interfaces de puerto y adaptador e inyección de dependencias |
+
+---
+
+## 🔌 Contrato, abstracción e interfaces / Contract, abstraction and interfaces
+
+**ES:** El **contrato** es lo que el módulo promete —operaciones, semántica, orden observable, límites y complejidad— y es **normativo y global**: no cambia de un lenguaje a otro. La **forma de declararlo** es **idiomática y local**: Ada usa la *package specification*, C un encabezado con un tipo opaco, Haskell la lista de exportación del módulo, y Java la API pública de una clase o una `interface`. Separar ambos planos es la ocultación de información de Parnas (1972) y la abstracción de datos de Liskov (1974): la especificación es independiente de la representación, y la notación elegida no altera el contrato.
+
+**EN:** The **contract** is what the module promises —operations, semantics, observable order, limits and complexity— and it is **normative and global**: it does not change from language to language. The **way it is declared** is **idiomatic and local**: Ada uses the *package specification*, C a header with an opaque type, Haskell the module's export list, and Java a class's public API or an `interface`. Separating both planes is Parnas's information hiding (1972) and Liskov's data abstraction (1974): the specification is independent of the representation, and the chosen notation does not alter the contract.
+
+### Notación idiomática del contrato / Idiomatic notation of the contract
+
+**ES:** La tabla agrupa por **familia de notación**, no por lenguaje: el contrato se declara siempre en la forma que ese lenguaje usa para separar «qué hace» de «cómo lo hace». La tercera columna indica si el lenguaje tiene una construcción dedicada para un contrato **aparte**; usarla con una sola implementación es abstracción prematura.
+
+**EN:** The table groups by **notation family**, not by language: the contract is always declared in the shape that language uses to separate "what it does" from "how it does it". The third column states whether the language has a dedicated construct for a **separate** contract; using it with a single implementation is premature abstraction.
+
+| Familia / Family | Declaración del contrato / Contract declaration | Contrato aparte / Separate contract |
+|---|---|---|
+| Ada | *package specification* (público) y *package body* (oculto) | No hace falta: la propia especificación ya es el contrato |
+| C, Assembly, COBOL, Forth | Encabezado o sección de declaraciones; tipo opaco o puntero incompleto | No existe; el contrato es el encabezado |
+| C++ | Encabezado con `class`/`struct`; `private` oculta la representación | Clase abstracta o método virtual puro cuando hay más de una implementación |
+| Java, C#, Kotlin, Scala, Dart | Miembros públicos de la clase | `interface` o `abstract class` cuando hay más de una implementación |
+| Rust | Módulo con `pub` | `trait` cuando hay más de una implementación |
+| Swift, Objective-C | Miembros públicos | `protocol` |
+| Go | Nombres exportados del paquete | `interface` implícita; se declara cuando se consume polimórficamente |
+| Haskell, OCaml, F# | Lista de exportación del módulo o firma `.mli` | Clase de tipos o firma de módulo cuando hay más de una implementación |
+| Elm, Erlang, Elixir, Gleam, Clojure, Common Lisp, Scheme, Prolog | Exportación del módulo y sus funciones | `behaviour`, protocolo o multimétodo cuando hay más de una implementación |
+| Python, Ruby, Perl, Raku, Lua, Tcl/Tk | API documentada y convenida | `Protocol`/`ABC`/rol o módulo de contrato cuando hay más de una implementación |
+
+### Momento de adopción por fase / Adoption moment per phase
+
+| Fase / Phase | Qué se exige / What is required | Por qué / Why |
+|---|---|---|
+| 0 — Foundations | El contrato se declara en la notación natural del lenguaje; sin contratos aparte | El programa es una función y no hay nada que abstraer |
+| 1 — Algorithms Pure | Igual: contrato normativo y representación libre. **No** se exige `interface`/`trait`/`protocol` | Hay **una** implementación por estructura; abstraer antes de tener lo concreto es prematuro (HtDP: *abstract after concrete*) |
+| 3 — Algorithms on Structures | **Primer uso con sentido**: cuando un algoritmo debe consumir estructuras intercambiables (cola de prioridad de Dijkstra; pila y cola de BFS, DFS y backtracking) | Es el caso de las operaciones genéricas de SICP §2.4–2.5: la abstracción se justifica cuando existen **varias** representaciones de la misma interfaz |
+| 4 — Abstraction & Persistence | Contratos formales con varias implementaciones reales (consultas crudas frente a ORM, *parsers* intercambiables) y tipos de retorno `Option`/`Result` | Meyer (1988): el contrato se especifica con precondiciones, postcondiciones e invariantes; sustituibilidad de Liskov |
+| 6–7 — UI y Web | Interfaces de puerto y adaptador, inyección de dependencias y dobles de prueba | La capa de aplicación depende de abstracciones y no de implementaciones |
+
+**ES:** Consecuencia para las especificaciones: la de Fase 1 fija **comportamiento** (resultado de éxito, resultado de fallo, límites, orden y complejidad) y deja libre la **forma**; no puede exigir una construcción que solo tiene sentido cuando aparece un segundo consumidor o una segunda implementación. Una especificación que obligue a `interface` donde hay una sola implementación es un hallazgo, igual que una que deje sin definir qué devuelve una operación.
+
+**EN:** Consequence for specifications: a Phase 1 specification fixes **behaviour** (success result, failure result, limits, order and complexity) and leaves the **form** free; it cannot require a construct that only makes sense once a second consumer or a second implementation appears. A specification that mandates an `interface` where there is a single implementation is a finding, as is one that leaves undefined what an operation returns.
+
+**ES:** Referencias que sostienen este calendario: Parnas, *On the Criteria To Be Used in Decomposing Systems into Modules* (1972); Liskov y Guttag, *Abstraction and Specification in Program Development* (1986); Abelson y Sussman, *SICP* §2.1 (barrera de abstracción) frente a §2.4–2.5 (operaciones genéricas); Felleisen et al., *How to Design Programs* (la abstracción llega después de lo concreto); Meyer, *Object-Oriented Software Construction* (1988); Cormen et al., *CLRS* (el ADT «cola de prioridad» se especifica aparte del heap que lo implementa).
+
+**EN:** References supporting this calendar: Parnas, *On the Criteria To Be Used in Decomposing Systems into Modules* (1972); Liskov and Guttag, *Abstraction and Specification in Program Development* (1986); Abelson and Sussman, *SICP* §2.1 (abstraction barrier) versus §2.4–2.5 (generic operations); Felleisen et al., *How to Design Programs* (abstraction comes after the concrete); Meyer, *Object-Oriented Software Construction* (1988); Cormen et al., *CLRS* (the "priority queue" ADT is specified apart from the heap implementing it).
 
 ---
 

@@ -51,12 +51,35 @@ The standard library may support the internal representation of neighbours, indi
 | Estructura / Structure | Operaciones / Operations | Contrato e invariantes / Contract and invariants | Complejidad / Complexity |
 |---|---|---|---|
 | `Node` | `init(value)`, `get_value()`, `get_left()`, `get_right()`, `set_left(node)`, `set_right(node)` | Un nodo puede enlazar hasta dos hijos; un enlace ausente representa un subárbol vacío. | `O(1)` |
-| `BinaryTree` | `init(capacity)`, `insert(value)`, `contains(value)`, `is_empty()`, `size()` | ABB: valores menores a la izquierda, mayores a la derecha; duplicados no aumentan el tamaño; capacidad máxima de nodos. | `O(h)` para insertar y buscar; `O(1)` para vacío y tamaño |
-| `Graph` | `init(capacity)`, `add_edge(u,v)`, `has_edge(u,v)`, `get_neighbors(u)`, `is_empty()`, `size()` | Dirigido; nodos identificados dentro de la capacidad; aristas distintas cuentan una vez; vecinos en orden creciente. | `O(1)` para acceso directo; `O(V)` para vecinos, según representación |
+| `BinaryTree` | `init(capacity)`, `insert(value)`, `contains(value)`, `is_empty()`, `size()` | ABB: valores menores a la izquierda, mayores a la derecha; duplicados no aumentan el tamaño; capacidad máxima de nodos. `contains` es una consulta de pertenencia intrínseca a la invariante ABB, no un algoritmo de búsqueda: la búsqueda sobre secuencias indexables pertenece al módulo `searching`. | `O(h)` para insertar y comprobar pertenencia; `O(1)` para vacío y tamaño |
+| `Graph` | `init(capacity)`, `add_edge(u,v)`, `has_edge(u,v)`, `get_neighbors(u)`, `is_empty()`, `size()` | Dirigido; nodos identificados dentro de la capacidad; aristas distintas cuentan una vez; vecinos en orden creciente; `is_empty()` es verdadero cuando no hay aristas y `size()` cuenta aristas distintas, no nodos. | `O(1)` para acceso directo; `O(V)` para vecinos, según representación |
 
-En este módulo `capacity` es el máximo de nodos del árbol o grafo. `Graph.size()` cuenta aristas distintas, no nodos. Una estructura dinámica que no pueda expresar overflow declara esa limitación y conserva el contrato observable que sí pueda representar.
+En este módulo `capacity` es el máximo de nodos del árbol o grafo. Una capacidad inválida (menor que 1 o no representable) deja la instancia **inutilizable**, y ese estado es observable: `is_empty()` devuelve verdadero, `size()` devuelve cero y toda operación devuelve el indicador de fallo del lenguaje. Una estructura dinámica que no pueda expresar overflow declara esa limitación y conserva el contrato observable que sí pueda representar.
 
-In this module `capacity` is the maximum number of tree or graph nodes. `Graph.size()` counts distinct edges, not nodes. A dynamic structure that cannot express overflow declares that limitation and preserves the observable contract it can represent.
+In this module `capacity` is the maximum number of tree or graph nodes. An invalid capacity (less than 1 or not representable) leaves the instance **unusable**, and that state is observable: `is_empty()` returns true, `size()` returns zero and every operation returns the language's failure indicator. A dynamic structure that cannot express overflow declares that limitation and preserves the observable contract it can represent.
+
+## 📋 Política de resultados / Result policy
+
+**ES:** El contrato fija **qué devuelve cada operación** para que los tests comparen comportamiento y no representación. El indicador concreto es el del lenguaje y se declara en su README.
+
+**EN:** The contract fixes **what each operation returns** so tests compare behaviour and not representation. The concrete indicator is the language's and is declared in its README.
+
+| Operación / Operation | Éxito / Success | Fallo / Failure | Efecto / Effect |
+|---|---|---|---|
+| `TreeNode.init(value)` | Nodo con `value` y ambos enlaces ausentes | No aplica | — |
+| `BinaryTree.insert(value)` | Éxito, también cuando el valor es un duplicado | Fallo si `size() == capacity` o la instancia es inutilizable | `size()` `+1` solo si el valor es nuevo |
+| `BinaryTree.contains(value)` | Éxito si el valor está en el árbol | Fallo si no está o la instancia es inutilizable | No muta |
+| `BinaryTree.is_empty`, `size` | Verdadero o falso; número de nodos | No aplica: devuelve 0 en la instancia inutilizable | No mutan |
+| `Graph.add_edge(u,v)` | Éxito, también cuando la arista ya existe | Fallo si `u` o `v` está fuera del dominio de nodos o la instancia es inutilizable | `size()` `+1` solo si la arista es nueva |
+| `Graph.has_edge(u,v)` | Éxito si la arista dirigida existe | Fallo si no existe, si `u` o `v` está fuera de rango o la instancia es inutilizable | No muta |
+| `Graph.get_neighbors(u)` | Vecinos de `u` en orden creciente de etiqueta | Fallo si `u` está fuera de rango o la instancia es inutilizable | No muta |
+| `Graph.is_empty`, `size` | Verdadero si no hay aristas; número de aristas distintas | No aplica: devuelve 0 en la instancia inutilizable | No mutan |
+
+## 🔌 Declaración del contrato / Contract declaration
+
+**ES:** Igual que en el módulo anterior, la especificación fija el **contrato** y el lenguaje elige la **forma de declararlo**: *package specification* en Ada, encabezado y tipo opaco en C, lista de exportación del módulo en Haskell o la API pública de la clase donde la haya. Declarar un tipo de contrato aparte (`interface`, `trait`, `protocol`, firma de módulo) solo se justifica cuando exista **más de una implementación real** de la misma abstracción. La regla general y su calendario por fase están en [`AGENT_Template.md`](../../AGENT_Template.md).
+
+**EN:** As in the previous module, the specification fixes the **contract** and the language chooses the **way to declare it**: *package specification* in Ada, a header and an opaque type in C, the module's export list in Haskell, or a class's public API where there is one. Declaring a separate contract type (`interface`, `trait`, `protocol`, module signature) is only justified when there is **more than one real implementation** of the same abstraction. The general rule and its per-phase calendar are in [`AGENT_Template.md`](../../AGENT_Template.md).
 
 ## 🧠 Modelo conceptual / Conceptual model
 
@@ -66,53 +89,107 @@ type TreeNode
     left = absent
     right = absent
 
+    init(value)
+        this.value = value
+        this.left = absent
+        this.right = absent
+        return this
+
 type BinaryTree
     root = absent
+    count = 0
+    capacity
+    usable = true
+
+    init(capacity)
+        if capacity is invalid
+            this.usable = false
+        this.capacity = capacity
+        return this
+
+    is_empty() = return root is absent
+    size()     = return count
 
     insert(value)
+        if not usable or count == capacity
+            return failure
         if root is absent
             root = TreeNode.init(value)
+            count = count + 1
             return success
         current = root
         while true
             if value == current.value
-                return success
+                return success          # duplicado: no inserta ni cambia el tamaño
             if value < current.value
                 if current.left is absent
                     current.left = TreeNode.init(value)
+                    count = count + 1
                     return success
                 current = current.left
             else
                 if current.right is absent
                     current.right = TreeNode.init(value)
+                    count = count + 1
                     return success
                 current = current.right
+
+    contains(value)
+        if not usable return failure
+        current = root
+        while current is not absent
+            if value == current.value
+                return success
+            if value < current.value
+                current = current.left
+            else
+                current = current.right
+        return failure
 
 type GraphNode
     value
     neighbours = empty collection
 
 type Graph
-    nodes = capacity-sized representation
+    nodes = capacity-sized representation   # etiquetas 0 .. capacity - 1
     edges = 0
+    usable = true
+
+    init(capacity)
+        if capacity is invalid
+            this.usable = false
+        else
+            create capacity nodes with labels 0 .. capacity - 1
+        this.capacity = capacity
+        return this
+
+    is_empty() = return edges == 0
+    size()     = return edges
 
     add_edge(u, v)
-        if u or v is outside the node domain
+        if not usable or u or v is outside the node domain
             return failure
         if v is not already in nodes[u].neighbours
             add v
             edges = edges + 1
         return success
 
+    has_edge(u, v)
+        if not usable or u or v is outside the node domain
+            return failure
+        if v is in nodes[u].neighbours
+            return success
+        return failure
+
     get_neighbors(u)
-        if u is outside the node domain
+        if not usable or u is outside the node domain
             return failure
         return neighbours of u in increasing label order
 ```
 
-La colección de vecinos puede ser una lista, un array, un mapa de conjuntos u otra representación del lenguaje. Esa elección no elimina el contrato de `GraphNode` ni permite importar la implementación del módulo básico.
+El pseudocódigo cubre **todas** las operaciones de la tabla, incluidos `contains`, `has_edge`, `is_empty`, `size` y los límites de capacidad. La colección de vecinos puede ser una lista, un array, un mapa de conjuntos u otra representación del lenguaje; esa elección no elimina el contrato de `GraphNode` ni permite importar la implementación del módulo básico.
 
-The neighbour collection may be a list, array, set map or another language representation. That choice does not remove the `GraphNode` contract or permit importing the basic module's implementation.
+The pseudocode covers **every** operation in the table, including `contains`, `has_edge`, `is_empty`, `size` and the capacity limits. The neighbour collection may be a list, array, set map or another language representation; that choice does not remove the `GraphNode` contract or permit importing the basic module's implementation.
 
 ## 🧪 Casos de prueba / Test cases
 
@@ -128,7 +205,9 @@ The neighbour collection may be a list, array, set map or another language repre
 - [ ] `Node` se define y prueba de nuevo con múltiples referencias.
 - [ ] `BinaryTree` y `Graph` se implementan manualmente y no importan módulos previos.
 - [ ] Los tests verifican el contrato del nodo, las invariantes y el comportamiento observable.
+- [ ] Cada operación declara su resultado de éxito y su resultado de fallo, y el pseudocódigo cubre todas las operaciones de la tabla, sin `…` ni «etc.».
 - [ ] Se documentan indicadores, adaptaciones y casos no representables por lenguaje.
+- [ ] No se exige un tipo de contrato aparte (`interface`, `trait`, `protocol`) mientras haya una sola implementación; la forma elegida se declara en el README.
 - [ ] La biblioteca estándar solo apoya representaciones internas permitidas; no sustituye el algoritmo o la estructura enseñada.
 - [ ] El README del lenguaje sigue la plantilla y enlaza la evidencia real.
 
