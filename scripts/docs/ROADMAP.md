@@ -83,6 +83,12 @@
 | La sección «Secuencias de varios pasos» de la guía de inicialización no la valida nadie: la incoherencia `test`/`tests` de Ada vivió ahí sin aviso (la tabla sí se compara con el catálogo) | v1.1.0 — ampliar la deriva del harness a esa sección |
 | El catálogo de pasos del sprint no tiene paso de **corrección**: un artefacto de pytest versionado en un módulo se arregló a mano, fuera del flujo | v1.1.0 — decidir si es paso propio o parte de `suite` |
 | Con la capa cargable, `use` hace el `cd` real en un **subproceso**: `glot use … \| tail -1` pierde el `cd` (limitación de bash, no del verbo) | v1.1.0 — documentarlo en la ayuda del verbo |
+| Cinco lenguajes no tienen fila en `data/toolchains.tsv` (ada, common-lisp, rescript, rexx, scala): `doctor` no comprueba su toolchain, así que un sprint en ellos no avisa de una herramienta ausente | v1.1.0 — añadir la fila cuando la herramienta tenga un comando de versión fiable |
+| La política de **CI por submódulo** no está definida: el workflow debe usar el comando del catálogo (no copiarlo) y hay que decidir si convive con el acta de `docs/evidence/`, que vive en el monorepo | v1.1.0 — documentarla antes de añadir workflows por lenguaje |
+
+**ES:** Esta deuda se paga en la **v1.1.0**, que se abre cuando `core.algorithms.data_structures` cierre `50/50`; ese es el alcance con el que nace la versión.
+
+**EN:** This debt is paid in **v1.1.0**, which opens when `core.algorithms.data_structures` reaches `50/50`; that is the scope the version starts with.
 
 **ES:** Pagadas: los commits a mano se acabaron en la v0.9.0 (`save`), el puntero del submódulo dejó de actualizarse a mano en la v0.12.0 (`pointer` prepara y `save 9` confirma), y desde el 2026-09-25 el harness aísla el `PATH` del `HOME` desechable para no depender de una instalación real de `glot`.
 

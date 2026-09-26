@@ -140,6 +140,9 @@ scripts/
 > **ES:** El bloque carga la **copia**, no el clon: mover o borrar el repositorio no rompe la instalación, y `doctor` dice si la copia se quedó vieja (`install_stale:`) respecto al clon y si la capa está activa en esa shell (`shell_loaded:`). Lo instalado **solo** cambia cuando se repite `install`; por eso la rama `main` debe quedar siempre en un estado cargable.
 > **EN:** The block loads the **copy**, not the clone: moving or deleting the repository does not break the installation, and `doctor` reports whether the copy went stale (`install_stale:`) against the clone and whether the layer is active in that shell (`shell_loaded:`). What is installed **only** changes when `install` runs again; that is why `main` must always stay in a loadable state.
 
+> **ES:** La copia congela lo que copió (`glot.sh`, `data/`, `prompts/` y `completions/`), así que **cualquier cambio en `scripts/` —código, datos o plantillas— exige repetir `install`** para que la capa cargable y el clon digan lo mismo. Aviso: `install_stale` solo mira `glot.sh`, así que un catálogo de datos desactualizado **no** se avisa; se comprueba comparando con el clon (`diff -r scripts/data ~/.local/share/glot/data`).
+> **EN:** The copy freezes what it copied (`glot.sh`, `data/`, `prompts/` and `completions/`), so **any change under `scripts/` —code, data or templates— requires running `install` again** so that the loadable layer and the clone agree. Warning: `install_stale` only looks at `glot.sh`, so an outdated data catalogue is **not** reported; check it by diffing against the clone.
+
 ---
 
 ## 🌿 Rama y flujo / Branch & flow
