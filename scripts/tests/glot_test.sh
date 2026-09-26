@@ -730,7 +730,7 @@ glot_run -n test tcl-tk algorithms/naive_sort
 assert_contains 'test -n: suite con extensión .test' 'naive_sort.test' "$out"
 
 glot_run -n test ada algorithms/naive_sort
-assert_contains 'test -n: comando corregido de ada' 'alr -C test run' "$out"
+assert_contains 'test -n: comando corregido de ada' 'alr -C tests run' "$out"
 
 # el estado del sprint completa lo que no llega por argumento
 glot_run set lang php
@@ -1774,7 +1774,10 @@ glot_install() {
 # glot_in_home <código> — ejecuta código en un bash real con ese HOME desechable
 glot_in_home() {
     local rc=0
-    out="$(HOME="$INSTALL_HOME" bash -c "$1" 2>"$WORK_DIR/stderr")" || rc=$?
+    # El HOME desechable se aísla también del PATH del usuario: con una instalación
+    # real de `glot` en el PATH, `type -t glot` encontraría su ejecutable en vez de
+    # decir que ya no queda la función tras el desinstalado.
+    out="$(HOME="$INSTALL_HOME" PATH="/usr/local/bin:/usr/bin:/bin" bash -c "$1" 2>"$WORK_DIR/stderr")" || rc=$?
     err="$(cat -- "$WORK_DIR/stderr")"
     rc_last="$rc"
 }
