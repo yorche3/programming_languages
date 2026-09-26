@@ -1682,13 +1682,13 @@ glot_loaded 'source "$1"; GLOT_ROOT="$2" glot langs'
 assert_eq 'cargado: los otros verbos pasan igual que el programa' "$out_program" "$out"
 
 # el cd real es el único comportamiento que cambia al cargar el archivo
-printf '# 06 — Data Structures\n' >"$SANDBOX/docs/core/algorithms/06_Data_Structures.md"
-glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use php algorithms/data_structures >/dev/null; pwd'
-assert_eq 'cargado: use hace el cd real' "$SANDBOX/php/core/algorithms/data_structures" "$out"
+printf '# 06 — Data Structures Basics\n' >"$SANDBOX/docs/core/algorithms/06_Data_Structures_Basics.md"
+glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use php algorithms/data_structures_basics >/dev/null; pwd'
+assert_eq 'cargado: use hace el cd real' "$SANDBOX/php/core/algorithms/data_structures_basics" "$out"
 assert_eq 'cargado: sin recordatorio de cd, que ya lo hizo la función' 'no' \
     "$([[ "$err" == *'recuerda / remember'* ]] && echo si || echo no)"
 
-glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot -n use php algorithms/data_structures >/dev/null; pwd'
+glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot -n use php algorithms/data_structures_basics >/dev/null; pwd'
 assert_eq 'cargado: use -n no cambia de directorio' '/tmp' "$out"
 
 glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use 2>/dev/null; echo "vivo"'

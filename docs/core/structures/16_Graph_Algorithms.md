@@ -1,13 +1,13 @@
 ---
 layout: default
-title: 15 — Graph Algorithms
+title: 16 — Graph Algorithms
 description: Decimoquinta especificación / Fifteenth specification — Algoritmos de grafos con secuencias indexables y valores centinela
 nav_order: 1
 parent: Algoritmos sobre Estructuras / Algorithms on Structures
 grand_parent: Core
 ---
 
-# 🚀 15 — Graph Algorithms
+# 🚀 16 — Graph Algorithms
 
 > [← Volver a Algoritmos sobre Estructuras](README.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar los algoritmos clásicos de grafos (BFS, DFS, Dijkstra, Prim, Kruskal, orden topológico y componentes conexas) sobre grafos representados con listas de adyacencia construidas sobre **secuencias indexables** (ver [`04_Numbers.md`](../foundations/04_Numbers.md)), usando únicamente las estructuras construidas en `data_structures` y valores centinela para los casos "no alcanzable". | Implement classic graph algorithms (BFS, DFS, Dijkstra, Prim, Kruskal, topological sort, and connected components) over graphs represented with adjacency lists built over **indexable sequences** (see [`04_Numbers.md`](../foundations/04_Numbers.md)), using only the structures built in `data_structures` and sentinel values for "unreachable" cases. |
+| Implementar los algoritmos clásicos de grafos (BFS, DFS, Dijkstra, Prim, Kruskal, orden topológico y componentes conexas) sobre grafos representados con listas de adyacencia construidas sobre **secuencias indexables** (ver [`04_Numbers.md`](../foundations/04_Numbers.md)), usando las representaciones de grafos aprendidas en `data_structures_advanced` y valores centinela para los casos "no alcanzable". | Implement classic graph algorithms (BFS, DFS, Dijkstra, Prim, Kruskal, topological sort, and connected components) over graphs represented with adjacency lists built over **indexable sequences** (see [`04_Numbers.md`](../foundations/04_Numbers.md)), using graph representations learned in `data_structures_advanced` and sentinel values for "unreachable" cases. |
 
 ---
 
@@ -151,8 +151,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`16_Backtracking.md`](16_Backtracking.md) — Recursión con retroceso (N-Queens, permutaciones, laberinto).  
-👉 Continue with [`16_Backtracking.md`](16_Backtracking.md) — Backtracking recursion (N-Queens, permutations, maze).
+👉 Sigue con [`17_Backtracking.md`](17_Backtracking.md) — Recursión con retroceso (N-Queens, permutaciones, laberinto).  
+👉 Continue with [`17_Backtracking.md`](17_Backtracking.md) — Backtracking recursion (N-Queens, permutations, maze).
 
 ---
 

@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 10 — String Transformations
+title: 11 — String Transformations
 description: Representación de cadenas, unidad indexada y transformaciones manuales / String representation, indexed unit and manual transformations
 nav_order: 1
 parent: Procesamiento Contiguo / Contiguous Processing
 grand_parent: Core
 ---
 
-# 🚀 10 — String Transformations
+# 🚀 11 — String Transformations
 
-> [← Volver a Algorithms Pure](../algorithms/09_Searching.md)  
+> [← Volver a Algorithms Pure](../algorithms/10_Searching.md)
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ## 🎯 Objetivo / Objective
@@ -87,5 +87,5 @@ grand_parent: Core
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`11_Patterns.md`](11_Patterns.md).  
-👉 Continue with [`11_Patterns.md`](11_Patterns.md).
+👉 Sigue con [`12_Patterns.md`](12_Patterns.md).  
+👉 Continue with [`12_Patterns.md`](12_Patterns.md).

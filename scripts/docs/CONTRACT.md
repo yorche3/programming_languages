@@ -147,10 +147,10 @@
 
 ### De un id a todas sus formas / From one id to all its forms
 
-| Forma / Form | `data_structures` | Cómo se obtiene / How |
+| Forma / Form | `data_structures_basics` | Cómo se obtiene / How |
 |--------------|-------------------|------------------------|
 | `name` (legible) | `Data Structures` | palabras capitalizadas, separadas por espacio |
-| `project_name` (id) | `data_structures` | el id canónico del roadmap; no se deriva, se declara |
+| `project_name` (id) | `data_structures_basics` o `data_structures_advanced` | el id canónico del roadmap; no se deriva, se declara |
 | `branch` | `data-structures` | `_glot_kebab`: `_` → `-` |
 | documento | `NN_Data_Structures.md` | stem en `Title_Case` con `_`; el prefijo `NN` se **lee** de `docs/core/{fase}/` |
 | commit | `data structures` | minúsculas y espacios |

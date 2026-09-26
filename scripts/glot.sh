@@ -3207,7 +3207,7 @@ _glot_cmd_help() {
 
 # --- catálogo (L2.5) --------------------------------------------------------
 
-# El catálogo no adivina nombres: los convierte. Un id canónico (`data_structures`)
+# El catálogo no adivina nombres: los convierte. Un id canónico (`data_structures_basics`)
 # se proyecta a todas sus formas, y las divergencias legacy del módulo se resuelven
 # sondeando el disco, no con una tabla completa.
 

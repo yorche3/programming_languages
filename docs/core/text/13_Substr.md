@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 12 — Substring Search
+title: 13 — Substring Search
 description: Búsqueda de subcadenas con tablas auxiliares indexables / Substring search with indexable auxiliary tables
 nav_order: 3
 parent: Procesamiento Contiguo / Contiguous Processing
 grand_parent: Core
 ---
 
-# 🚀 12 — Substring Search
+# 🚀 13 — Substring Search
 
-> [← Volver a 11_Patterns](11_Patterns.md)  
+> [← Volver a 12_Patterns](12_Patterns.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ## 🎯 Objetivo / Objective
@@ -20,13 +20,13 @@ grand_parent: Core
 
 ## 📝 Especificación / Specification
 
-**ES:** Implementar `build_lps(pattern)` y `kmp_find(text, pattern)`. Implementar también `z_array(text)` y `z_find(text, pattern)`. `boyer_moore_find` es una extensión cuando el alfabeto y la tabla de saltos puedan definirse con secuencias indexables; documenta si se implementa solo la regla del carácter malo. `naive_find` de [`11_Patterns.md`](11_Patterns.md) se reutiliza como **oráculo de pruebas**: no se vuelve a implementar.
+**ES:** Implementar `build_lps(pattern)` y `kmp_find(text, pattern)`. Implementar también `z_array(text)` y `z_find(text, pattern)`. `boyer_moore_find` es una extensión cuando el alfabeto y la tabla de saltos puedan definirse con secuencias indexables; documenta si se implementa solo la regla del carácter malo. `naive_find` de [`12_Patterns.md`](12_Patterns.md) se reutiliza como **oráculo de pruebas**: no se vuelve a implementar.
 
-**EN:** Implement `build_lps(pattern)` and `kmp_find(text, pattern)`. Also implement `z_array(text)` and `z_find(text, pattern)`. `boyer_moore_find` is an extension when the alphabet and the shift table can be defined with indexable sequences; document whether only the bad-character rule is implemented. `naive_find` from [`11_Patterns.md`](11_Patterns.md) is reused as a **test oracle**: it is not implemented again.
+**EN:** Implement `build_lps(pattern)` and `kmp_find(text, pattern)`. Also implement `z_array(text)` and `z_find(text, pattern)`. `boyer_moore_find` is an extension when the alphabet and the shift table can be defined with indexable sequences; document whether only the bad-character rule is implemented. `naive_find` from [`12_Patterns.md`](12_Patterns.md) is reused as a **test oracle**: it is not implemented again.
 
-**ES:** Las **tablas auxiliares** —LPS y Z-array— son **secuencias indexables de enteros**, con una posición por unidad del patrón o del texto, y **no** arrays de arrays. Cuando el algoritmo lo requiera (por ejemplo, una tabla por patrón o una matriz de saltos) **pueden representarse como secuencias de secuencias**, y esa es una decisión idiomática del lenguaje. La representación del texto también es libre: la cadena es una secuencia indexable de unidades de texto, con su unidad declarada (ver [`10_Transformations.md`](10_Transformations.md)).
+**ES:** Las **tablas auxiliares** —LPS y Z-array— son **secuencias indexables de enteros**, con una posición por unidad del patrón o del texto, y **no** arrays de arrays. Cuando el algoritmo lo requiera (por ejemplo, una tabla por patrón o una matriz de saltos) **pueden representarse como secuencias de secuencias**, y esa es una decisión idiomática del lenguaje. La representación del texto también es libre: la cadena es una secuencia indexable de unidades de texto, con su unidad declarada (ver [`11_Transformations.md`](11_Transformations.md)).
 
-**EN:** The **auxiliary tables** —LPS and Z-array— are **indexable sequences of integers**, with one position per unit of the pattern or text, and **not** arrays of arrays. When the algorithm requires it (for example, a table per pattern or a shift matrix) they **may be represented as sequences of sequences**, and that is a language-idiomatic decision. The text's representation is free as well: the string is an indexable sequence of text units, with its declared unit (see [`10_Transformations.md`](10_Transformations.md)).
+**EN:** The **auxiliary tables** —LPS and Z-array— are **indexable sequences of integers**, with one position per unit of the pattern or text, and **not** arrays of arrays. When the algorithm requires it (for example, a table per pattern or a shift matrix) they **may be represented as sequences of sequences**, and that is a language-idiomatic decision. The text's representation is free as well: the string is an indexable sequence of text units, with its declared unit (see [`11_Transformations.md`](11_Transformations.md)).
 
 | Algoritmo / Algorithm | Tabla o precondición / Table or precondition | Tiempo / Time | Memoria auxiliar / Auxiliary memory |
 |-----------|----------------------|--------|------------------|
@@ -38,9 +38,9 @@ grand_parent: Core
 
 **EN:** Conventions the suite checks: `lps[i]` is the length of the pattern's **longest proper prefix** that is also a suffix of `pattern[0..i]`; `z[0]` is the text size (if the language uses `0` in that position, it declares it); and the Z-array separator is a unit appearing in **neither** the pattern nor the text, declared in the README.
 
-**ES:** No incluir LCS en este módulo: se desarrolla como programación dinámica en [`17_Dynamic_Programming.md`](../structures/17_Dynamic_Programming.md). Las tablas se construyen **manualmente**, sin funciones de biblioteca equivalentes.
+**ES:** No incluir LCS en este módulo: se desarrolla como programación dinámica en [`18_Dynamic_Programming.md`](../structures/18_Dynamic_Programming.md). Las tablas se construyen **manualmente**, sin funciones de biblioteca equivalentes.
 
-**EN:** Do not include LCS in this module: it is developed as dynamic programming in [`17_Dynamic_Programming.md`](../structures/17_Dynamic_Programming.md). The tables are built **manually**, without equivalent library functions.
+**EN:** Do not include LCS in this module: it is developed as dynamic programming in [`18_Dynamic_Programming.md`](../structures/18_Dynamic_Programming.md). The tables are built **manually**, without equivalent library functions.
 
 ### 🔀 Adaptación idiomática / Idiomatic adaptation
 
@@ -81,5 +81,5 @@ grand_parent: Core
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`13_Input_Output.md`](13_Input_Output.md).  
-👉 Continue with [`13_Input_Output.md`](13_Input_Output.md).
+👉 Sigue con [`14_Input_Output.md`](14_Input_Output.md).  
+👉 Continue with [`14_Input_Output.md`](14_Input_Output.md).

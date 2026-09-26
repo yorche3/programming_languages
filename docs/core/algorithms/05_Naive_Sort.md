@@ -143,8 +143,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`06_Data_Structures.md`](06_Data_Structures.md) — Estructuras de datos fundamentales: contrato fijo y representación libre.
-👉 Continue with [`06_Data_Structures.md`](06_Data_Structures.md) — Fundamental data structures: fixed contract and free representation.
+👉 Sigue con [`06_Data_Structures_Basics.md`](06_Data_Structures_Basics.md) — Node, listas enlazadas, pilas y colas.
+👉 Continue with [`06_Data_Structures_Basics.md`](06_Data_Structures_Basics.md) — Node, linked lists, stacks and queues.
 
 ---
 

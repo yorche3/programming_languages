@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 09 — Searching
+title: 10 — Searching
 description: Novena especificación / Ninth specification — Algoritmos de búsqueda sobre secuencias indexables de números (Linear, Binary, Jump, Interpolation)
-nav_order: 5
+nav_order: 6
 parent: Algoritmos Puros / Algorithms Pure
 grand_parent: Core
 ---
 
-# 🚀 09 — Searching
+# 🚀 10 — Searching
 
-> [← Volver a 08_Distributed_Sort](08_Distributed_Sort.md)  
+> [← Volver a 09_Distributed_Sort](09_Distributed_Sort.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ---

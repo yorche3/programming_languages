@@ -35,7 +35,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 | Concepto introducido / Concept introduced | Fase / Phase | Dónde se practica / Where practiced |
 |-------------------------------------------|-------------|-------------------------------------|
 | Bucles, condicionales, funciones / Loops, conditionals, functions | 0 — **Foundations** | `hello_world`, `hello_user`, `unit_test`, `numbers` |
-| **Indicadores de fallo compatibles con el lenguaje/API** (sin excepciones): la función devuelve una representación controlada (`-1`, `None`, `null`, `Option/Maybe`, `Result`, etc.) sin interrumpir el flujo / **Language/API-compatible failure indicators** (no exceptions): function returns a controlled representation (`-1`, `None`, `null`, `Option/Maybe`, `Result`, etc.) without interrupting flow | 1 — **Algorithms Pure** | `naive_sort`, `data_structures`, `searching`, `efficient_sort`, `distributed_sort` |
+| **Indicadores de fallo compatibles con el lenguaje/API** (sin excepciones): la función devuelve una representación controlada (`-1`, `None`, `null`, `Option/Maybe`, `Result`, etc.) sin interrumpir el flujo / **Language/API-compatible failure indicators** (no exceptions): function returns a controlled representation (`-1`, `None`, `null`, `Option/Maybe`, `Result`, etc.) without interrupting flow | 1 — **Algorithms Pure** | `naive_sort`, `data_structures_basics`, `data_structures_advanced`, `searching`, `efficient_sort`, `distributed_sort` |
 | **Excepciones**: los algoritmos lanzan/atrapan excepciones para entradas inválidas / **Exceptions**: algorithms throw/catch exceptions for invalid inputs | 2 — **Contiguous Processing** | `transformations`, `patterns`, `substr`, `input_output`, `etl_basico` |
 | **Aplicación de estructuras y paradigmas de optimización** (grafos, backtracking, DP, greedy) — sigue usando indicadores de fallo compatibles / **Application of structures and optimization paradigms** (graphs, backtracking, DP, greedy) — still uses compatible failure indicators | 3 — **Algorithms on Structures** | `graph_algorithms`, `backtracking`, `dynamic_programming`, `greedy` |
 | **Tipos de retorno** (Option/Result, Maybe/Either) si el lenguaje lo soporta / **Return types** (Option/Result, Maybe/Either) if the language supports it | 4 — **Abstraction & Persistence** | `modeling`, `regex`, `parsing`, `data_base`, `integracion_etl` |
@@ -68,20 +68,22 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 | Módulo | Estado | Lenguajes | Algoritmos | Especificación |
 |--------|--------|-----------|------------|----------------|
 | `core.algorithms.naive_sort` | ✅ | 50/50 | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
-| `core.algorithms.data_structures` | 📋 | 0/50 | construcción y contrato de stack, queue, linked_list, tree y graph sobre arrays | [`📄 06_Data_Structures.md`](core/algorithms/06_Data_Structures.md) |
-| `core.algorithms.efficient_sort` | 📋 | 0/50 | quick, merge, heap; puede usar ADTs optimizados del lenguaje salvo `sort()` | [`📄 07_Efficient_Sort.md`](core/algorithms/07_Efficient_Sort.md) |
-| `core.algorithms.distributed_sort` | 📋 | 0/50 | radix, bucket, shell, counting | [`📄 08_Distributed_Sort.md`](core/algorithms/08_Distributed_Sort.md) |
-| `core.algorithms.searching` | 📋 | 0/50 | linear sobre arrays numéricos; binary, jump e interpolation con precondición de array ordenado | [`📄 09_Searching.md`](core/algorithms/09_Searching.md) |
+| `core.algorithms.data_structures_basics` | 📋 | 0/50 | Node, linked_list, stack y queue construidos desde cero | [`📄 06_Data_Structures_Basics.md`](core/algorithms/06_Data_Structures_Basics.md) |
+| `core.algorithms.data_structures_advanced` | 📋 | 0/50 | Node con múltiples enlaces, binary tree y graph dirigidos construidos desde cero | [`📄 07_Data_Structures_Advanced.md`](core/algorithms/07_Data_Structures_Advanced.md) |
+| `core.algorithms.efficient_sort` | 📋 | 0/50 | quick, merge, heap; puede usar ADTs optimizados del lenguaje salvo `sort()` | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |
+| `core.algorithms.distributed_sort` | 📋 | 0/50 | radix, bucket, shell, counting | [`📄 09_Distributed_Sort.md`](core/algorithms/09_Distributed_Sort.md) |
+| `core.algorithms.searching` | 📋 | 0/50 | linear sobre arrays numéricos; binary, jump e interpolation con precondición de array ordenado | [`📄 10_Searching.md`](core/algorithms/10_Searching.md) |
 
 ### Ejes de progresión / Progression axes
 
 | Módulo | Eje computacional / Computational | Eje estructural / Structural | Andamiaje / Scaffolding |
 |--------|-----------------------------------|------------------------------|--------------------------|
 | 05 — naive sort | $O(n^2)$ | array numérico mutable | comparación, intercambio e invariante de prefijo ordenado |
-| 06 — data structures | operaciones locales; depende del ADT | arrays e índices implementan ADTs | representación, capacidad, invariantes y contrato |
-| 07 — efficient sort | $O(n \log n)$ esperado/típico | arrays; heap/colección optimizada permitida | divide & conquer, recursión y partición |
-| 08 — distributed sort | $O(n+k)$ o dependiente de dígitos | arrays de conteo/cubetas | rango, distribución y estabilidad como límites de aplicabilidad |
-| 09 — searching | $O(n)$ a $O(\log n)$, más preparación cuando aplica | array numérico; acceso indexado | consumo de una secuencia ordenada; contrato y composición con sort |
+| 06 — data structures basics | operaciones locales; depende del ADT | Node y enlaces simples | valor, referencia, capacidad, invariantes y contrato |
+| 07 — data structures advanced | operaciones locales; depende de la estructura | Node con múltiples enlaces y representación de vecinos | jerarquía, adyacencia, invariantes y contrato |
+| 08 — efficient sort | $O(n \log n)$ esperado/típico | arrays; heap/colección optimizada permitida | divide & conquer, recursión y partición |
+| 09 — distributed sort | $O(n+k)$ o dependiente de dígitos | arrays de conteo/cubetas | rango, distribución y estabilidad como límites de aplicabilidad |
+| 10 — searching | $O(n)$ a $O(\log n)$, más preparación cuando aplica | array numérico; acceso indexado | consumo de una secuencia ordenada; contrato y composición con sort |
 
 ---
 
@@ -93,11 +95,11 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
-| `core.text.transformations` | 🔄 | representación de strings, recorrido, reverse, trim, case, padding y normalización de blancos | [`📄 10_Transformations.md`](core/text/10_Transformations.md) |
-| `core.text.patterns` | 📋 | palindrome, anagram, búsqueda ingenua y patrones literales | [`📄 11_Patterns.md`](core/text/11_Patterns.md) |
-| `core.text.substr` | 📋 | LPP, KMP, Boyer–Moore y Z; tablas auxiliares basadas en arrays | [`📄 12_Substr.md`](core/text/12_Substr.md) |
-| `core.text.input_output` | 📋 | fixtures compartidos, read/write/append, codificación y excepciones de frontera | [`📄 13_Input_Output.md`](core/text/13_Input_Output.md) |
-| `core.text.etl_basico` | 📋 | CSV delimitado, validación, transformación, búsqueda/ordenamiento y salida reproducible | [`📄 14_ETL_Basico.md`](core/text/14_ETL_Basico.md) |
+| `core.text.transformations` | 🔄 | representación de strings, recorrido, reverse, trim, case, padding y normalización de blancos | [`📄 11_Transformations.md`](core/text/11_Transformations.md) |
+| `core.text.patterns` | 📋 | palindrome, anagram, búsqueda ingenua y patrones literales | [`📄 12_Patterns.md`](core/text/12_Patterns.md) |
+| `core.text.substr` | 📋 | LPP, KMP, Boyer–Moore y Z; tablas auxiliares basadas en arrays | [`📄 13_Substr.md`](core/text/13_Substr.md) |
+| `core.text.input_output` | 📋 | fixtures compartidos, read/write/append, codificación y excepciones de frontera | [`📄 14_Input_Output.md`](core/text/14_Input_Output.md) |
+| `core.text.etl_basico` | 📋 | CSV delimitado, validación, transformación, búsqueda/ordenamiento y salida reproducible | [`📄 15_ETL_Basico.md`](core/text/15_ETL_Basico.md) |
 
 ---
 
@@ -109,10 +111,10 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 | Módulo | Estado | Algoritmos | Especificación |
 |--------|--------|------------|----------------|
-| `core.structures.graph_algorithms` | 📋 | BFS, DFS, Dijkstra, Prim, Kruskal, orden topológico, componentes conexas | [`📄 15_Graph_Algorithms.md`](core/structures/15_Graph_Algorithms.md) |
-| `core.structures.backtracking` | 📋 | N-Queens, permutaciones, subconjuntos, laberinto | [`📄 16_Backtracking.md`](core/structures/16_Backtracking.md) |
-| `core.structures.dynamic_programming` | 📋 | LCS, knapsack 0/1, coin change, LIS, caminos en grid | [`📄 17_Dynamic_Programming.md`](core/structures/17_Dynamic_Programming.md) |
-| `core.structures.greedy` | 📋 | activity selection, fractional knapsack, coin change greedy | [`📄 18_Greedy.md`](core/structures/18_Greedy.md) |
+| `core.structures.graph_algorithms` | 📋 | BFS, DFS, Dijkstra, Prim, Kruskal, orden topológico, componentes conexas | [`📄 16_Graph_Algorithms.md`](core/structures/16_Graph_Algorithms.md) |
+| `core.structures.backtracking` | 📋 | N-Queens, permutaciones, subconjuntos, laberinto | [`📄 17_Backtracking.md`](core/structures/17_Backtracking.md) |
+| `core.structures.dynamic_programming` | 📋 | LCS, knapsack 0/1, coin change, LIS, caminos en grid | [`📄 18_Dynamic_Programming.md`](core/structures/18_Dynamic_Programming.md) |
+| `core.structures.greedy` | 📋 | activity selection, fractional knapsack, coin change greedy | [`📄 19_Greedy.md`](core/structures/19_Greedy.md) |
 
 > **ES:** El heap de `efficient_sort` se reutiliza aquí como cola de prioridad en Dijkstra. `backtracking` sienta las bases de la recursión con retroceso que se usará en el `parsing` de la Fase 4. DP y greedy son insumos directos de la capa de abstracción (optimización de pipelines ETL, menús de UI).
 > **EN:** The heap from `efficient_sort` is reused here as a priority queue in Dijkstra. `backtracking` lays the foundation for the backtracking recursion used in Phase 4's `parsing`. DP and greedy are direct inputs for the abstraction layer (ETL pipeline optimization, UI menus).
@@ -292,10 +294,11 @@ core.foundations.numbers              ✅ 50/50
 
 ## Fase 1 — Algorithms Pure 🔄 (fase abierta; implementados: 1/50)
 core.algorithms.naive_sort            ✅ 50/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript, V, Vala, Zig)
-core.algorithms.data_structures       📋
-core.algorithms.efficient_sort        📋
-core.algorithms.distributed_sort      📋
-core.algorithms.searching             📋
+core.algorithms.data_structures_basics   📋
+core.algorithms.data_structures_advanced 📋
+core.algorithms.efficient_sort           📋
+core.algorithms.distributed_sort         📋
+core.algorithms.searching                📋
 
 ## Fase 2 — Contiguous Processing 📋 (refactorizados: 0/50)
 core.text.transformations             🔄 (refactor pendiente)
