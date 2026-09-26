@@ -117,6 +117,36 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   `scripts/docs/ROADMAP.md`, `scripts/docs/SPRINT.md` y `docs/WORKFLOW.md`.
 - Se abrió la fase `Algorithms Pure` como siguiente fase del roadmap.
 - Se estableció el flujo de cierre documental y actualización del roadmap.
+- `glot` v1.1.0: **la secuencia de inicialización como dato** y el **contrato con
+  paso propio**. `scripts/data/init_sequences.tsv` declara, por lenguaje, los
+  pasos de la inicialización (orden, directorio de trabajo `module`/`phase`,
+  modo `run`/`expect`, comando, requisito y `expect` answers) y **lo que queda
+  por completar a mano**; son 18 lenguajes y 28 pasos, medidos en el laboratorio
+  el 2026-09-26. `new` imprime el plan con `-n` (`cd <directorio> && <comando>`,
+  más `# completar`), lo ejecuta en orden, conduce los interactivos con `expect`
+  (que entra como requisito declarado) y retira la carpeta vacía que dejó `use`
+  cuando el generador la crea él mismo. La columna 7 del catálogo queda como
+  **comando único**: un lenguaje con secuencia la deja en `-`, para no tener dos
+  fuentes de verdad.
+- `glot` v1.1.0: el **contrato es el paso `4b`**, con encargo versionado
+  (`scripts/prompts/contract.prompt.md`) que declara el tipo nuevo y las firmas
+  con el indicador natural del lenguaje **antes** de que exista la suite; la
+  suite pasa a `4c` y **consume** el contrato en vez de inventarlo. Regla fijada:
+  cuando un paso entra **en medio**, los siguientes se recorren, y el ordinal se
+  cambia a la vez en la tabla del sprint, el catálogo de commits y el `step:` de
+  la plantilla.
+- `glot` v1.1.0: **`doctor` ve la deriva de datos**. `install.meta` guarda la
+  huella de todo lo que viaja con la copia (`data/`, `prompts/` y
+  `completions/`, no solo `glot.sh`) y `doctor` informa `install_data`: una copia
+  con el catálogo viejo deja de pasar por buena, que es lo que el 2026-09-25
+  medía `install_stale: no` con el comando de pruebas de Ada anterior. El verbo
+  desconocido que coincide con un encargo sugiere `glot prompt <encargo>`, y el
+  harness se aísla de `GLOT_STATE_DIR` y `GLOT_DATA_DIR`.
+- El reparto de la inicialización queda en **33 `tool` · 17 `manual` · 0
+  `deferred`** tras aplicar la política R1–R6 (se usa la herramienta del
+  ecosistema instalada y lo que falte se completa a mano), y la guía de
+  inicialización se corrige con lo medido: son **cuatro** los generadores que
+  crean la carpeta (`common-lisp`, `julia`, `clojure` y `racket`).
 
 ### Changed
 

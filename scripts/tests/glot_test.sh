@@ -291,6 +291,8 @@ sandbox_make() {
     rm -rf -- "$SANDBOX"
     mkdir -p -- "$SANDBOX/docs/core/algorithms" "$SANDBOX/docs/core/foundations" "$SANDBOX/remote"
     printf '# 05 — Naive Sort\n' >"$SANDBOX/docs/core/algorithms/05_Naive_Sort.md"
+    # el módulo 06 se partió en dos: el sandbox declara el actual, que es el que usan los casos
+    printf '# 06 — Data Structures Basics\n' >"$SANDBOX/docs/core/algorithms/06_Data_Structures_Basics.md"
     # Fase con nombres divergentes: el id del roadmap no es el de la carpeta ni el
     # del documento, que es justo lo que el conversor tiene que resolver.
     printf '# 01 — Hello World\n' >"$SANDBOX/docs/core/foundations/01_Hello_World.md"
@@ -986,6 +988,19 @@ assert_contains 'scaffold: declara la entrada' '**Entrada**' "$scaffold_prompt"
 assert_contains 'scaffold: declara lo que queda fuera' '**Fuera de alcance**' "$scaffold_prompt"
 assert_contains 'scaffold: parte de lo que dejó new' 'glot new' "$scaffold_prompt"
 assert_contains 'scaffold: no escribe la suite' 'encargo `suite`' "$scaffold_prompt"
+
+# v1.1.0: el encargo del README remite a la plantilla en vez de copiar su lista de secciones.
+# Una lista copiada se queda atrás en cuanto la plantilla crece (pasó: la plantilla llegó a
+# 13 secciones y el encargo seguía enumerando seis)
+docs_module_prompt="$(cat -- "$PROMPTS_DIR/docs-module.prompt.md")"
+assert_contains 'docs-module: remite a la plantilla' 'todas las secciones obligatorias de `docs/README_Template.md`' "$docs_module_prompt"
+sections_named=0
+while IFS= read -r title; do
+    [[ -n "$title" ]] || continue
+    grep -qF -- "$title" <<<"$docs_module_prompt" && sections_named=$((sections_named + 1))
+done < <(sed -n 's/^## [^ ]* \(.*\) \/ .*$/\1/p' "$REPO/docs/README_Template.md")
+assert_eq 'docs-module: no vuelve a enumerar las secciones' 'si' \
+    "$([[ "$sections_named" -le 2 ]] && echo si || echo no)"
 
 # la plantilla de validación define el contrato del veredicto que `validate` lee
 validate_prompt="$(cat -- "$PROMPTS_DIR/validate.prompt.md")"
@@ -1803,7 +1818,7 @@ glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use 2>/dev/null; echo "vi
 assert_contains 'cargado: un use fallido no deja la shell rota' 'vivo' "$out"
 
 # el modo programa sí recuerda el `cd`: es el único caso en que hace falta
-out="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" use php algorithms/data_structures 2>"$WORK_DIR/stderr")" || true
+out="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" use php algorithms/data_structures_basics 2>"$WORK_DIR/stderr")" || true
 err="$(cat -- "$WORK_DIR/stderr")"
 assert_contains 'programa: el recordatorio del cd menciona glot install' 'glot install' "$err"
 
@@ -1946,6 +1961,20 @@ assert_contains 'doctor: una copia retocada se marca vieja' 'install_stale: yes'
 glot_install install >/dev/null
 glot_install doctor
 assert_contains 'doctor: reinstalar deja la copia buena' 'install_stale: no' "$out"
+
+# v1.1.0: la huella cubre lo que viaja con la copia, no solo `glot.sh`. Una copia con el
+# catálogo retocado es vieja aunque el script esté intacto, y la deriva de datos se informa
+# aparte: es la parte que se olvida al actualizar el tooling sin reinstalar (medido el
+# 2026-09-25: la copia seguía diciendo `install_stale: no` con el comando de Ada anterior)
+assert_contains 'install: los metadatos cubren los datos' 'data_sha=' "$(cat -- "$INSTALL_DIR/install.meta")"
+assert_contains 'doctor: los datos están al día' 'install_data: ok' "$out"
+printf '\n# retoque en los datos / data tweak\n' >>"$INSTALL_DIR/data/languages.tsv"
+glot_install doctor
+assert_contains 'doctor: datos retocados marcan la copia vieja' 'install_stale: yes' "$out"
+assert_contains 'doctor: la deriva de datos se informa' 'install_data: stale' "$out"
+glot_install install >/dev/null
+glot_install doctor
+assert_contains 'doctor: reinstalar deja los datos buenos' 'install_data: ok' "$out"
 
 # lo ajeno no se pisa: ni un enlace de otro, ni un fichero
 rm -rf -- "$INSTALL_HOME/.local/bin"
@@ -2125,12 +2154,12 @@ mode: agent
 
 Cuerpo de prueba para {module}.
 EOF
-out="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" prompt fuentes-check php algorithms/data_structures 2>"$WORK_DIR/stderr")" || true
+out="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" prompt fuentes-check php algorithms/data_structures_basics 2>"$WORK_DIR/stderr")" || true
 err="$(cat -- "$WORK_DIR/stderr")"
 assert_contains 'prompt: avisa de la fuente que falta' 'fuente ausente / missing source: docs/no-existe.md' "$err"
 assert_eq 'prompt: no avisa de la que sí está' 'no' "$([[ "$err" == *'missing source: docs/core'* ]] && echo si || echo no)"
 assert_eq 'prompt: el encargo se imprime igual' 'si' \
-    "$([[ "$out" == *'Cuerpo de prueba para data_structures'* ]] && echo si || echo no)"
+    "$([[ "$out" == *'Cuerpo de prueba para data_structures_basics'* ]] && echo si || echo no)"
 rm -rf -- "$SANDBOX/.github"
 
 # --- puerta de entrada al archivo de versiones -------------------------------

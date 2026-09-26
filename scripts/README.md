@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v1.0.0** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v1.1.0** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -74,7 +74,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v1.0.0)
+├── glot.sh                  # Versión viva / live version (v1.1.0)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
@@ -116,7 +116,8 @@ scripts/
     ├── glot_0.10.0.sh
     ├── glot_0.11.0.sh
     ├── glot_0.12.0.sh
-    └── glot_1.0.0.sh
+    ├── glot_1.0.0.sh
+    └── glot_1.1.0.sh
 ```
 
 ---
