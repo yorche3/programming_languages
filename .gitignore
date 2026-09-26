@@ -16,6 +16,9 @@ dotnet-tools.json
 .github/prompts/
 
 # Build artifacts / generated files
+**/.cpcache/
+**/erl_crash.dump
+_experimental/**/obj/
 **/.gradle/
 **/.kotlin/
 **/build/

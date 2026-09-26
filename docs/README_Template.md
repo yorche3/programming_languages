@@ -66,7 +66,9 @@ incluyas dependencias ni capacidades que no hayas verificado.
 **ES:** La salida se copia **de la última ejecución real**, sin editar ni resumir a mano; si es muy larga, se copian sus líneas finales y se enlaza el acta de evidencia del sprint en `docs/evidence/{fase}/{modulo}/{lenguaje}.md`.
 
 **EN:** The output is copied **from the last real run**, unedited; when it is too long, copy its final lines and link the sprint evidence record under `docs/evidence/{fase}/{modulo}/{lenguaje}.md`.
+**ES:** Única edición permitida sobre la salida: si incluye la ruta del directorio personal, se abrevia como `~` para no versionar rutas de la máquina.
 
+**EN:** The only allowed edit to the output: when it includes the home directory path, it is abbreviated as `~` so no machine paths are versioned.
 ## 🧠 Algoritmos y operaciones / Algorithms & Operations
 
 | Operación / Operation | Entrada → salida / Input → output | Complejidad / Complexity | Notas / Notes |

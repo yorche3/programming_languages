@@ -41,18 +41,21 @@ nuevo requiere una petición explícita.
    standardised modules— and does the work.
 
 **ES:** Consecuencia de límites: el agente **no** usa cuentas, cuotas ni
-credenciales del autor (nada de `copilot -p`, `gh auth` o tokens), y **no**
-versiona datos personales —correo, nombre civil o rutas absolutas
-(`/home/{usuario}/…`)— en ningún artefacto. El autor conserva el control: puede
-hacer por sí mismo cualquier paso, y el agente solo cubre los que se le
+credenciales del autor (nada de `copilot -p`, `gh auth` o tokens) y **no**
+introduce en los artefactos rutas absolutas de la máquina
+(`/home/{usuario}/…`) ni salidas de compilación con rutas de otro equipo. La
+identidad pública del autor en manifiestos y licencias (`maintainers`, `author`,
+*copyright*) no es una credencial y no se retira. El autor conserva el control:
+puede hacer por sí mismo cualquier paso, y el agente solo cubre los que se le
 presenten como encargo.
 
 **EN:** Scope consequence: the agent **does not** use the author's accounts,
-quotas or credentials (no `copilot -p`, `gh auth` or tokens), and **does not**
-version personal data —email, civil name or absolute paths
-(`/home/{user}/…`)— in any artefact. The author keeps control: they can do any
-step themselves, and the agent only covers the ones presented to it as a
-request.
+quotas or credentials (no `copilot -p`, `gh auth` or tokens) and **does not**
+introduce machine absolute paths (`/home/{user}/…`) or build output with another
+machine's paths into any artefact. The author's public identity in manifests and
+licences (`maintainers`, `author`, *copyright*) is not a credential and is not
+removed. The author keeps control: they can do any step themselves, and the
+agent only covers the ones presented to it as a request.
 
 ## Antes de escribir / Before writing
 

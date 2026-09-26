@@ -44,8 +44,10 @@ La implementación de código nuevo requiere una petición explícita del autor.
   artefacto.
 - No usar cuentas, cuotas ni credenciales del autor: nada de `copilot -p`,
   `gh auth`, tokens ni comandos que gasten sus recursos.
-- No versionar datos personales en ningún artefacto: ni correo, ni nombre civil,
-  ni rutas absolutas (`/home/{usuario}/…`), ni credenciales.
+- No versionar credenciales ni datos de la máquina: nada de tokens, contraseñas,
+  claves, rutas absolutas (`/home/{usuario}/…`) ni salidas de compilación con
+  rutas de otro equipo. La identidad pública del autor (nombre y correo de
+  contacto en manifiestos y licencias) no es una credencial y no se retira.
 
 ## Delegación: dos vías y alcance de cada herramienta
 
