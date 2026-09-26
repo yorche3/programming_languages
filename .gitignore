@@ -32,3 +32,6 @@ dotnet-tools.json
 .psc-ide-port
 package-lock.json
 package.json
+
+# Plan de trabajo interno de la v1.1.0 (solo local, nunca versionado)
+scripts/docs/PLAN_v1.1.0.md
