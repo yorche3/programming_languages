@@ -75,19 +75,9 @@ checking what it leaves on disk gets added. A case that could not be verified th
 way **is not added**: it stays `deferred` and the agent writes it. Coverage is
 reported by `doctor` as `new_commands` and `deferred: N`.
 
-**ES:** Reparto real de los 50 lenguajes: **22 `tool`**, **21 `manual`** y **7
-`deferred`** (ada, clojure, cpp, groovy, kotlin, nim y python). Los `deferred` son
-los que no se pudieron cerrar con la entrada cerrada: `alr init` pide la licencia,
-`gradle init` falla, `nimble init` termina sin crear nada, `elm init` pregunta,
-y `uv` no está instalado en este entorno. La lista de `deferred` es deuda visible:
-si un lenguaje consigue un comando no interactivo verificado, se le cambia el tipo.
+**ES:** Reparto **objetivo** de los 50 lenguajes tras la política R1–R6 (cerrada el 2026-09-26): **33 `tool`**, **17 `manual`** y **0 `deferred`**. Pasan a `tool` doce lenguajes —`ada`, `groovy`, `kotlin`, `clojure`, `nim` y `python` (eran `deferred`) más `julia`, `vala`, `perl`, `common-lisp`, `racket` y `v` (eran `manual`)—, `cpp` queda `manual` (C++ mantiene Bazel, decidido el 2026-09-26) y `java` baja a `manual` por R2 (el arquetipo `quickstart` trae `main`). **`languages.tsv` todavía declara 22 `tool` / 21 `manual` / 7 `deferred`**: el cambio de columnas 6 a 8 es el paso P3 de [`PLAN_v1.1.0.md`](../docs/PLAN_v1.1.0.md), junto con la secuencia de `init_sequences.tsv`.
 
-**EN:** Real split of the 50 languages: **22 `tool`**, **21 `manual`** and **7
-`deferred`** (ada, clojure, cpp, groovy, kotlin, nim and python). The `deferred` ones
-are those that could not be closed with stdin closed: `alr init` asks for the
-licence, `gradle init` fails, `nimble init` ends up creating nothing, `elm init`
-asks, and `uv` is not installed in this environment. The `deferred` list is visible
-debt: if a language gets a verified non-interactive command, its kind is changed.
+**EN:** **Target** split of the 50 languages after policy R1–R6 (closed on 2026-09-26): **33 `tool`**, **17 `manual`** and **0 `deferred`**. Twelve languages move to `tool` —`ada`, `groovy`, `kotlin`, `clojure`, `nim` and `python` (were `deferred`) plus `julia`, `vala`, `perl`, `common-lisp`, `racket` and `v` (were `manual`)—, `cpp` stays `manual` (C++ keeps Bazel, decided on 2026-09-26) and `java` moves down to `manual` under R2 (the `quickstart` archetype ships `main`). **`languages.tsv` still declares 22 `tool` / 21 `manual` / 7 `deferred`**: changing columns 6 to 8 is step P3 of [`PLAN_v1.1.0.md`](../docs/PLAN_v1.1.0.md), together with the `init_sequences.tsv` sequence.
 
 **ES:** Normalización declarada: `flat:<sub>` sube al directorio del módulo el
 contenido de `<sub>` (incluidos los archivos ocultos) y borra `<sub>`; `rm:<ruta>`
@@ -104,6 +94,27 @@ order, and that order matters: `crystal` and `gleam` create a `.git` of their ow
 the child project, so the row declares `rm:{module}/.git` **before**
 `flat:{module}`, because after flattening that path no longer exists. A language with
 no declared operation is untouched: it is a data decision, not the script's.
+
+## 🧩 `init_sequences.tsv` — secuencias de inicialización / initialisation sequences
+
+| Columna / Column | Contenido / Content | Ejemplo / Example |
+|:---:|---|---|
+| 1 | Lenguaje, tal como aparece en `.gitmodules` | `ada` |
+| 2 | Orden del paso, desde `1` | `1` |
+| 3 | Directorio de trabajo del paso: `module` (la carpeta del módulo que crea `use`) o `phase` (cuando el generador crea la carpeta él mismo) | `module` |
+| 4 | Modo: `run` (se ejecuta), `expect` (se conduce con `expect`) o `print` (solo se imprime) | `run` |
+| 5 | Comando con los marcadores del tooling (`{module}`, `{Module}`) | `alr -n init --lib --in-place {module}` |
+| 6 | Requisito del paso: `-`, `expect`, `network`, `env:PERL5LIB+PATH` o `tool:uv` | `-` |
+| 7 | Respuestas de `expect`, separadas por `|`; `-` en los demás modos | `library|<defecto>|<defecto>|<defecto>|<defecto>` |
+| 8 | Lo que hay que **completar a mano** después (el generador no lo crea); `-` si no falta nada | `borrar el .git que crea uv` |
+
+**ES:** Un lenguaje aparece aquí **solo** si su inicialización necesita **más de un paso**, **otro directorio de trabajo**, `expect` o un **completado posterior**; los que se resuelven con un único comando siguen en la columna 7 de `languages.tsv` y **no se duplican**. La consume `new` desde la v1.1.0 (paso P3/P4 de [`PLAN_v1.1.0.md`](../docs/PLAN_v1.1.0.md)) y está pensada también como **consulta humana**: es la lista que dice, lenguaje a lenguaje, qué se ejecuta y qué falta.
+
+**EN:** A language appears here **only** when its initialisation needs **more than one step**, **another working directory**, `expect` or a later **completion**; single-command languages stay in column 7 of `languages.tsv` and are **not duplicated**. It is consumed by `new` from v1.1.0 onwards (steps P3/P4 of [`PLAN_v1.1.0.md`](../docs/PLAN_v1.1.0.md)) and is also meant as a **human reference**: the per-language list of what runs and what is missing.
+
+**ES:** Las filas están medidas ejecutando cada generador en el laboratorio el 2026-09-26 (ver la tabla de medición de [`ROADMAP.md`](../docs/ROADMAP.md)). La regla de la columna 3 se comprobó una a una: `uv init --lib .`, `module-starter --dir=.` y `quickproject` con nombre trabajan **en el sitio**, mientras que `Pkg.generate`, `deps-new` con destino, `raco pkg new` y `alr init` **crean la carpeta** — con `alr` se resuelve con `--in-place` y se queda en `module`.
+
+**EN:** Rows were measured by running each generator in the lab on 2026-09-26 (see the measurement table in [`ROADMAP.md`](../docs/ROADMAP.md)). The column 3 rule was checked one by one: `uv init --lib .`, `module-starter --dir=.` and `quickproject` with a name work **in place**, whereas `Pkg.generate`, `deps-new` with a target, `raco pkg new` and `alr init` **create the folder** — `alr` is solved with `--in-place`, staying in `module`.
 
 ## 📝 `commits.tsv` — la tabla de commits / the commit table
 

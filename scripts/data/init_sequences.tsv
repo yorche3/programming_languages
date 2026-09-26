@@ -1,0 +1,28 @@
+ada	1	module	run	alr -n init --lib --in-place {module}	-	-	-
+ada	2	module	run	alr -n init --bin tests	-	-	licencia GPL-3.0-or-later en alire.toml y tests/alire.toml con description, [[depends-on]] {module}, [[pins]] {module} = { path='..' } y aunit
+clojure	1	phase	run	clojure -Sdeps '{:deps {io.github.seancorfield/deps-new {:git/tag "v0.9.0" :git/sha "da2f764f71da871224ae639656d52ccedfb0020c"}}}' -Tnew create :template lib :name {module} :target-dir {module}	network	-	sustituir el test de plantilla que falla a propósito
+common-lisp	1	phase	run	ros -e '(ql:quickload :quickproject :silent t)' -e '(quickproject:make-project "{module}" :depends-on nil)'	network	-	añadir src/, test/ y run-tests.lisp: el generador deja el proyecto plano
+csharp	1	module	run	dotnet new sln -n {Module}	-	-	-
+csharp	2	module	run	dotnet new classlib -n {Module} -o src/{Module}	-	-	-
+csharp	3	module	run	dotnet new xunit -n {Module}.Tests -o test/{Module}.Tests	-	-	-
+csharp	4	module	run	dotnet sln add src/{Module}/{Module}.csproj test/{Module}.Tests/{Module}.Tests.csproj	-	-	ProjectReference a src en el csproj de tests, borrar Class1.cs y UnitTest1.cs y añadir .gitignore
+fsharp	1	module	run	dotnet new sln -n {Module}	-	-	-
+fsharp	2	module	run	dotnet new classlib -lang F# -n {Module} -o src/{Module}	-	-	-
+fsharp	3	module	run	dotnet new xunit -lang F# -n {Module}.Tests -o test/{Module}.Tests	-	-	-
+fsharp	4	module	run	dotnet sln add src/{Module}/{Module}.fsproj test/{Module}.Tests/{Module}.Tests.fsproj	-	-	aplanar a src/{Module}.fsproj, ProjectReference a ..\src\{Module}.fsproj, borrar Library.fs y Tests.fs y añadir .gitignore
+groovy	1	module	run	gradle init --type groovy-library --dsl groovy --project-name {module} --package {module} --use-defaults	-	-	borrar lib/src/main/groovy/**/Library.groovy y lib/src/test/groovy/**/LibraryTest.groovy
+haxe	1	module	run	mkdir -p src test	-	-	-
+haxe	2	module	run	haxelib install utest	network	-	build.hxml y RunTests.hx son contenido del sprint
+julia	1	phase	run	julia -e 'using Pkg; Pkg.generate("{module}")'	-	-	completar test/ y su runner y añadir uuid, [compat], [extras] y [targets] a Project.toml
+kotlin	1	module	run	gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project	-	-	borrar src/main/kotlin/**/Library.kt y src/test/kotlin/**/LibraryTest.kt
+nim	1	module	expect	nimble init	expect	library|<defecto>|<defecto>|<defecto>|<defecto>	llevar src/{module}/{module}.nim a src/{module}.nim, tests/ a test/ y añadir la task test del .nimble
+ocaml	1	module	run	dune init proj {module}	-	-	quitar bin/, aplanar a src/ y borrar el {module}.opam
+perl	1	module	run	module-starter --module={module} --dir=. --author='Yorche <hyaoki123@gmail.com>'	env:PERL5LIB+PATH	-	aceptar lib/ y t/, pasar el runner a prove -l t/ y sustituir ignore.txt
+python	1	module	run	uv init --lib .	tool:uv	-	borrar el .git que crea uv, añadir conftest.py y tests/ con config de pytest y pasar el runner a uv run pytest
+racket	1	phase	run	raco pkg new {module}	-	-	quitar .github/ si no se usa y decidir el paso a src/ y test/
+rescript	1	module	run	mkdir -p src test	-	-	-
+rescript	2	module	run	npm install	network	-	el package.json con rescript y jest va antes: npm install falla sin manifiesto
+ruby	1	module	run	bundle init	-	-	-
+ruby	2	module	run	bundle install	network	-	Gemfile con rspec y .rspec
+v	1	module	expect	v init --lib	expect	<vacio>|0.1.0|<defecto>	quitar el .git anidado que crea v y llevar tests/ a test/
+vala	1	module	run	meson init --language vala --type library --name {module}	-	-	completar src/ y test/ y decidir el build con meson
