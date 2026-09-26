@@ -1,4 +1,4 @@
-ada	alr init --lib {module}	alire.toml, {module}.gpr, config/	alr -C test run	-	deferred	-	-
+ada	alr init --lib {module}	alire.toml, {module}.gpr, config/	alr -C tests run	-	deferred	-	-
 assembly	mkdir -p src test + Makefile	Makefile	make run	-	manual	mkdir -p src test	-
 ballerina	bal new {module}	Ballerina.toml, {module}.bal, tests/	bal test	-	tool	bal new {module}	flat:{module}
 c	mkdir -p include src test + Makefile	include/{module}.h, Makefile	make test	-	manual	mkdir -p include src test	-

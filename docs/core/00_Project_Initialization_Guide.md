@@ -58,7 +58,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 
 | Lenguaje | Comando de inicialización | Manifiesto / archivos clave | Pruebas |
 |----------|---------------------------|-----------------------------|---------|
-| **ada** | ✅ `alr init --lib {module}` | `alire.toml`, `{module}.gpr`, `config/` | ✅ `alr -C test run` |
+| **ada** | ✅ `alr init --lib {module}` | `alire.toml`, `{module}.gpr`, `config/` | ✅ `alr -C tests run` |
 | **assembly** | ✍️ `mkdir -p src test` + `Makefile` | `Makefile` | ✅ `make run` |
 | **ballerina** | 🔧 `bal new {module}` | `Ballerina.toml`, `{module}.bal`, `tests/` | ✅ `bal test` |
 | **c** | ✍️ `mkdir -p include src test` + `Makefile` | `include/{module}.h`, `Makefile` | ✅ `make test` |
