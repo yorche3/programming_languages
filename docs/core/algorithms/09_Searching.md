@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 09 — Searching
-description: Novena especificación / Ninth specification — Algoritmos de búsqueda sobre arrays (Linear, Binary, Jump, Interpolation)
+description: Novena especificación / Ninth specification — Algoritmos de búsqueda sobre secuencias indexables de números (Linear, Binary, Jump, Interpolation)
 nav_order: 5
 parent: Algoritmos Puros / Algorithms Pure
 grand_parent: Core
@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar algoritmos de búsqueda sobre **arrays numéricos** y razonar sobre las precondiciones que hacen aplicable cada uno. `linear_search` no requiere orden; **Binary**, **Jump** e **Interpolation** requieren un array en orden ascendente, e Interpolation además una distribución aproximadamente uniforme. Este módulo consume los ordenamientos de la fase: la búsqueda no ordena, copia ni modifica su entrada. | Implement search algorithms over **numeric arrays** and reason about the preconditions that make each applicable. `linear_search` requires no ordering; **Binary**, **Jump**, and **Interpolation** require an ascending array, and Interpolation additionally needs an approximately uniform distribution. This module consumes the phase's sorting algorithms: search does not sort, copy, or mutate its input. |
+| Implementar algoritmos de búsqueda sobre **secuencias indexables de números** y razonar sobre las precondiciones que hacen aplicable cada uno. `linear_search` no requiere orden; **Binary**, **Jump** e **Interpolation** requieren una secuencia en orden ascendente, e Interpolation además una distribución aproximadamente uniforme. Este módulo consume los ordenamientos de la fase: la búsqueda no ordena, no copia y no modifica su entrada. | Implement search algorithms over **indexable sequences of numbers** and reason about the preconditions that make each applicable. `linear_search` requires no ordering; **Binary**, **Jump**, and **Interpolation** require an ascending sequence, and Interpolation additionally needs an approximately uniform distribution. This module consumes the phase's sorting algorithms: search does not sort, does not copy and does not mutate its input. |
 
 ---
 
@@ -27,19 +27,22 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `searching` con un módulo que contenga las funciones `linear_search(arr, target)`, `binary_search(arr, target)`, `jump_search(arr, target)` e `interpolation_search(arr, target)`. Cada función devuelve el índice base 0 donde se ubica `target` en `arr`. Si el elemento no existe, o si el array es nulo/vacío, devuelve el indicador de fallo compatible con el lenguaje/API. Sin excepciones. | Create a `searching` project with a module containing `linear_search(arr, target)`, `binary_search(arr, target)`, `jump_search(arr, target)`, and `interpolation_search(arr, target)`. Each function returns the 0-based index where `target` is located in `arr`. If the element does not exist, or if the array is null/empty, returns the language/API-compatible failure indicator. No exceptions. |
+| Crear un proyecto `searching` con un módulo que contenga las funciones `linear_search(arr, target)`, `binary_search(arr, target)`, `jump_search(arr, target)` e `interpolation_search(arr, target)`. Cada función devuelve el índice base 0 donde se ubica `target` en la secuencia. Si el elemento no existe, o si la secuencia es nula o vacía, devuelve el indicador de fallo compatible con el lenguaje/API. Sin excepciones. | Create a `searching` project with a module containing `linear_search(arr, target)`, `binary_search(arr, target)`, `jump_search(arr, target)`, and `interpolation_search(arr, target)`. Each function returns the 0-based index where `target` is located in the sequence. If the element does not exist, or if the sequence is null or empty, it returns the language/API-compatible failure indicator. No exceptions. |
 
 ### Algoritmos esperados
 
 | Algoritmo | Precondición | Complejidad temporal | Estrategia |
 |-----------|:------------:|:--------------------:|------------|
 | `linear_search(arr, target)` | Ninguna (funciona en desordenado) | $O(n)$ | Recorre elemento a elemento de inicio a fin |
-| `binary_search(arr, target)` | Array ordenado ascendente | $O(\log n)$ | Divide el espacio de búsqueda a la mitad en cada paso |
-| `jump_search(arr, target)` | Array ordenado ascendente | $O(\sqrt{n})$ | Salta bloques de tamaño $m = \lfloor \sqrt{n} \rfloor$ y luego busca lineal |
-| `interpolation_search(arr, target)` | Array ordenado y uniformemente distribuido | $O(\log \log n)$ promedio, $O(n)$ peor | Estima la posición mediante interpolación lineal de valores |
+| `binary_search(arr, target)` | Secuencia ordenada ascendente | $O(\log n)$ | Divide el espacio de búsqueda a la mitad en cada paso |
+| `jump_search(arr, target)` | Secuencia ordenada ascendente | $O(\sqrt{n})$ | Salta bloques de tamaño $m = \lfloor \sqrt{n} \rfloor$ y luego busca lineal |
+| `interpolation_search(arr, target)` | Secuencia ordenada y uniformemente distribuida | $O(\log \log n)$ promedio, $O(n)$ peor | Estima la posición mediante interpolación lineal de valores |
 
-> **ES:** **Precondición contractual:** `binary_search`, `jump_search` e `interpolation_search` reciben arrays ya ordenados; no llaman a `sort()` ni a un algoritmo propio internamente. La suite debe incluir, además de arrays literales ordenados, un caso de composición: crear un array desordenado, ordenar una **copia** con uno de los algoritmos previos (`selection_sort`, `quick_sort`, `counting_sort` u otro aplicable) y después invocar la búsqueda. La aserción debe comprobar que la búsqueda no mutó el array ordenado. Strings y listas quedan fuera de este módulo.
-> **EN:** **Contractual precondition:** `binary_search`, `jump_search`, and `interpolation_search` receive already sorted arrays; they do not call `sort()` or an own algorithm internally. Beyond sorted literal arrays, the suite must include one composition case: create an unordered array, sort a **copy** with a previous algorithm (`selection_sort`, `quick_sort`, `counting_sort`, or another applicable one), and then invoke search. The assertion must verify that search did not mutate the sorted array. Strings and lists are outside this module.
+> **ES:** **Precondición contractual:** `binary_search`, `jump_search` e `interpolation_search` reciben secuencias ya ordenadas; no llaman a `sort()` ni a un algoritmo propio internamente. La suite debe incluir, además de secuencias literales ordenadas, un caso de composición: crear una secuencia desordenada, ordenar una **copia** con uno de los algoritmos previos (`selection_sort`, `quick_sort`, `counting_sort` u otro aplicable) y después invocar la búsqueda. La aserción debe comprobar que la búsqueda no mutó la secuencia ordenada. Las cadenas quedan fuera de este módulo (pertenecen a la Fase 2); la secuencia de entrada es numérica.
+> **EN:** **Contractual precondition:** `binary_search`, `jump_search`, and `interpolation_search` receive already sorted sequences; they do not call `sort()` or an own algorithm internally. Beyond sorted literal sequences, the suite must include one composition case: create an unordered sequence, sort a **copy** with a previous algorithm (`selection_sort`, `quick_sort`, `counting_sort`, or another applicable one), and then invoke search. The assertion must verify that search did not mutate the sorted sequence. Strings are outside this module (they belong to Phase 2); the input sequence is numeric.
+
+> **ES:** **Representación libre:** la secuencia puede ser un array, una lista, un vector, una tupla o cualquier colección indexable del lenguaje, siempre que conserve el **orden** y el **acceso por índice**. No se asume mutabilidad ni capacidad fija y no se usa la colección del lenguaje para la búsqueda en sí. Lo elegido y lo adaptado se declara en la tabla de *Adaptaciones idiomáticas* del README, según [`AGENT_Template.md`](../../AGENT_Template.md).
+> **EN:** **Free representation:** the sequence may be an array, a list, a vector, a tuple or any indexable collection of the language, as long as it preserves **order** and **index access**. Neither mutability nor fixed capacity is assumed, and the language's collection is not used for the search itself. What was chosen and adapted is declared in the README's *Idiomatic adaptations* table, per [`AGENT_Template.md`](../../AGENT_Template.md).
 
 ### Pseudocódigo / Pseudocode
 
@@ -102,7 +105,7 @@ end container
 
 ### Casos de prueba / Test Cases
 
-| Algoritmo | Array de prueba | Target | Salida esperada |
+| Algoritmo | Secuencia de prueba | Target | Salida esperada |
 |-----------|-----------------|:------:|:---------------:|
 | `linear_search` | `[10, 50, 30, 70, 80, 20]` (desordenado) | 30 | 2 |
 | `linear_search` | `[10, 50, 30, 70, 80, 20]` | 99 | -1 |
@@ -114,7 +117,8 @@ end container
 | `interpolation_search` | `[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]` | 15 | -1 |
 | Todos | `[]` (vacío) | 5 | -1 |
 | Todos | `[42]` (un elemento) | 42 | 0 |
-| Composición | Copia de `[10, 50, 30, 70, 80, 20]`, ordenada previamente con un sort propio | 70 | Índice de `70`; la búsqueda conserva el array ordenado |
+| Composición | Copia de `[10, 50, 30, 70, 80, 20]`, ordenada previamente con un sort propio | 70 | Índice de `70`; la búsqueda conserva la secuencia ordenada |
+| No mutación / No mutation | Cualquier caso con la secuencia recibida | — | La secuencia comparada antes y después es **la misma**, elemento a elemento<br>The sequence compared before and after is **the same**, element by element |
 
 ---
 
@@ -126,8 +130,10 @@ end container
     **EN:** When the element does not exist or input is invalid, a language/API-compatible failure indicator is returned (for example, `-1` when the index type permits it), without exceptions.
 - [ ] **ES:** `binary_search` evita el desbordamiento de enteros calculando el punto medio con `low + div(high - low, 2)`.  
       **EN:** `binary_search` prevents integer overflow calculating the midpoint with `low + div(high - low, 2)`.
-- [ ] **ES:** Las pruebas muestran al menos una composición explícita con un ordenamiento anterior; ninguna función de búsqueda ordena o muta el array recibido.
-    **EN:** Tests show at least one explicit composition with a preceding sort; no search function sorts or mutates the received array.
+- [ ] **ES:** Las pruebas muestran al menos una composición explícita con un ordenamiento anterior; ninguna función de búsqueda ordena o muta la secuencia recibida.
+    **EN:** Tests show at least one explicit composition with a preceding sort; no search function sorts or mutates the received sequence.
+- [ ] **ES:** La representación elegida para la secuencia es la idiomática del lenguaje y está declarada en el README, junto con las operaciones que se hayan adaptado.
+      **EN:** The representation chosen for the sequence is the language's idiomatic one and is declared in the README, together with any adapted operations.
 - [ ] **ES:** El proyecto separa el código fuente (`src/`) de las pruebas (`test/`).  
       **EN:** The project separates source code (`src/`) from tests (`test/`).
 

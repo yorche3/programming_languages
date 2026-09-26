@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 15 — Graph Algorithms
-description: Decimoquinta especificación / Fifteenth specification — Algoritmos de grafos con arrays y valores centinela
+description: Decimoquinta especificación / Fifteenth specification — Algoritmos de grafos con secuencias indexables y valores centinela
 nav_order: 1
 parent: Algoritmos sobre Estructuras / Algorithms on Structures
 grand_parent: Core
@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar los algoritmos clásicos de grafos (BFS, DFS, Dijkstra, Prim, Kruskal, orden topológico y componentes conexas) sobre grafos representados con listas de adyacencia basadas en arrays, usando únicamente las estructuras construidas en `data_structures` y valores centinela para los casos "no alcanzable". | Implement classic graph algorithms (BFS, DFS, Dijkstra, Prim, Kruskal, topological sort, and connected components) over graphs represented with array-based adjacency lists, using only the structures built in `data_structures` and sentinel values for "unreachable" cases. |
+| Implementar los algoritmos clásicos de grafos (BFS, DFS, Dijkstra, Prim, Kruskal, orden topológico y componentes conexas) sobre grafos representados con listas de adyacencia construidas sobre **secuencias indexables** (ver [`04_Numbers.md`](../foundations/04_Numbers.md)), usando únicamente las estructuras construidas en `data_structures` y valores centinela para los casos "no alcanzable". | Implement classic graph algorithms (BFS, DFS, Dijkstra, Prim, Kruskal, topological sort, and connected components) over graphs represented with adjacency lists built over **indexable sequences** (see [`04_Numbers.md`](../foundations/04_Numbers.md)), using only the structures built in `data_structures` and sentinel values for "unreachable" cases. |
 
 ---
 
@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `graph_algorithms` con un módulo `graph` que represente grafos con listas de adyacencia construidas desde arrays, y que implemente los algoritmos listados abajo. Los nodos no alcanzables devuelven el valor centinela `-1`. Sin excepciones. | Create a `graph_algorithms` project with a `graph` module representing graphs with array-built adjacency lists and implementing the algorithms below. Unreachable nodes return the sentinel value `-1`. No exceptions. |
+| Crear un proyecto `graph_algorithms` con un módulo `graph` que represente grafos con listas de adyacencia construidas desde **secuencias indexables**, cuya representación es libre y se declara en el README, y que implemente los algoritmos listados abajo. Los nodos no alcanzables devuelven el valor centinela `-1`. Sin excepciones. | Create a `graph_algorithms` project with a `graph` module representing graphs with adjacency lists built from **indexable sequences**, whose representation is free and is declared in the README, and implementing the algorithms below. Unreachable nodes return the sentinel value `-1`. No exceptions. |
 
 ### Implementaciones esperadas
 
@@ -37,19 +37,19 @@ grand_parent: Core
 | `dfs(graph, start)` | stack (o recursión) | Recorrido en profundidad; devuelve orden de visita |
 | `dijkstra(graph, start)` | priority queue (heap) | Caminos mínimos en grafos con pesos no negativos |
 | `prim(graph)` | priority queue (heap) | Árbol de expansión mínimo (MST) |
-| `kruskal(graph)` | union-find (arrays) | MST por aristas ordenadas |
+| `kruskal(graph)` | union-find (secuencias indexables) | MST por aristas ordenadas |
 | `topological_sort(graph)` | stack / indegree | Orden topológico de un DAG (`-1` si hay ciclo) |
 | `connected_components(graph)` | queue / stack | Número de componentes conexas |
 
-> **ES:** La cola de prioridad se implementa reutilizando el heap de `efficient_sort` (Fase 1). La representación del grafo es una lista de adyacencia: `adjacency_list[u] = [(v, weight), ...]` construida desde arrays de aristas.
-> **EN:** The priority queue reuses the heap from `efficient_sort` (Phase 1). The graph representation is an adjacency list: `adjacency_list[u] = [(v, weight), ...]` built from edge arrays.
+> **ES:** La cola de prioridad se implementa reutilizando el heap de `efficient_sort` (Fase 1). La representación del grafo es una lista de adyacencia: `adjacency_list[u] = [(v, weight), ...]`, construida desde secuencias indexables de aristas; su representación concreta es libre y se declara en el README.
+> **EN:** The priority queue reuses the heap from `efficient_sort` (Phase 1). The graph representation is an adjacency list: `adjacency_list[u] = [(v, weight), ...]`, built from indexable edge sequences; its concrete representation is free and is declared in the README.
 
 ### Pseudocódigo / Pseudocode
 
 ```pseudocode
 container graph
     .- bfs(adjacency_list, start)
-        distance = array(size(adjacency_list), -1)   # sentinela
+        distance = sequence(size(adjacency_list), -1)   # sentinela
         distance[start] = 0
         queue.enqueue(start)
         while queue is not empty
@@ -61,7 +61,7 @@ container graph
         return distance
 
     .- dfs(adjacency_list, start)
-        visited = array(size(adjacency_list), false)
+        visited = sequence(size(adjacency_list), false)
         order = []
         stack.push(start)
         while stack is not empty
@@ -75,7 +75,7 @@ container graph
         return order
 
     .- dijkstra(adjacency_list, start)
-        distance = array(size(adjacency_list), INF)
+        distance = sequence(size(adjacency_list), INF)
         distance[start] = 0
         pq = priority_queue()
         pq.push((0, start))
@@ -121,8 +121,8 @@ end container
 
 ## ✅ Criterios de aceptación / Acceptance Criteria
 
-- [ ] **ES:** Todos los algoritmos se implementan con estructuras array-backed (sin colecciones externas).  
-      **EN:** All algorithms use array-backed structures (no external collections).
+- [ ] **ES:** Todos los algoritmos se implementan con estructuras construidas sobre **secuencias indexables propias** (sin colecciones externas).
+      **EN:** All algorithms use structures built over **own indexable sequences** (no external collections).
 - [ ] **ES:** Los casos "no alcanzable"/"ciclo" devuelven `-1` (valores centinela, sin excepciones).  
       **EN:** "Unreachable"/"cycle" cases return `-1` (sentinel values, no exceptions).
 - [ ] **ES:** Dijkstra usa la cola de prioridad basada en el heap de Fase 1.  

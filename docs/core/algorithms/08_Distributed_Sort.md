@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar algoritmos de ordenamiento distributivo y no comparativo: **Counting Sort**, **Radix Sort**, **Bucket Sort** y **Shell Sort**, comprendiendo cómo romper la barrera teórica de $\Omega(n \log n)$ de los ordenamientos por comparación mediante el conteo de frecuencias, la posición de dígitos y la distribución en cubetas sobre arrays. | Implement non-comparative and distributive sorting algorithms: **Counting Sort**, **Radix Sort**, **Bucket Sort**, and **Shell Sort**, understanding how to break the theoretical $\Omega(n \log n)$ bound of comparison sorts through frequency counts, digit positions, and bucket distribution over arrays. |
+| Implementar algoritmos de ordenamiento distributivo y no comparativo: **Counting Sort**, **Radix Sort**, **Bucket Sort** y **Shell Sort**, comprendiendo cómo romper la barrera teórica de $\Omega(n \log n)$ de los ordenamientos por comparación mediante el conteo de frecuencias, la posición de dígitos y la distribución en cubetas sobre **secuencias indexables**. | Implement non-comparative and distributive sorting algorithms: **Counting Sort**, **Radix Sort**, **Bucket Sort**, and **Shell Sort**, understanding how to break the theoretical $\Omega(n \log n)$ bound of comparison sorts through frequency counts, digit positions, and bucket distribution over **indexable sequences**. |
 
 ---
 
@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `distributed_sort` con un módulo que implemente `counting_sort(arr)`, `radix_sort(arr)`, `bucket_sort(arr)` y `shell_sort(arr)`. Cada algoritmo ordena enteros no negativos (o con rango conocido) en orden ascendente. Los casos nulos devuelven el indicador de fallo definido por el lenguaje/API. Sin excepciones. | Create a `distributed_sort` project with a module implementing `counting_sort(arr)`, `radix_sort(arr)`, `bucket_sort(arr)`, and `shell_sort(arr)`. Each algorithm sorts non-negative integers (or integers in a known range) in ascending order. Null cases return the failure indicator defined by the language/API. No exceptions. |
+| Crear un proyecto `distributed_sort` con un módulo que implemente `counting_sort(arr)`, `radix_sort(arr)`, `bucket_sort(arr)` y `shell_sort(arr)`. Cada algoritmo ordena enteros no negativos (o con rango conocido) en orden ascendente sobre una **secuencia indexable de enteros** (ver [`04_Numbers.md`](../foundations/04_Numbers.md)), cuya representación es libre y se declara en el README. Los casos nulos devuelven el indicador de fallo definido por el lenguaje/API. Sin excepciones. | Create a `distributed_sort` project with a module implementing `counting_sort(arr)`, `radix_sort(arr)`, `bucket_sort(arr)`, and `shell_sort(arr)`. Each algorithm sorts non-negative integers (or integers in a known range) in ascending order over an **indexable sequence of integers** (see [`04_Numbers.md`](../foundations/04_Numbers.md)), whose representation is free and is declared in the README. Null cases return the failure indicator defined by the language/API. No exceptions. |
 
 ### Algoritmos esperados
 
@@ -35,7 +35,7 @@ grand_parent: Core
 |-----------|------------|---------------------|-----------------|
 | `counting_sort(arr)` | Tabla de conteo acumulado y colocación estable | $O(n + k)$ donde $k$ es el rango de valores | Rango de valores $k$ acotado |
 | `radix_sort(arr)` | Counting sort estable por dígito (LSD: menos a más significativo) | $O(d \cdot (n + b))$ donde $d$ son dígitos y $b$ la base (10) | Enteros no negativos |
-| `bucket_sort(arr)` | Distribución en cubetas con arrays + ordenamiento interno | $O(n + k)$ promedio | Distribución uniforme de valores |
+| `bucket_sort(arr)` | Distribución en cubetas con secuencias auxiliares + ordenamiento interno | $O(n + k)$ promedio | Distribución uniforme de valores |
 | `shell_sort(arr)` | Insertion sort generalizado con brechas decrecientes ($gap = \lfloor gap / 2 \rfloor$) | $O(n^{3/2})$ o $O(n \log^2 n)$ | Comparativo, sin memoria extra |
 
 ### Pseudocódigo / Pseudocode
@@ -46,8 +46,8 @@ container distributed_sort
         if arr is null return -1
         if size(arr) <= 1 return arr
         max_val = max(arr)
-        count = array(max_val + 1, 0)
-        output = array(size(arr), 0)
+        count = sequence(max_val + 1, 0)
+        output = sequence(size(arr), 0)
 
         for x in arr
             count[x] = count[x] + 1
@@ -93,7 +93,7 @@ end container
 | `radix_sort` | `[170, 45, 75, 90, 802, 24, 2, 66]` | `[2, 24, 45, 66, 75, 90, 170, 802]` |
 | `shell_sort` | `[12, 34, 54, 2, 3]` | `[2, 3, 12, 34, 54]` |
 | `counting_sort` | `[0, 0, 1, 0]` | `[0, 0, 0, 1]` |
-| Todos | Array vacío `[]` y unitario `[5]` | `[]` y `[5]` |
+| Todos / All | Secuencia vacía `[]` y unitaria `[5]`<br>Empty `[]` and single-element `[5]` sequence | `[]` y `[5]` |
 
 ---
 

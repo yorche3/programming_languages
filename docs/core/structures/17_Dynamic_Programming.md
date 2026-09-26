@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar algoritmos de programación dinámica (LCS, knapsack 0/1, coin change, LIS y caminos en grid) descomponiendo el problema en subproblemas superpuestos y almacenando resultados en tablas (arrays), sin colecciones externas ni excepciones. LCS enlaza la fase de strings con el modelo de estado bidimensional de DP. | Implement dynamic programming algorithms (LCS, 0/1 knapsack, coin change, LIS, and grid paths) by decomposing the problem into overlapping subproblems and storing results in tables (arrays), without external collections or exceptions. LCS connects the string phase to DP's two-dimensional state model. |
+| Implementar algoritmos de programación dinámica (LCS, knapsack 0/1, coin change, LIS y caminos en grid) descomponiendo el problema en subproblemas superpuestos y almacenando resultados en **tablas indexables** (secuencias indexables de enteros), sin colecciones externas ni excepciones. LCS enlaza la fase de strings con el modelo de estado bidimensional de DP. | Implement dynamic programming algorithms (LCS, 0/1 knapsack, coin change, LIS, and grid paths) by decomposing the problem into overlapping subproblems and storing results in **indexable tables** (indexable sequences of integers), without external collections or exceptions. LCS connects the string phase to DP's two-dimensional state model. |
 
 ---
 
@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `dynamic_programming` con un módulo que implemente los cinco algoritmos usando tabulación (bottom-up) con arrays. Los problemas sin solución devuelven `-1` (sentinela). | Create a `dynamic_programming` project with a module implementing the five algorithms using bottom-up tabulation with arrays. Problems with no solution return `-1` (sentinel). |
+| Crear un proyecto `dynamic_programming` con un módulo que implemente los cinco algoritmos usando tabulación (bottom-up) con **secuencias indexables** (ver [`04_Numbers.md`](../foundations/04_Numbers.md)), cuya representación es libre y se declara en el README. Los problemas sin solución devuelven `-1` (sentinela). | Create a `dynamic_programming` project with a module implementing the five algorithms using bottom-up tabulation with **indexable sequences** (see [`04_Numbers.md`](../foundations/04_Numbers.md)), whose representation is free and is declared in the README. Problems with no solution return `-1` (sentinel). |
 
 ### Implementaciones esperadas
 
@@ -44,7 +44,7 @@ grand_parent: Core
 ```pseudocode
 container dynamic_programming
     .- longest_common_subsequence(left, right)
-        dp = array(size(left) + 1, size(right) + 1, 0)
+        dp = sequence(size(left) + 1, size(right) + 1, 0)
         for i = 1 to size(left)
             for j = 1 to size(right)
                 if left[i - 1] == right[j - 1]
@@ -55,7 +55,7 @@ container dynamic_programming
 
     .- knapsack_01(weights, values, capacity)
         n = size(weights)
-        dp = array(n + 1, capacity + 1, 0)
+        dp = sequence(n + 1, capacity + 1, 0)
         for i = 1 to n
             for c = 0 to capacity
                 if weights[i - 1] <= c
@@ -66,7 +66,7 @@ container dynamic_programming
         return dp[n][capacity]
 
     .- coin_change(coins, amount)
-        dp = array(amount + 1, INF)     # INF como "no alcanzable"
+        dp = sequence(amount + 1, INF)     # INF como "no alcanzable"
         dp[0] = 0
         for i = 1 to amount
             for coin in coins
@@ -76,7 +76,7 @@ container dynamic_programming
 
     .- longest_increasing_subsequence(list)
         n = size(list)
-        dp = array(n, 1)
+        dp = sequence(n, 1)
         for i = 0 to n - 1
             for j = 0 to i - 1
                 if list[j] < list[i] and dp[j] + 1 > dp[i]
@@ -84,7 +84,7 @@ container dynamic_programming
         return max(dp)
 
     .- grid_paths(n, m, obstacles)
-        dp = array(n, m, 0)
+        dp = sequence(n, m, 0)
         dp[0][0] = obstacles[0][0] ? 0 : 1
         for i = 0 to n - 1
             for j = 0 to m - 1
@@ -116,8 +116,8 @@ end container
 
 ## ✅ Criterios de aceptación / Acceptance Criteria
 
-- [ ] **ES:** Las soluciones usan tabulación bottom-up con arrays (no memoización global ni colecciones externas).  
-      **EN:** Solutions use bottom-up tabulation with arrays (no global memoization or external collections).
+- [ ] **ES:** Las soluciones usan tabulación bottom-up con **secuencias indexables** (no memoización global ni colecciones externas).
+      **EN:** Solutions use bottom-up tabulation with **indexable sequences** (no global memoization or external collections).
 - [ ] **ES:** Los casos sin solución devuelven `-1` (sentinela), sin excepciones.  
       **EN:** Cases without a solution return `-1` (sentinel), no exceptions.
 - [ ] **ES:** El proyecto separa `src/` de `test/` y usa el framework de pruebas del lenguaje.  

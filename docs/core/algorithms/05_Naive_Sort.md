@@ -1,7 +1,7 @@
 ---
 layout: default
 title: 05 — Naive Sort
-description: Quinta especificación / Fifth specification — Ordenamiento elemental O(n²) con arrays e indicadores de fallo
+description: Quinta especificación / Fifth specification — Ordenamiento elemental O(n²) sobre secuencias indexables e indicadores de fallo
 nav_order: 1
 parent: Algoritmos Puros / Algorithms Pure
 grand_parent: Core
@@ -18,7 +18,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Implementar los tres algoritmos elementales de ordenamiento ($O(n^2)$): **Selection Sort**, **Bubble Sort** e **Insertion Sort**, trabajando directamente sobre arrays y utilizando comparaciones e intercambios paso a paso sin bibliotecas de ordenamiento del sistema ni estructuras auxiliares complejas. | Implement the three elementary sorting algorithms ($O(n^2)$): **Selection Sort**, **Bubble Sort**, and **Insertion Sort**, working directly over arrays and using step-by-step comparisons and swaps without system sorting libraries or complex auxiliary structures. |
+| Implementar los tres algoritmos elementales de ordenamiento ($O(n^2)$): **Selection Sort**, **Bubble Sort** e **Insertion Sort**, trabajando directamente sobre la **secuencia indexable** de entrada y utilizando comparaciones e intercambios paso a paso sin bibliotecas de ordenamiento del sistema ni estructuras auxiliares complejas. | Implement the three elementary sorting algorithms ($O(n^2)$): **Selection Sort**, **Bubble Sort**, and **Insertion Sort**, working directly over the **input indexable sequence** and using step-by-step comparisons and swaps without system sorting libraries or complex auxiliary structures. |
 
 ---
 
@@ -27,7 +27,7 @@ grand_parent: Core
 ### 📋 Enunciado / Problem Statement
 
 | Español | English |
-| Crear un proyecto `naive_sort` con un módulo que contenga las funciones `selection_sort(arr)`, `bubble_sort(arr)` e `insertion_sort(arr)`. Cada función recibe un array de enteros y devuelve el array ordenado de menor a mayor (de forma in-place o retornando una copia ordenada según el paradigma del lenguaje). Si la entrada es nula o inválida, devuelve el indicador de fallo definido por el lenguaje o la API (`-1`, `null`, `Option/Maybe` vacío, `Result` de error u otra representación equivalente); si está vacía, devuelve el mismo array vacío. No lanza excepciones. | Create a `naive_sort` project with a module containing `selection_sort(arr)`, `bubble_sort(arr)`, and `insertion_sort(arr)`. Each function takes an integer array and returns it sorted in ascending order (in-place or returning a sorted copy depending on the language paradigm). If the input is null or invalid, it returns the failure indicator defined by the language or API (`-1`, `null`, empty `Option/Maybe`, error `Result`, or another equivalent representation); if empty, it returns the same empty array. It does not throw exceptions. |
+| Crear un proyecto `naive_sort` con un módulo que contenga las funciones `selection_sort(arr)`, `bubble_sort(arr)` e `insertion_sort(arr)`. Cada función recibe una **secuencia indexable de enteros** (ver [`04_Numbers.md`](../foundations/04_Numbers.md)) y devuelve la secuencia ordenada de menor a mayor (de forma in-place o retornando una copia ordenada según el paradigma del lenguaje); su representación es libre y se declara en el README. Si la entrada es nula o inválida, devuelve el indicador de fallo definido por el lenguaje o la API (`-1`, `null` u otra representación equivalente, **sin** `Option`/`Result`: llegan en la Fase 4); si está vacía, devuelve la misma secuencia vacía. No lanza excepciones. | Create a `naive_sort` project with a module containing `selection_sort(arr)`, `bubble_sort(arr)`, and `insertion_sort(arr)`. Each function takes an **indexable sequence of integers** (see [`04_Numbers.md`](../foundations/04_Numbers.md)) and returns it sorted in ascending order (in-place or returning a sorted copy depending on the language paradigm); its representation is free and is declared in the README. If the input is null or invalid, it returns the failure indicator defined by the language or API (`-1`, `null` or another equivalent representation, **without** `Option`/`Result`: they arrive in Phase 4); if empty, it returns the same empty sequence. It does not throw exceptions. |
 
 ### Implementaciones esperadas
 
@@ -35,7 +35,7 @@ grand_parent: Core
 | ----------- | ------------ | --------------------- | :--------: |
 | `selection_sort(arr)` | Encuentra iterativamente el mínimo del resto no ordenado y lo ubica al inicio | $O(n^2)$ siempre | ✅ |
 | `bubble_sort(arr)` | Compara e intercambia adyacentes; optimizado con bandera si no hay swaps | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ |
-| `insertion_sort(arr)` | Construye el sub-array ordenado insertando cada elemento en su posición | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ |
+| `insertion_sort(arr)` | Construye la sub-secuencia ordenada insertando cada elemento en su posición | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ |
 
 ### Pseudocódigo / Pseudocode
 
@@ -93,18 +93,18 @@ end container
 
 Las pruebas unitarias deben validar los siguientes casos para cada uno de los tres algoritmos:
 
-| Caso | Entrada | Salida esperada |
+| Caso / Case | Entrada / Input | Salida esperada / Expected output |
 | ------ | --------- | ---------------- |
-| Array estándar desordenado | `[5, 2, 9, 1, 5, 6]` | `[1, 2, 5, 5, 6, 9]` |
-| Array ya ordenado | `[1, 2, 3, 4, 5]` | `[1, 2, 3, 4, 5]` |
-| Array en orden inverso | `[5, 4, 3, 2, 1]` | `[1, 2, 3, 4, 5]` |
-| Elementos idénticos | `[7, 7, 7, 7]` | `[7, 7, 7, 7]` |
-| Con números negativos | `[3, -1, 4, -5, 0]` | `[-5, -1, 0, 3, 4]` |
-| Un solo elemento | `[42]` | `[42]` |
-| Array vacío | `[]` | `[]` |
+| Secuencia estándar desordenada<br>Standard unordered sequence | `[5, 2, 9, 1, 5, 6]` | `[1, 2, 5, 5, 6, 9]` |
+| Secuencia ya ordenada<br>Already sorted sequence | `[1, 2, 3, 4, 5]` | `[1, 2, 3, 4, 5]` |
+| Secuencia en orden inverso<br>Reverse-ordered sequence | `[5, 4, 3, 2, 1]` | `[1, 2, 3, 4, 5]` |
+| Elementos idénticos<br>Identical elements | `[7, 7, 7, 7]` | `[7, 7, 7, 7]` |
+| Con números negativos<br>With negative numbers | `[3, -1, 4, -5, 0]` | `[-5, -1, 0, 3, 4]` |
+| Un solo elemento<br>Single element | `[42]` | `[42]` |
+| Secuencia vacía<br>Empty sequence | `[]` | `[]` |
 
-> **ES:** Si el lenguaje/API puede representar una entrada nula o inválida, añade un caso controlado que compruebe el indicador de fallo correspondiente. No es una prueba para provocar una excepción: el contrato exige devolver el indicador y continuar con el runner. Si el tipo de array no admite `null`, documenta la representación equivalente y conserva el resto de casos.
-> **EN:** If the language/API can represent a null or invalid input, add a controlled case that checks the corresponding failure indicator. This is not an exception-triggering test: the contract requires returning the indicator and continuing through the runner. If the array type cannot represent `null`, document the equivalent representation and keep the remaining cases.
+> **ES:** Si el lenguaje/API puede representar una entrada nula o inválida, añade un caso controlado que compruebe el indicador de fallo correspondiente. No es una prueba para provocar una excepción: el contrato exige devolver el indicador y continuar con el runner. Si el tipo de la secuencia no admite un valor ausente, documenta la representación equivalente y conserva el resto de casos.
+> **EN:** If the language/API can represent a null or invalid input, add a controlled case that checks the corresponding failure indicator. This is not an exception-triggering test: the contract requires returning the indicator and continuing through the runner. If the sequence type admits no absent value, document the equivalent representation and keep the remaining cases.
 
 ---
 
@@ -143,8 +143,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`06_Data_Structures.md`](06_Data_Structures.md) — Estructuras de datos fundamentales modeladas con arrays.  
-👉 Continue with [`06_Data_Structures.md`](06_Data_Structures.md) — Fundamental data structures modeled with arrays.
+👉 Sigue con [`06_Data_Structures.md`](06_Data_Structures.md) — Estructuras de datos fundamentales: contrato fijo y representación libre.
+👉 Continue with [`06_Data_Structures.md`](06_Data_Structures.md) — Fundamental data structures: fixed contract and free representation.
 
 ---
 

@@ -16,7 +16,7 @@ grand_parent: Core
 
 | Español | English |
 |---------|---------|
-| Integrar archivos, strings y algoritmos previamente construidos en un pipeline pequeño y determinista. La meta es hacer visibles las decisiones de representación: filas contiguas, arrays de campos, validación y coste de ordenar o buscar. | Integrate files, strings, and previously built algorithms into a small deterministic pipeline. The goal is to make representation choices visible: contiguous rows, field arrays, validation, and the cost of sorting or searching. |
+| Integrar archivos, strings y algoritmos previamente construidos en un pipeline pequeño y determinista. La meta es hacer visibles las decisiones de representación: filas contiguas, secuencias de campos, validación y coste de ordenar o buscar. | Integrate files, strings, and previously built algorithms into a small deterministic pipeline. The goal is to make representation choices visible: contiguous rows, field sequences, validation, and the cost of sorting or searching. |
 
 ## 📝 Especificación / Specification
 

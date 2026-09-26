@@ -78,6 +78,36 @@ failed 0
 >
 > Document in your implementation's README which combination applies and why, instead of assuming the default count of 33.
 
+## 🧱 Primitiva del roadmap: la secuencia indexable / Roadmap primitive: the indexable sequence
+
+**ES:** Una **secuencia indexable** es una colección **ordenada** de elementos a la que se accede por **índice entero**, desde `0` hasta `size - 1`. Es la estructura más básica sobre la que se apoyan los módulos siguientes: los algoritmos de ordenamiento, de búsqueda y de texto la reciben como entrada. Se introduce aquí porque los módulos posteriores la usan sin definirla.
+
+**EN:** An **indexable sequence** is an **ordered** collection of elements accessed by **integer index**, from `0` to `size - 1`. It is the most basic structure the following modules rely on: sorting, searching and text algorithms take it as input. It is introduced here because later modules use it without defining it.
+
+**ES:** En los ejemplos y en las pruebas la secuencia tiene índices de acceso y una **capacidad fija** (los casos literales como `[5, 2, 9]`). Eso es el **ejemplo**, no el requisito: el contrato fija las **operaciones**, no cómo se guardan los datos.
+
+**EN:** In the examples and tests the sequence has access indices and a **fixed capacity** (literal cases such as `[5, 2, 9]`). That is the **example**, not the requirement: the contract fixes the **operations**, not how data is stored.
+
+**ES:** La **representación es libre** y debe ser la idiomática del lenguaje: un array, una lista, un vector, una tupla, un término, una cadena indexada o un mapa ordenado son representaciones válidas. No se asume **mutabilidad** ni **capacidad fija**; si el lenguaje no las tiene, se usa su representación idiomática y se declara. El indicador de fallo es el del lenguaje, y en las Fases 1 y 3 no se usan excepciones.
+
+**EN:** The **representation is free** and must be the language's idiomatic one: an array, a list, a vector, a tuple, a term, an indexed string or an ordered map are all valid representations. Neither **mutability** nor **fixed capacity** is assumed; if the language lacks them, its idiomatic representation is used and declared. The failure indicator is the language's own, and Phases 1 and 3 use no exceptions.
+
+| Operación asumida / Assumed operation | Qué garantiza / What it guarantees |
+|---|---|
+| Acceso por índice / Index access | Leer la posición `i` con `0 <= i < size`<br>Read position `i` with `0 <= i < size` |
+| Recorrido completo / Full traversal | Visitar todas las posiciones una vez, en orden<br>Visit every position once, in order |
+| `size` | Número de elementos de la secuencia<br>Number of elements in the sequence |
+| Copia / Copy | Obtener una secuencia independiente con los mismos elementos y orden<br>Obtain an independent sequence with the same elements and order |
+| Ventana / Window | Delimitar un tramo contiguo por sus dos extremos<br>Delimit a contiguous slice by its two ends |
+| Comparación elemento a elemento / Element-wise comparison | Decidir igualdad u orden entre dos secuencias, posición a posición<br>Decide equality or order between two sequences, position by position |
+| Construcción de una secuencia auxiliar / Building an auxiliary sequence | Crear una secuencia nueva: tabla, buffer o acumulador de resultados<br>Create a new sequence: table, buffer or result accumulator |
+
+**ES:** Los módulos que la usan declaran en su README qué representación eligieron y qué operaciones tuvieron que adaptar, según [`AGENT_Template.md`](../../AGENT_Template.md).
+
+**EN:** Modules using it declare in their README which representation they chose and which operations they had to adapt, per [`AGENT_Template.md`](../../AGENT_Template.md).
+
+---
+
 ## ✅ Criterios de aceptación / Acceptance Criteria
 
 - [ ] **ES:** Se implementan los cinco algoritmos (suma, factorial, Fibonacci, MCD, MCM) en los tres enfoques.  
