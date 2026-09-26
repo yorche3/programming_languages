@@ -77,8 +77,14 @@
 | Hasta la v1.0.0 el `cd` no es real: se usa `cd "$(glot use …)"` | v1.0.0 (`install` + capa cargable) |
 | El **estado del sprint es global** (XDG), sin clave de repositorio: dos monorepos comparten `lang/phase/module`, así que un sprint en un banco de pruebas pisa el del trabajo real. Medido el 2026-09-23 ejecutando un sprint completo en un laboratorio aparte, que hubo que aislar con `GLOT_STATE_DIR` | v1.0.0 (`install` + capa cargable): clave por raíz del monorepo |
 | Los **encargos citan rutas y nombres del monorepo real** (`docs/core/00_Project_Initialization_Guide.md`, `AGENTS.md`, los módulos homologados del lenguaje y el nombre `yorche3/programming_languages` en prosa) y no comprueban que existan. Medido el 2026-09-23: en el laboratorio faltaban y hubo que añadirlas a mano | v1.0.0: raíz del monorepo como marcador del encargo y comprobación de fuentes |
+| **La instalación congela los datos**: `install.meta` solo registra el `sha` de `glot.sh`, así que `doctor` no ve que la copia lleve `data/` o `prompts/` viejos (medido el 2026-09-25: la copia seguía diciendo `install_stale: no` con el comando de pruebas de Ada anterior) | v1.1.0 — que el `sha` cubra `data/` y `prompts/`, o que `doctor` informe la deriva de datos |
+| El harness limpia `GLOT_ROOT` y `GLOT_TOOLCHAINS_FILE`, pero **no** `GLOT_STATE_DIR`: con esa variable exportada (laboratorio) falla la comprobación de desinstalado (medido el 2026-09-25) | v1.1.0 — añadir el `unset` |
+| `docs-module` enumera las secciones del README de forma **cerrada** y quedó atrás respecto a la plantilla ampliada el 2026-09-25 (13 secciones) | v1.1.0 — remitir a «todas las secciones obligatorias de la plantilla» |
+| La sección «Secuencias de varios pasos» de la guía de inicialización no la valida nadie: la incoherencia `test`/`tests` de Ada vivió ahí sin aviso (la tabla sí se compara con el catálogo) | v1.1.0 — ampliar la deriva del harness a esa sección |
+| El catálogo de pasos del sprint no tiene paso de **corrección**: un artefacto de pytest versionado en un módulo se arregló a mano, fuera del flujo | v1.1.0 — decidir si es paso propio o parte de `suite` |
+| Con la capa cargable, `use` hace el `cd` real en un **subproceso**: `glot use … \| tail -1` pierde el `cd` (limitación de bash, no del verbo) | v1.1.0 — documentarlo en la ayuda del verbo |
 
-**ES:** Pagadas: los commits a mano se acabaron en la v0.9.0 (`save`), y el puntero del submódulo dejó de actualizarse a mano en la v0.12.0 (`pointer` prepara y `save 9` confirma).
+**ES:** Pagadas: los commits a mano se acabaron en la v0.9.0 (`save`), el puntero del submódulo dejó de actualizarse a mano en la v0.12.0 (`pointer` prepara y `save 9` confirma), y desde el 2026-09-25 el harness aísla el `PATH` del `HOME` desechable para no depender de una instalación real de `glot`.
 
 **EN:** Paid: hand-made commits ended in v0.9.0 (`save`).
 
