@@ -80,23 +80,90 @@
 | **La instalación congela los datos**: `install.meta` solo registra el `sha` de `glot.sh`, así que `doctor` no ve que la copia lleve `data/` o `prompts/` viejos (medido el 2026-09-25: la copia seguía diciendo `install_stale: no` con el comando de pruebas de Ada anterior) | v1.1.0 — que el `sha` cubra `data/` y `prompts/`, o que `doctor` informe la deriva de datos |
 | El harness limpia `GLOT_ROOT` y `GLOT_TOOLCHAINS_FILE`, pero **no** `GLOT_STATE_DIR`: con esa variable exportada (laboratorio) falla la comprobación de desinstalado (medido el 2026-09-25) | v1.1.0 — añadir el `unset` |
 | `docs-module` enumera las secciones del README de forma **cerrada** y quedó atrás respecto a la plantilla ampliada el 2026-09-25 (13 secciones) | v1.1.0 — remitir a «todas las secciones obligatorias de la plantilla» |
-| La sección «Secuencias de varios pasos» de la guía de inicialización no la valida nadie: la incoherencia `test`/`tests` de Ada vivió ahí sin aviso (la tabla sí se compara con el catálogo) | v1.1.0 — ampliar la deriva del harness a esa sección |
-| El catálogo de pasos del sprint no tiene paso de **corrección**: un artefacto de pytest versionado en un módulo se arregló a mano, fuera del flujo | v1.1.0 — decidir si es paso propio o parte de `suite` |
-| Con la capa cargable, `use` hace el `cd` real en un **subproceso**: `glot use … \| tail -1` pierde el `cd` (limitación de bash, no del verbo) | v1.1.0 — documentarlo en la ayuda del verbo |
-| Cinco lenguajes no tienen fila en `data/toolchains.tsv` (ada, common-lisp, rescript, rexx, scala): `doctor` no comprueba su toolchain, así que un sprint en ellos no avisa de una herramienta ausente | v1.1.0 — añadir la fila cuando la herramienta tenga un comando de versión fiable |
-| La política de **CI por submódulo** no está definida: el workflow debe usar el comando del catálogo (no copiarlo) y hay que decidir si convive con el acta de `docs/evidence/`, que vive en el monorepo | v1.1.0 — documentarla antes de añadir workflows por lenguaje |
-| La **inicialización multi-paso** no está en el catálogo: los lenguajes que necesitan dos o más comandos (Ada, C#, F#, Haxe, ReScript, Ruby…) aparecen como `deferred`/`manual` y `glot new` no ejecuta ni imprime esos comandos. Medido el 2026-09-25: `glot -n new ada algorithms/data_structures` responde `sin inicializador validado… skipped` y remite a `glot prompt scaffold`, sin listar `alr init --lib` + `alr init --bin tests`, que solo están en la guía de inicialización | v1.1.0 — que el catálogo exprese la secuencia, que `new` la imprima y, si se acuerda, la ejecute |
+| La sección «Secuencias de varios pasos» de la guía de inicialización no la valida nadie: la incoherencia `test`/`tests` de Ada vivió ahí sin aviso (la tabla sí se compara con el catálogo). Medido el 2026-09-26 en el laboratorio: la secuencia de ReScript es **imposible** tal como está escrita (`npm install` sin `package.json`) y los layouts que genera la guía para F# y OCaml **no coinciden** con los módulos homologados | v1.1.0 — corregir la guía con la medición y ampliar la deriva del harness a esa sección |
+| El catálogo de pasos del sprint no tiene paso de **corrección**: un artefacto de pytest versionado en un módulo se arregló a mano, fuera del flujo | ⏳ **Bloque B** (v1.2.0) — hay camino alternativo (commit manual) y falta decidir si es paso propio o parte de `suite` |
+| Con la capa cargable, `use` hace el `cd` real en un **subproceso**: `glot use … \| tail -1` pierde el `cd` (limitación de bash, no del verbo) | ⏳ **Bloque B** (v1.2.0) — es una nota en la ayuda, no un bloqueo del ciclo |
+| Cinco lenguajes no tienen fila en `data/toolchains.tsv` (ada, common-lisp, rescript, rexx, scala): `doctor` no comprueba su toolchain, así que un sprint en ellos no avisa de una herramienta ausente | ⏳ **Bloque B** (v1.2.0) — la fila exige un comando de versión **verificado**: el 2026-09-26 `gnat` no está instalado y `uv` tampoco, así que no se puede medir aquí |
+| La política de **CI por submódulo** no está definida: el workflow debe usar el comando del catálogo (no copiarlo) y hay que decidir si convive con el acta de `docs/evidence/`, que vive en el monorepo | ⏳ **Bloque B** (v1.2.0) — es una decisión de diseño, no un bloqueo; se documenta antes de añadir workflows |
+| La **inicialización multi-paso** no está en el catálogo: los lenguajes que necesitan dos o más comandos (Ada, C#, F#, Haxe, ReScript, Ruby…) aparecen como `deferred`/`manual` y `glot new` no ejecuta ni imprime esos comandos. Medido el 2026-09-25: `glot -n new ada algorithms/data_structures` responde `sin inicializador validado… skipped` y remite a `glot prompt scaffold`, sin listar `alr init --lib` + `alr init --bin tests`, que solo están en la guía de inicialización. **Medición del 2026-09-26** (tabla abajo): Ada, C#, F#, Groovy y Kotlin se automatizan **sin interacción**; V, Java, OCaml, ReScript, Python, Clojure, Nim y C++ se quedan manuales | v1.1.0 — que el catálogo exprese la secuencia, que `new` la imprima y, si se acuerda, la ejecute **solo** en los casos no interactivos |
 | **Los encargos no se descubren**: no hay verbo ni alias para ellos y no aparecen en el autocompletado, así que `glot suite` devuelve `2` por verbo desconocido cuando lo que se quiere es `glot prompt suite`. Medido el 2026-09-25 | v1.1.0 — completar `glot prompt <TAB>` con los seis encargos y que el verbo desconocido sugiera el encargo homónimo |
 | El encargo `suite` **no define los contratos idiomáticos**: la especificación da los nombres y la semántica, pero no el **tipo nuevo** del lenguaje ni las firmas, así que quien escribe la suite tiene que inventar la API antes de que exista la implementación. Medido el 2026-09-25 escribiendo `data_structures_basics` en Ada | v1.1.0 — que el encargo exija declarar el tipo nuevo, el `init` homologado y el dominio de valores antes de escribir la suite |
 | El **contrato no tiene paso propio** y acaba escrito dentro de `4b`: el encargo `suite` prohíbe tocar `src/`, pero sin contrato previo la suite no compila, así que el sprint declaró el contrato de `data_structures_basics` fuera de su paso. El orden natural —contrato primero, suite después— no está ni en el catálogo de commits ni en la decisión «Paso 4 en dos commits» de la v0.9.0. Medido el 2026-09-25 con `data_structures_basics` en Ada | v1.1.0 — dar al contrato su propio paso antes de la suite (o incluirlo en `4a`), con fila propia en `data/commits.tsv`, y **un commit por artefacto** (nunca varios mensajes en un solo commit): el historial del sprint se lee como se trabaja |
 
-**ES:** Esta deuda se paga en la **v1.1.0**, que se abre cuando `core.algorithms.data_structures_basics` y `core.algorithms.data_structures_advanced` cierren `50/50`; ese es el alcance con el que nace la versión.
+**ES:** La deuda se reparte en **dos bloques** para que la v1.1.0 no nazca cargada. Abre la versión cuando `core.algorithms.data_structures_basics` y `core.algorithms.data_structures_advanced` cierren `50/50`.
 
-**EN:** This debt is paid in **v1.1.0**, which opens when `core.algorithms.data_structures_basics` and `core.algorithms.data_structures_advanced` reach `50/50`; that is the scope the version starts with.
+**EN:** The debt is split into **two blocks** so that v1.1.0 does not start overloaded. The version opens when `core.algorithms.data_structures_basics` and `core.algorithms.data_structures_advanced` reach `50/50`.
+
+- **✅ Bloque A — entra en la v1.1.0 (8 entradas).** Es lo que **desbloquea el uso diario**: la secuencia de inicialización en el catálogo; el paso propio del contrato antes de la suite y el contrato idiomático en el encargo `suite`; los encargos descubribles desde `glot prompt`; la deriva de datos en `install.meta`/`doctor`; el `unset GLOT_STATE_DIR` del harness; la validación de «Secuencias de varios pasos» con la corrección medida; y `docs-module` remitiendo a la plantilla vigente.
+- **⏳ Bloque B — se aplaza a la v1.2.0 (4 entradas).** No bloquea el ciclo: el paso de corrección, el `cd` en tubería, las cinco filas de `toolchains.tsv` y la política de CI por submódulo.
+
+**ES:** El orden de aplicación del bloque A y la verificación de cada paso están en [`PLAN_v1.1.0.md`](PLAN_v1.1.0.md).
+
+**EN:** The work order for block A and each step's verification are in [`PLAN_v1.1.0.md`](PLAN_v1.1.0.md).
+
+**ES:** Criterio del reparto: entra en la v1.1.0 lo que **impide cerrar un sprint** o lo que hace que `doctor`/`new` informen mal; se aplaza lo que tiene camino alternativo, exige una medición que hoy no se puede hacer (toolchain ausente) o es una decisión de diseño pendiente.
+
+**EN:** Split rule: v1.1.0 takes what **blocks closing a sprint** or makes `doctor`/`new` report wrongly; the rest is postponed when a workaround exists, when it needs a measurement that cannot be taken today (missing toolchain) or when it is a pending design decision.
 
 **ES:** Pagadas: los commits a mano se acabaron en la v0.9.0 (`save`), el puntero del submódulo dejó de actualizarse a mano en la v0.12.0 (`pointer` prepara y `save 9` confirma), y desde el 2026-09-25 el harness aísla el `PATH` del `HOME` desechable para no depender de una instalación real de `glot`.
 
 **EN:** Paid: hand-made commits ended in v0.9.0 (`save`).
+
+#### 🧪 Inicialización multi-paso: medición del 2026-09-26 / Multi-step initialisation measurement
+
+**ES:** Cada secuencia se ejecutó **de verdad** en `~/glot-lab/init-lab/`, fuera del monorepo y de los submódulos, y el resultado se comparó —sin tocarlos— con el módulo homologado `naive_sort` del repo de cada lenguaje. `✅` no interactivo y layout coincidente · `⚠️` funciona con matices · `❌` no se puede automatizar así.
+
+**EN:** Every sequence was **actually run** in `~/glot-lab/init-lab/`, outside the monorepo and the submodules, and the result was compared —without touching them— against the `naive_sort` homologated module in each language repo. `✅` non-interactive and matching layout · `⚠️` works with caveats · `❌` cannot be automated this way.
+
+| Lenguaje | Secuencia medida | Interactivo | Layout homologado | Normalización que falta |
+|---|---|:--:|:--:|---|
+| Ada | `alr -n init --lib --in-place {module}` + `alr -n init --bin tests` (**desde la carpeta del módulo**, que `use` ya creó) | ✅ | ✅ | Licencia (`GPL-3.0-or-later`; el default es `MIT OR Apache-2.0 WITH LLVM-exception`) y `tests/alire.toml`: `description`, `[[depends-on]]`, `[[pins]] path='..'`, `aunit`. **Sin `--in-place` el crate sale anidado** (`{module}/{module}/`), que es el choque con la carpeta que crea `use` |
+| C# | `dotnet new sln/classlib/xunit` + `dotnet sln add` (4 comandos) | ✅ | ✅ (`.slnx`) | `<ProjectReference>` al proyecto de `src` (el generador no lo añade), borrar `Class1.cs`/`UnitTest1.cs`, añadir `.gitignore` |
+| F# | igual que C# con `-lang F#` | ✅ | ❌ | La guía propone `-o src/{Module}` (anidado) y el repo es **plano** (`src/{Module}.fsproj`); ídem C# (referencia, plantillas por defecto, `.gitignore`) |
+| Haxe | `mkdir -p src test` + `haxelib install utest` | ✅ | n/a | `build.hxml` y `RunTests.hx` son contenido del sprint, no inicialización |
+| ReScript | la guía dice `mkdir -p src test` + `npm install` | ❌ | ❌ | `npm install` **falla** (`ENOENT package.json`): el manifiesto va primero; la secuencia de la guía es inviable |
+| Ruby | `mkdir -p src test` + `bundle init` + `bundle install` | ✅ | ✅ | El `Gemfile` nace sin `rspec`: añadirlo y crear `.rspec` |
+| V | `v init --lib` (descripción, versión, licencia) | ✅ con `expect` | ❌ | Con `expect` concluye y genera **biblioteca**; crea `{m}.v` en raíz, `tests/`, `.editorconfig`, `.gitattributes` y un **`git init` anidado** (que hay que quitar). **R1/R3: se usa y se completa**; el módulo homologado (`src/{m}.v` + `test/`) se actualiza al retomar V (R6) |
+| Groovy | `gradle init --type groovy-library --dsl groovy --project-name {m} --package {m} --use-defaults` | ✅ | ✅ (`lib/`) | Borrar `Library.groovy`/`LibraryTest.groovy` |
+| Kotlin | ídem con `--type kotlin-library --dsl kotlin … --no-split-project` | ✅ | ✅ (plano) | Borrar `Library.kt`/`LibraryTest.kt` |
+| Java | `mvn archetype:generate … -DinteractiveMode=false` | ✅ | ❌ | Genera carpeta anidada, paquete `com.example`, `App`/`AppTest` y otro JUnit; el repo es plano, `com.programminglanguages`, JUnit 5.11.3 |
+| OCaml | `dune init proj {module}` | ✅ | ❌ | Genera `lib/`+`bin/`+`.opam`; el repo es `src/` plano sin `.opam` |
+| Python | `uv init --lib` (`uv` 0.12.19 instalado) | ✅ | ❌ | Genera **biblioteca** (`.gitignore`, `.python-version`, `README.md`, `pyproject.toml`, `src/{paquete}/__init__.py`, `py.typed`, backend `uv_build`). **R1: se usa y se completa** (`conftest.py`, `tests/`, configuración de pytest; el runner pasa a `uv run pytest`). Módulo homologado a actualizar (R6) |
+| Clojure | `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new {:git/tag "v0.9.0" :git/sha "da2f764f…"}}}' -Tnew create :template lib :name {m} :target-dir {m}` | ✅ | ✅ | El comando del catálogo (`clojure -T:build new`) es **inválido**: el `build.clj` del repo no tiene tarea `new`. Con `deps-new` el layout coincide (`src/{m}/{m}.clj`, `test/`, `build.clj`, `deps.edn`) y `clojure -T:build test` corre (falla solo por el test de plantilla, que el sprint sustituye) |
+| Nim | `nimble init` (tipo de paquete, versión, descripción, licencia y versión mínima de Nim) | ✅ con `expect` | ❌ | **R1: se usa** (`library` + Enter) y se completa: mover `src/{m}/{m}.nim`→`src/{m}.nim`, `tests/`→`test/` y añadir la `task test` del `.nimble`. Módulo homologado a actualizar (R6) |
+| C++ | — (Bazel escrito a mano) | n/a | ✅ por construcción | No hay generador: `MODULE.bazel`, `WORKSPACE`, `BUILD` y `.bazelversion` son del esqueleto manual |
+
+**ES:** Política de inicialización cerrada el 2026-09-26 (sustituye al criterio anterior de «solo si el layout coincide»):
+
+- **R1** — Se usa la herramienta del ecosistema **instalada** (las versiones de WSL son el estándar nuevo) **aunque su salida difiera** de la convención anterior; lo que falte (carpetas, manifiesto, configuración del runner) se completa a mano, como haría un desarrollador. `glot` solo **automatiza ejecutar comandos**.
+- **R2** — Se descarta la herramienta cuyo esqueleto es para una **aplicación** y no para una biblioteca.
+- **R3** — Se acepta la herramienta que añada documentos o carpetas extra que no alejen del proyecto de biblioteca.
+- **R4** — La **herramienta de construcción** puede cambiar a la más usada del lenguaje (Make, CMake, meson…).
+- **R5** — Decide el **uso y la aceptación de la comunidad** del lenguaje.
+- **R6** — Si la herramienta impone otra estructura, **el módulo homologado se actualiza** al retomar ese lenguaje; es deuda declarada, no trabajo de esta versión.
+
+**ES:** Reparto resultante: **33 `tool` · 17 `manual` · 0 `deferred`**. Pasan a `tool` doce lenguajes: los seis que estaban `deferred` (`ada`, `groovy`, `kotlin`, `clojure`, `nim`, `python`) y seis que estaban `manual` (`julia`, `vala`, `perl`, `common-lisp`, `racket`, `v`). `cpp` queda `manual` (sin generador) y `java` **baja a `manual`** por **R2** (el arquetipo `quickstart` trae `main`: es aplicación, no biblioteca). Con R6, hay que **actualizar el módulo homologado** de `fsharp`, `nim`, `python`, `julia`, `vala`, `perl`, `common-lisp`, `racket` y `v` cuando se retomen.
+
+**EN:** Policy closed on 2026-09-26 (it replaces the earlier “only if the layout matches” rule): **R1** use the **installed** ecosystem tool even when its output differs, completing what is missing by hand; **R2** reject tools whose skeleton is an **application**; **R3** accept extra docs or folders that keep the library project intact; **R4** the build tool may move to the language's most used one; **R5** community acceptance decides; **R6** when the tool imposes another structure, **the homologated module is updated** when that language is retaken. Result: **33 `tool` · 17 `manual` · 0 `deferred`**.
+
+**ES:** Herramientas instaladas el 2026-09-26 para poder medir: `uv 0.12.19` (`~/.local/bin`), `Module::Starter 1.82` (`~/perl5`; su `bin` y `PERL5LIB` son parte de la normalización de Perl) y `quickproject` mediante el quicklisp ya configurado de `ros`. `expect 5.45.4` conduce los interactivos (`nim`, `v`). La tabla de decisión completa —lenguaje a lenguaje, con la normalización y si el módulo homologado hay que actualizarlo— está en [`PLAN_v1.1.0.md`](PLAN_v1.1.0.md).
+
+**EN:** Tools installed on 2026-09-26 so the measurement could be taken: `uv 0.12.19`, `Module::Starter 1.82` and `quickproject` through the already-configured `ros` quicklisp; `expect 5.45.4` drives the interactive ones. The full decision table lives in [`PLAN_v1.1.0.md`](PLAN_v1.1.0.md).
+
+#### 📍 Dónde queda el autor: `use`, `new` y la carpeta del módulo / Where the author ends up
+
+**ES:** `use` **crea y devuelve la carpeta del módulo** (`{lang}/core/{fase}/{módulo}`) y la capa cargable hace el `cd` real hasta ahí; `new` ejecuta su comando **dentro de esa carpeta** y en un subproceso, así que **no mueve al autor**: sigue donde lo dejó `use`, que es donde vive el proyecto y donde `git` funciona (el submódulo es el repositorio).
+
+**EN:** `use` **creates and prints the module folder** (`{lang}/core/{phase}/{module}`) and the loadable layer performs the real `cd` there; `new` runs its command **inside that folder** in a subshell, so it **does not move the author**: they stay where `use` left them, which is where the project lives and where `git` works (the submodule is the repository).
+
+**ES:** Consecuencia para el catálogo multi-paso: **no hace falta cambiar `use`**. Lo que la secuencia necesita es declarar **el directorio de trabajo de cada paso**, que en todos los casos medidos es la carpeta del módulo:
+
+1. los comandos que crean carpeta por su cuenta van con **`--in-place`** (Ada) o admiten destino explícito (`-o` en C#/F#, `:target-dir` en Clojure);
+2. los que deben correr dentro del proyecto (Ada `--bin tests`, `dotnet sln add`, `bundle install`) ya están en esa carpeta.
+
+Y la alternativa de «volver a `{fase}`» no aporta nada: desde `{módulo}` funcionan igual `git add`, `glot save`, `glot test` y la suite, porque el estado del sprint y el repo del submódulo **no dependen del `cwd`**. Se deja el comportamiento actual —el autor termina dentro del proyecto— y se documenta en la ayuda del verbo.
+
+**EN:** Multi-step catalogue consequence: **`use` does not need to change**. The sequence must declare **each step's working directory**, which in every measured case is the module folder: (1) commands that create the folder themselves run with **`--in-place`** (Ada) or accept an explicit target (`-o` in C#/F#, `:target-dir` in Clojure); (2) commands that must run inside the project (Ada `--bin tests`, `dotnet sln add`, `bundle install`) are already there. The “return to `{phase}`” alternative adds nothing: from `{module}`, `git add`, `glot save`, `glot test` and the suite all work, because sprint state and the submodule repo **do not depend on the `cwd`**. Current behaviour stays —the author ends inside the project— and it is documented in the verb's help.
 
 ---
 
