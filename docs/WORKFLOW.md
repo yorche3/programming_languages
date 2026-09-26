@@ -60,6 +60,10 @@
 
 **EN:** Steps 4a (scaffold), 4b (contract), 4c (suite), 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). The request is built by `glot prompt <request>` from the **versioned** templates in [`scripts/prompts/`](../scripts/prompts/); the local bank in `.github/prompts/` (excluded by `.gitignore`) is accepted as a fallback, with a warning. The agent **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
 
+**ES:** El agente que hace el paso **no ejecuta los verbos de delegación** (`glot prompt`, `glot ask`): recibe el encargo ya armado, o lee las fuentes que este declara, y **realiza** el trabajo. Delegar es opcional y tiene dos vías que conviven: el autor puede enviar el encargo a su propio delegado (configurado en su entorno, fuera del repositorio y sin versionar) o el mismo agente del editor lo ejecuta. El reparto no cambia: `glot` orquesta y ejecuta comandos, el agente escribe el artefacto y el autor decide y publica. Los detalles están en [`AGENT_Template.md`](AGENT_Template.md).
+
+**EN:** The agent performing the step **does not run the delegation verbs** (`glot prompt`, `glot ask`): it receives the request already built, or reads the sources the request declares, and **does** the work. Delegating is optional and has two coexisting routes: the author may send the request to their own delegate (configured in their environment, outside the repository and unversioned) or the editor's own agent performs it. The split does not change: `glot` orchestrates and runs commands, the agent writes the artefact and the author decides and publishes. Details are in [`AGENT_Template.md`](AGENT_Template.md).
+
 ---
 
 ## 🗂️ Estado del sprint / Sprint state

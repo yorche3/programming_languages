@@ -10,6 +10,50 @@ Los agentes ayudan principalmente con documentación, verificación y revisiones
 puntuales. El autor implementa los lenguajes para practicar; generar código
 nuevo requiere una petición explícita.
 
+## Delegación y alcance / Delegation and scope
+
+**ES:** La delegación se puede hacer de **dos maneras** y las dos conviven:
+
+1. **Delega el autor.** `glot prompt <encargo>` imprime el encargo y el autor lo
+   envía a un agente: el chat del editor o `glot ask` con `GLOT_DELEGATE`
+   definido en su entorno. Esa configuración es **suya**, vive fuera del
+   repositorio y no se versiona.
+2. **El agente hace el paso.** El agente que recibe el encargo **no ejecuta los
+   comandos de delegación** (`glot prompt`, `glot ask`): lee las fuentes que el
+   encargo declara —reglas, especificación y módulos homologados del lenguaje—
+   y realiza el trabajo.
+
+| Pieza / Piece | Sí hace / Does | No hace / Does not |
+|---|---|---|
+| `glot` | Orquesta y ejecuta los comandos de terminal, resuelve catálogo y estado, captura salidas reales y arma el encargo | No piensa por el agente ni ejecuta los encargos |
+| Agente de IA / AI agent | Lee las reglas, la especificación y los módulos homologados, y escribe el artefacto del paso | No ejecuta `prompt`/`ask`, no decide el cierre, no commitea ni empuja |
+| Autor / Author | Decide, configura su delegado, revisa, commitea, empuja y cierra | — |
+
+**EN:** Delegation can be done in **two ways** and both coexist:
+
+1. **The author delegates.** `glot prompt <request>` prints the request and the
+   author sends it to an agent: the editor's chat or `glot ask` with
+   `GLOT_DELEGATE` set in their environment. That configuration is **theirs**, it
+   lives outside the repository and is not versioned.
+2. **The agent performs the step.** The agent receiving the request **does not
+   run the delegation commands** (`glot prompt`, `glot ask`): it reads the
+   sources the request declares —rules, specification and the language's
+   standardised modules— and does the work.
+
+**ES:** Consecuencia de límites: el agente **no** usa cuentas, cuotas ni
+credenciales del autor (nada de `copilot -p`, `gh auth` o tokens), y **no**
+versiona datos personales —correo, nombre civil o rutas absolutas
+(`/home/{usuario}/…`)— en ningún artefacto. El autor conserva el control: puede
+hacer por sí mismo cualquier paso, y el agente solo cubre los que se le
+presenten como encargo.
+
+**EN:** Scope consequence: the agent **does not** use the author's accounts,
+quotas or credentials (no `copilot -p`, `gh auth` or tokens), and **does not**
+version personal data —email, civil name or absolute paths
+(`/home/{user}/…`)— in any artefact. The author keeps control: they can do any
+step themselves, and the agent only covers the ones presented to it as a
+request.
+
 ## Antes de escribir / Before writing
 
 1. Ejecutar `git status --short` y `git submodule status` en la raíz.

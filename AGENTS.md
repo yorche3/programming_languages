@@ -39,6 +39,37 @@ La implementación de código nuevo requiere una petición explícita del autor.
 - No ejecutar `git push` ni crear commits salvo instrucción explícita; tampoco
   los subcomandos de `glot` que crean ramas o empujan (`use`).
 - No modificar `docs/ROADMAP.md` durante una implementación parcial.
+- No ejecutar los verbos de delegación de `glot` (`prompt`, `ask`): el agente
+  **hace** el paso; lee la especificación y las fuentes del encargo y produce el
+  artefacto.
+- No usar cuentas, cuotas ni credenciales del autor: nada de `copilot -p`,
+  `gh auth`, tokens ni comandos que gasten sus recursos.
+- No versionar datos personales en ningún artefacto: ni correo, ni nombre civil,
+  ni rutas absolutas (`/home/{usuario}/…`), ni credenciales.
+
+## Delegación: dos vías y alcance de cada herramienta
+
+Un sprint se puede llevar de dos maneras y **las dos conviven**; ninguna es la
+única válida:
+
+1. **El autor delega.** `glot prompt <encargo>` imprime el encargo y el autor lo
+   lleva a un agente: el chat del editor, o `glot ask` con `GLOT_DELEGATE`
+   definido en **su** entorno. Esa configuración es suya, vive fuera del
+   repositorio y no se versiona.
+2. **El agente hace el paso.** El agente que recibe el encargo **no ejecuta los
+   comandos de delegación**: busca las especificaciones y las fuentes que el
+   encargo declara y realiza el trabajo.
+
+Para que cada pieza haga solo lo suyo:
+
+| Pieza | Sí hace | No hace |
+|---|---|---|
+| `glot` | Orquesta: resuelve catálogo y estado, ejecuta los comandos de terminal, captura las salidas reales y arma el encargo | No piensa por el agente ni ejecuta los encargos |
+| Agente de IA | Lee las reglas, la especificación y los módulos homologados, y **escribe** el artefacto del paso | No ejecuta `prompt`/`ask`, no decide el cierre, no commitea ni empuja |
+| Autor | Decide, configura su delegado, revisa, commitea, empuja y cierra | — |
+
+Esto deja el control en el autor: puede hacer por sí mismo cualquier paso que
+quiera, y el agente solo cubre los que se le presenten como encargo.
 
 ## Convenciones de ramas
 
