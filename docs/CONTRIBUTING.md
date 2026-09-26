@@ -105,7 +105,7 @@ este repositorio es obligatorio para cambios de módulo y submódulo. Debe usar
 el identificador del módulo o la infraestructura afectada:
 
 - **Por fase:** `foundations`, `algorithms`, `text`, `structures`, `data`, `math`, `ui`, `web`
-- **Por módulo:** `hello_world`, `calculator`, `numbers`, `naive_sort`, `data_structures`, `transformations`, etc.
+- **Por módulo:** `hello_world`, `calculator`, `numbers`, `naive_sort`, `data_structures_basics`, `data_structures_advanced`, `transformations`, etc.
 - **Por infraestructura:** `submodule`, `ci`, `docker`, `docs`, `glot` (herramientas de `scripts/`)
 
 **EN:** The `(scope)` is optional in Conventional Commits, but mandatory here

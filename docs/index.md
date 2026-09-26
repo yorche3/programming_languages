@@ -53,22 +53,23 @@ programming_languages/
 │       │   ├── 02_Hello_User.md
 │       │   ├── 03_Unit_Test_Calculator.md
 │       │   └── 04_Numbers.md
-│       ├── algorithms/            # Fase 1 — Algoritmos Puros (05_ a 09_)
+│       ├── algorithms/            # Fase 1 — Algoritmos Puros (05_ a 10_)
 │       │   ├── README.md
 │       │   ├── 05_Naive_Sort.md
-│       │   ├── 06_Data_Structures.md
-│       │   ├── 07_Efficient_Sort.md
-│       │   ├── 08_Distributed_Sort.md
-│       │   └── 09_Searching.md
-│       ├── text/                  # Fase 2 — Procesamiento Contiguo (10_ a 14_)
+│       │   ├── 06_Data_Structures_Basics.md
+│       │   ├── 07_Data_Structures_Advanced.md
+│       │   ├── 08_Efficient_Sort.md
+│       │   ├── 09_Distributed_Sort.md
+│       │   └── 10_Searching.md
+│       ├── text/                  # Fase 2 — Procesamiento Contiguo (11_ a 15_)
 │       │   ├── README.md
 │       │   └── ...
-│       ├── structures/            # Fase 3 — Algoritmos sobre Estructuras (15_ a 18_)
+│       ├── structures/            # Fase 3 — Algoritmos sobre Estructuras (16_ a 19_)
 │       │   ├── README.md
-│       │   ├── 15_Graph_Algorithms.md
-│       │   ├── 16_Backtracking.md
-│       │   ├── 17_Dynamic_Programming.md
-│       │   └── 18_Greedy.md
+│       │   ├── 16_Graph_Algorithms.md
+│       │   ├── 17_Backtracking.md
+│       │   ├── 18_Dynamic_Programming.md
+│       │   └── 19_Greedy.md
 │       ├── data/                  # Fase 4 — Abstracción y Persistencia
 │       │   └── README.md
 │       └── math/                  # Fase 5 — Matemáticas
@@ -171,20 +172,21 @@ git submodule update --init --recursive
 ├── algorithms/             ← Fase 1 — Algoritmos Puros (arrays, centinelas, O(n²) a O(n log n))
 │   ├── README.md
 │   ├── 05_Naive_Sort.md
-│   ├── 06_Data_Structures.md
-│   ├── 07_Efficient_Sort.md
-│   ├── 08_Distributed_Sort.md
-│   └── 09_Searching.md
-├── text/                   ← Fase 2 — Procesamiento Contiguo (strings, excepciones, I/O)
+│   ├── 06_Data_Structures_Basics.md
+│   ├── 07_Data_Structures_Advanced.md
+│   ├── 08_Efficient_Sort.md
+│   ├── 09_Distributed_Sort.md
+│   └── 10_Searching.md
+├── text/                   ← Fase 2 — Procesamiento Contiguo (11_ a 15_; strings, excepciones, I/O)
 │   ├── README.md
-│   ├── 10_Transformations.md
-│   └── ... (hasta 14_ETL_Basico.md)
-├── structures/             ← Fase 3 — Algoritmos sobre Estructuras (grafos, backtracking, DP, greedy)
+│   ├── 11_Transformations.md
+│   └── ... (hasta 15_ETL_Basico.md)
+├── structures/             ← Fase 3 — Algoritmos sobre Estructuras (16_ a 19_; grafos, backtracking, DP, greedy)
 │   ├── README.md
-│   ├── 15_Graph_Algorithms.md
-│   ├── 16_Backtracking.md
-│   ├── 17_Dynamic_Programming.md
-│   └── 18_Greedy.md
+│   ├── 16_Graph_Algorithms.md
+│   ├── 17_Backtracking.md
+│   ├── 18_Dynamic_Programming.md
+│   └── 19_Greedy.md
 ├── data/                   ← Fase 4 — Abstracción y Persistencia (Result/Option, BD, ORM)
 │   └── README.md
 └── math/                   ← Fase 5 — Matemáticas (estadística, álgebra lineal)

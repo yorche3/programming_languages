@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 18 — Greedy
+title: 19 — Greedy
 description: Decimoctava especificación / Eighteenth specification — Algoritmos voraces
 nav_order: 4
 parent: Algoritmos sobre Estructuras / Algorithms on Structures
 grand_parent: Core
 ---
 
-# 🚀 18 — Greedy
+# 🚀 19 — Greedy
 
-> [← Volver a 17_Dynamic_Programming](17_Dynamic_Programming.md)
+> [← Volver a 18_Dynamic_Programming](18_Dynamic_Programming.md)
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ---

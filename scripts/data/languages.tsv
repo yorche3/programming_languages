@@ -1,50 +1,50 @@
-ada	alr init --lib {module}	alire.toml, {module}.gpr, config/	alr -C tests run	-	deferred	-	-
+ada	alr init --lib --in-place {module} + alr init --bin tests	alire.toml, {module}.gpr, config/, tests/	alr -C tests run	-	tool	-	-
 assembly	mkdir -p src test + Makefile	Makefile	make run	-	manual	mkdir -p src test	-
 ballerina	bal new {module}	Ballerina.toml, {module}.bal, tests/	bal test	-	tool	bal new {module}	flat:{module}
 c	mkdir -p include src test + Makefile	include/{module}.h, Makefile	make test	-	manual	mkdir -p include src test	-
-clojure	clojure -T:build new	deps.edn, build.clj	clojure -T:build test	-	deferred	-	-
+clojure	clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib	deps.edn, build.clj, src/{module}/	clojure -T:build test	-	tool	-	-
 cobol	mkdir -p src/copybooks src/lib test	Makefile, run_tests	make test	-	manual	mkdir -p src/copybooks src/lib test	-
-common-lisp	mkdir -p src tests	{module}.asd, run-tests.lisp	ros run --load run-tests.lisp --eval '(uiop:quit)'	-	manual	mkdir -p src tests	-
-cpp	Configuración manual de Bazel (MODULE.bazel, WORKSPACE, targets en BUILD)	BUILD, MODULE.bazel, .bazelversion	bazelisk test //...	-	deferred	-	-
+common-lisp	quickproject:make-project (ros + quicklisp)	{module}.asd, package.lisp, src/, test/, run-tests.lisp	ros run --load run-tests.lisp --eval '(uiop:quit)'	-	tool	-	-
+cpp	Configuración manual de Bazel (MODULE.bazel, WORKSPACE, targets en BUILD)	BUILD, MODULE.bazel, .bazelversion	bazelisk test //...	-	manual	mkdir -p include src tests	-
 crystal	crystal init lib {module}	shard.yml	crystal spec	crystal tool format --check src	tool	crystal init lib {module}	rm:{module}/.git;flat:{module}
-csharp	dotnet new classlib -n {Module} -o src/{Module}	{Module}.slnx, src/{Module}/{Module}.csproj	dotnet test {Module}.slnx	-	tool	dotnet new classlib -n {Module} -o src/{Module}	-
+csharp	dotnet new sln -n {Module} + classlib + xunit + sln add	{Module}.slnx, src/{Module}/{Module}.csproj, test/{Module}.Tests/	dotnet test {Module}.slnx	-	tool	-	-
 d	dub init {module} --format=sdl	dub.sdl	dub test	-	tool	dub init {module} --format=sdl	flat:{module}
 dart	dart create -t package {module}	pubspec.yaml, analysis_options.yaml	dart test · dart analyze	dart analyze	tool	dart create -t package {module}	flat:{module}
 elixir	mix new {module} --module {Module}	mix.exs	mix test	mix format --check-formatted	tool	mix new {module} --module {Module}	flat:{module}
 elm	elm init	elm.json	elm-test	-	tool	printf 'y\n' | elm init	-
 erlang	rebar3 new lib {module}	rebar.config, src/{module}.app.src	rebar3 eunit	-	tool	rebar3 new lib {module}	flat:{module}
 forth	mkdir -p src test	— (runner casero test.forth)	cd test && gforth run-tests.forth	-	manual	mkdir -p src test	-
-fsharp	dotnet new classlib -lang F# -n {Module} -o src/{Module}	{Module}.slnx, src/{Module}/{Module}.fsproj	dotnet test	-	tool	dotnet new classlib -lang F# -n {Module} -o src/{Module}	-
+fsharp	dotnet new sln -n {Module} + classlib -lang F# + xunit + sln add	{Module}.slnx, src/{Module}.fsproj, test/{Module}.Tests.fsproj	dotnet test	-	tool	-	-
 gleam	gleam new {module}	gleam.toml, manifest.toml	gleam test	-	tool	gleam new {module}	rm:{module}/.git;flat:{module}
 go	go mod init example.com/{module}	go.mod	go test ./...	test -z "$(gofmt -l src)"	tool	go mod init example.com/{module}	-
 grain	mkdir -p src tests + Makefile	Makefile	make test	-	manual	mkdir -p src tests	-
-groovy	gradle init --type groovy-library	build.gradle, settings.gradle, gradle/wrapper/	./gradlew test	-	deferred	-	-
+groovy	gradle init --type groovy-library --dsl groovy --use-defaults	settings.gradle, lib/build.gradle, gradle/	./gradlew test	-	tool	-	-
 haskell	cabal init --lib	{module}.cabal	cabal test	-	tool	cabal init --lib -n	-
-haxe	mkdir -p src test	build.hxml, RunTests.hx	haxe build.hxml	-	manual	mkdir -p src test	-
-java	mvn archetype:generate -DgroupId=com.example -DartifactId={module} -DarchetypeGroupId=org.apache.maven.archetypes -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false	pom.xml	mvn test	-	tool	mvn archetype:generate -DgroupId=com.example -DartifactId={module} -DarchetypeGroupId=org.apache.maven.archetypes -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false	flat:{module}
+haxe	mkdir -p src test + haxelib install utest	build.hxml, RunTests.hx	haxe build.hxml	-	manual	-	-
+java	pom.xml a mano (el arquetipo quickstart es de aplicación: R2)	pom.xml	mvn test	-	manual	mkdir -p src/main/java src/test/java	-
 javascript	npm init -y	package.json, jest.config.js	npm test	-	tool	npm init -y	-
-julia	mkdir -p src test + Project.toml	Project.toml, Manifest.toml	julia --project=. test/run_tests.jl	julia --project=. -e 'for f in filter(x->endswith(x,".jl"), readdir("src")); Meta.parse(read("src/$f", String)); end'	manual	mkdir -p src test	-
-kotlin	gradle init --type kotlin-library	build.gradle.kts, settings.gradle.kts	gradle test	-	deferred	-	-
+julia	julia -e 'using Pkg; Pkg.generate("{module}")'	Project.toml, src/{Module}.jl, test/	julia --project=. test/run_tests.jl	julia --project=. -e 'for f in filter(x->endswith(x,".jl"), readdir("src")); Meta.parse(read("src/$f", String)); end'	tool	-	-
+kotlin	gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project	build.gradle.kts, settings.gradle.kts	gradle test	-	tool	-	-
 lua	luarocks init	{module}.rockspec, .busted	busted	-	tool	luarocks init {module} 1.0.0	-
-nim	nimble init	{module}.nimble, test/config.nims	nimble test	nim check src/{module}.nim	deferred	-	-
-ocaml	dune init proj {module}	dune-project, src/dune, test/dune	dune runtest	-	tool	dune init proj {module}	flat:{module}
-perl	mkdir -p src test	—	prove --ext=.pl test/	perl -c src/{module}.pl	manual	mkdir -p src test	-
+nim	nimble init (tipo library; lo conduce expect)	{module}.nimble, src/{module}.nim, test/config.nims	nimble test	nim check src/{module}.nim	tool	-	-
+ocaml	dune init proj {module}	dune-project, src/dune, test/dune	dune runtest	-	tool	-	-
+perl	module-starter --module={module} --dir=.	Makefile.PL, lib/{module}.pm, t/	prove --ext=.pl test/	perl -c src/{module}.pl	tool	-	-
 php	mkdir -p src test + composer require --dev phpunit/phpunit	composer.json, phpunit.xml, .gitignore	composer test	php -l src/{Module}.php	tool	mkdir -p src test && composer require --dev phpunit/phpunit	-
 prolog	mkdir -p src test	—	cd test && swipl -q -f {suite}.pl -t halt	-	manual	mkdir -p src test	-
 purescript	spago init	spago.yaml	spago test	-	tool	spago init	-
-python	uv init --lib	pyproject.toml, conftest.py	pytest	python3 -m compileall -q src	deferred	-	-
+python	uv init --lib .	pyproject.toml, src/{module}/, conftest.py, tests/	pytest	python3 -m compileall -q src	tool	-	-
 r	mkdir -p src test	—	Rscript test/run_tests.R	Rscript -e 'invisible(lapply(list.files("src", full.names=TRUE), parse))'	manual	mkdir -p src test	-
-racket	mkdir -p src test	—	racket test/run_tests.rkt	-	manual	mkdir -p src test	-
+racket	raco pkg new {module}	info.rkt, main.rkt, scribblings/	racket test/run_tests.rkt	-	tool	-	-
 raku	mkdir -p lib t	—	prove6 -l t/	-	manual	mkdir -p lib t	-
-rescript	mkdir -p src test	rescript.json, package.json, jest.config.js	npm test	-	manual	mkdir -p src test	-
+rescript	mkdir -p src test	rescript.json, package.json, jest.config.js	npm test	-	manual	-	-
 rexx	mkdir -p src test	—	rexx test/{suite}.rexx	-	manual	mkdir -p src test	-
-ruby	mkdir -p src test	Gemfile, .rspec	bundle exec rspec	ruby -c src/{module}.rb	manual	mkdir -p src test	-
+ruby	mkdir -p src test	Gemfile, .rspec	bundle exec rspec	ruby -c src/{module}.rb	manual	-	-
 rust	cargo init --lib	Cargo.toml	cargo test	cargo fmt --check	tool	cargo init --lib	rm:.git
 scala	mkdir -p src/main/scala src/test/scala project	build.sbt, project/build.properties	sbt -batch -no-colors test	-	manual	mkdir -p src/main/scala src/test/scala project	-
 scheme	mkdir -p src test	—	cd test && guile --no-auto-compile -s {suite}_guile.scm	-	manual	mkdir -p src test	-
 swift	swift package init --type library	Package.swift, Sources/{Module}/	swift test	-	tool	swift package init --type library	-
 tcl-tk	mkdir -p src test	src/pkgIndex.tcl	cd test && TCLLIBPATH="$(cd ../src && pwd)" tclsh9.0 {suite}.test	-	manual	mkdir -p src test	-
 typescript	npm init -y	package.json, tsconfig.json, jest.config.cjs	npm test	-	tool	npm init -y	-
-v	mkdir -p src test + v.mod	v.mod	v test .	v fmt -verify src	manual	mkdir -p src test	-
-vala	mkdir -p src test	—	valac src/{module}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{module}-tests && /tmp/{module}-tests	-	manual	mkdir -p src test	-
+v	v init --lib (lo conduce expect)	v.mod, {module}.v, test/	v test .	v fmt -verify src	tool	-	-
+vala	meson init --language vala --type library --name {module}	meson.build, src/, test/	valac src/{module}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{module}-tests && /tmp/{module}-tests	-	tool	-	-
 zig	zig init	build.zig	zig build test	zig fmt --check src	tool	zig init	-

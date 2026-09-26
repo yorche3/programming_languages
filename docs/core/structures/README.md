@@ -27,19 +27,19 @@ has_children: true
 
 | Módulo | Estado | Tema |
 |--------|--------|------|
-| [`graph_algorithms`](15_Graph_Algorithms.md) | 📋 | BFS, DFS, Dijkstra, Prim, Kruskal, orden topológico, componentes conexas |
-| [`backtracking`](16_Backtracking.md) | 📋 | N-Queens, permutaciones, subconjuntos, laberinto |
-| [`dynamic_programming`](17_Dynamic_Programming.md) | 📋 | LCS, knapsack 0/1, coin change, LIS, caminos en grid |
-| [`greedy`](18_Greedy.md) | 📋 | activity selection, fractional knapsack, coin change greedy |
+| [`graph_algorithms`](16_Graph_Algorithms.md) | 📋 | BFS, DFS, Dijkstra, Prim, Kruskal, orden topológico, componentes conexas |
+| [`backtracking`](17_Backtracking.md) | 📋 | N-Queens, permutaciones, subconjuntos, laberinto |
+| [`dynamic_programming`](18_Dynamic_Programming.md) | 📋 | LCS, knapsack 0/1, coin change, LIS, caminos en grid |
+| [`greedy`](19_Greedy.md) | 📋 | activity selection, fractional knapsack, coin change greedy |
 
 ---
 
 ## 🧭 Flujo recomendado / Recommended flow
 
-1. `15_Graph_Algorithms.md`
-2. `16_Backtracking.md`
-3. `17_Dynamic_Programming.md`
-4. `18_Greedy.md`
+1. `16_Graph_Algorithms.md`
+2. `17_Backtracking.md`
+3. `18_Dynamic_Programming.md`
+4. `19_Greedy.md`
 
 > **ES:** El heap de `efficient_sort` (Fase 1) se reutiliza como cola de prioridad en Dijkstra. `backtracking` prepara la recursión con retroceso del `parsing` de la Fase 4. DP y greedy son insumos de la capa de abstracción.
 > **EN:** The heap from `efficient_sort` (Phase 1) is reused as a priority queue in Dijkstra. `backtracking` prepares the backtracking recursion of Phase 4's `parsing`. DP and greedy are inputs for the abstraction layer.
@@ -48,8 +48,8 @@ has_children: true
 
 ## ▶️ Siguiente / Next
 
-👉 Continúa con [`graph_algorithms`](15_Graph_Algorithms.md).
-👉 Continue with [`graph_algorithms`](15_Graph_Algorithms.md).
+👉 Continúa con [`graph_algorithms`](16_Graph_Algorithms.md).
+👉 Continue with [`graph_algorithms`](16_Graph_Algorithms.md).
 
 ---
 

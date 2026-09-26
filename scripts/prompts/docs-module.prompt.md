@@ -83,8 +83,9 @@ Ejecuta el comando nativo de pruebas. Copia la salida real.
 de `docs/AGENT_Template.md` y `AGENTS.md`:
 
 - Formato **bilingüe** español/inglés.
-- Secciones: archivos y estructura, enfoque y construcción, configuración clave, compilación y
-  ejecución, algoritmos y operaciones, notas de implementación.
+- Secciones: **todas las secciones obligatorias de `docs/README_Template.md`**, en su orden y
+  con sus encabezados bilingües. La plantilla es la fuente: no copies aquí la lista de
+  secciones, que se queda atrás en cuanto la plantilla crece.
 - **Salidas reales** de compilación y pruebas: no inventes ni edites la salida.
 - Incluye una **nota de desviación** respecto a la ubicación esperada por la especificación
   (`src/` → `lib/`, `source/`, ausencia de `run_tests`, *naming* idiomático, etc.) con el motivo.

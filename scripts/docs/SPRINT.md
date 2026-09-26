@@ -15,10 +15,11 @@
 | # | Paso | Comando | Evidencia / artefacto | Quién |
 |:-:|------|---------|-----------------------|-------|
 | 1 | Reconocimiento | `git status --short`, `git submodule status`, `glot progress` (0.6.0), `glot status` (0.12.0) | — | autor / script |
-| 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo, estado `lang/phase/module/branch/spec/repo`, ruta en `stdout` | script |
+| 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo **creado y devuelto**; el autor queda **dentro** de él (capa cargable) y desde ahí funcionan `git`, `glot test`, `save` y `pointer`; estado `lang/phase/module/branch/spec/repo` | script |
 | 3 | Rama publicada | incluido en `use`: `git push -u origin feat/algorithms/naive-sort` | Rama `feat/{fase}/{módulo}` con upstream | script |
-| 4a | Esqueleto | `glot new` (0.9.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas, sin runners de ejemplo; `.gitignore` verificado | script + **agente** |
-| 4b | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4b` (0.9.0) | Suite unitaria derivada de la especificación, con salida real | **agente** |
+| 4a | Esqueleto | `glot new` (0.9.0; secuencia desde la 1.1.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas según la **secuencia** del dato [`data/init_sequences.tsv`](../data/init_sequences.tsv) (pasos, directorio de trabajo y completado), sin runners de ejemplo; `.gitignore` verificado. **`new` no mueve al autor**: sigue en la carpeta del módulo | script + **agente** |
+| 4b | **Contrato** (artefacto propio, antes de la suite) | `glot prompt contract` (1.1.0) · `glot save 4b` (1.1.0) | Tipo nuevo y firmas del contrato (en Ada, `src/*.ads`) declarados con el **indicador natural** del lenguaje: sin él la suite no compila | **agente** |
+| 4c | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4c` (1.1.0) | Suite unitaria derivada de la especificación, **sobre el contrato del paso 4b** (no lo declara: lo usa) y con salida real | **agente** |
 | 5 | Implementación | `glot prompt implement` (0.8.0) + `glot test` (0.7.0) | `feat(algorithms): add naive sort implementation`; suite en verde | autor / **agente** |
 | 6 | Verificación | `glot test`, `glot verify` (0.7.0) · `glot evidence` (0.10.0) · `glot validate` (0.10.0) | Acta en `docs/evidence/{fase}/{módulo}/{lenguaje}.md` con la salida real de la suite y del analizador, sin warnings **nuevos**; y el informe del validador, si se usa | script + **agente** |
 | 7 | Cierre documental del módulo | `glot prompt docs-module` (0.8.0) → README de Nivel 3 desde [`README_Template.md`](../../docs/README_Template.md) | `docs(naive-sort): add README for naive sort module` | **agente** |
@@ -26,6 +27,10 @@
 **ES:** Al terminar la Fase A, el cambio del submódulo se integra en **su** `main` y se anota el commit resultante.
 
 **EN:** When Phase A ends, the submodule change is integrated into **its** `main` and the resulting commit is noted.
+
+**ES:** **Numeración de pasos:** cuando un paso nuevo entra **en medio**, se le asigna el ordinal libre y **los siguientes se recorren**: el paso 4 se partió en `4a` (esqueleto) y `4b` (suite) en la v0.9.0, y en la v1.1.0 el contrato entra como `4b` con la suite desplazada a `4c`. La numeración es **contrato del tooling**: el mismo ordinal vale para esta tabla, para [`data/commits.tsv`](../data/commits.tsv) y para el `step:` del frontmatter de cada plantilla, y se cambia en los tres sitios a la vez.
+
+**EN:** **Step numbering:** when a new step goes **in the middle**, it takes the free ordinal and **the following ones shift**: step 4 was split into `4a` (scaffold) and `4b` (suite) in v0.9.0, and in v1.1.0 the contract comes in as `4b` with the suite shifted to `4c`. The numbering is a **tooling contract**: the same ordinal holds for this table, for [`data/commits.tsv`](../data/commits.tsv) and for the `step:` frontmatter of each template, and the three change at once.
 
 ## Fase B — en el monorepo / Phase B — in the monorepo
 
@@ -43,6 +48,7 @@
 | Paso | Mensaje |
 |------|---------|
 | Esqueleto | `chore({phase}): add scaffold for {module}` |
+| Contrato del módulo | `chore({phase}): add contract for {module}` |
 | Suite de pruebas | `chore({phase}): add suite for {module}` |
 | Implementación | `feat({phase}): add {module} implementation` |
 | README del módulo | `docs({module}): add README for {module} module` |
@@ -60,14 +66,15 @@
 
 ## 🤖 Los pasos con IA, y por qué / The AI-assisted steps, and why
 
-**ES:** Los pasos 4a, 4b, 5, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/). El banco local de `.github/prompts/` sigue ahí como taller del autor y `glot` lo acepta como respaldo, avisando de que no viaja en el repositorio.
+**ES:** Los pasos 4a, 4b, 4c, 5, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/). El banco local de `.github/prompts/` sigue ahí como taller del autor y `glot` lo acepta como respaldo, avisando de que no viaja en el repositorio.
 
-**EN:** Steps 4a, 4b, 5, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Since v0.8.0 the request is built by `glot prompt <request>` from the sprint state, and the templates are **versioned** in [`scripts/prompts/`](../../scripts/prompts/). The local bank in `.github/prompts/` remains the author's workshop and `glot` accepts it as a fallback, warning that it does not travel with the repository.
+**EN:** Steps 4a, 4b, 4c, 5, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Since v0.8.0 the request is built by `glot prompt <request>` from the sprint state, and the templates are **versioned** in [`scripts/prompts/`](../../scripts/prompts/). The local bank in `.github/prompts/` remains the author's workshop and `glot` accepts it as a fallback, warning that it does not travel with the repository.
 
 | Encargo previsto | Plantilla versionada | Paso | Modelo (v0.11.0) |
 |------------------|----------------------|:----:|-----------------|
 | `scaffold` | [`scaffold.prompt.md`](../../scripts/prompts/scaffold.prompt.md) | 4a | `gpt-5.6-terra` |
-| `suite` | [`suite.prompt.md`](../../scripts/prompts/suite.prompt.md) | 4b | `gpt-5.6-terra` |
+| `contract` | [`contract.prompt.md`](../../scripts/prompts/contract.prompt.md) | 4b | `gpt-5.6-terra` |
+| `suite` | [`suite.prompt.md`](../../scripts/prompts/suite.prompt.md) | 4c | `gpt-5.6-terra` |
 | `implement` | [`implement.prompt.md`](../../scripts/prompts/implement.prompt.md) | 5 | `claude-sonnet-5` |
 | `docs-module` | [`docs-module.prompt.md`](../../scripts/prompts/docs-module.prompt.md) | 7 | `gemini-3.8-flash` |
 | `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 | `gemini-3.8-flash` |

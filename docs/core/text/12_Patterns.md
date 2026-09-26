@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 11 — String Properties and Naïve Patterns
+title: 12 — String Properties and Naïve Patterns
 description: Propiedades de cadenas y patrones explícitos / String properties and explicit patterns
 nav_order: 2
 parent: Procesamiento Contiguo / Contiguous Processing
 grand_parent: Core
 ---
 
-# 🚀 11 — String Properties and Naïve Patterns
+# 🚀 12 — String Properties and Naïve Patterns
 
-> [← Volver a 10_Transformations](10_Transformations.md)  
+> [← Volver a 11_Transformations](11_Transformations.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ## 🎯 Objetivo / Objective
@@ -22,9 +22,9 @@ grand_parent: Core
 
 Implementar `is_palindrome(text)`, `are_anagrams(left, right)` y `naive_find(text, pattern)`. Añadir opcionalmente `matches_wildcard(text, pattern)`, donde solo `?` representa una unidad y `*` una secuencia; no se usa un motor regex.
 
-**ES:** El texto es una **secuencia indexable de unidades de texto**: la unidad indexada (carácter, byte o *code unit*) y la política Unicode/ASCII son las que declare cada lenguaje, como en [`10_Transformations.md`](10_Transformations.md). La tabla de frecuencias es una **secuencia indexable de enteros**, no un mapa ni una tabla hash, y su representación es libre.
+**ES:** El texto es una **secuencia indexable de unidades de texto**: la unidad indexada (carácter, byte o *code unit*) y la política Unicode/ASCII son las que declare cada lenguaje, como en [`11_Transformations.md`](11_Transformations.md). La tabla de frecuencias es una **secuencia indexable de enteros**, no un mapa ni una tabla hash, y su representación es libre.
 
-**EN:** The text is an **indexable sequence of text units**: the indexed unit (character, byte or *code unit*) and the Unicode/ASCII policy are the ones each language declares, as in [`10_Transformations.md`](10_Transformations.md). The frequency table is an **indexable sequence of integers**, not a map or a hash table, and its representation is free.
+**EN:** The text is an **indexable sequence of text units**: the indexed unit (character, byte or *code unit*) and the Unicode/ASCII policy are the ones each language declares, as in [`11_Transformations.md`](11_Transformations.md). The frequency table is an **indexable sequence of integers**, not a map or a hash table, and its representation is free.
 
 | Algoritmo / Algorithm | Representación o restricción / Representation or restriction | Complejidad / Complexity |
 |-----------|------------------------------|-------------|
@@ -47,5 +47,5 @@ Cubrir palíndromos con y sin normalización, anagramas positivos/negativos y lo
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`12_Substr.md`](12_Substr.md).  
-👉 Continue with [`12_Substr.md`](12_Substr.md).
+👉 Sigue con [`13_Substr.md`](13_Substr.md).  
+👉 Continue with [`13_Substr.md`](13_Substr.md).

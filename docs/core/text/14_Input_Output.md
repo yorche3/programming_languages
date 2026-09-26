@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 13 — Controlled File I/O
+title: 14 — Controlled File I/O
 description: Entrada y salida reproducible con fixtures compartidos / Reproducible input and output with shared fixtures
 nav_order: 4
 parent: Procesamiento Contiguo / Contiguous Processing
 grand_parent: Core
 ---
 
-# 🚀 13 — Controlled File I/O
+# 🚀 14 — Controlled File I/O
 
-> [← Volver a 12_Substr](12_Substr.md)  
+> [← Volver a 13_Substr](13_Substr.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ## 🎯 Objetivo / Objective
@@ -36,5 +36,5 @@ Probar lectura exacta de fixture, escritura y relectura, append conservando cont
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`14_ETL_Basico.md`](14_ETL_Basico.md).  
-👉 Continue with [`14_ETL_Basico.md`](14_ETL_Basico.md).
+👉 Sigue con [`15_ETL_Basico.md`](15_ETL_Basico.md).  
+👉 Continue with [`15_ETL_Basico.md`](15_ETL_Basico.md).

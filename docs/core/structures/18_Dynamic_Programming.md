@@ -1,15 +1,15 @@
 ---
 layout: default
-title: 17 — Dynamic Programming
+title: 18 — Dynamic Programming
 description: Decimoséptima especificación / Seventeenth specification — Programación dinámica con tablas
 nav_order: 3
 parent: Algoritmos sobre Estructuras / Algorithms on Structures
 grand_parent: Core
 ---
 
-# 🚀 17 — Dynamic Programming
+# 🚀 18 — Dynamic Programming
 
-> [← Volver a 16_Backtracking](16_Backtracking.md)  
+> [← Volver a 17_Backtracking](17_Backtracking.md)  
 > [↑ Volver a inicio / Back to home](../../index.md)
 
 ---
@@ -144,8 +144,8 @@ programming_languages/
 
 ## ▶️ Siguiente / Next
 
-👉 Sigue con [`18_Greedy.md`](18_Greedy.md) — Algoritmos voraces (activity selection, fractional knapsack).  
-👉 Continue with [`18_Greedy.md`](18_Greedy.md) — Greedy algorithms (activity selection, fractional knapsack).
+👉 Sigue con [`19_Greedy.md`](19_Greedy.md) — Algoritmos voraces (activity selection, fractional knapsack).  
+👉 Continue with [`19_Greedy.md`](19_Greedy.md) — Greedy algorithms (activity selection, fractional knapsack).
 
 ---
 

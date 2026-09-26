@@ -1,5 +1,6 @@
 4a	scaffold	submodule	chore({phase}): add scaffold for {module}
-4b	suite	submodule	chore({phase}): add suite for {module}
+4b	contract	submodule	chore({phase}): add contract for {module}
+4c	suite	submodule	chore({phase}): add suite for {module}
 5	implement	submodule	feat({phase}): add {module} implementation
 7	docs-module	submodule	docs({module}): add README for {module} module
 8	docs-language	submodule	docs: add README for {phase} and update indexes

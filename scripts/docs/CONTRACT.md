@@ -68,7 +68,7 @@
 | `clean [lenguaje] [fase/módulo]` | Borra lo que el propio `.gitignore` del lenguaje declara como artefacto, **solo dentro del directorio del módulo**, y sincroniza el submódulo. Imprime las rutas borradas o `nothing` | 0 / 1 / 2 |
 | `install` | Deja la **copia estable** (`~/.local/share/glot/`), el enlace `~/.local/bin/glot`, el completado de cada shell presente y el bloque del rc entre marcas. Idempotente; imprime el directorio de instalación | 0 / 1 / 2 / 3 |
 | `uninstall` | Deshace lo de `install`: quita el bloque del rc, borra los completados, retira el enlace **solo si es el suyo** y la copia. Idempotente: sin nada instalado imprime `nothing` | 0 / 1 / 2 / 3 |
-| Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
+| Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale. Desde la **v1.1.0**, si el nombre es un **encargo registrado** (`scaffold`, `contract`, `suite`, `implement`, `validate`, `docs-module`, `docs-language`), la sugerencia es el verbo que lo arma: `glot suite` → `quizá buscabas / maybe you meant: glot prompt suite` | 2 |
 
 ---
 
@@ -113,7 +113,7 @@
 4. **Idempotencia** cuando se repite el mismo efecto.
 5. **Inyectable para test**: raíz del repo y ruta del estado sobreescribibles por variable.
 6. **Mensajes bilingües ES/EN**; los datos de salida no se traducen.
-7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR`, `GLOT_STATE_FILE`, `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` y `GLOT_TOOLCHAINS_FILE` (esta última, como `GLOT_STATE_FILE`, es para pruebas y herramientas: apunta a otro catálogo de toolchains). `GLOT_LOADED` no se declara: la capa cargable la pone al delegar en el programa, para que `doctor` sepa que hay función
+7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR`, `GLOT_STATE_FILE`, `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` y `GLOT_TOOLCHAINS_FILE` (esta última, como `GLOT_STATE_FILE`, es para pruebas y herramientas: apunta a otro catálogo de toolchains) y `GLOT_DATA_DIR` (apunta a otro directorio de datos, para pruebas y laboratorio). `GLOT_LOADED` no se declara: la capa cargable la pone al delegar en el programa, para que `doctor` sepa que hay función
 
 ### Desde v0.4.0 — el almacén
 
@@ -147,10 +147,10 @@
 
 ### De un id a todas sus formas / From one id to all its forms
 
-| Forma / Form | `data_structures` | Cómo se obtiene / How |
+| Forma / Form | `data_structures_basics` | Cómo se obtiene / How |
 |--------------|-------------------|------------------------|
 | `name` (legible) | `Data Structures` | palabras capitalizadas, separadas por espacio |
-| `project_name` (id) | `data_structures` | el id canónico del roadmap; no se deriva, se declara |
+| `project_name` (id) | `data_structures_basics` o `data_structures_advanced` | el id canónico del roadmap; no se deriva, se declara |
 | `branch` | `data-structures` | `_glot_kebab`: `_` → `-` |
 | documento | `NN_Data_Structures.md` | stem en `Title_Case` con `_`; el prefijo `NN` se **lee** de `docs/core/{fase}/` |
 | commit | `data structures` | minúsculas y espacios |
@@ -282,7 +282,7 @@
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
-| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** (`4a`, `4b`, `5`, `7`, `8`) o por **alias del encargo** (`scaffold`, `suite`, `implement`, `docs-module`, `docs-language`). Nunca se escribe a mano |
+| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** (`4a`, `4b`, `4c`, `5`, `7`, `8`) o por **alias del encargo** (`scaffold`, `contract`, `suite`, `implement`, `docs-module`, `docs-language`). Nunca se escribe a mano |
 | Marcadores / Placeholders | `{lang}`, `{phase}`, `{module}`, `{Module}`: los mismos del resto del tooling, resueltos con el estado del sprint |
 | Índice / Index | `git add -A` del **submódulo** completo. Si hay cambios fuera del módulo, se nombran por stderr antes de confirmar |
 | Rama / Branch | Si la rama activa no es la del estado del sprint, se avisa (no se bloquea) |
@@ -407,13 +407,13 @@
 | `uninstall` | Quita el bloque, borra el completado (y la carpeta vacía que lo contenía), retira el enlace **solo si es el suyo** y la copia. Idempotente: `nothing` y `0` si no había nada |
 | Qué **no** hace / What it does **not** | No instala dependencias ni toolchains (L9), no toca el `PATH` de ningún rc, no modifica `.bashrc`/`.zshrc` fuera de sus marcas ni los crea si ya existen, y no confirma nada en git |
 
-**ES:** `doctor` da el estado de esta capa con cuatro líneas: `install:` (sí/no y ruta), `install_version:` e `install_source:` (de los metadatos), `install_stale:` (la copia o el clon cambiaron respecto al `sha` guardado), `install_rc:` (el bloque sigue en el rc de cada shell: `bash:yes zsh:no`), `install_path:` (la carpeta del enlace está en el `PATH`), `shell:` (bash y zsh presentes con su versión) y `shell_loaded:` (si esa shell cargó la función, que lo sabe porque la capa exporta `GLOT_LOADED` al delegar).
+**ES:** `doctor` da el estado de esta capa con estas líneas: `install:` (sí/no y ruta), `install_version:` e `install_source:` (de los metadatos), `install_stale:` (la copia o el clon cambiaron respecto al `sha` guardado), `install_data:` (desde la **v1.1.0**: si `data/`, `prompts/` y `completions/` siguen siendo los instalados; `(sin metadatos)` en una instalación anterior), `install_rc:` (el bloque sigue en el rc de cada shell: `bash:yes zsh:no`), `install_path:` (la carpeta del enlace está en el `PATH`), `shell:` (bash y zsh presentes con su versión) y `shell_loaded:` (si esa shell cargó la función, que lo sabe porque la capa exporta `GLOT_LOADED` al delegar). Desde la **v1.1.0** `install.meta` guarda tres huellas —`sha` de todo lo que viaja con la copia, `script_sha` y `data_sha`—, así que una copia con el catálogo viejo deja de pasar por buena.
 
-**EN:** `doctor` reports this layer with four lines: `install:` (yes/no and path), `install_version:` and `install_source:` (from the metadata), `install_stale:` (copy or clone changed against the stored `sha`), `install_rc:` (the block is still in each shell's rc: `bash:yes zsh:no`), `install_path:` (the symlink directory is in `PATH`), `shell:` (bash and zsh present, with their version) and `shell_loaded:` (whether that shell loaded the function, known because the layer exports `GLOT_LOADED` when delegating).
+**EN:** `doctor` reports this layer with these lines: `install:` (yes/no and path), `install_version:` and `install_source:` (from the metadata), `install_stale:` (copy or clone changed against the stored `sha`), `install_data:` (since **v1.1.0**: whether `data/`, `prompts/` and `completions/` are still the installed ones; `(sin metadatos)` on an older installation), `install_rc:` (the block is still in each shell's rc: `bash:yes zsh:no`), `install_path:` (the symlink directory is in `PATH`), `shell:` (bash and zsh present, with their version) and `shell_loaded:` (whether that shell loaded the function, known because the layer exports `GLOT_LOADED` when delegating). Since **v1.1.0** `install.meta` stores three fingerprints —`sha` for everything that travels with the copy, `script_sha` and `data_sha`— so a copy with a stale catalogue no longer passes as good.
 
 ---
 
-## � Toolchains: el dato y la comprobación (v1.0.0) / Toolchains: the datum and the check
+## 🧰 Toolchains: el dato y la comprobación (v1.0.0) / Toolchains: the datum and the check
 
 **ES:** La L9 es **instalar** versiones; lo que entra en la v1.0.0 es el **dato** y su comprobación. El dato vive en [`data/toolchains.tsv`](../data/toolchains.tsv) (`lenguaje`, `comando`, `serie verificada`) y crece **solo con versiones verificadas en este entorno**, así que hay lenguajes sin fila: es un fichero que crece, no una lista que hay que completar.
 
@@ -431,7 +431,7 @@
 
 ---
 
-## �🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
+## 🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
 
 ```bash
 glot use <lenguaje> <fase>/<módulo> [tipo]     # tipo por defecto: feat

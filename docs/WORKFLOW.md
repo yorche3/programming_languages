@@ -22,9 +22,9 @@
 | # | Paso | Objetivo | Artefacto obligatorio |
 |:-:|------|----------|-----------------------|
 | 1 | Reconocimiento | Saber en qué estado está el repo y el submódulo antes de tocar nada | `git status --short` y `git submodule status` leídos, sin cambios pendientes ajenos al sprint |
-| 2 | Asignación | Fijar `{lenguaje}`, `{fase}`, `{módulo}`, la rama y la especificación del sprint | Estado del sprint registrado fuera del shell (ver «Estado del sprint») |
+| 2 | Asignación | Fijar `{lenguaje}`, `{fase}`, `{módulo}`, la rama y la especificación del sprint; `use` **crea la carpeta del módulo y deja al autor dentro de ella** | Estado del sprint registrado fuera del shell (ver «Estado del sprint») |
 | 3 | Rama de trabajo | Trabajar aislado, con la rama publicada y su upstream | Rama `{tipo}/{fase}/{módulo}` en minúsculas y `kebab-case`, publicada |
-| 4 | Esqueleto y pruebas | Dejar el andamiaje y la suite, **sin implementar** | Estructura del lenguaje + suite que falla por falta de implementación (o pasa si el módulo es solo documental) |
+| 4 | Esqueleto, contrato y pruebas | Dejar el andamiaje (**4a**), el **contrato** (**4b**) y la suite (**4c**), **sin implementar**. El andamiaje sale de la **secuencia** del lenguaje ([`scripts/data/init_sequences.tsv`](../scripts/data/init_sequences.tsv): pasos, directorio de trabajo y completado); el contrato (tipo nuevo y firmas) es un artefacto propio y va **antes** de la suite | Estructura del lenguaje + contrato + suite que falla por falta de implementación (o pasa si el módulo es solo documental) |
 | 5 | Implementación | Cumplir el contrato de la especificación | Código verificado por la suite, sin warnings |
 | 6 | Verificación | Tener evidencia real de que cumple | Salida real de la suite y del analizador, copiada sin editar |
 | 7 | Cierre documental del módulo | Documentar lo implementado | `README.md` de Nivel 3 generado desde [`README_Template.md`](README_Template.md) |
@@ -56,9 +56,9 @@
 | 8 Puntero e índices | decide | ejecuta | **escribe la documentación** |
 | 9 Registro del cierre | autoriza | encarga | **escribe el registro** |
 
-**ES:** Los pasos 4a, 4b, 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El encargo lo arma `glot prompt <encargo>` con las plantillas **versionadas** de [`scripts/prompts/`](../scripts/prompts/); el banco local de `.github/prompts/` (que `.gitignore` excluye) se acepta como respaldo, con aviso. El agente **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
+**ES:** Los pasos 4a (esqueleto), 4b (contrato), 4c (suite), 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El encargo lo arma `glot prompt <encargo>` con las plantillas **versionadas** de [`scripts/prompts/`](../scripts/prompts/); el banco local de `.github/prompts/` (que `.gitignore` excluye) se acepta como respaldo, con aviso. El agente **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
 
-**EN:** Steps 4a, 4b, 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). The request is built by `glot prompt <request>` from the **versioned** templates in [`scripts/prompts/`](../scripts/prompts/); the local bank in `.github/prompts/` (excluded by `.gitignore`) is accepted as a fallback, with a warning. The agent **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
+**EN:** Steps 4a (scaffold), 4b (contract), 4c (suite), 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). The request is built by `glot prompt <request>` from the **versioned** templates in [`scripts/prompts/`](../scripts/prompts/); the local bank in `.github/prompts/` (excluded by `.gitignore`) is accepted as a fallback, with a warning. The agent **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
 
 ---
 
