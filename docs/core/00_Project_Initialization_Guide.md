@@ -138,9 +138,9 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 
 ## 🔗 Secuencias de varios pasos / Multi-step sequences
 
-**ES:** Estos lenguajes necesitan más de un comando, **otro directorio de trabajo** o un **completado posterior** a mano. El comando se ejecuta desde la **carpeta del módulo** (`{lenguaje}/core/{fase}/{module}`), que es donde deja al autor `glot use`; la excepción son los tres generadores que **crean la carpeta ellos mismos** y se ejecutan desde la **fase**: `julia`, `clojure` y `racket`.
+**ES:** Estos lenguajes necesitan más de un comando, **otro directorio de trabajo** o un **completado posterior** a mano. El comando se ejecuta desde la **carpeta del módulo** (`{lenguaje}/core/{fase}/{module}`), que es donde deja al autor `glot use`; la excepción son los **cuatro** generadores que **crean la carpeta ellos mismos** y se ejecutan desde la **fase**: `common-lisp`, `julia`, `clojure` y `racket` (medido el 2026-09-26: `quickproject:make-project` crea el directorio del proyecto).
 
-**EN:** These languages need more than one command, **another working directory** or a later **completion** by hand. The command runs from the **module folder** (`{language}/core/{phase}/{module}`), where `glot use` leaves the author; the exception is the three generators that **create the folder themselves** and run from the **phase**: `julia`, `clojure` and `racket`.
+**EN:** These languages need more than one command, **another working directory** or a later **completion** by hand. The command runs from the **module folder** (`{language}/core/{phase}/{module}`), where `glot use` leaves the author; the exception is the **four** generators that **create the folder themselves** and run from the **phase**: `common-lisp`, `julia`, `clojure` and `racket` (measured on 2026-09-26: `quickproject:make-project` creates the project directory).
 
 **ES:** La **fuente de verdad es el dato** [`scripts/data/init_sequences.tsv`](../../scripts/data/init_sequences.tsv): una fila por paso, con lenguaje, orden, directorio de trabajo, modo (`run`/`expect`), comando, requisito, respuestas de `expect` y lo que falta por completar. La tabla de abajo es su **lectura humana**, y el tooling comprueba que las dos no se separen.
 

@@ -68,7 +68,7 @@
 | `clean [lenguaje] [fase/módulo]` | Borra lo que el propio `.gitignore` del lenguaje declara como artefacto, **solo dentro del directorio del módulo**, y sincroniza el submódulo. Imprime las rutas borradas o `nothing` | 0 / 1 / 2 |
 | `install` | Deja la **copia estable** (`~/.local/share/glot/`), el enlace `~/.local/bin/glot`, el completado de cada shell presente y el bloque del rc entre marcas. Idempotente; imprime el directorio de instalación | 0 / 1 / 2 / 3 |
 | `uninstall` | Deshace lo de `install`: quita el bloque del rc, borra los completados, retira el enlace **solo si es el suyo** y la copia. Idempotente: sin nada instalado imprime `nothing` | 0 / 1 / 2 / 3 |
-| Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale | 2 |
+| Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale. Desde la **v1.1.0**, si el nombre es un **encargo registrado** (`scaffold`, `contract`, `suite`, `implement`, `validate`, `docs-module`, `docs-language`), la sugerencia es el verbo que lo arma: `glot suite` → `quizá buscabas / maybe you meant: glot prompt suite` | 2 |
 
 ---
 
@@ -413,7 +413,7 @@
 
 ---
 
-## � Toolchains: el dato y la comprobación (v1.0.0) / Toolchains: the datum and the check
+## 🧰 Toolchains: el dato y la comprobación (v1.0.0) / Toolchains: the datum and the check
 
 **ES:** La L9 es **instalar** versiones; lo que entra en la v1.0.0 es el **dato** y su comprobación. El dato vive en [`data/toolchains.tsv`](../data/toolchains.tsv) (`lenguaje`, `comando`, `serie verificada`) y crece **solo con versiones verificadas en este entorno**, así que hay lenguajes sin fila: es un fichero que crece, no una lista que hay que completar.
 
@@ -431,7 +431,7 @@
 
 ---
 
-## �🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
+## 🧾 Especificación de `use` (v0.5.0, implementado) / `use` specification
 
 ```bash
 glot use <lenguaje> <fase>/<módulo> [tipo]     # tipo por defecto: feat

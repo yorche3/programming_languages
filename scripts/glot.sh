@@ -1243,6 +1243,24 @@ _glot_prompts_list() {
     done
 }
 
+# _glot_prompt_registered <nombre> — ¿hay plantilla para ese encargo? Mira la versionada y,
+# en silencio, el banco local del autor: es lo que usa la sugerencia de verbo desconocido.
+_glot_prompt_registered() {
+    local name="$1"
+    local dir=""
+
+    case "$name" in
+        "" | */* | .* | *" "*) return 1 ;;
+    esac
+
+    if dir="$(_glot_prompts_dir)" && [[ -r "$dir/$name.prompt.md" ]]; then
+        return 0
+    fi
+
+    dir="$(_glot_repo_root 2>/dev/null || true)/.github/prompts"
+    [[ -r "$dir/$name.prompt.md" ]]
+}
+
 # _glot_expand_state <lenguaje> <fase> <módulo> <texto> — resuelve los marcadores con
 # las claves del estado del sprint, más `{Module}` (PascalCase) y `{module_dir}`.
 # Un marcador que no se pueda resolver es un error: nunca texto literal escondido.
@@ -4721,9 +4739,16 @@ _glot_main() {
             return 2
             ;;
         *)
-            # Maneja los verbos desconocidos / Handle unknown verbs
+            # Maneja los verbos desconocidos / Handle unknown verbs. Si el nombre es un
+            # encargo registrado, se sugiere el verbo que lo arma (`glot suite` →
+            # `glot prompt suite`): los encargos son la mitad del ciclo y no se descubren
+            # solos.
             _glot_error "verbo desconocido / unknown verb: $cmd"
-            _glot_hint
+            if _glot_prompt_registered "$cmd"; then
+                printf 'glot: quizá buscabas / maybe you meant: glot prompt %s\n' "$cmd" >&2
+            else
+                _glot_hint
+            fi
             return 2
             ;;
     esac

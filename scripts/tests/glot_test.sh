@@ -24,11 +24,14 @@ LIVE_VERSION="$(sed -n 's/^GLOT_VERSION="\(.*\)"$/\1/p' "$GLOT_SH")"
 export GLOT_STATE_FILE="$WORK_DIR/state"
 
 # El harness prueba **este** repositorio, así que no puede heredar el entorno del autor:
-# con `GLOT_ROOT` apuntando a otro monorepo (lo normal si se trabaja en un laboratorio)
-# todas las comprobaciones de catálogo y roadmap mirarían el repositorio equivocado. Las
-# variables se fijan por caso donde hacen falta (`glot_run_in`, `glot_run_state`…).
+# con `GLOT_ROOT` apuntando a otro monorepo, o con `GLOT_STATE_DIR`/`GLOT_DATA_DIR` de un
+# laboratorio (lo normal si se trabaja fuera de él), las comprobaciones mirarían el
+# repositorio, el estado o el catálogo equivocados. Las variables se fijan por caso donde
+# hacen falta (`glot_run_in`, `glot_run_state`, el `GLOT_DATA_DIR` inyectado…).
 unset GLOT_ROOT
 unset GLOT_TOOLCHAINS_FILE
+unset GLOT_STATE_DIR
+unset GLOT_DATA_DIR
 
 passed=0
 failed=0
@@ -124,6 +127,20 @@ glot_run nope
 assert_eq 'verbo desconocido: código' '2' "$rc_last"
 assert_eq 'verbo desconocido: stdout vacío' '' "$out"
 assert_contains 'verbo desconocido: mensaje en stderr' 'unknown verb' "$err"
+assert_contains 'verbo desconocido: pista general' 'glot help' "$err"
+
+# v1.1.0: un encargo es un verbo a medias; `glot suite` no existe, pero se sugiere el verbo
+# que lo arma en vez de dejarlo en la pista general
+glot_run suite
+assert_eq 'verbo de encargo: código' '2' "$rc_last"
+assert_eq 'verbo de encargo: stdout vacío' '' "$out"
+assert_contains 'verbo de encargo: mensaje en stderr' 'unknown verb: suite' "$err"
+assert_contains 'verbo de encargo: sugiere glot prompt' 'glot prompt suite' "$err"
+assert_eq 'verbo de encargo: sin pista general' 'no' "$([[ "$err" == *'glot help'* ]] && echo si || echo no)"
+
+glot_run ../etc/passwd
+assert_eq 'verbo con ruta: código' '2' "$rc_last"
+assert_eq 'verbo con ruta: no sugiere un encargo' 'no' "$([[ "$err" == *'glot prompt'* ]] && echo si || echo no)"
 
 # opción desconocida
 glot_run --nope
@@ -675,6 +692,32 @@ guide_tests="$(awk -F'|' '/^\| \*\*[a-z]/ {print $5}' "$GUIDE" |
 data_tests="$(cut -f4 "$REPO/scripts/data/languages.tsv")"
 assert_eq 'catálogo y guía: mismos comandos de pruebas' "$guide_tests" "$data_tests"
 
+# deriva: la sección «Secuencias de varios pasos» no la comparaba nadie, y ahí vivió una
+# secuencia imposible sin aviso (medido el 2026-09-26). Son tres vistas del mismo conjunto:
+# la sección, el marcador de secuencia de la tabla maestra y el dato de secuencias.
+CHAIN_MARK="$(printf '\xe2\x9b\x93')"
+data_seq="$(cut -f1 "$REPO/scripts/data/init_sequences.tsv" | LC_ALL=C sort -u)"
+guide_seq="$(awk '/^## .*Multi-step sequences/,/^## .*Reference structures/' "$GUIDE" |
+    awk -F'|' '/^\| `/ {gsub(/[` ]/, "", $2); print $2}' | LC_ALL=C sort -u)"
+guide_chain="$(awk -F'|' -v chain="$CHAIN_MARK" '/^\| \*\*/ && index($3, chain) > 0 {gsub(/[* ]/, "", $2); print $2}' "$GUIDE" | LC_ALL=C sort -u)"
+assert_eq 'secuencias y guía: el dato trae los 18 lenguajes' '18' "$(printf '%s\n' "$data_seq" | wc -l | tr -d ' ')"
+assert_eq 'secuencias y guía: la sección lista el mismo conjunto' '' \
+    "$(comm -3 <(printf '%s\n' "$guide_seq") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"
+assert_eq 'secuencias y guía: el marcador de secuencia coincide' '' \
+    "$(comm -3 <(printf '%s\n' "$guide_chain") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"
+
+# la regla del directorio de trabajo: solo los generadores que crean la carpeta salen de
+# `module`, y la guía tiene que nombrarlos a los cuatro. La sección se lee una vez: con
+# `pipefail`, un `awk | grep -q` muere por SIGPIPE cuando `grep` acierta y sale antes.
+data_phase="$(awk -F'\t' '$3 == "phase" {print $1}' "$REPO/scripts/data/init_sequences.tsv" | LC_ALL=C sort -u | tr '\n' ' ')"
+assert_eq 'secuencias: los que crean la carpeta' 'clojure common-lisp julia racket ' "$data_phase"
+guide_seq_body="$(awk '/^## .*Multi-step sequences/,/^## .*Reference structures/' "$GUIDE")"
+missing_phase=""
+for lang in $data_phase; do
+    grep -q -- "$lang" <<<"$guide_seq_body" || missing_phase+="$lang "
+done
+assert_eq 'secuencias y guía: nombra los que crean la carpeta' '' "$missing_phase"
+
 # el conversor resuelve el id del roadmap aunque no coincida con la carpeta ni con
 # el documento: es el fallo que el fixture anterior no podía ver
 sandbox_make
@@ -959,6 +1002,15 @@ assert_contains 'completion bash: el contrato como paso propio' 'contract' "$sav
 assert_contains 'completion bash: la suite se desplaza a 4c' '4c' "$save_comp"
 assert_contains 'completion bash: alias de los pasos' 'scaffold' "$save_comp"
 assert_eq 'completion bash: un candidato por línea' '12' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
+
+# v1.1.0: los encargos se complean **en vivo** desde el registro, así que la lista no puede
+# quedarse corta al añadir una plantilla (el fallo que dejaba `scaffold` sin descubrir)
+prompt_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot prompt ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+glot_run prompt
+assert_eq 'completion bash: los encargos salen del registro' \
+    "$(printf '%s\n' "$out" | cut -f1 | LC_ALL=C sort)" \
+    "$(printf '%s\n' "$prompt_comp" | LC_ALL=C sort)"
+assert_contains 'completion bash: el contrato entre los encargos' 'contract' "$prompt_comp"
 
 # new: con herramienta, el plan es el comando del catálogo y el directorio del módulo
 glot_run -n new php algorithms/naive_sort
