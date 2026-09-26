@@ -15,10 +15,11 @@
 | # | Paso | Comando | Evidencia / artefacto | Quién |
 |:-:|------|---------|-----------------------|-------|
 | 1 | Reconocimiento | `git status --short`, `git submodule status`, `glot progress` (0.6.0), `glot status` (0.12.0) | — | autor / script |
-| 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo, estado `lang/phase/module/branch/spec/repo`, ruta en `stdout` | script |
+| 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo **creado y devuelto**; el autor queda **dentro** de él (capa cargable) y desde ahí funcionan `git`, `glot test`, `save` y `pointer`; estado `lang/phase/module/branch/spec/repo` | script |
 | 3 | Rama publicada | incluido en `use`: `git push -u origin feat/algorithms/naive-sort` | Rama `feat/{fase}/{módulo}` con upstream | script |
-| 4a | Esqueleto | `glot new` (0.9.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas, sin runners de ejemplo; `.gitignore` verificado | script + **agente** |
-| 4b | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4b` (0.9.0) | Suite unitaria derivada de la especificación, con salida real | **agente** |
+| 4a | Esqueleto | `glot new` (0.9.0; secuencia desde la 1.1.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas según la **secuencia** del dato [`data/init_sequences.tsv`](../data/init_sequences.tsv) (pasos, directorio de trabajo y completado), sin runners de ejemplo; `.gitignore` verificado. **`new` no mueve al autor**: sigue en la carpeta del módulo | script + **agente** |
+| — | **Contrato** (artefacto propio, antes de la suite) | lo escribe el agente; **su paso y su fila de commit se fijan en P6** | Tipo nuevo y firmas del contrato (en Ada, `src/*.ads`): sin él la suite no compila | **agente** |
+| 4b | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4b` (0.9.0) | Suite unitaria derivada de la especificación, con el contrato idiomático declarado (tipo nuevo, `init` homologado y dominio de valores) y salida real | **agente** |
 | 5 | Implementación | `glot prompt implement` (0.8.0) + `glot test` (0.7.0) | `feat(algorithms): add naive sort implementation`; suite en verde | autor / **agente** |
 | 6 | Verificación | `glot test`, `glot verify` (0.7.0) · `glot evidence` (0.10.0) · `glot validate` (0.10.0) | Acta en `docs/evidence/{fase}/{módulo}/{lenguaje}.md` con la salida real de la suite y del analizador, sin warnings **nuevos**; y el informe del validador, si se usa | script + **agente** |
 | 7 | Cierre documental del módulo | `glot prompt docs-module` (0.8.0) → README de Nivel 3 desde [`README_Template.md`](../../docs/README_Template.md) | `docs(naive-sort): add README for naive sort module` | **agente** |
