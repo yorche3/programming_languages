@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v1.1.0** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v1.2.0** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -74,7 +74,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v1.1.0)
+├── glot.sh                  # Versión viva / live version (v1.2.0)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
@@ -144,8 +144,28 @@ scripts/
 > **ES:** El bloque carga la **copia**, no el clon: mover o borrar el repositorio no rompe la instalación, y `doctor` dice si la copia se quedó vieja (`install_stale:`) respecto al clon y si la capa está activa en esa shell (`shell_loaded:`). Lo instalado **solo** cambia cuando se repite `install`; por eso la rama `main` debe quedar siempre en un estado cargable.
 > **EN:** The block loads the **copy**, not the clone: moving or deleting the repository does not break the installation, and `doctor` reports whether the copy went stale (`install_stale:`) against the clone and whether the layer is active in that shell (`shell_loaded:`). What is installed **only** changes when `install` runs again; that is why `main` must always stay in a loadable state.
 
-> **ES:** La copia congela lo que copió (`glot.sh`, `data/`, `prompts/` y `completions/`), así que **cualquier cambio en `scripts/` —código, datos o plantillas— exige repetir `install`** para que la capa cargable y el clon digan lo mismo. Aviso: `install_stale` solo mira `glot.sh`, así que un catálogo de datos desactualizado **no** se avisa; se comprueba comparando con el clon (`diff -r scripts/data ~/.local/share/glot/data`).
-> **EN:** The copy freezes what it copied (`glot.sh`, `data/`, `prompts/` and `completions/`), so **any change under `scripts/` —code, data or templates— requires running `install` again** so that the loadable layer and the clone agree. Warning: `install_stale` only looks at `glot.sh`, so an outdated data catalogue is **not** reported; check it by diffing against the clone.
+> **ES:** La copia congela lo que copió (`glot.sh`, `data/`, `prompts/` y `completions/`), así que **cualquier cambio en `scripts/` —código, datos o plantillas— exige repetir `install`** para que la capa cargable y el clon digan lo mismo. Desde la **v1.1.0** `install.meta` guarda tres huellas (`sha` de todo lo que viaja con la copia, `script_sha` y `data_sha`) y `doctor` informa `install_stale:` y `install_data:` (`ok`/`stale`), así que una copia con el catálogo de datos viejo ya no pasa por buena.
+> **EN:** The copy freezes what it copied (`glot.sh`, `data/`, `prompts/` and `completions/`), so **any change under `scripts/` —code, data or templates— requires running `install` again** so that the loadable layer and the clone agree. Since **v1.1.0** `install.meta` stores three fingerprints (`sha` for everything that travels with the copy, `script_sha` and `data_sha`) and `doctor` reports `install_stale:` and `install_data:` (`ok`/`stale`), so a copy with a stale data catalogue no longer passes as good.
+
+### 🤝 Delegados de `ask` / `ask` delegates
+
+**ES:** `ask` envía el encargo a un **delegado** cuya orden vive en el entorno del autor, nunca en el repositorio: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) y `GLOT_DELEGATE_AGY` (Antigravity CLI), con `GLOT_DELEGATE` como alias del primero. Se eligen con `--delegate copilot|antigravity` (cortos `cop` y `agy`); sin el argumento, con una sola variable definida se usa esa y con las dos `ask` pide elegir (`2`).
+
+**EN:** `ask` sends the request to a **delegate** whose command lives in the author's environment, never in the repository: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) and `GLOT_DELEGATE_AGY` (Antigravity CLI), with `GLOT_DELEGATE` as an alias of the first one. They are chosen with `--delegate copilot|antigravity` (short `cop`, `agy`); with no argument, one defined variable is used and two of them make `ask` ask for the choice (`2`).
+
+```bash
+# el encargo llega por stdin y {root}/{module_dir} los resuelve glot: la línea
+# no lleva tu ruta, así que `install` te la imprime para pegarla en tu rc
+export GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools'
+export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6 -p "$(cat)" --add-dir {root}'
+./scripts/glot.sh ask --delegate copilot contract ada algorithms/data_structures_basics
+./scripts/glot.sh ask --delegate antigravity suite ada algorithms/data_structures_basics
+./scripts/glot.sh doctor | grep '^delegate_'   # delegate_cop: / delegate_agy:
+```
+
+**ES:** `glot` no elige delegado ni guarda claves: la orden es tuya y `install` **no** la escribe en el rc —al terminar la imprime para que la pegues—, para que en el repositorio solo haya marcadores y nombres de modelo. El detalle de permisos de cada CLI está en [`docs/VALIDATION.md`](docs/VALIDATION.md).
+
+**EN:** `glot` neither picks a delegate nor stores keys: the command is yours and `install` does **not** write it into the rc —it prints it at the end so you can paste it— so that only placeholders and model names land in the repository. Each CLI's permission details are in [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
 ---
 

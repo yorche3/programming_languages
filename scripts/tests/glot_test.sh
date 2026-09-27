@@ -32,6 +32,9 @@ unset GLOT_ROOT
 unset GLOT_TOOLCHAINS_FILE
 unset GLOT_STATE_DIR
 unset GLOT_DATA_DIR
+unset GLOT_DELEGATE
+unset GLOT_DELEGATE_COP
+unset GLOT_DELEGATE_AGY
 
 passed=0
 failed=0
@@ -377,11 +380,29 @@ glot_run_no_home() {
     rc_last="$rc"
 }
 
-# glot_run_nodelegate [args...] — ejecuta glot sin GLOT_DELEGATE, para que el caso no
-# dependa de lo que tenga exportado la sesión.
+# glot_run_nodelegate [args...] — ejecuta glot sin ningún delegado, para que el caso no
+# dependa de lo que tenga exportado la sesión (las tres variables: los dos nombres y el
+# alias antiguo).
 glot_run_nodelegate() {
     local rc=0
-    out="$(env -u GLOT_DELEGATE "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    out="$(env -u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY \
+        "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+# glot_run_delegates <cop> <agy> [args...] — ejecuta glot fijando los dos delegados del
+# caso (cadena vacía = sin definir), para probar la elección y la expansión de marcadores
+# sin salir del directorio temporal.
+glot_run_delegates() {
+    local cop="$1"
+    local agy="$2"
+    shift 2
+    local -a env_args=(-u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY)
+    local rc=0
+    [[ -n "$cop" ]] && env_args+=(GLOT_DELEGATE_COP="$cop")
+    [[ -n "$agy" ]] && env_args+=(GLOT_DELEGATE_AGY="$agy")
+    out="$(env "${env_args[@]}" "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
     err="$(cat -- "$WORK_DIR/stderr")"
     rc_last="$rc"
 }
@@ -857,7 +878,8 @@ assert_contains 'prompt con encargo desconocido: sugiere el registro' 'glot prom
 # ask: sin delegado no hay nada que enviar
 ask_nodelegate() {
     local rc=0
-    out="$(env -u GLOT_DELEGATE "$GLOT_SH" ask "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    out="$(env -u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY \
+        "$GLOT_SH" ask "$@" 2>"$WORK_DIR/stderr")" || rc=$?
     err="$(cat -- "$WORK_DIR/stderr")"
     rc_last="$rc"
 }
@@ -887,7 +909,8 @@ assert_contains 'ask -n: imprime el plan sin enviar' 'cat >/dev/null' "$out"
 glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
 assert_contains 'doctor: registro de encargos' 'prompts_ok: 7 encargos / requests' "$out"
-assert_contains 'doctor: delegado sin configurar' 'delegate: (sin configurar / not configured)' "$out"
+assert_contains 'doctor: delegado COP sin configurar' 'delegate_cop: (sin configurar / not configured)' "$out"
+assert_contains 'doctor: delegado AGY sin configurar' 'delegate_agy: (sin configurar / not configured)' "$out"
 
 # --- casos de la especificación v0.9.0 (L5, creación y registro) -------------
 
@@ -2161,6 +2184,64 @@ assert_eq 'prompt: no avisa de la que sí está' 'no' "$([[ "$err" == *'missing 
 assert_eq 'prompt: el encargo se imprime igual' 'si' \
     "$([[ "$out" == *'Cuerpo de prueba para data_structures_basics'* ]] && echo si || echo no)"
 rm -rf -- "$SANDBOX/.github"
+
+# --- casos de la especificación v1.2.0 (delegados COP y AGY) -----------------
+
+# La orden del delegado usa el mismo vocabulario de marcadores que el resto del tooling,
+# y se resuelve con el módulo del **encargo**: la ruta esperada se lee del propio encargo
+# (su cabecera), no se escribe en el caso.
+glot_run prompt implement php algorithms/naive_sort
+expected_root="$(printf '%s\n' "$out" | awk -F'|' '$2 ~ /^ root / {gsub(/^ +| +$/, "", $3); print $3}')"
+expected_dir="$(printf '%s\n' "$out" | awk -F'|' '$2 ~ /^ module_dir / {gsub(/^ +| +$/, "", $3); print $3}')"
+assert_eq 'delegado: el encargo trae root y module_dir' 'si' \
+    "$([[ -n "$expected_root" && -n "$expected_dir" ]] && echo si || echo no)"
+
+glot_run_delegates 'echo ROOT={root} DIR={module_dir}; cat >/dev/null' '' \
+    ask implement php algorithms/naive_sort
+assert_eq 'delegado COP: código' '0' "$rc_last"
+assert_eq 'delegado COP: resuelve {root} y {module_dir}' "ROOT=$expected_root DIR=$expected_dir" "$out"
+
+glot_run_delegates 'printf "%s\n" "${GLOT_ROOT}"; cat >/dev/null' '' \
+    ask implement php algorithms/naive_sort
+assert_eq 'delegado: GLOT_ROOT exportado al delegado' "$expected_root" "$out"
+
+glot_run_delegates 'printf "%s\n" "${GLOT_MODULE_DIR}"; cat >/dev/null' '' \
+    ask implement php algorithms/naive_sort
+assert_eq 'delegado: GLOT_MODULE_DIR exportado al delegado' "$expected_dir" "$out"
+
+glot_run_delegates 'echo {root}; cat >/dev/null' '' -n ask implement php algorithms/naive_sort
+assert_eq 'delegado -n: el plan trae la orden ya expandida' 'si' \
+    "$([[ "$out" == *"echo $expected_root"* ]] && echo si || echo no)"
+
+# Elección: con los dos configurados y sin `--delegate`, no se adivina
+glot_run_delegates 'cat >/dev/null' 'cat >/dev/null' ask implement php algorithms/naive_sort
+assert_eq 'dos delegados sin --delegate: código' '2' "$rc_last"
+assert_contains 'dos delegados sin --delegate: pide elegir' '--delegate' "$err"
+
+glot_run_delegates 'cat >/dev/null' '' ask --delegate antigravity implement php algorithms/naive_sort
+assert_eq '--delegate antigravity sin AGY: código' '1' "$rc_last"
+assert_contains '--delegate antigravity sin AGY: nombra la variable' 'GLOT_DELEGATE_AGY' "$err"
+
+glot_run_delegates 'cat >/dev/null' 'echo ALIAS; cat >/dev/null' ask --delegate antigravity implement php algorithms/naive_sort
+assert_eq '--delegate antigravity elige el suyo' 'ALIAS' "$out"
+
+glot_run_delegates 'cat >/dev/null' '' ask --delegate gemini implement php algorithms/naive_sort
+assert_eq '--delegate desconocido: código' '2' "$rc_last"
+assert_contains '--delegate desconocido: lista los válidos' 'copilot, antigravity' "$err"
+
+glot_run_delegates 'echo {foo}; cat >/dev/null' '' ask implement php algorithms/naive_sort
+assert_eq 'delegado: marcador sin resolver' '1' "$rc_last"
+assert_contains 'delegado: marcador sin resolver lo nombra' '{foo}' "$err"
+
+# `GLOT_DELEGATE` sigue valiendo como alias del de Copilot: es lo ya documentado
+out="$(env -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY GLOT_DELEGATE='echo ALIAS; cat >/dev/null' \
+    "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || true
+assert_eq 'GLOT_DELEGATE es el alias de COP' 'ALIAS' "$out"
+
+# Y `doctor` informa de los dos
+out="$(env -u GLOT_DELEGATE GLOT_DELEGATE_COP='cat' GLOT_DELEGATE_AGY='cat' "$GLOT_SH" doctor 2>/dev/null)" || true
+assert_contains 'doctor: delegado COP configurado' 'delegate_cop: cat' "$out"
+assert_contains 'doctor: delegado AGY configurado' 'delegate_agy: cat' "$out"
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 
