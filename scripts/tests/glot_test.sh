@@ -850,7 +850,7 @@ assert_contains 'doctor: hay verificadores' 'verify_commands: 14 de / of 50' "$o
 # registro de encargos: nombre<TAB>paso<TAB>descripción, leído del frontmatter
 glot_run prompt
 assert_eq 'prompt: código' '0' "$rc_last"
-assert_eq 'prompt: siete encargos' '7' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'prompt: ocho encargos' '8' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 assert_eq 'prompt: cuatro columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=4')"
 assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
 assert_contains 'prompt: contract en el paso 4b' "$(printf 'contract\t4b')" "$out"
@@ -908,7 +908,7 @@ assert_contains 'ask -n: imprime el plan sin enviar' 'cat >/dev/null' "$out"
 # doctor informa de las plantillas y del delegado
 glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
-assert_contains 'doctor: registro de encargos' 'prompts_ok: 7 encargos / requests' "$out"
+assert_contains 'doctor: registro de encargos' 'prompts_ok: 8 encargos / requests' "$out"
 assert_contains 'doctor: delegado COP sin configurar' 'delegate_cop: (sin configurar / not configured)' "$out"
 assert_contains 'doctor: delegado AGY sin configurar' 'delegate_agy: (sin configurar / not configured)' "$out"
 
@@ -937,6 +937,14 @@ assert_eq 'secuencias de inicialización: modos válidos' '0' \
     "$(awk -F'\t' '$4 != "run" && $4 != "expect"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
 assert_eq 'secuencias de inicialización: modo expect con requisito expect' '0' \
     "$(awk -F'\t' '$4 == "expect" && $6 != "expect"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+# v1.3.0: el orden tiene que ser 1..n por lenguaje. Un hueco o un repetido rompe el plan
+# sin que nadie lo note (el `read` de `new` se queda con una línea de menos).
+assert_eq 'secuencias de inicialización: órdenes contiguos por lenguaje' '0' \
+    "$(awk -F'\t' '{rows[$1]++; if ($2 > top[$1]) top[$1] = $2} END {for (k in rows) if (rows[k] != top[k]) bad++; print bad + 0}' "$DATA_DIR/init_sequences.tsv")"
+# la columna 8 no puede quedar vacía: una fila de 7 campos manda el completado a
+# «respuestas» y lo silencia (medido el 2026-09-26: 3 filas de Ada con 7 campos)
+assert_eq 'secuencias de inicialización: la columna 8 nunca queda vacía' '0' \
+    "$(awk -F'\t' '$8 == ""' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
 assert_eq 'catálogo de inicialización: operaciones conocidas' '0' \
     "$(awk -F'\t' '{n = split($8, ops, ";"); for (i = 1; i <= n; i++) if (ops[i] != "-" && ops[i] !~ /^(flat|rm):[^:]+$/) print $1}' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
 
@@ -1012,6 +1020,20 @@ assert_contains 'scaffold: declara lo que queda fuera' '**Fuera de alcance**' "$
 assert_contains 'scaffold: parte de lo que dejó new' 'glot new' "$scaffold_prompt"
 assert_contains 'scaffold: no escribe la suite' 'encargo `suite`' "$scaffold_prompt"
 
+# v1.3.0: el runner es del 4a. La frontera tiene que estar en un solo sitio, así que el caso
+# comprueba las **dos mitades**: el esqueleto lo deja arrancando y la suite no lo crea.
+# Medido el 2026-09-26 en `assembly`: el manifiesto era del 4a, el runner nunca se generó y
+# `make build` se paró en el enlace (`ld: undefined reference to 'tests_failed'`).
+assert_contains 'scaffold: el runner es de este paso' 'el **runner es de este paso**' "$scaffold_prompt"
+assert_contains 'scaffold: exige que arranque sin casos' 'arranca sin casos' "$scaffold_prompt"
+assert_contains 'scaffold: lo escribe si el framework no lo trae' 'escríbelo aquí' "$scaffold_prompt"
+assert_eq 'suite: ya no dice que crea el runner' 'no' \
+    "$([[ "$suite_prompt" == *'Si el framework no incluye runner propio'* ]] && echo si || echo no)"
+assert_contains 'suite: el runner es del paso 4a' 'runner es del paso 4a' "$suite_prompt"
+assert_contains 'suite: si falta el runner, se detiene' 'detente y avísalo' "$suite_prompt"
+assert_contains 'SPRINT: el 4a deja el runner arrancando' 'runner arrancando sin casos' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
+assert_contains 'SPRINT: el 4c no crea el runner' 'sin crear el runner' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
+
 # v1.1.0: el encargo del README remite a la plantilla en vez de copiar su lista de secciones.
 # Una lista copiada se queda atrás en cuanto la plantilla crece (pasó: la plantilla llegó a
 # 13 secciones y el encargo seguía enumerando seis)
@@ -1039,7 +1061,7 @@ assert_contains 'completion bash: pasos de save' '4a' "$save_comp"
 assert_contains 'completion bash: el contrato como paso propio' 'contract' "$save_comp"
 assert_contains 'completion bash: la suite se desplaza a 4c' '4c' "$save_comp"
 assert_contains 'completion bash: alias de los pasos' 'scaffold' "$save_comp"
-assert_eq 'completion bash: un candidato por línea' '12' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
+assert_eq 'completion bash: un candidato por línea' '14' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
 
 # v1.1.0: los encargos se complean **en vivo** desde el registro, así que la lista no puede
 # quedarse corta al añadir una plantilla (el fallo que dejaba `scaffold` sin descubrir)
@@ -1063,6 +1085,17 @@ assert_contains 'new -n: normalización en el plan' 'rm:naive_sort/.git;flat:nai
 glot_run -n new erlang algorithms/naive_sort
 assert_contains 'new -n: aplanar el nido' 'rebar3 new lib naive_sort' "$out"
 
+# v1.3.0: los flags globales valen en **cualquier** posición. Medido el 2026-09-26:
+# `glot new -n ada …` → `opción desconocida: -n` y `glot save -n 4a …` tomaba `-n` por el paso.
+glot_run new -n php algorithms/naive_sort
+assert_eq 'new -n detrás del verbo: código' '0' "$rc_last"
+assert_contains 'new -n detrás del verbo: imprime el plan' 'cd ' "$out"
+glot_run new --dry-run php algorithms/naive_sort
+assert_eq 'new --dry-run detrás del verbo: código' '0' "$rc_last"
+assert_contains 'new --dry-run detrás del verbo: imprime el plan' 'cd ' "$out"
+glot_run new -x -n php algorithms/naive_sort
+assert_eq 'new: la opción desconocida sigue dando 2' '2' "$rc_last"
+
 # new: sin inicializador validado no se inventa nada: skipped, como verify. El
 # catálogo real ya no tiene lenguajes `deferred` (R1/R6: todos traen herramienta o
 # estructura manual), así que el caso se prueba con un catálogo inyectado.
@@ -1081,6 +1114,26 @@ assert_eq 'new deferred: código' '0' "$rc_last"
 assert_eq 'new deferred: dato' 'skipped' "$out"
 assert_contains 'new deferred: lo escribe el agente' 'no verified initializer' "$err"
 assert_contains 'new deferred: encargo sugerido' 'glot prompt scaffold' "$err"
+
+# v1.3.0: el completado del dato (columna 8) tiene que llegar al autor. Antes se imprimía
+# dentro del bucle de pasos y la salida de los propios comandos se lo comía; medido el
+# 2026-09-26, el `tests/alire.toml` de Ada quedó sin `[[depends-on]]`, `[[pins]]` ni `aunit`
+# hasta aplicarlo a mano. Ahora va en un bloque al final, y este caso lo comprueba con un
+# dato inyectado (el comando es `mkdir`, así que no depende de la red).
+SEQ_DIR="$WORK_DIR/sequence-data"
+mkdir -p "$SEQ_DIR"
+cp -R "$DATA_DIR/." "$SEQ_DIR/"
+printf 'java\t1\tmodule\trun\tmkdir -p src test\t-\t-\tnota-de-completado-de-prueba\n' \
+    >>"$SEQ_DIR/init_sequences.tsv"
+glot_run_sandbox use java algorithms/naive_sort
+assert_eq 'new con secuencia: use deja el módulo' '0' "$rc_last"
+rc_last=0
+out="$(GLOT_ROOT="$SANDBOX" GLOT_DATA_DIR="$SEQ_DIR" "$GLOT_SH" new java algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_eq 'new con secuencia: código' '0' "$rc_last"
+assert_contains 'new: el completado se anuncia al final' 'left to complete' "$err"
+assert_contains 'new: el completado llega con su nota' 'nota-de-completado-de-prueba' "$err"
+assert_contains 'new: el completado va numerado por su paso' '[1]' "$err"
 
 # new: errores de objetivo y de argumentos
 glot_run -n new php algorithms/nope
@@ -1148,7 +1201,28 @@ printf 'y\n' >"$RB/src/y.rb"
 glot_run_sandbox -n save contract ruby algorithms/naive_sort
 assert_eq 'save -n contrato: código' '0' "$rc_last"
 assert_contains 'save -n contrato: mensaje del catálogo' "commit -m 'chore(algorithms): add contract for naive_sort'" "$out"
+# v1.3.0: el mismo flag, detrás del verbo (antes tomaba `-n` por el paso)
+glot_run_sandbox save -n contract ruby algorithms/naive_sort
+assert_eq 'save -n detrás del verbo: código' '0' "$rc_last"
+assert_contains 'save -n detrás del verbo: mensaje del catálogo' "commit -m 'chore(algorithms): add contract for naive_sort'" "$out"
 rm -f -- "$RB/src/y.rb"
+
+# v1.3.0: la corrección es paso propio (`4d`, alias `fix`) y **exige la causa**, que va como
+# segundo `-m` del commit: es el registro del retrabajo. Medido el 2026-09-26: en Ada hubo
+# que corregir el contrato (4b) y la suite (4c) después de confirmarlos, y `save` los habría
+# metido en un solo commit sin decir por qué.
+glot_run_sandbox -n save 4d ruby algorithms/naive_sort
+assert_eq 'save 4d sin causa: código' '2' "$rc_last"
+assert_contains 'save 4d sin causa: lo explica' 'necesita su causa' "$err"
+printf 'z\n' >"$RB/src/z.rb"
+glot_run_sandbox -n save 4d --causa 'la suite no cubría el caso vacío' ruby algorithms/naive_sort
+assert_eq 'save 4d con causa: código' '0' "$rc_last"
+assert_contains 'save 4d: el mensaje sale del catálogo' "commit -m 'fix(algorithms): correct naive_sort'" "$out"
+assert_contains 'save 4d: la causa va al cuerpo del commit' "-m 'la suite no cubría el caso vacío'" "$out"
+glot_run_sandbox -n save fix --causa 'la causa' ruby algorithms/naive_sort
+assert_eq 'save con el alias fix: código' '0' "$rc_last"
+assert_contains 'save con el alias fix: el mismo mensaje' "commit -m 'fix(algorithms): correct naive_sort'" "$out"
+rm -f -- "$RB/src/z.rb"
 
 # save -n con el árbol ya limpio: no hay plan que enseñar, y lo dice como la ejecución real
 glot_run_sandbox -n save 4c ruby algorithms/naive_sort
@@ -1170,7 +1244,7 @@ assert_contains 'doctor: cobertura de inicializadores' 'new_commands: ' "$out"
 assert_contains 'doctor: inicializadores verificados' 'new_commands: 50 de / of 50' "$out"
 assert_contains 'doctor: ya no hay aplazadas' '(deferred: 0)' "$out"
 assert_contains 'doctor: catálogo de commits' 'commits_file: ' "$out"
-assert_contains 'doctor: pasos de commit' 'commit_steps: 8 de / of which 6 son del submódulo' "$out"
+assert_contains 'doctor: pasos de commit' 'commit_steps: 9 de / of which 7 son del submódulo' "$out"
 
 # --- casos de la especificación v0.10.0 (L6, evidencia y cierre) -------------
 
@@ -1607,7 +1681,7 @@ assert_contains 'modelo fuera del catálogo: lo dice' 'sin perfil en el catálog
 # doctor informa de la cobertura del catálogo y del envejecimiento contra el CLI
 glot_run doctor
 assert_contains 'doctor: catálogo de modelos' 'models_file: ' "$out"
-assert_contains 'doctor: cobertura de perfiles' 'model_profiles: 7 de / of 7' "$out"
+assert_contains 'doctor: cobertura de perfiles' 'model_profiles: 8 de / of 8' "$out"
 if command -v copilot >/dev/null 2>&1; then
     assert_contains 'doctor: los modelos siguen en el CLI' 'model_available: 3 de / of 3' "$out"
     cli_models="$(copilot help config 2>/dev/null || true)"
@@ -1715,15 +1789,20 @@ glot_run_sandbox pointer php algorithms/naive_sort
 assert_eq 'pointer sin publicar: código' '1' "$rc_last"
 assert_contains 'pointer sin publicar: lo dice' 'no es el de origin/main' "$err"
 
-# integrado y publicado: prepara la rama del monorepo, publica y deja el gitlink añadido
+# v1.3.0: `pointer` añade el gitlink **en la rama activa**, sin abrir ni publicar rama
+# propia: el puntero pertenece al cierre en curso (medido el 2026-09-26: el paso 8 abría
+# otra rama con el sprint a medias)
 git -C "$SANDBOX/php" push -q origin main
 monorepo_before="$(git -C "$SANDBOX" rev-parse HEAD)"
+monorepo_branch_before="$(git -C "$SANDBOX" symbolic-ref --short HEAD)"
 glot_run_sandbox pointer php algorithms/naive_sort
 assert_eq 'pointer: código' '0' "$rc_last"
 assert_eq 'pointer: stdout es el SHA corto del submódulo' "$(git -C "$SANDBOX/php" rev-parse --short HEAD)" "$out"
-assert_eq 'pointer: rama del monorepo' 'chore/algorithms/naive-sort-pointer' "$(git -C "$SANDBOX" symbolic-ref --short HEAD)"
-assert_eq 'pointer: la rama está en el remoto' 'si' \
+assert_eq 'pointer: no cambia la rama del monorepo' "$monorepo_branch_before" "$(git -C "$SANDBOX" symbolic-ref --short HEAD)"
+assert_eq 'pointer: no publica rama propia' 'no' \
     "$(git -C "$SANDBOX/remote/repo.git" show-ref --verify --quiet refs/heads/chore/algorithms/naive-sort-pointer && echo si || echo no)"
+assert_eq 'pointer: deja el gitlink preparado' 'si' \
+    "$(git -C "$SANDBOX" diff --cached --name-only | grep -qx 'php' && echo si || echo no)"
 assert_contains 'pointer: el gitlink queda añadido' 'php' "$(git -C "$SANDBOX" diff --cached --name-only)"
 assert_eq 'pointer: no confirma el monorepo' "$monorepo_before" "$(git -C "$SANDBOX" rev-parse HEAD)"
 assert_contains 'pointer: dice el siguiente paso' 'glot save 9' "$err"
@@ -1744,27 +1823,17 @@ assert_eq 'save 9: asunto del commit' 'chore(submodule): update php pointer' \
 assert_eq 'save 9: solo el submódulo en el commit' 'php' "$(git -C "$SANDBOX" show --pretty=format: --name-only HEAD)"
 assert_contains 'save 9: sin push' 'no push' "$err"
 
-# lo del propio sprint no bloquea a `pointer`: el gitlink lo prepara él y la evidencia la
-# confirma el paso de cierre (`save 10`), que va **después**. Se comprueba sobre el
-# escenario real: la rama del puntero se vuelve a preparar con la evidencia sin confirmar.
-git -C "$SANDBOX" switch -q main
-git -C "$SANDBOX" branch -q -D chore/algorithms/naive-sort-pointer
-mkdir -p -- "$SANDBOX/docs/evidence/algorithms/naive_sort"
-printf '# Evidencia — php algorithms/naive_sort\n' >"$SANDBOX/docs/evidence/algorithms/naive_sort/php.md"
-glot_run_sandbox pointer php algorithms/naive_sort
-assert_eq 'pointer con la evidencia del sprint sin confirmar: código' '0' "$rc_last"
-assert_eq 'pointer con la evidencia del sprint sin confirmar: solo entra el gitlink' 'php' \
-    "$(git -C "$SANDBOX" diff --cached --name-only)"
-
-# cualquier otra ruta sin confirmar sí bloquea, y se nombra
+# v1.3.0: `pointer` no cambia de rama, así que **no** bloquea por trabajo sin confirmar:
+# prepara el gitlink en la rama activa y `save 9` decide qué entra (antes sí bloqueaba,
+# porque abría rama propia). Aquí el puntero ya apunta al commit, así que es idempotente.
 git -C "$SANDBOX" reset -q
-git -C "$SANDBOX" switch -q main
 printf 'nota\n' >"$SANDBOX/docs/nota-suelta.md"
+monorepo_before="$(git -C "$SANDBOX" rev-parse HEAD)"
 glot_run_sandbox pointer php algorithms/naive_sort
-assert_eq 'pointer con trabajo ajeno sin confirmar: código' '1' "$rc_last"
-assert_contains 'pointer con trabajo ajeno sin confirmar: lo nombra' 'docs/nota-suelta.md' "$err"
+assert_eq 'pointer con trabajo sin confirmar: no bloquea' '0' "$rc_last"
+assert_eq 'pointer con trabajo sin confirmar: idempotente' 'nothing' "$out"
+assert_eq 'pointer con trabajo sin confirmar: no toca el monorepo' "$monorepo_before" "$(git -C "$SANDBOX" rev-parse HEAD)"
 rm -f -- "$SANDBOX/docs/nota-suelta.md"
-rm -rf -- "$SANDBOX/docs/evidence"
 
 # save 10: el cierre añade el roadmap, el checklist y la evidencia de ese módulo
 rm -rf -- "$SANDBOX/docs/evidence/algorithms/naive_sort"

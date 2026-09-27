@@ -108,7 +108,7 @@ cualquier desviación.
 
 - El contrato debe **compilar, resolver o instalar** sin warnings ni errores.
 - La suite todavía no existe: es normal que el runner no tenga casos. **No** escribas la suite
-  ni un runner de ejemplo para «arreglarlo»: copia la salida real y sigue.
+  ni un ejecutable de ejemplo para «arreglarlo»: copia la salida real y sigue.
 - Si el contrato no compila porque falta la implementación, es lo esperado en este paso: deja
   constancia de dónde y por qué.
 

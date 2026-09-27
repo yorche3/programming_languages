@@ -13,7 +13,7 @@
 | stdout | Solo el dato (así `$(glot get lang)` es utilizable) |
 | stderr | Diagnóstico, avisos y errores; `set`/`unset` confirman aquí |
 | Códigos de salida | `0` correcto · `1` error de entorno o dato ausente · `2` uso incorrecto · `3` estado ilegible o no escribible |
-| Flags | `-h/--help` (general y por verbo), `--version`, `-q/--quiet`; desde v0.4.0, `-n/--dry-run` en los verbos que mutan y, desde v0.7.0, también en `test`/`verify`, donde imprime el comando sin ejecutarlo |
+| Flags | `-h/--help` (general y por verbo), `--version`, `-q/--quiet`; desde v0.4.0, `-n/--dry-run` en los verbos que mutan y, desde v0.7.0, también en `test`/`verify`, donde imprime el comando sin ejecutarlo. Desde la **v1.3.0** los globales (`-q`, `-n`) valen en **cualquier posición**: `glot new -n …` es lo que la mano escribe, y el verbo no los usa nunca como dato |
 | Interacción | Un verbo nunca pregunta: el dato llega por argumento o por stdin |
 | Idempotencia | Repetir el mismo efecto no cambia el resultado ni el código de salida |
 | Testabilidad | La raíz del repo y la ruta del estado son inyectables por variable (`GLOT_ROOT`, `GLOT_STATE_DIR`/`GLOT_STATE_FILE`) |
@@ -59,12 +59,12 @@
 | `prompt [encargo] [lenguaje] [fase/módulo]` | Sin encargo, lista el registro —`nombre<TAB>paso<TAB>modelo<TAB>descripción`—; con encargo, imprime el encargo armado (estado del sprint + plantilla expandida) | 0 / 1 / 2 / 3 |
 | `ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot\|antigravity]` | Arma el encargo y lo envía al **delegado elegido** por stdin; su salida va a stdout. El modelo del perfil del encargo viaja por entorno (`COPILOT_MODEL`, y el tier de auto si el perfil lo declara) y con él `GLOT_ROOT` y `GLOT_MODULE_DIR` | 0 / 1 / 2 / 3 |
 | `new [lenguaje] [fase/módulo]` | Inicializa el lenguaje y crea el esqueleto mecánico del módulo: con `tool` ejecuta el comando del catálogo; con `manual` crea las carpetas; con `deferred` informa e imprime `skipped`. Normaliza lo que deja el inicializador. No escribe la suite | 0 / 1 / 2 / **4** |
-| `save <paso\|alias> [lenguaje] [fase/módulo]` | Confirma con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. Los pasos del submódulo añaden el submódulo; los del monorepo (`9`, `10`) añaden **solo las rutas del paso**. Sin push | 0 / 1 / 2 / 3 / **4** |
+| `save <paso\|alias> [lenguaje] [fase/módulo] [--causa "<texto>"]` | Confirma con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. `--causa` viaja como **cuerpo del commit** y es **obligatoria** en el paso de corrección (`4d`): sin ella devuelve `2`. Los pasos del submódulo añaden el submódulo; los del monorepo (`9`, `10`) añaden **solo las rutas del paso**. Sin push | 0 / 1 / 2 / 3 / **4** |
 | `evidence [lenguaje] [fase/módulo]` | Ejecuta la suite y el verificador y deja el acta con la salida real en `docs/evidence/`; la escribe también cuando algo está en rojo | 0 / 1 / 2 / 3 / **4** |
 | `close [lenguaje] [fase/módulo]` | Cierra el módulo: exige la evidencia en verde y los README, registra la entrada del checklist y sube el contador y la lista del roadmap; idempotente. Imprime la línea nueva | 0 / 1 / 2 / 3 / **4** |
 | `validate [lenguaje] [fase/módulo]` | Pasa el encargo `validate` al validador automático (opcional) y guarda su informe como registro del sprint. Sin validador, avisa y devuelve `1` | 0 / 1 / 2 / 3 / **4** |
 | `status [lenguaje]` | **Solo lectura**: una línea por lenguaje registrado —`lang<TAB>branch<TAB>pointer<TAB>worktree`— con el puntero en `ok`, `differs`, `uninitialised` o `unknown` | 0 / 1 / 2 |
-| `pointer [lenguaje] [fase/módulo]` | Deja el puntero del submódulo **preparado y sin confirmar**: exige que el submódulo esté en su `main` y que ese commit sea el de `origin/main`, prepara y publica la rama `chore/{fase}/{módulo}-pointer` y añade el gitlink. Imprime el SHA corto o `nothing` | 0 / 1 / 2 / 3 |
+| `pointer [lenguaje] [fase/módulo]` | Deja el puntero del submódulo **preparado y sin confirmar**: exige que el submódulo esté en su `main` y que ese commit sea el de `origin/main`, y añade el gitlink **en la rama activa** del monorepo (desde la v1.3.0 **no** abre ni publica rama propia: el gitlink pertenece al cierre en curso). Imprime el SHA corto o `nothing` | 0 / 1 / 2 / 3 |
 | `clean [lenguaje] [fase/módulo]` | Borra lo que el propio `.gitignore` del lenguaje declara como artefacto, **solo dentro del directorio del módulo**, y sincroniza el submódulo. Imprime las rutas borradas o `nothing` | 0 / 1 / 2 |
 | `install` | Deja la **copia estable** (`~/.local/share/glot/`), el enlace `~/.local/bin/glot`, el completado de cada shell presente y el bloque del rc entre marcas. Idempotente; imprime el directorio de instalación | 0 / 1 / 2 / 3 |
 | `uninstall` | Deshace lo de `install`: quita el bloque del rc, borra los completados, retira el enlace **solo si es el suyo** y la copia. Idempotente: sin nada instalado imprime `nothing` | 0 / 1 / 2 / 3 |
@@ -286,7 +286,8 @@
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
-| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** (`4a`, `4b`, `4c`, `5`, `7`, `8`) o por **alias del encargo** (`scaffold`, `contract`, `suite`, `implement`, `docs-module`, `docs-language`). Nunca se escribe a mano |
+| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** (`4a`, `4b`, `4c`, `4d`, `5`, `7`, `8`) o por **alias del encargo** (`scaffold`, `contract`, `suite`, `fix`, `implement`, `docs-module`, `docs-language`). Nunca se escribe a mano |
+| Causa / Cause | `--causa "<texto>"` añade un **segundo párrafo** al commit (segundo `-m`) y es **obligatoria** en el paso de corrección (`4d`): es el registro del retrabajo —qué se corrigió y por qué—, lo único que explica por qué se toca algo ya confirmado |
 | Marcadores / Placeholders | `{lang}`, `{phase}`, `{module}`, `{Module}`: los mismos del resto del tooling, resueltos con el estado del sprint |
 | Índice / Index | `git add -A` del **submódulo** completo. Si hay cambios fuera del módulo, se nombran por stderr antes de confirmar |
 | Rama / Branch | Si la rama activa no es la del estado del sprint, se avisa (no se bloquea) |
@@ -384,12 +385,12 @@
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
-| `pointer` no confirma | **Prepara**: verifica, deja el submódulo en el commit integrado, prepara la rama `chore/{fase}/{módulo}-pointer`, la publica con upstream y hace `git add <lenguaje>`. El commit lo hace `save 9`, que es el mismo verbo que confirma el resto del sprint |
+| `pointer` no confirma | **Prepara**: verifica, deja el submódulo en el commit integrado y hace `git add <lenguaje>` **en la rama activa**. Desde la v1.3.0 **no abre ni publica rama propia**: el gitlink pertenece al cierre en curso, y abrir rama a mitad del cierre era lo que estorbaba. El commit lo hace `save 9`, que es el mismo verbo que confirma el resto del sprint |
 | La regla, como comprobación | `pointer` hace `fetch` explícito de `origin/main` del submódulo y exige que su HEAD **sea** ese commit: nunca se apunta a una rama de trabajo sin integrar. Con el ref local, la comprobación podría mentir |
 | Idempotencia | Si el monorepo ya apunta a ese commit, imprime `nothing` y no toca ramas |
 | `status` sin resumen | Cuatro columnas y un lenguaje por línea: el resumen de contadores es de `progress`, y `status` no muta nada, así que no necesita `-n` |
 | Alcance de `clean` | `git clean -Xfd` en el **directorio del módulo** (lo que el `.gitignore` del lenguaje declara como artefacto) más `git submodule sync` del lenguaje. Nunca `-x`: lo no rastreado y no ignorado es trabajo del autor. Nunca el monorepo ni `docs/` |
-| Lo del propio sprint no bloquea | `pointer` no se detiene por el **gitlink del lenguaje** (es el cambio que el verbo viene a preparar) ni por la **evidencia del sprint**, que confirma `save 10` *después* del puntero; cualquier otra ruta sin confirmar sí lo detiene y se nombra |
+| Suciedad del monorepo | `pointer` **no cambia de rama**, así que no bloquea por trabajo sin confirmar: solo añade el gitlink a la rama activa, y `save 9` decide qué entra. Antes de la v1.3.0 sí bloqueaba, porque abría rama propia |
 | Qué **no** hace / What it does **not** | No hace `push` del monorepo (`pointer` solo publica su rama), no confirma, y no borra nada que el lenguaje no haya declarado ignorado |
 
 ---

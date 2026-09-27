@@ -59,7 +59,7 @@ tienen inicializador validado: ahí el esqueleto lo construyes tú.
 | Aspecto | Detalle |
 |---|---|
 | **Entrada** | El directorio del módulo con lo que dejó `glot new`, la especificación, la fila de `{lang}` en `scripts/data/languages.tsv` y los módulos homologados del lenguaje |
-| **Salida** | Un esqueleto que compila, resuelve o instala, y cuyo runner de pruebas **arranca**; `.gitignore` verificado; sin runners de ejemplo ni nombres que no encajen |
+| **Salida** | Un esqueleto que compila, resuelve o instala y cuyo **runner de pruebas arranca sin casos** —el runner es de este paso: es andamiaje, no suite—; `.gitignore` verificado; sin ejecutables de ejemplo ni nombres que no encajen |
 | **Fuera de alcance** | El contrato del módulo (encargo `contract`, paso 4b), la suite (encargo `suite`, paso 4c), la implementación (paso 5), el README (paso 7) y los commits (`glot save`) |
 | **Evidencia** | La salida real del comando nativo de pruebas y de `git check-ignore -v`, pegadas sin editar |
 
@@ -85,6 +85,7 @@ detecta cada caso:
 | Resto / Leftover | Cómo se detecta | Qué se hace |
 |------------------|-----------------|-------------|
 | **Runner de ejemplo**: un punto de entrada `main`/`app`/`example` en lo que es una biblioteca | El inicializador generó un ejecutable y el módulo expone funciones | Quitarlo: rompe el runner de pruebas de la herramienta (casos reales: `dub test` en D, `dotnet test` en C#, `zig build test` con `src/main.zig`) |
+| **Framework sin runner**: el comando nativo de pruebas (columna 4 del catálogo) no tiene nada que ejecutar | El inicializador dejó el manifiesto pero ningún punto de entrada de pruebas | **Escribirlo aquí**: el runner es andamiaje de este paso, no de la suite. Mínimo y sin casos, pero que el comando arranque |
 | **Nombres predefinidos** que no encajan | Un archivo o manifiesto se llama como la plantilla (`MyLib.hs`, `<dir>_spec.<ext>`, `library.cabal`) y no como el módulo | Renombrar a la convención del módulo y ajustar el manifiesto (nombre, versión, descripción) para que concuerde con `{module}` / `{Module}` |
 | **Layout divergente** | El inicializador creó `bin/`+`lib/` y este repositorio usa `src/`+`test/` en ese lenguaje, o al revés | Dejar **una** disposición: la que ya usan los módulos homologados |
 | **Andamiaje de otro fin** | CI propia del inicializador, *samples*, `example/`, utilidades que el módulo no usa | Conservar si el repositorio también lo conserva en otros módulos del lenguaje; quitar solo lo que rompe o contradice la convención, y decirlo |
@@ -109,10 +110,12 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 ### 4. Verificación
 
 - El proyecto debe compilar, resolver o instalar sin warnings ni errores.
-- Ejecuta el comando nativo de pruebas: debe poder **arrancar** aunque todavía no haya casos
-  (la suite llega en el paso 4c, después del contrato). Copia la salida real, sin editar y sin resumir.
-- Si el runner no arranca por falta de la suite, dilo con la salida real y sigue: no escribas
-  la suite para «arreglarlo».
+- Ejecuta el comando nativo de pruebas: el **runner es de este paso** y tiene que **arrancar**
+  —con cero casos, que es lo normal— porque la suite del paso 4c solo añade casos, no
+  andamiaje. Copia la salida real, sin editar y sin resumir.
+- Si el comando no arranca porque el framework no trae runner, **escríbelo aquí** (mínimo y sin
+  casos) y vuelve a comprobarlo. Si aun así no arranca, **detente y dilo** con la salida real.
+  No escribas la suite para «arreglarlo»: eso es el paso 4c.
 
 ### 5. Cierre
 
@@ -145,7 +148,8 @@ eso corresponde a otra delegación.
 ## Definition of Done
 
 - [ ] Variables resueltas y confirmadas con evidencia del repositorio.
-- [ ] Esqueleto ajustado a lo que el módulo requiere, sin runners de ejemplo ni nombres que no encajen.
+- [ ] Esqueleto ajustado a lo que el módulo requiere, sin ejecutables de ejemplo ni nombres que no encajen.
+- [ ] El runner de pruebas **arranca sin casos** (el andamiaje es de este paso; los casos llegan en el 4c).
 - [ ] Layout igual al de los módulos homologados del mismo lenguaje.
 - [ ] Manifiesto con el nombre del módulo (`{module}` / `{Module}`).
 - [ ] Cada ajuste justificado en una línea; lo que ya estaba bien, intacto.

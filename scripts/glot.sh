@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# glot 1.2.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
+# glot 1.3.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
 # programa y se **carga** con `source` (capa cargable de la L8), donde `glot` es una
 # función de bash que hace el `cd` real de `use`. `install` deja la copia estable,
 # el bloque del rc y el completado; `doctor` cierra el diagnóstico del entorno.
@@ -10,6 +10,8 @@
 # Desde la v1.2.0 `ask` tiene **dos delegados con nombre** —`GLOT_DELEGATE_COP` y
 # `GLOT_DELEGATE_AGY`, elegibles con `--delegate`— y resuelve `{root}` y `{module_dir}`
 # dentro de su orden, que es del autor y nunca viaja en el repositorio.
+# Desde la v1.3.0 el **runner** de pruebas es del paso `4a` —el esqueleto lo deja
+# arrancando sin casos— y la suite (`4c`) solo añade casos: si falta, se detiene.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -47,7 +49,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.2.0"
+GLOT_VERSION="1.3.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -1810,34 +1812,15 @@ _glot_cmd_clean() {
     return 0
 }
 
-# _glot_sprint_path <lenguaje> <fase> <módulo> <ruta> — ¿la ruta es del propio sprint que se
-# está cerrando? Son dos: el **gitlink del lenguaje**, que es justo el cambio que `pointer`
-# viene a preparar, y la **evidencia del sprint**, que la confirma el paso de cierre (`save
-# 10`) y que por tanto todavía no lo está cuando se prepara el puntero. Ninguna de las dos
-# es «trabajo a medias» de otro sprint.
-_glot_sprint_path() {
-    local lang="$1"
-    local phase="$2"
-    local module="$3"
-    local path="$4"
-    local evidence="docs/evidence/$phase/$module"
-
-    [[ "$path" == "$lang" ]] && return 0
-    # git colapsa los directorios sin confirmar en su padre (`?? docs/evidence/`), así que
-    # valen la ruta de la evidencia, lo que hay debajo y cualquiera de sus padres.
-    [[ "$path" == "$evidence" || "$path" == "$evidence/"* || "$evidence" == "$path"* ]] && return 0
-
-    return 1
-}
-
 # _glot_cmd_pointer [lenguaje] [fase/módulo] — deja el puntero del submódulo listo para
 # confirmar con `save 9`. **Prepara y no confirma**: comprueba que el commit está
 # integrado en el `main` del submódulo (`fetch` explícito de `origin/main` y comparación
 # con su punta, porque la regla del repositorio es no apuntar nunca a una rama de
-# trabajo), lleva el monorepo a la rama `chore/{fase}/{módulo}-pointer`, la publica con
-# upstream como `use` y deja el gitlink añadido. Lo del propio sprint —el gitlink y la
-# evidencia del paso de cierre— no cuenta como trabajo a medias. Idempotente: si el puntero
-# ya apunta a ese commit imprime `nothing`. Códigos: 0 listo (o `nothing`) · 1 entorno o regla · 2 uso.
+# trabajo) y deja el gitlink añadido **en la rama activa** del monorepo. Desde la v1.3.0
+# no abre ni publica rama propia: el gitlink pertenece al cierre que se está haciendo, y
+# `save 9` es quien confirma (medido el 2026-09-26: el paso 8 abría otra rama con el sprint
+# a medias). Idempotente: si el puntero ya apunta a ese commit imprime `nothing`.
+# Códigos: 0 listo (o `nothing`) · 1 entorno o regla · 2 uso.
 _glot_cmd_pointer() {
     local target=""
     local lang=""
@@ -1845,11 +1828,9 @@ _glot_cmd_pointer() {
     local module=""
     local root=""
     local sub=""
-    local branch=""
     local current=""
     local link=""
     local head=""
-    local dirty=""
 
     target="$(_glot_exec_target "$@")" || return $?
     IFS=$'\t' read -r lang phase module <<<"$target"
@@ -1866,7 +1847,6 @@ _glot_cmd_pointer() {
         return 1
     fi
 
-    branch="chore/$phase/$(_glot_kebab "$module")-pointer"
     link="$(_glot_gitlink "$root" "$lang" || true)"
     head="$(git -C "$sub" rev-parse -q --verify HEAD 2>/dev/null || true)"
 
@@ -1887,9 +1867,8 @@ _glot_cmd_pointer() {
         printf 'git -C %s fetch -q origin main\n' "$sub"
         printf '# el HEAD del submódulo tiene que ser el de origin/main (regla de CONTRIBUTING.md)\n'
         printf '# the submodule HEAD must be the origin/main one (CONTRIBUTING.md rule)\n'
-        printf 'git -C %s switch -c %s main\n' "$root" "$branch"
-        printf 'git -C %s push -u origin %s\n' "$root" "$branch"
         printf 'git -C %s add -- %s\n' "$root" "$lang"
+        printf '# sin rama propia: se prepara en la rama activa / no branch of its own: staged on the active branch\n'
         printf '# después / then: glot save 9 %s %s/%s\n' "$lang" "$phase" "$module"
         return 0
     fi
@@ -1918,50 +1897,16 @@ _glot_cmd_pointer() {
         _glot_info "el commit apuntado es el integrado / the recorded commit is the integrated one"
     fi
 
-    # El propio gitlink del submódulo cambiado no es suciedad: es justo el cambio que
-    # este verbo viene a preparar. Cualquier otra cosa sí bloquea el cambio de rama.
+    # La rama es la que ya está activa: el gitlink pertenece al cierre que se está
+    # haciendo, así que `pointer` **no** abre ni publica rama propia (v1.3.0) y no hay
+    # cambio de rama que proteger con reglas de suciedad: solo se añade el gitlink donde el
+    # autor trabaja, y `save 9` confirma.
     current="$(git -C "$root" symbolic-ref --short -q HEAD || true)"
-    if [[ "$current" != "$branch" ]]; then
-        # Lo del propio sprint no bloquea: el gitlink del lenguaje y su evidencia (pasos 9 y
-        # 10). Cualquier otra cosa sí: `pointer` no cambia de rama con trabajo a medias.
-        dirty="$(git -C "$root" status --porcelain 2>/dev/null | while IFS= read -r line; do
-            _glot_sprint_path "$lang" "$phase" "$module" "${line:3}" || printf '%s\n' "$line"
-        done)"
-        if [[ -n "$dirty" ]]; then
-            _glot_error 'el monorepo tiene cambios sin confirmar / the monorepo has uncommitted changes'
-            _glot_info "$dirty"
-            _glot_info "pointer no cambia de rama con trabajo a medias / pointer does not switch branches with work in progress"
-            return 1
-        fi
-        if git -C "$root" show-ref --verify --quiet "refs/heads/$branch"; then
-            git -C "$root" switch -q "$branch" 2>/dev/null || {
-                _glot_error "no se pudo activar la rama / cannot switch to branch: $branch"
-                return 1
-            }
-            _glot_info "rama activada / branch activated: $branch"
-        elif git -C "$root" switch -q -c "$branch" main 2>/dev/null; then
-            _glot_info "rama creada desde main / branch created from main: $branch"
-        elif git -C "$root" switch -q -c "$branch" 2>/dev/null; then
-            _glot_warn "no hay rama main; la rama nace de ${current:-HEAD} / no main branch; branch created from ${current:-HEAD}"
-        else
-            _glot_error "no se pudo crear la rama / cannot create branch: $branch"
-            return 1
-        fi
-        if ! git -C "$root" push -q -u origin "$branch" 2>/dev/null; then
-            _glot_error "no se pudo publicar la rama / cannot publish branch: $branch"
-            return 1
-        fi
-        _glot_info "publicada / published: origin/$branch"
-    fi
+    _glot_info "rama del monorepo / monorepo branch: ${current:-detached}"
 
     if ! git -C "$root" add -- "$lang" 2>/dev/null; then
         _glot_error "no se pudo añadir el puntero / cannot stage the pointer: $lang"
         return 1
-    fi
-
-    if ! _glot_state_rewrite set branch "$branch"; then
-        _glot_error "el puntero está preparado, pero no se pudo guardar el estado / the pointer is ready, but the state could not be saved"
-        return 3
     fi
 
     _glot_info "puntero preparado / pointer staged: ${head:0:7}"
@@ -2074,7 +2019,6 @@ _glot_cmd_new() {
     local step_cmd=""
     local step_answers=""
     local step_complete=""
-    local complete_note=""
 
     target="$(_glot_exec_target "$@")" || return $?
     IFS=$'\t' read -r lang phase module <<<"$target"
@@ -2148,14 +2092,10 @@ _glot_cmd_new() {
             [[ -n "$step_dir" ]] || continue
             printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
             [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
-            if [[ -n "$step_complete" && "$step_complete" != "-" ]]; then
-                complete_note="${step_complete//\{module\}/$module}"
-                complete_note="${complete_note//\{Module\}/$(_glot_pascal "$module")}"
-                printf '# completar / complete: %s\n' "$complete_note"
-            fi
         done <<<"$steps"
         [[ -n "$fix" && "$fix" != "-" ]] && printf '# normalizar / normalise: %s\n' "$(_glot_expand_command "$dir" "$module" "$fix")"
         [[ "$kind" == "manual" ]] && printf '# el manifiesto y la suite son del encargo / manifest and suite belong to the request\n'
+        _glot_init_completion_report "$steps" "$module"
         printf '%s\n' "$dir"
         return 0
     fi
@@ -2197,12 +2137,6 @@ _glot_cmd_new() {
             _glot_info "el directorio queda como está / the directory is left as it is: $dir"
             return 4
         fi
-
-        if [[ -n "$step_complete" && "$step_complete" != "-" ]]; then
-            complete_note="${step_complete//\{module\}/$module}"
-            complete_note="${complete_note//\{Module\}/$(_glot_pascal "$module")}"
-            _glot_info "completar / complete: $complete_note"
-        fi
     done <<<"$steps"
 
     if [[ -n "$fix" && "$fix" != "-" ]]; then
@@ -2216,6 +2150,8 @@ _glot_cmd_new() {
         _glot_info "estructura manual creada / manual layout created: $dir"
         _glot_info "el manifiesto y la suite son del encargo / manifest and suite belong to the request: glot prompt scaffold $lang $phase/$module"
     fi
+
+    _glot_init_completion_report "$steps" "$module"
 
     printf '%s\n' "$dir"
     return 0
@@ -2248,7 +2184,10 @@ _glot_cmd_save() {
     local stage_err=""
     local commit_err=""
     local paths=""
+    local cause=""
     local -a add=()
+    local -a rest=()
+    local -a commit_args=()
 
     if [[ -z "$step" ]]; then
         _glot_error 'falta el paso del sprint / missing sprint step'
@@ -2258,6 +2197,34 @@ _glot_cmd_save() {
         return 2
     fi
     shift
+
+    # `--causa "<texto>"`: el registro del retrabajo. En el paso de corrección es
+    # obligatoria (más abajo) y viaja como segundo `-m` del commit: un commit de corrección
+    # sin causa deja fuera justo lo que hay que saber la próxima vez.
+    #
+    # `--causa "<text>"`: the rework record. It is required in the correction step (below)
+    # and travels as the commit's second `-m`.
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --causa)
+                if [[ $# -lt 2 ]]; then
+                    _glot_error 'falta el texto de --causa / missing --causa text'
+                    return 2
+                fi
+                cause="$2"
+                shift 2
+                ;;
+            --causa=*)
+                cause="${1#*=}"
+                shift
+                ;;
+            *)
+                rest+=("$1")
+                shift
+                ;;
+        esac
+    done
+    set -- ${rest[@]+"${rest[@]}"}
 
     target="$(_glot_exec_target "$@")" || return $?
     IFS=$'\t' read -r lang phase module <<<"$target"
@@ -2271,6 +2238,15 @@ _glot_cmd_save() {
     scope="$(_glot_commit_field "$step" 3)"
 
     msg="$(_glot_expand_state "$lang" "$phase" "$module" "$(_glot_commit_field "$step" 4)")" || return $?
+
+    # El paso de corrección exige la causa: es el registro del retrabajo, y el único sitio
+    # donde queda por qué se corrige lo que ya se había confirmado.
+    if [[ "$step" == "4d" || "$step" == "fix" ]] && [[ -z "$cause" ]]; then
+        _glot_error 'la corrección necesita su causa / the correction needs its cause'
+        _glot_info 'uso / usage: glot save 4d --causa "<qué falló y por qué>" [lenguaje] [fase/módulo]'
+        _glot_info 'mira / see: glot prompt fix'
+        return 2
+    fi
 
     root="$(_glot_repo_root)" || {
         _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
@@ -2354,7 +2330,11 @@ _glot_cmd_save() {
 
     if ((_glot_dry_run)); then
         printf 'git -C %s add %s\n' "$repo" "${add[*]}"
-        printf "git -C %s commit -m '%s'\n" "$repo" "$msg"
+        if [[ -n "$cause" ]]; then
+            printf "git -C %s commit -m '%s' -m '%s'\n" "$repo" "$msg" "$cause"
+        else
+            printf "git -C %s commit -m '%s'\n" "$repo" "$msg"
+        fi
         return 0
     fi
 
@@ -2366,7 +2346,9 @@ _glot_cmd_save() {
         return 3
     fi
 
-    if ! commit_err="$(git -C "$repo" commit -q -m "$msg" 2>&1)"; then
+    commit_args=(-q -m "$msg")
+    [[ -n "$cause" ]] && commit_args+=(-m "$cause")
+    if ! commit_err="$(git -C "$repo" commit "${commit_args[@]}" 2>&1)"; then
         _glot_error "no se pudo confirmar / cannot commit: $lang $phase/$module"
         [[ -n "$commit_err" ]] && _glot_info "$commit_err"
         return 4
@@ -3416,8 +3398,8 @@ _glot_help_verb() {
             printf '(fetch explícito): nunca se apunta a una rama de trabajo sin integrar\n'
             printf 'Requires the submodule to be on its main and its HEAD to be the origin/main\n'
             printf 'one (explicit fetch): a working branch is never pointed at\n'
-            printf 'Prepara y publica la rama chore/{fase}/{módulo}-pointer y añade el gitlink\n'
-            printf 'Prepares and publishes the chore/{phase}/{module}-pointer branch and stages the gitlink\n'
+            printf 'Añade el gitlink en la rama activa: no abre ni publica rama propia\n'
+            printf 'Stages the gitlink on the active branch: it opens and publishes no branch\n'
             printf 'No confirma: lo hace `glot save 9`. Idempotente: si ya apunta, imprime nothing\n'
             printf 'It does not commit: `glot save 9` does. Idempotent: if already pointing, prints nothing\n'
             printf 'Códigos / codes: 0 preparado o nothing · 1 entorno o regla · 2 uso · 3 estado\n'
@@ -3674,6 +3656,44 @@ _glot_init_sequence() {
 # _glot_init_sequence_has <lenguaje> — ¿el lenguaje tiene secuencia declarada?
 _glot_init_sequence_has() {
     [[ -n "$(_glot_init_sequence "$1")" ]]
+}
+
+# _glot_init_completion_report <pasos> <module> — lo que hay que completar **a mano**
+# después de la secuencia, en un solo bloque y al final. Impreso dentro del bucle se lo
+# come la salida de los propios comandos, y ese completado es justo lo que el autor tiene
+# que hacer después: medido el 2026-09-26, el `tests/alire.toml` de Ada quedó sin
+# `[[depends-on]]`, `[[pins]]` ni `aunit` hasta aplicarlo a mano. `pasos` es la lista
+# `dir<TAB>modo<TAB>comando<TAB>respuestas<TAB>completado`; `-` en la última no se nombra.
+_glot_init_completion_report() {
+    local steps="$1"
+    local module="$2"
+    local sdir=""
+    local smode=""
+    local scmd=""
+    local sanswers=""
+    local scomplete=""
+    local note=""
+    local order=0
+    local pending=""
+
+    while IFS=$'\t' read -r sdir smode scmd sanswers scomplete; do
+        [[ -n "$sdir" ]] || continue
+        order=$((order + 1))
+        [[ -n "$scomplete" && "$scomplete" != "-" ]] || continue
+        note="${scomplete//\{module\}/$module}"
+        note="${note//\{Module\}/$(_glot_pascal "$module")}"
+        pending+="$order"$'\t'"$note"$'\n'
+    done <<<"$steps"
+
+    [[ -n "$pending" ]] || return 0
+
+    _glot_info 'queda por completar / left to complete:'
+    while IFS=$'\t' read -r order note; do
+        [[ -n "$order" ]] || continue
+        _glot_info "  [$order] $note"
+    done <<<"$pending"
+
+    return 0
 }
 
 # _glot_expect_run <comando> <respuestas> — ejecuta un inicializador interactivo
@@ -4850,6 +4870,36 @@ _glot_main() {
     if [[ $# -gt 0 ]]; then
         # Elimina el comando de la lista de argumentos / Remove the command from the argument list
         shift
+    fi
+
+    # Los flags globales valen en **cualquier** posición: la mano escribe `glot new -n …`
+    # y hasta la v1.3.0 solo se entendían delante del verbo (medido el 2026-09-26:
+    # `glot new -n ada …` → `opción desconocida: -n`, y `glot save -n 4a …` tomaba `-n`
+    # por el paso). Se retiran de los argumentos del verbo, que nunca los usa como dato:
+    # los datos son lenguaje, fase/módulo y paso.
+    #
+    # Global flags are valid **anywhere**: the hand types `glot new -n …` and until v1.3.0
+    # they were only understood before the verb (measured on 2026-09-26). They are removed
+    # from the verb's arguments, which never use them as data.
+    if [[ $# -gt 0 ]]; then
+        local -a rest=()
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                -q | --quiet)
+                    _glot_quiet=1
+                    shift
+                    ;;
+                -n | --dry-run)
+                    _glot_dry_run=1
+                    shift
+                    ;;
+                *)
+                    rest+=("$1")
+                    shift
+                    ;;
+            esac
+        done
+        set -- ${rest[@]+"${rest[@]}"}
     fi
 
     # Despacha el comando según el verbo / Dispatch the command based on the verb

@@ -17,9 +17,10 @@
 | 1 | Reconocimiento | `git status --short`, `git submodule status`, `glot progress` (0.6.0), `glot status` (0.12.0) | — | autor / script |
 | 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo **creado y devuelto**; el autor queda **dentro** de él (capa cargable) y desde ahí funcionan `git`, `glot test`, `save` y `pointer`; estado `lang/phase/module/branch/spec/repo` | script |
 | 3 | Rama publicada | incluido en `use`: `git push -u origin feat/algorithms/naive-sort` | Rama `feat/{fase}/{módulo}` con upstream | script |
-| 4a | Esqueleto | `glot new` (0.9.0; secuencia desde la 1.1.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas según la **secuencia** del dato [`data/init_sequences.tsv`](../data/init_sequences.tsv) (pasos, directorio de trabajo y completado), sin runners de ejemplo; `.gitignore` verificado. **`new` no mueve al autor**: sigue en la carpeta del módulo | script + **agente** |
+| 4a | Esqueleto | `glot new` (0.9.0; secuencia desde la 1.1.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas según la **secuencia** del dato [`data/init_sequences.tsv`](../data/init_sequences.tsv) (pasos, directorio de trabajo y completado) y con el **runner arrancando sin casos** —el runner es de este paso—, sin ejecutables de ejemplo; `.gitignore` verificado. **`new` no mueve al autor**: sigue en la carpeta del módulo | script + **agente** |
 | 4b | **Contrato** (artefacto propio, antes de la suite) | `glot prompt contract` (1.1.0) · `glot save 4b` (1.1.0) | Tipo nuevo y firmas del contrato (en Ada, `src/*.ads`) declarados con el **indicador natural** del lenguaje: sin él la suite no compila | **agente** |
-| 4c | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4c` (1.1.0) | Suite unitaria derivada de la especificación, **sobre el contrato del paso 4b** (no lo declara: lo usa) y con salida real | **agente** |
+| 4c | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4c` (1.1.0) | Suite unitaria derivada de la especificación, **sobre el contrato del paso 4b** (no lo declara: lo usa) y **sin crear el runner**, que es del 4a: si falta o no arranca, se detiene. Con salida real | **agente** |
+| 4d | **Corrección** (cuando haga falta: un artefacto ya confirmado resultó defectuoso) | `glot prompt fix` (1.3.0) · `glot save 4d --causa "…"` (1.3.0) | El artefacto corregido y la **causa en el cuerpo del commit** (obligatoria en este paso): es el registro del retrabajo. El acta del paso 6 se vuelve a escribir | **agente** |
 | 5 | Implementación | `glot prompt implement` (0.8.0) + `glot test` (0.7.0) | `feat(algorithms): add naive sort implementation`; suite en verde | autor / **agente** |
 | 6 | Verificación | `glot test`, `glot verify` (0.7.0) · `glot evidence` (0.10.0) · `glot validate` (0.10.0) | Acta en `docs/evidence/{fase}/{módulo}/{lenguaje}.md` con la salida real de la suite y del analizador, sin warnings **nuevos**; y el informe del validador, si se usa | script + **agente** |
 | 7 | Cierre documental del módulo | `glot prompt docs-module` (0.8.0) → README de Nivel 3 desde [`README_Template.md`](../../docs/README_Template.md) | `docs(naive-sort): add README for naive sort module` | **agente** |
@@ -36,7 +37,7 @@
 
 | # | Paso | Comando | Evidencia / artefacto | Quién |
 |:-:|------|---------|-----------------------|-------|
-| 8 | Puntero y cierre del lenguaje | `glot pointer` (0.12.0) + `glot save 9` (0.12.0) en rama `chore/{fase}/{módulo}-pointer` · `glot prompt docs-language` (0.8.0) | `chore(submodule): update php pointer`; readmes faltantes e índices N1/N2/N3 | script + **agente** |
+| 8 | Puntero y cierre del lenguaje | `glot pointer` (0.12.0; **sin rama propia** desde la 1.3.0) + `glot save 9` (0.12.0) **en la rama activa** · `glot prompt docs-language` (0.8.0) | `chore(submodule): update php pointer`; readmes faltantes e índices N1/N2/N3 | script + **agente** |
 | 9 | Registro del cierre | `glot close` (0.10.0) + `glot save 10` (0.12.0) | Entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](../../docs/ROADMAP_UPDATE_CHECKLIST.md) y contador de [`ROADMAP.md`](../../docs/ROADMAP.md) al día, a partir del acta de evidencia | script + **agente** |
 
 ---
@@ -50,6 +51,7 @@
 | Esqueleto | `chore({phase}): add scaffold for {module}` |
 | Contrato del módulo | `chore({phase}): add contract for {module}` |
 | Suite de pruebas | `chore({phase}): add suite for {module}` |
+| Corrección de un artefacto | `fix({phase}): correct {module}` |
 | Implementación | `feat({phase}): add {module} implementation` |
 | README del módulo | `docs({module}): add README for {module} module` |
 | Índices y lenguaje | `docs: add README for {phase} and update indexes` |
@@ -66,7 +68,7 @@
 
 ## 🤖 Los pasos con IA, y por qué / The AI-assisted steps, and why
 
-**ES:** Los pasos 4a, 4b, 4c, 5, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/). El banco local de `.github/prompts/` sigue ahí como taller del autor y `glot` lo acepta como respaldo, avisando de que no viaja en el repositorio.
+**ES:** Los pasos 4a, 4b, 4c, 4d, 5, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/). El banco local de `.github/prompts/` sigue ahí como taller del autor y `glot` lo acepta como respaldo, avisando de que no viaja en el repositorio.
 
 **EN:** Steps 4a, 4b, 4c, 5, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Since v0.8.0 the request is built by `glot prompt <request>` from the sprint state, and the templates are **versioned** in [`scripts/prompts/`](../../scripts/prompts/). The local bank in `.github/prompts/` remains the author's workshop and `glot` accepts it as a fallback, warning that it does not travel with the repository.
 
@@ -75,6 +77,7 @@
 | `scaffold` | [`scaffold.prompt.md`](../../scripts/prompts/scaffold.prompt.md) | 4a | `gpt-5.6-terra` |
 | `contract` | [`contract.prompt.md`](../../scripts/prompts/contract.prompt.md) | 4b | `gpt-5.6-terra` |
 | `suite` | [`suite.prompt.md`](../../scripts/prompts/suite.prompt.md) | 4c | `gpt-5.6-terra` |
+| `fix` | [`fix.prompt.md`](../../scripts/prompts/fix.prompt.md) | 4d | `gpt-5.6-terra` |
 | `implement` | [`implement.prompt.md`](../../scripts/prompts/implement.prompt.md) | 5 | `claude-sonnet-5` |
 | `docs-module` | [`docs-module.prompt.md`](../../scripts/prompts/docs-module.prompt.md) | 7 | `gemini-3.8-flash` |
 | `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 | `gemini-3.8-flash` |
