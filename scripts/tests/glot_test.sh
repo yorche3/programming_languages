@@ -2339,6 +2339,27 @@ out="$(env -u GLOT_DELEGATE GLOT_DELEGATE_COP='cat' GLOT_DELEGATE_AGY='cat' "$GL
 assert_contains 'doctor: delegado COP configurado' 'delegate_cop: cat' "$out"
 assert_contains 'doctor: delegado AGY configurado' 'delegate_agy: cat' "$out"
 
+# --- casos de la especificación v1.4.0 (alcance de la verificación) -----------
+
+# El alcance del paso 6 está escrito: `verify` es lint idiomático, la suite entera es de
+# `test`, el *hardcode* es de `validate` y el análisis estático de seguridad es un
+# no-objetivo explícito (medido el 2026-09-26 al revisar el sprint de Ada).
+glot_run help verify
+assert_eq 'help verify: código' '0' "$rc_last"
+assert_contains 'help verify: es un lint' 'lint' "$out"
+assert_contains 'help verify: no comprueba la suite' 'eso es `test`' "$out"
+assert_contains 'help verify: no busca valores codificados' 'no busca valores codificados' "$out"
+assert_contains 'help verify: el SAST queda fuera' 'fuera de alcance' "$out"
+
+validate_prompt="$(cat -- "$PROMPTS_DIR/validate.prompt.md")"
+assert_contains 'validate: el hardcode es de este paso' 'valores codificados' "$validate_prompt"
+assert_contains 'validate: lo nombra' 'hardcode' "$validate_prompt"
+
+assert_contains 'contrato: el SAST es no-objetivo' 'análisis estático de seguridad (SAST) es un no-objetivo' "$(cat -- "$TESTS_DIR/../docs/CONTRACT.md")"
+assert_contains 'contrato: el reparto del paso 6' 'Alcance de la capa' "$(cat -- "$TESTS_DIR/../docs/CONTRACT.md")"
+assert_contains 'sprint: el reparto del paso 6' 'Reparto del paso 6' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
+assert_contains 'data/README: la columna 5 es lint' 'lint idiomático' "$(cat -- "$DATA_DIR/README.md")"
+
 # --- puerta de entrada al archivo de versiones -------------------------------
 
 # La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:

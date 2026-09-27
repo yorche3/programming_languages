@@ -39,7 +39,7 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 1. **Contrato frente a código:** cada función de la especificación existe y respeta lo que dice —firma, parámetros, valor devuelto, comportamiento con la entrada vacía y con la entrada nula o inválida (indicador de fallo, `Option`/`Maybe`, `Result` o equivalente)—. Distingue **divergencia idiomática** (la forma propia del lenguaje, documentada) de **defecto** (no cumple el contrato).
 2. **Cumple lo que promete su README:** las secciones obligatorias de la plantilla están, el documento es bilingüe y **las salidas que cita coinciden con el acta de evidencia**. Una salida inventada o editada es un hallazgo **alto**.
 3. **Enlaces:** los relativos del README resuelven dentro del repositorio.
-4. **Suite:** los casos de la especificación están cubiertos y la evidencia muestra que se ejecutaron.
+4. **Suite:** los casos de la especificación están cubiertos y la evidencia muestra que se ejecutaron. **Y que no estén aprobados a base de valores codificados**: si el código bajo prueba —o la propia suite— devuelve el resultado esperado por caso (constantes, una tabla por entrada, ramas que copian la salida), es un hallazgo **alto**: la suite pasa sin probar nada. Ese ***hardcode*** es de este paso: `verify` es un *lint* de sintaxis y formato **y no lo mira**.
 5. **Higiene:** los artefactos generados están ignorados, no hay ficheros temporales, rutas absolutas del autor ni credenciales.
 
 Si algo **no lo has podido comprobar**, dilo como no comprobado. No rellenes el hueco con una suposición, y no inventes hallazgos.

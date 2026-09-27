@@ -27,6 +27,10 @@
 
 **ES:** Al terminar la Fase A, el cambio del submódulo se integra en **su** `main` y se anota el commit resultante.
 
+**ES:** **Reparto del paso 6** (decidido en la v1.4.0, y en [`CONTRACT.md`](CONTRACT.md)): `test` comprueba que la suite **entera** pase; `verify` es **lint idiomático** (sintaxis y formato) y nada más —no comprueba la suite, no busca valores codificados para aprobar y **no** hace análisis estático de seguridad—; `evidence` deja el **acta** con las dos salidas reales; `validate` revisa contrato, README, enlaces, cobertura y el ***hardcode***; y la **revisión humana** se queda con lo cualitativo (pseudocódigo y divergencias idiomáticas).
+
+**EN:** **Step 6 split** (decided in v1.4.0, and in [`CONTRACT.md`](CONTRACT.md)): `test` checks that the **whole** suite passes; `verify` is **idiomatic lint** (syntax and formatting) and nothing else —it does not check the suite, does not look for hardcoded values and does **not** run static security analysis—; `evidence` leaves the **record** with both real outputs; `validate` reviews contract, README, links, coverage and ***hardcode***; and the **human review** keeps the qualitative part.
+
 **EN:** When Phase A ends, the submodule change is integrated into **its** `main` and the resulting commit is noted.
 
 **ES:** **Numeración de pasos:** cuando un paso nuevo entra **en medio**, se le asigna el ordinal libre y **los siguientes se recorren**: el paso 4 se partió en `4a` (esqueleto) y `4b` (suite) en la v0.9.0, y en la v1.1.0 el contrato entra como `4b` con la suite desplazada a `4c`. La numeración es **contrato del tooling**: el mismo ordinal vale para esta tabla, para [`data/commits.tsv`](../data/commits.tsv) y para el `step:` del frontmatter de cada plantilla, y se cambia en los tres sitios a la vez.

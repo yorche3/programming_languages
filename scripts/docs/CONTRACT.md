@@ -55,7 +55,7 @@
 | `progress [fase]` | Estado del roadmap: sin fase, contadores globales en `clave=valor`; con fase, una línea por módulo | 0 / 1 / 2 |
 | `completion [bash\|zsh]` | Imprime el guion de autocompletado en stdout; **no** lo instala | 0 / 1 / 2 |
 | `test [lenguaje] [fase/módulo]` | Ejecuta la suite del módulo asignado en su directorio, con el comando nativo del lenguaje; la salida del runner va a stdout | 0 / 1 / 2 / 3 / **4** |
-| `verify [lenguaje] [fase/módulo]` | Ejecuta el verificador (sintaxis/formato) del lenguaje; imprime `skipped` si aún no tiene uno | 0 / 1 / 2 / 3 / **4** |
+| `verify [lenguaje] [fase/módulo]` | Ejecuta el verificador: **lint idiomático** (sintaxis y formato) del lenguaje; imprime `skipped` si aún no tiene uno. **No** comprueba que la suite pase (eso es `test`), **no** busca valores codificados para aprobar los casos (eso es `validate`) y el **análisis estático de seguridad (SAST) es un no-objetivo** de `glot` | 0 / 1 / 2 / 3 / **4** |
 | `prompt [encargo] [lenguaje] [fase/módulo]` | Sin encargo, lista el registro —`nombre<TAB>paso<TAB>modelo<TAB>descripción`—; con encargo, imprime el encargo armado (estado del sprint + plantilla expandida) | 0 / 1 / 2 / 3 |
 | `ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot\|antigravity]` | Arma el encargo y lo envía al **delegado elegido** por stdin; su salida va a stdout. El modelo del perfil del encargo viaja por entorno (`COPILOT_MODEL`, y el tier de auto si el perfil lo declara) y con él `GLOT_ROOT` y `GLOT_MODULE_DIR` | 0 / 1 / 2 / 3 |
 | `new [lenguaje] [fase/módulo]` | Inicializa el lenguaje y crea el esqueleto mecánico del módulo: con `tool` ejecuta el comando del catálogo; con `manual` crea las carpetas; con `deferred` informa e imprime `skipped`. Normaliza lo que deja el inicializador. No escribe la suite | 0 / 1 / 2 / **4** |
@@ -217,6 +217,20 @@
 | La suite o el verificador fallaron | `4` |
 | El lenguaje aún no tiene verificador (imprime `skipped`) | `0` |
 | No se pudo preparar (sin estado, módulo o fase inexistentes, suite ambigua) | `1` |
+
+**ES:** **Alcance de la capa, decidido en la v1.4.0.** El paso 6 reparte el trabajo así, y ninguna pieza finge lo de otra:
+
+| Pieza / Piece | Qué comprueba / What it checks |
+|---------------|--------------------------------|
+| `test` | Que la **suite entera pase**, con la salida real del runner |
+| `verify` | **Lint idiomático**: sintaxis y formato, con la herramienta del propio lenguaje. Nada más |
+| `evidence` | Que exista el **acta** con las dos salidas reales y su veredicto |
+| `validate` | El informe del validador: contrato, README, enlaces, cobertura y los **valores codificados para aprobar los casos** (*hardcode*) |
+| Revisión humana | Lo cualitativo: pseudocódigo, divergencias idiomáticas y si el algoritmo es el de la especificación |
+
+**ES:** El **análisis estático de seguridad (SAST) es un no-objetivo explícito**: no se propone `gnatcheck`/`gnatprove` como verificador de Ada ni se añade SonarQube. `verify` es un *lint*, no un analizador profundo, y su columna 5 en [`data/languages.tsv`](../data/languages.tsv) dice exactamente eso.
+
+**EN:** **Layer scope, decided in v1.4.0.** Step 6 splits the work like this, and no piece fakes another's: `test` checks that the **whole suite passes**; `verify` is **idiomatic lint** (syntax and formatting) and nothing more; `evidence` leaves the **record** with both real outputs; `validate` reviews contract, README, links, coverage and **values hardcoded to pass the cases**; the **human review** keeps the qualitative part. **Static security analysis (SAST) is an explicit non-goal**: no `gnatcheck`/`gnatprove` as Ada's verifier, no SonarQube. `verify` is a lint, not a deep analyser.
 
 **ES:** La tabla de comandos es **superficie de ejecución**: por eso se versiona, `glot doctor` informa de su ruta y de su cobertura, `-n` imprime el comando exacto antes de correrlo y el harness comprueba su forma. Los comandos salen de la ejecución real de los módulos: **tres lenguajes ya homologados** (V, Rust y Crystal) tienen hallazgos de formato preexistentes, así que `verify` informa de ellos con `4`; no es un fallo de `glot` ni una regresión.
 

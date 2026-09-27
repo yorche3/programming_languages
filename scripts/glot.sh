@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# glot 1.3.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
+# glot 1.4.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
 # programa y se **carga** con `source` (capa cargable de la L8), donde `glot` es una
 # función de bash que hace el `cd` real de `use`. `install` deja la copia estable,
 # el bloque del rc y el completado; `doctor` cierra el diagnóstico del entorno.
@@ -12,6 +12,9 @@
 # dentro de su orden, que es del autor y nunca viaja en el repositorio.
 # Desde la v1.3.0 el **runner** de pruebas es del paso `4a` —el esqueleto lo deja
 # arrancando sin casos— y la suite (`4c`) solo añade casos: si falta, se detiene.
+# Desde la v1.4.0 el **alcance de `verify`** está escrito: es *lint* idiomático (sintaxis y
+# formato) y el **análisis estático de seguridad queda fuera**; los valores codificados
+# para aprobar los casos (*hardcode*) los revisa `validate`.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -49,7 +52,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.3.0"
+GLOT_VERSION="1.4.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -3071,10 +3074,16 @@ Verbos / Verbs:
                      Runs the assigned module's suite in its directory; the runner's
                      output goes to stdout. With no arguments it uses the sprint state
   verify [lenguaje] [fase/módulo]
-                     Ejecuta el verificador (sintaxis/lint) del lenguaje; `skipped` si
-                     el lenguaje aún no tiene uno
-                     Runs the language verifier (syntax/lint); `skipped` when the
-                     language has none yet
+                     Ejecuta el verificador: lint idiomático (sintaxis y formato), con la
+                     herramienta del lenguaje; `skipped` si aún no tiene uno. **No**
+                     comprueba que la suite pase (eso es `test`), **no** busca valores
+                     codificados para aprobar los casos (eso es `validate`) y el análisis
+                     estático de seguridad queda **fuera de alcance**
+                     Runs the verifier: idiomatic lint (syntax and formatting), with the
+                     language tool; `skipped` when there is none yet. It does **not** check
+                     the whole suite (that is `test`), does **not** look for values
+                     hardcoded to pass the cases (that is `validate`) and static security
+                     analysis is **out of scope**
   evidence [lenguaje] [fase/módulo]
                      Ejecuta la suite y el verificador y deja el acta con la salida real
                      en `docs/evidence/`; con algo en rojo escribe el acta igual y
@@ -3249,6 +3258,11 @@ _glot_help_verb() {
             printf 'glot verify [language] [phase/module] — runs the language verifier\n'
             printf 'Sintaxis o formato, con la herramienta del propio lenguaje; `skipped` si no hay\n'
             printf 'Syntax or formatting, with the language own tool; `skipped` when there is none\n'
+            printf 'Alcance / scope: es un lint, no un analizador. No comprueba que la suite pase\n'
+            printf '(eso es `test`), no busca valores codificados para aprobar los casos (eso es\n'
+            printf '`validate`) y el analisis estatico de seguridad queda fuera de alcance\n'
+            printf 'It is a lint, not an analyser: it does not check the suite (`test`), it does not\n'
+            printf 'look for hardcoded values (`validate`) and static security analysis is out of scope\n'
             printf 'Códigos / codes: 0 correcto · 4 hallazgos / findings\n'
             ;;
         evidence)
