@@ -1012,6 +1012,20 @@ assert_contains 'scaffold: declara lo que queda fuera' '**Fuera de alcance**' "$
 assert_contains 'scaffold: parte de lo que dejó new' 'glot new' "$scaffold_prompt"
 assert_contains 'scaffold: no escribe la suite' 'encargo `suite`' "$scaffold_prompt"
 
+# v1.3.0: el runner es del 4a. La frontera tiene que estar en un solo sitio, así que el caso
+# comprueba las **dos mitades**: el esqueleto lo deja arrancando y la suite no lo crea.
+# Medido el 2026-09-26 en `assembly`: el manifiesto era del 4a, el runner nunca se generó y
+# `make build` se paró en el enlace (`ld: undefined reference to 'tests_failed'`).
+assert_contains 'scaffold: el runner es de este paso' 'el **runner es de este paso**' "$scaffold_prompt"
+assert_contains 'scaffold: exige que arranque sin casos' 'arranca sin casos' "$scaffold_prompt"
+assert_contains 'scaffold: lo escribe si el framework no lo trae' 'escríbelo aquí' "$scaffold_prompt"
+assert_eq 'suite: ya no dice que crea el runner' 'no' \
+    "$([[ "$suite_prompt" == *'Si el framework no incluye runner propio'* ]] && echo si || echo no)"
+assert_contains 'suite: el runner es del paso 4a' 'runner es del paso 4a' "$suite_prompt"
+assert_contains 'suite: si falta el runner, se detiene' 'detente y avísalo' "$suite_prompt"
+assert_contains 'SPRINT: el 4a deja el runner arrancando' 'runner arrancando sin casos' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
+assert_contains 'SPRINT: el 4c no crea el runner' 'sin crear el runner' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
+
 # v1.1.0: el encargo del README remite a la plantilla en vez de copiar su lista de secciones.
 # Una lista copiada se queda atrás en cuanto la plantilla crece (pasó: la plantilla llegó a
 # 13 secciones y el encargo seguía enumerando seis)

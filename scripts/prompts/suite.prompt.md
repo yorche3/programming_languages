@@ -60,8 +60,9 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 - `git status --short` y `git submodule status` en la raíz del monorepo.
 - Inspecciona: la especificación, el módulo `numbers/` del mismo lenguaje, el esqueleto que
-  dejó el encargo `scaffold` (paso 4a) —directorio de pruebas, runner y manifiesto— y el
-  **contrato** que dejó el encargo `contract` (paso 4b): tipo, firmas y ubicación.
+  dejó el encargo `scaffold` (paso 4a) —directorio de pruebas, **runner que arranca** y
+  manifiesto— y el **contrato** que dejó el encargo `contract` (paso 4b): tipo, firmas y
+  ubicación. El runner es **condición de entrada**: si falta, no lo escribas tú, detente.
 - Determina y anota: framework de pruebas idiomático, dónde vive la suite, si existe un
   `run_tests` propio y si el tipo de secuencia admite nulos o cuál es su indicador de fallo.
 
@@ -106,8 +107,8 @@ escribir y anótalas:
 ### 4. Escribir la suite
 
 En el directorio de pruebas que use el lenguaje (`test/`, `tests/`, `spec/`, `t/`), con el
-patrón obligatorio de más abajo. Si el framework no incluye runner propio, añade el archivo de
-ejecución que pida la especificación.
+patrón obligatorio de más abajo. El **runner es del paso 4a**: si no existe o no arranca,
+**detente y avísalo** —no lo crees aquí—; esta suite solo añade casos sobre el que ya hay.
 
 ### 5. Verificación
 
@@ -180,7 +181,7 @@ test con todas las aserciones que no diga cuál falló.
 | Naming | Convención del lenguaje (`snake_case`, `camelCase`, `PascalCase`, `kebab-case`) |
 | Aserciones | Las del framework (`assertEqual`, `is`, `Assert`, `expect`, …) |
 | Dependencias | Solo las estándar del lenguaje o las ya presentes en `numbers/` |
-| Runner | El comando de la columna 4 del catálogo: la suite tiene que ser recogida por él **sin configuración extra** |
+| Runner | El comando de la columna 4 del catálogo, que **ya dejó arrancando** el paso 4a: la suite tiene que ser recogida por él **sin configuración extra** |
 | Determinismo | Sin aleatoriedad, sin reloj y sin depender del orden del sistema de ficheros: las mismas entradas dan siempre el mismo veredicto |
 | Datos | Los *fixtures* se construyen en la propia suite: nada leído de ficheros externos ni de la red |
 
