@@ -10,6 +10,52 @@
 
 ---
 
+## 🧱 Niveles / Levels
+
+**ES:** El README de un lenguaje se escribe en **tres niveles** y cada uno responde a una pregunta distinta. Los niveles 1 y 2 son **índices**: dicen qué hay dentro de la carpeta y cómo se ejecuta, sin repetir el detalle de los módulos, que vive en el nivel 3.
+
+**EN:** A language's README is written in **three levels** and each answers a different question. Levels 1 and 2 are **indexes**: they say what is inside the folder and how it runs, without repeating the modules' detail, which lives in level 3.
+
+| Nivel / Level | Fichero / File | Pregunta que responde / Question it answers |
+|:-------------:|----------------|--------------------------------------------|
+| 1 | `{lenguaje}/README.md` | ¿Qué hay en este submódulo y cómo se ejecuta? / What is in this submodule and how does it run? |
+| 2 | `{lenguaje}/core/README.md` y `{lenguaje}/core/{fase}/README.md` | ¿Qué fases o módulos hay en esta carpeta y cómo se ejecutan? / What phases or modules are in this folder and how do they run? |
+| 3 | `{lenguaje}/core/{fase}/{modulo}/README.md` | ¿Cómo está implementado este módulo? / How is this module implemented? (plantilla de abajo / template below) |
+
+### Nivel 1 — `{lenguaje}/README.md`
+
+| Sección / Section | Contenido / Contents |
+|-------------------|----------------------|
+| Título y presentación / Title and introduction | Nombre del lenguaje y una o dos frases: qué implementa el submódulo y con qué toolchain / Language name and one or two sentences: what the submodule implements and with which toolchain |
+| `📂 Módulos / Modules` | Tabla de **una fila por carpeta de primer nivel**: ruta, fases y módulos que contiene / Table with **one row per top-level folder**: path, phases and modules it contains |
+| `▶️ Comenzar / Getting Started` | Comandos reales, al menos uno por tipo de proyecto / Real commands, at least one per project type |
+| `📦 Requisitos / Requirements` o `📋 Toolchain` | Herramientas, versiones e instalación / Tools, versions and installation |
+| `🏗️ Tipos de proyecto / Project Types` | Los formatos de proyecto del lenguaje, con su estructura mínima / The language's project formats, with their minimal structure |
+| Secciones propias del lenguaje / Language-specific sections | Solo si aportan: convenciones de pruebas, decisiones del lenguaje / Only when they add value: test conventions, language decisions |
+| `🌐 Otras implementaciones / Other implementations` | Cierre común del repositorio / Common repository closing |
+
+### Nivel 2 — `{lenguaje}/core/README.md` y `{lenguaje}/core/{fase}/README.md`
+
+**ES:** El de `core/` es el más corto: tabla de fases con su estado y contenido, y el enlace de vuelta. El de la carpeta de fase es el índice de esa fase.
+
+**EN:** The `core/` one is the shortest: a table of phases with their status and contents, and the back link. The phase folder one is that phase's index.
+
+| Sección / Section | Contenido / Contents |
+|-------------------|----------------------|
+| Título y presentación / Title and introduction | `{Fase} — {Lenguaje}` y lo que comparten sus módulos / `{Phase} — {Language}` and what its modules share |
+| `📂 Módulos / Modules` | Una fila por módulo: enlace a su carpeta, especificación, enfoque, número de pruebas y estado / One row per module: link to its folder, specification, approach, test count and status |
+| `📁 Estructura / Structure` | Árbol real de la carpeta de la fase / Real tree of the phase folder |
+| `🛠️ Patrón común / Common Pattern` | Lo que comparten los módulos: runtime, CLI, andamiaje, framework de pruebas, separación de carpetas, artefactos / What the modules share: runtime, CLI, scaffolding, test framework, folder split, artifacts |
+| `🚀 Compilación rápida / Quick Build` | Los comandos de la fase, reales / The phase's real commands |
+| `▶️ Siguiente / Next` | Cierre con enlace al roadmap / Closing with a roadmap link |
+| Pie común / Common footer | Vuelta al nivel superior y pie del repositorio / Back to the upper level and repository footer |
+
+**ES:** Reglas de los índices: (1) no repiten el detalle que ya está en el README de nivel 3; (2) **no listan módulos que no existen** en la carpeta; (3) un módulo pendiente se lista con `📋` y **sin enlace** a una carpeta que aún no existe; (4) cada enlace relativo tiene que resolver dentro del repositorio del lenguaje.
+
+**EN:** Index rules: (1) they do not repeat detail already in the level-3 README; (2) they **do not list modules that are not** in the folder; (3) a pending module is listed with `📋` and **no link** to a folder that does not exist yet; (4) every relative link must resolve inside the language repository.
+
+---
+
 # {Nombre del Módulo} — {Lenguaje}
 
 Implementación de la especificación [{ID de la especificación}]({Enlace a la especificación}) en **{Lenguaje}**, con un enfoque manual y minimalista.
