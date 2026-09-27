@@ -2,7 +2,7 @@
 
 Esta guía complementa las instrucciones de `AGENTS.md` y describe cómo generar
 o corregir documentación en este monorepo. La plantilla de README de Nivel 3
-es [`README_Template.md`](README_Template.md).
+y la de los índices de Nivel 1 y Nivel 2 son [`README_Template.md`](README_Template.md).
 
 ## Alcance / Scope
 
@@ -88,7 +88,7 @@ agent only covers the ones presented to it as a request.
 
 ## Evolución por fase / Phase evolution
 
-`README_Template.md` es la plantilla única de Nivel 3. Se puede ampliar cuando
+`README_Template.md` es la plantilla única de Nivel 3, y también fija la estructura de los **índices** (Nivel 1 y Nivel 2). Se puede ampliar cuando
 una fase introduce conceptos nuevos, pero no se crean copias por lenguaje ni
 plantillas paralelas con nombres distintos.
 
