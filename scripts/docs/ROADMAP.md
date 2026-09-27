@@ -349,6 +349,19 @@ glot ask --delegate antigravity contract ballerina algorithms/data_structures_ba
 
 ---
 
+### Decisiones cerradas de la v1.3.0 / Closed decisions for v1.3.0
+
+**ES:** La versión se abre el **2026-09-27** para terminar el **bloque B**, con las correcciones del paso 4 primero. Como siempre, los temas con decisión abierta se cierran **antes** de escribir el código.
+
+**EN:** The version opens on **2026-09-27** to finish **block B**, with the step-4 fixes first. As always, open topics are closed **before** writing code.
+
+| Tema | Decisión |
+|------|----------|
+| El **runner de pruebas** | Es del paso **`4a`**: el esqueleto lo deja **arrancando sin casos** y la **suite no lo crea** —si falta o no arranca, se detiene—. Estaba en los dos sitios a la vez (el `4a` lo daba por hecho y el `4c` lo añadía «si el framework no trae»), y así se quedó sin escribir en `assembly`: `make build` se paró en el enlace hasta escribirlo a mano. Se aplica en [`scaffold.prompt.md`](../prompts/scaffold.prompt.md), [`suite.prompt.md`](../prompts/suite.prompt.md) y el paso 4 de [`SPRINT.md`](SPRINT.md), y el harness comprueba **las dos mitades** |
+| Orden de trabajo | Primero las correcciones del paso 4 —el runner y el **completado** de la secuencia ([`data/init_sequences.tsv`](../data/init_sequences.tsv), que se imprime pero no se ejecuta ni se comprueba, y por eso el `tests/alire.toml` de Ada quedó sin `aunit` hasta hacerlo a mano)—; después el resto del bloque B |
+
+---
+
 ## ✅ Decisiones cerradas / Closed decisions
 
 **ES:** Las tres decisiones que quedaban abiertas para la v0.6.0 se resolvieron el 2026-09-22.

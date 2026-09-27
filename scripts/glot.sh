@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# glot 1.2.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
+# glot 1.3.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
 # programa y se **carga** con `source` (capa cargable de la L8), donde `glot` es una
 # función de bash que hace el `cd` real de `use`. `install` deja la copia estable,
 # el bloque del rc y el completado; `doctor` cierra el diagnóstico del entorno.
@@ -10,6 +10,8 @@
 # Desde la v1.2.0 `ask` tiene **dos delegados con nombre** —`GLOT_DELEGATE_COP` y
 # `GLOT_DELEGATE_AGY`, elegibles con `--delegate`— y resuelve `{root}` y `{module_dir}`
 # dentro de su orden, que es del autor y nunca viaja en el repositorio.
+# Desde la v1.3.0 el **runner** de pruebas es del paso `4a` —el esqueleto lo deja
+# arrancando sin casos— y la suite (`4c`) solo añade casos: si falta, se detiene.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -47,7 +49,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.2.0"
+GLOT_VERSION="1.3.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
