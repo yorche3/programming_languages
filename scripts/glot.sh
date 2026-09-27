@@ -2692,10 +2692,13 @@ _glot_close_roadmap_line() {
         _glot_display_sort "$table" |
         awk 'NR > 1 { printf ", " } { printf "%s", $0 }')"
 
+    # El espacio va **dentro** del relleno: con un id de 38 caracteres o más (`core.algorithms.data_structures_basics`
+    # mide exactamente 38) `%-38s` no añade nada y la marca quedaba pegada al id, así que la línea
+    # desaparecía del catálogo **en silencio** (medido el 2026-09-27).
     if [[ -n "$joined" ]]; then
-        printf '%-38s%s %s/%s (%s)\n' "$id" "$mark" "$x" "$n" "$joined"
+        printf '%-38s%s %s/%s (%s)\n' "$id " "$mark" "$x" "$n" "$joined"
     else
-        printf '%-38s%s %s/%s\n' "$id" "$mark" "$x" "$n"
+        printf '%-38s%s %s/%s\n' "$id " "$mark" "$x" "$n"
     fi
 }
 
@@ -4068,7 +4071,14 @@ _glot_roadmap_modules() {
     while IFS= read -r line; do
         [[ "$line" == core.* ]] || continue
         id="${line%%[[:space:]]*}"
-        [[ "$id" =~ ^core\.[a-z_]+\.[a-z_0-9]+$ ]] || continue
+        # Un id ilegible se avisa: saltarlo en silencio hacía que el módulo desapareciera del
+        # catálogo sin decir nada (medido el 2026-09-27: `data_structures_basics` con la marca
+        # pegada al id dejó de ofrecerse en `glot modules`, `glot use` y `progress`).
+        if [[ ! "$id" =~ ^core\.[a-z_]+\.[a-z_0-9]+$ ]]; then
+            _glot_warn "línea del roadmap ilegible / unreadable roadmap line: $id"
+            _glot_info '  esperado / expected: core.{fase}.{módulo} con un espacio antes de la marca / core.{phase}.{module} with a space before the mark'
+            continue
+        fi
 
         rest="${line#"$id"}"
         rest="${rest#"${rest%%[![:space:]]*}"}"

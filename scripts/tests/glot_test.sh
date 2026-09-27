@@ -1855,6 +1855,33 @@ glot_run_sandbox save 10 ruby algorithms/naive_sort
 assert_eq 'save 10 sin cambios: dato' 'nothing' "$out"
 assert_eq 'save 10 sin cambios: código' '0' "$rc_last"
 
+# v1.3.0: una línea del bloque de contadores con el id **pegado** a la marca desaparecía del
+# catálogo **en silencio**. Medido el 2026-09-27: `core.algorithms.data_structures_basics🔄 3/50`
+# en el roadmap real hizo que `glot modules`, `glot use` y `progress` dejasen de ofrecer el
+# módulo, sin un solo aviso. El catálogo ahora nombra la línea que no entiende.
+sandbox_make
+mkdir -p -- "$SANDBOX/docs"
+printf 'core.algorithms.naive_sort \xe2\x9c\x85 1/50 (Ada)\n' >"$SANDBOX/docs/ROADMAP.md"
+printf 'core.algorithms.data_structures_basics\xf0\x9f\x94\x84 3/50 (Ada, Assembly)\n' >>"$SANDBOX/docs/ROADMAP.md"
+glot_run_sandbox modules
+assert_contains 'roadmap: avisa de la línea con el id pegado a la marca' 'unreadable roadmap line' "$err"
+assert_eq 'roadmap: el módulo ilegible no se inventa' 'no' \
+    "$([[ "$out" == *'data_structures_basics'* ]] && echo si || echo no)"
+assert_contains 'roadmap: el módulo legible sí entra' 'naive_sort' "$out"
+printf 'core.algorithms.data_structures_basics \xf0\x9f\x94\x84 3/50 (Ada, Assembly)\n' >"$SANDBOX/docs/ROADMAP.md.tmp"
+head -1 "$SANDBOX/docs/ROADMAP.md" >"$SANDBOX/docs/ROADMAP.md"
+cat "$SANDBOX/docs/ROADMAP.md.tmp" >>"$SANDBOX/docs/ROADMAP.md"
+rm -f -- "$SANDBOX/docs/ROADMAP.md.tmp"
+glot_run_sandbox modules
+assert_contains 'roadmap: con el espacio, el módulo vuelve al catálogo' 'data_structures_basics' "$out"
+assert_eq 'roadmap: y ya no avisa' 'no' "$([[ "$err" == *'unreadable'* ]] && echo si || echo no)"
+
+# y `close` no puede volver a pegar la marca: el separador va **dentro** del relleno, porque
+# con un id de 38 caracteres o más (`core.algorithms.data_structures_basics` mide 38 exactos)
+# `%-38s` no añade nada y la marca quedaba pegada al id
+assert_eq 'close: el id y la marca nunca se pegan' '0' \
+    "$(grep -c "printf '%-38s%s'" "$GLOT_SH" | tr -d ' ')"
+
 # la ayuda: los tres verbos nuevos están en el listado y tienen ayuda propia
 glot_run help
 assert_eq 'help: los tres verbos de L7 en el listado general' '3' \
