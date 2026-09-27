@@ -1085,6 +1085,17 @@ assert_contains 'new -n: normalización en el plan' 'rm:naive_sort/.git;flat:nai
 glot_run -n new erlang algorithms/naive_sort
 assert_contains 'new -n: aplanar el nido' 'rebar3 new lib naive_sort' "$out"
 
+# v1.3.0: los flags globales valen en **cualquier** posición. Medido el 2026-09-26:
+# `glot new -n ada …` → `opción desconocida: -n` y `glot save -n 4a …` tomaba `-n` por el paso.
+glot_run new -n php algorithms/naive_sort
+assert_eq 'new -n detrás del verbo: código' '0' "$rc_last"
+assert_contains 'new -n detrás del verbo: imprime el plan' 'cd ' "$out"
+glot_run new --dry-run php algorithms/naive_sort
+assert_eq 'new --dry-run detrás del verbo: código' '0' "$rc_last"
+assert_contains 'new --dry-run detrás del verbo: imprime el plan' 'cd ' "$out"
+glot_run new -x -n php algorithms/naive_sort
+assert_eq 'new: la opción desconocida sigue dando 2' '2' "$rc_last"
+
 # new: sin inicializador validado no se inventa nada: skipped, como verify. El
 # catálogo real ya no tiene lenguajes `deferred` (R1/R6: todos traen herramienta o
 # estructura manual), así que el caso se prueba con un catálogo inyectado.
@@ -1190,6 +1201,10 @@ printf 'y\n' >"$RB/src/y.rb"
 glot_run_sandbox -n save contract ruby algorithms/naive_sort
 assert_eq 'save -n contrato: código' '0' "$rc_last"
 assert_contains 'save -n contrato: mensaje del catálogo' "commit -m 'chore(algorithms): add contract for naive_sort'" "$out"
+# v1.3.0: el mismo flag, detrás del verbo (antes tomaba `-n` por el paso)
+glot_run_sandbox save -n contract ruby algorithms/naive_sort
+assert_eq 'save -n detrás del verbo: código' '0' "$rc_last"
+assert_contains 'save -n detrás del verbo: mensaje del catálogo' "commit -m 'chore(algorithms): add contract for naive_sort'" "$out"
 rm -f -- "$RB/src/y.rb"
 
 # save -n con el árbol ya limpio: no hay plan que enseñar, y lo dice como la ejecución real

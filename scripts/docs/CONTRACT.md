@@ -13,7 +13,7 @@
 | stdout | Solo el dato (así `$(glot get lang)` es utilizable) |
 | stderr | Diagnóstico, avisos y errores; `set`/`unset` confirman aquí |
 | Códigos de salida | `0` correcto · `1` error de entorno o dato ausente · `2` uso incorrecto · `3` estado ilegible o no escribible |
-| Flags | `-h/--help` (general y por verbo), `--version`, `-q/--quiet`; desde v0.4.0, `-n/--dry-run` en los verbos que mutan y, desde v0.7.0, también en `test`/`verify`, donde imprime el comando sin ejecutarlo |
+| Flags | `-h/--help` (general y por verbo), `--version`, `-q/--quiet`; desde v0.4.0, `-n/--dry-run` en los verbos que mutan y, desde v0.7.0, también en `test`/`verify`, donde imprime el comando sin ejecutarlo. Desde la **v1.3.0** los globales (`-q`, `-n`) valen en **cualquier posición**: `glot new -n …` es lo que la mano escribe, y el verbo no los usa nunca como dato |
 | Interacción | Un verbo nunca pregunta: el dato llega por argumento o por stdin |
 | Idempotencia | Repetir el mismo efecto no cambia el resultado ni el código de salida |
 | Testabilidad | La raíz del repo y la ruta del estado son inyectables por variable (`GLOT_ROOT`, `GLOT_STATE_DIR`/`GLOT_STATE_FILE`) |

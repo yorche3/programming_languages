@@ -4883,6 +4883,36 @@ _glot_main() {
         shift
     fi
 
+    # Los flags globales valen en **cualquier** posición: la mano escribe `glot new -n …`
+    # y hasta la v1.3.0 solo se entendían delante del verbo (medido el 2026-09-26:
+    # `glot new -n ada …` → `opción desconocida: -n`, y `glot save -n 4a …` tomaba `-n`
+    # por el paso). Se retiran de los argumentos del verbo, que nunca los usa como dato:
+    # los datos son lenguaje, fase/módulo y paso.
+    #
+    # Global flags are valid **anywhere**: the hand types `glot new -n …` and until v1.3.0
+    # they were only understood before the verb (measured on 2026-09-26). They are removed
+    # from the verb's arguments, which never use them as data.
+    if [[ $# -gt 0 ]]; then
+        local -a rest=()
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                -q | --quiet)
+                    _glot_quiet=1
+                    shift
+                    ;;
+                -n | --dry-run)
+                    _glot_dry_run=1
+                    shift
+                    ;;
+                *)
+                    rest+=("$1")
+                    shift
+                    ;;
+            esac
+        done
+        set -- ${rest[@]+"${rest[@]}"}
+    fi
+
     # Despacha el comando según el verbo / Dispatch the command based on the verb
     case "$cmd" in
         "" | help | -h | --help)
