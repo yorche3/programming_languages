@@ -57,7 +57,7 @@
 | `test [lenguaje] [fase/módulo]` | Ejecuta la suite del módulo asignado en su directorio, con el comando nativo del lenguaje; la salida del runner va a stdout | 0 / 1 / 2 / 3 / **4** |
 | `verify [lenguaje] [fase/módulo]` | Ejecuta el verificador (sintaxis/formato) del lenguaje; imprime `skipped` si aún no tiene uno | 0 / 1 / 2 / 3 / **4** |
 | `prompt [encargo] [lenguaje] [fase/módulo]` | Sin encargo, lista el registro —`nombre<TAB>paso<TAB>modelo<TAB>descripción`—; con encargo, imprime el encargo armado (estado del sprint + plantilla expandida) | 0 / 1 / 2 / 3 |
-| `ask <encargo> [lenguaje] [fase/módulo]` | Arma el encargo y lo envía a `GLOT_DELEGATE` por stdin; su salida va a stdout. El modelo del perfil del encargo viaja por entorno (`COPILOT_MODEL`, y el tier de auto si el perfil lo declara) | 0 / 1 / 2 / 3 |
+| `ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot\|antigravity]` | Arma el encargo y lo envía al **delegado elegido** por stdin; su salida va a stdout. El modelo del perfil del encargo viaja por entorno (`COPILOT_MODEL`, y el tier de auto si el perfil lo declara) y con él `GLOT_ROOT` y `GLOT_MODULE_DIR` | 0 / 1 / 2 / 3 |
 | `new [lenguaje] [fase/módulo]` | Inicializa el lenguaje y crea el esqueleto mecánico del módulo: con `tool` ejecuta el comando del catálogo; con `manual` crea las carpetas; con `deferred` informa e imprime `skipped`. Normaliza lo que deja el inicializador. No escribe la suite | 0 / 1 / 2 / **4** |
 | `save <paso\|alias> [lenguaje] [fase/módulo]` | Confirma con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. Los pasos del submódulo añaden el submódulo; los del monorepo (`9`, `10`) añaden **solo las rutas del paso**. Sin push | 0 / 1 / 2 / 3 / **4** |
 | `evidence [lenguaje] [fase/módulo]` | Ejecuta la suite y el verificador y deja el acta con la salida real en `docs/evidence/`; la escribe también cuando algo está en rojo | 0 / 1 / 2 / 3 / **4** |
@@ -113,7 +113,7 @@
 4. **Idempotencia** cuando se repite el mismo efecto.
 5. **Inyectable para test**: raíz del repo y ruta del estado sobreescribibles por variable.
 6. **Mensajes bilingües ES/EN**; los datos de salida no se traducen.
-7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR`, `GLOT_STATE_FILE`, `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` y `GLOT_TOOLCHAINS_FILE` (esta última, como `GLOT_STATE_FILE`, es para pruebas y herramientas: apunta a otro catálogo de toolchains) y `GLOT_DATA_DIR` (apunta a otro directorio de datos, para pruebas y laboratorio). `GLOT_LOADED` no se declara: la capa cargable la pone al delegar en el programa, para que `doctor` sepa que hay función
+7. **Namespace**: funciones y variables internas con prefijo `_glot_`; públicas solo `GLOT_VERSION`, `GLOT_ROOT`, `GLOT_STATE_DIR`, `GLOT_STATE_FILE`, `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` y `GLOT_TOOLCHAINS_FILE` (esta última, como `GLOT_STATE_FILE`, es para pruebas y herramientas: apunta a otro catálogo de toolchains) y `GLOT_DATA_DIR` (apunta a otro directorio de datos, para pruebas y laboratorio), más `GLOT_DELEGATE_COP` y `GLOT_DELEGATE_AGY` (las órdenes de los dos delegados, con `GLOT_DELEGATE` como alias del primero) y las que `ask` **exporta** para el delegado: `GLOT_MODULE_DIR`, `COPILOT_MODEL` y `COPILOT_AUTO_TIER`. `GLOT_LOADED` no se declara: la capa cargable la pone al delegar en el programa, para que `doctor` sepa que hay función
 
 ### Desde v0.4.0 — el almacén
 
@@ -236,7 +236,11 @@
 | Salida de `prompt` / `prompt` output | Cabecera con el estado del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`, `module_dir`) + la plantilla sin frontmatter y con los marcadores resueltos. `root` es la raíz del monorepo, y es desde donde se leen las rutas de las fuentes |
 | Fuentes del encargo / Request sources | La plantilla declara en su frontmatter las fuentes del monorepo que necesita (`sources:`, rutas relativas a `root`, ordenadas y separadas por coma). `prompt` y `ask` **avisan** por stderr de cada una que falte y el encargo se imprime igual: el código no cambia, porque el aviso es para el autor. Las plantillas ya **no** nombran el monorepo en prosa: sus rutas son relativas a `root` |
 | `-n/--dry-run` | `prompt` no lo necesita (imprimir es su función); `ask -n` imprime el plan sin enviar nada |
-| Delegado / Delegate | `GLOT_DELEGATE`: el encargo va por **stdin** y su salida va a **stdout**. Sin la variable, `ask` devuelve `1` |
+| Delegado / Delegate | `GLOT_DELEGATE_COP` (GitHub Copilot CLI) y `GLOT_DELEGATE_AGY` (Antigravity CLI); `GLOT_DELEGATE` sigue valiendo como **alias del primero**, que es lo ya documentado. El encargo va por **stdin** y la salida del delegado a **stdout** |
+| Elección / Selection | `--delegate copilot\|antigravity`; se aceptan los cortos `cop` y `agy`. Sin el argumento: con **una** variable definida se usa esa; con **las dos**, error `2` que pide elegir; sin ninguna, `ask` devuelve `1`. No se adivina |
+| Marcadores en la orden / Placeholders in the command | `{root}` (raíz del monorepo) y `{module_dir}` (directorio del módulo) se expanden **antes** de ejecutar la orden —el mismo vocabulario que el resto del tooling—; un marcador sin resolver es `1` que lo nombra |
+| Entorno del delegado / Delegate environment | `ask` exporta `GLOT_ROOT` y `GLOT_MODULE_DIR`, además de `COPILOT_MODEL` y `COPILOT_AUTO_TIER`: la orden cita las rutas **por variable** en vez de llevarlas escritas |
+| Dónde vive la orden / Where the command lives | En el **entorno del autor**, nunca en el repositorio: `install` no la escribe en el rc y al terminar imprime las dos líneas de `export` listas para pegar, con los marcadores sin resolver. `doctor` informa `delegate_cop:` y `delegate_agy:` |
 | Plantilla local / Local template | Si solo existe en `.github/prompts/` (banco local del autor, no versionado), `prompt` la usa **avisando** |
 | Marcador desconocido | Error `1` con el marcador y la lista de los válidos: nunca texto literal silencioso |
 

@@ -67,6 +67,32 @@ copilot -C "$MODULE_DIR" -p "<encargo validate>" \
 
 ---
 
+## 🤝 Los dos delegados de `ask` / The two `ask` delegates
+
+**ES:** `validate` usa el validador; `ask` usa un **delegado**, y desde la **v1.2.0** hay dos con nombre propio: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) y `GLOT_DELEGATE_AGY` (Antigravity CLI). `GLOT_DELEGATE` sigue valiendo como **alias del primero**. Se eligen con `--delegate copilot|antigravity` (cortos `cop` y `agy`); sin el argumento, con una sola variable definida se usa esa y con las dos `ask` devuelve `2` pidiendo la elección.
+
+**EN:** `validate` uses the validator; `ask` uses a **delegate**, and since **v1.2.0** there are two with their own name: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) and `GLOT_DELEGATE_AGY` (Antigravity CLI). `GLOT_DELEGATE` still works as an **alias of the first one**. They are chosen with `--delegate copilot|antigravity` (short `cop`, `agy`); with no argument, one defined variable is used and two of them make `ask` return `2` asking for the choice.
+
+```bash
+export GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools'
+export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6 -p "$(cat)" --add-dir {root}'
+glot ask --delegate copilot contract ada algorithms/data_structures_basics
+```
+
+| Aspecto / Aspect | Detalle / Detail |
+|------------------|------------------|
+| Marcadores / Placeholders | `{root}` y `{module_dir}` los resuelve `glot` **antes** de ejecutar la orden, y `ask` exporta además `GLOT_ROOT` y `GLOT_MODULE_DIR` para el delegado y sus hijos. Así la línea no lleva la ruta del autor y se puede pegar en cualquier clon |
+| `-p "$(cat)"` | El encargo llega por **stdin** (lo garantiza `ask`); `-p` a secas no lo leería. `-C` fija el directorio de trabajo y `--add-dir` abre la raíz, porque el sandbox deja fuera la especificación y el `gitdir` del submódulo |
+| Permisos de COP | `--allow-all-tools` para los encargos que **escriben** (`contract`, `suite`, `implement`, `scaffold`, `docs-module`); para los de solo lectura va `--deny-tool write`, que gana sobre `--allow-all-tools`. **No** se exporta `COPILOT_ALLOW_ALL=true` |
+| Permisos de AGY | En modo desatendido lo que no está permitido se **auto-deniega** —no hay prompt— y el mensaje **no dice qué permiso falta**. Viven **por proyecto**, en `~/.gemini/config/projects/<id>.json`, anidados en `permissionGrants.permissionGrants.allow`, con tres clases: `command(<binario y subcomando>)`, `read_file(<ruta>)` y `write_file(<ruta>)` (`*` vale como comodín). El comando o la ruta exactos se sacan de la base de conversaciones (`~/.gemini/antigravity-cli/conversations/*.db`, tabla `steps`) o de `--log-file` |
+| Guardas / Guards | Ni la orden ni su ruta viven en el repositorio: `install` las **imprime** para que el autor las pegue, y `doctor` informa `delegate_cop:` y `delegate_agy:`. Un delegado que falla devuelve `1`, no `4` |
+
+**ES:** Documentar la línea **no** es compartir credenciales: lo que va al repositorio son marcadores y nombres de modelo; la ruta, el `MODEL` del perfil y cualquier permiso viven en el entorno del autor.
+
+**EN:** Documenting the command is **not** sharing credentials: what goes into the repository are placeholders and model names; the path, the profile's `MODEL` and any permission live in the author's environment.
+
+---
+
 ## ⚠️ Advertencias / Warnings
 
 - **No** exportar `COPILOT_ALLOW_ALL=true` en `.bashrc`: con el valor exacto `"true"` además confía en el directorio de trabajo y carga sus skills y hooks, que pueden ejecutar shell. Mejor `--allow-all-tools` por corrida.

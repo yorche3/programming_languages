@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# glot 1.1.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
+# glot 1.2.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
 # programa y se **carga** con `source` (capa cargable de la L8), donde `glot` es una
 # función de bash que hace el `cd` real de `use`. `install` deja la copia estable,
 # el bloque del rc y el completado; `doctor` cierra el diagnóstico del entorno.
@@ -7,6 +7,9 @@
 # directorio de trabajo y completado, en datos), el **contrato** tiene su propio paso
 # (`4b`) con encargo versionado —la suite pasa a `4c`— y `doctor` informa de la deriva de
 # datos de la copia instalada, no solo de la del script.
+# Desde la v1.2.0 `ask` tiene **dos delegados con nombre** —`GLOT_DELEGATE_COP` y
+# `GLOT_DELEGATE_AGY`, elegibles con `--delegate`— y resuelve `{root}` y `{module_dir}`
+# dentro de su orden, que es del autor y nunca viaja en el repositorio.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -29,7 +32,7 @@
 #   ./scripts/glot.sh validate php algorithms/naive_sort
 #   ./scripts/glot.sh prompt scaffold php algorithms/naive_sort
 #   ./scripts/glot.sh prompt contract php algorithms/naive_sort
-#   GLOT_DELEGATE=cat ./scripts/glot.sh ask implement php algorithms/naive_sort
+#   GLOT_DELEGATE_COP=cat ./scripts/glot.sh ask --delegate copilot contract php algorithms/naive_sort
 #   ./scripts/glot.sh set lang php
 #   ./scripts/glot.sh get lang
 #   ./scripts/glot.sh list
@@ -44,7 +47,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.1.0"
+GLOT_VERSION="1.2.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -479,10 +482,18 @@ _glot_cmd_doctor() {
             status=1
         fi
 
-        if [[ -n "${GLOT_DELEGATE:-}" ]]; then
-            printf 'delegate: %s\n' "$GLOT_DELEGATE"
+        if [[ -n "${GLOT_DELEGATE_COP:-}" ]]; then
+            printf 'delegate_cop: %s\n' "$GLOT_DELEGATE_COP"
+        elif [[ -n "${GLOT_DELEGATE:-}" ]]; then
+            printf 'delegate_cop: %s\n' "$GLOT_DELEGATE"
+            _glot_info 'GLOT_DELEGATE es el alias antiguo / is the old alias: GLOT_DELEGATE_COP'
         else
-            printf 'delegate: (sin configurar / not configured)\n'
+            printf 'delegate_cop: (sin configurar / not configured)\n'
+        fi
+        if [[ -n "${GLOT_DELEGATE_AGY:-}" ]]; then
+            printf 'delegate_agy: %s\n' "$GLOT_DELEGATE_AGY"
+        else
+            printf 'delegate_agy: (sin configurar / not configured)\n'
         fi
 
         if [[ -n "${GLOT_VALIDATOR:-}" ]]; then
@@ -1396,14 +1407,130 @@ _glot_cmd_prompt() {
     _glot_prompt_build "$name" "${@:2}"
 }
 
-# _glot_cmd_ask <encargo> [lenguaje] [fase/módulo] — arma el mismo encargo y lo envía
-# a `GLOT_DELEGATE` por stdin. Sin delegado configurado no hay nada que hacer: 1.
-# El modelo del encargo (perfil del catálogo, resuelto desde el `model:` de la plantilla)
-# viaja por **entorno** (`COPILOT_MODEL`, y el tier de auto si el perfil lo declara): es lo
-# único que un delegado cualquiera puede leer sin que haya que inyectarle flags, que
-# romperían un `GLOT_DELEGATE='wc -l'`.
+# --- delegados (v1.2.0) ------------------------------------------------------
+
+# _glot_delegate_command <delegado> [encargo] — resuelve la orden del delegado pedido.
+# Las dos órdenes viven en el **entorno del autor** —`GLOT_DELEGATE_COP` y
+# `GLOT_DELEGATE_AGY`—, nunca en el repositorio; `GLOT_DELEGATE` sigue valiendo como
+# alias del de Copilot, que es lo ya documentado. Sin argumento se elige sola **si hay
+# una**: con las dos se pide elegir en vez de adivinar.
+_glot_delegate_command() {
+    local kind="$1"
+    local cop="${GLOT_DELEGATE_COP:-${GLOT_DELEGATE:-}}"
+    local agy="${GLOT_DELEGATE_AGY:-}"
+
+    case "$kind" in
+        "")
+            if [[ -n "$cop" && -n "$agy" ]]; then
+                _glot_error 'hay dos delegados configurados / two delegates are configured'
+                _glot_info 'elige uno / choose one: glot ask --delegate copilot|antigravity <encargo>'
+                return 2
+            fi
+            if [[ -n "$cop" ]]; then
+                printf '%s\n' "$cop"
+                return 0
+            fi
+            if [[ -n "$agy" ]]; then
+                printf '%s\n' "$agy"
+                return 0
+            fi
+            _glot_error 'no hay delegado configurado / no delegate configured'
+            _glot_info 'define GLOT_DELEGATE_COP o GLOT_DELEGATE_AGY / set GLOT_DELEGATE_COP or GLOT_DELEGATE_AGY'
+            _glot_info 'o imprime el encargo / or print the request: glot prompt '"$2"
+            return 1
+            ;;
+        copilot | cop)
+            if [[ -z "$cop" ]]; then
+                _glot_error 'el delegado de Copilot no está configurado / the Copilot delegate is not set'
+                _glot_info 'define GLOT_DELEGATE_COP / set GLOT_DELEGATE_COP'
+                return 1
+            fi
+            printf '%s\n' "$cop"
+            ;;
+        antigravity | agy)
+            if [[ -z "$agy" ]]; then
+                _glot_error 'el delegado de Antigravity no está configurado / the Antigravity delegate is not set'
+                _glot_info 'define GLOT_DELEGATE_AGY / set GLOT_DELEGATE_AGY'
+                return 1
+            fi
+            printf '%s\n' "$agy"
+            ;;
+        *)
+            _glot_error "delegado desconocido / unknown delegate: $kind"
+            _glot_info 'valen / valid: copilot, antigravity'
+            return 2
+            ;;
+    esac
+
+    return 0
+}
+
+# _glot_delegate_env [lenguaje] [fase/módulo] — exporta `GLOT_ROOT` y `GLOT_MODULE_DIR`
+# para el delegado y sus hijos, para que su orden cite las rutas **por variable** en vez
+# de llevarlas escritas. El módulo es el del **encargo** —resuelto igual que su cabecera,
+# argumentos → estado—, no otro del almacén. Se llama **sin** capturar la salida: dentro
+# de un `$( )` el `export` se perdería.
+_glot_delegate_env() {
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local root=""
+
+    root="$(_glot_repo_root || true)"
+    [[ -n "$root" ]] || return 0
+    export GLOT_ROOT="$root"
+
+    target="$(_glot_exec_target "$@" || true)"
+    IFS=$'\t' read -r lang phase module <<<"$target"
+    if [[ -n "$lang" && -n "$phase" && -n "$module" ]]; then
+        GLOT_MODULE_DIR="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+        export GLOT_MODULE_DIR
+    fi
+
+    return 0
+}
+
+# _glot_delegate_expand <orden> — resuelve `{root}` y `{module_dir}` con lo que dejó
+# exportado `_glot_delegate_env`. La orden del delegado usa el **mismo vocabulario de
+# marcadores** que el resto del tooling, y uno que no valga aquí es un error: mejor
+# detenerse que lanzar una orden a la que le falta una ruta.
+_glot_delegate_expand() {
+    local order="$1"
+    local probe=""
+    local marker=""
+
+    if [[ "$order" != *'{'* ]]; then
+        printf '%s\n' "$order"
+        return 0
+    fi
+
+    order="${order//\{root\}/${GLOT_ROOT:-}}"
+    order="${order//\{module_dir\}/${GLOT_MODULE_DIR:-}}"
+
+    # Los `${VAR}` del shell son legítimos en la orden —es la forma de citar las rutas por
+    # variable—, así que se apartan antes de buscar marcadores de glot sin resolver.
+    probe="${order//\$\{[A-Za-z_][A-Za-z_0-9]*\}/}"
+    if [[ "$probe" =~ \{[A-Za-z_][A-Za-z_0-9]*\} ]]; then
+        marker="${BASH_REMATCH[0]}"
+        _glot_error "marcador sin resolver en el delegado / unresolved placeholder in the delegate: $marker"
+        _glot_info 'en la orden solo valen root y module_dir / only root and module_dir are valid in the command'
+        return 1
+    fi
+
+    printf '%s\n' "$order"
+}
+
+# _glot_cmd_ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot|antigravity] —
+# arma el mismo encargo y lo envía al delegado por stdin. Sin delegado configurado no
+# hay nada que hacer: 1. El modelo del encargo (perfil del catálogo, resuelto desde el
+# `model:` de la plantilla) viaja por **entorno** (`COPILOT_MODEL`, y el tier de auto si
+# el perfil lo declara), y con él `GLOT_ROOT` y `GLOT_MODULE_DIR`: es lo único que un
+# delegado cualquiera puede leer sin que haya que inyectarle flags, que romperían un
+# `GLOT_DELEGATE_COP='wc -l'`.
 _glot_cmd_ask() {
-    local name="${1:-}"
+    local delegate_kind=""
+    local name=""
     local request=""
     local template=""
     local profile=""
@@ -1414,22 +1541,42 @@ _glot_cmd_ask() {
     local tier=""
     local requests=""
     local env_prefix=""
+    local delegate_order=""
+    local -a rest=()
     local rc=0
 
+    while (( $# > 0 )); do
+        case "$1" in
+            --delegate)
+                if (( $# < 2 )); then
+                    _glot_error 'falta el valor de --delegate / missing --delegate value'
+                    _glot_info 'valen / valid: copilot, antigravity'
+                    return 2
+                fi
+                delegate_kind="$2"
+                shift 2
+                ;;
+            --delegate=*)
+                delegate_kind="${1#*=}"
+                shift
+                ;;
+            *)
+                rest+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    name="${rest[0]:-}"
     if [[ -z "$name" ]]; then
         _glot_error 'falta el encargo / missing request'
-        _glot_error 'uso / usage: glot ask <encargo> [lenguaje] [fase/módulo]'
+        _glot_error 'uso / usage: glot ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot|antigravity]'
         _glot_info 'disponibles / available: glot prompt'
         return 2
     fi
 
-    request="$(_glot_prompt_build "$name" "${@:2}")" || return $?
-
-    if [[ -z "${GLOT_DELEGATE:-}" ]]; then
-        _glot_error 'no hay delegado configurado / no delegate configured'
-        _glot_info 'define GLOT_DELEGATE o imprime el encargo / set GLOT_DELEGATE or print it: glot prompt '"$name"
-        return 1
-    fi
+    request="$(_glot_prompt_build "$name" "${rest[@]:1}")" || return $?
+    delegate_order="$(_glot_delegate_command "$delegate_kind" "$name")" || return $?
 
     template="$(_glot_prompt_file "$name")" || return 1
     profile="$(_glot_prompt_profile "$template")" || return $?
@@ -1442,14 +1589,20 @@ _glot_cmd_ask() {
         env_prefix+=" COPILOT_AUTO_TIER=$tier"
     fi
 
+    # Las rutas que la orden puede citar: `GLOT_ROOT` y `GLOT_MODULE_DIR`, las del
+    # **encargo**. La llamada va **sin** capturar la salida, porque dentro de un `$( )`
+    # el `export` se perdería.
+    _glot_delegate_env "${rest[@]:1}"
+    delegate_order="$(_glot_delegate_expand "$delegate_order")" || return $?
+
     if ((_glot_dry_run)); then
-        printf '%s <encargo de %s> | %s\n' "$env_prefix" "$name" "$GLOT_DELEGATE"
+        printf '%s <encargo de %s> | %s\n' "$env_prefix" "$name" "$delegate_order"
         return 0
     fi
 
     _glot_info "perfil / profile: $pname ($pmodel, esfuerzo / effort $effort, $credits créditos / credits)"
-    _glot_info "delegado / delegate: $GLOT_DELEGATE"
-    printf '%s\n' "$request" | eval "$GLOT_DELEGATE" || rc=$?
+    _glot_info "delegado / delegate: $delegate_order"
+    printf '%s\n' "$request" | eval "$delegate_order" || rc=$?
 
     if ((rc != 0)); then
         _glot_error "el delegado falló / the delegate failed: código / code $rc"
@@ -2963,9 +3116,13 @@ Verbos / Verbs:
                      armado con el estado del sprint. No muta nada
                      With no request it lists the registry; with one it prints the
                      request built from the sprint state. It mutates nothing
-  ask <encargo> [lenguaje] [fase/módulo]
-                     Arma el encargo y lo envía a GLOT_DELEGATE por stdin
-                     Builds the request and pipes it to GLOT_DELEGATE
+  ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot|antigravity]
+                     Arma el encargo y lo envía al delegado por stdin: --delegate elige
+                     entre GLOT_DELEGATE_COP (Copilot) y GLOT_DELEGATE_AGY (Antigravity),
+                     y sin él, con uno solo configurado, se usa ese
+                     Builds the request and pipes it to the delegate over stdin: --delegate
+                     chooses between GLOT_DELEGATE_COP (Copilot) and GLOT_DELEGATE_AGY
+                     (Antigravity), and without it, with only one set, that one is used
   use <lenguaje> <fase>/<módulo> [tipo]
                      Sitúa el trabajo: valida y, con el árbol limpio, activa o crea
                      la rama {tipo}/{fase}/{módulo} desde main y la publica con
@@ -3182,16 +3339,20 @@ _glot_help_verb() {
             printf 'No muta nada y no necesita -n / it mutates nothing and does not need -n\n'
             ;;
         ask)
-            printf 'glot ask <encargo> [lenguaje] [fase/módulo] — envía el encargo al delegado\n'
-            printf 'glot ask <request> [language] [phase/module] — pipes the request to the delegate\n'
-            printf 'El encargo va por stdin a la orden de GLOT_DELEGATE y su salida va a stdout\n'
-            printf 'The request goes to the GLOT_DELEGATE command over stdin and its output to stdout\n'
-            printf 'Sin GLOT_DELEGATE devuelve 1; `-n` imprime el plan sin enviar nada\n'
-            printf 'With no GLOT_DELEGATE it returns 1; `-n` prints the plan without sending anything\n'
-            printf 'El modelo del perfil del encargo se exporta como COPILOT_MODEL (y COPILOT_AUTO_TIER\n'
-            printf 'si el perfil lo declara): al delegado se le da entorno, no flags\n'
-            printf 'The request profile model is exported as COPILOT_MODEL (and COPILOT_AUTO_TIER when the\n'
-            printf 'profile declares it): the delegate gets environment, not flags\n'
+            printf 'glot ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot|antigravity]\n'
+            printf '  — envía el encargo al delegado / pipes the request to the delegate\n'
+            printf 'Las órdenes viven en el entorno del autor, no en el repositorio: GLOT_DELEGATE_COP\n'
+            printf '(Copilot) y GLOT_DELEGATE_AGY (Antigravity); GLOT_DELEGATE es el alias del primero\n'
+            printf 'The commands live in the author environment, not in the repository: GLOT_DELEGATE_COP\n'
+            printf '(Copilot) and GLOT_DELEGATE_AGY (Antigravity); GLOT_DELEGATE is the old alias of the first one\n'
+            printf 'En la orden, {root} y {module_dir} los resuelve glot; el encargo va por stdin\n'
+            printf 'In the command, {root} and {module_dir} are resolved by glot; the request goes over stdin\n'
+            printf 'Sin delegado, o con dos configurados sin --delegate, devuelve 1 y 2\n'
+            printf 'With no delegate, or two set without --delegate, it returns 1 and 2\n'
+            printf 'El modelo del perfil se exporta como COPILOT_MODEL (y COPILOT_AUTO_TIER si el perfil\n'
+            printf 'lo declara), junto con GLOT_ROOT y GLOT_MODULE_DIR: entorno, no flags\n'
+            printf 'The profile model is exported as COPILOT_MODEL (and COPILOT_AUTO_TIER when the profile\n'
+            printf 'declares it), together with GLOT_ROOT and GLOT_MODULE_DIR: environment, not flags\n'
             ;;
         use)
             printf 'glot use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint\n'
@@ -4425,6 +4586,16 @@ _glot_rc_remove() {
     return 0
 }
 
+# _glot_delegates_hint — las dos líneas de delegado que el autor pega en su rc. Las
+# imprime `install` —por stdout en el plan y por stderr al instalar—: la orden es **del
+# autor**, así que no se escribe en el rc ni viaja en el repositorio. Los marcadores los
+# resuelve `ask`, de modo que tampoco queda ninguna ruta de la máquina.
+_glot_delegates_hint() {
+    printf 'delegados: estas dos líneas van en tu rc / delegates: these two lines go in your rc\n'
+    printf "export GLOT_DELEGATE_COP='copilot -C {module_dir} -p \"\$(cat)\" --add-dir {root} --allow-all-tools'\n"
+    printf "export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6 -p \"\$(cat)\" --add-dir {root}'\n"
+}
+
 # _glot_cmd_install — copia estable, enlace en el PATH, completados y bloque del rc.
 # Idempotente: repetirlo deja lo mismo. Muta: admite `-n`.
 # Códigos: 0 instalado · 1 entorno (HOME, fuente, enlace ajeno) · 2 uso · 3 no se pudo escribir.
@@ -4465,6 +4636,7 @@ _glot_cmd_install() {
             printf '# bloque en / block in %s\n' "$(_glot_rc_file "$shell")"
         done
         printf '%s\n' "$dir"
+        _glot_delegates_hint
         return 0
     fi
 
@@ -4557,6 +4729,7 @@ _glot_cmd_install() {
 
     printf '%s\n' "$dir"
     _glot_info "abre una shell nueva, o recárgala / open a new shell, or reload it: . $(_glot_rc_file bash)"
+    _glot_delegates_hint >&2
     return 0
 }
 
