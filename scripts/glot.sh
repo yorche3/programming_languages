@@ -2076,7 +2076,6 @@ _glot_cmd_new() {
     local step_cmd=""
     local step_answers=""
     local step_complete=""
-    local complete_note=""
 
     target="$(_glot_exec_target "$@")" || return $?
     IFS=$'\t' read -r lang phase module <<<"$target"
@@ -2150,14 +2149,10 @@ _glot_cmd_new() {
             [[ -n "$step_dir" ]] || continue
             printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
             [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
-            if [[ -n "$step_complete" && "$step_complete" != "-" ]]; then
-                complete_note="${step_complete//\{module\}/$module}"
-                complete_note="${complete_note//\{Module\}/$(_glot_pascal "$module")}"
-                printf '# completar / complete: %s\n' "$complete_note"
-            fi
         done <<<"$steps"
         [[ -n "$fix" && "$fix" != "-" ]] && printf '# normalizar / normalise: %s\n' "$(_glot_expand_command "$dir" "$module" "$fix")"
         [[ "$kind" == "manual" ]] && printf '# el manifiesto y la suite son del encargo / manifest and suite belong to the request\n'
+        _glot_init_completion_report "$steps" "$module"
         printf '%s\n' "$dir"
         return 0
     fi
@@ -2199,12 +2194,6 @@ _glot_cmd_new() {
             _glot_info "el directorio queda como está / the directory is left as it is: $dir"
             return 4
         fi
-
-        if [[ -n "$step_complete" && "$step_complete" != "-" ]]; then
-            complete_note="${step_complete//\{module\}/$module}"
-            complete_note="${complete_note//\{Module\}/$(_glot_pascal "$module")}"
-            _glot_info "completar / complete: $complete_note"
-        fi
     done <<<"$steps"
 
     if [[ -n "$fix" && "$fix" != "-" ]]; then
@@ -2218,6 +2207,8 @@ _glot_cmd_new() {
         _glot_info "estructura manual creada / manual layout created: $dir"
         _glot_info "el manifiesto y la suite son del encargo / manifest and suite belong to the request: glot prompt scaffold $lang $phase/$module"
     fi
+
+    _glot_init_completion_report "$steps" "$module"
 
     printf '%s\n' "$dir"
     return 0
@@ -3676,6 +3667,44 @@ _glot_init_sequence() {
 # _glot_init_sequence_has <lenguaje> — ¿el lenguaje tiene secuencia declarada?
 _glot_init_sequence_has() {
     [[ -n "$(_glot_init_sequence "$1")" ]]
+}
+
+# _glot_init_completion_report <pasos> <module> — lo que hay que completar **a mano**
+# después de la secuencia, en un solo bloque y al final. Impreso dentro del bucle se lo
+# come la salida de los propios comandos, y ese completado es justo lo que el autor tiene
+# que hacer después: medido el 2026-09-26, el `tests/alire.toml` de Ada quedó sin
+# `[[depends-on]]`, `[[pins]]` ni `aunit` hasta aplicarlo a mano. `pasos` es la lista
+# `dir<TAB>modo<TAB>comando<TAB>respuestas<TAB>completado`; `-` en la última no se nombra.
+_glot_init_completion_report() {
+    local steps="$1"
+    local module="$2"
+    local sdir=""
+    local smode=""
+    local scmd=""
+    local sanswers=""
+    local scomplete=""
+    local note=""
+    local order=0
+    local pending=""
+
+    while IFS=$'\t' read -r sdir smode scmd sanswers scomplete; do
+        [[ -n "$sdir" ]] || continue
+        order=$((order + 1))
+        [[ -n "$scomplete" && "$scomplete" != "-" ]] || continue
+        note="${scomplete//\{module\}/$module}"
+        note="${note//\{Module\}/$(_glot_pascal "$module")}"
+        pending+="$order"$'\t'"$note"$'\n'
+    done <<<"$steps"
+
+    [[ -n "$pending" ]] || return 0
+
+    _glot_info 'queda por completar / left to complete:'
+    while IFS=$'\t' read -r order note; do
+        [[ -n "$order" ]] || continue
+        _glot_info "  [$order] $note"
+    done <<<"$pending"
+
+    return 0
 }
 
 # _glot_expect_run <comando> <respuestas> — ejecuta un inicializador interactivo

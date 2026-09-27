@@ -937,6 +937,14 @@ assert_eq 'secuencias de inicialización: modos válidos' '0' \
     "$(awk -F'\t' '$4 != "run" && $4 != "expect"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
 assert_eq 'secuencias de inicialización: modo expect con requisito expect' '0' \
     "$(awk -F'\t' '$4 == "expect" && $6 != "expect"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+# v1.3.0: el orden tiene que ser 1..n por lenguaje. Un hueco o un repetido rompe el plan
+# sin que nadie lo note (el `read` de `new` se queda con una línea de menos).
+assert_eq 'secuencias de inicialización: órdenes contiguos por lenguaje' '0' \
+    "$(awk -F'\t' '{rows[$1]++; if ($2 > top[$1]) top[$1] = $2} END {for (k in rows) if (rows[k] != top[k]) bad++; print bad + 0}' "$DATA_DIR/init_sequences.tsv")"
+# la columna 8 no puede quedar vacía: una fila de 7 campos manda el completado a
+# «respuestas» y lo silencia (medido el 2026-09-26: 3 filas de Ada con 7 campos)
+assert_eq 'secuencias de inicialización: la columna 8 nunca queda vacía' '0' \
+    "$(awk -F'\t' '$8 == ""' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
 assert_eq 'catálogo de inicialización: operaciones conocidas' '0' \
     "$(awk -F'\t' '{n = split($8, ops, ";"); for (i = 1; i <= n; i++) if (ops[i] != "-" && ops[i] !~ /^(flat|rm):[^:]+$/) print $1}' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
 
@@ -1095,6 +1103,26 @@ assert_eq 'new deferred: código' '0' "$rc_last"
 assert_eq 'new deferred: dato' 'skipped' "$out"
 assert_contains 'new deferred: lo escribe el agente' 'no verified initializer' "$err"
 assert_contains 'new deferred: encargo sugerido' 'glot prompt scaffold' "$err"
+
+# v1.3.0: el completado del dato (columna 8) tiene que llegar al autor. Antes se imprimía
+# dentro del bucle de pasos y la salida de los propios comandos se lo comía; medido el
+# 2026-09-26, el `tests/alire.toml` de Ada quedó sin `[[depends-on]]`, `[[pins]]` ni `aunit`
+# hasta aplicarlo a mano. Ahora va en un bloque al final, y este caso lo comprueba con un
+# dato inyectado (el comando es `mkdir`, así que no depende de la red).
+SEQ_DIR="$WORK_DIR/sequence-data"
+mkdir -p "$SEQ_DIR"
+cp -R "$DATA_DIR/." "$SEQ_DIR/"
+printf 'java\t1\tmodule\trun\tmkdir -p src test\t-\t-\tnota-de-completado-de-prueba\n' \
+    >>"$SEQ_DIR/init_sequences.tsv"
+glot_run_sandbox use java algorithms/naive_sort
+assert_eq 'new con secuencia: use deja el módulo' '0' "$rc_last"
+rc_last=0
+out="$(GLOT_ROOT="$SANDBOX" GLOT_DATA_DIR="$SEQ_DIR" "$GLOT_SH" new java algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_eq 'new con secuencia: código' '0' "$rc_last"
+assert_contains 'new: el completado se anuncia al final' 'left to complete' "$err"
+assert_contains 'new: el completado llega con su nota' 'nota-de-completado-de-prueba' "$err"
+assert_contains 'new: el completado va numerado por su paso' '[1]' "$err"
 
 # new: errores de objetivo y de argumentos
 glot_run -n new php algorithms/nope
