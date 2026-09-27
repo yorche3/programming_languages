@@ -2095,6 +2095,70 @@ glot_install install >/dev/null
 glot_install doctor
 assert_contains 'doctor: reinstalar deja los datos buenos' 'install_data: ok' "$out"
 
+# v1.4.0: la deriva se mide en las **dos orillas**. Los casos de arriba tocan la copia (el
+# retoque a mano, que es el caso raro); falta la otra: que el clon del que se instaló haya
+# avanzado. Se instala desde una fuente desechable —lo que viaja con la copia, nada más— y
+# se mide cada orilla por separado: fuente tocada (`install_source_state: stale`), copia
+# tocada (`install_copy: tweaked`) y origen movido (`moved`), que **no** convierte en vieja
+# a una copia intacta: lo que falta entonces es el clon, no la copia.
+SRC_HOME="$WORK_DIR/home-source"
+SRC_DIR="$WORK_DIR/src-source"
+mkdir -p -- "$SRC_HOME" "$SRC_DIR"
+cp -- "$GLOT_SH" "$SRC_DIR/glot.sh"
+cp -R -- "$TESTS_DIR/../data" "$TESTS_DIR/../prompts" "$TESTS_DIR/../completions" "$SRC_DIR/"
+
+# src_install [args...] — glot desde la fuente desechable, con HOME desechable
+src_install() {
+    local rc=0
+    out="$(env -u GLOT_STATE_FILE -u GLOT_ROOT GLOT_ROOT= HOME="$SRC_HOME" "$SRC_DIR/glot.sh" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+# src_copy_doctor — doctor desde la **copia**, para cuando el origen ya no está
+src_copy_doctor() {
+    local rc=0
+    out="$(env -u GLOT_STATE_FILE -u GLOT_ROOT GLOT_ROOT= HOME="$SRC_HOME" "$SRC_HOME/.local/bin/glot" doctor 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+src_install install >/dev/null
+src_install doctor
+assert_contains 'doctor: la orilla de la copia está al día' 'install_copy: ok' "$out"
+assert_contains 'doctor: la orilla de la fuente está al día' 'install_source_state: ok' "$out"
+assert_contains 'doctor: sin deriva no hay porqué' 'install_stale: no' "$out"
+
+# orilla de la fuente: el clon avanza (el catálogo cambia en la fuente, no en la copia)
+printf '\n# retoque en la fuente / source tweak\n' >>"$SRC_DIR/data/commits.tsv"
+src_install doctor
+assert_contains 'doctor: la fuente avanzada marca deriva' 'install_stale: yes' "$out"
+assert_contains 'doctor: la deriva se atribuye a la fuente' 'install_source_state: stale' "$out"
+assert_contains 'doctor: la copia sigue siendo la instalada' 'install_copy: ok' "$out"
+assert_contains 'doctor: la deriva trae el remedio' 'glot install' "$err"
+src_install install >/dev/null
+src_install doctor
+assert_contains 'doctor: reinstalar desde la fuente la pone al día' 'install_source_state: ok' "$out"
+assert_contains 'doctor: tras reinstalar no queda deriva' 'install_stale: no' "$out"
+
+# orilla de la copia: el retoque está en la copia y la fuente sigue igual
+printf '\n# retoque en la copia / copy tweak\n' >>"$SRC_HOME/.local/share/glot/data/commits.tsv"
+src_install doctor
+assert_contains 'doctor: la copia retocada marca deriva' 'install_stale: yes' "$out"
+assert_contains 'doctor: la deriva se atribuye a la copia' 'install_copy: tweaked' "$out"
+assert_contains 'doctor: la fuente sigue al día' 'install_source_state: ok' "$out"
+src_install install >/dev/null
+
+# el origen movido no es deriva de la copia: se nombra y la copia intacta no se marca vieja
+mv -- "$SRC_DIR" "$SRC_DIR-moved"
+src_copy_doctor
+assert_contains 'doctor: copia intacta sin origen no es deriva' 'install_stale: no' "$out"
+assert_contains 'doctor: el origen que ya no está se nombra' 'install_source_state: moved' "$out"
+assert_contains 'doctor: la copia intacta se declara' 'install_copy: ok' "$out"
+mv -- "$SRC_DIR-moved" "$SRC_DIR"
+src_install doctor
+assert_contains 'doctor: vuelto el origen, todo vuelve a estar al día' 'install_source_state: ok' "$out"
+
 # lo ajeno no se pisa: ni un enlace de otro, ni un fichero
 rm -rf -- "$INSTALL_HOME/.local/bin"
 mkdir -p -- "$INSTALL_HOME/.local/bin"
@@ -2123,6 +2187,19 @@ assert_eq 'help install: código' '0' "$rc_last"
 assert_contains 'help install: explica la copia estable' 'copia estable' "$out"
 glot_run help uninstall
 assert_contains 'help uninstall: explica que deshace' 'deshace' "$out"
+
+# v1.4.0: la ayuda del verbo es la única documentación que se lee con el verbo delante, así
+# que ahí viven las dos notas nuevas: el `cd` de la capa no cruza una tubería, y `doctor`
+# mide la deriva en dos orillas (la copia y la fuente)
+glot_run help use
+assert_eq 'help use: código' '0' "$rc_last"
+assert_contains 'help use: el cd de la capa solo llega en tu shell' 'subshell' "$out"
+assert_contains 'help use: lo explica en inglés' 'pipeline' "$out"
+assert_contains 'help use: sin capa el cd lo hace tu shell' 'cd "$(glot use' "$out"
+glot_run help doctor
+assert_eq 'help doctor: código' '0' "$rc_last"
+assert_contains 'help doctor: la deriva se mide en dos orillas' 'install_copy:' "$out"
+assert_contains 'help doctor: la orilla de la fuente se nombra' 'install_source_state:' "$out"
 assert_contains 'completado bash: conoce install' 'install uninstall' "$(cat -- "$TESTS_DIR/../completions/glot.bash")"
 assert_contains 'completado zsh: conoce install' "'install:" "$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
 
@@ -2359,6 +2436,21 @@ assert_contains 'contrato: el SAST es no-objetivo' 'análisis estático de segur
 assert_contains 'contrato: el reparto del paso 6' 'Alcance de la capa' "$(cat -- "$TESTS_DIR/../docs/CONTRACT.md")"
 assert_contains 'sprint: el reparto del paso 6' 'Reparto del paso 6' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
 assert_contains 'data/README: la columna 5 es lint' 'lint idiomático' "$(cat -- "$DATA_DIR/README.md")"
+
+# --- casos de la especificación v1.4.0 (política de CI) ----------------------
+#
+# La política de CI está escrita **antes** de añadir workflows (v1.4.0), y lo que decide es
+# comprobable: el comando sale del catálogo en vez de copiarse, la CI comprueba y **no**
+# firma el acta de `docs/evidence/`, y el SAST del repositorio no es el verbo `verify`.
+CI_POLICY="$REPO/docs/WORKFLOW.md"
+assert_contains 'CI: la política vive donde vive el ciclo' 'CI por submódulo' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: el comando no se copia del catálogo' 'no se copia del catálogo, se le pide al catálogo' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: llama a los verbos del catálogo' '`glot test`' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: la CI comprueba y no firma' 'la CI comprueba y no firma' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: la CI no escribe el acta' 'no escribe' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: el SAST del repositorio no es verify' 'no el verbo `verify`' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: el workflow que copia queda como excepción' 'excepción declarada' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: la excepción se nombra' 'ada/.github/workflows/tests.yml' "$(cat -- "$CI_POLICY")"
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 

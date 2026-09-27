@@ -540,6 +540,8 @@ _glot_cmd_doctor() {
         local install_version="-"
         local install_source="-"
         local install_stale="no"
+        local install_copy="-"
+        local install_source_state="-"
         local install_sha_now=""
         local install_sha_src=""
         local install_bin_dir=""
@@ -560,14 +562,42 @@ _glot_cmd_doctor() {
             fi
             printf 'install_version: %s\n' "${install_version:--}"
             printf 'install_source: %s\n' "${install_source:--}"
+            # Las **dos orillas** se miden por separado (v1.4.0): la copia frente a lo que se
+            # instaló —un retoque a mano— y la fuente frente a lo instalado —el clon avanzó—.
+            # El remedio es el mismo (`glot install`), pero decir cuál cambió evita llamar
+            # vieja a una copia intacta solo porque el clon se movió, y evita "arreglar" con
+            # una reinstalación un origen que ya no está.
             if [[ -n "$install_sha" && "$install_sha" != "-" ]]; then
                 install_sha_now="$(_glot_install_fingerprint "$install_dir" || true)"
-                install_sha_src="$(_glot_install_fingerprint "$install_source" || true)"
-                if [[ "$install_sha_now" != "$install_sha" || "$install_sha_src" != "$install_sha" ]]; then
+                if [[ "$install_sha_now" == "$install_sha" ]]; then
+                    install_copy="ok"
+                else
+                    install_copy="tweaked"
                     install_stale="yes"
+                fi
+
+                install_sha_src=""
+                if [[ -r "$install_source/glot.sh" ]]; then
+                    install_sha_src="$(_glot_install_fingerprint "$install_source" || true)"
+                fi
+                if [[ -z "$install_source" ]]; then
+                    install_source_state="-"
+                elif [[ -z "$install_sha_src" ]]; then
+                    install_source_state="moved"
+                elif [[ "$install_sha_src" == "$install_sha" ]]; then
+                    install_source_state="ok"
+                else
+                    install_source_state="stale"
+                    install_stale="yes"
+                fi
+
+                if [[ "$install_stale" == "yes" ]]; then
+                    _glot_info 'la copia se quedó atrás / the copy is behind: glot install'
                 fi
             fi
             printf 'install_stale: %s\n' "$install_stale"
+            printf 'install_copy: %s\n' "$install_copy"
+            printf 'install_source_state: %s\n' "$install_source_state"
             # La deriva de datos se informa aparte: saber que la copia entera está vieja no
             # dice si lo viejo es el script o el catálogo, y lo segundo es lo que pasa al
             # actualizar el tooling sin reinstalar.
@@ -3191,6 +3221,12 @@ _glot_help_verb() {
             printf 'el estado resuelto (state_root:) y las toolchains declaradas (toolchains:)\n'
             printf 'It also checks the installation and the shells (install:, shell:, shell_loaded:),\n'
             printf 'the resolved state (state_root:) and the declared toolchains (toolchains:)\n'
+            printf 'De la copia instalada informa las **dos orillas** de la deriva: install_copy:\n'
+            printf '(retoque a mano) e install_source_state: (el clon avanzó, o ya no está),\n'
+            printf 'con glot install como remedio\n'
+            printf 'Of the installed copy it reports the **two banks** of the drift: install_copy:\n'
+            printf '(a manual tweak) and install_source_state: (the clone moved on, or is gone),\n'
+            printf 'with glot install as the remedy\n'
             printf 'De las toolchains informa la cobertura y la presencia de las declaradas, y\n'
             printf 'comprueba la serie del lenguaje del sprint: una versión distinta se informa\n'
             printf 'como differs y no cambia el código, pero una herramienta que falte sí\n'
@@ -3366,6 +3402,14 @@ _glot_help_verb() {
             printf '  publishes it with -u; with uncommitted work it only reports (if you are\n'
             printf '  already on the branch, it republishes it). Creates the module folder\n'
             printf '  when missing. Stores state and prints the path\n'
+            printf 'El `cd` de la capa cargada (glot install) solo llega si el verbo corre en tu\n'
+            printf 'shell: en una tubería (`glot use … | …`) corre en un subshell y el cd se queda\n'
+            printf 'ahí —es una limitación de bash, no del verbo—. Sin capa, el cd lo hace tu shell:\n'
+            printf "  cd \"\$(glot use …)\"\n"
+            printf 'The `cd` of the loaded layer (glot install) only arrives when the verb runs in\n'
+            printf 'your shell: inside a pipeline (`glot use … | …`) it runs in a subshell and the cd\n'
+            printf 'stays there —a bash limitation, not the verb one—. Without the layer, your shell\n'
+            printf 'does the cd:\n'
             printf 'Tipos / types: feat (por defecto/default), fix, docs, chore, refactor, test\n'
             printf 'Con el módulo ya cerrado hay que indicar el tipo / with a closed module the type must be given\n'
             printf 'Desde dentro de un submódulo se puede omitir el lenguaje / the language can be omitted inside a submodule\n'
@@ -4445,6 +4489,7 @@ _glot_cmd_use() {
     # `cd` ya lo ha hecho la función, y repetirlo ahí sería contradecirse.
     if [[ -z "${GLOT_LOADED:-}" ]]; then
         _glot_info "recuerda / remember: cd \"\$(glot use $lang $target $kind)\" — o carga la capa con \"glot install\" y el cd lo hace use / or load the layer with \"glot install\" and use does the cd"
+        _glot_info "nunca dentro de una tubería: el cd se queda en el subshell / never inside a pipeline: the cd stays in the subshell"
     fi
 
     return 0
