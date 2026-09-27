@@ -148,7 +148,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 
 | Lenguaje | Secuencia | Completado posterior |
 |---|---|---|
-| `ada` | `alr init --lib --in-place {module}` → `alr init --bin tests` | Licencia `GPL-3.0-or-later` y `tests/alire.toml` (`description`, `[[depends-on]]`, `[[pins]] path='..'`, `aunit`) |
+| `ada` | `alr init --lib --in-place {module}` → `alr init --bin tests` → `alr with {module} --use=..` → `alr with aunit` (los dos últimos, dentro de `tests/`) | Licencia `GPL-3.0-or-later` en `alire.toml` y `tests/alire.toml`, y `description` del subproyecto de pruebas |
 | `clojure` | `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib :name {module} :target-dir {module}` | Sustituir el test de plantilla |
 | `common-lisp` | `ros -e '(ql:quickload :quickproject)' -e '(quickproject:make-project "{module}")'` | Añadir `src/`, `test/` y `run-tests.lisp` |
 | `csharp` | `dotnet new sln` → `dotnet new classlib` → `dotnet new xunit` → `dotnet sln add` | `<ProjectReference>` a `src`, borrar `Class1.cs` y `UnitTest1.cs`, `.gitignore` |
