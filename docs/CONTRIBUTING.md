@@ -150,9 +150,9 @@ diff; it records only the exact commit it points to.
 Submodule repository:
 main -> feat/algorithms/naive-sort -> review -> main (commit A)
 
-Monorepo repository:
-main -> chore/algorithms/naive-sort-pointer
-		checkout submodule at commit A
+Monorepo repository (on the **active branch**: the pointer belongs to the closing
+that is underway):
+active branch -> checkout submodule at commit A
 		git add <language>
 		git commit -m "chore(submodule): update <language> pointer"
 		review -> main
@@ -165,10 +165,10 @@ Flujo operativo:
 2. Integra ese cambio en el `main` del submódulo y anota el commit resultante.
 3. Vuelve a la raíz, cambia el submódulo al commit integrado y verifica
 	`git submodule status`.
-4. Crea una rama `chore/<phase>/<module>-pointer` en el monorepo, añade el
-	puntero y actualiza documentación o roadmap si corresponde. El paso del puntero
-	lo hace `glot pointer` (verifica que el commit está integrado, prepara y publica
-	la rama y añade el gitlink) y lo confirma `glot save 9`.
+4. Añade el puntero **en la rama activa** del monorepo y actualiza documentación o
+	roadmap si corresponde. El paso del puntero lo hace `glot pointer` (verifica que el
+	commit está integrado y añade el gitlink, **sin abrir ni publicar rama propia**) y lo
+	confirma `glot save 9`.
 5. Revisa y fusiona primero el cambio del submódulo; después revisa y fusiona
 	el cambio del puntero en el `main` del monorepo.
 
