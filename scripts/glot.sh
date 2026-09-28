@@ -15,6 +15,8 @@
 # Desde la v1.4.0 el **alcance de `verify`** está escrito: es *lint* idiomático (sintaxis y
 # formato) y el **análisis estático de seguridad queda fuera**; los valores codificados
 # para aprobar los casos (*hardcode*) los revisa `validate`.
+# Desde la v1.4.1 `ask` imprime las **dos líneas de delegado** cuando no hay ninguno —y con
+# `--delegate` solo la que falta—, en vez de dejar al autor con el nombre de la variable.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -52,7 +54,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.4.0"
+GLOT_VERSION="1.4.1"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -1471,6 +1473,10 @@ _glot_delegate_command() {
             fi
             _glot_error 'no hay delegado configurado / no delegate configured'
             _glot_info 'define GLOT_DELEGATE_COP o GLOT_DELEGATE_AGY / set GLOT_DELEGATE_COP or GLOT_DELEGATE_AGY'
+            # El error trae las dos líneas de referencia: sin ellas el verbo dice qué variable
+            # falta y deja al autor buscando el comando. Salen por stderr, que es el canal del
+            # diagnóstico (el stdout de `ask` es la salida del delegado).
+            _glot_delegates_hint >&2
             _glot_info 'o imprime el encargo / or print the request: glot prompt '"$2"
             return 1
             ;;
@@ -1478,6 +1484,7 @@ _glot_delegate_command() {
             if [[ -z "$cop" ]]; then
                 _glot_error 'el delegado de Copilot no está configurado / the Copilot delegate is not set'
                 _glot_info 'define GLOT_DELEGATE_COP / set GLOT_DELEGATE_COP'
+                _glot_delegates_hint cop >&2
                 return 1
             fi
             printf '%s\n' "$cop"
@@ -1486,6 +1493,7 @@ _glot_delegate_command() {
             if [[ -z "$agy" ]]; then
                 _glot_error 'el delegado de Antigravity no está configurado / the Antigravity delegate is not set'
                 _glot_info 'define GLOT_DELEGATE_AGY / set GLOT_DELEGATE_AGY'
+                _glot_delegates_hint agy >&2
                 return 1
             fi
             printf '%s\n' "$agy"
@@ -3380,6 +3388,11 @@ _glot_help_verb() {
             printf '(Copilot) y GLOT_DELEGATE_AGY (Antigravity); GLOT_DELEGATE es el alias del primero\n'
             printf 'The commands live in the author environment, not in the repository: GLOT_DELEGATE_COP\n'
             printf '(Copilot) and GLOT_DELEGATE_AGY (Antigravity); GLOT_DELEGATE is the old alias of the first one\n'
+            _glot_delegates_hint
+            printf 'Cada una es la invocación verificada de su CLI; se pegan en el rc y las imprime\n'
+            printf 'también `glot install`, además de este verbo cuando le falta el delegado\n'
+            printf 'Each one is the verified invocation of its CLI; they go in the rc and are printed\n'
+            printf 'by `glot install` too, and by this verb when the delegate is missing\n'
             printf 'En la orden, {root} y {module_dir} los resuelve glot; el encargo va por stdin\n'
             printf 'In the command, {root} and {module_dir} are resolved by glot; the request goes over stdin\n'
             printf 'Sin delegado, o con dos configurados sin --delegate, devuelve 1 y 2\n'
@@ -4675,14 +4688,20 @@ _glot_rc_remove() {
     return 0
 }
 
-# _glot_delegates_hint — las dos líneas de delegado que el autor pega en su rc. Las
-# imprime `install` —por stdout en el plan y por stderr al instalar—: la orden es **del
-# autor**, así que no se escribe en el rc ni viaja en el repositorio. Los marcadores los
+# _glot_delegates_hint [cop|agy] — las dos líneas de delegado que el autor pega en su rc.
+# Las imprime `install` —por stdout en el plan y por stderr al instalar— y también `ask`
+# cuando le falta el delegado, que es donde el autor se entera de que hacen falta: la orden
+# es **del autor**, así que no se escribe en el rc ni viaja en el repositorio. Con `cop` o
+# `agy` imprime solo esa línea, para el caso de que falte una de las dos. Los marcadores los
 # resuelve `ask`, de modo que tampoco queda ninguna ruta de la máquina.
 _glot_delegates_hint() {
-    printf 'delegados: estas dos líneas van en tu rc / delegates: these two lines go in your rc\n'
-    printf "export GLOT_DELEGATE_COP='copilot -C {module_dir} -p \"\$(cat)\" --add-dir {root} --allow-all-tools'\n"
-    printf "export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6 -p \"\$(cat)\" --add-dir {root}'\n"
+    local only="${1:-}"
+
+    if [[ -z "$only" ]]; then
+        printf 'delegados: estas dos líneas van en tu rc / delegates: these two lines go in your rc\n'
+    fi
+    [[ "$only" == "agy" ]] || printf "export GLOT_DELEGATE_COP='copilot -C {module_dir} -p \"\$(cat)\" --add-dir {root} --allow-all-tools'\n"
+    [[ "$only" == "cop" ]] || printf "export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6 -p \"\$(cat)\" --add-dir {root}'\n"
 }
 
 # _glot_cmd_install — copia estable, enlace en el PATH, completados y bloque del rc.
