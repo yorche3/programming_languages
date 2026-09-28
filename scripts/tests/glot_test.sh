@@ -853,7 +853,7 @@ assert_eq 'prompt: código' '0' "$rc_last"
 assert_eq 'prompt: ocho encargos' '8' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 assert_eq 'prompt: cuatro columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=4')"
 assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
-assert_contains 'prompt: contract en el paso 4b' "$(printf 'contract\t4b')" "$out"
+assert_contains 'prompt: contract_stub en el paso 4b' "$(printf 'contract_stub\t4b')" "$out"
 assert_contains 'prompt: suite después del contrato' "$(printf 'suite\t4c')" "$out"
 assert_contains 'prompt: docs-language en el paso 8' "$(printf 'docs-language\t8')" "$out"
 assert_contains 'prompt: el modelo sale del catálogo' "$(printf 'validate\t6\tgemini-3.8-flash')" "$out"
@@ -1029,16 +1029,25 @@ assert_contains 'suite: la especificación es la autoridad de los casos' 'autori
 assert_contains 'suite: decide el tipo de secuencia del lenguaje' 'Tipo de secuencia' "$suite_prompt"
 assert_contains 'suite: prohíbe inventar los casos' 'sustituyas por una lista inventada' "$suite_prompt"
 assert_contains 'suite: declara las adaptaciones' 'La adaptación se declara' "$suite_prompt"
-assert_contains 'suite: usa el contrato del paso 4b' 'encargo `contract`, paso 4b' "$suite_prompt"
+assert_contains 'suite: usa el contrato del paso 4b' 'encargo `contract_stub`, paso 4b' "$suite_prompt"
 assert_contains 'suite: no declara el contrato por su cuenta' 'no los declara' "$suite_prompt"
+assert_contains 'suite: el contrato ya deja esqueletos' 'contrato con sus esqueletos' "$suite_prompt"
+assert_contains 'suite: el enlace roto es defecto del 4b' 'defecto del paso 4b' "$suite_prompt"
 
-# el encargo del contrato declara su contrato y qué queda fuera
-contract_prompt="$(cat -- "$PROMPTS_DIR/contract.prompt.md")"
-assert_contains 'contract: declara la entrada' '**Entrada**' "$contract_prompt"
-assert_contains 'contract: declara lo que queda fuera' '**Fuera de alcance**' "$contract_prompt"
-assert_contains 'contract: usa el indicador natural' 'indicador natural' "$contract_prompt"
-assert_contains 'contract: una firma por función' 'una firma por función' "$contract_prompt"
-assert_contains 'contract: no escribe la suite' 'encargo `suite` (paso 4c)' "$contract_prompt"
+# v1.5.0: el encargo del contrato se llama `contract_stub` y exige, además del contrato,
+# el **esqueleto** de cada operación, para que el `4c` compile y enlace aunque el algoritmo
+# sea del paso 5 (era el bloqueo que detuvo dos veces al delegado del `4c`)
+contract_prompt="$(cat -- "$PROMPTS_DIR/contract_stub.prompt.md")"
+assert_contains 'contract_stub: declara la entrada' '**Entrada**' "$contract_prompt"
+assert_contains 'contract_stub: declara lo que queda fuera' '**Fuera de alcance**' "$contract_prompt"
+assert_contains 'contract_stub: usa el indicador natural' 'indicador natural' "$contract_prompt"
+assert_contains 'contract_stub: una firma por función' 'una firma por función' "$contract_prompt"
+assert_contains 'contract_stub: exige el esqueleto de cada operación' 'esqueleto de cada operación' "$contract_prompt"
+assert_contains 'contract_stub: el módulo compila y enlaza' 'compilar y enlazar' "$contract_prompt"
+assert_contains 'contract_stub: el esqueleto no es implementación' 'resuelve ningún caso' "$contract_prompt"
+assert_contains 'contract_stub: no escribe la suite' 'encargo `suite` (paso 4c)' "$contract_prompt"
+assert_eq 'contract_stub: el encargo viejo ya no existe' '0' \
+    "$(grep -c 'encargo `contract`' "$PROMPTS_DIR/contract_stub.prompt.md" || true)"
 
 # el encargo del esqueleto declara su contrato y parte de lo que dejó `new`
 scaffold_prompt="$(cat -- "$PROMPTS_DIR/scaffold.prompt.md")"
@@ -1046,6 +1055,10 @@ assert_contains 'scaffold: declara la entrada' '**Entrada**' "$scaffold_prompt"
 assert_contains 'scaffold: declara lo que queda fuera' '**Fuera de alcance**' "$scaffold_prompt"
 assert_contains 'scaffold: parte de lo que dejó new' 'glot new' "$scaffold_prompt"
 assert_contains 'scaffold: no escribe la suite' 'encargo `suite`' "$scaffold_prompt"
+
+# v1.5.0: el andamiaje regenera el índice de fuentes del lenguaje (medido el 2026-09-28: el
+# `composer require` de `new` deja el classmap del `src/` vacío y la suite no ve la clase)
+assert_contains 'scaffold: regenera el índice de fuentes' 'composer dump-autoload' "$scaffold_prompt"
 
 # v1.3.0: el runner es del 4a. La frontera tiene que estar en un solo sitio, así que el caso
 # comprueba las **dos mitades**: el esqueleto lo deja arrancando y la suite no lo crea.
@@ -1085,7 +1098,7 @@ assert_contains 'validate: la plantilla se declara de solo lectura' 'solo lectur
 # la firma de `save` sin paso), y con `set -e` y `pipefail` no puede tumbar aquí.
 save_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot save ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
 assert_contains 'completion bash: pasos de save' '4a' "$save_comp"
-assert_contains 'completion bash: el contrato como paso propio' 'contract' "$save_comp"
+assert_contains 'completion bash: el contrato como paso propio' 'contract_stub' "$save_comp"
 assert_contains 'completion bash: la suite se desplaza a 4c' '4c' "$save_comp"
 assert_contains 'completion bash: alias de los pasos' 'scaffold' "$save_comp"
 assert_eq 'completion bash: un candidato por línea' '14' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
@@ -1097,7 +1110,7 @@ glot_run prompt
 assert_eq 'completion bash: los encargos salen del registro' \
     "$(printf '%s\n' "$out" | cut -f1 | LC_ALL=C sort)" \
     "$(printf '%s\n' "$prompt_comp" | LC_ALL=C sort)"
-assert_contains 'completion bash: el contrato entre los encargos' 'contract' "$prompt_comp"
+assert_contains 'completion bash: el contrato entre los encargos' 'contract_stub' "$prompt_comp"
 
 # new: con herramienta, el plan es el comando del catálogo y el directorio del módulo
 glot_run -n new php algorithms/naive_sort
@@ -1223,15 +1236,21 @@ glot_run_sandbox save suite ruby algorithms/naive_sort
 assert_eq 'save con alias y nada que confirmar: código' '0' "$rc_last"
 assert_eq 'save con alias y nada que confirmar: dato' 'nothing' "$out"
 
-# save: el contrato es el paso 4b y su mensaje sale del catálogo
+# save: el contrato es el paso 4b (alias `contract_stub`) y su mensaje sale del catálogo
 printf 'y\n' >"$RB/src/y.rb"
-glot_run_sandbox -n save contract ruby algorithms/naive_sort
+glot_run_sandbox -n save contract_stub ruby algorithms/naive_sort
 assert_eq 'save -n contrato: código' '0' "$rc_last"
 assert_contains 'save -n contrato: mensaje del catálogo' "commit -m 'chore(algorithms): add contract for naive_sort'" "$out"
 # v1.3.0: el mismo flag, detrás del verbo (antes tomaba `-n` por el paso)
-glot_run_sandbox save -n contract ruby algorithms/naive_sort
+glot_run_sandbox save -n contract_stub ruby algorithms/naive_sort
 assert_eq 'save -n detrás del verbo: código' '0' "$rc_last"
 assert_contains 'save -n detrás del verbo: mensaje del catálogo' "commit -m 'chore(algorithms): add contract for naive_sort'" "$out"
+# v1.5.0: el alias viejo `contract` ya no resuelve; el ordinal `4b` sigue siendo la forma estable
+glot_run_sandbox -n save contract ruby algorithms/naive_sort
+assert_eq 'save con el alias viejo: código' '2' "$rc_last"
+assert_contains 'save con el alias viejo: lo explica' 'paso desconocido' "$err"
+glot_run_sandbox -n save 4b ruby algorithms/naive_sort
+assert_eq 'save 4b sigue valiendo: código' '0' "$rc_last"
 rm -f -- "$RB/src/y.rb"
 
 # v1.3.0: la corrección es paso propio (`4d`, alias `fix`) y **exige la causa**, que va como
@@ -1242,11 +1261,21 @@ glot_run_sandbox -n save 4d ruby algorithms/naive_sort
 assert_eq 'save 4d sin causa: código' '2' "$rc_last"
 assert_contains 'save 4d sin causa: lo explica' 'necesita su causa' "$err"
 printf 'z\n' >"$RB/src/z.rb"
-glot_run_sandbox -n save 4d --causa 'la suite no cubría el caso vacío' ruby algorithms/naive_sort
+glot_run_sandbox -n save 4d --cause 'la suite no cubría el caso vacío' ruby algorithms/naive_sort
 assert_eq 'save 4d con causa: código' '0' "$rc_last"
 assert_contains 'save 4d: el mensaje sale del catálogo' "commit -m 'fix(algorithms): correct naive_sort'" "$out"
 assert_contains 'save 4d: la causa va al cuerpo del commit' "-m 'la suite no cubría el caso vacío'" "$out"
-glot_run_sandbox -n save fix --causa 'la causa' ruby algorithms/naive_sort
+# v1.5.0: la opción va en inglés, como el resto del CLI; `--causa` se acepta como alias
+glot_run_sandbox -n save 4d --causa 'la causa en español sigue valiendo' ruby algorithms/naive_sort
+assert_eq 'save 4d con --causa (alias): código' '0' "$rc_last"
+assert_contains 'save 4d con --causa: la causa llega' "-m 'la causa en español sigue valiendo'" "$out"
+glot_run_sandbox -n save 4d --cause='la causa con igual' ruby algorithms/naive_sort
+assert_eq 'save 4d con --cause= (pegado): código' '0' "$rc_last"
+assert_contains 'save 4d con --cause=: la causa llega' "-m 'la causa con igual'" "$out"
+glot_run_sandbox -n save 4d --cause
+assert_eq 'save 4d con --cause sin texto: código' '2' "$rc_last"
+assert_contains 'save 4d con --cause sin texto: lo explica' 'falta el texto de --cause' "$err"
+glot_run_sandbox -n save fix --cause 'la causa' ruby algorithms/naive_sort
 assert_eq 'save con el alias fix: código' '0' "$rc_last"
 assert_contains 'save con el alias fix: el mismo mensaje' "commit -m 'fix(algorithms): correct naive_sort'" "$out"
 rm -f -- "$RB/src/z.rb"
@@ -1882,6 +1911,51 @@ glot_run_sandbox save 10 ruby algorithms/naive_sort
 assert_eq 'save 10 sin cambios: dato' 'nothing' "$out"
 assert_eq 'save 10 sin cambios: código' '0' "$rc_last"
 
+# v1.5.0: `pointer` no puede tapar que la rama del sprint **no** está integrada. Se monta el
+# caso peligroso —volver a `main` sin fusionar, que es lo que decía el mensaje viejo— y se
+# comprueba que frena en vez de responder `nothing`. Medido el 2026-09-28 en el laboratorio:
+# seguir aquel mensaje al pie de la letra dejaba los seis commits del módulo fuera del
+# puntero, en silencio, porque `main` seguía siendo el de `origin/main`.
+state_branch_before="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" get branch 2>/dev/null || true)"
+state_lang_before="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" get lang 2>/dev/null || true)"
+state_phase_before="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" get phase 2>/dev/null || true)"
+state_module_before="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" get module 2>/dev/null || true)"
+git -C "$SANDBOX/php" switch -q -c feat/algorithms/sprint-lost main
+printf '# trabajo del sprint\n' >>"$SANDBOX/php/README.md"
+git -C "$SANDBOX/php" add -A
+git -C "$SANDBOX/php" commit -q -m 'feat(algorithms): sprint work'
+git -C "$SANDBOX/php" switch -q main
+glot_run_sandbox set lang php
+glot_run_sandbox set phase algorithms
+glot_run_sandbox set module naive_sort
+glot_run_sandbox set branch feat/algorithms/sprint-lost
+glot_run_sandbox pointer php algorithms/naive_sort
+assert_eq 'pointer con la rama del sprint sin integrar: código' '1' "$rc_last"
+assert_contains 'pointer con la rama del sprint sin integrar: lo dice' 'tiene trabajo que main no tiene' "$err"
+assert_contains 'pointer con la rama del sprint sin integrar: da el merge' 'merge --no-ff feat/algorithms/sprint-lost' "$err"
+glot_run_sandbox set branch "${state_branch_before:-main}"
+if [[ -n "$state_lang_before" ]]; then glot_run_sandbox set lang "$state_lang_before"; fi
+if [[ -n "$state_phase_before" ]]; then glot_run_sandbox set phase "$state_phase_before"; fi
+if [[ -n "$state_module_before" ]]; then glot_run_sandbox set module "$state_module_before"; fi
+git -C "$SANDBOX/php" branch -q -D feat/algorithms/sprint-lost
+
+# v1.5.0: `close` exige que el puntero del monorepo apunte al commit **integrado** del
+# submódulo. El paso 8 (índices del lenguaje) se confirma **dentro** del submódulo y puede ir
+# después del `pointer`: entonces el puntero se queda atrás y cerrar registraría un commit
+# que no es el apuntado (medido el 2026-09-28 en el laboratorio: `status` decía `differs` y
+# `close` cerraba igual, con el módulo «cerrado» apuntando a un commit anterior).
+printf 'core.algorithms.naive_sort            pending 1/2 (Ada)\n' >"$SANDBOX/docs/ROADMAP.md"
+printf '# Registro de cierre\n' >"$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md"
+printf '# índices del lenguaje\n' >>"$SANDBOX/php/README.md"
+git -C "$SANDBOX/php" add -A
+git -C "$SANDBOX/php" commit -q -m 'docs: add README for algorithms and update indexes'
+glot_run_sandbox close php algorithms/naive_sort
+assert_eq 'close con el puntero obsoleto: código' '1' "$rc_last"
+assert_contains 'close con el puntero obsoleto: lo dice' 'no apunta al submódulo' "$err"
+assert_contains 'close con el puntero obsoleto: nombra los dos commits' 'y el puntero en ' "$err"
+assert_contains 'close con el puntero obsoleto: da el remedio' 'glot pointer php algorithms/naive_sort' "$err"
+assert_contains 'close con el puntero obsoleto: no toca el roadmap' 'pending 1/2 (Ada)' "$(cat -- "$SANDBOX/docs/ROADMAP.md")"
+
 # v1.3.0: una línea del bloque de contadores con el id **pegado** a la marca desaparecía del
 # catálogo **en silencio**. Medido el 2026-09-27: `core.algorithms.data_structures_basics🔄 3/50`
 # en el roadmap real hizo que `glot modules`, `glot use` y `progress` dejasen de ofrecer el
@@ -2227,6 +2301,18 @@ glot_run help doctor
 assert_eq 'help doctor: código' '0' "$rc_last"
 assert_contains 'help doctor: la deriva se mide en dos orillas' 'install_copy:' "$out"
 assert_contains 'help doctor: la orilla de la fuente se nombra' 'install_source_state:' "$out"
+
+# v1.5.0: `save` documenta la opción en inglés y `pointer` deja de anunciar una rama propia
+# (eso se decidió en la v1.3.0 y la ayuda del listado se quedó atrás)
+glot_run help save
+assert_eq 'help save: código' '0' "$rc_last"
+assert_contains 'help save: documenta --cause' '--cause' "$out"
+assert_contains 'help save: --causa queda como alias' '--causa' "$out"
+glot_run help pointer
+assert_eq 'help pointer: código' '0' "$rc_last"
+assert_contains 'help pointer: el gitlink va en la rama activa' 'rama activa' "$out"
+assert_eq 'help pointer: ya no anuncia rama propia' '0' \
+    "$(printf '%s\n' "$out" | grep -c -- '-pointer' || true)"
 assert_contains 'completado bash: conoce install' 'install uninstall' "$(cat -- "$TESTS_DIR/../completions/glot.bash")"
 assert_contains 'completado zsh: conoce install' "'install:" "$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
 
@@ -2575,26 +2661,9 @@ assert_contains 'completado zsh: ask tiene su propia rama' '        ask)' "$ZSH_
 # --- puerta de entrada al archivo de versiones -------------------------------
 
 # La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:
-# es la regla que evita que una versión se cierre sin dejar su foto congelada. El
-# salto 0.x -> 1.0.0 se salta la comprobación (la versión anterior no se deduce).
+# es la regla que evita que una versión se cierre sin dejar su foto congelada.
 live_version="$LIVE_VERSION"
 assert_eq 'puerta de entrada: la versión viva se lee del script' 'si' "$([[ -n "$live_version" ]] && echo si || echo no)"
-
-major="${live_version%%.*}"
-rest="${live_version#*.}"
-minor="${rest%%.*}"
-patch="${rest#*.}"
-previous=""
-if ((patch > 0)); then
-    previous="$major.$minor.$((patch - 1))"
-elif ((minor > 0)); then
-    previous="$major.$((minor - 1)).0"
-fi
-
-if [[ -n "$previous" ]]; then
-    assert_eq 'puerta de entrada: el snapshot de la versión anterior está archivado' \
-        'si' "$([[ -f "$TESTS_DIR/../versions/glot_$previous.sh" ]] && echo si || echo no)"
-fi
 
 # La puerta se comprueba también hacia atrás: toda versión que el log marca como
 # cerrada tiene que tener su snapshot, y ningún snapshot puede sobrar. Así el olvido
@@ -2602,6 +2671,18 @@ fi
 # detectó en las v0.5.0 y v0.6.0.
 closed_versions="$(awk -F'|' '/^\| [0-9]+\.[0-9]+\.[0-9]+ / {v = $2; gsub(/[ \t]/, "", v); s = $(NF - 1); if (s ~ /cerrada/) print v}' "$TESTS_DIR/../docs/VERSIONS.md")"
 assert_eq 'archivado: el log de versiones se lee' 'si' "$([[ -n "$closed_versions" ]] && echo si || echo no)"
+
+# La versión anterior a la viva es la **última cerrada** del log, no la anterior aritmética:
+# desde la convención de parches (un `fix` o un `refactor` sobre la viva cierran como
+# `X.Y.(Z+1)`) la anterior a la 1.5.0 es la 1.4.2, no la 1.4.0, así que calcularla restando
+# uno al parche daría un falso verde y saltaría la puerta equivocada.
+previous="$(printf '%s\n' "$closed_versions" | tail -1)"
+if [[ -n "$previous" ]]; then
+    assert_eq 'puerta de entrada: el snapshot de la versión anterior está archivado' \
+        'si' "$([[ -f "$TESTS_DIR/../versions/glot_$previous.sh" ]] && echo si || echo no)"
+    assert_eq 'puerta de entrada: la viva es posterior a la última cerrada' "$live_version" \
+        "$(printf '%s\n%s\n' "$previous" "$live_version" | LC_ALL=C sort -V | tail -1)"
+fi
 
 missing_snapshots=""
 while IFS= read -r v; do

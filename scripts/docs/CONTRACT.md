@@ -59,7 +59,7 @@
 | `prompt [encargo] [lenguaje] [fase/módulo]` | Sin encargo, lista el registro —`nombre<TAB>paso<TAB>modelo<TAB>descripción`—; con encargo, imprime el encargo armado (estado del sprint + plantilla expandida) | 0 / 1 / 2 / 3 |
 | `ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot\|antigravity]` | Arma el encargo y lo envía al **delegado elegido** por stdin; su salida va a stdout. El modelo del perfil del encargo viaja por entorno (`COPILOT_MODEL`, y el tier de auto si el perfil lo declara) y con él `GLOT_ROOT` y `GLOT_MODULE_DIR` | 0 / 1 / 2 / 3 |
 | `new [lenguaje] [fase/módulo]` | Inicializa el lenguaje y crea el esqueleto mecánico del módulo: con `tool` ejecuta el comando del catálogo; con `manual` crea las carpetas; con `deferred` informa e imprime `skipped`. Normaliza lo que deja el inicializador. No escribe la suite | 0 / 1 / 2 / **4** |
-| `save <paso\|alias> [lenguaje] [fase/módulo] [--causa "<texto>"]` | Confirma con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. `--causa` viaja como **cuerpo del commit** y es **obligatoria** en el paso de corrección (`4d`): sin ella devuelve `2`. Los pasos del submódulo añaden el submódulo; los del monorepo (`9`, `10`) añaden **solo las rutas del paso**. Sin push | 0 / 1 / 2 / 3 / **4** |
+| `save <paso\|alias> [lenguaje] [fase/módulo] [--cause "<texto>"]` | Confirma con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. `--cause` viaja como **cuerpo del commit** y es **obligatoria** en el paso de corrección (`4d`): sin ella devuelve `2`. `--causa` sigue admitiéndose como **alias** desde la v1.5.0. Los pasos del submódulo añaden el submódulo; los del monorepo (`9`, `10`) añaden **solo las rutas del paso**. Sin push | 0 / 1 / 2 / 3 / **4** |
 | `evidence [lenguaje] [fase/módulo]` | Ejecuta la suite y el verificador y deja el acta con la salida real en `docs/evidence/`; la escribe también cuando algo está en rojo | 0 / 1 / 2 / 3 / **4** |
 | `close [lenguaje] [fase/módulo]` | Cierra el módulo: exige la evidencia en verde y los README, registra la entrada del checklist y sube el contador y la lista del roadmap; idempotente. Imprime la línea nueva | 0 / 1 / 2 / 3 / **4** |
 | `validate [lenguaje] [fase/módulo]` | Pasa el encargo `validate` al validador automático (opcional) y guarda su informe como registro del sprint. Sin validador, avisa y devuelve `1` | 0 / 1 / 2 / 3 / **4** |
@@ -68,7 +68,7 @@
 | `clean [lenguaje] [fase/módulo]` | Borra lo que el propio `.gitignore` del lenguaje declara como artefacto, **solo dentro del directorio del módulo**, y sincroniza el submódulo. Imprime las rutas borradas o `nothing` | 0 / 1 / 2 |
 | `install` | Deja la **copia estable** (`~/.local/share/glot/`), el enlace `~/.local/bin/glot`, el completado de cada shell presente y el bloque del rc entre marcas. Idempotente; imprime el directorio de instalación | 0 / 1 / 2 / 3 |
 | `uninstall` | Deshace lo de `install`: quita el bloque del rc, borra los completados, retira el enlace **solo si es el suyo** y la copia. Idempotente: sin nada instalado imprime `nothing` | 0 / 1 / 2 / 3 |
-| Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale. Desde la **v1.1.0**, si el nombre es un **encargo registrado** (`scaffold`, `contract`, `suite`, `implement`, `validate`, `docs-module`, `docs-language`), la sugerencia es el verbo que lo arma: `glot suite` → `quizá buscabas / maybe you meant: glot prompt suite` | 2 |
+| Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale. Desde la **v1.1.0**, si el nombre es un **encargo registrado** (`scaffold`, `contract_stub`, `suite`, `implement`, `validate`, `docs-module`, `docs-language`), la sugerencia es el verbo que lo arma: `glot suite` → `quizá buscabas / maybe you meant: glot prompt suite` | 2 |
 
 ---
 
@@ -300,8 +300,8 @@
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
-| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** (`4a`, `4b`, `4c`, `4d`, `5`, `7`, `8`) o por **alias del encargo** (`scaffold`, `contract`, `suite`, `fix`, `implement`, `docs-module`, `docs-language`). Nunca se escribe a mano |
-| Causa / Cause | `--causa "<texto>"` añade un **segundo párrafo** al commit (segundo `-m`) y es **obligatoria** en el paso de corrección (`4d`): es el registro del retrabajo —qué se corrigió y por qué—, lo único que explica por qué se toca algo ya confirmado |
+| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** (`4a`, `4b`, `4c`, `4d`, `5`, `7`, `8`) o por **alias del encargo** (`scaffold`, `contract_stub`, `suite`, `fix`, `implement`, `docs-module`, `docs-language`). Nunca se escribe a mano |
+| Causa / Cause | `--cause "<texto>"` (desde la v1.5.0; `--causa` se acepta como alias) añade un **segundo párrafo** al commit (segundo `-m`) y es **obligatoria** en el paso de corrección (`4d`): es el registro del retrabajo —qué se corrigió y por qué—, lo único que explica por qué se toca algo ya confirmado |
 | Marcadores / Placeholders | `{lang}`, `{phase}`, `{module}`, `{Module}`: los mismos del resto del tooling, resueltos con el estado del sprint |
 | Índice / Index | `git add -A` del **submódulo** completo. Si hay cambios fuera del módulo, se nombran por stderr antes de confirmar |
 | Rama / Branch | Si la rama activa no es la del estado del sprint, se avisa (no se bloquea) |

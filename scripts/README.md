@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v1.4.2** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v1.5.0** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -42,7 +42,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh -n new php algorithms/naive_sort   # esqueleto: plan sin tocar nada
 ./scripts/glot.sh new php algorithms/naive_sort      # inicializador + normalización
 ./scripts/glot.sh prompt suite                        # encargo de la suite (paso 4c)
-./scripts/glot.sh prompt contract                     # encargo del contrato (paso 4b)
+./scripts/glot.sh prompt contract_stub                # encargo del contrato y sus esqueletos (paso 4b)
 ./scripts/glot.sh prompt                              # registro: nombre, paso, modelo y descripción
 ./scripts/glot.sh status                              # submódulos, ramas y punteros (solo lectura)
 ./scripts/glot.sh -n pointer php algorithms/naive_sort  # puntero del submódulo: plan sin tocar nada
@@ -74,13 +74,13 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v1.4.2)
+├── glot.sh                  # Versión viva / live version (v1.5.0)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
 ├── prompts/                  # Plantillas de encargo, versionadas
 │   ├── scaffold.prompt.md        # Paso 4a · esqueleto
-│   ├── contract.prompt.md        # Paso 4b · contrato del módulo
+│   ├── contract_stub.prompt.md   # Paso 4b · contrato y esqueletos del módulo
 │   ├── suite.prompt.md           # Paso 4c · suite de pruebas
 │   ├── implement.prompt.md       # Paso 5
 │   ├── validate.prompt.md        # Paso 6 · informe del validador
@@ -158,7 +158,7 @@ scripts/
 # no lleva tu ruta, así que `install` te la imprime para pegarla en tu rc
 export GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools'
 export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6 -p "$(cat)" --add-dir {root}'
-./scripts/glot.sh ask --delegate copilot contract ada algorithms/data_structures_basics
+./scripts/glot.sh ask --delegate copilot contract_stub ada algorithms/data_structures_basics
 ./scripts/glot.sh ask --delegate antigravity suite ada algorithms/data_structures_basics
 ./scripts/glot.sh doctor | grep '^delegate_'   # delegate_cop: / delegate_agy:
 ```
