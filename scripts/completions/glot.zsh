@@ -10,6 +10,8 @@
 _glot_zsh() {
     local glot="${GLOT_CMD:-glot}"
     local -a verbs fases modulos lenguajes encargos pasos
+    local i=""
+    local positional=0
 
     verbs=(
         'version:versión instalada'
@@ -81,7 +83,7 @@ _glot_zsh() {
                 _describe 'módulo' modulos
             fi
             ;;
-        prompt | ask)
+        prompt)
             if ((CURRENT == 3)); then
                 encargos=(${(f)"$("$glot" prompt 2>/dev/null | cut -f1)"})
                 _describe 'encargo' encargos
@@ -92,6 +94,38 @@ _glot_zsh() {
                 modulos=(${(f)"$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"})
                 _describe 'módulo' modulos
             fi
+            ;;
+        ask)
+            # `ask` añade el delegado (v1.4.2): la opción y sus dos valores se completan, y el
+            # posicional se cuenta **saltando** el valor de `--delegate`.
+            if [[ "${words[CURRENT]}" == --delegate=* ]]; then
+                compadd -- --delegate=copilot --delegate=antigravity
+                return 0
+            fi
+            if [[ "${words[CURRENT - 1]}" == "--delegate" ]]; then
+                compadd -- copilot antigravity
+                return 0
+            fi
+            for ((i = 2; i < CURRENT; i++)); do
+                if [[ "${words[i]}" != -* && "${words[i - 1]}" != "--delegate" ]]; then
+                    positional=$((positional + 1))
+                fi
+            done
+            case "$positional" in
+                0)
+                    encargos=(${(f)"$("$glot" prompt 2>/dev/null | cut -f1)"})
+                    encargos+=(--delegate)
+                    _describe 'encargo' encargos
+                    ;;
+                1)
+                    lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
+                    _describe 'lenguaje' lenguajes
+                    ;;
+                *)
+                    modulos=(${(f)"$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"})
+                    _describe 'módulo' modulos
+                    ;;
+            esac
             ;;
         completion)
             _values 'shell' bash zsh

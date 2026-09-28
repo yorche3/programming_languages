@@ -17,6 +17,8 @@
 # para aprobar los casos (*hardcode*) los revisa `validate`.
 # Desde la v1.4.1 `ask` imprime las **dos líneas de delegado** cuando no hay ninguno —y con
 # `--delegate` solo la que falta—, en vez de dejar al autor con el nombre de la variable.
+# Desde la v1.4.2 el **autocompletado completa esa opción y sus dos valores** (`--delegate
+# copilot|antigravity`), que era lo que había que recordar de memoria.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -54,7 +56,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.4.1"
+GLOT_VERSION="1.4.2"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
