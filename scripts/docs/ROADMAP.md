@@ -74,9 +74,17 @@
 | 1.4.0 | deuda B (resto) | 6, 8 | **El cierre del bloque B:** el **alcance real de `verify`** (*lint* idiomático, con el SAST fuera), la **deriva repo→copia** medida en sus **dos orillas**, el **`cd` en tubería**, la **política de CI** por submódulo, las filas **medibles** de `toolchains.tsv` (`ada`, `common-lisp`, `rexx`, `scala`; `rescript` es excepción declarada), la **tabla de módulos** como vista manual sin contador y la **`suite` sin falso positivo** | **No abre capa**: termina el bloque B (17 de 17 entradas pagadas) | ✅ cerrada |
 | 1.4.1 | fix de la 1.4.0 | 6 | **El remedio del delegado en `ask`**: sin delegado imprime las **dos líneas de invocación verificada** —y con `--delegate`, solo la que falta—, y `help ask` las trae, en vez de dejar al autor con el nombre de la variable | **No abre capa**: fix sobre una versión cerrada; cierra como **parche** por la regla de `fix`/`refactor`, con la rama `fix/repo/glot-v1.4.0` | ✅ cerrada |
 | 1.4.2 | fix de la 1.4.1 | 6 | **El delegado en el autocompletado**: `glot ask <TAB>` ofrece `--delegate` y sus dos valores (y con `--delegate=` filtra el valor pegado), el posicional no se desplaza aunque la opción vaya delante, y el guion de zsh deja de compartir rama con `prompt` | **No abre capa**: fix sobre una versión cerrada; cierra como **parche**, con la rama `fix/repo/glot-v1.4.1` | ✅ cerrada |
+| 1.5.0 | deuda C (medida el 2026-09-27) | 4b, 4d | **El contrato se encarga como `contract_stub`** —el paso `4b` entrega el contrato **y los esqueletos** de todas sus operaciones, para que el `4c` compile y enlace aunque el cuerpo sea del paso 5, con el encargo renombrado— y **el paso de corrección alineado con el resto del CLI** (`--cause`, no `--causa`) | **No abre capa**: paga las dos entradas que midió el sprint de `c` + `data_structures_basics` | 🔄 en curso |
 | ⏳ | L9 | — | Versión esperada por lenguaje y comprobación/instalación | Segunda acepción de «manejador de versiones»; llega después del ciclo del roadmap |
 
 ### Deuda técnica / Technical debt
+
+#### ⏳ Abierta — la paga la v1.5.0 / Open — v1.5.0 pays it
+
+| Deuda | Qué la cierra / What closes it |
+|-------|--------------------------------|
+| **El paso `4b` deja el contrato sin esqueletos**, así que el `4c` se bloquea al compilar: en Ada un `.ads` sin su `.adb` no construye, y en C el andamiaje no compilaba el objeto de producción ni declaraba la operación nueva del contrato. Medido el 2026-09-27 en el sprint de `c` + `data_structures_basics`: el delegado del `4c` **se detuvo con el bloqueo** y el stub hubo que añadirlo a mano; la v1.4.0 solo pudo mitigarlo admitiendo la **compilación sin enlace** | Encargar el contrato como **`contract_stub`**: contrato **y esqueletos** de todas sus operaciones, para que el `4c` compile y enlace. Toca plantilla, `name:`, alias del catálogo de commits, [`SPRINT.md`](SPRINT.md) y referencias de [`CONTRACT.md`](CONTRACT.md) |
+| **El paso de corrección usa `--causa`**, en español, mientras el resto del CLI usa inglés (`-n/--dry-run`, `-q/--quiet`, `--delegate`). Medido el 2026-09-27 | Homogeneizar la opción (`--cause`) en el verbo, su ayuda, su mensaje de error, [`SPRINT.md`](SPRINT.md) y [`CONTRACT.md`](CONTRACT.md) |
 
 #### ✅ Cerrada — la pagó la v1.4.0 / Closed — v1.4.0 paid it
 
@@ -389,6 +397,15 @@ glot ask --delegate antigravity contract ballerina algorithms/data_structures_ba
 7. ✅ **La `suite` sin falso positivo** — **hecho el 2026-09-27**: el encargo distingue el contrato **inválido** (detiene el paso) de «aún no enlaza» (no lo detiene), admite la **compilación sin enlace** con el comando del lenguaje (`gprbuild -c -cargs -gnatc` en Ada) mientras falte el cuerpo, y traslada la ejecución y su contra-verificación al **acta del paso 6**; [`SPRINT.md`](SPRINT.md) y el harness lo recogen.
 
 **EN:** What is left of block B, in this order and without opening a new layer: 1. the **real scope of `verify`** (idiomatic lint **plus** the whole suite passing **plus** no hardcoded values, with static security analysis as an explicit non-goal); 2. the **repo → copy drift** in `doctor` (compare both shores); 3. the **CI policy** per submodule, written before adding workflows; 4. the **`cd` in a pipe** note in `use`'s help; 5. the **five `toolchains.tsv` rows**, which need a verified version command that cannot be measured here today; 6. the **module table**, deciding whether `close` keeps both views or the table becomes a manual view without a counter; 7. the **`suite` without a false positive** when the language needs the implementation to link (separate “invalid contract” from “missing body” and allow the check **without linking**).
+
+### Plan de la v1.5.0 / v1.5.0 plan
+
+**ES:** Las dos entradas que el sprint de `c` + `data_structures_basics` midió el 2026-09-27:
+
+1. **El contrato se encarga como `contract_stub`.** El paso `4b` deja el contrato **y los esqueletos** de todas sus operaciones —una definición por cada declaración, con el cuerpo vacío, incluido el indicador natural de fallo—, para que el `4c` **compile y enlace** aunque la implementación sea del paso 5. Hoy no lo hace y el `4c` se bloquea: el delegado del sprint de C se detuvo al ver que la suite quedaría «con símbolos sin resolver» y el stub de la operación nueva hubo que añadirlo a mano. La v1.4.0 mitigó el caso admitiendo la **compilación sin enlace**, pero la causa de raíz es esta. Toca renombrar el encargo (`contract` → `contract_stub`) en la plantilla y en su `name:`, el **alias** del catálogo de commits ([`data/commits.tsv`](../data/commits.tsv)), la tabla de [`SPRINT.md`](SPRINT.md) y las referencias de [`CONTRACT.md`](CONTRACT.md); y que el encargo exija el esqueleto **completo**, sin inventar ni omitir operaciones.
+2. **El paso de corrección, alineado con el resto del CLI.** Su opción es `--causa` —en español— mientras el CLI usa inglés (`-n/--dry-run`, `-q/--quiet`, `--delegate`). Pasa a **`--cause`**, con `--causa` aceptado como alias mientras se documenta el cambio, y con la ayuda, el mensaje de error y [`SPRINT.md`](SPRINT.md) al día.
+
+**EN:** The two entries the 2026-09-27 `c` + `data_structures_basics` sprint measured: 1. the contract is requested as **`contract_stub`** —step `4b` leaves the contract **and the skeletons** of all its operations— so that `4c` compiles and links even though the body belongs to step 5; 2. the **correction step** aligns its option with the rest of the CLI (`--cause` instead of `--causa`).
 
 ---
 

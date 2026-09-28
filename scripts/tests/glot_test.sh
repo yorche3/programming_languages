@@ -2575,26 +2575,9 @@ assert_contains 'completado zsh: ask tiene su propia rama' '        ask)' "$ZSH_
 # --- puerta de entrada al archivo de versiones -------------------------------
 
 # La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:
-# es la regla que evita que una versión se cierre sin dejar su foto congelada. El
-# salto 0.x -> 1.0.0 se salta la comprobación (la versión anterior no se deduce).
+# es la regla que evita que una versión se cierre sin dejar su foto congelada.
 live_version="$LIVE_VERSION"
 assert_eq 'puerta de entrada: la versión viva se lee del script' 'si' "$([[ -n "$live_version" ]] && echo si || echo no)"
-
-major="${live_version%%.*}"
-rest="${live_version#*.}"
-minor="${rest%%.*}"
-patch="${rest#*.}"
-previous=""
-if ((patch > 0)); then
-    previous="$major.$minor.$((patch - 1))"
-elif ((minor > 0)); then
-    previous="$major.$((minor - 1)).0"
-fi
-
-if [[ -n "$previous" ]]; then
-    assert_eq 'puerta de entrada: el snapshot de la versión anterior está archivado' \
-        'si' "$([[ -f "$TESTS_DIR/../versions/glot_$previous.sh" ]] && echo si || echo no)"
-fi
 
 # La puerta se comprueba también hacia atrás: toda versión que el log marca como
 # cerrada tiene que tener su snapshot, y ningún snapshot puede sobrar. Así el olvido
@@ -2602,6 +2585,18 @@ fi
 # detectó en las v0.5.0 y v0.6.0.
 closed_versions="$(awk -F'|' '/^\| [0-9]+\.[0-9]+\.[0-9]+ / {v = $2; gsub(/[ \t]/, "", v); s = $(NF - 1); if (s ~ /cerrada/) print v}' "$TESTS_DIR/../docs/VERSIONS.md")"
 assert_eq 'archivado: el log de versiones se lee' 'si' "$([[ -n "$closed_versions" ]] && echo si || echo no)"
+
+# La versión anterior a la viva es la **última cerrada** del log, no la anterior aritmética:
+# desde la convención de parches (un `fix` o un `refactor` sobre la viva cierran como
+# `X.Y.(Z+1)`) la anterior a la 1.5.0 es la 1.4.2, no la 1.4.0, así que calcularla restando
+# uno al parche daría un falso verde y saltaría la puerta equivocada.
+previous="$(printf '%s\n' "$closed_versions" | tail -1)"
+if [[ -n "$previous" ]]; then
+    assert_eq 'puerta de entrada: el snapshot de la versión anterior está archivado' \
+        'si' "$([[ -f "$TESTS_DIR/../versions/glot_$previous.sh" ]] && echo si || echo no)"
+    assert_eq 'puerta de entrada: la viva es posterior a la última cerrada' "$live_version" \
+        "$(printf '%s\n%s\n' "$previous" "$live_version" | LC_ALL=C sort -V | tail -1)"
+fi
 
 missing_snapshots=""
 while IFS= read -r v; do

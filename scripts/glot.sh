@@ -19,6 +19,10 @@
 # `--delegate` solo la que falta—, en vez de dejar al autor con el nombre de la variable.
 # Desde la v1.4.2 el **autocompletado completa esa opción y sus dos valores** (`--delegate
 # copilot|antigravity`), que era lo que había que recordar de memoria.
+# Desde la v1.5.0 el contrato se encarga como **`contract_stub`**: el paso `4b` entrega el
+# contrato **y los esqueletos** de todas sus operaciones, para que la suite compile y enlace
+# aunque el cuerpo sea del paso 5 —el 4c se bloqueó dos veces por esa causa—, y el paso de
+# corrección alinea su opción con el resto del CLI (`--cause`, no `--causa`).
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -56,7 +60,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.4.2"
+GLOT_VERSION="1.5.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
