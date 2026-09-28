@@ -14,6 +14,8 @@ _glot_complete() {
     local words=""
     local keys="lang phase module branch spec repo"
     local verbs="version help doctor greet langs modules progress completion use new save test verify evidence close validate prompt ask status pointer clean install uninstall set get unset list path"
+    local i=""
+    local positional=0
 
     if ((COMP_CWORD == 1)); then
         COMPREPLY=($(compgen -W "$verbs -q --quiet -n --dry-run -h --help --version" -- "$cur"))
@@ -50,7 +52,7 @@ _glot_complete() {
                 words="$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"
             fi
             ;;
-        prompt | ask)
+        prompt)
             if ((COMP_CWORD == 2)); then
                 words="$("$glot" prompt 2>/dev/null | cut -f1 | grep -v -e '^$')"
             elif ((COMP_CWORD == 3)); then
@@ -58,6 +60,29 @@ _glot_complete() {
             else
                 words="$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"
             fi
+            ;;
+        ask)
+            # `ask` añade el delegado (v1.4.2): la opción y sus dos valores se completan, y el
+            # posicional se cuenta **saltando** el valor de `--delegate`, para que el encargo
+            # siga completándose aunque la opción vaya delante.
+            if [[ "$cur" == --delegate=* ]]; then
+                COMPREPLY=($(compgen -W "--delegate=copilot --delegate=antigravity" -- "$cur"))
+                return 0
+            fi
+            if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "--delegate" ]]; then
+                COMPREPLY=($(compgen -W "copilot antigravity" -- "$cur"))
+                return 0
+            fi
+            for ((i = 2; i < COMP_CWORD; i++)); do
+                if [[ "${COMP_WORDS[i]}" != -* && "${COMP_WORDS[i - 1]}" != "--delegate" ]]; then
+                    positional=$((positional + 1))
+                fi
+            done
+            case "$positional" in
+                0) words="$("$glot" prompt 2>/dev/null | cut -f1 | grep -v -e '^$') --delegate" ;;
+                1) words="$("$glot" langs 2>/dev/null | cut -f1)" ;;
+                *) words="$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')" ;;
+            esac
             ;;
         completion)
             words="bash zsh"

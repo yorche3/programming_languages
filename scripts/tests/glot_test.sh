@@ -2513,6 +2513,65 @@ assert_contains 'suite: traslada la ejecución al acta' 'acta del paso' "$(cat -
 assert_contains 'SPRINT: el paso 4c recoge la compilación sin enlace' 'compilación sin enlace' \
     "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
 
+# --- casos de la especificación v1.4.2 (el delegado en el autocompletado) -----
+#
+# `ask` tiene una opción propia —`--delegate copilot|antigravity`— y el completado no la
+# ofrecía: `glot ask <TAB>` listaba los encargos y nada más, así que la opción había que
+# recordarla de memoria. Ahora se completa la opción, sus dos valores y el posicional sigue
+# funcionando aunque la opción vaya delante. Se prueba **funcionando** —se carga el guion y
+# se llama a `_glot_complete`—, no solo mirando el texto.
+
+# completion_probe <palabras...> — qué ofrecería el completado de bash para esa línea
+completion_probe() {
+    local rc=0
+    out="$(GLOT_CMD="$GLOT_SH" "$BASH" -c '
+        source <(GLOT_CMD="$GLOT_CMD" "$GLOT_CMD" completion bash)
+        COMP_WORDS=(glot "$@")
+        COMP_CWORD=$(( ${#COMP_WORDS[@]} - 1 ))
+        _glot_complete
+        printf "%s\n" "${COMPREPLY[@]}"
+    ' glot "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+completion_probe ask ""
+assert_eq 'completado ask: código' '0' "$rc_last"
+assert_contains 'completado ask: sigue ofreciendo los encargos' 'scaffold' "$out"
+assert_contains 'completado ask: ofrece la opción del delegado' '--delegate' "$out"
+
+completion_probe ask --delegate ""
+assert_eq 'completado --delegate: los dos valores, ni uno más' 'antigravity copilot' \
+    "$(printf '%s\n' "$out" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
+
+completion_probe ask --delegate=c
+assert_contains 'completado --delegate=c: completa el valor pegado' '--delegate=copilot' "$out"
+assert_eq 'completado --delegate=c: filtra por la letra' 'no' \
+    "$([[ "$out" == *--delegate=antigravity* ]] && echo si || echo no)"
+
+completion_probe ask --delegate=
+assert_eq 'completado --delegate=: los dos valores' '--delegate=antigravity --delegate=copilot' \
+    "$(printf '%s\n' "$out" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
+
+completion_probe ask --delegate copilot ""
+assert_contains 'completado tras el delegado: vuelve a los encargos' 'scaffold' "$out"
+assert_contains 'completado tras el delegado: el posicional no se desplaza' '--delegate' "$out"
+
+completion_probe ask --delegate copilot suite ""
+assert_contains 'completado tras el encargo: el lenguaje' 'assembly' "$out"
+
+completion_probe prompt ""
+assert_eq 'completado prompt: sin delegado (no lo tiene)' 'no' \
+    "$([[ "$out" == *--delegate* ]] && echo si || echo no)"
+
+# zsh no se puede ejecutar como un guion suelto (necesita `compinit` y el contexto del
+# completado), así que ahí se comprueba el guion: la opción, sus valores y que `ask` dejó de
+# compartir rama con `prompt`, que es de donde venía la carencia.
+ZSH_COMP="$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
+assert_contains 'completado zsh: los dos valores del delegado' 'compadd -- copilot antigravity' "$ZSH_COMP"
+assert_contains 'completado zsh: la forma --delegate=' 'compadd -- --delegate=copilot --delegate=antigravity' "$ZSH_COMP"
+assert_contains 'completado zsh: ask tiene su propia rama' '        ask)' "$ZSH_COMP"
+
 # --- puerta de entrada al archivo de versiones -------------------------------
 
 # La versión viva no puede arrancar sin el snapshot de la anterior ya archivado:
