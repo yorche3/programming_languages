@@ -887,6 +887,33 @@ ask_nodelegate() {
 ask_nodelegate implement php algorithms/naive_sort
 assert_eq 'ask sin delegado: código' '1' "$rc_last"
 assert_contains 'ask sin delegado: explica GLOT_DELEGATE' 'GLOT_DELEGATE' "$err"
+# El error trae el remedio entero: las dos líneas de invocación verificada, listas para el
+# rc. Sin ellas el verbo decía qué variable faltaba y dejaba al autor buscando el comando.
+assert_contains 'ask sin delegado: imprime la línea de Copilot' "export GLOT_DELEGATE_COP='copilot -C {module_dir}" "$err"
+assert_contains 'ask sin delegado: imprime la línea de Antigravity' "export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6" "$err"
+assert_contains 'ask sin delegado: dice dónde van' 'van en tu rc' "$err"
+assert_contains 'ask sin delegado: ofrece imprimir el encargo' 'glot prompt' "$err"
+assert_contains 'ask sin delegado: no ensucia stdout' '' "$out"
+
+# y con --delegate, la que falta se nombra sola
+ask_nodelegate --delegate copilot implement php algorithms/naive_sort
+assert_eq 'ask --delegate copilot sin delegado: código' '1' "$rc_last"
+assert_contains 'ask --delegate copilot: nombra su variable' 'GLOT_DELEGATE_COP' "$err"
+assert_contains 'ask --delegate copilot: imprime su línea' "export GLOT_DELEGATE_COP='copilot" "$err"
+assert_eq 'ask --delegate copilot: no imprime la del otro' 'no' \
+    "$([[ "$err" == *GLOT_DELEGATE_AGY* ]] && echo si || echo no)"
+
+ask_nodelegate --delegate antigravity implement php algorithms/naive_sort
+assert_eq 'ask --delegate antigravity sin delegado: código' '1' "$rc_last"
+assert_contains 'ask --delegate antigravity: imprime su línea' "export GLOT_DELEGATE_AGY='agy" "$err"
+assert_eq 'ask --delegate antigravity: no imprime la del otro' 'no' \
+    "$([[ "$err" == *GLOT_DELEGATE_COP* ]] && echo si || echo no)"
+
+# la ayuda de `ask` trae las dos líneas, que es donde se buscan
+glot_run help ask
+assert_contains 'help ask: trae la línea de Copilot' "export GLOT_DELEGATE_COP='copilot" "$out"
+assert_contains 'help ask: trae la línea de Antigravity' "export GLOT_DELEGATE_AGY='agy" "$out"
+assert_contains 'help ask: dice que install también las imprime' 'glot install' "$out"
 
 ask_nodelegate
 assert_eq 'ask sin encargo: código' '2' "$rc_last"

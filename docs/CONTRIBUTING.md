@@ -55,6 +55,18 @@ The same convention applies inside a submodule and in the monorepo. The branch
 type must match the main change type. Do not use generic branches such as
 `feature`, `work`, `changes`, or names without a phase and module.
 
+**Tooling (`glot`):** una versión se cierra en `chore/repo/glot-vX.Y.Z`, y un **fix** o un
+**refactor** usan `fix/repo/glot-vX.Y.Z` —la versión **arreglada**, no la nueva— pero
+**cierran como `X.Y.(Z+1)`**: la rama dice a qué versión se le hace el fix y el número dice
+cuántas entregas ha habido. La regla completa está en
+[`../scripts/docs/VERSIONS.md`](../scripts/docs/VERSIONS.md).
+
+**Tooling (`glot`):** a version is closed on `chore/repo/glot-vX.Y.Z`, and a **fix** or a
+**refactor** use `fix/repo/glot-vX.Y.Z` —the version being **fixed**, not the new one— but
+they **close as `X.Y.(Z+1)`**: the branch names the version the fix is for and the number
+says how many releases there have been. The full rule is in
+[`../scripts/docs/VERSIONS.md`](../scripts/docs/VERSIONS.md).
+
 ```text
 main -> <type>/<phase>/<module> -> review -> main
 ```
