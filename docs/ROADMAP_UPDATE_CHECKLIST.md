@@ -782,3 +782,15 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`ballerina/core/algorithms/data_structures_basics/README.md` y `ballerina/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics   🔄 2/50 (Ada, Assembly)` -> `core.algorithms.data_structures_basics🔄 3/50 (Ada, Assembly, Ballerina)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-09-27
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): c
+Código verificado / Code verified: yes (`c/core/algorithms/data_structures_basics/src/data_structures_basics.c` e `include/data_structures_basics.h`; la suite pasa 4/4 con `gcc -Wall -Wextra -std=c99` sin warnings)
+Tests y comandos / Tests and commands:
+- `make clean && make test` en `c/core/algorithms/data_structures_basics` -> `gcc -Wall -Wextra -std=c99 -Iinclude` (0 warnings, 0 errors); `[====] Synthesis: Tested: 4 | Passing: 4 | Failing: 0 | Crashing: 0`
+- Verificación estática: `gcc -Wall -Wextra -std=c99` — sin warnings ni errores
+README(s) verificado(s) / README(s) verified: yes (`c/core/algorithms/data_structures_basics/README.md`, generado desde `docs/README_Template.md` con las secciones obligatorias) e índices corregidos: `c/core/algorithms/README.md` (estructura de directorios con `data_structures_basics`, tabla de módulos actualizada, patrón común y compilación rápida añadidos; nombres canónicos de los módulos pendientes corregidos de `data_structures`/`structures_apps` a `data_structures_advanced`), `c/core/README.md` (`data_structures_basics` añadido a la descripción de la fase) y `c/README.md` (`core/algorithms/` añadido a la tabla de módulos y comandos de `naive_sort` y `data_structures_basics` añadidos al inicio rápido)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 3/50 (Ada, Assembly, Ballerina)` -> `core.algorithms.data_structures_basics 🔄 4/50 (Ada, Assembly, Ballerina, C)`. La fase sigue abierta.
+Observaciones / Notes: Cuarta implementación homologada del módulo 06. Adaptaciones idiomáticas declaradas en el README del módulo: `node_init(Node*, int)` en lugar del método `Node.init(value)` del pseudocódigo (C no tiene métodos; el prefijo de tipo es la convención de espacio de nombres), `NULL` como ausencia nativa de enlace, `FAILURE_VALUE = -1` como indicador de fallo entero, `linked_list_delete` devolviendo `0`/`-1` en lugar del tipo booleano del pseudocódigo, `malloc`/`free` para gestión de memoria manual y layout `include/` + `src/` + `test/` (sin `run_tests.ext` separado: Criterion descubre tests automáticamente). El índice de Nivel 2 `c/core/algorithms/README.md` también corregía los nombres de los módulos pendientes 06 y 07, que se listaban como `data_structures` y `structures_apps` en lugar de sus nombres canónicos `data_structures_basics` y `data_structures_advanced`.
