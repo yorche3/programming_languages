@@ -20,7 +20,7 @@ language or per step, **tab-separated**, no header, sorted.
 | 2 | Comando de inicialización del ecosistema | `mkdir -p src test + composer require --dev phpunit/phpunit` |
 | 3 | Manifiestos y archivos clave | `composer.json, phpunit.xml, .gitignore` |
 | 4 | Comando nativo de pruebas (lo ejecuta `glot test`) | `composer test` |
-| 5 | Verificador de sintaxis o formato (lo ejecuta `glot verify`); `-` si el lenguaje aún no tiene | `php -l src/{Module}.php` |
+| 5 | Verificador (lo ejecuta `glot verify`): **lint idiomático** de sintaxis y formato, con la herramienta del lenguaje; `-` si el lenguaje aún no tiene. **No** comprueba la suite ni busca *hardcode*, y el análisis estático de seguridad es un no-objetivo (v1.4.0) | `php -l src/{Module}.php` |
 | 6 | Tipo de inicialización (lo lee `glot new`): `tool` (hay herramienta), `manual` (esqueleto de carpetas) o `deferred` (lo escribe el agente) | `tool` |
 | 7 | Comando que ejecuta `glot new` **en el directorio del módulo**; `-` cuando el tipo es `deferred` | `mkdir -p src test && composer require --dev phpunit/phpunit` |
 | 8 | Normalización posterior (la aplica `glot new`), separada por `;`; `-` si no hace falta | `rm:{module}/.git;flat:{module}` |

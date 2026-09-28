@@ -2095,6 +2095,70 @@ glot_install install >/dev/null
 glot_install doctor
 assert_contains 'doctor: reinstalar deja los datos buenos' 'install_data: ok' "$out"
 
+# v1.4.0: la deriva se mide en las **dos orillas**. Los casos de arriba tocan la copia (el
+# retoque a mano, que es el caso raro); falta la otra: que el clon del que se instaló haya
+# avanzado. Se instala desde una fuente desechable —lo que viaja con la copia, nada más— y
+# se mide cada orilla por separado: fuente tocada (`install_source_state: stale`), copia
+# tocada (`install_copy: tweaked`) y origen movido (`moved`), que **no** convierte en vieja
+# a una copia intacta: lo que falta entonces es el clon, no la copia.
+SRC_HOME="$WORK_DIR/home-source"
+SRC_DIR="$WORK_DIR/src-source"
+mkdir -p -- "$SRC_HOME" "$SRC_DIR"
+cp -- "$GLOT_SH" "$SRC_DIR/glot.sh"
+cp -R -- "$TESTS_DIR/../data" "$TESTS_DIR/../prompts" "$TESTS_DIR/../completions" "$SRC_DIR/"
+
+# src_install [args...] — glot desde la fuente desechable, con HOME desechable
+src_install() {
+    local rc=0
+    out="$(env -u GLOT_STATE_FILE -u GLOT_ROOT GLOT_ROOT= HOME="$SRC_HOME" "$SRC_DIR/glot.sh" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+# src_copy_doctor — doctor desde la **copia**, para cuando el origen ya no está
+src_copy_doctor() {
+    local rc=0
+    out="$(env -u GLOT_STATE_FILE -u GLOT_ROOT GLOT_ROOT= HOME="$SRC_HOME" "$SRC_HOME/.local/bin/glot" doctor 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+
+src_install install >/dev/null
+src_install doctor
+assert_contains 'doctor: la orilla de la copia está al día' 'install_copy: ok' "$out"
+assert_contains 'doctor: la orilla de la fuente está al día' 'install_source_state: ok' "$out"
+assert_contains 'doctor: sin deriva no hay porqué' 'install_stale: no' "$out"
+
+# orilla de la fuente: el clon avanza (el catálogo cambia en la fuente, no en la copia)
+printf '\n# retoque en la fuente / source tweak\n' >>"$SRC_DIR/data/commits.tsv"
+src_install doctor
+assert_contains 'doctor: la fuente avanzada marca deriva' 'install_stale: yes' "$out"
+assert_contains 'doctor: la deriva se atribuye a la fuente' 'install_source_state: stale' "$out"
+assert_contains 'doctor: la copia sigue siendo la instalada' 'install_copy: ok' "$out"
+assert_contains 'doctor: la deriva trae el remedio' 'glot install' "$err"
+src_install install >/dev/null
+src_install doctor
+assert_contains 'doctor: reinstalar desde la fuente la pone al día' 'install_source_state: ok' "$out"
+assert_contains 'doctor: tras reinstalar no queda deriva' 'install_stale: no' "$out"
+
+# orilla de la copia: el retoque está en la copia y la fuente sigue igual
+printf '\n# retoque en la copia / copy tweak\n' >>"$SRC_HOME/.local/share/glot/data/commits.tsv"
+src_install doctor
+assert_contains 'doctor: la copia retocada marca deriva' 'install_stale: yes' "$out"
+assert_contains 'doctor: la deriva se atribuye a la copia' 'install_copy: tweaked' "$out"
+assert_contains 'doctor: la fuente sigue al día' 'install_source_state: ok' "$out"
+src_install install >/dev/null
+
+# el origen movido no es deriva de la copia: se nombra y la copia intacta no se marca vieja
+mv -- "$SRC_DIR" "$SRC_DIR-moved"
+src_copy_doctor
+assert_contains 'doctor: copia intacta sin origen no es deriva' 'install_stale: no' "$out"
+assert_contains 'doctor: el origen que ya no está se nombra' 'install_source_state: moved' "$out"
+assert_contains 'doctor: la copia intacta se declara' 'install_copy: ok' "$out"
+mv -- "$SRC_DIR-moved" "$SRC_DIR"
+src_install doctor
+assert_contains 'doctor: vuelto el origen, todo vuelve a estar al día' 'install_source_state: ok' "$out"
+
 # lo ajeno no se pisa: ni un enlace de otro, ni un fichero
 rm -rf -- "$INSTALL_HOME/.local/bin"
 mkdir -p -- "$INSTALL_HOME/.local/bin"
@@ -2123,6 +2187,19 @@ assert_eq 'help install: código' '0' "$rc_last"
 assert_contains 'help install: explica la copia estable' 'copia estable' "$out"
 glot_run help uninstall
 assert_contains 'help uninstall: explica que deshace' 'deshace' "$out"
+
+# v1.4.0: la ayuda del verbo es la única documentación que se lee con el verbo delante, así
+# que ahí viven las dos notas nuevas: el `cd` de la capa no cruza una tubería, y `doctor`
+# mide la deriva en dos orillas (la copia y la fuente)
+glot_run help use
+assert_eq 'help use: código' '0' "$rc_last"
+assert_contains 'help use: el cd de la capa solo llega en tu shell' 'subshell' "$out"
+assert_contains 'help use: lo explica en inglés' 'pipeline' "$out"
+assert_contains 'help use: sin capa el cd lo hace tu shell' 'cd "$(glot use' "$out"
+glot_run help doctor
+assert_eq 'help doctor: código' '0' "$rc_last"
+assert_contains 'help doctor: la deriva se mide en dos orillas' 'install_copy:' "$out"
+assert_contains 'help doctor: la orilla de la fuente se nombra' 'install_source_state:' "$out"
 assert_contains 'completado bash: conoce install' 'install uninstall' "$(cat -- "$TESTS_DIR/../completions/glot.bash")"
 assert_contains 'completado zsh: conoce install' "'install:" "$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
 
@@ -2200,10 +2277,13 @@ glot_run set lang ruby
 glot_run doctor
 assert_contains 'doctor: la serie del lenguaje del sprint' 'toolchain_ruby: ' "$out"
 assert_eq 'doctor: un sprint sin fila declarada no rompe' '0' "$rc_last"
-glot_run set lang ada
+# `rescript` es el lenguaje que sigue **sin fila** (su toolchain no está instalada aquí):
+# con él se prueba que un sprint sin serie declarada se dice y no rompe nada. Antes este
+# caso usaba `ada`, hasta que su fila se midió el 2026-09-27.
+glot_run set lang rescript
 glot_run doctor
 assert_eq 'doctor: sin serie declarada, código' '0' "$rc_last"
-assert_contains 'doctor: sin serie declarada, se dice' 'toolchain_ada: - (sin serie declarada' "$out"
+assert_contains 'doctor: sin serie declarada, se dice' 'toolchain_rescript: - (sin serie declarada' "$out"
 
 # inyectando el catálogo se prueban los tres estados sin tocar el dato del repositorio
 cp -f -- "$TOOLCHAINS" "$INJECTED/differs.tsv"
@@ -2338,6 +2418,73 @@ assert_eq 'GLOT_DELEGATE es el alias de COP' 'ALIAS' "$out"
 out="$(env -u GLOT_DELEGATE GLOT_DELEGATE_COP='cat' GLOT_DELEGATE_AGY='cat' "$GLOT_SH" doctor 2>/dev/null)" || true
 assert_contains 'doctor: delegado COP configurado' 'delegate_cop: cat' "$out"
 assert_contains 'doctor: delegado AGY configurado' 'delegate_agy: cat' "$out"
+
+# --- casos de la especificación v1.4.0 (alcance de la verificación) -----------
+
+# El alcance del paso 6 está escrito: `verify` es lint idiomático, la suite entera es de
+# `test`, el *hardcode* es de `validate` y el análisis estático de seguridad es un
+# no-objetivo explícito (medido el 2026-09-26 al revisar el sprint de Ada).
+glot_run help verify
+assert_eq 'help verify: código' '0' "$rc_last"
+assert_contains 'help verify: es un lint' 'lint' "$out"
+assert_contains 'help verify: no comprueba la suite' 'eso es `test`' "$out"
+assert_contains 'help verify: no busca valores codificados' 'no busca valores codificados' "$out"
+assert_contains 'help verify: el SAST queda fuera' 'fuera de alcance' "$out"
+
+validate_prompt="$(cat -- "$PROMPTS_DIR/validate.prompt.md")"
+assert_contains 'validate: el hardcode es de este paso' 'valores codificados' "$validate_prompt"
+assert_contains 'validate: lo nombra' 'hardcode' "$validate_prompt"
+
+assert_contains 'contrato: el SAST es no-objetivo' 'análisis estático de seguridad (SAST) es un no-objetivo' "$(cat -- "$TESTS_DIR/../docs/CONTRACT.md")"
+assert_contains 'contrato: el reparto del paso 6' 'Alcance de la capa' "$(cat -- "$TESTS_DIR/../docs/CONTRACT.md")"
+assert_contains 'sprint: el reparto del paso 6' 'Reparto del paso 6' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
+assert_contains 'data/README: la columna 5 es lint' 'lint idiomático' "$(cat -- "$DATA_DIR/README.md")"
+
+# --- casos de la especificación v1.4.0 (política de CI) ----------------------
+#
+# La política de CI está escrita **antes** de añadir workflows (v1.4.0), y lo que decide es
+# comprobable: el comando sale del catálogo en vez de copiarse, la CI comprueba y **no**
+# firma el acta de `docs/evidence/`, y el SAST del repositorio no es el verbo `verify`.
+CI_POLICY="$REPO/docs/WORKFLOW.md"
+assert_contains 'CI: la política vive donde vive el ciclo' 'CI por submódulo' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: el comando no se copia del catálogo' 'no se copia del catálogo, se le pide al catálogo' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: llama a los verbos del catálogo' '`glot test`' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: la CI comprueba y no firma' 'la CI comprueba y no firma' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: la CI no escribe el acta' 'no escribe' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: el SAST del repositorio no es verify' 'no el verbo `verify`' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: el workflow que copia queda como excepción' 'excepción declarada' "$(cat -- "$CI_POLICY")"
+assert_contains 'CI: la excepción se nombra' 'ada/.github/workflows/tests.yml' "$(cat -- "$CI_POLICY")"
+
+# Punto 5 del plan: las filas de `toolchains.tsv` que se pueden medir en este entorno ya
+# están (`ada`, `common-lisp`, `rexx`, `scala`), y `rescript` queda como excepción
+# declarada porque su toolchain no está instalada aquí. La fila solo se añade con la serie
+# **verificada**: la deuda era no poder medirlas, y estas cuatro se midieron el 2026-09-27.
+assert_contains 'toolchains: ada con su serie medida' "$(printf 'ada\talr --version\t2.1')" "$(cat -- "$TOOLCHAINS")"
+assert_contains 'toolchains: common-lisp con su serie medida' "$(printf 'common-lisp\tros run -- --version\t2.6')" "$(cat -- "$TOOLCHAINS")"
+assert_contains 'toolchains: rexx con su serie medida' "$(printf 'rexx\trexx -v\t5.2')" "$(cat -- "$TOOLCHAINS")"
+assert_contains 'toolchains: scala con su serie medida' "$(printf 'scala\tscalac -version\t3.9')" "$(cat -- "$TOOLCHAINS")"
+assert_eq 'toolchains: rescript sigue sin fila (no medible aquí)' '0' \
+    "$(grep -c '^rescript' "$TOOLCHAINS" || true)"
+
+# Punto 6 del plan: la tabla de módulos del roadmap es una **vista manual** y no lleva
+# contador —así ningún número puede quedarse atrás en silencio—; el recuento de verdad vive
+# en el bloque de contadores, que es el que lee `glot progress`.
+ROADMAP_DOC="$REPO/docs/ROADMAP.md"
+assert_eq 'roadmap: ninguna tabla de módulos lleva contador' '0' \
+    "$(grep -cE '^\| `core\.[a-z_0-9.]+` \| [^|]*\| *[0-9]+/50 *\|' "$ROADMAP_DOC" || true)"
+assert_contains 'roadmap: la tabla se declara vista manual' 'vista manual' "$(cat -- "$ROADMAP_DOC")"
+assert_contains 'roadmap: el contador de verdad se nombra' 'bloque de contadores' "$(cat -- "$ROADMAP_DOC")"
+
+# Punto 7 del plan: la suite deja de dar un falso positivo cuando el lenguaje necesita el
+# cuerpo para enlazar. El contrato **inválido** detiene el paso; que **aún no enlace** no lo
+# detiene: se comprueba sin enlace y la ejecución se traslada al acta del paso 6.
+SUITE_PROMPT="$TESTS_DIR/../prompts/suite.prompt.md"
+assert_contains 'suite: distingue el contrato inválido' 'contrato **inválido**' "$(cat -- "$SUITE_PROMPT")"
+assert_contains 'suite: admite la compilación sin enlace' 'compilación sin enlace' "$(cat -- "$SUITE_PROMPT")"
+assert_contains 'suite: nombra el comando sin enlace de Ada' 'gnatc' "$(cat -- "$SUITE_PROMPT")"
+assert_contains 'suite: traslada la ejecución al acta' 'acta del paso' "$(cat -- "$SUITE_PROMPT")"
+assert_contains 'SPRINT: el paso 4c recoge la compilación sin enlace' 'compilación sin enlace' \
+    "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 

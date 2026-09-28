@@ -90,6 +90,38 @@
 
 ---
 
+## 🤖 CI por submódulo / CI per submodule
+
+**ES:** La decisión está tomada **antes de escribir ningún workflow**: **el comando de la CI no se copia del catálogo, se le pide al catálogo**. Un workflow que repite `alr build` o `pytest -q` crea una **segunda verdad** que envejece en silencio —cambia el catálogo y el workflow no—, así que la CI llama a los mismos verbos que usan el autor y el harness: `glot test` (la suite, con el comando nativo del lenguaje) y `glot verify` (el lint idiomático). El workflow declara la **versión** de la herramienta, no la implementación del comando.
+
+**EN:** The decision is taken **before any workflow is written**: **the CI command is not copied from the catalogue, it is asked of the catalogue**. A workflow repeating `alr build` or `pytest -q` creates a **second truth** that ages in silence —the catalogue changes and the workflow does not—, so CI calls the same verbs the author and the harness use: `glot test` (the suite, with the language's native command) and `glot verify` (the idiomatic lint). The workflow declares the tool **version**, not the command's implementation.
+
+**ES:** Dónde vive cada CI:
+
+- **La CI del ciclo vive en el monorepo** (`.github/workflows/`), porque es el único sitio que tiene a la vez `glot`, su catálogo, las especificaciones, el roadmap y `docs/evidence/`. Un submódulo es un repositorio aparte: no tiene `scripts/`, así que una CI allí solo podría comprobar su lenguaje **copiando** el comando.
+- **El disparador del monorepo es el puntero del submódulo**: un push dentro del submódulo no se ve desde el monorepo, así que esa CI comprueba **cuando el módulo entra** (paso 9, `pointer`) y a mano (`workflow_dispatch`). Quien quiera la comprobación en **cada** commit del submódulo tiene que llevar allí la CI, y entonces el paso previo obligatorio es **traer `glot`** (clon superficial del monorepo, o el script con su catálogo) y llamarlo; **nunca** reescribir el comando.
+- **La CI del tooling** (`scripts/`) también vive en el monorepo, y es la que ya existe: el análisis estático de `scripts/**`. Es **CI del repositorio**, no el verbo `verify`: desde la v1.4.0 `verify` está declarado *lint* y el **análisis estático de seguridad es un no-objetivo suyo**, lo que no impide que el repositorio tenga su propio SAST.
+
+**EN:** Where each CI lives:
+
+- **The cycle's CI lives in the monorepo** (`.github/workflows/`), because it is the only place holding `glot`, its catalogue, the specifications, the roadmap and `docs/evidence/` at once. A submodule is a repository of its own: it has no `scripts/`, so a CI there could only check its language by **copying** the command.
+- **The monorepo's trigger is the submodule pointer**: a push inside the submodule is not seen from the monorepo, so that CI checks **when the module comes in** (step 9, `pointer`) and by hand (`workflow_dispatch`). Whoever wants the check on **every** submodule commit has to move CI there, and then the mandatory previous step is **fetching `glot`** (a shallow clone of the monorepo, or the script with its catalogue) and calling it; **never** rewriting the command.
+- **The tooling CI** (`scripts/`) also lives in the monorepo, and it is the one that exists today: static analysis of `scripts/**`. It is **repository CI**, not the `verify` verb: since v1.4.0 `verify` is declared *lint* and **static security analysis is an explicit non-goal of it**, which does not stop the repository from having its own SAST.
+
+**ES:** Convivencia con el acta, en una frase: **la CI comprueba y no firma; el acta la firma el autor**. `docs/evidence/` es un artefacto versionado con la salida real de la máquina del autor y el commit del submódulo que la respalda —es lo que cierra un módulo—, mientras que la CI deja su salida en su propio registro. Por eso la CI **no escribe** en `docs/evidence/` ni confirma nada: un acta escrita desde la CI sería un acta sin autor, y `close` exige el acta con su commit. Las dos dicen lo mismo por caminos distintos; si divergen, manda el acta y lo que está mal configurado es la CI.
+
+**ES:** Lo que la CI **no** hace: no instala toolchains del roadmap (eso es L9 y es del autor), no crea ni publica ramas, no fusiona, no sustituye a `close` y no es la puerta del cierre: la puerta es la evidencia del autor.
+
+**EN:** Living with the record, in one sentence: **CI checks and does not sign; the author signs the record**. `docs/evidence/` is a versioned artefact with the author's machine's real output and the submodule commit backing it —it is what closes a module—, while CI leaves its output in its own log. That is why CI **does not write** to `docs/evidence/` nor commit anything: a record written from CI would be a record without an author, and `close` demands the record with its commit. Both say the same thing along different paths; if they diverge, the record wins and the misconfigured part is the CI.
+
+**EN:** What CI does **not** do: it does not install roadmap toolchains (that is L9 and the author's job), it does not create or publish branches, it does not merge, it does not replace `close` and it is not the closing gate: the gate is the author's evidence.
+
+**ES:** Lo que ya existe se alinea con esta política: `ada/.github/workflows/tests.yml` **copia** hoy sus dos comandos (`alr build` y `alr -C tests run`), así que queda como **excepción declarada** —se conserva porque funciona y se alinea al catálogo (`glot test`) cuando ese submódulo cierre su siguiente módulo—, y los workflows nuevos se escriben ya con la regla.
+
+**EN:** What already exists is aligned with this policy: `ada/.github/workflows/tests.yml` **copies** its two commands today (`alr build` and `alr -C tests run`), so it stands as a **declared exception** —kept because it works and aligned with the catalogue (`glot test`) when that submodule closes its next module—, and new workflows are written with the rule already in place.
+
+---
+
 ## ✅ Validación de la documentación / Documentation validation
 
 **ES:** Antes de cerrar un paso se comprueba el artefacto que ese paso produce. Cada punto se marca `Sí`, `No` (con motivo) o `No aplica` (con motivo); un `No` sin motivo es un incumplimiento. Esta sección comprueba lo que otras normas mandan, no lo repite.
