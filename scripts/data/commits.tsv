@@ -1,5 +1,5 @@
 4a	scaffold	submodule	chore({phase}): add scaffold for {module}
-4b	contract	submodule	chore({phase}): add contract for {module}
+4b	contract_stub	submodule	chore({phase}): add contract for {module}
 4c	suite	submodule	chore({phase}): add suite for {module}
 4d	fix	submodule	fix({phase}): correct {module}
 5	implement	submodule	feat({phase}): add {module} implementation

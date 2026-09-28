@@ -42,7 +42,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh -n new php algorithms/naive_sort   # esqueleto: plan sin tocar nada
 ./scripts/glot.sh new php algorithms/naive_sort      # inicializador + normalización
 ./scripts/glot.sh prompt suite                        # encargo de la suite (paso 4c)
-./scripts/glot.sh prompt contract                     # encargo del contrato (paso 4b)
+./scripts/glot.sh prompt contract_stub                # encargo del contrato y sus esqueletos (paso 4b)
 ./scripts/glot.sh prompt                              # registro: nombre, paso, modelo y descripción
 ./scripts/glot.sh status                              # submódulos, ramas y punteros (solo lectura)
 ./scripts/glot.sh -n pointer php algorithms/naive_sort  # puntero del submódulo: plan sin tocar nada
@@ -80,7 +80,7 @@ scripts/
 │   └── glot.zsh
 ├── prompts/                  # Plantillas de encargo, versionadas
 │   ├── scaffold.prompt.md        # Paso 4a · esqueleto
-│   ├── contract.prompt.md        # Paso 4b · contrato del módulo
+│   ├── contract_stub.prompt.md   # Paso 4b · contrato y esqueletos del módulo
 │   ├── suite.prompt.md           # Paso 4c · suite de pruebas
 │   ├── implement.prompt.md       # Paso 5
 │   ├── validate.prompt.md        # Paso 6 · informe del validador
@@ -158,7 +158,7 @@ scripts/
 # no lleva tu ruta, así que `install` te la imprime para pegarla en tu rc
 export GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools'
 export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6 -p "$(cat)" --add-dir {root}'
-./scripts/glot.sh ask --delegate copilot contract ada algorithms/data_structures_basics
+./scripts/glot.sh ask --delegate copilot contract_stub ada algorithms/data_structures_basics
 ./scripts/glot.sh ask --delegate antigravity suite ada algorithms/data_structures_basics
 ./scripts/glot.sh doctor | grep '^delegate_'   # delegate_cop: / delegate_agy:
 ```

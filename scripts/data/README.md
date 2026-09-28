@@ -203,7 +203,7 @@ here is a **missing datum** (`1`), never an invented profile.
 | Perfil / Profile | Modelo / Model | Esfuerzo / Effort | Créditos / Credits | Encargos / Requests |
 |---|---|---|:--:|---|
 | `economy` | `gemini-3.8-flash` | `low` | 30 | `validate`, `docs-module`, `docs-language` |
-| `balanced` | `gpt-5.6-terra` | `medium` | 90 | `scaffold`, `suite` |
+| `balanced` | `gpt-5.6-terra` | `medium` | 90 | `scaffold`, `contract_stub`, `suite`, `fix` |
 | `deep` | `claude-sonnet-5` | `high` | 120 | `implement` |
 
 ## 🧰 `toolchains.tsv` — series verificadas / verified series

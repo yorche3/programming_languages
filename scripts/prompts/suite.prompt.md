@@ -14,7 +14,7 @@ mode: agent
 Eres un ingeniero de software senior de este monorepo. Cada lenguaje
 homologado es un submódulo Git con su propio `main`. Tu entrega es exclusivamente la **suite de
 pruebas unitarias** del módulo, derivada de su especificación. El esqueleto ya está hecho
-(encargo `scaffold`, paso 4a), **el contrato ya está declarado** (encargo `contract`, paso 4b) y
+(encargo `scaffold`, paso 4a), **el contrato ya está declarado** (encargo `contract_stub`, paso 4b) y
 la implementación del algoritmo **no** es tu tarea (paso 5).
 
 ---
@@ -37,7 +37,7 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
    cualquier `{lang}/core/{phase}/*/`. Son la **autoridad del cómo**: el tipo de secuencia
    canónico, el framework, el naming, el layout de `test/`, el runner y el `.gitignore`. La
    suite homologada más parecida al módulo es el mejor punto de partida.
-3. **El contrato del módulo** — el tipo nuevo y las firmas que dejó el encargo `contract`
+3. **El contrato del módulo** — el tipo nuevo y las firmas que dejó el encargo `contract_stub`
    (paso 4b), en el archivo donde viva según el lenguaje. Es la **autoridad del tipo**: la suite
    **usa** esos nombres y esas firmas, no los declara. Si el contrato **no existe**, **no
    compila** o no cubre una función de `{spec}`, **detente y avísalo**; no lo escribas tú.
@@ -64,8 +64,9 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 - `git status --short` y `git submodule status` en la raíz del monorepo.
 - Inspecciona: la especificación, el módulo `numbers/` del mismo lenguaje, el esqueleto que
   dejó el encargo `scaffold` (paso 4a) —directorio de pruebas, **runner que arranca** y
-  manifiesto— y el **contrato** que dejó el encargo `contract` (paso 4b): tipo, firmas y
-  ubicación. El runner es **condición de entrada**: si falta, no lo escribas tú, detente.
+  manifiesto— y el **contrato con sus esqueletos** que dejó el encargo `contract_stub` (paso
+  4b): tipo, firmas, **cuerpo vacío de cada operación** y ubicación. El runner es **condición
+  de entrada**: si falta, no lo escribas tú, detente.
 - Determina y anota: framework de pruebas idiomático, dónde vive la suite, si existe un
   `run_tests` propio y si el tipo de secuencia admite nulos o cuál es su indicador de fallo.
 
@@ -118,14 +119,15 @@ patrón obligatorio de más abajo. El **runner es del paso 4a**: si no existe o 
 Ejecuta el comando nativo de pruebas y **copia la salida real** (sin editar, sin resumir).
 El build no debe producir warnings ni errores.
 
-**Si el lenguaje necesita el cuerpo para enlazar**, el comando nativo va a fallar en el enlace, y
-eso **no** es un fallo de la suite ni del contrato: el contrato es una **declaración** y el
-cuerpo es del paso 5, que aún no ha pasado (en Ada, un `src/*.ads` sin su `.adb` no construye).
-En ese caso la verificación de este paso es la **compilación sin enlace** —sintaxis y chequeo de
-tipos—, con el comando que el lenguaje permita para eso (`gprbuild -c -cargs -gnatc` en Ada), y
-lo **declaras** en el reporte: qué se comprobó, con qué comando, su salida real y qué queda
-pendiente. La **ejecución** de la suite y su contra-verificación se trasladan al **acta del paso
-6** (`glot evidence`), cuando ya exista el cuerpo: aquí **no** se dan por hechas.
+**Desde la v1.5.0 el contrato (paso 4b) deja sus esqueletos**, así que el módulo compila **y
+enlaza** aunque el algoritmo sea del paso 5: no deberías encontrarte el enlace roto. Si el
+comando nativo falla por **símbolos sin resolver**, entonces el `4b` entregó el contrato **sin
+esqueletos** y es un **defecto del paso 4b**, no de la suite: avísalo. Como mitigación se admite
+la **compilación sin enlace** —sintaxis y chequeo de tipos—, con el comando que el lenguaje
+permita para eso (`gprbuild -c -cargs -gnatc` en Ada), y lo **declaras** en el reporte: qué se
+comprobó, con qué comando, su salida real y qué queda pendiente. La **ejecución** de la suite y
+su contra-verificación se trasladan entonces al **acta del paso 6** (`glot evidence`), cuando ya
+exista el cuerpo: aquí **no** se dan por hechas.
 
 ### 6. Contra-verificación (obligatoria)
 
@@ -133,12 +135,12 @@ Rompe a propósito **una** comparación del código bajo prueba o de un ejecutor
 confirma que la suite falla señalando el test correcto. Después **revierte** el cambio y vuelve
 a verificar que todo pasa. Sin este paso no puedes declarar la tarea terminada.
 
-Si estás en el caso del paso 5 —el contrato compila sin enlace porque el cuerpo aún no
-existe—, la suite **todavía no se puede ejecutar**: la contra-verificación no se omite, se
-**traslada**. Se hace sobre el ejecutor compartido o sobre el código bajo prueba en cuanto
-exista el cuerpo, y queda registrada en el **acta del paso 6** (`glot evidence`). Lo que no vale
-es darla por hecha ni dar la suite por buena: lo que entregas aquí está **compilado sin enlace**,
-y así lo dices tanto en el reporte como al hablar de la cobertura.
+Si te encontraste el caso anterior —el contrato llegó **sin esqueletos** y la suite solo
+compila sin enlace—, la suite **todavía no se puede ejecutar**: la contra-verificación no se
+omite, se **traslada**. Se hace sobre el ejecutor compartido o sobre el código bajo prueba en
+cuanto exista el cuerpo, y queda registrada en el **acta del paso 6** (`glot evidence`). Lo que
+no vale es darla por hecha ni dar la suite por buena: lo que entregas aquí está **compilado sin
+enlace**, y así lo dices tanto en el reporte como al hablar de la cobertura.
 
 ### 7. Cierre
 
@@ -221,7 +223,7 @@ test con todas las aserciones que no diga cuál falló.
 
 - Tocar el esqueleto ni el `.gitignore`: son del encargo `scaffold` (paso 4a).
 - Declarar ni modificar el contrato del módulo —tipo, firmas o indicador de fallo—: es del
-  encargo `contract` (paso 4b). Si falta o no compila, se avisa y se detiene.
+  encargo `contract_stub` (paso 4b). Si falta o no compila, se avisa y se detiene.
 - Modificar la implementación (`src/`, `lib/`, `source/`): si existe, se deja tal cual.
 - Escribir el código de la implementación del pseudocódigo.
 - Modificar la especificación ni el roadmap.

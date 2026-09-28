@@ -57,7 +57,7 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 ### 2. La causa, en una frase
 
 Escribe **una frase** con qué falla y **por qué**: defecto de la especificación, del contrato, de
-la suite o de la implementación. Va al cuerpo del commit (`glot save 4d --causa "…"`), así que
+la suite o de la implementación. Va al cuerpo del commit (`glot save 4d --cause "…"`), así que
 tiene que ser concreta y comprobable, no un «se corrige el módulo».
 
 ### 3. Corrección mínima
@@ -81,7 +81,7 @@ cambio y vuelve a verificar que todo pasa.
 ### 6. Cierre
 
 Reporta en el formato de salida. **No** confirmes nada en git: el commit de la corrección lo
-hace el autor con `glot save 4d --causa "<la causa>"`, y la causa es obligatoria en ese paso.
+hace el autor con `glot save 4d --cause "<la causa>"`, y la causa es obligatoria en ese paso.
 
 ---
 
