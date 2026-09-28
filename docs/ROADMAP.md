@@ -53,12 +53,15 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 ## Fase 0 — Fundamentos / Foundations (✅ Completada / Completed)
 
-| Módulo | Estado | Lenguajes | Especificación | Notas |
-|--------|--------|-----------|----------------|-------|
-| `core.foundations.hello_world` | ✅ | 50/50 | [`📄 01_Hello_World.md`](core/foundations/01_Hello_World.md) | Base mínima del lenguaje |
-| `core.foundations.hello_user` | ✅ | 50/50 | [`📄 02_Hello_User.md`](core/foundations/02_Hello_User.md) | Entrada/salida interactiva |
-| `core.foundations.unit_test` | ✅ | 50/50 | [`📄 03_Unit_Test_Calculator.md`](core/foundations/03_Unit_Test_Calculator.md) | Operaciones aritméticas básicas con unit tests |
-| `core.foundations.numbers` | ✅ | 50/50 | [`📄 04_Numbers.md`](core/foundations/04_Numbers.md) | Algoritmos numéricos recursivos e iterativos |
+> **ES:** Las tablas de módulos de este documento son una **vista manual** —las mantiene el autor al cerrar— y **el contador no vive en ellas**: desde la v1.4.0 no hay columna de lenguajes, para que ningún número pueda quedarse atrás en silencio. El recuento de verdad está en el **bloque de contadores** del final, que es el que lee `glot progress`.
+> **EN:** The module tables in this document are a **manual view** —kept by the author when closing— and **the counter does not live in them**: since v1.4.0 there is no languages column, so no number can fall behind silently. The real count is in the **counter block** at the end, which is what `glot progress` reads.
+
+| Módulo | Estado | Especificación | Notas |
+|--------|--------|----------------|-------|
+| `core.foundations.hello_world` | ✅ | [`📄 01_Hello_World.md`](core/foundations/01_Hello_World.md) | Base mínima del lenguaje |
+| `core.foundations.hello_user` | ✅ | [`📄 02_Hello_User.md`](core/foundations/02_Hello_User.md) | Entrada/salida interactiva |
+| `core.foundations.unit_test` | ✅ | [`📄 03_Unit_Test_Calculator.md`](core/foundations/03_Unit_Test_Calculator.md) | Operaciones aritméticas básicas con unit tests |
+| `core.foundations.numbers` | ✅ | [`📄 04_Numbers.md`](core/foundations/04_Numbers.md) | Algoritmos numéricos recursivos e iterativos |
 
 > **ES:** Los **50 submódulos registrados en `.gitmodules`** tienen los cuatro módulos de Foundations homologados y documentados. Foundations queda cerrada; la siguiente fase visible es Algorithms Pure.
 > **EN:** All **49 submodules registered in `.gitmodules`** have the four Foundations modules standardized and documented. Foundations is complete; Algorithms Pure is the next visible phase.
@@ -71,14 +74,14 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 **EN:** Algorithms on numbers and numeric sequences. Each topic is introduced according to three axes: (1) computational cost, (2) required ADT or representation, and (3) conceptual scaffolding.
 
-| Módulo | Estado | Lenguajes | Algoritmos | Especificación |
-|--------|--------|-----------|------------|----------------|
-| `core.algorithms.naive_sort` | ✅ | 50/50 | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
-| `core.algorithms.data_structures_basics` | 🔄 | 3/50 | Node, linked_list, stack y queue construidos desde cero | [`📄 06_Data_Structures_Basics.md`](core/algorithms/06_Data_Structures_Basics.md) |
-| `core.algorithms.data_structures_advanced` | 📋 | 0/50 | Node con múltiples enlaces, binary tree y graph dirigidos construidos desde cero | [`📄 07_Data_Structures_Advanced.md`](core/algorithms/07_Data_Structures_Advanced.md) |
-| `core.algorithms.efficient_sort` | 📋 | 0/50 | quick, merge, heap; puede usar ADTs optimizados del lenguaje salvo `sort()` | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |
-| `core.algorithms.distributed_sort` | 📋 | 0/50 | radix, bucket, shell, counting | [`📄 09_Distributed_Sort.md`](core/algorithms/09_Distributed_Sort.md) |
-| `core.algorithms.searching` | 📋 | 0/50 | linear sobre arrays numéricos; binary, jump e interpolation con precondición de array ordenado | [`📄 10_Searching.md`](core/algorithms/10_Searching.md) |
+| Módulo | Estado | Algoritmos | Especificación |
+|--------|--------|------------|----------------|
+| `core.algorithms.naive_sort` | ✅ | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
+| `core.algorithms.data_structures_basics` | 🔄 | Node, linked_list, stack y queue construidos desde cero | [`📄 06_Data_Structures_Basics.md`](core/algorithms/06_Data_Structures_Basics.md) |
+| `core.algorithms.data_structures_advanced` | 📋 | Node con múltiples enlaces, binary tree y graph dirigidos construidos desde cero | [`📄 07_Data_Structures_Advanced.md`](core/algorithms/07_Data_Structures_Advanced.md) |
+| `core.algorithms.efficient_sort` | 📋 | quick, merge, heap; puede usar ADTs optimizados del lenguaje salvo `sort()` | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |
+| `core.algorithms.distributed_sort` | 📋 | radix, bucket, shell, counting | [`📄 09_Distributed_Sort.md`](core/algorithms/09_Distributed_Sort.md) |
+| `core.algorithms.searching` | 📋 | linear sobre arrays numéricos; binary, jump e interpolation con precondición de array ordenado | [`📄 10_Searching.md`](core/algorithms/10_Searching.md) |
 
 ### Ejes de progresión / Progression axes
 

@@ -1,8 +1,10 @@
+ada	alr --version	2.1
 assembly	nasm -v	2.16
 ballerina	bal version	2201.13
 c	gcc --version	13.3
 clojure	clojure --version	1.12
 cobol	cobc --version	3.2
+common-lisp	ros run -- --version	2.6
 cpp	g++ --version	13.3
 crystal	crystal --version	1.20
 csharp	dotnet --version	10.0
@@ -34,8 +36,10 @@ python	python3 --version	3.12
 r	Rscript --version	4.3
 racket	racket --version	9.1
 raku	raku --version	2026.07
+rexx	rexx -v	5.2
 ruby	ruby --version	3.4
 rust	rustc --version	1.98
+scala	scalac -version	3.9
 scheme	guile --version	3.0
 swift	swift --version	6.3
 tcl-tk	echo 'puts $tcl_version' | tclsh	8.6

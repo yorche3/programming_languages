@@ -2277,10 +2277,13 @@ glot_run set lang ruby
 glot_run doctor
 assert_contains 'doctor: la serie del lenguaje del sprint' 'toolchain_ruby: ' "$out"
 assert_eq 'doctor: un sprint sin fila declarada no rompe' '0' "$rc_last"
-glot_run set lang ada
+# `rescript` es el lenguaje que sigue **sin fila** (su toolchain no está instalada aquí):
+# con él se prueba que un sprint sin serie declarada se dice y no rompe nada. Antes este
+# caso usaba `ada`, hasta que su fila se midió el 2026-09-27.
+glot_run set lang rescript
 glot_run doctor
 assert_eq 'doctor: sin serie declarada, código' '0' "$rc_last"
-assert_contains 'doctor: sin serie declarada, se dice' 'toolchain_ada: - (sin serie declarada' "$out"
+assert_contains 'doctor: sin serie declarada, se dice' 'toolchain_rescript: - (sin serie declarada' "$out"
 
 # inyectando el catálogo se prueban los tres estados sin tocar el dato del repositorio
 cp -f -- "$TOOLCHAINS" "$INJECTED/differs.tsv"
@@ -2451,6 +2454,37 @@ assert_contains 'CI: la CI no escribe el acta' 'no escribe' "$(cat -- "$CI_POLIC
 assert_contains 'CI: el SAST del repositorio no es verify' 'no el verbo `verify`' "$(cat -- "$CI_POLICY")"
 assert_contains 'CI: el workflow que copia queda como excepción' 'excepción declarada' "$(cat -- "$CI_POLICY")"
 assert_contains 'CI: la excepción se nombra' 'ada/.github/workflows/tests.yml' "$(cat -- "$CI_POLICY")"
+
+# Punto 5 del plan: las filas de `toolchains.tsv` que se pueden medir en este entorno ya
+# están (`ada`, `common-lisp`, `rexx`, `scala`), y `rescript` queda como excepción
+# declarada porque su toolchain no está instalada aquí. La fila solo se añade con la serie
+# **verificada**: la deuda era no poder medirlas, y estas cuatro se midieron el 2026-09-27.
+assert_contains 'toolchains: ada con su serie medida' "$(printf 'ada\talr --version\t2.1')" "$(cat -- "$TOOLCHAINS")"
+assert_contains 'toolchains: common-lisp con su serie medida' "$(printf 'common-lisp\tros run -- --version\t2.6')" "$(cat -- "$TOOLCHAINS")"
+assert_contains 'toolchains: rexx con su serie medida' "$(printf 'rexx\trexx -v\t5.2')" "$(cat -- "$TOOLCHAINS")"
+assert_contains 'toolchains: scala con su serie medida' "$(printf 'scala\tscalac -version\t3.9')" "$(cat -- "$TOOLCHAINS")"
+assert_eq 'toolchains: rescript sigue sin fila (no medible aquí)' '0' \
+    "$(grep -c '^rescript' "$TOOLCHAINS" || true)"
+
+# Punto 6 del plan: la tabla de módulos del roadmap es una **vista manual** y no lleva
+# contador —así ningún número puede quedarse atrás en silencio—; el recuento de verdad vive
+# en el bloque de contadores, que es el que lee `glot progress`.
+ROADMAP_DOC="$REPO/docs/ROADMAP.md"
+assert_eq 'roadmap: ninguna tabla de módulos lleva contador' '0' \
+    "$(grep -cE '^\| `core\.[a-z_0-9.]+` \| [^|]*\| *[0-9]+/50 *\|' "$ROADMAP_DOC" || true)"
+assert_contains 'roadmap: la tabla se declara vista manual' 'vista manual' "$(cat -- "$ROADMAP_DOC")"
+assert_contains 'roadmap: el contador de verdad se nombra' 'bloque de contadores' "$(cat -- "$ROADMAP_DOC")"
+
+# Punto 7 del plan: la suite deja de dar un falso positivo cuando el lenguaje necesita el
+# cuerpo para enlazar. El contrato **inválido** detiene el paso; que **aún no enlace** no lo
+# detiene: se comprueba sin enlace y la ejecución se traslada al acta del paso 6.
+SUITE_PROMPT="$TESTS_DIR/../prompts/suite.prompt.md"
+assert_contains 'suite: distingue el contrato inválido' 'contrato **inválido**' "$(cat -- "$SUITE_PROMPT")"
+assert_contains 'suite: admite la compilación sin enlace' 'compilación sin enlace' "$(cat -- "$SUITE_PROMPT")"
+assert_contains 'suite: nombra el comando sin enlace de Ada' 'gnatc' "$(cat -- "$SUITE_PROMPT")"
+assert_contains 'suite: traslada la ejecución al acta' 'acta del paso' "$(cat -- "$SUITE_PROMPT")"
+assert_contains 'SPRINT: el paso 4c recoge la compilación sin enlace' 'compilación sin enlace' \
+    "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 
