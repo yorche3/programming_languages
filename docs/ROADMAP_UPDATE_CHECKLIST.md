@@ -31,11 +31,25 @@ Observaciones / Notes:
 
 ## Pendientes / Pending closures
 
-Sin pendientes a 2026-09-28: la implementación, la documentación y el registro de cierre de `core.algorithms.data_structures_basics` (Clojure) están completos.
+Sin pendientes a 2026-09-28: la implementación, la documentación y el registro de cierre de `core.algorithms.data_structures_basics` (Clojure y COBOL) están completos.
 
 ## Historial / History
 
 <!-- Las entradas cerradas se conservan debajo con su fecha y evidencia. -->
+
+```text
+Fecha / Date: 2026-09-28
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): cobol
+Código verificado / Code verified: yes
+Tests y comandos / Tests and commands:
+- `make clean && make build` en `cobol/core/algorithms/data_structures_basics` -> exit 0, sin warnings (GnuCOBOL, formato libre)
+- `make test` -> `Total: 049 / Passed: 049 / Failed: 000 / >>> ALL TESTS PASSED <<<`
+README(s) verificado(s) / README(s) verified: yes (cobol/core/algorithms/data_structures_basics/README.md)
+Cambio en ROADMAP.md / ROADMAP.md change: core.algorithms.data_structures_basics 5/50 (Ada, Assembly, Ballerina, C, Clojure) -> 6/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL)
+Observaciones / Notes: Sexta implementación homologada de data_structures_basics. No cierra el módulo: faltan los demás lenguajes. COBOL es procedimental sin objetos: el contrato se declara como un conjunto de subprogramas PROGRAM-ID compilados en el mismo archivo fuente; la familia idiomática es «C, Assembly, COBOL, Forth» según AGENT_Template.md. Los nodos se gestionan con ALLOCATE/FREE (ISO COBOL 2002+) y el tipo DS-NODE es BASED; el acceso a campos usa SET ADDRESS OF DS-NODE TO <puntero>. Ausencia nativa de puntero: NULL. Indicador de fallo numérico: -1 (DS-FAILURE-VALUE, PIC S9(9)). Los booleanos se representan con PIC 9 (1 = vacía, 0 = no vacía). No hay framework de pruebas externo: la suite es artesanal con contadores propios en RUN-TESTS.cbl. No se usa recursión (COBOL tiene soporte limitado); todos los recorridos son iterativos con PERFORM UNTIL. Los índices Nivel 2 (algorithms/README.md), Nivel 1 (core/README.md y cobol/README.md) se actualizaron en el mismo cambio.
+```
 
 ```text
 Fecha / Date: 2026-09-28
