@@ -1,3 +1,3 @@
-economy	gemini-3.8-flash	low	30	-	validate, docs-module, docs-language
-balanced	gpt-5.6-terra	medium	90	-	scaffold, contract_stub, suite, fix
-deep	claude-sonnet-5	high	120	-	implement
+economy	gemini-3.8-flash	low	30	-	validate, docs-module, docs-language	gemini-3.8-flash-low
+balanced	gpt-5.6-terra	low	90	-	scaffold, contract_stub, suite, correct	gemini-3.8-flash-medium
+deep	claude-sonnet-5	high	120	-	implement, fix, refactor	claude-sonnet-4-6

@@ -112,8 +112,8 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 - Se auditó el módulo `05_Naive_Sort` en los 50 lenguajes y se abrió
   `docs/audits/` para registrar la deuda técnica por módulo, con criterios,
   estados, método reproducible y plan de cierre.
-- Se documentó el alcance real de `.github/prompts/` (plantillas locales que
-  `.gitignore` no versiona y que se normalizarán en la L4) en
+- Se documentó el alcance real de las plantillas de encargo versionadas de
+  `scripts/prompts/` (las que usa `glot prompt`) en
   `scripts/docs/ROADMAP.md`, `scripts/docs/SPRINT.md` y `docs/WORKFLOW.md`.
 - Se abrió la fase `Algorithms Pure` como siguiente fase del roadmap.
 - Se estableció el flujo de cierre documental y actualización del roadmap.

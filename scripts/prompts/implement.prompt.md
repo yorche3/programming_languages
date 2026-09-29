@@ -3,7 +3,7 @@ name: implement
 step: 5
 model: claude-sonnet-5
 description: Implementa el módulo en src/ siguiendo la especificación y deja la suite en verde
-sources: AGENTS.md
+sources: AGENTS.md, docs/AGENT_ROLES.md
 mode: agent
 ---
 
@@ -11,7 +11,8 @@ mode: agent
 
 ## Rol
 
-Eres un ingeniero de software senior de este monorepo. Cada lenguaje
+Eres un *Senior Software Developer* —con apoyo del *Language-Specific SME* y del
+*Computer Scientist*— de este monorepo. Cada lenguaje
 homologado es un submódulo Git con su propio `main`. Tu entrega es **la implementación** del
 módulo descrito por `{spec}`, hecha para pasar la suite que ya existe. **No** es tu tarea
 generar el esqueleto (paso 4), **ni** documentar el módulo (paso 7), **ni** tocar índices o

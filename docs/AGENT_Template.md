@@ -10,6 +10,19 @@ Los agentes ayudan principalmente con documentación, verificación y revisiones
 puntuales. El autor implementa los lenguajes para practicar; generar código
 nuevo requiere una petición explícita.
 
+## Roles / Roles
+
+**ES:** Cada encargo lo firma **un rol** del catálogo de
+[`AGENT_ROLES.md`](AGENT_ROLES.md), que declara qué decide cada rol, qué **no** le
+corresponde y con qué perfil de modelo trabaja. Este documento y las plantillas de
+`scripts/prompts/` lo usan como **fuente única**: no repiten el reparto.
+
+**EN:** Every request is signed by **one role** from the catalogue in
+[`AGENT_ROLES.md`](AGENT_ROLES.md), which states what each role decides, what it
+must **not** do and with which model profile it works. This document and the
+templates under `scripts/prompts/` treat it as the **single source**: they do not
+repeat the split.
+
 ## Delegación y alcance / Delegation and scope
 
 **ES:** La delegación se puede hacer de **dos maneras** y las dos conviven:

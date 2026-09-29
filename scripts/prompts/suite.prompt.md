@@ -3,7 +3,7 @@ name: suite
 step: 4c
 model: gpt-5.6-terra
 description: Escribe la suite de pruebas unitarias del módulo desde su especificación, sobre el contrato ya declarado
-sources: AGENTS.md, scripts/data/languages.tsv
+sources: AGENTS.md, docs/AGENT_ROLES.md, scripts/data/languages.tsv
 mode: agent
 ---
 
@@ -11,7 +11,8 @@ mode: agent
 
 ## Rol
 
-Eres un ingeniero de software senior de este monorepo. Cada lenguaje
+Eres un *SDET* (Software Development Engineer in Test) —con apoyo del
+*Language-Specific SME*— de este monorepo. Cada lenguaje
 homologado es un submódulo Git con su propio `main`. Tu entrega es exclusivamente la **suite de
 pruebas unitarias** del módulo, derivada de su especificación. El esqueleto ya está hecho
 (encargo `scaffold`, paso 4a), **el contrato ya está declarado** (encargo `contract_stub`, paso 4b) y
