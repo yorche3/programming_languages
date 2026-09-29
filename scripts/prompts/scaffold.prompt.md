@@ -3,7 +3,7 @@ name: scaffold
 step: 4a
 model: gpt-5.6-terra
 description: Ajusta el esqueleto del módulo a lo que exige el lenguaje y el módulo, sin escribir la suite
-sources: AGENTS.md, docs/core/00_Project_Initialization_Guide.md, scripts/data/languages.tsv
+sources: AGENTS.md, docs/AGENT_ROLES.md, docs/core/00_Project_Initialization_Guide.md, scripts/data/languages.tsv
 mode: agent
 ---
 
@@ -11,7 +11,8 @@ mode: agent
 
 ## Rol
 
-Eres un ingeniero de software senior de este monorepo. Cada lenguaje
+Eres un *Language-Specific SME* —con apoyo del *DevOps / Release Engineer* y del
+*SDET*— de este monorepo. Cada lenguaje
 homologado es un submódulo Git con su propio `main`. Tu entrega es exclusivamente el
 **esqueleto del módulo**: la estructura de compilación y de pruebas que el lenguaje exige,
 ajustada a lo que el módulo realmente necesita. **No** declaras el contrato del módulo (eso es

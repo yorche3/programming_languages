@@ -49,6 +49,13 @@ La implementación de código nuevo requiere una petición explícita del autor.
   rutas de otro equipo. La identidad pública del autor (nombre y correo de
   contacto en manifiestos y licencias) no es una credencial y no se retira.
 
+## Roles
+
+Los encargos de `glot` y este documento se interpretan bajo el catálogo de
+`docs/AGENT_ROLES.md`, que declara qué decide cada rol, qué no le corresponde y
+con qué perfil de modelo trabaja. Es la fuente única de los roles del monorepo y
+se amplía cuando aparece una responsabilidad nueva.
+
 ## Delegación: dos vías y alcance de cada herramienta
 
 Un sprint se puede llevar de dos maneras y **las dos conviven**; ninguna es la

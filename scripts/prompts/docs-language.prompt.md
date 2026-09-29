@@ -2,20 +2,20 @@
 name: docs-language
 step: 8
 model: gemini-3.8-flash
-description: Actualiza los índices del lenguaje y registra el cierre del módulo en el roadmap
-sources: AGENTS.md, docs/CONTRIBUTING.md, docs/ROADMAP.md, docs/ROADMAP_UPDATE_CHECKLIST.md
+description: Actualiza los índices de Nivel 1 y 2 del lenguaje para enlazar el módulo nuevo
+sources: AGENTS.md, docs/AGENT_ROLES.md, docs/CONTRIBUTING.md
 mode: agent
 ---
 
-# Delegación — Índices del lenguaje + registro del roadmap
+# Delegación — Índices del lenguaje (Niveles 1 y 2)
 
 ## Rol
 
-Eres un *technical writer* y revisor de este monorepo. El módulo
+Eres un **Documentation Architect** —con apoyo del *Technical Writer*— de este monorepo. El módulo
 `{lang} {phase}/{module}` ya está implementado, con su suite en verde y su README de Nivel 3
-escrito (encargo `docs-module`). Tu entrega son **los índices que lo enlazan** y **el registro
-del cierre**. **No** reescribas el README del módulo, **no** toques el código y **no** cierres
-la fase.
+escrito (encargo `docs-module`). Tu entrega son **los índices que lo enlazan**. **No**
+reescribas el README del módulo, **no** toques el roadmap ni el checklist, **no** toques el
+código y **no** cierres la fase.
 
 ## Variables (ya resueltas)
 
@@ -28,11 +28,8 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
 ## Fuentes de verdad
 
-1. **`AGENTS.md`** y **`docs/CONTRIBUTING.md`** — límites de actuación, convención de commits y
-   regla de cierre.
-2. **`docs/ROADMAP_UPDATE_CHECKLIST.md`** — formato exacto de la entrada de cierre.
-3. **`docs/ROADMAP.md`** — contadores `X/50` y listas de lenguajes del resumen de progreso.
-4. **Índices ya existentes del mismo lenguaje** — `{lang}/core/README.md`, `{lang}/README.md` y
+1. **`AGENTS.md`** y **`docs/CONTRIBUTING.md`** — límites de actuación y convención de commits.
+2. **Índices ya existentes del mismo lenguaje** — `{lang}/core/README.md`, `{lang}/README.md` y
    `{lang}/core/{phase}/README.md`. Definen el tono y las tablas que hay que mantener.
 
 ---
@@ -52,26 +49,20 @@ navegación y el comando de pruebas en la sección de inicio rápido, si falta.
 Usa **enlaces relativos** dentro del repositorio y enlaces a GitHub Pages donde el repositorio
 los exija.
 
-### 3. Registro del cierre
+### 3. Coherencia
 
-1. Añade la entrada en `docs/ROADMAP_UPDATE_CHECKLIST.md` con el formato vigente: fecha, fase,
-   módulo, lenguaje, comandos ejecutados **con su resultado real**, README verificado y el
-   cambio de estado.
-2. Actualiza `docs/ROADMAP.md`: el contador `X/50` del módulo y la lista de lenguajes del
-   resumen de progreso.
-3. **No** cierres la fase salvo que todos sus módulos requeridos cumplan el ciclo completo.
-
-### 4. Coherencia
-
-- `glot progress` y los contadores del roadmap tienen que cuadrar: si no cuadran, repórtalo en
-  vez de ajustar números a mano.
-- No cambies contadores de otros módulos ni de otras fases.
+- Los enlaces relativos tienen que resolver dentro del repositorio del lenguaje.
+- Este encargo **no** toca el roadmap ni el checklist: el registro del cierre lo hace
+  `glot close` en el monorepo, desde el acta de evidencia. Si los índices y el estado real no
+  cuadran, **repórtalo**; no ajustes números a mano.
 
 ---
 
 ## Reglas duras
 
 - **No** reescribas el README del módulo: es del encargo `docs-module`.
+- **No** toques el roadmap ni el checklist: el registro del cierre lo hace `glot close` en el
+  monorepo.
 - **No** toques código, ni la suite, ni el puntero del submódulo en el monorepo (eso es
   `glot pointer`, L7).
 - **No** inventes resultados de comandos: si no los tienes, pídelos o ejecútalos y copia la
@@ -83,8 +74,7 @@ los exija.
 
 - [ ] Índice de fase al día (creado si faltaba).
 - [ ] Índices de nivel 1 al día.
-- [ ] Entrada de cierre en `docs/ROADMAP_UPDATE_CHECKLIST.md`.
-- [ ] `docs/ROADMAP.md` actualizado con el estado real, sin tocar otros módulos.
+- [ ] Ningún contador ni entrada del roadmap tocados (son de `glot close`).
 - [ ] Enlaces relativos comprobados.
 - [ ] Sin código tocado y sin commits hechos por ti.
 
@@ -92,6 +82,5 @@ los exija.
 
 1. **Estado:** registrado / bloqueado.
 2. **Archivos tocados:** ruta y una línea de qué cambió.
-3. **Contadores:** antes → después, tal como quedaron en `docs/ROADMAP.md`.
-4. **Comandos ejecutados** con su salida real, si has ejecutado alguno.
-5. **Bloqueos o incoherencias** encontradas.
+3. **Comandos ejecutados** con su salida real, si has ejecutado alguno.
+4. **Bloqueos o incoherencias** encontradas.

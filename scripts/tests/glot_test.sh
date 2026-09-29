@@ -850,7 +850,7 @@ assert_contains 'doctor: hay verificadores' 'verify_commands: 14 de / of 50' "$o
 # registro de encargos: nombre<TAB>paso<TAB>descripción, leído del frontmatter
 glot_run prompt
 assert_eq 'prompt: código' '0' "$rc_last"
-assert_eq 'prompt: ocho encargos' '8' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'prompt: diez encargos' '10' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 assert_eq 'prompt: cuatro columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=4')"
 assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
 assert_contains 'prompt: contract_stub en el paso 4b' "$(printf 'contract_stub\t4b')" "$out"
@@ -890,7 +890,7 @@ assert_contains 'ask sin delegado: explica GLOT_DELEGATE' 'GLOT_DELEGATE' "$err"
 # El error trae el remedio entero: las dos líneas de invocación verificada, listas para el
 # rc. Sin ellas el verbo decía qué variable faltaba y dejaba al autor buscando el comando.
 assert_contains 'ask sin delegado: imprime la línea de Copilot' "export GLOT_DELEGATE_COP='copilot -C {module_dir}" "$err"
-assert_contains 'ask sin delegado: imprime la línea de Antigravity' "export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6" "$err"
+assert_contains 'ask sin delegado: imprime la línea de Antigravity' "export GLOT_DELEGATE_AGY='agy -m {model}" "$err"
 assert_contains 'ask sin delegado: dice dónde van' 'van en tu rc' "$err"
 assert_contains 'ask sin delegado: ofrece imprimir el encargo' 'glot prompt' "$err"
 assert_contains 'ask sin delegado: no ensucia stdout' '' "$out"
@@ -935,7 +935,7 @@ assert_contains 'ask -n: imprime el plan sin enviar' 'cat >/dev/null' "$out"
 # doctor informa de las plantillas y del delegado
 glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
-assert_contains 'doctor: registro de encargos' 'prompts_ok: 8 encargos / requests' "$out"
+assert_contains 'doctor: registro de encargos' 'prompts_ok: 10 encargos / requests' "$out"
 assert_contains 'doctor: delegado COP sin configurar' 'delegate_cop: (sin configurar / not configured)' "$out"
 assert_contains 'doctor: delegado AGY sin configurar' 'delegate_agy: (sin configurar / not configured)' "$out"
 
@@ -1101,7 +1101,7 @@ assert_contains 'completion bash: pasos de save' '4a' "$save_comp"
 assert_contains 'completion bash: el contrato como paso propio' 'contract_stub' "$save_comp"
 assert_contains 'completion bash: la suite se desplaza a 4c' '4c' "$save_comp"
 assert_contains 'completion bash: alias de los pasos' 'scaffold' "$save_comp"
-assert_eq 'completion bash: un candidato por línea' '14' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
+assert_eq 'completion bash: un candidato por línea' '18' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
 
 # v1.1.0: los encargos se complean **en vivo** desde el registro, así que la lista no puede
 # quedarse corta al añadir una plantilla (el fallo que dejaba `scaffold` sin descubrir)
@@ -1263,7 +1263,7 @@ assert_contains 'save 4d sin causa: lo explica' 'necesita su causa' "$err"
 printf 'z\n' >"$RB/src/z.rb"
 glot_run_sandbox -n save 4d --cause 'la suite no cubría el caso vacío' ruby algorithms/naive_sort
 assert_eq 'save 4d con causa: código' '0' "$rc_last"
-assert_contains 'save 4d: el mensaje sale del catálogo' "commit -m 'fix(algorithms): correct naive_sort'" "$out"
+assert_contains 'save 4d: el mensaje sale del catálogo' "commit -m 'chore(algorithms): correct naive_sort'" "$out"
 assert_contains 'save 4d: la causa va al cuerpo del commit' "-m 'la suite no cubría el caso vacío'" "$out"
 # v1.5.0: la opción va en inglés, como el resto del CLI; `--causa` se acepta como alias
 glot_run_sandbox -n save 4d --causa 'la causa en español sigue valiendo' ruby algorithms/naive_sort
@@ -1300,7 +1300,7 @@ assert_contains 'doctor: cobertura de inicializadores' 'new_commands: ' "$out"
 assert_contains 'doctor: inicializadores verificados' 'new_commands: 50 de / of 50' "$out"
 assert_contains 'doctor: ya no hay aplazadas' '(deferred: 0)' "$out"
 assert_contains 'doctor: catálogo de commits' 'commits_file: ' "$out"
-assert_contains 'doctor: pasos de commit' 'commit_steps: 9 de / of which 7 son del submódulo' "$out"
+assert_contains 'doctor: pasos de commit' 'commit_steps: 11 de / of which 9 son del submódulo' "$out"
 
 # --- casos de la especificación v0.10.0 (L6, evidencia y cierre) -------------
 
@@ -1665,7 +1665,7 @@ MODELS_TSV="$TESTS_DIR/../data/models.tsv"
 
 # el catálogo: una fila por perfil, con el modelo como clave
 assert_eq 'modelos: el catálogo existe' 'si' "$([[ -f "$MODELS_TSV" ]] && echo si || echo no)"
-assert_eq 'modelos: seis columnas por fila' '' "$(awk -F'\t' 'NF!=6' "$MODELS_TSV")"
+assert_eq 'modelos: siete columnas por fila' '' "$(awk -F'\t' 'NF!=7' "$MODELS_TSV")"
 assert_eq 'modelos: perfiles únicos' '3' "$(cut -f1 -- "$MODELS_TSV" | sort -u | wc -l | tr -d ' ')"
 assert_eq 'modelos: modelos únicos (el modelo es la clave)' '3' "$(cut -f2 -- "$MODELS_TSV" | sort -u | wc -l | tr -d ' ')"
 assert_eq 'modelos: esfuerzo válido para el CLI' '' \
@@ -1694,7 +1694,7 @@ assert_eq 'modelos: el modelo declarado está en el catálogo' '' "$unknown_mode
 # deriva en los dos sentidos: la columna de encargos de cada perfil tiene que ser
 # exactamente el conjunto de plantillas que declaran ese modelo
 models_drift=""
-while IFS=$'\t' read -r profile model effort credits tier requests; do
+while IFS=$'\t' read -r profile model effort credits tier requests pagy_model; do
     declared="$(for prompt_file in "$PROMPTS_DIR"/*.prompt.md; do
         if [[ "$(sed -n 's/^model: \(.*\)$/\1/p' "$prompt_file")" == "$model" ]]; then
             sed -n 's/^name: \(.*\)$/\1/p' "$prompt_file"
@@ -1737,7 +1737,7 @@ assert_contains 'modelo fuera del catálogo: lo dice' 'sin perfil en el catálog
 # doctor informa de la cobertura del catálogo y del envejecimiento contra el CLI
 glot_run doctor
 assert_contains 'doctor: catálogo de modelos' 'models_file: ' "$out"
-assert_contains 'doctor: cobertura de perfiles' 'model_profiles: 8 de / of 8' "$out"
+assert_contains 'doctor: cobertura de perfiles' 'model_profiles: 10 de / of 10' "$out"
 if command -v copilot >/dev/null 2>&1; then
     assert_contains 'doctor: los modelos siguen en el CLI' 'model_available: 3 de / of 3' "$out"
     cli_models="$(copilot help config 2>/dev/null || true)"
@@ -2453,8 +2453,14 @@ assert_eq 'prompt: código' '0' "$rc_last"
 assert_contains 'prompt: la cabecera lleva la raíz del monorepo' "| root | $REPO |" "$out"
 assert_eq 'prompt: sin fuentes ausentes no avisa' 'no' "$([[ "$err" == *'fuente ausente'* ]] && echo si || echo no)"
 
-mkdir -p -- "$SANDBOX/.github/prompts"
-cat >"$SANDBOX/.github/prompts/fuentes-check.prompt.md" <<'EOF'
+# v1.6.0: las plantillas **solo** mandan versionadas. El aviso de fuentes se prueba
+# inyectando la plantilla en la carpeta del clon, que es la única fuente que existe.
+fuentes_glot="$WORK_DIR/glot-fuentes"
+mkdir -p -- "$fuentes_glot/prompts"
+cp -- "$GLOT_SH" "$fuentes_glot/glot.sh"
+cp -R -- "$TESTS_DIR/../data" "$fuentes_glot/data"
+cp -R -- "$PROMPTS_DIR/." "$fuentes_glot/prompts/"
+cat >"$fuentes_glot/prompts/fuentes-check.prompt.md" <<'EOF'
 ---
 name: fuentes-check
 step: 4b
@@ -2466,12 +2472,22 @@ mode: agent
 
 Cuerpo de prueba para {module}.
 EOF
-out="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" prompt fuentes-check php algorithms/data_structures_basics 2>"$WORK_DIR/stderr")" || true
+out="$(GLOT_ROOT="$SANDBOX" "$fuentes_glot/glot.sh" prompt fuentes-check php algorithms/data_structures_basics 2>"$WORK_DIR/stderr")" || true
 err="$(cat -- "$WORK_DIR/stderr")"
 assert_contains 'prompt: avisa de la fuente que falta' 'fuente ausente / missing source: docs/no-existe.md' "$err"
 assert_eq 'prompt: no avisa de la que sí está' 'no' "$([[ "$err" == *'missing source: docs/core'* ]] && echo si || echo no)"
 assert_eq 'prompt: el encargo se imprime igual' 'si' \
     "$([[ "$out" == *'Cuerpo de prueba para data_structures_basics'* ]] && echo si || echo no)"
+
+# v1.6.0: el banco local ya **no** es respaldo: una plantilla fuera de `scripts/prompts/`
+# no se lee, aunque exista en el clon.
+mkdir -p -- "$SANDBOX/.github/prompts"
+cp -- "$PROMPTS_DIR/suite.prompt.md" "$SANDBOX/.github/prompts/local-only.prompt.md"
+sed -i 's/^name: suite/name: local-only/' "$SANDBOX/.github/prompts/local-only.prompt.md"
+rc_last=0
+out="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" prompt local-only php algorithms/data_structures_basics 2>"$WORK_DIR/stderr")" || rc_last=$?
+assert_eq 'prompt: el banco local ya no se lee' '1' "$rc_last"
+assert_contains 'prompt: lo dice' 'encargo desconocido' "$(cat -- "$WORK_DIR/stderr")"
 rm -rf -- "$SANDBOX/.github"
 
 # --- casos de la especificación v1.2.0 (delegados COP y AGY) -----------------

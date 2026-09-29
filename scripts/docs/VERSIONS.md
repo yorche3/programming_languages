@@ -98,7 +98,7 @@
 ## 0.8.0 — 2026-09-22 (cerrada)
 
 - **Añade:** la **delegación** (L4) con `prompt` (sin argumentos lista el registro; con encargo imprime la cabecera del estado del sprint y la plantilla expandida) y `ask` (el mismo encargo, enviado a `GLOT_DELEGATE` por stdin). Ninguno de los dos ejecuta el trabajo ni escribe en el repositorio.
-- **Plantillas versionadas:** cuatro encargos en `scripts/prompts/` — `scaffold` (paso 4), `implement` (5), `docs-module` (7) y `docs-language` (8) — normalizados desde el banco local de `.github/prompts/`. El registro no está codificado: `glot prompt` recorre `*.prompt.md` y lee `name`, `step` y `description` del frontmatter, así que añadir un encargo es añadir un archivo.
+- **Plantillas versionadas:** cuatro encargos en `scripts/prompts/` — `scaffold` (paso 4), `implement` (5), `docs-module` (7) y `docs-language` (8) — normalizados y versionados junto al tooling. El registro no está codificado: `glot prompt` recorre `*.prompt.md` y lee `name`, `step` y `description` del frontmatter, así que añadir un encargo es añadir un archivo.
 - **Un solo vocabulario de marcadores**, anclado a las claves del estado: `{lang}`, `{phase}`, `{module}`, `{Module}`, `{repo}`, `{branch}`, `{spec}`, `{suite}` y `{module_dir}`. Se renombran en la guía de inicialización y en el catálogo de datos (`{modulo}`/`{Modulo}` → `{module}`/`{Module}`, 110 ocurrencias).
 - **Contrato:** un marcador sin resolver es un error `1` que lo nombra, nunca texto literal; `prompt` no necesita `-n` (imprimir es su función) y `ask -n` imprime el plan; sin `GLOT_DELEGATE`, `ask` devuelve `1`; un delegado que falla devuelve `1`, no `4`.
 - **`doctor`:** informa de la carpeta de plantillas, del número de encargos y de si hay delegado configurado.

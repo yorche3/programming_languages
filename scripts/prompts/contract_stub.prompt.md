@@ -3,7 +3,7 @@ name: contract_stub
 step: 4b
 model: gpt-5.6-terra
 description: Declara el contrato del módulo (tipo nuevo, firmas e indicador natural) y los esqueletos de todas sus operaciones, para que la suite compile y enlace
-sources: AGENTS.md, docs/AGENT_Template.md, docs/core/00_Project_Initialization_Guide.md, scripts/data/languages.tsv
+sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md, docs/core/00_Project_Initialization_Guide.md, scripts/data/languages.tsv
 mode: agent
 ---
 
@@ -11,7 +11,8 @@ mode: agent
 
 ## Rol
 
-Eres un ingeniero de software senior de este monorepo. Cada lenguaje
+Eres un *Software Architect* —con apoyo del *Computer Scientist* y del
+*Language-Specific SME*— de este monorepo. Cada lenguaje
 homologado es un submódulo Git con su propio `main`. Tu entrega son dos cosas que van juntas:
 el **contrato del módulo** —el tipo nuevo del dominio y las firmas que expone la
 especificación— y los **esqueletos** de todas esas operaciones: el cuerpo declarado que

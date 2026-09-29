@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# glot 1.5.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
+# glot 1.6.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
 # programa y se **carga** con `source` (capa cargable de la L8), donde `glot` es una
 # función de bash que hace el `cd` real de `use`. `install` deja la copia estable,
 # el bloque del rc y el completado; `doctor` cierra el diagnóstico del entorno.
@@ -28,6 +28,16 @@
 # fusionar dejaba el módulo entero fuera del puntero, en silencio— y `close` exige que el
 # gitlink apunte al commit integrado, porque el paso 8 se confirma dentro del submódulo y
 # puede ir después.
+# Desde la v1.6.0 el retrabajo se reparte por momento: `4d correct` corrige un artefacto
+# **anterior** a la implementación, `5b fix` un defecto de comportamiento de la
+# implementación y `5c refactor` un cambio de forma que no altera lo observable; los tres
+# exigen `--cause`, que `save` toma de la opción o de la clave de estado `cause` que el
+# propio encargo deja puesta. El **modelo se elige por rol** y viaja también para AGY
+# (`models.tsv` gana la columna del delegado), con `--model`/`GLOT_MODEL` y
+# `--effort`/`GLOT_EFFORT` como override de una corrida. El **cierre** tiene su verbo:
+# `finish` prepara el puntero, lo confirma y registra el cierre en el monorepo, en la rama
+# activa y sin abrir rama. Y las plantillas **solo mandan versionadas**: la fuente única es
+# `scripts/prompts/`.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -65,7 +75,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.5.0"
+GLOT_VERSION="1.6.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -494,6 +504,23 @@ _glot_cmd_doctor() {
                     "$model_rows" "$(_glot_models_list | wc -l | tr -d ' ')"
             else
                 printf 'model_available: (sin Copilot CLI / no Copilot CLI)\n'
+            fi
+            # La columna del delegado (campo 7) es la de AGY: aquí se comprueba contra su
+            # propio catálogo, porque los ids no son los mismos que los de Copilot.
+            if command -v agy >/dev/null 2>&1; then
+                local agy_models=""
+                local agy_rows=0
+                agy_models="$(agy models 2>/dev/null || true)"
+                while IFS= read -r model; do
+                    [[ -z "$model" || "$model" == "-" ]] && continue
+                    if printf '%s\n' "$agy_models" | awk '{print $1}' | grep -qxF -- "$model"; then
+                        agy_rows=$((agy_rows + 1))
+                    fi
+                done < <(_glot_models_list | cut -f7)
+                printf 'model_available_agy: %s de / of %s en AGY / in AGY\n' \
+                    "$agy_rows" "$(_glot_models_list | wc -l | tr -d ' ')"
+            else
+                printf 'model_available_agy: (sin agy / no agy)\n'
             fi
         else
             printf 'models_file: (no encontrado / not found)\n'
@@ -1236,22 +1263,14 @@ _glot_prompts_dir() {
     return 1
 }
 
-# _glot_prompt_file <encargo> — plantilla del encargo. Manda la versionada y, si no
-# está, se acepta la del banco local con un aviso: esa no viaja en el repositorio.
+# _glot_prompt_file <encargo> — plantilla versionada del encargo. La fuente única es
+# `scripts/prompts/`, junto al tooling.
 _glot_prompt_file() {
     local name="$1"
     local dir=""
-    local local_dir=""
 
     if dir="$(_glot_prompts_dir)" && [[ -r "$dir/$name.prompt.md" ]]; then
         printf '%s\n' "$dir/$name.prompt.md"
-        return 0
-    fi
-
-    local_dir="$(_glot_repo_root 2>/dev/null || true)/.github/prompts"
-    if [[ -r "$local_dir/$name.prompt.md" ]]; then
-        _glot_warn "plantilla local y no versionada / local, unversioned template: $local_dir/$name.prompt.md"
-        printf '%s\n' "$local_dir/$name.prompt.md"
         return 0
     fi
 
@@ -1321,8 +1340,8 @@ _glot_prompts_list() {
     done
 }
 
-# _glot_prompt_registered <nombre> — ¿hay plantilla para ese encargo? Mira la versionada y,
-# en silencio, el banco local del autor: es lo que usa la sugerencia de verbo desconocido.
+# _glot_prompt_registered <nombre> — ¿hay plantilla versionada para ese encargo? Es lo que
+# usa la sugerencia de verbo desconocido.
 _glot_prompt_registered() {
     local name="$1"
     local dir=""
@@ -1331,11 +1350,7 @@ _glot_prompt_registered() {
         "" | */* | .* | *" "*) return 1 ;;
     esac
 
-    if dir="$(_glot_prompts_dir)" && [[ -r "$dir/$name.prompt.md" ]]; then
-        return 0
-    fi
-
-    dir="$(_glot_repo_root 2>/dev/null || true)/.github/prompts"
+    dir="$(_glot_prompts_dir)" || return 1
     [[ -r "$dir/$name.prompt.md" ]]
 }
 
@@ -1457,6 +1472,27 @@ _glot_cmd_prompt() {
 
 # --- delegados (v1.2.0) ------------------------------------------------------
 
+# _glot_delegate_effective <delegado> — resuelve a `cop` o `agy` el delegado elegido. Sin
+# argumento, con una sola variable configurada se usa esa; con las dos hace falta elegir, y
+# eso ya lo dijo `_glot_delegate_command`. Es lo que decide **de qué columna** sale el
+# modelo: los ids de Copilot y de AGY no son los mismos.
+_glot_delegate_effective() {
+    local kind="$1"
+    local cop="${GLOT_DELEGATE_COP:-${GLOT_DELEGATE:-}}"
+    local agy="${GLOT_DELEGATE_AGY:-}"
+
+    case "$kind" in
+        copilot | cop) printf 'cop\n' ;;
+        antigravity | agy) printf 'agy\n' ;;
+        "")
+            if [[ -n "$cop" && -z "$agy" ]]; then printf 'cop\n'; return 0; fi
+            if [[ -z "$cop" && -n "$agy" ]]; then printf 'agy\n'; return 0; fi
+            return 1
+            ;;
+        *) return 1 ;;
+    esac
+}
+
 # _glot_delegate_command <delegado> [encargo] — resuelve la orden del delegado pedido.
 # Las dos órdenes viven en el **entorno del autor** —`GLOT_DELEGATE_COP` y
 # `GLOT_DELEGATE_AGY`—, nunca en el repositorio; `GLOT_DELEGATE` sigue valiendo como
@@ -1561,6 +1597,8 @@ _glot_delegate_expand() {
 
     order="${order//\{root\}/${GLOT_ROOT:-}}"
     order="${order//\{module_dir\}/${GLOT_MODULE_DIR:-}}"
+    order="${order//\{model\}/${GLOT_DELEGATE_MODEL:-}}"
+    order="${order//\{effort\}/${GLOT_DELEGATE_EFFORT:-}}"
 
     # Los `${VAR}` del shell son legítimos en la orden —es la forma de citar las rutas por
     # variable—, así que se apartan antes de buscar marcadores de glot sin resolver.
@@ -1568,7 +1606,7 @@ _glot_delegate_expand() {
     if [[ "$probe" =~ \{[A-Za-z_][A-Za-z_0-9]*\} ]]; then
         marker="${BASH_REMATCH[0]}"
         _glot_error "marcador sin resolver en el delegado / unresolved placeholder in the delegate: $marker"
-        _glot_info 'en la orden solo valen root y module_dir / only root and module_dir are valid in the command'
+        _glot_info 'en la orden valen root, module_dir, model y effort / root, module_dir, model and effort are valid'
         return 1
     fi
 
@@ -1584,16 +1622,23 @@ _glot_delegate_expand() {
 # `GLOT_DELEGATE_COP='wc -l'`.
 _glot_cmd_ask() {
     local delegate_kind=""
+    local delegate_eff=""
     local name=""
     local request=""
     local template=""
     local profile=""
     local pname=""
     local pmodel=""
+    local pagy_model=""
+    local base_model=""
+    local env_model=""
+    local model=""
     local effort=""
     local credits=""
     local tier=""
     local requests=""
+    local model_opt=""
+    local effort_opt=""
     local env_prefix=""
     local delegate_order=""
     local -a rest=()
@@ -1614,6 +1659,30 @@ _glot_cmd_ask() {
                 delegate_kind="${1#*=}"
                 shift
                 ;;
+            --model)
+                if (( $# < 2 )); then
+                    _glot_error 'falta el valor de --model / missing --model value'
+                    return 2
+                fi
+                model_opt="$2"
+                shift 2
+                ;;
+            --model=*)
+                model_opt="${1#*=}"
+                shift
+                ;;
+            --effort)
+                if (( $# < 2 )); then
+                    _glot_error 'falta el valor de --effort / missing --effort value'
+                    return 2
+                fi
+                effort_opt="$2"
+                shift 2
+                ;;
+            --effort=*)
+                effort_opt="${1#*=}"
+                shift
+                ;;
             *)
                 rest+=("$1")
                 shift
@@ -1631,13 +1700,35 @@ _glot_cmd_ask() {
 
     request="$(_glot_prompt_build "$name" "${rest[@]:1}")" || return $?
     delegate_order="$(_glot_delegate_command "$delegate_kind" "$name")" || return $?
+    delegate_eff="$(_glot_delegate_effective "$delegate_kind")" || return 2
 
     template="$(_glot_prompt_file "$name")" || return 1
     profile="$(_glot_prompt_profile "$template")" || return $?
-    IFS=$'\t' read -r pname pmodel effort credits tier requests <<<"$profile"
+    IFS=$'\t' read -r pname pmodel effort credits tier requests pagy_model <<<"$profile"
 
-    export COPILOT_MODEL="$pmodel"
-    env_prefix="COPILOT_MODEL=$pmodel"
+    # El modelo efectivo: gana `--model`, después el entorno del delegado (`GLOT_MODEL`, o
+    # `GLOT_MODEL_COP`/`GLOT_MODEL_AGY`) y, si no, el del perfil. Para AGY el del perfil es la
+    # columna del delegado, porque los ids no son los mismos que los de Copilot.
+    if [[ "$delegate_eff" == "agy" ]]; then
+        base_model="$pagy_model"
+        env_model="${GLOT_MODEL_AGY:-}"
+    else
+        base_model="$pmodel"
+        env_model="${GLOT_MODEL_COP:-${GLOT_MODEL:-}}"
+    fi
+    model="${model_opt:-${env_model:-$base_model}}"
+    if [[ -z "$model" || "$model" == "-" ]]; then
+        _glot_error "el perfil no declara modelo para $delegate_eff / the profile declares no model for $delegate_eff"
+        _glot_info 'mira el catálogo / check the catalogue: scripts/data/models.tsv'
+        return 1
+    fi
+    if [[ -n "$effort_opt" ]]; then effort="$effort_opt"; fi
+    if [[ -n "${GLOT_EFFORT:-}" ]]; then effort="$GLOT_EFFORT"; fi
+
+    export GLOT_DELEGATE_MODEL="$model"
+    export GLOT_DELEGATE_EFFORT="$effort"
+    export COPILOT_MODEL="$model"
+    env_prefix="COPILOT_MODEL=$model"
     if [[ "$tier" != "-" ]]; then
         export COPILOT_AUTO_TIER="$tier"
         env_prefix+=" COPILOT_AUTO_TIER=$tier"
@@ -1654,7 +1745,7 @@ _glot_cmd_ask() {
         return 0
     fi
 
-    _glot_info "perfil / profile: $pname ($pmodel, esfuerzo / effort $effort, $credits créditos / credits)"
+    _glot_info "perfil / profile: $pname (cop $pmodel · $delegate_eff $model, esfuerzo / effort $effort, $credits créditos / credits)"
     _glot_info "delegado / delegate: $delegate_order"
     printf '%s\n' "$request" | eval "$delegate_order" || rc=$?
 
@@ -2006,6 +2097,7 @@ _glot_cmd_pointer() {
 
     _glot_info "puntero preparado / pointer staged: ${head:0:7}"
     _glot_info "confirma con / commit with: glot save 9 $lang $phase/$module"
+    _glot_state_rewrite set target monorepo >/dev/null 2>&1 || true
     printf '%s\n' "${head:0:7}"
     return 0
 }
@@ -2338,14 +2430,24 @@ _glot_cmd_save() {
 
     msg="$(_glot_expand_state "$lang" "$phase" "$module" "$(_glot_commit_field "$step" 4)")" || return $?
 
-    # El paso de corrección exige la causa: es el registro del retrabajo, y el único sitio
-    # donde queda por qué se corrige lo que ya se había confirmado.
-    if [[ "$step" == "4d" || "$step" == "fix" ]] && [[ -z "$cause" ]]; then
-        _glot_error 'la corrección necesita su causa / the correction needs its cause'
-        _glot_info 'uso / usage: glot save 4d --cause "<qué falló y por qué>" [lenguaje] [fase/módulo]'
-        _glot_info 'mira / see: glot prompt fix'
-        return 2
-    fi
+    # Los pasos de retrabajo (correct 4d, fix 5b, refactor 5c) exigen su causa. `save` la toma
+    # de `--cause` y, si no, de la clave de estado `cause`, que el propio encargo deja puesta
+    # con `glot set cause "…"` (v1.6.0): así no queda ningún fichero de trabajo en el módulo.
+    # La causa es el registro del retrabajo, y el único sitio donde queda por qué se corrige
+    # lo que ya se había confirmado.
+    case "$step" in
+        4d | correct | 5b | fix | 5c | refactor)
+            if [[ -z "$cause" ]]; then
+                cause="$(_glot_state_get cause 2>/dev/null || true)"
+            fi
+            if [[ -z "$cause" ]]; then
+                _glot_error 'el retrabajo necesita su causa / the rework needs its cause'
+                _glot_info 'el encargo la deja en el estado / the request leaves it in the state: glot set cause "<…>"'
+                _glot_info "o pásala / or pass it: glot save $step --cause \"<qué falló y por qué>\" [lenguaje] [fase/módulo]"
+                return 2
+            fi
+            ;;
+    esac
 
     root="$(_glot_repo_root)" || {
         _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
@@ -2455,6 +2557,12 @@ _glot_cmd_save() {
 
     sha="$(git -C "$repo" rev-parse --short HEAD)"
     printf '%s\n' "$sha"
+    # La causa ya cumplió: se retira del estado para que no se cuele en el commit siguiente.
+    case "$step" in
+        4d | correct | 5b | fix | 5c | refactor)
+            _glot_state_rewrite unset cause >/dev/null 2>&1 || true
+            ;;
+    esac
     _glot_info "sin push / no push"
     # El paso 7 y el 8 son los últimos del submódulo: lo que sigue ya es del monorepo.
     # Si la rama del sprint aún no está contenida en el `main` del submódulo, el autor
@@ -2992,6 +3100,32 @@ _glot_cmd_close() {
     return 0
 }
 
+# _glot_cmd_finish [lenguaje] [fase/módulo] — el cierre del monorepo en un paso (v1.6.0).
+# Prepara y confirma el **puntero** (`save 9`) y registra el **cierre** (`close` + `save 10`),
+# en la rama activa y **sin abrir rama propia**. Deja el estado en `target=monorepo` para que
+# se sepa que el trabajo ya es del monorepo. Son **dos commits** a propósito, para poder
+# separar el guardado del puntero del de la información; el **push lo hace el autor**.
+# Códigos: los de `pointer` y `close` (0 correcto · 1 entorno o dato · 3 no se pudo escribir
+# · 4 requisitos sin cumplir).
+_glot_cmd_finish() {
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    _glot_cmd_pointer "$lang" "$phase/$module" || return $?
+    _glot_cmd_save 9 "$lang" "$phase/$module" || return $?
+    _glot_cmd_close "$lang" "$phase/$module" || return $?
+    _glot_cmd_save 10 "$lang" "$phase/$module" || return $?
+
+    _glot_info 'cierre del monorepo listo / monorepo closure ready; publica tú / you push:'
+    _glot_info '  git push origin <rama-del-monorepo>'
+    return 0
+}
+
 # _glot_validate_file <raíz> <fase> <módulo> <lenguaje> — registro de la validación del
 # sprint, en la misma carpeta de evidencia que el acta: lo que se ejecutó y lo que el
 # validador informó viven juntos.
@@ -3029,6 +3163,7 @@ _glot_cmd_validate() {
     local credits=""
     local tier=""
     local requests=""
+    local pagy_model=""
     local cmd=""
     local response=""
     local rc=0
@@ -3063,7 +3198,16 @@ _glot_cmd_validate() {
     # modelo, esfuerzo ni créditos que se puedan quedar viejos por su cuenta.
     template="$(_glot_prompt_file validate)" || return 1
     profile="$(_glot_prompt_profile "$template")" || return $?
-    IFS=$'\t' read -r pname pmodel effort credits tier requests <<<"$profile"
+    IFS=$'\t' read -r pname pmodel effort credits tier requests pagy_model <<<"$profile"
+
+    # El validador usa el delegado de Copilot: el modelo sale del perfil, y `GLOT_MODEL` (o
+    # su alias `GLOT_MODEL_COP`) y `GLOT_EFFORT` lo pueden cambiar para una sola corrida.
+    if [[ -n "${GLOT_MODEL_COP:-${GLOT_MODEL:-}}" ]]; then
+        pmodel="${GLOT_MODEL_COP:-${GLOT_MODEL:-}}"
+    fi
+    if [[ -n "${GLOT_EFFORT:-}" ]]; then
+        effort="$GLOT_EFFORT"
+    fi
 
     export COPILOT_MODEL="$pmodel"
     if [[ "$tier" != "-" ]]; then
@@ -3238,13 +3382,17 @@ Verbos / Verbs:
                      armado con el estado del sprint. No muta nada
                      With no request it lists the registry; with one it prints the
                      request built from the sprint state. It mutates nothing
-  ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot|antigravity]
+  ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot|antigravity] [--model <id>] [--effort <nivel>]
                      Arma el encargo y lo envía al delegado por stdin: --delegate elige
                      entre GLOT_DELEGATE_COP (Copilot) y GLOT_DELEGATE_AGY (Antigravity),
-                     y sin él, con uno solo configurado, se usa ese
+                     y sin él, con uno solo configurado, se usa ese. El modelo sale del
+                     **rol** (perfil del encargo) y `--model`/`GLOT_MODEL` y
+                     `--effort`/`GLOT_EFFORT` lo cambian para una corrida
                      Builds the request and pipes it to the delegate over stdin: --delegate
                      chooses between GLOT_DELEGATE_COP (Copilot) and GLOT_DELEGATE_AGY
-                     (Antigravity), and without it, with only one set, that one is used
+                     (Antigravity), and without it, with only one set, that one is used.
+                     The model comes from the **role** (the request profile) and
+                     `--model`/`GLOT_MODEL` and `--effort`/`GLOT_EFFORT` change it for one run
   use <lenguaje> <fase>/<módulo> [tipo]
                      Sitúa el trabajo: valida y, con el árbol limpio, activa o crea
                      la rama {tipo}/{fase}/{módulo} desde main y la publica con
@@ -3266,13 +3414,15 @@ Verbos / Verbs:
   save <paso|alias> [lenguaje] [fase/módulo] [--cause "<texto>"]
                      Confirma con el mensaje de la convención del repositorio, que sale
                      del catálogo de commits. Los pasos del monorepo (9 y 10) añaden
-                     solo sus rutas. --cause añade el cuerpo del commit y es
-                     obligatoria en la corrección (4d); --causa se acepta como alias.
+                     solo sus rutas. --cause añade el cuerpo del commit y es obligatoria
+                     en el retrabajo (4d correct, 5b fix, 5c refactor), que también la
+                     toma de la clave de estado `cause`; --causa se acepta como alias.
                      Sin push
                      Commits with the message from the repository convention, taken
                      from the commit catalogue. Monorepo steps (9 and 10) add only
                      their own paths. --cause adds the commit body and is required in
-                     the correction step (4d); --causa is accepted as an alias. No push
+                     rework (4d correct, 5b fix, 5c refactor), which also takes it from
+                     the `cause` state key; --causa is accepted as an alias. No push
   status [lenguaje]
                      Submódulos, ramas y punteros, solo lectura: una línea por lenguaje
                      con lang<TAB>branch<TAB>pointer<TAB>worktree. El puntero es `ok`,
@@ -3280,6 +3430,13 @@ Verbos / Verbs:
                      Submodules, branches and pointers, read-only: one line per language
                      with lang<TAB>branch<TAB>pointer<TAB>worktree. The pointer is `ok`,
                      `differs`, `uninitialised` or `unknown`
+  finish [lenguaje] [fase/módulo]
+                     Cierre del monorepo en un paso: prepara y confirma el puntero
+                     (`save 9`) y registra el cierre (`close` + `save 10`), en la rama
+                     activa y sin abrir rama. Dos commits; el push es tuyo
+                     Monorepo closure in one step: prepares and commits the pointer
+                     (`save 9`) and records the closure (`close` + `save 10`), on the
+                     active branch and opening no branch. Two commits; the push is yours
   pointer [lenguaje] [fase/módulo]
                      Prepara el puntero del submódulo: exige que su HEAD sea el de
                      origin/main y añade el gitlink en la rama activa, sin abrir ni
@@ -3491,9 +3648,13 @@ _glot_help_verb() {
             printf 'Sin delegado, o con dos configurados sin --delegate, devuelve 1 y 2\n'
             printf 'With no delegate, or two set without --delegate, it returns 1 and 2\n'
             printf 'El modelo del perfil se exporta como COPILOT_MODEL (y COPILOT_AUTO_TIER si el perfil\n'
-            printf 'lo declara), junto con GLOT_ROOT y GLOT_MODULE_DIR: entorno, no flags\n'
+            printf 'lo declara), junto con GLOT_ROOT, GLOT_MODULE_DIR, GLOT_DELEGATE_MODEL y\n'
+            printf 'GLOT_DELEGATE_EFFORT: entorno, no flags. `--model`/`GLOT_MODEL` y `--effort`/`GLOT_EFFORT`\n'
+            printf 'lo cambian para una corrida\n'
             printf 'The profile model is exported as COPILOT_MODEL (and COPILOT_AUTO_TIER when the profile\n'
-            printf 'declares it), together with GLOT_ROOT and GLOT_MODULE_DIR: environment, not flags\n'
+            printf 'declares it), together with GLOT_ROOT, GLOT_MODULE_DIR, GLOT_DELEGATE_MODEL and\n'
+            printf 'GLOT_DELEGATE_EFFORT: environment, not flags. `--model`/`GLOT_MODEL` and `--effort`/`GLOT_EFFORT`\n'
+            printf 'change it for one run\n'
             ;;
         use)
             printf 'glot use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint\n'
@@ -3541,15 +3702,26 @@ _glot_help_verb() {
             printf 'se escribe a mano. Añade el submódulo al índice y confirma en el submódulo\n'
             printf 'The message comes from the commit catalogue (the sprint table in data); it\n'
             printf 'is not written by hand. It stages the submodule and commits in it\n'
-            printf '%s\n' '--cause añade el cuerpo del commit (obligatoria en la corrección, 4d);'
+            printf '%s\n' '--cause añade el cuerpo del commit (obligatoria en el retrabajo 4d/5b/5c);'
             printf '%s\n' '--causa se acepta como alias'
-            printf '%s\n' '--cause adds the commit body (required in the correction step, 4d);'
+            printf '%s\n' '--cause adds the commit body (required in rework 4d/5b/5c);'
             printf '%s\n' '--causa is accepted as an alias'
-            printf 'Pasos / steps: 4a (andamiaje/scaffold) · 4b (contrato/contract_stub) · 4c (suite) · 4d (corrección/fix) · 5 (implementación) · 7 · 8\n'
+            printf 'Pasos / steps: 4a (andamiaje/scaffold) · 4b (contrato/contract_stub) · 4c (suite) · 4d (corrección/correct) · 5 (implementación) · 5b (defecto/fix) · 5c (reelaboración/refactor) · 7 · 8\n'
             printf 'Del monorepo / monorepo steps: 9 (puntero/pointer) · 10 (cierre/close), cada uno\n'
             printf 'con sus rutas: el submódulo, o roadmap + checklist + evidencia del módulo\n'
             printf 'Each with its own paths: the submodule, or roadmap + checklist + module evidence\n'
             printf 'No hace push / it does not push; `-n` imprime el plan / prints the plan\n'
+            ;;
+        finish)
+            printf 'glot finish [lenguaje] [fase/módulo] — cierre del monorepo en un paso\n'
+            printf 'glot finish [language] [phase/module] — monorepo closure in one step\n'
+            printf 'Prepara y confirma el puntero (`save 9`) y registra el cierre\n'
+            printf '(`close` + `save 10`), en la rama activa y sin abrir rama propia\n'
+            printf 'Prepares and commits the pointer (`save 9`) and records the closure\n'
+            printf '(`close` + `save 10`), on the active branch, opening no branch\n'
+            printf 'Deja el estado en `target=monorepo`. Dos commits; el push es tuyo\n'
+            printf 'It leaves the state in `target=monorepo`. Two commits; the push is yours\n'
+            printf 'Códigos / codes: 0 correcto · 1 entorno o dato · 3 no se pudo escribir · 4 requisitos sin cumplir\n'
             ;;
         status)
             printf 'glot status [lenguaje] — submódulos, ramas y punteros\n'
@@ -4586,7 +4758,7 @@ _glot_cmd_use() {
     fi
 
     # 7. Estado del sprint: si falla, la rama ya estaría preparada y se avisa.
-    for pair in "lang=$lang" "phase=$phase" "module=$module" "branch=$branch" "spec=$spec" "repo=$lang"; do
+    for pair in "lang=$lang" "phase=$phase" "module=$module" "branch=$branch" "spec=$spec" "repo=$lang" "target=submodule"; do
         if ! _glot_state_rewrite set "${pair%%=*}" "${pair#*=}"; then
             _glot_error "la rama ya está preparada, pero no se pudo guardar el estado / the branch is ready, but the state could not be saved"
             return 3
@@ -4798,7 +4970,7 @@ _glot_delegates_hint() {
         printf 'delegados: estas dos líneas van en tu rc / delegates: these two lines go in your rc\n'
     fi
     [[ "$only" == "agy" ]] || printf "export GLOT_DELEGATE_COP='copilot -C {module_dir} -p \"\$(cat)\" --add-dir {root} --allow-all-tools'\n"
-    [[ "$only" == "cop" ]] || printf "export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6 -p \"\$(cat)\" --add-dir {root}'\n"
+    [[ "$only" == "cop" ]] || printf "export GLOT_DELEGATE_AGY='agy -m {model} -p \"\$(cat)\" --add-dir {root}'\n"
 }
 
 # _glot_cmd_install — copia estable, enlace en el PATH, completados y bloque del rc.
@@ -5188,6 +5360,10 @@ _glot_main() {
         pointer)
             # Prepara el puntero del submódulo para confirmarlo / prepares the submodule pointer to be committed
             _glot_cmd_pointer "$@"
+            ;;
+        finish)
+            # Puntero y cierre del monorepo en un paso / submodule pointer and monorepo closure in one step
+            _glot_cmd_finish "$@"
             ;;
         clean)
             # Borra los artefactos del módulo y sincroniza el submódulo / removes the module artefacts and syncs the submodule
