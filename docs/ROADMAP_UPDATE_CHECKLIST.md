@@ -31,11 +31,25 @@ Observaciones / Notes:
 
 ## Pendientes / Pending closures
 
-Sin pendientes a 2026-09-21: la implementación, la documentación y el registro de cierre de `core.algorithms.naive_sort` están completos en los 50 lenguajes.
+Sin pendientes a 2026-09-28: la implementación, la documentación y el registro de cierre de `core.algorithms.data_structures_basics` (Clojure) están completos.
 
 ## Historial / History
 
 <!-- Las entradas cerradas se conservan debajo con su fecha y evidencia. -->
+
+```text
+Fecha / Date: 2026-09-28
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): clojure
+Código verificado / Code verified: yes
+Tests y comandos / Tests and commands:
+- `clojure -M -e "(require 'data-structures-basics.data-structures-basics)"` -> exit 0, sin warnings
+- `clojure -M:test -m cognitect.test-runner` -> `Ran 4 tests containing 46 assertions. 0 failures, 0 errors.`
+README(s) verificado(s) / README(s) verified: yes (clojure/core/algorithms/data_structures_basics/README.md)
+Cambio en ROADMAP.md / ROADMAP.md change: core.algorithms.data_structures_basics 4/50 (Ada, Assembly, Ballerina, C) -> 5/50 (Ada, Assembly, Ballerina, C, Clojure)
+Observaciones / Notes: Quinta implementación homologada de data_structures_basics. No cierra el módulo: faltan los demás lenguajes. Clojure es funcional e inmutable: `defrecord` crea tipos de valor, cada operación devuelve una nueva instancia, y `pop`/`dequeue` devuelven un mapa `{:stack/:queue …, :value …}` para proporcionar ambos — la estructura actualizada y el valor extraído — sin mutación. `ll-insert-tail` y `queue-enqueue` son O(n) en lugar de O(1) porque el nodo existente en cola no puede enlazarse en su lugar. Los getters/setters del pseudocódigo se expresan como acceso por keyword (`:value`, `:next`) y `assoc` respectivamente, que es la forma idiomática de los campos de un `defrecord`. No se añade `interface`/`protocol`: la especificación (Fase 1) y AGENT_Template.md prohíben el contrato aparte mientras haya una sola implementación. Los índices Nivel 2 (algorithms/README.md), Nivel 1 (core/README.md y clojure/README.md) se actualizaron en el mismo cambio.
+```
 
 ```text
 Fecha / Date: 2026-09-21
