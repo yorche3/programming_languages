@@ -38,18 +38,15 @@
 # `finish` prepara el puntero, lo confirma y registra el cierre en el monorepo, en la rama
 # activa y sin abrir rama. Y las plantillas **solo mandan versionadas**: la fuente única es
 # `scripts/prompts/`.
-# Desde la v1.6.1 la línea del delegado de AGY usa `--model` —el binario **no** define `-m`— y
-# lleva el marcador `{model}`, así que el modelo lo elige el perfil y no el rc del autor; y la
-# secuencia de `common-lisp` pasa a **`cl-project`**, el generador de la comunidad, con la
-# homologación del andamiaje declarada en su nota de completado y medida en la guía.
 #
-# Versión viva del script: las versiones cerradas se archivan en versions/.
+# Snapshot archivado: versión cerrada el 2026-09-30. No se edita; el código es
+# el mismo que tenía la versión viva en su cierre.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
 # monorepo se resuelve con GLOT_ROOT, el superproyecto o la raíz de git.
 # El estado vive fuera del repositorio (XDG) y se puede redirigir con GLOT_STATE_FILE.
 #
 # Uso / Usage:
-#   ./scripts/glot.sh help
+#   ./versions/glot_1.6.0.sh help
 #   ./scripts/glot.sh doctor
 #   ./scripts/glot.sh langs
 #   ./scripts/glot.sh modules algorithms
@@ -79,7 +76,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.6.1"
+GLOT_VERSION="1.6.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -4974,7 +4971,7 @@ _glot_delegates_hint() {
         printf 'delegados: estas dos líneas van en tu rc / delegates: these two lines go in your rc\n'
     fi
     [[ "$only" == "agy" ]] || printf "export GLOT_DELEGATE_COP='copilot -C {module_dir} -p \"\$(cat)\" --add-dir {root} --allow-all-tools'\n"
-    [[ "$only" == "cop" ]] || printf "export GLOT_DELEGATE_AGY='agy --model {model} -p \"\$(cat)\" --add-dir {root}'\n"
+    [[ "$only" == "cop" ]] || printf "export GLOT_DELEGATE_AGY='agy -m {model} -p \"\$(cat)\" --add-dir {root}'\n"
 }
 
 # _glot_cmd_install — copia estable, enlace en el PATH, completados y bloque del rc.

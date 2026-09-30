@@ -3,7 +3,7 @@ ada	2	module	run	alr -n init --bin tests	-	-	-
 ada	3	module	run	cd tests && alr with {module} --use=..	-	-	-
 ada	4	module	run	cd tests && alr with aunit	-	-	licencia GPL-3.0-or-later en alire.toml y tests/alire.toml, y description del subproyecto de pruebas
 clojure	1	phase	run	clojure -Sdeps '{:deps {io.github.seancorfield/deps-new {:git/tag "v0.9.0" :git/sha "da2f764f71da871224ae639656d52ccedfb0020c"}}}' -Tnew create :template lib :name {module} :target-dir {module}	network	-	sustituir el test de plantilla que falla a propósito
-common-lisp	1	phase	run	ros -e '(ql:quickload :quickproject :silent t)' -e '(quickproject:make-project "{module}" :depends-on nil)'	network	-	añadir src/, test/ y run-tests.lisp: el generador deja el proyecto plano
+common-lisp	1	phase	run	ros -e '(ql:quickload :cl-project :silent t)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'	network	-	homologar el andamiaje con guion y no subrayado, sistema de pruebas con fiveam y escribir run-tests.lisp
 csharp	1	module	run	dotnet new sln -n {Module}	-	-	-
 csharp	2	module	run	dotnet new classlib -n {Module} -o src/{Module}	-	-	-
 csharp	3	module	run	dotnet new xunit -n {Module}.Tests -o test/{Module}.Tests	-	-	-

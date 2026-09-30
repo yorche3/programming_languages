@@ -889,8 +889,10 @@ assert_eq 'ask sin delegado: código' '1' "$rc_last"
 assert_contains 'ask sin delegado: explica GLOT_DELEGATE' 'GLOT_DELEGATE' "$err"
 # El error trae el remedio entero: las dos líneas de invocación verificada, listas para el
 # rc. Sin ellas el verbo decía qué variable faltaba y dejaba al autor buscando el comando.
+# La de AGY va con `--model` **medido**: el binario no define `-m` (`flags provided but not
+# defined: -m`) y el marcador `{model}` lo resuelve el perfil.
 assert_contains 'ask sin delegado: imprime la línea de Copilot' "export GLOT_DELEGATE_COP='copilot -C {module_dir}" "$err"
-assert_contains 'ask sin delegado: imprime la línea de Antigravity' "export GLOT_DELEGATE_AGY='agy -m {model}" "$err"
+assert_contains 'ask sin delegado: imprime la línea de Antigravity' "export GLOT_DELEGATE_AGY='agy --model {model}" "$err"
 assert_contains 'ask sin delegado: dice dónde van' 'van en tu rc' "$err"
 assert_contains 'ask sin delegado: ofrece imprimir el encargo' 'glot prompt' "$err"
 assert_contains 'ask sin delegado: no ensucia stdout' '' "$out"
@@ -972,6 +974,13 @@ assert_eq 'secuencias de inicialización: órdenes contiguos por lenguaje' '0' \
 # «respuestas» y lo silencia (medido el 2026-09-26: 3 filas de Ada con 7 campos)
 assert_eq 'secuencias de inicialización: la columna 8 nunca queda vacía' '0' \
     "$(awk -F'\t' '$8 == ""' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+# El generador **plano** de Common Lisp quedó fuera del dato (v1.6.1): `cl-project` es el
+# de la comunidad y deja `src/` y `tests/`, pero **exige un *pathname*** —con una cadena
+# abre el depurador—, así que el `#p` no es opcional (medido el 2026-09-29 y el 2026-09-30).
+assert_eq 'secuencias: common-lisp genera con cl-project y con pathname' '1' \
+    "$(awk -F'\t' '$1 == "common-lisp" && index($5, "cl-project:make-project") > 0 && index($5, "#p") > 0 {print "1"}' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+assert_eq 'secuencias: sin el generador plano de common-lisp' '' \
+    "$(awk -F'\t' 'index($5, "quickproject") > 0 {print $1}' "$DATA_DIR/init_sequences.tsv")"
 assert_eq 'catálogo de inicialización: operaciones conocidas' '0' \
     "$(awk -F'\t' '{n = split($8, ops, ";"); for (i = 1; i <= n; i++) if (ops[i] != "-" && ops[i] !~ /^(flat|rm):[^:]+$/) print $1}' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
 
@@ -2689,9 +2698,9 @@ closed_versions="$(awk -F'|' '/^\| [0-9]+\.[0-9]+\.[0-9]+ / {v = $2; gsub(/[ \t]
 assert_eq 'archivado: el log de versiones se lee' 'si' "$([[ -n "$closed_versions" ]] && echo si || echo no)"
 
 # La versión anterior a la viva es la **última cerrada** del log, no la anterior aritmética:
-# desde la convención de parches (un `fix` o un `refactor` sobre la viva cierran como
-# `X.Y.(Z+1)`) la anterior a la 1.5.0 es la 1.4.2, no la 1.4.0, así que calcularla restando
-# uno al parche daría un falso verde y saltaría la puerta equivocada.
+# un `fix` o un `refactor` cierran como parche, y desde la v1.6.1 su rama lleva el número de la
+# entrega que cierra, así que calcularla restando uno al parche daría un falso verde y saltaría
+# la puerta equivocada.
 previous="$(printf '%s\n' "$closed_versions" | tail -1)"
 if [[ -n "$previous" ]]; then
     assert_eq 'puerta de entrada: el snapshot de la versión anterior está archivado' \

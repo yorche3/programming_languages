@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v1.6.0** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v1.6.1** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -75,7 +75,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v1.5.0)
+├── glot.sh                  # Versión viva / live version (v1.6.1)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
@@ -83,10 +83,13 @@ scripts/
 │   ├── scaffold.prompt.md        # Paso 4a · esqueleto
 │   ├── contract_stub.prompt.md   # Paso 4b · contrato y esqueletos del módulo
 │   ├── suite.prompt.md           # Paso 4c · suite de pruebas
-│   ├── implement.prompt.md       # Paso 5
+│   ├── correct.prompt.md         # Paso 4d · corrección de un artefacto anterior al 5
+│   ├── implement.prompt.md       # Paso 5 · implementación
+│   ├── fix.prompt.md             # Paso 5b · defecto de comportamiento del paso 5
+│   ├── refactor.prompt.md        # Paso 5c · reelaboración sin cambio de comportamiento
 │   ├── validate.prompt.md        # Paso 6 · informe del validador
-│   ├── docs-module.prompt.md     # Paso 7
-│   └── docs-language.prompt.md   # Paso 8
+│   ├── docs-module.prompt.md     # Paso 7 · README del módulo (Nivel 3)
+│   └── docs-language.prompt.md   # Paso 8 · índices del lenguaje (Niveles 1 y 2)
 ├── data/                     # Catálogo de datos del tooling
 │   ├── README.md
 │   ├── languages.tsv         # Un lenguaje por fila: init, manifiestos, pruebas, verificador e inicialización
@@ -118,7 +121,14 @@ scripts/
     ├── glot_0.11.0.sh
     ├── glot_0.12.0.sh
     ├── glot_1.0.0.sh
-    └── glot_1.1.0.sh
+    ├── glot_1.1.0.sh
+    ├── glot_1.2.0.sh
+    ├── glot_1.3.0.sh
+    ├── glot_1.4.0.sh
+    ├── glot_1.4.1.sh
+    ├── glot_1.4.2.sh
+    ├── glot_1.5.0.sh
+    └── glot_1.6.0.sh
 ```
 
 ---
@@ -155,10 +165,11 @@ scripts/
 **EN:** `ask` sends the request to a **delegate** whose command lives in the author's environment, never in the repository: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) and `GLOT_DELEGATE_AGY` (Antigravity CLI), with `GLOT_DELEGATE` as an alias of the first one. They are chosen with `--delegate copilot|antigravity` (short `cop`, `agy`); with no argument, one defined variable is used and two of them make `ask` ask for the choice (`2`).
 
 ```bash
-# el encargo llega por stdin y {root}/{module_dir} los resuelve glot: la línea
-# no lleva tu ruta, así que `install` te la imprime para pegarla en tu rc
+# el encargo llega por stdin y glot resuelve {root}, {module_dir} y {model}: la
+# línea no lleva tu ruta ni el modelo, así que `install` te la imprime para
+# pegarla en tu rc. En AGY la opción es `--model` (el binario **no** define `-m`)
 export GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools'
-export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6 -p "$(cat)" --add-dir {root}'
+export GLOT_DELEGATE_AGY='agy --model {model} -p "$(cat)" --add-dir {root}'
 ./scripts/glot.sh ask --delegate copilot contract_stub ada algorithms/data_structures_basics
 ./scripts/glot.sh ask --delegate antigravity suite ada algorithms/data_structures_basics
 ./scripts/glot.sh doctor | grep '^delegate_'   # delegate_cop: / delegate_agy:

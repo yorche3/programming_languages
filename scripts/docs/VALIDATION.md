@@ -75,13 +75,14 @@ copilot -C "$MODULE_DIR" -p "<encargo validate>" \
 
 ```bash
 export GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools'
-export GLOT_DELEGATE_AGY='agy -m claude-sonnet-4-6 -p "$(cat)" --add-dir {root}'
+export GLOT_DELEGATE_AGY='agy --model {model} -p "$(cat)" --add-dir {root}'
 glot ask --delegate copilot contract_stub ada algorithms/data_structures_basics
 ```
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
-| Marcadores / Placeholders | `{root}` y `{module_dir}` los resuelve `glot` **antes** de ejecutar la orden, y `ask` exporta además `GLOT_ROOT` y `GLOT_MODULE_DIR` para el delegado y sus hijos. Así la línea no lleva la ruta del autor y se puede pegar en cualquier clon |
+| Marcadores / Placeholders | `{root}`, `{module_dir}` y `{model}` los resuelve `glot` **antes** de ejecutar la orden, y `ask` exporta además `GLOT_ROOT` y `GLOT_MODULE_DIR` para el delegado y sus hijos. Así la línea no lleva ni la ruta ni el modelo del autor y se puede pegar en cualquier clon |
+| Modelo de AGY / AGY model | `{model}` sale de la **séptima columna** de [`data/models.tsv`](../data/models.tsv) —los ids de AGY **no** son los de Copilot—: `economy` → `gemini-3.8-flash-low`, `balanced` → `gemini-3.8-flash-medium` y `deep` → `claude-sonnet-4-6`. Gana `--model` y después `GLOT_MODEL_AGY`. La opción del binario es **`--model`** —también acepta `-model`— y **`-m` no existe**: medido, `agy -m` responde `flags provided but not defined: -m` |
 | `-p "$(cat)"` | El encargo llega por **stdin** (lo garantiza `ask`); `-p` a secas no lo leería. `-C` fija el directorio de trabajo y `--add-dir` abre la raíz, porque el sandbox deja fuera la especificación y el `gitdir` del submódulo |
 | Permisos de COP | `--allow-all-tools` para los encargos que **escriben** (`contract_stub`, `suite`, `implement`, `scaffold`, `docs-module`); para los de solo lectura va `--deny-tool write`, que gana sobre `--allow-all-tools`. **No** se exporta `COPILOT_ALLOW_ALL=true` |
 | Permisos de AGY | En modo desatendido lo que no está permitido se **auto-deniega** —no hay prompt— y el mensaje **no dice qué permiso falta**. Viven **por proyecto**, en `~/.gemini/config/projects/<id>.json`, anidados en `permissionGrants.permissionGrants.allow`, con tres clases: `command(<binario y subcomando>)`, `read_file(<ruta>)` y `write_file(<ruta>)` (`*` vale como comodín). El comando o la ruta exactos se sacan de la base de conversaciones (`~/.gemini/antigravity-cli/conversations/*.db`, tabla `steps`) o de `--log-file` |

@@ -4,7 +4,7 @@ ballerina	bal new {module}	Ballerina.toml, {module}.bal, tests/	bal test	-	tool	
 c	mkdir -p include src test + Makefile	include/{module}.h, Makefile	make test	-	manual	mkdir -p include src test	-
 clojure	clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib	deps.edn, build.clj, src/{module}/	clojure -T:build test	-	tool	-	-
 cobol	mkdir -p src/copybooks src/lib test	Makefile, run_tests	make test	-	manual	mkdir -p src/copybooks src/lib test	-
-common-lisp	quickproject:make-project (ros + quicklisp)	{module}.asd, package.lisp, src/, test/, run-tests.lisp	ros run --load run-tests.lisp --eval '(uiop:quit)'	-	tool	-	-
+common-lisp	cl-project:make-project (ros + quicklisp)	{module}.asd, src/{module}.lisp y tests/{module}-test.lisp con guion, y run-tests.lisp	ros run --load run-tests.lisp --eval '(uiop:quit)'	-	tool	-	-
 cpp	Configuración manual de Bazel (MODULE.bazel, WORKSPACE, targets en BUILD)	BUILD, MODULE.bazel, .bazelversion	bazelisk test //...	-	manual	mkdir -p include src tests	-
 crystal	crystal init lib {module}	shard.yml	crystal spec	crystal tool format --check src	tool	crystal init lib {module}	rm:{module}/.git;flat:{module}
 csharp	dotnet new sln -n {Module} + classlib + xunit + sln add	{Module}.slnx, src/{Module}/{Module}.csproj, test/{Module}.Tests/	dotnet test {Module}.slnx	-	tool	-	-
