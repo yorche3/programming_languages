@@ -21,16 +21,28 @@
 | 4b | **Contrato y esqueletos** (artefacto propio, antes de la suite) | `glot prompt contract_stub` (1.5.0) · `glot save 4b` (1.1.0) | Tipo nuevo, firmas del contrato (en Ada, `src/*.ads`) y **esqueleto de cada operación** (en Ada, `src/*.adb`), con el **indicador natural** del lenguaje: sin el cuerpo, la suite no compila **ni enlaza** | **agente** |
 | 4c | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4c` (1.1.0) | Suite unitaria derivada de la especificación, **sobre el contrato y sus esqueletos del paso 4b** (no los declara: los usa) y **sin crear el runner**, que es del 4a: si falta o no arranca, se detiene. Con salida real. Desde la v1.5.0 el `4b` deja el cuerpo vacío, así que compila **y enlaza**; si el contrato llegara **sin esqueletos**, se admite la **compilación sin enlace** y la ejecución se traslada al acta del paso 6, pero eso es un **defecto del `4b`**, no del contrato | **agente** |
 | 4d | **Corrección previa a la implementación** (un artefacto `4a`/`4b`/`4c` confirmado resultó defectuoso) | `glot prompt correct` (1.6.0) · `glot save 4d` (1.6.0) | El artefacto corregido y la **causa en el cuerpo del commit** (obligatoria): el registro del retrabajo. Solo artefactos **anteriores** a la implementación | **agente** |
-| 5 | Implementación | `glot prompt implement` (0.8.0) + `glot test` (0.7.0) | `feat(algorithms): add naive sort implementation`; suite en verde | autor / **agente** |
+| 5 | Implementación | `glot prompt implement` (0.8.0) + `glot test` (0.7.0) · `glot save 5` (0.9.0) | `feat(algorithms): add naive sort implementation`; suite en verde | autor / **agente** |
 | 5b | **Defecto de la implementación** (un test en rojo, un criterio incumplido) | `glot prompt fix` (1.6.0) · `glot save 5b` (1.6.0) | El defecto corregido y la **causa** en el commit (obligatoria); el paso 6 se repite | **agente** |
 | 5c | **Reelaboración** sin cambio de comportamiento | `glot prompt refactor` (1.6.0) · `glot save 5c` (1.6.0) | La forma reelaborada y el **motivo** en el commit (obligatorio); suite verde antes y después, sin tocarla | **agente** |
-| 6 | Verificación | `glot test`, `glot verify` (0.7.0) · `glot evidence` (0.10.0) · `glot validate` (0.10.0) | Acta en `docs/evidence/{fase}/{módulo}/{lenguaje}.md` con la salida real de la suite y del analizador, sin warnings **nuevos**; y el informe del validador, si se usa | script + **agente** |
-| 7 | Cierre documental del módulo | `glot prompt docs-module` (0.8.0) → README de Nivel 3 desde [`README_Template.md`](../../docs/README_Template.md) | `docs(naive-sort): add README for naive sort module` | **agente** |
-| 8 | Índices del lenguaje | `glot prompt docs-language` (0.8.0) → `{lang}/README.md` y los `README.md` de fase | `docs: add README for {phase} and update indexes` | **agente** |
+| 6 | Verificación | `glot test`, `glot verify` (0.7.0) · `glot evidence` (0.10.0) · `glot validate` (0.10.0) — **sin commit propio**: el acta entra en el monorepo con `save 10` | Acta en `docs/evidence/{fase}/{módulo}/{lenguaje}.md` con la salida real de la suite y del analizador, sin warnings **nuevos**; y el informe del validador, si se usa | script + **agente** |
+| 7 | Cierre documental del módulo | `glot prompt docs-module` (0.8.0; alcance **solo N3** desde la 1.6.0) · `glot save 7` (0.9.0) → README de Nivel 3 desde [`README_Template.md`](../../docs/README_Template.md) | `docs(naive-sort): add README for naive sort module` | **agente** |
+| 8 | Índices del lenguaje | `glot prompt docs-language` (0.8.0; alcance **solo N1/N2** desde la 1.6.0) · `glot save 8` (0.9.0) → `{lang}/README.md` y los `README.md` de fase | `docs: add README for {phase} and update indexes` | **agente** |
 
 **ES:** El paso 8 es del **submódulo**, igual que el 7: sube los índices N1/N2 que enumeran el módulo nuevo. Va aquí, **antes** de la integración, para que el merge y el puntero se hagan una sola vez. Confirmarlo **después** del `pointer` deja el gitlink apuntando a un commit anterior: `glot status` lo enseña como `differs` y `glot close` **frena** hasta que el puntero se vuelva a preparar.
 
 **EN:** Step 8 belongs to the **submodule**, like step 7: it updates the N1/N2 indexes that list the new module. It goes here, **before** the integration, so that the merge and the pointer happen once. Confirming it **after** the `pointer` leaves the gitlink pointing at an earlier commit: `glot status` shows it as `differs` and `glot close` **stops** until the pointer is prepared again.
+
+**ES:** **Reparto del paso 6** (decidido en la v1.4.0, y en [`CONTRACT.md`](CONTRACT.md)): `test` comprueba que la suite **entera** pase; `verify` es **lint idiomático** (sintaxis y formato) y nada más —no comprueba la suite, no busca valores codificados para aprobar y **no** hace análisis estático de seguridad—; `evidence` deja el **acta** con las dos salidas reales; `validate` revisa contrato, README, enlaces, cobertura y el ***hardcode***; y la **revisión humana** se queda con lo cualitativo (pseudocódigo y divergencias idiomáticas).
+
+**EN:** **Step 6 split** (decided in v1.4.0, and in [`CONTRACT.md`](CONTRACT.md)): `test` checks that the **whole** suite passes; `verify` is **idiomatic lint** (syntax and formatting) and nothing else —it does not check the suite, does not look for hardcoded values and does **not** run static security analysis—; `evidence` leaves the **record** with both real outputs; `validate` reviews contract, README, links, coverage and ***hardcode***; and the **human review** keeps the qualitative part.
+
+**ES:** Al terminar la Fase A, el cambio del submódulo se integra en **su** `main` y se anota el commit resultante (la sección **Integración** de abajo); después el monorepo lo registra con los pasos 9 y 10 (Fase B).
+
+**EN:** When Phase A ends, the submodule change is merged into **its** `main` and the resulting commit is noted (the **Integration** section below); then the monorepo records it with steps 9 and 10 (Phase B).
+
+**ES:** **Numeración de pasos:** cuando un paso nuevo entra **en medio**, se le asigna el ordinal libre y **los siguientes se recorren**: el paso 4 se partió en `4a` (esqueleto) y `4b` (suite) en la v0.9.0; en la v1.1.0 el contrato entró como `4b` con la suite desplazada a `4c`; y en la **v1.6.0** llegaron los tres pasos del **retrabajo** —`4d correct` (un artefacto `4a`/`4b`/`4c` anterior a la implementación), `5b fix` (un defecto de comportamiento del paso 5) y `5c refactor` (una forma nueva sin cambio observable)—, que toman el ordinal libre **junto a su paso de origen**. La numeración es **contrato del tooling**: el mismo ordinal vale para esta tabla, para [`data/commits.tsv`](../data/commits.tsv) y para el `step:` del frontmatter de cada plantilla, y se cambia en los tres sitios a la vez.
+
+**EN:** **Step numbering:** when a new step goes **in the middle**, it takes the free ordinal and **the following ones shift**: step 4 was split into `4a` (scaffold) and `4b` (suite) in v0.9.0; in v1.1.0 the contract came in as `4b` with the suite shifted to `4c`; and in **v1.6.0** the three **rework** steps arrived —`4d correct` (an artefact `4a`/`4b`/`4c` from before the implementation), `5b fix` (a behaviour defect of step 5) and `5c refactor` (a new shape with no observable change)—, taking the free ordinal **next to their source step**. The numbering is a **tooling contract**: the same ordinal holds for this table, for [`data/commits.tsv`](../data/commits.tsv) and for the `step:` frontmatter of each template, and the three change at once.
 
 ---
 
@@ -53,24 +65,13 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 
 **EN:** What `glot` does do is **tell you when it is time**: when step 7 or 8 is committed with the sprint branch unmerged, `save` prints the four-command block; and `pointer` **stops** with that same block if it finds unmerged work (also if you switch back to `main` without merging: it checks that the sprint branch has no commits `main` does not have).
 
-**ES:** Al terminar la Fase A, el cambio del submódulo se integra en **su** `main` y se anota el commit resultante (la sección **Integración** de arriba).
-
-**ES:** **Reparto del paso 6** (decidido en la v1.4.0, y en [`CONTRACT.md`](CONTRACT.md)): `test` comprueba que la suite **entera** pase; `verify` es **lint idiomático** (sintaxis y formato) y nada más —no comprueba la suite, no busca valores codificados para aprobar y **no** hace análisis estático de seguridad—; `evidence` deja el **acta** con las dos salidas reales; `validate` revisa contrato, README, enlaces, cobertura y el ***hardcode***; y la **revisión humana** se queda con lo cualitativo (pseudocódigo y divergencias idiomáticas).
-
-**EN:** **Step 6 split** (decided in v1.4.0, and in [`CONTRACT.md`](CONTRACT.md)): `test` checks that the **whole** suite passes; `verify` is **idiomatic lint** (syntax and formatting) and nothing else —it does not check the suite, does not look for hardcoded values and does **not** run static security analysis—; `evidence` leaves the **record** with both real outputs; `validate` reviews contract, README, links, coverage and ***hardcode***; and the **human review** keeps the qualitative part.
-
-**EN:** When Phase A and the integration end, the submodule `main` holds the module and the monorepo records that commit (Phase B).
-
-**ES:** **Numeración de pasos:** cuando un paso nuevo entra **en medio**, se le asigna el ordinal libre y **los siguientes se recorren**: el paso 4 se partió en `4a` (esqueleto) y `4b` (suite) en la v0.9.0, y en la v1.1.0 el contrato entra como `4b` con la suite desplazada a `4c`. La numeración es **contrato del tooling**: el mismo ordinal vale para esta tabla, para [`data/commits.tsv`](../data/commits.tsv) y para el `step:` del frontmatter de cada plantilla, y se cambia en los tres sitios a la vez.
-
-**EN:** **Step numbering:** when a new step goes **in the middle**, it takes the free ordinal and **the following ones shift**: step 4 was split into `4a` (scaffold) and `4b` (suite) in v0.9.0, and in v1.1.0 the contract comes in as `4b` with the suite shifted to `4c`. The numbering is a **tooling contract**: the same ordinal holds for this table, for [`data/commits.tsv`](../data/commits.tsv) and for the `step:` frontmatter of each template, and the three change at once.
-
 ## Fase B — en el monorepo / Phase B — in the monorepo
 
 | # | Paso | Comando | Evidencia / artefacto | Quién |
 |:-:|------|---------|-----------------------|-------|
 | 9 | Puntero | `glot pointer` (0.12.0; **sin rama propia** desde la 1.3.0) + `glot save 9` (0.12.0), **en la rama activa** | `chore(submodule): update {lang} pointer` con el gitlink del commit integrado | script |
 | 10 | Registro del cierre | `glot close` (0.10.0) + `glot save 10` (0.12.0) | Entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](../../docs/ROADMAP_UPDATE_CHECKLIST.md) y contador de [`ROADMAP.md`](../../docs/ROADMAP.md) al día, a partir del acta de evidencia | script + **agente** |
+| **9+10** | **Cierre completo**, en un paso | `glot finish` (1.6.0) → `pointer` + `save 9` + `close` + `save 10` | Los **dos commits** —el puntero y el registro— y el estado en `target=monorepo`; el **push** es del autor | script |
 
 **ES:** Los pasos 9 y 10 se hacen de una vez con `glot finish` (1.6.0): prepara y confirma el **puntero** (`save 9`) y registra el **cierre** (`close` + `save 10`), en la **rama activa** y sin abrir rama propia. Son **dos commits** —el puntero y el registro— y el **push** lo hace el autor. `finish` deja el estado en `target=monorepo`.
 
@@ -104,7 +105,7 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 
 ---
 
-## � Qué hace cada verbo, paso a paso / What each verb does, step by step
+## 🔧 Qué hace cada verbo, paso a paso / What each verb does, step by step
 
 **ES:** Lo que hay **dentro** de cada verbo del ciclo. Los ordinales son pasos internos, no pasos del sprint: sirven para saber dónde frena un verbo y qué queda en tu mano. Medido el 2026-09-28 recorriendo el ciclo entero en el laboratorio (`~/glot-lab/cycle`).
 
@@ -162,7 +163,7 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 | 2 | Resuelve el destino del sprint y comprueba que la rama activa del submódulo sea la del estado (avisa si no) |
 | 3 | **Ámbito `submodule`**: `git add -A` del submódulo entero, avisando de lo que entra de fuera del módulo. **Ámbito `monorepo`**: añade **solo las rutas del paso** (el gitlink, o roadmap + checklist + evidencia) |
 | 4 | **`-n`**: imprime el plan (`git add` y `git commit` con su mensaje) sin tocar el índice |
-| 5 | Confirma con el mensaje del catálogo e imprime el **SHA corto**; `--cause` viaja como **segundo `-m`** y es obligatoria en el paso `4d` |
+| 5 | Confirma con el mensaje del catálogo e imprime el **SHA corto**. El **retrabajo** (`4d`, `5b`, `5c`) **exige causa**: sale de `--cause` —`--causa` vale como alias— o de la **clave de estado `cause`**, que el propio encargo deja con `glot set cause "…"`, y viaja como **segundo `-m`**; al confirmar, `save` **retira la clave** para que no se cuele en el commit siguiente |
 | 6 | **Nunca hace push**. Y en los pasos `7` y `8`, si la rama del sprint no está integrada, imprime el bloque de **integración** |
 
 ### `glot pointer` — el gitlink del monorepo
@@ -187,6 +188,15 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 | 5 | Exige el **README del módulo** (paso 7) y el de la **fase** (paso 8), y nombra el encargo que los escribe |
 | 6 | Reescribe la línea del roadmap —contador y lista de lenguajes— y **añade** la entrada del checklist. **No confirma**: el commit es `save 10` |
 
+### `glot finish` — el cierre del monorepo en un paso (v1.6.0)
+
+| # | Qué hace / What it does |
+|:-:|---|
+| 1 | Prepara y confirma el **puntero** (`pointer` + `save 9`) |
+| 2 | Registra el **cierre** (`close` + `save 10` y su commit), reutilizando lo que ya hacen los dos verbos, así que sus requisitos siguen valiendo: el gitlink al `HEAD` del submódulo y el acta en `green` |
+| 3 | Todo en la **rama activa** del monorepo y **sin abrir rama propia**: son **dos commits** —el puntero y el registro— y el **push** es del autor |
+| 4 | Deja el estado en `target=monorepo` (que es lo que fija `use` en `target=submodule`); códigos: `0` correcto · `1` entorno o dato · `3` no se pudo escribir · `4` requisitos sin cumplir |
+
 ## 🙋 Lo que solo puede hacer el autor / What only the author can do
 
 **ES:** `glot` no hace estas cuatro cosas, y no son un defecto: son el reparto. Cuando toca, las **dice** (el bloque de integración y el remedio del puntero); aquí quedan juntas:
@@ -202,7 +212,7 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 
 ---
 
-## �🤖 Los pasos con IA, y por qué / The AI-assisted steps, and why
+## 🤖 Los pasos con IA, y por qué / The AI-assisted steps, and why
 
 **ES:** Los pasos 4a, 4b, 4c, 4d, 5, 5b, 5c, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/).
 
@@ -221,9 +231,9 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 | `docs-module` | [`docs-module.prompt.md`](../../scripts/prompts/docs-module.prompt.md) | 7 | `gemini-3.8-flash` |
 | `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 | `gemini-3.8-flash` |
 
-**ES:** Desde la v0.11.0 cada plantilla **declara su modelo** en el frontmatter (`model:`, con el id real que ofrece Copilot) y el catálogo [`data/models.tsv`](../../scripts/data/models.tsv) fija el esfuerzo, el tope de créditos y el tier de auto de ese modelo. El **modelo es la clave del perfil**: no hay una clave `profile:` que pueda derivar. Las plantillas siguen siendo **genéricas**: el modelo es política de coste, no dato de un módulo. Desde la v1.0.0 declaran además sus **fuentes** (`sources:`, rutas relativas a la raíz del monorepo, que la cabecera del encargo trae como `root`) y `glot prompt` **avisa** por stderr de las que falten: el encargo dice qué documentos necesita como dato comprobable, en vez de nombrar el monorepo en prosa.
+**ES:** Desde la v0.11.0 cada plantilla **declara su modelo** en el frontmatter (`model:`, con el id real que ofrece Copilot) y el catálogo [`data/models.tsv`](../../scripts/data/models.tsv) fija el esfuerzo, el tope de créditos y el tier de auto de ese modelo. El **modelo es la clave del perfil**: no hay una clave `profile:` que pueda derivar. Las plantillas siguen siendo **genéricas**: el modelo es política de coste, no dato de un módulo. Desde la **v1.6.0** el catálogo añade la **séptima columna** con el modelo del **delegado de AGY** —sus ids no son los de Copilot—, así que el modelo se elige **por rol** y viaja también con `--delegate antigravity`; `--model`/`GLOT_MODEL` (`_COP`/`_AGY`) y `--effort`/`GLOT_EFFORT` lo cambian **para una corrida** sin tocar el dato (los perfiles: `economy` → `gemini-3.8-flash-low`, `balanced` → `gemini-3.8-flash-medium`, `deep` → `claude-sonnet-4-6`). Desde la v1.0.0 declaran además sus **fuentes** (`sources:`, rutas relativas a la raíz del monorepo, que la cabecera del encargo trae como `root`) y `glot prompt` **avisa** por stderr de las que falten: el encargo dice qué documentos necesita como dato comprobable, en vez de nombrar el monorepo en prosa.
 
-**EN:** Since v0.11.0 every template **declares its model** in the frontmatter (`model:`, with the real id Copilot offers) and the [`data/models.tsv`](../../scripts/data/models.tsv) catalogue states the effort, the credit cap and the auto tier for that model. The **model is the profile key**: there is no `profile:` key that could drift. Templates stay **generic**: the model is cost policy, not module data. Since v1.0.0 they also declare their **sources** (`sources:`, paths relative to the monorepo root, which the request header carries as `root`) and `glot prompt` **warns** on stderr about the missing ones: the request states which documents it needs as checkable data, instead of naming the monorepo in prose.
+**EN:** Since v0.11.0 every template **declares its model** in the frontmatter (`model:`, with the real id Copilot offers) and the [`data/models.tsv`](../../scripts/data/models.tsv) catalogue states the effort, the credit cap and the auto tier for that model. The **model is the profile key**: there is no `profile:` key that could drift. Templates stay **generic**: the model is cost policy, not module data. Since **v1.6.0** the catalogue adds the **seventh column** with the **AGY delegate's** model —its ids are not Copilot's—, so the model is chosen **by role** and travels with `--delegate antigravity` too; `--model`/`GLOT_MODEL` (`_COP`/`_AGY`) and `--effort`/`GLOT_EFFORT` change it **for one run** without touching the datum (the profiles: `economy` → `gemini-3.8-flash-low`, `balanced` → `gemini-3.8-flash-medium`, `deep` → `claude-sonnet-4-6`). Since v1.0.0 they also declare their **sources** (`sources:`, paths relative to the monorepo root, which the request header carries as `root`) and `glot prompt` **warns** on stderr about the missing ones: the request states which documents it needs as checkable data, instead of naming the monorepo in prose.
 
 **ES:** Las plantillas son **genéricas**: no llevan datos de ningún módulo concreto (ni casos de prueba ni nombres de archivo). Cada encargo **lee** lo que necesita de la especificación del módulo y de los módulos ya homologados del lenguaje; el harness comprueba que ninguna plantilla vuelva a llevar datos de un módulo.
 
@@ -233,9 +243,9 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 
 ## 🧭 Estado del sprint y dónde vive / Sprint state and where it lives
 
-**ES:** El estado del sprint es el del almacén de `glot` ([`CONTRACT.md`](CONTRACT.md)): `lang`, `phase`, `module`, `branch`, `spec` y `repo`. Cualquier verb que necesite saber «dónde estoy trabajando» lo lee de ahí, no del directorio actual: por eso `glot test` funciona **desde cualquier directorio**.
+**ES:** El estado del sprint es el del almacén de `glot` ([`CONTRACT.md`](CONTRACT.md)): `lang`, `phase`, `module`, `branch`, `spec` y `repo`. Cualquier verb que necesite saber «dónde estoy trabajando» lo lee de ahí, no del directorio actual: por eso `glot test` funciona **desde cualquier directorio**. Desde la **v1.6.0** hay además `target` —`submodule` mientras el trabajo vive en el submódulo y `monorepo` después de `finish`— y, mientras hay retrabajo pendiente, la clave `cause`, que el encargo deja puesta y `save` **retira** al confirmar el commit.
 
-**EN:** The sprint state is `glot`'s state store ([`CONTRACT.md`](CONTRACT.md)): `lang`, `phase`, `module`, `branch`, `spec` and `repo`. Any verb that needs to know "where am I working" reads it from there, not from the current directory: that is why `glot test` works **from any directory**.
+**EN:** The sprint state is `glot`'s state store ([`CONTRACT.md`](CONTRACT.md)): `lang`, `phase`, `module`, `branch`, `spec` and `repo`. Any verb that needs to know "where am I working" reads it from there, not from the current directory: that is why `glot test` works **from any directory**. Since **v1.6.0** there is also `target` —`submodule` while the work lives in the submodule and `monorepo` after `finish`— and, while rework is pending, the `cause` key, which the request leaves set and `save` **removes** when the commit is confirmed.
 
 **ES:** Un sprint empieza **siempre** desde el `main` del submódulo, que guarda el estado concluido. La rama `dev` existe en algunos repositorios como legado del flujo anterior y no se usa.
 
