@@ -35,3 +35,7 @@ _experimental/**/obj/
 .psc-ide-port
 package-lock.json
 package.json
+# Evidence leaves are local, never tracked. The pattern is file-level on
+# purpose: `git add` fails when the whole directory is ignored, and the closing
+# step stages the evidence path.
+**/evidence/**/*.md
