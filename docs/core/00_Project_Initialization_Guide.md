@@ -89,7 +89,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **c** | ✍️ `mkdir -p include src test` + `Makefile` | `include/{module}.h`, `Makefile` | ✅ `make test` |
 | **clojure** | ⛓️ 🔧 `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib` | `deps.edn`, `build.clj`, `src/{module}/` | ✅ `clojure -T:build test` |
 | **cobol** | ✍️ `mkdir -p src/copybooks src/lib test` | `Makefile`, `run_tests` | ✅ `make test` |
-| **common-lisp** | ⛓️ 🔧 `quickproject:make-project` vía `ros` + quicklisp | `{module}.asd`, `package.lisp`, `src/`, `test/`, `run-tests.lisp` | ✅ `ros run --load run-tests.lisp --eval '(uiop:quit)'` |
+| **common-lisp** | ⛓️ 🔧 `cl-project:make-project` vía `ros` + quicklisp | `{module}.asd`, `src/{module}.lisp` y `tests/{module}-test.lisp` (con guion), `run-tests.lisp` | ✅ `ros run --load run-tests.lisp --eval '(uiop:quit)'` |
 | **cpp** | ✅ Configuración manual de Bazel (`MODULE.bazel`, `WORKSPACE`, targets en `BUILD`) | `BUILD`, `MODULE.bazel`, `.bazelversion` | ✅ `bazelisk test //...` |
 | **crystal** | 🔧 `crystal init lib {module}` | `shard.yml` | ✅ `crystal spec` |
 | **csharp** | ⛓️ ✅ `dotnet new sln -n {Module}` | `{Module}.slnx`, `src/{Module}/{Module}.csproj`, `test/{Module}.Tests/` | ✅ `dotnet test {Module}.slnx` |
@@ -138,9 +138,9 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 
 ## 🔗 Secuencias de varios pasos / Multi-step sequences
 
-**ES:** Estos lenguajes necesitan más de un comando, **otro directorio de trabajo** o un **completado posterior** a mano. El comando se ejecuta desde la **carpeta del módulo** (`{lenguaje}/core/{fase}/{module}`), que es donde deja al autor `glot use`; la excepción son los **cuatro** generadores que **crean la carpeta ellos mismos** y se ejecutan desde la **fase**: `common-lisp`, `julia`, `clojure` y `racket` (medido el 2026-09-26: `quickproject:make-project` crea el directorio del proyecto).
+**ES:** Estos lenguajes necesitan más de un comando, **otro directorio de trabajo** o un **completado posterior** a mano. El comando se ejecuta desde la **carpeta del módulo** (`{lenguaje}/core/{fase}/{module}`), que es donde deja al autor `glot use`; la excepción son los **cuatro** generadores que **crean la carpeta ellos mismos** y se ejecutan desde la **fase**: `common-lisp`, `julia`, `clojure` y `racket` (medido el 2026-09-26 con `quickproject` y el **2026-09-29** con `cl-project`: los dos crean el directorio del proyecto).
 
-**EN:** These languages need more than one command, **another working directory** or a later **completion** by hand. The command runs from the **module folder** (`{language}/core/{phase}/{module}`), where `glot use` leaves the author; the exception is the **four** generators that **create the folder themselves** and run from the **phase**: `common-lisp`, `julia`, `clojure` and `racket` (measured on 2026-09-26: `quickproject:make-project` creates the project directory).
+**EN:** These languages need more than one command, **another working directory** or a later **completion** by hand. The command runs from the **module folder** (`{language}/core/{phase}/{module}`), where `glot use` leaves the author; the exception is the **four** generators that **create the folder themselves** and run from the **phase**: `common-lisp`, `julia`, `clojure` and `racket` (measured on 2026-09-26 with `quickproject` and on **2026-09-29** with `cl-project`: both create the project directory).
 
 **ES:** La **fuente de verdad es el dato** [`scripts/data/init_sequences.tsv`](../../scripts/data/init_sequences.tsv): una fila por paso, con lenguaje, orden, directorio de trabajo, modo (`run`/`expect`), comando, requisito, respuestas de `expect` y lo que falta por completar. La tabla de abajo es su **lectura humana**, y el tooling comprueba que las dos no se separen.
 
@@ -150,7 +150,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 |---|---|---|
 | `ada` | `alr init --lib --in-place {module}` → `alr init --bin tests` → `alr with {module} --use=..` → `alr with aunit` (los dos últimos, dentro de `tests/`) | Licencia `GPL-3.0-or-later` en `alire.toml` y `tests/alire.toml`, y `description` del subproyecto de pruebas |
 | `clojure` | `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib :name {module} :target-dir {module}` | Sustituir el test de plantilla |
-| `common-lisp` | `ros -e '(ql:quickload :quickproject)' -e '(quickproject:make-project "{module}")'` | Añadir `src/`, `test/` y `run-tests.lisp` |
+| `common-lisp` | `ros -e '(ql:quickload :cl-project)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'` | Homologar el andamiaje con guion y no subrayado, sistema de pruebas con `fiveam` y `run-tests.lisp` |
 | `csharp` | `dotnet new sln` → `dotnet new classlib` → `dotnet new xunit` → `dotnet sln add` | `<ProjectReference>` a `src`, borrar `Class1.cs` y `UnitTest1.cs`, `.gitignore` |
 | `fsharp` | Igual que C# con `-lang F#` | Aplanar a `src/{Module}.fsproj`, `<ProjectReference>`, borrar `Library.fs` y `Tests.fs`, `.gitignore` |
 | `groovy` | `gradle init --type groovy-library --dsl groovy --use-defaults` | Borrar `Library.groovy` y `LibraryTest.groovy` |
@@ -225,17 +225,13 @@ mkdir -p src/copybooks src/lib test
 
 ### Common Lisp — ASDF + `src/` + `tests/`
 
-**ES:** Herramienta (R1): `quickproject:make-project` vía `ros` + quicklisp, desde la carpeta de la fase. Lo que sigue es la estructura **homologada actual**; el generador deja `{module}.asd`, `{module}.lisp` y `package.lisp` en la raíz, así que el módulo se actualizará al retomarlo (R6). A **completar** tras el generador: `src/`, `tests/` y el runner.
+**ES:** Herramienta (R1): **`cl-project:make-project`** vía `ros` + quicklisp, desde la carpeta de la fase; es el generador de la comunidad y sustituyó a `quickproject` el **2026-09-29**, porque aquel dejaba el proyecto **plano**. Exige un *pathname*, así que la cadena no vale: `#p"{module}"` no es opcional. Deja `{module}/` con `{module}.asd`, `src/main.lisp`, `tests/main.lisp`, `README.org`, `README.markdown` y `.gitignore`. Para que el andamiaje quede **homologado** hay que aplicar **seis correcciones** —medidas el 2026-09-29 al dejar homologado `common-lisp/core/algorithms/data_structures_basics/`, que queda como **referencia**—: **1)** nombrar los ficheros como el módulo y **con guion** (`{module}.asd`, `src/{module}.lisp`, `tests/{module}-test.lisp`), porque `main` es el nombre de la **plantilla** y el subrayado no es la convención de Lisp; **2)** el `.asd` con `defsystem`/`test-op` y `uiop:symbol-call`; **3)** el paquete **con guion**; **4)** el sistema de pruebas sobre **`fiveam`**, como `numbers.asd` y `naive-sort.asd`, y no sobre `rove`, que **no** está instalado aquí; **5)** el paquete de pruebas `{module}/tests` con `:export #:run-tests` y un `run-tests` que llama a `run!`; y **6)** `run-tests.lisp`, que `cl-project` **no** genera y el comando de pruebas del catálogo exige. Los dos READMEs de la plantilla los sustituye el `README.md` del paso 7, y el **código de salida** del runner y el **guardia del depurador** son deuda del runner compartido (afectan también a `naive_sort` y `numbers`).
 
-**EN:** Tool (R1): `quickproject:make-project` through `ros` + quicklisp, from the phase folder. What follows is the **current homologated** structure; the generator leaves `{module}.asd`, `{module}.lisp` and `package.lisp` at the root, so the module will be updated when retaken (R6). To **complete** after the generator: `src/`, `tests/` and the runner.
-
-```bash
-mkdir -p src tests
-```
+**EN:** Tool (R1): **`cl-project:make-project`** through `ros` + quicklisp, from the phase folder; it is the community generator and it replaced `quickproject` on **2026-09-29**, because the latter left the project **flat**. It requires a *pathname*, so a plain string will not do: `#p"{module}"` is not optional. It leaves `{module}/` with `{module}.asd`, `src/main.lisp`, `tests/main.lisp`, `README.org`, `README.markdown` and `.gitignore`. To homologate the scaffolding **six corrections** must be applied —measured on 2026-09-29 when `common-lisp/core/algorithms/data_structures_basics/` was homologated, kept as the **reference**—: **1)** name the files after the module and **with hyphens** (`{module}.asd`, `src/{module}.lisp`, `tests/{module}-test.lisp`), because `main` is the **template** name and underscores are not the Lisp convention; **2)** the `.asd` with `defsystem`/`test-op` and `uiop:symbol-call`; **3)** the package **with hyphens**; **4)** the test system over **`fiveam`**, like `numbers.asd` and `naive-sort.asd`, and not over `rove`, which is **not** installed here; **5)** the test package `{module}/tests` with `:export #:run-tests` and a `run-tests` calling `run!`; and **6)** `run-tests.lisp`, which `cl-project` does **not** generate and the catalogue's test command requires. The template's two READMEs are replaced by the step-7 `README.md`, and the runner's **exit code** and **debugger guard** are debt of the shared runner (they also affect `naive_sort` and `numbers`).
 
 ```text
 {module}/
-├── {module}.asd             # definición del sistema ASDF (+ test-op)
+├── {module}.asd             # sistema ASDF (+ test-op); el nombre va con guion
 ├── run-tests.lisp           # runner FiveAM
 ├── src/{module}.lisp
 └── tests/                   # una suite .lisp por enfoque
