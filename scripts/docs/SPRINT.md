@@ -75,11 +75,11 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 |:-:|------|---------|-----------------------|-------|
 | 9 | Puntero | `glot pointer` (0.12.0; **sin rama propia** desde la 1.3.0) + `glot save 9` (0.12.0), **en la rama activa** | `chore(submodule): update {lang} pointer` con el gitlink del commit integrado | script |
 | 10 | Registro del cierre | `glot close` (0.10.0) + `glot save 10` (0.12.0) | Entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](../../docs/ROADMAP_UPDATE_CHECKLIST.md) y contador de [`ROADMAP.md`](../../docs/ROADMAP.md) al día, a partir del acta de evidencia | script + **agente** |
-| **9+10** | **Cierre completo**, en un paso | `glot finish` (1.6.0) → `pointer` + `save 9` + `close` + `save 10` | Los **dos commits** —el puntero y el registro— y el estado en `target=monorepo`; el **push** es del autor | script |
+| **9+10** | **Cierre completo**, en un paso | `glot finish` (1.6.0) → `pointer` + `save 9` + `close` + `save 10` | Los **dos commits** —el puntero y el registro— y el **estado del sprint limpio** (salvo `model`); el **push** es del autor |
 
-**ES:** Los pasos 9 y 10 se hacen de una vez con `glot finish` (1.6.0): prepara y confirma el **puntero** (`save 9`) y registra el **cierre** (`close` + `save 10`), en la **rama activa** y sin abrir rama propia. Son **dos commits** —el puntero y el registro— y el **push** lo hace el autor. `finish` deja el estado en `target=monorepo`.
+**ES:** Los pasos 9 y 10 se hacen de una vez con `glot finish` (1.6.0): prepara y confirma el **puntero** (`save 9`) y registra el **cierre** (`close` + `save 10`), en la **rama activa** y sin abrir rama propia. Son **dos commits** —el puntero y el registro— y el **push** lo hace el autor. `finish` deja el estado en `target=monorepo` y, desde la **v1.6.2**, al terminar **limpia el estado del sprint** (salvo `model`): el sprint siguiente empieza por `glot use`.
 
-**EN:** Steps 9 and 10 are done at once with `glot finish` (1.6.0): it prepares and commits the **pointer** (`save 9`) and records the **closure** (`close` + `save 10`), on the **active branch** and opening no branch. That is **two commits** —the pointer and the record— and the **push** is the author's. `finish` leaves the state in `target=monorepo`.
+**EN:** Steps 9 and 10 are done at once with `glot finish` (1.6.0): it prepares and commits the **pointer** (`save 9`) and records the **closure** (`close` + `save 10`), on the **active branch** and opening no branch. That is **two commits** —the pointer and the record— and the **push** is the author's. `finish` leaves the state in `target=monorepo` and, since **v1.6.2**, when it is done it **clears the sprint state** (except `model`): the next sprint starts with `glot use`.
 
 ---
 
@@ -202,6 +202,7 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 | 2 | Registra el **cierre** (`close` + `save 10` y su commit), reutilizando lo que ya hacen los dos verbos, así que sus requisitos siguen valiendo: el gitlink al `HEAD` del submódulo y el acta en `green` |
 | 3 | Todo en la **rama activa** del monorepo y **sin abrir rama propia**: son **dos commits** —el puntero y el registro— y el **push** es del autor |
 | 4 | Deja el estado en `target=monorepo` (que es lo que fija `use` en `target=submodule`); códigos: `0` correcto · `1` entorno o dato · `3` no se pudo escribir · `4` requisitos sin cumplir |
+| 5 | Al terminar, **limpia el estado del sprint** (v1.6.2): se van `lang`, `phase`, `module`, `branch`, `spec`, `repo`, `target` y `cause`, y se queda `model`. Es lo que evita seguir trabajando sobre una rama y un directorio finalizados: para el siguiente, `glot use`. En ensayo (`-n`) solo lo anuncia |
 
 ## 🙋 Lo que solo puede hacer el autor / What only the author can do
 
@@ -252,6 +253,10 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 **ES:** El estado del sprint es el del almacén de `glot` ([`CONTRACT.md`](CONTRACT.md)): `lang`, `phase`, `module`, `branch`, `spec` y `repo`. Cualquier verb que necesite saber «dónde estoy trabajando» lo lee de ahí, no del directorio actual: por eso `glot test` funciona **desde cualquier directorio**. Desde la **v1.6.0** hay además `target` —`submodule` mientras el trabajo vive en el submódulo y `monorepo` después de `finish`— y, mientras hay retrabajo pendiente, la clave `cause`, que el encargo deja puesta y `save` **retira** al confirmar el commit.
 
 **EN:** The sprint state is `glot`'s state store ([`CONTRACT.md`](CONTRACT.md)): `lang`, `phase`, `module`, `branch`, `spec` and `repo`. Any verb that needs to know "where am I working" reads it from there, not from the current directory: that is why `glot test` works **from any directory**. Since **v1.6.0** there is also `target` —`submodule` while the work lives in the submodule and `monorepo` after `finish`— and, while rework is pending, the `cause` key, which the request leaves set and `save` **removes** when the commit is confirmed.
+
+**ES:** El estado **se limpia al cerrar** (v1.6.2): `glot finish` retira las claves del sprint y deja solo `model`, así que un sprint cerrado no se continúa por inercia —y ningún verbo trabaja sobre una rama o un directorio que ya no existen en `main`—: para el siguiente hay que volver a asignar los valores con `glot use`. Al cerrar sin `finish` (`close` + `save 10` por separado) el estado se queda como está.
+
+**EN:** The state **is cleared on closure** (v1.6.2): `glot finish` removes the sprint keys and leaves only `model`, so a closed sprint is not carried on by inertia —and no verb works against a branch or a directory that no longer exists on `main`—: the next one needs the values assigned again with `glot use`. Closing without `finish` (`close` + `save 10` separately) leaves the state as it is.
 
 **ES:** Un sprint empieza **siempre** desde el `main` del submódulo, que guarda el estado concluido. La rama `dev` existe en algunos repositorios como legado del flujo anterior y no se usa.
 

@@ -12,7 +12,7 @@ _glot_complete() {
     local cmd="${COMP_WORDS[1]}"
     local glot="${GLOT_CMD:-glot}"
     local words=""
-    local keys="lang phase module branch spec repo"
+    local keys="lang phase module branch spec repo target cause model"
     local verbs="version help doctor greet langs modules progress completion use new save test verify evidence close validate prompt ask status pointer clean install uninstall set get unset list path"
     local i=""
     local positional=0

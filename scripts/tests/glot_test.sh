@@ -682,8 +682,9 @@ assert_eq 'completion bash: completa el lenguaje' 'php' "$bash_comp"
 bash_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot use php alg); COMP_CWORD=3; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"' | head -1)"
 assert_eq 'completion bash: completa fase/módulo' 'algorithms/naive_sort' "$bash_comp"
 
-bash_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot get m); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
-assert_eq 'completion bash: completa una clave reservada' 'module' "$bash_comp"
+bash_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot get mo); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_eq 'completion bash: completa una clave reservada' 'module
+model' "$bash_comp"
 
 # el autocompletado de zsh se verifica solo si zsh está instalado: no es una
 # dependencia del repositorio
@@ -1135,6 +1136,20 @@ assert_eq 'completion bash: los pasos del monorepo están' 'si' \
 assert_contains 'completion bash: el alias del puntero' 'pointer' "$save_comp"
 assert_contains 'completion bash: el alias del cierre' 'close' "$save_comp"
 assert_eq 'completion bash: un candidato por línea' '22' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
+
+# v1.6.2: `get`/`set`/`unset` complean **todas** las claves reservadas. La lista vive en tres
+# sitios —el completado de bash, el de zsh y la ayuda del verbo— y estos casos la mantienen
+# alineada: una clave nueva con un sitio olvidado es el fallo que dejó `target`, `cause` y
+# `model` fuera del completado.
+keys_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot get ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_eq 'completion bash: las nueve claves reservadas' \
+    'branch cause lang model module phase repo spec target' \
+    "$(printf '%s\n' "$keys_comp" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
+assert_contains 'completion zsh: la misma lista de claves' \
+    'lang phase module branch spec repo target cause model' "$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
+glot_run help set
+assert_contains 'help set: la misma lista de claves' \
+    'lang, phase, module, branch, spec, repo, target, cause, model' "$out"
 
 # v1.1.0: los encargos se complean **en vivo** desde el registro, así que la lista no puede
 # quedarse corta al añadir una plantilla (el fallo que dejaba `scaffold` sin descubrir)
@@ -1944,6 +1959,71 @@ glot_run_sandbox save 10 ruby algorithms/naive_sort
 assert_eq 'save 10 sin cambios: dato' 'nothing' "$out"
 assert_eq 'save 10 sin cambios: código' '0' "$rc_last"
 
+# v1.6.2: `finish` limpia el estado del sprint al terminar (salvo `model`), y en ensayo solo
+# lo anuncia. Se prepara php para el cierre —módulo y fase documentados, evidencia en verde y
+# su línea en el roadmap— y el almacén va aparte para no alterar el del resto de los casos.
+FINISH_STATE="$WORK_DIR/state-finish"
+glot_run_finish() {
+    local rc=0
+    out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    rc_last="$rc"
+}
+cat >"$SANDBOX/stub/composer" <<'STUB'
+#!/usr/bin/env bash
+printf 'stub composer: %s\n' "$*"
+exit "${STUB_TEST_EXIT:-0}"
+STUB
+cat >"$SANDBOX/stub/php" <<'STUB'
+#!/usr/bin/env bash
+printf 'stub php: %s\n' "$*"
+exit "${STUB_VERIFY_EXIT:-0}"
+STUB
+chmod +x -- "$SANDBOX/stub/composer" "$SANDBOX/stub/php"
+printf '# naive sort (php)\n' >"$SANDBOX/php/core/algorithms/naive_sort/README.md"
+printf '# algorithms (php)\n' >"$SANDBOX/php/core/algorithms/README.md"
+printf 'core.algorithms.naive_sort            pending 1/50 (Ada)\n' >"$SANDBOX/docs/ROADMAP.md"
+printf '# Registro de cierre\n' >"$SANDBOX/docs/ROADMAP_UPDATE_CHECKLIST.md"
+# los README van confirmados y publicados dentro del submódulo: `pointer` solo apunta a un
+# commit que está en `origin/main`, y con el submódulo sucio `save 9` no tendría nada que
+# confirmar y el cierre se quedaría a medias
+git -C "$SANDBOX/php" add -A
+git -C "$SANDBOX/php" commit -q -m 'docs(algorithms): add module README'
+git -C "$SANDBOX/php" push -q origin main
+glot_run_evidence php algorithms/naive_sort
+assert_eq 'finish: la evidencia de php sale en verde' '0' "$rc_last"
+
+glot_run_finish set lang php
+glot_run_finish set phase algorithms
+glot_run_finish set module naive_sort
+glot_run_finish set branch main
+assert_eq 'finish: el sprint está asignado' 'php' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get lang)"
+glot_run_finish set model gemini-3.7-flash-high
+
+glot_run_finish finish php algorithms/naive_sort
+assert_eq 'finish: código' '0' "$rc_last"
+assert_contains 'finish: lo dice' 'estado del sprint limpiado' "$err"
+assert_eq 'finish: el sprint se ha ido' '1' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get lang >/dev/null 2>&1; echo $?)"
+assert_eq 'finish: el modelo se queda' 'gemini-3.7-flash-high' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get model)"
+glot_run_finish save 4a
+assert_eq 'finish sin estado: hay que asignarlo otra vez' '1' "$rc_last"
+assert_contains 'finish sin estado: lo dice' 'glot use' "$err"
+
+# en ensayo se anuncia la limpieza sin hacerla. Con el puntero ya al día y el módulo cerrado,
+# los cuatro pasos pasan en ensayo y el estado sigue ahí (si el puntero tuviera que moverse,
+# `close` no podría validarlo: el ensayo no lo prepara de verdad)
+glot_run_finish set lang php
+glot_run_finish set phase algorithms
+glot_run_finish set module naive_sort
+glot_run_finish -n finish php algorithms/naive_sort
+assert_eq 'finish -n: código' '0' "$rc_last"
+assert_contains 'finish -n: anuncia la limpieza' 'estado del sprint limpiado' "$out"
+assert_eq 'finish -n: no limpia' 'php' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get lang)"
+
 # v1.5.0: `pointer` no puede tapar que la rama del sprint **no** está integrada. Se monta el
 # caso peligroso —volver a `main` sin fusionar, que es lo que decía el mensaje viejo— y se
 # comprueba que frena en vez de responder `nothing`. Medido el 2026-09-28 en el laboratorio:
@@ -2084,6 +2164,31 @@ assert_eq 'cargado: save -n 7 no cambia de directorio' "$SANDBOX/php/core/algori
 
 glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use 2>/dev/null; echo "vivo"'
 assert_contains 'cargado: un use fallido no deja la shell rota' 'vivo' "$out"
+
+# v1.6.2: `glot finish` limpia el estado del sprint al terminar, para no seguir trabajando
+# sobre una rama y un directorio finalizados (el `finish` completo va más abajo, con el
+# sandbox). Aquí se prueba la limpieza sola, con un almacén propio para no alterar el del
+# resto de los casos: se van las claves del sprint —y no otras— y `model` se queda.
+STATE_CLEAR="$WORK_DIR/state-clear"
+for kv in lang=php phase=algorithms module=naive_sort branch=feat/algorithms/x \
+    spec=spec.md target=monorepo cause=fix model=claude-opus-4-6-thinking zap=1; do
+    GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" set "${kv%%=*}" "${kv#*=}" >/dev/null 2>&1
+done
+assert_eq 'estado del sprint: el almacén de prueba está montado' 'php' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get lang)"
+
+glot_loaded "source \"\$1\"; GLOT_STATE_FILE='$STATE_CLEAR'; _glot_sprint_clear"
+assert_eq 'finish: la limpieza no falla' '0' "$rc_last"
+assert_eq 'finish: el sprint se ha ido' 'si' \
+    "$(grep -qE '^(lang|phase|module|branch|spec|repo|target|cause)=' "$STATE_CLEAR" && echo no || echo si)"
+assert_eq 'finish: el modelo se queda' 'claude-opus-4-6-thinking' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get model)"
+assert_eq 'finish: las claves del autor se quedan' '1' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get zap)"
+
+# el cierre se puede reejecutar: limpiar dos veces no falla
+glot_loaded "source \"\$1\"; GLOT_STATE_FILE='$STATE_CLEAR'; _glot_sprint_clear"
+assert_eq 'finish: repetir la limpieza' '0' "$rc_last"
 
 # el modo programa sí recuerda el `cd`: es el único caso en que hace falta
 out="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" use php algorithms/data_structures_basics 2>"$WORK_DIR/stderr")" || true

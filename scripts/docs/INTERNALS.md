@@ -49,6 +49,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 5. **Lectura**: `list` ordena con `LC_ALL=C sort -t= -k1,1`, así el orden no depende del idioma del entorno. `get` distingue «no encontrada» (`1` y error en stderr) de «valor vacío» (`0` y línea vacía): dato ausente no es lo mismo que dato vacío.
 6. **Errores de estado**: si no se puede crear o escribir, el verbo devuelve `3` y no `1`, para que quien llama distinga «me falta un dato» de «no puedo guardar».
 7. **`-n/--dry-run`**: los verbos que mutan imprimen el efecto en stdout (`clave=valor`) y no escriben; `set` valida igual la clave y el valor, así el ensayo detecta los mismos errores de uso que la ejecución.
+8. **Ciclo del sprint (v1.6.2)**: `_glot_sprint_clear` retira las claves que describen el sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `target` y `cause`) y respeta el resto —`model` es preferencia del delegado de AGY, no dato del sprint—. La llama `finish` al terminar, y en ensayo solo lo anuncia: un sprint cerrado no se continúa por inercia, y seguir trabajando sobre una rama o un directorio finalizados es justo lo que el cierre evita.
 
 ## 5. Qué hace cada verbo / What each verb does
 

@@ -49,7 +49,8 @@
 # **modelo del delegado de AGY** se puede fijar por sprint con `glot set model <id>` (su CLI
 # no expone los límites de horas o cuota, así que tiene que poder cambiarse a mitad de
 # módulo); y `install` avisa en vez de recopiarse sobre sí mismo cuando se lanza desde la
-# copia instalada.
+# copia instalada. `glot finish` **limpia el estado del sprint** al terminar (salvo `model`),
+# y el autocompletado y la ayuda ofrecen las **nueve** claves reservadas.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -3128,11 +3129,28 @@ _glot_cmd_close() {
     return 0
 }
 
+# _glot_sprint_clear — cierra el sprint en el almacén: retira las claves que lo describen
+# (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `target` y `cause`) para que nadie siga
+# trabajando sobre una rama y un módulo ya cerrados: para continuar hay que volver a
+# asignarlos con `glot use`, que además vuelve a validar. **No** toca `model` —el modelo del
+# delegado de AGY es una preferencia de la herramienta y sus límites son por horas o por
+# semana, no por sprint— ni ninguna clave que no sea del sprint, que son del autor.
+_glot_sprint_clear() {
+    local key=""
+
+    for key in lang phase module branch spec repo target cause; do
+        _glot_state_rewrite unset "$key" >/dev/null 2>&1 || true
+    done
+
+    return 0
+}
+
 # _glot_cmd_finish [lenguaje] [fase/módulo] — el cierre del monorepo en un paso (v1.6.0).
 # Prepara y confirma el **puntero** (`save 9`) y registra el **cierre** (`close` + `save 10`),
-# en la rama activa y **sin abrir rama propia**. Deja el estado en `target=monorepo` para que
-# se sepa que el trabajo ya es del monorepo. Son **dos commits** a propósito, para poder
-# separar el guardado del puntero del de la información; el **push lo hace el autor**.
+# en la rama activa y **sin abrir rama propia**. Son **dos commits** a propósito, para poder
+# separar el guardado del puntero del de la información; el **push lo hace el autor**. Desde
+# la v1.6.2 **limpia el estado del sprint** al terminar (salvo `model`), para que no se siga
+# trabajando sobre la rama y el módulo finalizados.
 # Códigos: los de `pointer` y `close` (0 correcto · 1 entorno o dato · 3 no se pudo escribir
 # · 4 requisitos sin cumplir).
 _glot_cmd_finish() {
@@ -3151,6 +3169,16 @@ _glot_cmd_finish() {
 
     _glot_info 'cierre del monorepo listo / monorepo closure ready; publica tú / you push:'
     _glot_info '  git push origin <rama-del-monorepo>'
+
+    # El sprint ya está cerrado: se retira lo que lo describía para no seguir trabajando
+    # sobre una rama y un directorio finalizados. En ensayo no se toca el estado.
+    if ((_glot_dry_run)); then
+        printf '# estado del sprint limpiado / sprint state cleared: lang phase module branch spec repo target cause\n'
+        return 0
+    fi
+
+    _glot_sprint_clear
+    _glot_info 'estado del sprint limpiado / sprint state cleared (salvo `model` / except `model`): para el siguiente, `glot use` / for the next one, `glot use`'
     return 0
 }
 
@@ -3530,7 +3558,8 @@ _glot_help_verb() {
         set)
             printf 'glot set <clave> <valor> — guarda una clave en el estado (claves [A-Za-z0-9_.-])\n'
             printf 'glot set <key> <value> — stores a state key (keys [A-Za-z0-9_.-])\n'
-            printf 'Claves reservadas / reserved keys: lang, phase, module, branch, spec, repo\n'
+            printf 'Claves reservadas / reserved keys: lang, phase, module, branch, spec, repo, target, cause, model\n'
+            printf '`glot finish` las limpia al cerrar el sprint, salvo `model` / `glot finish` clears them when the sprint closes, except `model`\n'
             ;;
         get)
             printf 'glot get <clave> — imprime el valor; 1 si la clave no existe\n'
@@ -3751,8 +3780,10 @@ _glot_help_verb() {
             printf '(`close` + `save 10`), en la rama activa y sin abrir rama propia\n'
             printf 'Prepares and commits the pointer (`save 9`) and records the closure\n'
             printf '(`close` + `save 10`), on the active branch, opening no branch\n'
-            printf 'Deja el estado en `target=monorepo`. Dos commits; el push es tuyo\n'
-            printf 'It leaves the state in `target=monorepo`. Two commits; the push is yours\n'
+            printf 'Deja el estado en `target=monorepo`. Dos commits; el push es tuyo. Al terminar\n'
+            printf '**limpia el estado del sprint** (salvo `model`): para el siguiente, `glot use`\n'
+            printf 'It leaves the state in `target=monorepo`. Two commits; the push is yours. When\n'
+            printf 'done it **clears the sprint state** (except `model`): for the next one, `glot use`\n'
             printf 'Códigos / codes: 0 correcto · 1 entorno o dato · 3 no se pudo escribir · 4 requisitos sin cumplir\n'
             ;;
         status)

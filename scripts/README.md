@@ -46,7 +46,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh prompt                              # registro: nombre, paso, modelo y descripción
 ./scripts/glot.sh status                              # submódulos, ramas y punteros (solo lectura)
 ./scripts/glot.sh -n pointer php algorithms/naive_sort  # puntero del submódulo: plan sin tocar nada
-./scripts/glot.sh -n finish php algorithms/naive_sort   # cierre del monorepo: puntero + registro
+./scripts/glot.sh -n finish php algorithms/naive_sort   # cierre del monorepo: puntero + registro (y al final limpia el estado del sprint)
 ./scripts/glot.sh -n clean php algorithms/naive_sort    # artefactos del módulo: plan sin borrar
 ./scripts/glot.sh set lang php && ./scripts/glot.sh get lang
 ./scripts/glot.sh -n install                  # copia estable + rc + completado: plan

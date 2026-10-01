@@ -66,7 +66,7 @@
 | `status [lenguaje]` | **Solo lectura**: una línea por lenguaje registrado —`lang<TAB>branch<TAB>pointer<TAB>worktree`— con el puntero en `ok`, `differs`, `uninitialised` o `unknown` | 0 / 1 / 2 |
 | `pointer [lenguaje] [fase/módulo]` | Deja el puntero del submódulo **preparado y sin confirmar**: exige que el submódulo esté en su `main` y que ese commit sea el de `origin/main`, y añade el gitlink **en la rama activa** del monorepo (desde la v1.3.0 **no** abre ni publica rama propia: el gitlink pertenece al cierre en curso). Imprime el SHA corto o `nothing` | 0 / 1 / 2 / 3 |
 | `clean [lenguaje] [fase/módulo]` | Borra lo que el propio `.gitignore` del lenguaje declara como artefacto, **solo dentro del directorio del módulo**, y sincroniza el submódulo. Imprime las rutas borradas o `nothing` | 0 / 1 / 2 |
-| `finish [lenguaje] [fase/módulo]` | Cierre del monorepo en un paso: prepara y confirma el puntero (`save 9`) y registra el cierre (`close` + `save 10`), en la rama activa y sin abrir rama; deja el estado en `target=monorepo`. Dos commits; **sin push** | 0 / 1 / 2 / 3 / **4** |
+| `finish [lenguaje] [fase/módulo]` | Cierre del monorepo en un paso: prepara y confirma el puntero (`save 9`) y registra el cierre (`close` + `save 10`), en la rama activa y sin abrir rama; deja el estado en `target=monorepo` y, al terminar, **limpia el estado del sprint** (salvo `model`). Dos commits; **sin push** | 0 / 1 / 2 / 3 / **4** |
 | `install` | Deja la **copia estable** (`~/.local/share/glot/`), el enlace `~/.local/bin/glot`, el completado de cada shell presente y el bloque del rc entre marcas. Idempotente; imprime el directorio de instalación | 0 / 1 / 2 / 3 |
 | `uninstall` | Deshace lo de `install`: quita el bloque del rc, borra los completados, retira el enlace **solo si es el suyo** y la copia. Idempotente: sin nada instalado imprime `nothing` | 0 / 1 / 2 / 3 |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale. Desde la **v1.1.0**, si el nombre es un **encargo registrado** (`scaffold`, `contract_stub`, `suite`, `correct`, `implement`, `fix`, `refactor`, `validate`, `docs-module`, `docs-language`), la sugerencia es el verbo que lo arma: `glot suite` → `quizá buscabas / maybe you meant: glot prompt suite` | 2 |
@@ -104,6 +104,10 @@
 **ES:** Hasta la v0.4.0 el almacén solo guardaba y devolvía texto: no interpretaba ninguna clave. Desde la v0.5.0 las escribe `use`.
 
 **EN:** Up to v0.4.0 the store only saved and returned text: it interpreted no key. Since v0.5.0, `use` writes them.
+
+**ES:** Desde la **v1.6.2**, `glot finish` **retira** al cerrar las claves del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `target` y `cause`): un sprint cerrado no se sigue por inercia, así que el siguiente empieza por `glot use`, que vuelve a asignarlas y valida. **`model` no se toca** —es preferencia del delegado de AGY, y sus límites son por horas o por semana, no por sprint— y `unset` sigue borrando cualquier clave a mano.
+
+**EN:** Since **v1.6.2**, `glot finish` **removes** the sprint keys when it closes (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `target` and `cause`): a closed sprint is not carried on by inertia, so the next one starts with `glot use`, which assigns them again and validates. **`model` is untouched** —it is an AGY delegate preference, and its limits are hourly or weekly, not per sprint— and `unset` still removes any key by hand.
 
 ---
 
