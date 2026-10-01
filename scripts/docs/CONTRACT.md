@@ -49,7 +49,7 @@
 | `unset <clave>` | Borra la clave; repetirlo no es error | 0 / 2 / 3 |
 | `list` | Todas las entradas `clave=valor`, ordenadas por clave en `LC_ALL=C` | 0 / 3 |
 | `path` | Ruta del fichero de estado | 0 |
-| `use <lenguaje> <fase>/<módulo> [tipo]` | Sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado): valida, activa o crea la rama desde `main`, la publica con `-u` y crea la carpeta del módulo si falta; con trabajo sin confirmar no toca nada. Guarda el estado del sprint e imprime la ruta. **No hace `cd`**: ese `cd` es de la capa cargada, y solo llega si el verbo corre en tu shell —en una tubería corre en un subshell y se queda ahí— | 0 / 1 / 2 / 3 |
+| `use <lenguaje> <fase>/<módulo> [tipo]` | Sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado): valida, activa o crea la rama desde `main`, la publica con `-u` y crea la carpeta del módulo si falta; con trabajo sin confirmar no toca nada. Guarda el estado del sprint e imprime la **carpeta de la fase** (`{lenguaje}/core/{fase}`), que es donde deja al autor la capa cargada —el andamiaje del paso 4a arranca ahí y `new` es quien baja al módulo—. **No hace `cd`** el verbo: ese `cd` es de la capa cargada, y solo llega si el verbo corre en tu shell —en una tubería corre en un subshell y se queda ahí— | 0 / 1 / 2 / 3 |
 | `langs` | Catálogo de lenguajes: uno por línea con su **comando nativo de pruebas** | 0 / 1 |
 | `modules [fase]` | Catálogo de módulos del roadmap con su especificación resuelta (`-` si aún no existe) | 0 / 1 / 2 |
 | `progress [fase]` | Estado del roadmap: sin fase, contadores globales en `clave=valor`; con fase, una línea por módulo | 0 / 1 / 2 |
@@ -66,7 +66,7 @@
 | `status [lenguaje]` | **Solo lectura**: una línea por lenguaje registrado —`lang<TAB>branch<TAB>pointer<TAB>worktree`— con el puntero en `ok`, `differs`, `uninitialised` o `unknown` | 0 / 1 / 2 |
 | `pointer [lenguaje] [fase/módulo]` | Deja el puntero del submódulo **preparado y sin confirmar**: exige que el submódulo esté en su `main` y que ese commit sea el de `origin/main`, y añade el gitlink **en la rama activa** del monorepo (desde la v1.3.0 **no** abre ni publica rama propia: el gitlink pertenece al cierre en curso). Imprime el SHA corto o `nothing` | 0 / 1 / 2 / 3 |
 | `clean [lenguaje] [fase/módulo]` | Borra lo que el propio `.gitignore` del lenguaje declara como artefacto, **solo dentro del directorio del módulo**, y sincroniza el submódulo. Imprime las rutas borradas o `nothing` | 0 / 1 / 2 |
-| `finish [lenguaje] [fase/módulo]` | Cierre del monorepo en un paso: prepara y confirma el puntero (`save 9`) y registra el cierre (`close` + `save 10`), en la rama activa y sin abrir rama; deja el estado en `target=monorepo`. Dos commits; **sin push** | 0 / 1 / 2 / 3 / **4** |
+| `finish [lenguaje] [fase/módulo]` | Cierre del monorepo en un paso: prepara y confirma el puntero (`save 9`) y registra el cierre (`close` + `save 10`), en la rama activa y sin abrir rama; deja el estado en `target=monorepo` y, al terminar, **limpia el estado del sprint** (salvo `model`). Dos commits; **sin push** | 0 / 1 / 2 / 3 / **4** |
 | `install` | Deja la **copia estable** (`~/.local/share/glot/`), el enlace `~/.local/bin/glot`, el completado de cada shell presente y el bloque del rc entre marcas. Idempotente; imprime el directorio de instalación | 0 / 1 / 2 / 3 |
 | `uninstall` | Deshace lo de `install`: quita el bloque del rc, borra los completados, retira el enlace **solo si es el suyo** y la copia. Idempotente: sin nada instalado imprime `nothing` | 0 / 1 / 2 / 3 |
 | Verbo desconocido | Error en stderr con sugerencia de `greet`/`help`; un nombre suelto ya no vale. Desde la **v1.1.0**, si el nombre es un **encargo registrado** (`scaffold`, `contract_stub`, `suite`, `correct`, `implement`, `fix`, `refactor`, `validate`, `docs-module`, `docs-language`), la sugerencia es el verbo que lo arma: `glot suite` → `quizá buscabas / maybe you meant: glot prompt suite` | 2 |
@@ -97,10 +97,17 @@
 | `branch` | Rama de trabajo (`feat/algorithms/naive-sort`) | `use` (v0.5.0) |
 | `spec` | Ruta de la especificación (`docs/core/algorithms/05_Naive_Sort.md`) | `use` (v0.5.0) |
 | `repo` | Nombre del submódulo en la raíz del monorepo (`php`) | `use` (v0.5.0) |
+| `target` | Dónde está el trabajo del cierre: `submodule` o `monorepo` | `use` y `finish` (v1.6.0) |
+| `cause` | Causa del retrabajo, mientras el paso la necesite | el encargo, y `save` la retira al confirmar (v1.6.0) |
+| `model` | Modelo del delegado de **AGY** en este sprint; gana a la columna del perfil y pierde con `--model` y `GLOT_MODEL_AGY` (v1.6.2) | el autor, con `glot set model <id>` |
 
 **ES:** Hasta la v0.4.0 el almacén solo guardaba y devolvía texto: no interpretaba ninguna clave. Desde la v0.5.0 las escribe `use`.
 
 **EN:** Up to v0.4.0 the store only saved and returned text: it interpreted no key. Since v0.5.0, `use` writes them.
+
+**ES:** Desde la **v1.6.2**, `glot finish` **retira** al cerrar las claves del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `target` y `cause`): un sprint cerrado no se sigue por inercia, así que el siguiente empieza por `glot use`, que vuelve a asignarlas y valida. **`model` no se toca** —es preferencia del delegado de AGY, y sus límites son por horas o por semana, no por sprint— y `unset` sigue borrando cualquier clave a mano.
+
+**EN:** Since **v1.6.2**, `glot finish` **removes** the sprint keys when it closes (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `target` and `cause`): a closed sprint is not carried on by inertia, so the next one starts with `glot use`, which assigns them again and validates. **`model` is untouched** —it is an AGY delegate preference, and its limits are hourly or weekly, not per sprint— and `unset` still removes any key by hand.
 
 ---
 
@@ -136,7 +143,7 @@
 17. **Quirúrgico en el rc**: el bloque va entre `# >>> glot (install) >>>` y `# <<< glot (install) <<<`, y `install`/`uninstall` **solo** tocan lo que hay entre esas marcas. Nunca reescriben el rc entero ni lo crean si ya existe.
 18. **Lo ajeno no se pisa**: si en la ruta del enlace hay un fichero, o un enlace que no apunta a la copia instalada, `install` falla con `1` y no toca nada; `uninstall` deja ese fichero donde está y avisa.
 19. **Idempotencia y ensayo**: `install` repetido deja exactamente lo mismo (un solo bloque); `uninstall` sin nada instalado devuelve `0` con `nothing`. Los dos admiten `-n/--dry-run`.
-20. **Cargar no ejecuta**: `source glot.sh` define la función y no ejecuta el dispatcher; el `cd` de `use` ocurre solo cuando el verbo se invoca **a través** de la función.
+20. **Cargar no ejecuta**: `source glot.sh` define la función y no ejecuta el dispatcher; los `cd` del ciclo —`use` a la carpeta de la fase, `new` a la del módulo y el `7`/`8` de `save` a la raíz del lenguaje— ocurren solo cuando el verbo se invoca **a través** de la función.
 
 ---
 
@@ -412,12 +419,13 @@
 
 ## 📦 Instalación y capa cargable (L8, v1.0.0) / Installation and the loadable layer
 
-**ES:** `install` es el único verbo que toca el `HOME` del usuario, y lo hace de forma declarada y reversible: copia el script con sus datos, deja el enlace en el `PATH`, el completado donde cada shell lo busca y un bloque del rc entre marcas. El bloque carga la **copia**, y esa copia es la que define la función `glot`: la única forma de que `use` haga el `cd` real, porque un proceso hijo no puede cambiar el directorio de su padre.
+**ES:** `install` es el único verbo que toca el `HOME` del usuario, y lo hace de forma declarada y reversible: copia el script con sus datos, deja el enlace en el `PATH`, el completado donde cada shell lo busca y un bloque del rc entre marcas. El bloque carga la **copia**, y esa copia es la que define la función `glot`: la única forma de que el ciclo haga sus `cd` reales, porque un proceso hijo no puede cambiar el directorio de su padre.
 
-**EN:** `install` is the only verb that touches the user's `HOME`, and it does so explicitly and reversibly: it copies the script along with its data, leaves the symlink in `PATH`, the completion where each shell looks for it and an rc block between markers. The block loads the **copy**, and that copy defines the `glot` function: the only way `use` can perform the real `cd`, because a child process cannot change its parent's directory.
+**EN:** `install` is the only verb that touches the user's `HOME`, and it does so explicitly and reversibly: it copies the script along with its data, leaves the symlink in `PATH`, the completion where each shell looks for it and an rc block between markers. The block loads the **copy**, and that copy defines the `glot` function: the only way the cycle can perform its real `cd`s, because a child process cannot change its parent's directory.
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
+| `cd` del ciclo / cycle `cd`s | Desde la **v1.6.2** la capa lleva al autor **donde toca**: `use` a la **carpeta de la fase**, `new` a la **del módulo** y el `7`/`8` de `save` a la **raíz del lenguaje** —la carpeta del módulo no existe en su `main`, así que integrar desde ahí deja un directorio sin contenido—. En ensayo (`-n`) no hay `cd`, y en modo programa el propio verbo recuerda la ruta. El dato de cada verbo es la carpeta donde deja |
 | Rutas por defecto | Copia `~/.local/share/glot/`, enlace `~/.local/bin/glot`, completado `~/.local/share/bash-completion/completions/glot` y `~/.zsh/completions/_glot`. Todas cambiables por variable: `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` |
 | Bloque del rc | Bash: `if [ -r "DIR/glot.sh" ]; then . "DIR/glot.sh"; fi`. Zsh: `fpath+=("DIR")`, que añade la carpeta del completado (el guion de bash no se puede cargar en zsh) |
 | Metadatos | `install.meta` junto a la copia, con `version`, `source`, `date` y **tres** huellas (`sha` de todo lo que viaja con la copia, `script_sha` y `data_sha`). Sin él, `doctor` no puede decir si la copia quedó vieja, así que no escribirlo es `3` |

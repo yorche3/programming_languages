@@ -42,23 +42,15 @@
 # lleva el marcador `{model}`, así que el modelo lo elige el perfil y no el rc del autor; y la
 # secuencia de `common-lisp` pasa a **`cl-project`**, el generador de la comunidad, con la
 # homologación del andamiaje declarada en su nota de completado y medida en la guía.
-# Desde la v1.6.2 el ciclo **te lleva donde toca**: `use` deja en la carpeta de la **fase**,
-# `new` en la del **módulo**, y `save 7`/`save 8` en la **raíz del lenguaje** —la carpeta
-# del módulo no existe en su `main`, así que integrar desde ahí deja un directorio sin
-# contenido—; el listado de `save` ofrece los **once** pasos, también los del monorepo; el
-# **modelo del delegado de AGY** se puede fijar por sprint con `glot set model <id>` (su CLI
-# no expone los límites de horas o cuota, así que tiene que poder cambiarse a mitad de
-# módulo); y `install` avisa en vez de recopiarse sobre sí mismo cuando se lanza desde la
-# copia instalada. `glot finish` **limpia el estado del sprint** al terminar (salvo `model`),
-# y el autocompletado y la ayuda ofrecen las **nueve** claves reservadas.
 #
-# Versión viva del script: las versiones cerradas se archivan en versions/.
+# Snapshot archivado: versión cerrada el 2026-09-30. No se edita; el código es
+# el mismo que tenía la versión viva en su cierre.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
 # monorepo se resuelve con GLOT_ROOT, el superproyecto o la raíz de git.
 # El estado vive fuera del repositorio (XDG) y se puede redirigir con GLOT_STATE_FILE.
 #
 # Uso / Usage:
-#   ./scripts/glot.sh help
+#   ./versions/glot_1.6.1.sh help
 #   ./scripts/glot.sh doctor
 #   ./scripts/glot.sh langs
 #   ./scripts/glot.sh modules algorithms
@@ -88,7 +80,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.6.2"
+GLOT_VERSION="1.6.1"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -535,10 +527,6 @@ _glot_cmd_doctor() {
             else
                 printf 'model_available_agy: (sin agy / no agy)\n'
             fi
-            # El modelo de AGY se puede fijar por sprint con `glot set model <id>`: es lo que
-            # permite cambiarlo a mitad de módulo cuando se agotan sus límites, que el CLI no
-            # expone. El del perfil sigue siendo el que manda cuando no hay nada fijado.
-            printf 'model_state: %s\n' "$(_glot_state_get model 2>/dev/null || printf '(del perfil / from the profile)')"
         else
             printf 'models_file: (no encontrado / not found)\n'
             status=1
@@ -1649,7 +1637,6 @@ _glot_cmd_ask() {
     local pagy_model=""
     local base_model=""
     local env_model=""
-    local state_model=""
     local model=""
     local effort=""
     local credits=""
@@ -1725,21 +1712,16 @@ _glot_cmd_ask() {
     IFS=$'\t' read -r pname pmodel effort credits tier requests pagy_model <<<"$profile"
 
     # El modelo efectivo: gana `--model`, después el entorno del delegado (`GLOT_MODEL`, o
-    # `GLOT_MODEL_COP`/`GLOT_MODEL_AGY`), después la clave de estado `model` —solo para AGY:
-    # su CLI no expone los límites, así que un sprint puede quedarse sin horas o sin cuota
-    # semanal a mitad de módulo y el modelo tiene que poder cambiarse desde `glot`— y, si no,
-    # el del perfil. Para AGY el del perfil es la columna del delegado, porque los ids no son
-    # los mismos que los de Copilot.
-    state_model=""
+    # `GLOT_MODEL_COP`/`GLOT_MODEL_AGY`) y, si no, el del perfil. Para AGY el del perfil es la
+    # columna del delegado, porque los ids no son los mismos que los de Copilot.
     if [[ "$delegate_eff" == "agy" ]]; then
         base_model="$pagy_model"
         env_model="${GLOT_MODEL_AGY:-}"
-        state_model="$(_glot_state_get model 2>/dev/null || true)"
     else
         base_model="$pmodel"
         env_model="${GLOT_MODEL_COP:-${GLOT_MODEL:-}}"
     fi
-    model="${model_opt:-${env_model:-${state_model:-$base_model}}}"
+    model="${model_opt:-${env_model:-$base_model}}"
     if [[ -z "$model" || "$model" == "-" ]]; then
         _glot_error "el perfil no declara modelo para $delegate_eff / the profile declares no model for $delegate_eff"
         _glot_info 'mira el catálogo / check the catalogue: scripts/data/models.tsv'
@@ -2404,9 +2386,8 @@ _glot_cmd_save() {
     if [[ -z "$step" ]]; then
         _glot_error 'falta el paso del sprint / missing sprint step'
         _glot_info 'uso / usage: glot save <paso|alias> [lenguaje] [fase/módulo]'
-        # Dato para el autor y para el autocompletado: **todos** los pasos, también los
-        # del monorepo (9 y 10), que se confirman con este mismo verbo desde la raíz.
-        _glot_commits_list 2>/dev/null || true
+        # Dato para el autor y para el autocompletado: los pasos que sí se confirman aquí.
+        _glot_commits_list 2>/dev/null | awk -F'\t' '$3 == "submodule"' || true
         return 2
     fi
     shift
@@ -2599,11 +2580,6 @@ _glot_cmd_save() {
                     ! git -C "$repo" merge-base --is-ancestor "$sprint_branch" main 2>/dev/null; then
                     _glot_integrate_hint "$repo" "$sprint_branch" "$lang" "$phase/$module"
                 fi
-            fi
-            # La integración se hace desde la raíz del lenguaje, que es donde `save` deja al
-            # autor con la capa cargable. En modo programa se recuerda el `cd`.
-            if [[ -z "${GLOT_LOADED:-}" ]]; then
-                _glot_info "la integración se hace desde la raíz del lenguaje / integration runs from the language root: cd $repo"
             fi
             ;;
     esac
@@ -3129,28 +3105,11 @@ _glot_cmd_close() {
     return 0
 }
 
-# _glot_sprint_clear — cierra el sprint en el almacén: retira las claves que lo describen
-# (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `target` y `cause`) para que nadie siga
-# trabajando sobre una rama y un módulo ya cerrados: para continuar hay que volver a
-# asignarlos con `glot use`, que además vuelve a validar. **No** toca `model` —el modelo del
-# delegado de AGY es una preferencia de la herramienta y sus límites son por horas o por
-# semana, no por sprint— ni ninguna clave que no sea del sprint, que son del autor.
-_glot_sprint_clear() {
-    local key=""
-
-    for key in lang phase module branch spec repo target cause; do
-        _glot_state_rewrite unset "$key" >/dev/null 2>&1 || true
-    done
-
-    return 0
-}
-
 # _glot_cmd_finish [lenguaje] [fase/módulo] — el cierre del monorepo en un paso (v1.6.0).
 # Prepara y confirma el **puntero** (`save 9`) y registra el **cierre** (`close` + `save 10`),
-# en la rama activa y **sin abrir rama propia**. Son **dos commits** a propósito, para poder
-# separar el guardado del puntero del de la información; el **push lo hace el autor**. Desde
-# la v1.6.2 **limpia el estado del sprint** al terminar (salvo `model`), para que no se siga
-# trabajando sobre la rama y el módulo finalizados.
+# en la rama activa y **sin abrir rama propia**. Deja el estado en `target=monorepo` para que
+# se sepa que el trabajo ya es del monorepo. Son **dos commits** a propósito, para poder
+# separar el guardado del puntero del de la información; el **push lo hace el autor**.
 # Códigos: los de `pointer` y `close` (0 correcto · 1 entorno o dato · 3 no se pudo escribir
 # · 4 requisitos sin cumplir).
 _glot_cmd_finish() {
@@ -3169,16 +3128,6 @@ _glot_cmd_finish() {
 
     _glot_info 'cierre del monorepo listo / monorepo closure ready; publica tú / you push:'
     _glot_info '  git push origin <rama-del-monorepo>'
-
-    # El sprint ya está cerrado: se retira lo que lo describía para no seguir trabajando
-    # sobre una rama y un directorio finalizados. En ensayo no se toca el estado.
-    if ((_glot_dry_run)); then
-        printf '# estado del sprint limpiado / sprint state cleared: lang phase module branch spec repo target cause\n'
-        return 0
-    fi
-
-    _glot_sprint_clear
-    _glot_info 'estado del sprint limpiado / sprint state cleared (salvo `model` / except `model`): para el siguiente, `glot use` / for the next one, `glot use`'
     return 0
 }
 
@@ -3473,15 +3422,12 @@ Verbos / Verbs:
                      solo sus rutas. --cause añade el cuerpo del commit y es obligatoria
                      en el retrabajo (4d correct, 5b fix, 5c refactor), que también la
                      toma de la clave de estado `cause`; --causa se acepta como alias.
-                     Sin push. Con la capa cargable, confirmar el paso 7 u 8 deja al autor
-                     en la raíz del lenguaje, que es donde se integra el submódulo
+                     Sin push
                      Commits with the message from the repository convention, taken
                      from the commit catalogue. Monorepo steps (9 and 10) add only
                      their own paths. --cause adds the commit body and is required in
                      rework (4d correct, 5b fix, 5c refactor), which also takes it from
-                     the `cause` state key; --causa is accepted as an alias. No push.
-                     With the loadable layer, committing steps 7 or 8 leaves the author
-                     at the language root, which is where the submodule is integrated
+                     the `cause` state key; --causa is accepted as an alias. No push
   status [lenguaje]
                      Submódulos, ramas y punteros, solo lectura: una línea por lenguaje
                      con lang<TAB>branch<TAB>pointer<TAB>worktree. El puntero es `ok`,
@@ -3558,8 +3504,7 @@ _glot_help_verb() {
         set)
             printf 'glot set <clave> <valor> — guarda una clave en el estado (claves [A-Za-z0-9_.-])\n'
             printf 'glot set <key> <value> — stores a state key (keys [A-Za-z0-9_.-])\n'
-            printf 'Claves reservadas / reserved keys: lang, phase, module, branch, spec, repo, target, cause, model\n'
-            printf '`glot finish` las limpia al cerrar el sprint, salvo `model` / `glot finish` clears them when the sprint closes, except `model`\n'
+            printf 'Claves reservadas / reserved keys: lang, phase, module, branch, spec, repo\n'
             ;;
         get)
             printf 'glot get <clave> — imprime el valor; 1 si la clave no existe\n'
@@ -3710,7 +3655,7 @@ _glot_help_verb() {
             printf 'El modelo del perfil se exporta como COPILOT_MODEL (y COPILOT_AUTO_TIER si el perfil\n'
             printf 'lo declara), junto con GLOT_ROOT, GLOT_MODULE_DIR, GLOT_DELEGATE_MODEL y\n'
             printf 'GLOT_DELEGATE_EFFORT: entorno, no flags. `--model`/`GLOT_MODEL` y `--effort`/`GLOT_EFFORT`\n'
-            printf 'lo cambian para una corrida; para AGY, `glot set model <id>` lo fija por sprint\n'
+            printf 'lo cambian para una corrida\n'
             printf 'The profile model is exported as COPILOT_MODEL (and COPILOT_AUTO_TIER when the profile\n'
             printf 'declares it), together with GLOT_ROOT, GLOT_MODULE_DIR, GLOT_DELEGATE_MODEL and\n'
             printf 'GLOT_DELEGATE_EFFORT: environment, not flags. `--model`/`GLOT_MODEL` and `--effort`/`GLOT_EFFORT`\n'
@@ -3722,14 +3667,13 @@ _glot_help_verb() {
             printf '  activa o crea la rama {tipo}/{fase}/{módulo} desde main y la publica\n'
             printf '  con -u; con trabajo sin confirmar solo informa (si ya estás en la rama,\n'
             printf '  la republica). Crea la carpeta del módulo si falta. Guarda el estado\n'
-            printf '  e imprime la carpeta de la fase, que es donde te deja la capa cargada\n'
+            printf '  e imprime la ruta\n'
             printf 'glot use <language> <phase>/<module> [type] — locates the sprint work\n'
             printf '  validates against .gitmodules and the spec; with a clean tree it\n'
             printf '  activates or creates the {type}/{phase}/{module} branch from main and\n'
             printf '  publishes it with -u; with uncommitted work it only reports (if you are\n'
             printf '  already on the branch, it republishes it). Creates the module folder\n'
-            printf '  when missing. Stores state and prints the phase folder, which is where\n'
-            printf '  the loaded layer leaves you\n'
+            printf '  when missing. Stores state and prints the path\n'
             printf 'El `cd` de la capa cargada (glot install) solo llega si el verbo corre en tu\n'
             printf 'shell: en una tubería (`glot use … | …`) corre en un subshell y el cd se queda\n'
             printf 'ahí —es una limitación de bash, no del verbo—. Sin capa, el cd lo hace tu shell:\n'
@@ -3780,10 +3724,8 @@ _glot_help_verb() {
             printf '(`close` + `save 10`), en la rama activa y sin abrir rama propia\n'
             printf 'Prepares and commits the pointer (`save 9`) and records the closure\n'
             printf '(`close` + `save 10`), on the active branch, opening no branch\n'
-            printf 'Deja el estado en `target=monorepo`. Dos commits; el push es tuyo. Al terminar\n'
-            printf '**limpia el estado del sprint** (salvo `model`): para el siguiente, `glot use`\n'
-            printf 'It leaves the state in `target=monorepo`. Two commits; the push is yours. When\n'
-            printf 'done it **clears the sprint state** (except `model`): for the next one, `glot use`\n'
+            printf 'Deja el estado en `target=monorepo`. Dos commits; el push es tuyo\n'
+            printf 'It leaves the state in `target=monorepo`. Two commits; the push is yours\n'
             printf 'Códigos / codes: 0 correcto · 1 entorno o dato · 3 no se pudo escribir · 4 requisitos sin cumplir\n'
             ;;
         status)
@@ -4536,10 +4478,8 @@ _glot_roadmap_modules() {
 # _glot_cmd_use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint:
 # valida y, con el árbol limpio, activa o crea la rama {tipo}/{fase}/{módulo} desde
 # main y la publica con upstream; con trabajo sin confirmar solo informa (salvo que
-# ya estés en la rama, que se republica). Guarda el estado e imprime la carpeta de la
-# **fase**, que es donde deja al autor la capa cargable: el andamiaje del paso 4a se
-# ejecuta desde ahí cuando el generador del lenguaje crea la carpeta del proyecto, y
-# `new` es quien baja al módulo. No implementa, no genera esqueleto y no toca el monorepo.
+# ya estés en la rama, que se republica). Guarda el estado e imprime la ruta
+# absoluta. No implementa, no genera esqueleto y no toca el monorepo.
 _glot_cmd_use() {
     local -a pos=()
     local arg=""
@@ -4669,8 +4609,7 @@ _glot_cmd_use() {
     }
 
     folder="$(_glot_module_folder "$root" "$lang" "$phase" "$module" || printf '%s' "$module")"
-    phase_dir="$sub/core/$phase"
-    module_dir="$phase_dir/$folder"
+    module_dir="$sub/core/$phase/$folder"
     branch="$kind/$phase/$(_glot_kebab "$module")"
     current="$(git -C "$sub" symbolic-ref --short -q HEAD || true)"
     if git -C "$sub" show-ref --verify --quiet "refs/heads/$branch"; then
@@ -4831,9 +4770,8 @@ _glot_cmd_use() {
         fi
     done
 
-    # 8. Dato para stdout: la carpeta de la **fase**, que es donde deja al autor la capa
-    # cargable (el módulo que acaba de crearse lo imprime `new`, al bajar a él).
-    printf '%s\n' "$phase_dir"
+    # 8. Dato para stdout: la ruta absoluta del módulo.
+    printf '%s\n' "$module_dir"
     # El recordatorio del `cd` solo vale para el modo programa: con la capa cargable el
     # `cd` ya lo ha hecho la función, y repetirlo ahí sería contradecirse.
     if [[ -z "${GLOT_LOADED:-}" ]]; then
@@ -5061,17 +4999,6 @@ _glot_cmd_install() {
 
     dir="$(_glot_install_dir)" || return 1
     bin="$(_glot_install_bin)" || return 1
-
-    # Instalar desde la **copia instalada** no es una actualización: se recopia sobre sí
-    # misma (`cp: son el mismo fichero`) y no trae nada nuevo. Se dice de dónde hay que
-    # lanzarlo, que es el clon: es la trampa que se mide al querer actualizar la copia
-    # desde el propio `glot` instalado.
-    if [[ "$(readlink -f -- "$src" 2>/dev/null || printf '%s' "$src")" == \
-        "$(readlink -f -- "$dir" 2>/dev/null || printf '%s' "$dir")" ]]; then
-        _glot_error "esta es la copia instalada, no el clon / this is the installed copy, not the clone"
-        _glot_info "lanza install desde el clon / run install from the clone: ./scripts/glot.sh install"
-        return 1
-    fi
 
     for shell in bash zsh; do
         command -v "$shell" >/dev/null 2>&1 && shells+=("$shell")
@@ -5482,10 +5409,8 @@ _glot_main() {
 #     proceso y ejecuta el dispatcher;
 #   - **cargado**: `source glot.sh` define la función `glot` y **no ejecuta nada**. Esa
 #     función delega en el programa —mismas opciones, mismo comportamiento, cero
-#     divergencia— y la única diferencia son los `cd` reales, que solo puede hacer una
-#     función en la shell actual: el ciclo **te lleva donde toca** (v1.6.2) —`use` a la
-#     carpeta de la fase, `new` a la del módulo y `save 7`/`8` a la raíz del lenguaje—.
-#     En ensayo (`-n`) no hay `cd`: la salida es un plan.
+#     divergencia— y la única diferencia es el `cd` real de `use`, que solo puede hacer
+#     una función en la shell actual. En ensayo (`-n`) no hay `cd`: la salida es un plan.
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
     set -euo pipefail
     _glot_main "$@"
@@ -5495,11 +5420,7 @@ else
         local arg=""
         local verb=""
         local dry=0
-        local handover=0
         local path=""
-        local lang=""
-        local root=""
-        local sub=""
         local rc=0
 
         for arg in "$@"; do
@@ -5511,45 +5432,13 @@ else
             fi
         done
 
-        # Confirmar el 7 o el 8 entrega el sprint a la integración, y eso se hace desde la
-        # raíz del lenguaje: la carpeta del módulo no existe en el `main` del submódulo, así
-        # que quedarse ahí deja un directorio sin contenido al hacer `switch`. El paso se
-        # reconoce por su ordinal o por su alias.
-        if [[ "$verb" == "save" && "$dry" -eq 0 ]]; then
-            for arg in "$@"; do
-                case "$arg" in
-                    7 | 8 | docs-module | docs-language) handover=1 ;;
-                esac
-            done
-        fi
-
-        # `use` y `new` imprimen la carpeta donde dejan al autor —la fase y el módulo—, así
-        # que aquí el `cd` es el del dato. En modo programa no hay `cd`: el recordatorio del
-        # propio verbo dice cómo hacerlo.
-        if [[ ("$verb" == "use" || "$verb" == "new") && "$dry" -eq 0 ]]; then
+        if [[ "$verb" == "use" && "$dry" -eq 0 ]]; then
             path="$(GLOT_LOADED=1 "$BASH" "$_GLOT_SELF" "$@")" || rc=$?
             ((rc == 0)) || return "$rc"
             if [[ -n "$path" && -d "$path" ]]; then
                 cd -- "$path" || return $?
             fi
             printf '%s\n' "$path"
-            return 0
-        fi
-
-        if [[ "$handover" -eq 1 ]]; then
-            GLOT_LOADED=1 "$BASH" "$_GLOT_SELF" "$@" || rc=$?
-            ((rc == 0)) || return "$rc"
-            # La raíz del lenguaje es el árbol de trabajo del submódulo en el que está el
-            # autor —ahí vive la sesión del sprint—, y si el verbo se lanza desde la raíz
-            # del monorepo, la del lenguaje del sprint: así el `cd` no depende de si el
-            # lenguaje llegó por argumento o por estado.
-            lang="$(_glot_state_get lang 2>/dev/null || true)"
-            root="$(_glot_repo_root 2>/dev/null || true)"
-            sub="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-            [[ -n "$root" && "$sub" == "$root" ]] && sub="$root/$lang"
-            if [[ -n "$sub" && -d "$sub" ]]; then
-                cd -- "$sub" || return $?
-            fi
             return 0
         fi
 

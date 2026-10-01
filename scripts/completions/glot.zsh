@@ -131,7 +131,7 @@ _glot_zsh() {
             _values 'shell' bash zsh
             ;;
         get | unset)
-            _values 'clave' lang phase module branch spec repo
+            _values 'clave' lang phase module branch spec repo target cause model
             ;;
     esac
 
