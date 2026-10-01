@@ -45,7 +45,11 @@
 # Desde la v1.6.2 el ciclo **te lleva donde toca**: `use` deja en la carpeta de la **fase**,
 # `new` en la del **módulo**, y `save 7`/`save 8` en la **raíz del lenguaje** —la carpeta
 # del módulo no existe en su `main`, así que integrar desde ahí deja un directorio sin
-# contenido—; y el listado de `save` ofrece los **once** pasos, también los del monorepo.
+# contenido—; el listado de `save` ofrece los **once** pasos, también los del monorepo; el
+# **modelo del delegado de AGY** se puede fijar por sprint con `glot set model <id>` (su CLI
+# no expone los límites de horas o cuota, así que tiene que poder cambiarse a mitad de
+# módulo); y `install` avisa en vez de recopiarse sobre sí mismo cuando se lanza desde la
+# copia instalada.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -530,6 +534,10 @@ _glot_cmd_doctor() {
             else
                 printf 'model_available_agy: (sin agy / no agy)\n'
             fi
+            # El modelo de AGY se puede fijar por sprint con `glot set model <id>`: es lo que
+            # permite cambiarlo a mitad de módulo cuando se agotan sus límites, que el CLI no
+            # expone. El del perfil sigue siendo el que manda cuando no hay nada fijado.
+            printf 'model_state: %s\n' "$(_glot_state_get model 2>/dev/null || printf '(del perfil / from the profile)')"
         else
             printf 'models_file: (no encontrado / not found)\n'
             status=1
@@ -1640,6 +1648,7 @@ _glot_cmd_ask() {
     local pagy_model=""
     local base_model=""
     local env_model=""
+    local state_model=""
     local model=""
     local effort=""
     local credits=""
@@ -1715,16 +1724,21 @@ _glot_cmd_ask() {
     IFS=$'\t' read -r pname pmodel effort credits tier requests pagy_model <<<"$profile"
 
     # El modelo efectivo: gana `--model`, después el entorno del delegado (`GLOT_MODEL`, o
-    # `GLOT_MODEL_COP`/`GLOT_MODEL_AGY`) y, si no, el del perfil. Para AGY el del perfil es la
-    # columna del delegado, porque los ids no son los mismos que los de Copilot.
+    # `GLOT_MODEL_COP`/`GLOT_MODEL_AGY`), después la clave de estado `model` —solo para AGY:
+    # su CLI no expone los límites, así que un sprint puede quedarse sin horas o sin cuota
+    # semanal a mitad de módulo y el modelo tiene que poder cambiarse desde `glot`— y, si no,
+    # el del perfil. Para AGY el del perfil es la columna del delegado, porque los ids no son
+    # los mismos que los de Copilot.
+    state_model=""
     if [[ "$delegate_eff" == "agy" ]]; then
         base_model="$pagy_model"
         env_model="${GLOT_MODEL_AGY:-}"
+        state_model="$(_glot_state_get model 2>/dev/null || true)"
     else
         base_model="$pmodel"
         env_model="${GLOT_MODEL_COP:-${GLOT_MODEL:-}}"
     fi
-    model="${model_opt:-${env_model:-$base_model}}"
+    model="${model_opt:-${env_model:-${state_model:-$base_model}}}"
     if [[ -z "$model" || "$model" == "-" ]]; then
         _glot_error "el perfil no declara modelo para $delegate_eff / the profile declares no model for $delegate_eff"
         _glot_info 'mira el catálogo / check the catalogue: scripts/data/models.tsv'
@@ -3667,7 +3681,7 @@ _glot_help_verb() {
             printf 'El modelo del perfil se exporta como COPILOT_MODEL (y COPILOT_AUTO_TIER si el perfil\n'
             printf 'lo declara), junto con GLOT_ROOT, GLOT_MODULE_DIR, GLOT_DELEGATE_MODEL y\n'
             printf 'GLOT_DELEGATE_EFFORT: entorno, no flags. `--model`/`GLOT_MODEL` y `--effort`/`GLOT_EFFORT`\n'
-            printf 'lo cambian para una corrida\n'
+            printf 'lo cambian para una corrida; para AGY, `glot set model <id>` lo fija por sprint\n'
             printf 'The profile model is exported as COPILOT_MODEL (and COPILOT_AUTO_TIER when the profile\n'
             printf 'declares it), together with GLOT_ROOT, GLOT_MODULE_DIR, GLOT_DELEGATE_MODEL and\n'
             printf 'GLOT_DELEGATE_EFFORT: environment, not flags. `--model`/`GLOT_MODEL` and `--effort`/`GLOT_EFFORT`\n'
@@ -5016,6 +5030,17 @@ _glot_cmd_install() {
 
     dir="$(_glot_install_dir)" || return 1
     bin="$(_glot_install_bin)" || return 1
+
+    # Instalar desde la **copia instalada** no es una actualización: se recopia sobre sí
+    # misma (`cp: son el mismo fichero`) y no trae nada nuevo. Se dice de dónde hay que
+    # lanzarlo, que es el clon: es la trampa que se mide al querer actualizar la copia
+    # desde el propio `glot` instalado.
+    if [[ "$(readlink -f -- "$src" 2>/dev/null || printf '%s' "$src")" == \
+        "$(readlink -f -- "$dir" 2>/dev/null || printf '%s' "$dir")" ]]; then
+        _glot_error "esta es la copia instalada, no el clon / this is the installed copy, not the clone"
+        _glot_info "lanza install desde el clon / run install from the clone: ./scripts/glot.sh install"
+        return 1
+    fi
 
     for shell in bash zsh; do
         command -v "$shell" >/dev/null 2>&1 && shells+=("$shell")

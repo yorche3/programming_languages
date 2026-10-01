@@ -934,6 +934,25 @@ glot_run_delegate 'cat >/dev/null' -n ask implement php algorithms/naive_sort
 assert_eq 'ask -n: código' '0' "$rc_last"
 assert_contains 'ask -n: imprime el plan sin enviar' 'cat >/dev/null' "$out"
 
+# v1.6.2: el modelo del delegado de AGY se puede fijar **por sprint** (`glot set model <id>`),
+# que es lo que permite cambiarlo a mitad de módulo: los límites de AGY no se pueden consultar
+# desde su CLI. El entorno del delegado sigue ganando y Copilot no se entera.
+AGY_LINE='agy --model {model} -p "$(cat)" --add-dir {root}'
+STATE_MODEL="$WORK_DIR/state-model"
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set model claude-opus-4-6-thinking >/dev/null 2>&1
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_AGY="$AGY_LINE" \
+    "$GLOT_SH" ask -n --delegate antigravity implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_contains 'set model: el modelo fijado llega a la orden de AGY' 'agy --model claude-opus-4-6-thinking' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_AGY="$AGY_LINE" GLOT_MODEL_AGY=gemini-3.7-flash-high \
+    "$GLOT_SH" ask -n --delegate antigravity implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_contains 'set model: el entorno del delegado gana al estado' 'agy --model gemini-3.7-flash-high' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_AGY="$AGY_LINE" \
+    GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root}' \
+    "$GLOT_SH" ask -n --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_contains 'set model: el de Copilot sigue saliendo del perfil' 'COPILOT_MODEL=claude-sonnet-5' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" doctor 2>/dev/null || true)"
+assert_contains 'set model: doctor informa del modelo fijado' 'model_state: claude-opus-4-6-thinking' "$out"
+
 # doctor informa de las plantillas y del delegado
 glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
@@ -2182,6 +2201,12 @@ assert_eq 'install: el completado de zsh queda instalado' 'si' \
 glot_install install
 assert_eq 'install: repetido, código' '0' "$rc_last"
 assert_eq 'install: repetido, un solo bloque' '1' "$(grep -c '# >>> glot (install) >>>' "$INSTALL_HOME/.bashrc")"
+
+# instalar desde la copia instalada no es una actualización: se dice de dónde va
+# (la trampa que aparece al querer actualizar la copia desde el propio `glot` instalado)
+glot_in_home '"$HOME/.local/share/glot/glot.sh" install; echo "rc=$?"'
+assert_eq 'install desde la copia: código' 'rc=1' "$out"
+assert_contains 'install desde la copia: dice desde dónde' 'lanza install desde el clon' "$err"
 
 # la copia estable funciona sola, aunque el clon se mueva o desaparezca
 glot_in_home '"$HOME/.local/bin/glot" version'

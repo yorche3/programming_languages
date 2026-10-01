@@ -174,7 +174,12 @@ export GLOT_DELEGATE_AGY='agy --model {model} -p "$(cat)" --add-dir {root}'
 ./scripts/glot.sh ask --delegate copilot contract_stub ada algorithms/data_structures_basics
 ./scripts/glot.sh ask --delegate antigravity suite ada algorithms/data_structures_basics
 ./scripts/glot.sh doctor | grep '^delegate_'   # delegate_cop: / delegate_agy:
+./scripts/glot.sh set model gemini-3.7-flash-high   # modelo de AGY para este sprint
 ```
+
+**ES:** El modelo del delegado sale del **rol** (el perfil del encargo) y, para **AGY**, se puede **fijar por sprint** con `glot set model <id>`: su CLI no expone los límites de horas o de cuota, así que un sprint puede quedarse sin él a mitad de módulo y tiene que poder cambiarse sin tocar el repositorio. Gana `--model`, después `GLOT_MODEL_AGY` y después esa clave; el perfil queda como último recurso, y el de Copilot no se ve afectado.
+
+**EN:** The delegate's model comes from the **role** (the request's profile) and, for **AGY**, it can be **pinned per sprint** with `glot set model <id>`: its CLI does not expose the hourly or quota limits, so a sprint may run out of it mid-module and it has to be changeable without touching the repository. `--model` wins, then `GLOT_MODEL_AGY`, then that key; the profile is the fallback, and Copilot's is unaffected.
 
 **ES:** `glot` no elige delegado ni guarda claves: la orden es tuya y `install` **no** la escribe en el rc —al terminar la imprime para que la pegues—, para que en el repositorio solo haya marcadores y nombres de modelo. El detalle de permisos de cada CLI está en [`docs/VALIDATION.md`](docs/VALIDATION.md).
 

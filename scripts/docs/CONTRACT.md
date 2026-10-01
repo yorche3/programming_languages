@@ -97,6 +97,9 @@
 | `branch` | Rama de trabajo (`feat/algorithms/naive-sort`) | `use` (v0.5.0) |
 | `spec` | Ruta de la especificación (`docs/core/algorithms/05_Naive_Sort.md`) | `use` (v0.5.0) |
 | `repo` | Nombre del submódulo en la raíz del monorepo (`php`) | `use` (v0.5.0) |
+| `target` | Dónde está el trabajo del cierre: `submodule` o `monorepo` | `use` y `finish` (v1.6.0) |
+| `cause` | Causa del retrabajo, mientras el paso la necesite | el encargo, y `save` la retira al confirmar (v1.6.0) |
+| `model` | Modelo del delegado de **AGY** en este sprint; gana a la columna del perfil y pierde con `--model` y `GLOT_MODEL_AGY` (v1.6.2) | el autor, con `glot set model <id>` |
 
 **ES:** Hasta la v0.4.0 el almacén solo guardaba y devolvía texto: no interpretaba ninguna clave. Desde la v0.5.0 las escribe `use`.
 
