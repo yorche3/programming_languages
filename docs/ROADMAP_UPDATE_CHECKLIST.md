@@ -822,3 +822,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`c/core/algorithms/data_structures_basics/README.md`, generado desde `docs/README_Template.md` con las secciones obligatorias) e índices corregidos: `c/core/algorithms/README.md` (estructura de directorios con `data_structures_basics`, tabla de módulos actualizada, patrón común y compilación rápida añadidos; nombres canónicos de los módulos pendientes corregidos de `data_structures`/`structures_apps` a `data_structures_advanced`), `c/core/README.md` (`data_structures_basics` añadido a la descripción de la fase) y `c/README.md` (`core/algorithms/` añadido a la tabla de módulos y comandos de `naive_sort` y `data_structures_basics` añadidos al inicio rápido)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 3/50 (Ada, Assembly, Ballerina)` -> `core.algorithms.data_structures_basics 🔄 4/50 (Ada, Assembly, Ballerina, C)`. La fase sigue abierta.
 Observaciones / Notes: Cuarta implementación homologada del módulo 06. Adaptaciones idiomáticas declaradas en el README del módulo: `node_init(Node*, int)` en lugar del método `Node.init(value)` del pseudocódigo (C no tiene métodos; el prefijo de tipo es la convención de espacio de nombres), `NULL` como ausencia nativa de enlace, `FAILURE_VALUE = -1` como indicador de fallo entero, `linked_list_delete` devolviendo `0`/`-1` en lugar del tipo booleano del pseudocódigo, `malloc`/`free` para gestión de memoria manual y layout `include/` + `src/` + `test/` (sin `run_tests.ext` separado: Criterion descubre tests automáticamente). El índice de Nivel 2 `c/core/algorithms/README.md` también corregía los nombres de los módulos pendientes 06 y 07, que se listaban como `data_structures` y `structures_apps` en lugar de sus nombres canónicos `data_structures_basics` y `data_structures_advanced`.
+
+Fecha / Date: 2026-09-30T18:06:49-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): cpp
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/cpp.md`, commit `d1d98d2`)
+Tests y comandos / Tests and commands:
+- `bazelisk test //...` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`cpp/core/algorithms/data_structures_basics/README.md` y `cpp/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 6/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL)` -> `core.algorithms.data_structures_basics 🔄 7/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL, C++)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
