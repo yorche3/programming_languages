@@ -42,18 +42,15 @@
 # lleva el marcador `{model}`, así que el modelo lo elige el perfil y no el rc del autor; y la
 # secuencia de `common-lisp` pasa a **`cl-project`**, el generador de la comunidad, con la
 # homologación del andamiaje declarada en su nota de completado y medida en la guía.
-# Desde la v1.6.2 el ciclo **te lleva donde toca**: `use` deja en la carpeta de la **fase**,
-# `new` en la del **módulo**, y `save 7`/`save 8` en la **raíz del lenguaje** —la carpeta
-# del módulo no existe en su `main`, así que integrar desde ahí deja un directorio sin
-# contenido—; y el listado de `save` ofrece los **once** pasos, también los del monorepo.
 #
-# Versión viva del script: las versiones cerradas se archivan en versions/.
+# Snapshot archivado: versión cerrada el 2026-09-30. No se edita; el código es
+# el mismo que tenía la versión viva en su cierre.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
 # monorepo se resuelve con GLOT_ROOT, el superproyecto o la raíz de git.
 # El estado vive fuera del repositorio (XDG) y se puede redirigir con GLOT_STATE_FILE.
 #
 # Uso / Usage:
-#   ./scripts/glot.sh help
+#   ./versions/glot_1.6.1.sh help
 #   ./scripts/glot.sh doctor
 #   ./scripts/glot.sh langs
 #   ./scripts/glot.sh modules algorithms
@@ -83,7 +80,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.6.2"
+GLOT_VERSION="1.6.1"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -2389,9 +2386,8 @@ _glot_cmd_save() {
     if [[ -z "$step" ]]; then
         _glot_error 'falta el paso del sprint / missing sprint step'
         _glot_info 'uso / usage: glot save <paso|alias> [lenguaje] [fase/módulo]'
-        # Dato para el autor y para el autocompletado: **todos** los pasos, también los
-        # del monorepo (9 y 10), que se confirman con este mismo verbo desde la raíz.
-        _glot_commits_list 2>/dev/null || true
+        # Dato para el autor y para el autocompletado: los pasos que sí se confirman aquí.
+        _glot_commits_list 2>/dev/null | awk -F'\t' '$3 == "submodule"' || true
         return 2
     fi
     shift
@@ -2584,11 +2580,6 @@ _glot_cmd_save() {
                     ! git -C "$repo" merge-base --is-ancestor "$sprint_branch" main 2>/dev/null; then
                     _glot_integrate_hint "$repo" "$sprint_branch" "$lang" "$phase/$module"
                 fi
-            fi
-            # La integración se hace desde la raíz del lenguaje, que es donde `save` deja al
-            # autor con la capa cargable. En modo programa se recuerda el `cd`.
-            if [[ -z "${GLOT_LOADED:-}" ]]; then
-                _glot_info "la integración se hace desde la raíz del lenguaje / integration runs from the language root: cd $repo"
             fi
             ;;
     esac
@@ -3431,15 +3422,12 @@ Verbos / Verbs:
                      solo sus rutas. --cause añade el cuerpo del commit y es obligatoria
                      en el retrabajo (4d correct, 5b fix, 5c refactor), que también la
                      toma de la clave de estado `cause`; --causa se acepta como alias.
-                     Sin push. Con la capa cargable, confirmar el paso 7 u 8 deja al autor
-                     en la raíz del lenguaje, que es donde se integra el submódulo
+                     Sin push
                      Commits with the message from the repository convention, taken
                      from the commit catalogue. Monorepo steps (9 and 10) add only
                      their own paths. --cause adds the commit body and is required in
                      rework (4d correct, 5b fix, 5c refactor), which also takes it from
-                     the `cause` state key; --causa is accepted as an alias. No push.
-                     With the loadable layer, committing steps 7 or 8 leaves the author
-                     at the language root, which is where the submodule is integrated
+                     the `cause` state key; --causa is accepted as an alias. No push
   status [lenguaje]
                      Submódulos, ramas y punteros, solo lectura: una línea por lenguaje
                      con lang<TAB>branch<TAB>pointer<TAB>worktree. El puntero es `ok`,
@@ -3679,14 +3667,13 @@ _glot_help_verb() {
             printf '  activa o crea la rama {tipo}/{fase}/{módulo} desde main y la publica\n'
             printf '  con -u; con trabajo sin confirmar solo informa (si ya estás en la rama,\n'
             printf '  la republica). Crea la carpeta del módulo si falta. Guarda el estado\n'
-            printf '  e imprime la carpeta de la fase, que es donde te deja la capa cargada\n'
+            printf '  e imprime la ruta\n'
             printf 'glot use <language> <phase>/<module> [type] — locates the sprint work\n'
             printf '  validates against .gitmodules and the spec; with a clean tree it\n'
             printf '  activates or creates the {type}/{phase}/{module} branch from main and\n'
             printf '  publishes it with -u; with uncommitted work it only reports (if you are\n'
             printf '  already on the branch, it republishes it). Creates the module folder\n'
-            printf '  when missing. Stores state and prints the phase folder, which is where\n'
-            printf '  the loaded layer leaves you\n'
+            printf '  when missing. Stores state and prints the path\n'
             printf 'El `cd` de la capa cargada (glot install) solo llega si el verbo corre en tu\n'
             printf 'shell: en una tubería (`glot use … | …`) corre en un subshell y el cd se queda\n'
             printf 'ahí —es una limitación de bash, no del verbo—. Sin capa, el cd lo hace tu shell:\n'
@@ -4491,10 +4478,8 @@ _glot_roadmap_modules() {
 # _glot_cmd_use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint:
 # valida y, con el árbol limpio, activa o crea la rama {tipo}/{fase}/{módulo} desde
 # main y la publica con upstream; con trabajo sin confirmar solo informa (salvo que
-# ya estés en la rama, que se republica). Guarda el estado e imprime la carpeta de la
-# **fase**, que es donde deja al autor la capa cargable: el andamiaje del paso 4a se
-# ejecuta desde ahí cuando el generador del lenguaje crea la carpeta del proyecto, y
-# `new` es quien baja al módulo. No implementa, no genera esqueleto y no toca el monorepo.
+# ya estés en la rama, que se republica). Guarda el estado e imprime la ruta
+# absoluta. No implementa, no genera esqueleto y no toca el monorepo.
 _glot_cmd_use() {
     local -a pos=()
     local arg=""
@@ -4624,8 +4609,7 @@ _glot_cmd_use() {
     }
 
     folder="$(_glot_module_folder "$root" "$lang" "$phase" "$module" || printf '%s' "$module")"
-    phase_dir="$sub/core/$phase"
-    module_dir="$phase_dir/$folder"
+    module_dir="$sub/core/$phase/$folder"
     branch="$kind/$phase/$(_glot_kebab "$module")"
     current="$(git -C "$sub" symbolic-ref --short -q HEAD || true)"
     if git -C "$sub" show-ref --verify --quiet "refs/heads/$branch"; then
@@ -4786,9 +4770,8 @@ _glot_cmd_use() {
         fi
     done
 
-    # 8. Dato para stdout: la carpeta de la **fase**, que es donde deja al autor la capa
-    # cargable (el módulo que acaba de crearse lo imprime `new`, al bajar a él).
-    printf '%s\n' "$phase_dir"
+    # 8. Dato para stdout: la ruta absoluta del módulo.
+    printf '%s\n' "$module_dir"
     # El recordatorio del `cd` solo vale para el modo programa: con la capa cargable el
     # `cd` ya lo ha hecho la función, y repetirlo ahí sería contradecirse.
     if [[ -z "${GLOT_LOADED:-}" ]]; then
@@ -5426,10 +5409,8 @@ _glot_main() {
 #     proceso y ejecuta el dispatcher;
 #   - **cargado**: `source glot.sh` define la función `glot` y **no ejecuta nada**. Esa
 #     función delega en el programa —mismas opciones, mismo comportamiento, cero
-#     divergencia— y la única diferencia son los `cd` reales, que solo puede hacer una
-#     función en la shell actual: el ciclo **te lleva donde toca** (v1.6.2) —`use` a la
-#     carpeta de la fase, `new` a la del módulo y `save 7`/`8` a la raíz del lenguaje—.
-#     En ensayo (`-n`) no hay `cd`: la salida es un plan.
+#     divergencia— y la única diferencia es el `cd` real de `use`, que solo puede hacer
+#     una función en la shell actual. En ensayo (`-n`) no hay `cd`: la salida es un plan.
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
     set -euo pipefail
     _glot_main "$@"
@@ -5439,11 +5420,7 @@ else
         local arg=""
         local verb=""
         local dry=0
-        local handover=0
         local path=""
-        local lang=""
-        local root=""
-        local sub=""
         local rc=0
 
         for arg in "$@"; do
@@ -5455,45 +5432,13 @@ else
             fi
         done
 
-        # Confirmar el 7 o el 8 entrega el sprint a la integración, y eso se hace desde la
-        # raíz del lenguaje: la carpeta del módulo no existe en el `main` del submódulo, así
-        # que quedarse ahí deja un directorio sin contenido al hacer `switch`. El paso se
-        # reconoce por su ordinal o por su alias.
-        if [[ "$verb" == "save" && "$dry" -eq 0 ]]; then
-            for arg in "$@"; do
-                case "$arg" in
-                    7 | 8 | docs-module | docs-language) handover=1 ;;
-                esac
-            done
-        fi
-
-        # `use` y `new` imprimen la carpeta donde dejan al autor —la fase y el módulo—, así
-        # que aquí el `cd` es el del dato. En modo programa no hay `cd`: el recordatorio del
-        # propio verbo dice cómo hacerlo.
-        if [[ ("$verb" == "use" || "$verb" == "new") && "$dry" -eq 0 ]]; then
+        if [[ "$verb" == "use" && "$dry" -eq 0 ]]; then
             path="$(GLOT_LOADED=1 "$BASH" "$_GLOT_SELF" "$@")" || rc=$?
             ((rc == 0)) || return "$rc"
             if [[ -n "$path" && -d "$path" ]]; then
                 cd -- "$path" || return $?
             fi
             printf '%s\n' "$path"
-            return 0
-        fi
-
-        if [[ "$handover" -eq 1 ]]; then
-            GLOT_LOADED=1 "$BASH" "$_GLOT_SELF" "$@" || rc=$?
-            ((rc == 0)) || return "$rc"
-            # La raíz del lenguaje es el árbol de trabajo del submódulo en el que está el
-            # autor —ahí vive la sesión del sprint—, y si el verbo se lanza desde la raíz
-            # del monorepo, la del lenguaje del sprint: así el `cd` no depende de si el
-            # lenguaje llegó por argumento o por estado.
-            lang="$(_glot_state_get lang 2>/dev/null || true)"
-            root="$(_glot_repo_root 2>/dev/null || true)"
-            sub="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-            [[ -n "$root" && "$sub" == "$root" ]] && sub="$root/$lang"
-            if [[ -n "$sub" && -d "$sub" ]]; then
-                cd -- "$sub" || return $?
-            fi
             return 0
         fi
 

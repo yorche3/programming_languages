@@ -423,7 +423,7 @@ sandbox_make
 # módulo nuevo: crea la rama desde main, la publica con -u y crea su carpeta
 glot_run_sandbox use php algorithms/naive_sort
 assert_eq 'use: código' '0' "$rc_last"
-assert_eq 'use: ruta del módulo en stdout' "$SANDBOX/php/core/algorithms/naive_sort" "$out"
+assert_eq 'use: carpeta de la fase en stdout' "$SANDBOX/php/core/algorithms" "$out"
 assert_eq 'use: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 assert_eq 'use: crea el directorio del módulo' 'si' "$([[ -d "$SANDBOX/php/core/algorithms/naive_sort" ]] && echo si || echo no)"
 assert_eq 'use: no avisa de módulo existente' 'no' "$(case "$err" in *'no se genera esqueleto'*) echo si ;; *) echo no ;; esac)"
@@ -448,7 +448,7 @@ assert_eq 'use: estado repo' 'php' "$out"
 # módulo existente: avisa, no crea nada y republica la rama activa
 glot_run_sandbox use php algorithms/naive_sort
 assert_eq 'use repetido: código' '0' "$rc_last"
-assert_eq 'use repetido: ruta' "$SANDBOX/php/core/algorithms/naive_sort" "$out"
+assert_eq 'use repetido: carpeta de la fase' "$SANDBOX/php/core/algorithms" "$out"
 assert_contains 'use repetido: aviso de módulo existente' 'no se genera esqueleto' "$err"
 assert_contains 'use repetido: aviso de que no hay esqueleto' 'no scaffolding' "$err"
 assert_contains 'use repetido: rama ya activa' 'rama ya activa' "$err"
@@ -1110,7 +1110,12 @@ assert_contains 'completion bash: pasos de save' '4a' "$save_comp"
 assert_contains 'completion bash: el contrato como paso propio' 'contract_stub' "$save_comp"
 assert_contains 'completion bash: la suite se desplaza a 4c' '4c' "$save_comp"
 assert_contains 'completion bash: alias de los pasos' 'scaffold' "$save_comp"
-assert_eq 'completion bash: un candidato por línea' '18' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
+# v1.6.2: el cierre también se confirma con `save`, así que sus pasos y alias se ofrecen
+assert_eq 'completion bash: los pasos del monorepo están' 'si' \
+    "$(printf '%s\n' "$save_comp" | grep -qx '9' && printf '%s\n' "$save_comp" | grep -qx '10' && echo si || echo no)"
+assert_contains 'completion bash: el alias del puntero' 'pointer' "$save_comp"
+assert_contains 'completion bash: el alias del cierre' 'close' "$save_comp"
+assert_eq 'completion bash: un candidato por línea' '22' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
 
 # v1.1.0: los encargos se complean **en vivo** desde el registro, así que la lista no puede
 # quedarse corta al añadir una plantilla (el fallo que dejaba `scaffold` sin descubrir)
@@ -2033,15 +2038,30 @@ out_program="$(GLOT_ROOT="$SANDBOX" "$GLOT_SH" langs)"
 glot_loaded 'source "$1"; GLOT_ROOT="$2" glot langs'
 assert_eq 'cargado: los otros verbos pasan igual que el programa' "$out_program" "$out"
 
-# el cd real es el único comportamiento que cambia al cargar el archivo
+# los `cd` reales son el único comportamiento que cambia al cargar el archivo: el ciclo
+# **te lleva donde toca** (v1.6.2) —`use` a la fase, `new` al módulo y `save 7`/`8` a la
+# raíz del lenguaje, porque la carpeta del módulo no existe en el `main` del submódulo—
 printf '# 06 — Data Structures Basics\n' >"$SANDBOX/docs/core/algorithms/06_Data_Structures_Basics.md"
 glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use php algorithms/data_structures_basics >/dev/null; pwd'
-assert_eq 'cargado: use hace el cd real' "$SANDBOX/php/core/algorithms/data_structures_basics" "$out"
+assert_eq 'cargado: use deja en la carpeta de la fase' "$SANDBOX/php/core/algorithms" "$out"
 assert_eq 'cargado: sin recordatorio de cd, que ya lo hizo la función' 'no' \
     "$([[ "$err" == *'recuerda / remember'* ]] && echo si || echo no)"
 
+glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use java algorithms/naive_sort >/dev/null; GLOT_ROOT="$2" glot new java algorithms/naive_sort >/dev/null; pwd'
+assert_eq 'cargado: new baja al directorio del módulo' "$SANDBOX/java/core/algorithms/naive_sort" "$out"
+
+printf 'x\n' >"$SANDBOX/php/core/algorithms/data_structures_basics/README.md"
+glot_loaded 'source "$1"; cd "$2/php/core/algorithms/data_structures_basics"; GLOT_ROOT="$2" glot save 7 php algorithms/data_structures_basics >/dev/null; pwd'
+assert_eq 'cargado: save 7 deja en la raíz del lenguaje' "$SANDBOX/php" "$out"
+
 glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot -n use php algorithms/data_structures_basics >/dev/null; pwd'
 assert_eq 'cargado: use -n no cambia de directorio' '/tmp' "$out"
+
+glot_loaded 'source "$1"; cd "$2/php/core/algorithms"; GLOT_ROOT="$2" glot -n new php algorithms/data_structures_basics >/dev/null; pwd'
+assert_eq 'cargado: new -n no cambia de directorio' "$SANDBOX/php/core/algorithms" "$out"
+
+glot_loaded 'source "$1"; cd "$2/php/core/algorithms/data_structures_basics"; GLOT_ROOT="$2" glot -n save 7 php algorithms/data_structures_basics >/dev/null; pwd'
+assert_eq 'cargado: save -n 7 no cambia de directorio' "$SANDBOX/php/core/algorithms/data_structures_basics" "$out"
 
 glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use 2>/dev/null; echo "vivo"'
 assert_contains 'cargado: un use fallido no deja la shell rota' 'vivo' "$out"

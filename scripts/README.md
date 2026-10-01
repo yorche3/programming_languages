@@ -75,7 +75,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v1.6.1)
+├── glot.sh                  # Versión viva / live version (v1.6.2)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
@@ -128,7 +128,8 @@ scripts/
     ├── glot_1.4.1.sh
     ├── glot_1.4.2.sh
     ├── glot_1.5.0.sh
-    └── glot_1.6.0.sh
+    ├── glot_1.6.0.sh
+    └── glot_1.6.1.sh
 ```
 
 ---

@@ -49,7 +49,7 @@
 | `unset <clave>` | Borra la clave; repetirlo no es error | 0 / 2 / 3 |
 | `list` | Todas las entradas `clave=valor`, ordenadas por clave en `LC_ALL=C` | 0 / 3 |
 | `path` | Ruta del fichero de estado | 0 |
-| `use <lenguaje> <fase>/<módulo> [tipo]` | Sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado): valida, activa o crea la rama desde `main`, la publica con `-u` y crea la carpeta del módulo si falta; con trabajo sin confirmar no toca nada. Guarda el estado del sprint e imprime la ruta. **No hace `cd`**: ese `cd` es de la capa cargada, y solo llega si el verbo corre en tu shell —en una tubería corre en un subshell y se queda ahí— | 0 / 1 / 2 / 3 |
+| `use <lenguaje> <fase>/<módulo> [tipo]` | Sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado): valida, activa o crea la rama desde `main`, la publica con `-u` y crea la carpeta del módulo si falta; con trabajo sin confirmar no toca nada. Guarda el estado del sprint e imprime la **carpeta de la fase** (`{lenguaje}/core/{fase}`), que es donde deja al autor la capa cargada —el andamiaje del paso 4a arranca ahí y `new` es quien baja al módulo—. **No hace `cd`** el verbo: ese `cd` es de la capa cargada, y solo llega si el verbo corre en tu shell —en una tubería corre en un subshell y se queda ahí— | 0 / 1 / 2 / 3 |
 | `langs` | Catálogo de lenguajes: uno por línea con su **comando nativo de pruebas** | 0 / 1 |
 | `modules [fase]` | Catálogo de módulos del roadmap con su especificación resuelta (`-` si aún no existe) | 0 / 1 / 2 |
 | `progress [fase]` | Estado del roadmap: sin fase, contadores globales en `clave=valor`; con fase, una línea por módulo | 0 / 1 / 2 |
@@ -136,7 +136,7 @@
 17. **Quirúrgico en el rc**: el bloque va entre `# >>> glot (install) >>>` y `# <<< glot (install) <<<`, y `install`/`uninstall` **solo** tocan lo que hay entre esas marcas. Nunca reescriben el rc entero ni lo crean si ya existe.
 18. **Lo ajeno no se pisa**: si en la ruta del enlace hay un fichero, o un enlace que no apunta a la copia instalada, `install` falla con `1` y no toca nada; `uninstall` deja ese fichero donde está y avisa.
 19. **Idempotencia y ensayo**: `install` repetido deja exactamente lo mismo (un solo bloque); `uninstall` sin nada instalado devuelve `0` con `nothing`. Los dos admiten `-n/--dry-run`.
-20. **Cargar no ejecuta**: `source glot.sh` define la función y no ejecuta el dispatcher; el `cd` de `use` ocurre solo cuando el verbo se invoca **a través** de la función.
+20. **Cargar no ejecuta**: `source glot.sh` define la función y no ejecuta el dispatcher; los `cd` del ciclo —`use` a la carpeta de la fase, `new` a la del módulo y el `7`/`8` de `save` a la raíz del lenguaje— ocurren solo cuando el verbo se invoca **a través** de la función.
 
 ---
 
@@ -412,12 +412,13 @@
 
 ## 📦 Instalación y capa cargable (L8, v1.0.0) / Installation and the loadable layer
 
-**ES:** `install` es el único verbo que toca el `HOME` del usuario, y lo hace de forma declarada y reversible: copia el script con sus datos, deja el enlace en el `PATH`, el completado donde cada shell lo busca y un bloque del rc entre marcas. El bloque carga la **copia**, y esa copia es la que define la función `glot`: la única forma de que `use` haga el `cd` real, porque un proceso hijo no puede cambiar el directorio de su padre.
+**ES:** `install` es el único verbo que toca el `HOME` del usuario, y lo hace de forma declarada y reversible: copia el script con sus datos, deja el enlace en el `PATH`, el completado donde cada shell lo busca y un bloque del rc entre marcas. El bloque carga la **copia**, y esa copia es la que define la función `glot`: la única forma de que el ciclo haga sus `cd` reales, porque un proceso hijo no puede cambiar el directorio de su padre.
 
-**EN:** `install` is the only verb that touches the user's `HOME`, and it does so explicitly and reversibly: it copies the script along with its data, leaves the symlink in `PATH`, the completion where each shell looks for it and an rc block between markers. The block loads the **copy**, and that copy defines the `glot` function: the only way `use` can perform the real `cd`, because a child process cannot change its parent's directory.
+**EN:** `install` is the only verb that touches the user's `HOME`, and it does so explicitly and reversibly: it copies the script along with its data, leaves the symlink in `PATH`, the completion where each shell looks for it and an rc block between markers. The block loads the **copy**, and that copy defines the `glot` function: the only way the cycle can perform its real `cd`s, because a child process cannot change its parent's directory.
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
+| `cd` del ciclo / cycle `cd`s | Desde la **v1.6.2** la capa lleva al autor **donde toca**: `use` a la **carpeta de la fase**, `new` a la **del módulo** y el `7`/`8` de `save` a la **raíz del lenguaje** —la carpeta del módulo no existe en su `main`, así que integrar desde ahí deja un directorio sin contenido—. En ensayo (`-n`) no hay `cd`, y en modo programa el propio verbo recuerda la ruta. El dato de cada verbo es la carpeta donde deja |
 | Rutas por defecto | Copia `~/.local/share/glot/`, enlace `~/.local/bin/glot`, completado `~/.local/share/bash-completion/completions/glot` y `~/.zsh/completions/_glot`. Todas cambiables por variable: `GLOT_INSTALL_DIR`, `GLOT_INSTALL_BIN`, `BASH_COMPLETION_DIR`, `ZSH_COMPLETION_DIR` |
 | Bloque del rc | Bash: `if [ -r "DIR/glot.sh" ]; then . "DIR/glot.sh"; fi`. Zsh: `fpath+=("DIR")`, que añade la carpeta del completado (el guion de bash no se puede cargar en zsh) |
 | Metadatos | `install.meta` junto a la copia, con `version`, `source`, `date` y **tres** huellas (`sha` de todo lo que viaja con la copia, `script_sha` y `data_sha`). Sin él, `doctor` no puede decir si la copia quedó vieja, así que no escribirlo es `3` |

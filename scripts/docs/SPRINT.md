@@ -15,9 +15,9 @@
 | # | Paso | Comando | Evidencia / artefacto | Quién |
 |:-:|------|---------|-----------------------|-------|
 | 1 | Reconocimiento | `git status --short`, `git submodule status`, `glot progress` (0.6.0), `glot status` (0.12.0) | — | autor / script |
-| 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo **creado y devuelto**; el autor queda **dentro** de él (capa cargable) y desde ahí funcionan `git`, `glot test`, `save` y `pointer`; estado `lang/phase/module/branch/spec/repo` | script |
+| 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo **creado**; la capa cargable deja al autor en la **carpeta de la fase** —el andamiaje del `4a` arranca ahí— y desde ahí funcionan `git`, `glot test`, `save` y `pointer`; estado `lang/phase/module/branch/spec/repo` | script |
 | 3 | Rama publicada | incluido en `use`: `git push -u origin feat/algorithms/naive-sort` | Rama `feat/{fase}/{módulo}` con upstream | script |
-| 4a | Esqueleto | `glot new` (0.9.0; secuencia desde la 1.1.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas según la **secuencia** del dato [`data/init_sequences.tsv`](../data/init_sequences.tsv) (pasos, directorio de trabajo y completado) y con el **runner arrancando sin casos** —el runner es de este paso—, sin ejecutables de ejemplo; `.gitignore` verificado. **`new` no mueve al autor**: sigue en la carpeta del módulo | script + **agente** |
+| 4a | Esqueleto | `glot new` (0.9.0; secuencia desde la 1.1.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas según la **secuencia** del dato [`data/init_sequences.tsv`](../data/init_sequences.tsv) (pasos, directorio de trabajo y completado) y con el **runner arrancando sin casos** —el runner es de este paso—, sin ejecutables de ejemplo; `.gitignore` verificado. **`new` baja al autor al directorio del módulo** (con la capa cargable) | script + **agente** |
 | 4b | **Contrato y esqueletos** (artefacto propio, antes de la suite) | `glot prompt contract_stub` (1.5.0) · `glot save 4b` (1.1.0) | Tipo nuevo, firmas del contrato (en Ada, `src/*.ads`) y **esqueleto de cada operación** (en Ada, `src/*.adb`), con el **indicador natural** del lenguaje: sin el cuerpo, la suite no compila **ni enlaza** | **agente** |
 | 4c | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4c` (1.1.0) | Suite unitaria derivada de la especificación, **sobre el contrato y sus esqueletos del paso 4b** (no los declara: los usa) y **sin crear el runner**, que es del 4a: si falta o no arranca, se detiene. Con salida real. Desde la v1.5.0 el `4b` deja el cuerpo vacío, así que compila **y enlaza**; si el contrato llegara **sin esqueletos**, se admite la **compilación sin enlace** y la ejecución se traslada al acta del paso 6, pero eso es un **defecto del `4b`**, no del contrato | **agente** |
 | 4d | **Corrección previa a la implementación** (un artefacto `4a`/`4b`/`4c` confirmado resultó defectuoso) | `glot prompt correct` (1.6.0) · `glot save 4d` (1.6.0) | El artefacto corregido y la **causa en el cuerpo del commit** (obligatoria): el registro del retrabajo. Solo artefactos **anteriores** a la implementación | **agente** |
@@ -56,6 +56,10 @@ git -C {lang} merge --no-ff {rama}         # 2. el trabajo del sprint entra en m
 git -C {lang} push origin main             # 3. el remoto guarda ese commit
 git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres conservarla
 ```
+
+**ES:** Desde la **v1.6.2**, confirmar el `7` o el `8` con la capa cargable **ya te deja en la raíz del lenguaje**, que es donde se integra: los comandos de abajo se pueden pegar sin el `-C {lang}` (y tal cual también funcionan desde cualquier directorio).
+
+**EN:** Since **v1.6.2**, committing step `7` or `8` with the loadable layer **already leaves you at the language root**, which is where the integration happens: the commands below can be pasted without `-C {lang}` (and as they are they also work from any directory).
 
 **ES:** El paso 3 no es cosmético: `pointer` exige que el `HEAD` del submódulo sea **el de `origin/main`** (un `fetch` explícito y una comparación), porque el puntero del monorepo no puede apuntar a una rama de trabajo. Y el **push del monorepo** tampoco lo hace `glot`: las ramas del monorepo las publica `use` y el resto del trabajo lo sube el autor.
 
@@ -122,7 +126,7 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 | 5 | **Módulo nuevo**: `switch -c {rama} main` → `push -u origin {rama}` → `mkdir -p {carpeta}`, vacía (el esqueleto del lenguaje es de `new`) |
 | 6 | **Módulo existente**: avisa de que no hay esqueleto que crear. Si ya estás en la rama, la **republica** (un `push` no toca el árbol: reanudar con trabajo a medias es seguro); con el árbol limpio **activa** la rama; si el módulo está cerrado, abre una de mantenimiento **solo** si le diste `tipo` |
 | 7 | **Con trabajo sin confirmar**, `use` **no crea ni cambia ramas**: informa de dónde estás y de la rama que falta, y para |
-| 8 | **Guarda el estado** `lang/phase/module/branch/spec/repo` e imprime **la ruta del módulo** en stdout |
+| 8 | **Guarda el estado** `lang/phase/module/branch/spec/repo` e imprime **la carpeta de la fase** (`{lenguaje}/core/{fase}`) en stdout, que es donde la capa cargable deja al autor |
 | 9 | Recuerda que el `cd` real solo llega con la **capa cargable** (`glot install`) y **nunca dentro de una tubería**: ahí corre en un subshell |
 
 ### `glot new [lenguaje] [fase/módulo]` — el esqueleto del lenguaje
@@ -136,6 +140,7 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 | 5 | Aplica la **normalización** declarada (aplanar el nido del inicializador, quitar el `.git` anidado, descartar el vendoring que el repositorio rechaza) |
 | 6 | Imprime **en un solo bloque final** el **completado**: lo que el dato declara como nota y el autor aplica a mano |
 | 7 | **No** escribe la suite ni el contrato: son los pasos `4b` y `4c` |
+| 8 | Deja al autor **en el directorio del módulo**: con la capa cargable es `new` quien baja a él, y en modo programa lo recuerda su salida |
 
 ### `glot test` · `glot verify` — ejecutar
 
@@ -165,6 +170,7 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 | 4 | **`-n`**: imprime el plan (`git add` y `git commit` con su mensaje) sin tocar el índice |
 | 5 | Confirma con el mensaje del catálogo e imprime el **SHA corto**. El **retrabajo** (`4d`, `5b`, `5c`) **exige causa**: sale de `--cause` —`--causa` vale como alias— o de la **clave de estado `cause`**, que el propio encargo deja con `glot set cause "…"`, y viaja como **segundo `-m`**; al confirmar, `save` **retira la clave** para que no se cuele en el commit siguiente |
 | 6 | **Nunca hace push**. Y en los pasos `7` y `8`, si la rama del sprint no está integrada, imprime el bloque de **integración** |
+| 7 | Con la capa cargable, confirmar el **`7` o el `8` deja al autor en la raíz del lenguaje**, que es donde se integra: la carpeta del módulo no existe en el `main` del submódulo, así que un `switch` desde ahí dejaría un directorio sin contenido |
 
 ### `glot pointer` — el gitlink del monorepo
 
