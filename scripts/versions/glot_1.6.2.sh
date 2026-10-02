@@ -51,20 +51,15 @@
 # módulo); y `install` avisa en vez de recopiarse sobre sí mismo cuando se lanza desde la
 # copia instalada. `glot finish` **limpia el estado del sprint** al terminar (salvo `model`),
 # y el autocompletado y la ayuda ofrecen las **nueve** claves reservadas.
-# Desde la v1.6.3 el **encargo deja de gastar créditos en rutas que no existen**: manda rutas
-# **absolutas** —`root`, `spec`, `module_dir` y las citas de la plantilla que son relativas a
-# la raíz del monorepo (`AGENTS.md`, `docs/…`, `scripts/…`, `{lenguaje}/…`)—, porque el
-# delegado las resolvía contra el submódulo y buscaba `{lenguaje}/docs/…`, que no existe; y el
-# autocompletado aprende **`set`** (no se completaba nada) y, tras `set model`, los ids del
-# modelo de **AGY**, que publica el verbo nuevo **`models`** con el catálogo de perfiles.
 #
-# Versión viva del script: las versiones cerradas se archivan en versions/.
+# Snapshot archivado: versión cerrada el 2026-09-30. No se edita; el código es
+# el mismo que tenía la versión viva en su cierre.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
 # monorepo se resuelve con GLOT_ROOT, el superproyecto o la raíz de git.
 # El estado vive fuera del repositorio (XDG) y se puede redirigir con GLOT_STATE_FILE.
 #
 # Uso / Usage:
-#   ./scripts/glot.sh help
+#   ./versions/glot_1.6.2.sh help
 #   ./scripts/glot.sh doctor
 #   ./scripts/glot.sh langs
 #   ./scripts/glot.sh modules algorithms
@@ -94,7 +89,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.6.3"
+GLOT_VERSION="1.6.2"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -975,32 +970,6 @@ _glot_cmd_modules() {
     fi
 }
 
-# _glot_cmd_models — catálogo de modelos (`data/models.tsv`) tal cual, una línea por perfil:
-#   perfil<TAB>modelo Copilot<TAB>esfuerzo<TAB>créditos<TAB>tier de auto<TAB>encargos<TAB>modelo AGY
-# El **perfil es la clave** (lo declara el frontmatter de la plantilla) y el campo 7 es el
-# modelo del delegado de AGY: es el que acepta `glot set model <id>`, así que el autocompletado
-# de esa clave se alimenta de aquí, como el de lenguajes se alimenta de `langs`.
-_glot_cmd_models() {
-    local data=""
-
-    if [[ $# -gt 0 ]]; then
-        _glot_error 'uso / usage: glot models'
-        _glot_hint
-        return 2
-    fi
-
-    data="$(_glot_models_list)" || {
-        _glot_error 'no se encontró el catálogo de modelos / models catalogue not found: data/models.tsv'
-        return 1
-    }
-    if [[ -z "$data" ]]; then
-        _glot_error 'catálogo de modelos vacío / empty models catalogue: data/models.tsv'
-        return 1
-    fi
-
-    printf '%s\n' "$data"
-}
-
 # _glot_cmd_progress [fase] — estado del roadmap. Sin fase imprime los contadores
 # globales en clave=valor; con fase, una línea por módulo:
 #   modulo<TAB>estado<TAB>hechos<TAB>total
@@ -1426,10 +1395,7 @@ _glot_expand_state() {
     text="${text//\{Module\}/$(_glot_pascal "$module")}"
     text="${text//\{repo\}/$lang}"
     text="${text//\{branch\}/$branch}"
-    # `{spec}` sale **absoluta**: el delegado resuelve las rutas relativas contra el repositorio
-    # en el que está (el submódulo), y con la ruta relativa buscaba `{lenguaje}/docs/…`, que no
-    # existe (medido el 2026-09-30 con `suite` en crystal).
-    text="${text//\{spec\}/${spec:+"$root/$spec"}}"
+    text="${text//\{spec\}/$spec}"
     text="${text//\{module_dir\}/$(_glot_module_dir "$root" "$lang" "$phase" "$module")}"
 
     if [[ "$text" =~ \{[A-Za-z_][A-Za-z_0-9]*\} ]]; then
@@ -1441,27 +1407,6 @@ _glot_expand_state() {
     fi
 
     printf '%s\n' "$text"
-}
-
-# _glot_absolutize <raíz> <lenguaje> <texto> — deja **absolutas** las rutas del encargo que
-# son relativas a la raíz del monorepo (`AGENTS.md`, `docs/…`, `scripts/…` y `{lenguaje}/…`).
-# El delegado resuelve las relativas contra el repositorio en el que está —el **submódulo**, no
-# el monorepo— y buscaba `{lenguaje}/docs/…`, que no existe: turnos y créditos gastados en rutas
-# que nunca van a estar (medido el 2026-09-30 con `suite` en crystal). Las rutas del submódulo
-# (`core/…`, `src/…`, `test/…`) se quedan como están, que ésas sí se resuelven bien.
-_glot_absolutize() {
-    local root="$1"
-    local lang="$2"
-    local text="$3"
-    local marker=$'\001'
-
-    # No se toca lo que ya va precedido de `/` (una ruta absoluta) ni de un carácter de palabra
-    # (`mydocs/`). El prefijo insertado es un centinela y se cambia al final, para que las reglas
-    # no se pisen unas a otras.
-    text="$(printf '%s\n' "$text" | sed -E \
-        -e "s#(^|[^/[:alnum:]_.-])(AGENTS\.md|docs/|scripts/)#\1${marker}/\2#g" \
-        -e "s#(^|[^/[:alnum:]_.-])(${lang}/core/)#\1${marker}/\2#g")"
-    printf '%s\n' "${text//$marker/$root}"
 }
 
 # _glot_prompt_build <encargo> [lenguaje] [fase/módulo] — encargo completo: cabecera
@@ -1503,11 +1448,6 @@ _glot_prompt_build() {
         return 1
     fi
 
-    # Las rutas de la plantilla que son relativas a la **raíz del monorepo** se imprimen
-    # absolutas: el delegado las resuelve contra el repositorio en el que está (el submódulo)
-    # y busca documentos que no existen.
-    body="$(_glot_absolutize "$root" "$lang" "$body")"
-
     # Las fuentes que la plantilla declara en su frontmatter (`sources:`) tienen que estar
     # en el monorepo: si falta alguna, el encargo cita un documento que no existe y se avisa
     # por stderr. El código no cambia: el encargo se imprime igual, que es lo que se pidió.
@@ -1528,16 +1468,10 @@ _glot_prompt_build() {
     printf '| phase | %s |\n' "$phase"
     printf '| module | %s |\n' "$module"
     printf '| branch | %s |\n' "${branch:-detached}"
-    if [[ -n "$spec" ]]; then
-        printf '| spec | %s |\n' "$root/$spec"
-    else
-        printf '| spec | - |\n'
-    fi
+    printf '| spec | %s |\n' "${spec:--}"
     printf '| repo | %s |\n' "$lang"
     printf '| root | %s |\n' "$root"
     printf '| module_dir | %s |\n' "$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
-    printf '\n**ES:** todas las rutas de este encargo son **absolutas** (`root` es la raíz del monorepo): ninguna se resuelve contra el submódulo ni contra `module_dir`.\n'
-    printf '\n**EN:** every path in this request is **absolute** (`root` is the monorepo root): none resolves against the submodule or `module_dir`.\n'
     printf '\n---\n\n%s\n' "$body"
 }
 
@@ -3459,8 +3393,6 @@ Verbos / Verbs:
                      Language catalogue: language<TAB>native test command
   modules [fase]      Catálogo de módulos del roadmap: id<TAB>fase<TAB>módulo<TAB>especificación
                      Roadmap module catalogue: id<TAB>phase<TAB>module<TAB>specification
-  models              Catálogo de perfiles y modelos: perfil<TAB>modelo<TAB>esfuerzo<TAB>créditos<TAB>auto<TAB>encargos<TAB>modelo AGY
-                     Profile and model catalogue: profile<TAB>model<TAB>effort<TAB>credits<TAB>auto<TAB>requests<TAB>AGY model
   progress [fase]     Estado del roadmap: contadores globales, o una línea por módulo
                      de la fase / roadmap state: global counters, or one line per module
   completion [shell]  Imprime el autocompletado en stdout (bash|zsh)
@@ -3657,12 +3589,6 @@ _glot_help_verb() {
             printf 'glot modules [phase] — roadmap module catalogue\n'
             printf 'Columnas / columns: id<TAB>fase<TAB>módulo<TAB>especificación (- si falta)\n'
             ;;
-        models)
-            printf 'glot models — catálogo de perfiles y modelos (data/models.tsv)\n'
-            printf 'glot models — profile and model catalogue (data/models.tsv)\n'
-            printf 'Columnas / columns: perfil<TAB>modelo Copilot<TAB>esfuerzo<TAB>créditos<TAB>auto<TAB>encargos<TAB>modelo AGY\n'
-            printf 'El campo 7 es el que acepta `glot set model <id>` / field 7 is the one `glot set model <id>` takes\n'
-            ;;
         progress)
             printf 'glot progress [fase] — estado del roadmap, que es la fuente de verdad\n'
             printf 'glot progress [phase] — roadmap state, which is the source of truth\n'
@@ -3764,12 +3690,6 @@ _glot_help_verb() {
             printf 'plantilla declara (`sources:`) se avisan por stderr si no están\n'
             printf 'The header also carries `root`, the monorepo root, and the sources the template\n'
             printf 'declares (`sources:`) are warned about on stderr when missing\n'
-            printf 'Las rutas del encargo van **absolutas** (`root`, `spec`, `module_dir` y las citas de\n'
-            printf 'la plantilla que son relativas a la raíz del monorepo): el delegado resuelve las\n'
-            printf 'relativas contra su repositorio —el submódulo— y buscaba rutas que no existen\n'
-            printf 'Every path in the request is **absolute** (`root`, `spec`, `module_dir` and the template\n'
-            printf 'citations relative to the monorepo root): the delegate resolves relative ones against\n'
-            printf 'its own repository —the submodule— and looked for paths that do not exist\n'
             printf 'No muta nada y no necesita -n / it mutates nothing and does not need -n\n'
             ;;
         ask)
@@ -5463,10 +5383,6 @@ _glot_main() {
         modules)
             # Catálogo de módulos del roadmap / Roadmap module catalogue
             _glot_cmd_modules "$@"
-            ;;
-        models)
-            # Catálogo de perfiles y modelos / Profile and model catalogue
-            _glot_cmd_models "$@"
             ;;
         progress)
             # Estado del roadmap / Roadmap state

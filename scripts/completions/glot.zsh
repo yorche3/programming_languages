@@ -19,6 +19,7 @@ _glot_zsh() {
         'doctor:diagnóstico del entorno y del repositorio'
         'langs:catálogo de lenguajes y su comando de pruebas'
         'modules:catálogo de módulos del roadmap'
+        'models:catálogo de perfiles y modelos'
         'progress:estado del roadmap'
         'completion:imprime el autocompletado'
         'use:sitúa el trabajo del sprint'
@@ -132,6 +133,16 @@ _glot_zsh() {
             ;;
         get | unset)
             _values 'clave' lang phase module branch spec repo target cause model
+            ;;
+        set)
+            if [[ "${words[CURRENT - 1]}" == "model" ]]; then
+                # La clave `model` es la del delegado de **AGY**: sus ids salen del catálogo en
+                # vivo (`glot models`, campo 7), como los lenguajes salen de `langs`.
+                ids=(${(f)"$("$glot" models 2>/dev/null | cut -f7)"})
+                _describe 'modelo de AGY' ids
+            else
+                _values 'clave' lang phase module branch spec repo target cause model
+            fi
             ;;
     esac
 

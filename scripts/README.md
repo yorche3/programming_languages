@@ -33,6 +33,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh doctor
 ./scripts/glot.sh langs
 ./scripts/glot.sh modules
+./scripts/glot.sh models                         # perfiles: modelo, esfuerzo, créditos y el de AGY
 ./scripts/glot.sh progress
 ./scripts/glot.sh test php algorithms/naive_sort    # suite del módulo / module suite
 ./scripts/glot.sh verify php algorithms/naive_sort  # sintaxis/lint del lenguaje
@@ -161,9 +162,9 @@ scripts/
 
 ### 🤝 Delegados de `ask` / `ask` delegates
 
-**ES:** `ask` envía el encargo a un **delegado** cuya orden vive en el entorno del autor, nunca en el repositorio: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) y `GLOT_DELEGATE_AGY` (Antigravity CLI), con `GLOT_DELEGATE` como alias del primero. Se eligen con `--delegate copilot|antigravity` (cortos `cop` y `agy`); sin el argumento, con una sola variable definida se usa esa y con las dos `ask` pide elegir (`2`).
+**ES:** `ask` envía el encargo a un **delegado** cuya orden vive en el entorno del autor, nunca en el repositorio: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) y `GLOT_DELEGATE_AGY` (Antigravity CLI), con `GLOT_DELEGATE` como alias del primero. Se eligen con `--delegate copilot|antigravity` (cortos `cop` y `agy`); sin el argumento, con una sola variable definida se usa esa y con las dos `ask` pide elegir (`2`). El encargo que reciben lleva **rutas absolutas** (v1.6.3): `root`, `spec`, `module_dir` y las citas de la plantilla que son relativas a la raíz del monorepo —`AGENTS.md`, `docs/…`, `scripts/…`, `{lenguaje}/…`—, porque el delegado resuelve las relativas contra *su* repositorio (el submódulo, por el `cd` del ciclo) y buscaba `{lenguaje}/docs/…`, que no existe. El modelo del delegado sale del **rol** (el perfil del encargo) y, para **AGY**, se puede **fijar por sprint** con `glot set model <id>` (los ids se completan con el TAB, desde `glot models`).
 
-**EN:** `ask` sends the request to a **delegate** whose command lives in the author's environment, never in the repository: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) and `GLOT_DELEGATE_AGY` (Antigravity CLI), with `GLOT_DELEGATE` as an alias of the first one. They are chosen with `--delegate copilot|antigravity` (short `cop`, `agy`); with no argument, one defined variable is used and two of them make `ask` ask for the choice (`2`).
+**EN:** `ask` sends the request to a **delegate** whose command lives in the author's environment, never in the repository: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) and `GLOT_DELEGATE_AGY` (Antigravity CLI), with `GLOT_DELEGATE` as an alias of the first one. They are chosen with `--delegate copilot|antigravity` (short `cop`, `agy`); with no argument, one defined variable is used and two of them make `ask` ask for the choice (`2`). The request they get carries **absolute paths** (v1.6.3): `root`, `spec`, `module_dir` and the template's citations that are relative to the monorepo root —`AGENTS.md`, `docs/…`, `scripts/…`, `{lang}/…`—, because the delegate resolves relative ones against *its* repository (the submodule, because of the cycle's `cd`) and looked for `{lang}/docs/…`, which does not exist. The delegate's model comes from the **role** (the request's profile) and, for **AGY**, it can be **pinned per sprint** with `glot set model <id>` (the ids complete with TAB, from `glot models`).
 
 ```bash
 # el encargo llega por stdin y glot resuelve {root}, {module_dir} y {model}: la

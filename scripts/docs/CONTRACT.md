@@ -52,6 +52,7 @@
 | `use <lenguaje> <fase>/<módulo> [tipo]` | Sitúa el trabajo según los cuatro estados del sprint (nuevo, en curso, reanudar y cerrado): valida, activa o crea la rama desde `main`, la publica con `-u` y crea la carpeta del módulo si falta; con trabajo sin confirmar no toca nada. Guarda el estado del sprint e imprime la **carpeta de la fase** (`{lenguaje}/core/{fase}`), que es donde deja al autor la capa cargada —el andamiaje del paso 4a arranca ahí y `new` es quien baja al módulo—. **No hace `cd`** el verbo: ese `cd` es de la capa cargada, y solo llega si el verbo corre en tu shell —en una tubería corre en un subshell y se queda ahí— | 0 / 1 / 2 / 3 |
 | `langs` | Catálogo de lenguajes: uno por línea con su **comando nativo de pruebas** | 0 / 1 |
 | `modules [fase]` | Catálogo de módulos del roadmap con su especificación resuelta (`-` si aún no existe) | 0 / 1 / 2 |
+| `models` | Catálogo de perfiles y modelos de `data/models.tsv`: `perfil<TAB>modelo de Copilot<TAB>esfuerzo<TAB>créditos<TAB>tier de auto<TAB>encargos<TAB>modelo de AGY` (v1.6.3) | 0 / 1 / 2 |
 | `progress [fase]` | Estado del roadmap: sin fase, contadores globales en `clave=valor`; con fase, una línea por módulo | 0 / 1 / 2 |
 | `completion [bash\|zsh]` | Imprime el guion de autocompletado en stdout; **no** lo instala | 0 / 1 / 2 |
 | `test [lenguaje] [fase/módulo]` | Ejecuta la suite del módulo asignado en su directorio, con el comando nativo del lenguaje; la salida del runner va a stdout | 0 / 1 / 2 / 3 / **4** |
@@ -100,7 +101,6 @@
 | `target` | Dónde está el trabajo del cierre: `submodule` o `monorepo` | `use` y `finish` (v1.6.0) |
 | `cause` | Causa del retrabajo, mientras el paso la necesite | el encargo, y `save` la retira al confirmar (v1.6.0) |
 | `model` | Modelo del delegado de **AGY** en este sprint; gana a la columna del perfil y pierde con `--model` y `GLOT_MODEL_AGY` (v1.6.2) | el autor, con `glot set model <id>` |
-
 **ES:** Hasta la v0.4.0 el almacén solo guardaba y devolvía texto: no interpretaba ninguna clave. Desde la v0.5.0 las escribe `use`.
 
 **EN:** Up to v0.4.0 the store only saved and returned text: it interpreted no key. Since v0.5.0, `use` writes them.
@@ -145,6 +145,11 @@
 19. **Idempotencia y ensayo**: `install` repetido deja exactamente lo mismo (un solo bloque); `uninstall` sin nada instalado devuelve `0` con `nothing`. Los dos admiten `-n/--dry-run`.
 20. **Cargar no ejecuta**: `source glot.sh` define la función y no ejecuta el dispatcher; los `cd` del ciclo —`use` a la carpeta de la fase, `new` a la del módulo y el `7`/`8` de `save` a la raíz del lenguaje— ocurren solo cuando el verbo se invoca **a través** de la función.
 
+### Desde v1.6.3 — el encargo y su autocompletado
+
+21. **El encargo manda rutas absolutas** (v1.6.3): `root`, `spec` y `module_dir` van absolutos, y las citas de la plantilla que son relativas a la **raíz del monorepo** (`AGENTS.md`, `docs/…`, `scripts/…`, `{lenguaje}/…`) se imprimen con `root` delante. El delegado resuelve las relativas contra *su* repositorio —el submódulo, por el `cd` del ciclo— y buscaba `{lenguaje}/docs/…`, que no existe: turnos y créditos gastados en rutas que nunca iban a estar. En la plantilla `sources:` y `{spec}` siguen siendo relativos (es lo que las hace portables al monorepo de cada uno) y el build es quien absolutiza. Las rutas del **submódulo** (`core/…`, `src/…`, `test/…`) se quedan como están: ésas sí se resuelven bien.
+22. **Los verbos de catálogo alimentan su autocompletado** (v1.6.3): `langs` → `use`/`new`/`save`…, `modules` → la fase/módulo, `models` → **los ids de `glot set model`** (campo 7, el del delegado de AGY). Ninguna de esas listas se copia en el completado: se pregunta al verbo en vivo, así que añadir un lenguaje, un módulo o un perfil no deja el TAB atrás.
+
 ---
 
 ## 🧭 Catálogo (L2.5, v0.6.0) / Catalogue
@@ -183,6 +188,7 @@
 |-------|--------|
 | `langs` | `lenguaje<TAB>prueba nativa`, uno por línea, ordenado en `LC_ALL=C` |
 | `modules [fase]` | `id<TAB>fase<TAB>módulo<TAB>especificación` (`-` si el documento aún no existe) |
+| `models` | `perfil<TAB>modelo Copilot<TAB>esfuerzo<TAB>créditos<TAB>auto<TAB>encargos<TAB>modelo AGY`, uno por perfil |
 | `progress` | `registrados=` · `homologados=` · `modulos=` · `pares_hechos=` · `pares_total=`, uno por línea |
 | `progress <fase>` | `modulo<TAB>estado<TAB>hechos<TAB>total` |
 

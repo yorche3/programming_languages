@@ -629,6 +629,27 @@ glot_run modules nope
 assert_eq 'modules con fase inexistente: código' '1' "$rc_last"
 assert_contains 'modules con fase inexistente: error' 'fase sin módulos' "$err"
 
+# v1.6.3: `glot models` publica el catálogo tal cual (una fila por perfil). Es el dato del que
+# se alimenta el autocompletado de la clave `model`, que es la del delegado de **AGY**: por eso
+# se comprueba que el campo 7 está y que es el catálogo, no una lista copiada en el completado.
+glot_run models
+assert_eq 'models: código' '0' "$rc_last"
+assert_eq 'models: el catálogo tal cual' \
+    "$(awk 'NF && $1 !~ /^#/' "$TESTS_DIR/../data/models.tsv")" "$out"
+assert_eq 'models: siete columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=7')"
+assert_eq 'models: ningún perfil sin modelo de AGY' '' \
+    "$(printf '%s\n' "$out" | awk -F'\t' '$7=="" || $7=="-"')"
+assert_eq 'models: ningún encargo en dos perfiles' '0' \
+    "$(printf '%s\n' "$out" | cut -f6 | tr ',' '\n' | sed 's/^ *//' | grep -v '^$' | LC_ALL=C sort | uniq -d | wc -l | tr -d ' ')"
+
+glot_run models extra
+assert_eq 'models con argumentos: código' '2' "$rc_last"
+
+glot_run help models
+assert_eq 'help models: código' '0' "$rc_last"
+assert_contains 'help models: las siete columnas' 'perfil<TAB>modelo Copilot' "$out"
+assert_contains 'help models: dónde encaja la clave' 'glot set model <id>' "$out"
+
 # progress: contadores globales y coherencia con el roadmap
 glot_run progress
 assert_eq 'progress: código' '0' "$rc_last"
@@ -863,8 +884,25 @@ assert_contains 'prompt: el modelo sale del catálogo' "$(printf 'validate\t6\tg
 glot_run prompt scaffold php algorithms/naive_sort
 assert_eq 'prompt scaffold: código' '0' "$rc_last"
 assert_contains 'prompt scaffold: nombre y objetivo' '# Encargo `scaffold` — php algorithms/naive_sort' "$out"
-assert_contains 'prompt scaffold: spec del estado' '| spec | docs/core/algorithms/05_Naive_Sort.md |' "$out"
+# v1.6.3: el encargo manda rutas **absolutas**. El delegado resuelve las relativas contra el
+# repositorio en el que está —el submódulo, no el monorepo— y con `docs/…` relativo buscaba
+# `{lenguaje}/docs/…`, que no existe: turnos y créditos en rutas que nunca iban a estar
+# (medido el 2026-09-30 con `suite` en crystal). Se comprueban las dos caras: la cabecera
+# manda absoluto y **no queda** ninguna cita relativa a la raíz en el encargo armado.
+assert_contains 'prompt scaffold: spec del estado, absoluta' "| spec | $REPO/docs/core/algorithms/05_Naive_Sort.md |" "$out"
+assert_contains 'prompt scaffold: la regla de las rutas va escrita' \
+    'todas las rutas de este encargo son **absolutas**' "$out"
+assert_contains 'prompt scaffold: las fuentes en absoluto' "$REPO/AGENTS.md" "$out"
 assert_contains 'prompt scaffold: directorio del módulo' '/php/core/algorithms/naive_sort |' "$out"
+
+# ...y en **los diez** encargos, no solo en uno: cualquiera de ellos cita documentos del
+# monorepo, y basta una plantilla que se quede atrás para volver a gastar créditos en rutas
+# que el delegado no puede resolver.
+for req in scaffold contract_stub suite correct implement fix refactor validate docs-module docs-language; do
+    glot_run prompt "$req" php algorithms/naive_sort
+    assert_eq "prompt $req: ninguna ruta relativa a la raíz del monorepo" '' \
+        "$(printf '%s\n' "$out" | grep -nE '(^|[^/[:alnum:]_.-])(AGENTS\.md|docs/|scripts/)' | grep -vF -- "$REPO" | head -5)"
+done
 assert_contains 'prompt scaffold: marcadores expandidos' 'php/core/algorithms/naive_sort' "$out"
 assert_eq 'prompt scaffold: sin frontmatter de VS Code' 'no' "$(case "$out" in *'mode: agent'*) echo si ;; *) echo no ;; esac)"
 assert_eq 'prompt scaffold: sin marcadores sin resolver' '' "$(printf '%s\n' "$out" | grep -oE '\{[a-zA-Z_]+\}' | sort -u)"
@@ -1150,6 +1188,20 @@ assert_contains 'completion zsh: la misma lista de claves' \
 glot_run help set
 assert_contains 'help set: la misma lista de claves' \
     'lang, phase, module, branch, spec, repo, target, cause, model' "$out"
+
+# v1.6.3: `set` también se completa (le faltaba la rama entera), y tras `model` salen los ids
+# del catálogo de AGY en vivo, como los lenguajes salen de `langs`.
+set_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_eq 'completion bash: `set` completa las claves' \
+    'lang phase module branch spec repo target cause model' \
+    "$(printf '%s\n' "$set_comp" | tr '\n' ' ' | sed 's/ $//')"
+set_model_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set model ""); COMP_CWORD=3; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+glot_run models
+assert_eq 'completion bash: `set model` completa los ids de AGY del catálogo' \
+    "$(printf '%s\n' "$out" | cut -f7)" "$set_model_comp"
+verb_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot mod); COMP_CWORD=1; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_eq 'completion bash: los dos verbos del catálogo' 'modules
+models' "$verb_comp"
 
 # v1.1.0: los encargos se complean **en vivo** desde el registro, así que la lista no puede
 # quedarse corta al añadir una plantilla (el fallo que dejaba `scaffold` sin descubrir)
@@ -2829,9 +2881,16 @@ assert_eq 'completado prompt: sin delegado (no lo tiene)' 'no' \
 # completado), así que ahí se comprueba el guion: la opción, sus valores y que `ask` dejó de
 # compartir rama con `prompt`, que es de donde venía la carencia.
 ZSH_COMP="$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
+# La línea que lee los ids de AGY del catálogo se comprueba por su forma —zsh no se ejecuta como
+# guion suelto: necesita `compinit` y el contexto del shell—; el comportamiento se prueba en el
+# completado de bash, que sí se puede cargar y llamar.
+ZSH_COMP_MODEL='models 2>/dev/null | cut -f7'
 assert_contains 'completado zsh: los dos valores del delegado' 'compadd -- copilot antigravity' "$ZSH_COMP"
 assert_contains 'completado zsh: la forma --delegate=' 'compadd -- --delegate=copilot --delegate=antigravity' "$ZSH_COMP"
 assert_contains 'completado zsh: ask tiene su propia rama' '        ask)' "$ZSH_COMP"
+assert_contains 'completado zsh: `set` tiene su rama' '        set)' "$ZSH_COMP"
+assert_contains 'completado zsh: los ids de AGY tras `model`' "$ZSH_COMP_MODEL" "$ZSH_COMP"
+assert_contains 'completado zsh: el verbo del catálogo de modelos' 'models:catálogo de perfiles y modelos' "$ZSH_COMP"
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 
