@@ -833,3 +833,15 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`cpp/core/algorithms/data_structures_basics/README.md` y `cpp/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 6/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL)` -> `core.algorithms.data_structures_basics 🔄 7/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL, C++)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-01T19:23:49-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): crystal
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/crystal.md`, commit `2a71183`)
+Tests y comandos / Tests and commands:
+- `crystal spec` -> código `0`
+- `crystal tool format --check src` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`crystal/core/algorithms/data_structures_basics/README.md` y `crystal/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 7/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL, C++)` -> `core.algorithms.data_structures_basics 🔄 8/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL, C++, Crystal)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
