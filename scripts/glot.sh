@@ -56,7 +56,10 @@
 # la raíz del monorepo (`AGENTS.md`, `docs/…`, `scripts/…`, `{lenguaje}/…`)—, porque el
 # delegado las resolvía contra el submódulo y buscaba `{lenguaje}/docs/…`, que no existe; y el
 # autocompletado aprende **`set`** (no se completaba nada) y, tras `set model`, los ids del
-# modelo de **AGY**, que publica el verbo nuevo **`models`** con el catálogo de perfiles.
+# modelo de **AGY**, que publica el verbo nuevo **`models`** con el catálogo de perfiles; y el
+# **validador puede leer lo que tiene que revisar**: la invocación de reserva añade `--add-dir`
+# con la raíz —la especificación, la plantilla y el acta viven fuera del submódulo— y un
+# `GLOT_VALIDATOR` propio cita las rutas con `{root}`, `{module_dir}`, `{model}` y `{effort}`.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -3261,6 +3264,12 @@ _glot_validate_file() {
 # `GLOT_VALIDATOR` —el encargo llega por stdin, como en `ask`— y, sin esa variable, es la
 # invocación verificada de Copilot CLI en **solo lectura**: `--deny-tool write` y sin
 # `--share`, porque el registro ya lo escribe `glot` y no se duplica.
+# La revisión necesita leer **fuera del submódulo**: la especificación, la plantilla del README,
+# `AGENT_Template.md` y el acta viven en el monorepo, así que la invocación de reserva añade
+# `--add-dir` con la raíz (v1.6.3). Medido el 2026-10-01: sin él, el validador de `crystal
+# algorithms/data_structures_basics` no pudo comprobar la especificación ni el acta y lo dejó
+# como dos notas en vez de revisarlos. Un `GLOT_VALIDATOR` propio puede citar las rutas con
+# `{root}`, `{module_dir}`, `{model}` y `{effort}`, los mismos marcadores que el delegado.
 # El **modelo, el esfuerzo y el tope de créditos salen del perfil** de la plantilla
 # (`model:` + `data/models.tsv`, L6.5); el modelo viaja además por entorno para que un
 # validador propio pueda leerlo.
@@ -3337,8 +3346,18 @@ _glot_cmd_validate() {
         export COPILOT_AUTO_TIER="$tier"
     fi
 
+    # El validador lee fuera del submódulo, así que necesita la raíz y el módulo por variable:
+    # los marca `_glot_delegate_env` (el mismo entorno que el delegado de `ask`) y el modelo y
+    # el esfuerzo del perfil viajan con ellos. Sin capturar la salida: dentro de un `$( )` el
+    # `export` se perdería.
+    _glot_delegate_env "$lang" "$phase/$module"
+    GLOT_DELEGATE_MODEL="$pmodel"
+    export GLOT_DELEGATE_MODEL
+    GLOT_DELEGATE_EFFORT="$effort"
+    export GLOT_DELEGATE_EFFORT
+
     if [[ -n "${GLOT_VALIDATOR:-}" ]]; then
-        cmd="$GLOT_VALIDATOR"
+        cmd="$(_glot_delegate_expand "$GLOT_VALIDATOR")" || return $?
     else
         if ! command -v copilot >/dev/null 2>&1; then
             _glot_error 'no hay validador / no validator configured'
@@ -3350,7 +3369,7 @@ _glot_cmd_validate() {
         if [[ "$tier" != "-" ]]; then
             cmd+=" --auto-tier $tier"
         fi
-        cmd+=" --allow-all-tools --deny-tool write"
+        cmd+=" --add-dir \"$root\" --allow-all-tools --deny-tool write"
     fi
 
     record="$(_glot_validate_file "$root" "$phase" "$module" "$lang")"
@@ -3737,6 +3756,11 @@ _glot_help_verb() {
             printf 'validator and keeps its report in `docs/evidence/{phase}/{module}/{language}.validate.md`\n'
             printf 'La orden sale de GLOT_VALIDATOR y el encargo llega por stdin, como en `ask`\n'
             printf 'The command comes from GLOT_VALIDATOR and the request arrives over stdin, as in `ask`\n'
+            printf 'En la orden, {root}, {module_dir}, {model} y {effort} los resuelve glot\n'
+            printf 'In the command, {root}, {module_dir}, {model} and {effort} are resolved by glot\n'
+            printf 'La revisión lee fuera del submódulo (especificación, plantilla, acta): la orden\n'
+            printf 'de reserva añade `--add-dir` con la raíz del monorepo / the check reads outside the\n'
+            printf 'submodule (spec, template, record): the fallback command adds `--add-dir` with the root\n'
             printf 'El modelo, el esfuerzo y el tope de créditos salen del perfil del encargo\n'
             printf '(`model:` en la plantilla y scripts/data/models.tsv); el modelo va además en COPILOT_MODEL\n'
             printf 'The model, the effort and the credit cap come from the request profile\n'

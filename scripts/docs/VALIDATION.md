@@ -18,12 +18,16 @@ copilot -C "$MODULE_DIR" -p "<encargo validate>" \
         -s --output-format json \
         --model "$PROFILE_MODEL" --reasoning-effort "$PROFILE_EFFORT" \
         --max-ai-credits "$PROFILE_CREDITS" \
-        --allow-all-tools --deny-tool write
+        --add-dir "$ROOT" --allow-all-tools --deny-tool write
 ```
 
 **ES:** Desde la v0.11.0 el modelo **no** lo elige la configuración del CLI para `validate`: sale del perfil del encargo (`model:` en la plantilla + [`data/models.tsv`](../data/models.tsv)), que fija modelo, esfuerzo y tope de créditos, y `glot` los pasa como flags explícitos. Además exporta `COPILOT_MODEL` (y `COPILOT_AUTO_TIER` si el perfil lo declara) para que un validador propio los lea del entorno. La configuración del CLI sigue mandando en cualquier otra invocación interactiva.
 
 **EN:** Since v0.11.0 the model is **not** picked by the CLI configuration for `validate`: it comes from the request's profile (`model:` in the template + [`data/models.tsv`](../data/models.tsv)), which fixes model, effort and credit cap, and `glot` passes them as explicit flags. It also exports `COPILOT_MODEL` (and `COPILOT_AUTO_TIER` when the profile declares it) so a custom validator can read them from the environment. The CLI configuration still rules in any other interactive invocation.
+
+**ES:** Un `GLOT_VALIDATOR` propio cita las rutas con los **mismos marcadores** que el delegado de `ask` —`{root}`, `{module_dir}`, `{model}` y `{effort}`—, que `glot` resuelve antes de lanzarlo (v1.6.3); así la orden no lleva ninguna ruta del autor y sigue sirviendo si el monorepo se mueve. Un marcador que no esté en esa lista detiene el verbo con `1` en vez de lanzar una orden a la que le falta algo.
+
+**EN:** A custom `GLOT_VALIDATOR` cites paths with the **same markers** as `ask`'s delegate —`{root}`, `{module_dir}`, `{model}` and `{effort}`—, which `glot` resolves before launching it (v1.6.3); the command therefore carries no author path and keeps working if the monorepo moves. A marker outside that list stops the verb with `1` instead of launching an incomplete command.
 
 **ES:** No se usa `--share`: el registro lo escribe `glot` en `docs/evidence/{fase}/{modulo}/{lenguaje}.validate.md` —bloque de máquina más el informe—, así que la sesión no se duplica y **también vale con un validador propio**, que no tendría por qué saber escribir sesiones.
 
@@ -40,6 +44,7 @@ copilot -C "$MODULE_DIR" -p "<encargo validate>" \
 | `--auto-tier <perfil>` | Solo cuando el perfil lo declara (el modelo es `auto`): `efficiency`, `balance`, `intelligence` o `fast` |
 | `--max-ai-credits <n>` | Cap blando de gasto en una corrida desatendida; **el mínimo que acepta el CLI es 30** |
 | `--allow-all-tools` | Obligatorio en modo no interactivo |
+| `--add-dir <raíz>` | El ámbito de la revisión es el módulo, pero lo que hay que **comprobar** —la especificación, [`README_Template.md`](../../docs/README_Template.md), [`AGENT_Template.md`](../../docs/AGENT_Template.md) y el acta de evidencia— vive en el **monorepo**, fuera del submódulo (v1.6.3). Medido el 2026-10-01: sin este flag el validador de `crystal algorithms/data_structures_basics` no pudo leer la especificación ni el acta y las dejó como dos notas en vez de revisarlas |
 | `--deny-tool write` | Deja el validador en solo lectura: las denegaciones tienen prioridad sobre `--allow-all-tools` |
 | `--share <ruta>` | Se midió y **no se usa**: duplicaría el registro que ya escribe `glot` |
 

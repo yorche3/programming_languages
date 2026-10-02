@@ -1744,6 +1744,11 @@ copilot_args="$(cat -- "$SANDBOX/copilot-args.txt")"
 assert_contains 'validate por defecto: el directorio del módulo' "-C $SANDBOX/php/core/algorithms/naive_sort" "$copilot_args"
 assert_contains 'validate por defecto: el encargo por -p' '# Encargo `validate`' "$copilot_args"
 assert_contains 'validate por defecto: modo solo lectura' '--deny-tool write' "$copilot_args"
+# v1.6.3: la revisión necesita leer **fuera del submódulo** —la especificación, la plantilla y
+# el acta viven en el monorepo—, así que la orden lleva la raíz en `--add-dir`. Medido el
+# 2026-10-01: sin él, el validador de `crystal algorithms/data_structures_basics` no pudo
+# comprobar la especificación ni el acta y las dejó como dos notas en vez de revisarlas.
+assert_contains 'validate por defecto: la raíz del monorepo' "--add-dir $SANDBOX" "$copilot_args"
 assert_contains 'validate por defecto: tope de créditos' '--max-ai-credits 30' "$copilot_args"
 assert_contains 'validate por defecto: el modelo del perfil' '--model gemini-3.8-flash' "$copilot_args"
 assert_contains 'validate por defecto: el esfuerzo del perfil' '--reasoning-effort low' "$copilot_args"
@@ -1753,6 +1758,26 @@ glot_run_validate php algorithms/nope
 assert_eq 'validate con módulo desconocido: código' '1' "$rc_last"
 glot_run_validate php algorithms/naive_sort extra
 assert_eq 'validate con demasiados argumentos: código' '2' "$rc_last"
+
+# v1.6.3: un validador propio cita las rutas con los **mismos marcadores** que el delegado de
+# `ask` (`{root}`, `{module_dir}`, `{model}`, `{effort}`), que glot resuelve antes de lanzarlo;
+# y un marcador que no exista detiene el verbo en vez de lanzar una orden incompleta.
+# (`rc_last` se pone a cero antes: el patrón `|| rc_last=$?` solo asigna cuando falla, y aquí
+# se espera un cero después de un caso que terminó en `2`)
+rc_last=0
+out="$(GLOT_ROOT="$SANDBOX" GLOT_VALIDATOR="$SANDBOX/stub/validador -C {module_dir} --add-dir {root} --model {model}" \
+    "$GLOT_SH" -n validate php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_eq 'validate con marcadores: código' '0' "$rc_last"
+assert_contains 'validate con marcadores: el módulo resuelto' "-C $SANDBOX/php/core/algorithms/naive_sort" "$out"
+assert_contains 'validate con marcadores: la raíz resuelta' "--add-dir $SANDBOX" "$out"
+assert_contains 'validate con marcadores: el modelo del perfil' '--model gemini-3.8-flash' "$out"
+
+out="$(GLOT_ROOT="$SANDBOX" GLOT_VALIDATOR="$SANDBOX/stub/validador --model {inexistente}" \
+    "$GLOT_SH" -n validate php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_eq 'validate con marcador desconocido: código' '1' "$rc_last"
+assert_contains 'validate con marcador desconocido: lo dice' 'marcador sin resolver' "$err"
 
 # doctor informa del validador configurado y del CLI disponible
 glot_run doctor
