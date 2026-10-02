@@ -31,7 +31,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `set`, `get`, `unset`, `list` | `_glot_cmd_<verbo> "$@"` | Operan sobre el almacén de estado (L1) |
 | `path` | `_glot_cmd_path` | Ruta del fichero de estado, sin leerlo |
 | `use` | `_glot_cmd_use "$@"` | Sitúa el trabajo del sprint (L2): catálogo, ramas y estado del sprint |
-| `langs`, `modules`, `progress`, `completion` | `_glot_cmd_<verbo> "$@"` | Catálogo, estado del roadmap y autocompletado (L2.5) |
+| `langs`, `modules`, `models`, `progress`, `completion` | `_glot_cmd_<verbo> "$@"` | Catálogo, estado del roadmap y autocompletado (L2.5) |
 | `test`, `verify` | `_glot_cmd_<verbo> "$@"` → `_glot_cmd_run` | Ejecución (L3): resuelven el objetivo y corren el comando del lenguaje |
 | `prompt`, `ask` | `_glot_cmd_<verbo> "$@"` | Delegación (L4): arman el encargo y, en `ask`, lo envían al delegado |
 | otra opción (`-*`) | error de uso | `2` y mensaje en `stderr` |
@@ -68,6 +68,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `langs` | `.gitmodules` y `data/languages.tsv` | Cruza los lenguajes registrados con su comando nativo de pruebas | `lenguaje<TAB>prueba` ordenado en `LC_ALL=C` | `0` o `1` |
 | `modules [fase]` | El roadmap y `docs/core/` | Filtra por fase y resuelve la especificación de cada módulo | `id<TAB>fase<TAB>módulo<TAB>especificación` | `0`, `1` o `2` |
 | `progress [fase]` | El roadmap y `.gitmodules` | Agrega contadores; avisa si el contador contradice la lista o el denominador | `clave=valor`, o `modulo<TAB>estado<TAB>hechos<TAB>total` | `0`, `1` o `2` |
+| `models` | `data/models.tsv` | Publica el catálogo tal cual, sin inventar filas | `perfil<TAB>modelo Copilot<TAB>esfuerzo<TAB>créditos<TAB>auto<TAB>encargos<TAB>modelo AGY` | `0`, `1` o `2` |
 | `completion [shell]` | `completions/glot.<shell>` | Comprueba el shell soportado | El guion completo en stdout | `0`, `1` o `2` |
 | `test [lenguaje] [fase/módulo]` | El estado del sprint, el catálogo de datos y el directorio del módulo | Resuelve el objetivo, expande los marcadores y ejecuta | La salida del runner, tal cual, en stdout | `0`, `1`, `2`, `3` o `4` |
 | `verify [lenguaje] [fase/módulo]` | Igual, con la columna 5 | Si el lenguaje no tiene verificador, imprime `skipped` y no falla | La salida del verificador en stdout | `0`, `1`, `2`, `3` o `4` |

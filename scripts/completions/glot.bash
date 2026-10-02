@@ -13,7 +13,7 @@ _glot_complete() {
     local glot="${GLOT_CMD:-glot}"
     local words=""
     local keys="lang phase module branch spec repo target cause model"
-    local verbs="version help doctor greet langs modules progress completion use new save test verify evidence close validate prompt ask status pointer clean install uninstall set get unset list path"
+    local verbs="version help doctor greet langs modules models progress completion use new save test verify evidence close validate prompt ask status pointer clean install uninstall set get unset list path"
     local i=""
     local positional=0
 
@@ -86,6 +86,15 @@ _glot_complete() {
             ;;
         completion)
             words="bash zsh"
+            ;;
+        set)
+            if ((COMP_CWORD == 2)); then
+                words="$keys"
+            elif [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "model" ]]; then
+                # La clave `model` es la del delegado de **AGY**: sus ids salen del catálogo en
+                # vivo (`glot models`, campo 7), como los lenguajes salen de `langs`.
+                words="$("$glot" models 2>/dev/null | cut -f7)"
+            fi
             ;;
         get | unset)
             words="$keys"

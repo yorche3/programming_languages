@@ -244,6 +244,10 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 
 **ES:** Las plantillas son **genéricas**: no llevan datos de ningún módulo concreto (ni casos de prueba ni nombres de archivo). Cada encargo **lee** lo que necesita de la especificación del módulo y de los módulos ya homologados del lenguaje; el harness comprueba que ninguna plantilla vuelva a llevar datos de un módulo.
 
+**ES:** El encargo viaja con **rutas absolutas** (v1.6.3, [`CONTRACT.md`](CONTRACT.md) regla 21): `root`, `spec`, `module_dir` y las citas de la plantilla que son relativas a la raíz del monorepo. El `cd` del ciclo deja al autor dentro del módulo, y el delegado resuelve las rutas relativas contra *su* repositorio —el submódulo—, así que buscaba `{lenguaje}/docs/…` y gastaba turnos y créditos en documentos que no existen ahí. Los ids del modelo de **AGY** se completan con el TAB en `glot set model`, desde `glot models`.
+
+**EN:** The request travels with **absolute paths** (v1.6.3, [`CONTRACT.md`](CONTRACT.md) rule 21): `root`, `spec`, `module_dir` and the template's citations that are relative to the monorepo root. The cycle's `cd` leaves the author inside the module, and the delegate resolves relative paths against *its* repository —the submodule—, so it looked for `{lang}/docs/…` and burned turns and credits on documents that are not there. The **AGY** model ids complete with TAB in `glot set model`, from `glot models`.
+
 **EN:** The templates are **generic**: they carry no data from any particular module (no test cases, no file names). Each request **reads** what it needs from the module's specification and from the language's already homologated modules; the harness checks that no template carries module data again.
 
 ---
