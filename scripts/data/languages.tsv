@@ -9,7 +9,7 @@ cpp	Configuración manual de Bazel (MODULE.bazel, WORKSPACE, targets en BUILD)	B
 crystal	crystal init lib {module}	shard.yml	crystal spec	crystal tool format --check src	tool	crystal init lib {module}	rm:{module}/.git;flat:{module}
 csharp	dotnet new sln -n {Module} + classlib + xunit + sln add	{Module}.slnx, src/{Module}/{Module}.csproj, test/{Module}.Tests/	dotnet test {Module}.slnx	-	tool	-	-
 d	dub init {module} --format=sdl	dub.sdl	dub test	-	tool	dub init {module} --format=sdl	flat:{module}
-dart	dart create -t package {module}	pubspec.yaml, analysis_options.yaml	dart test · dart analyze	dart analyze	tool	dart create -t package {module}	flat:{module}
+dart	dart create -t package {module}	pubspec.yaml, analysis_options.yaml	dart test	dart analyze	tool	dart create -t package {module}	flat:{module}
 elixir	mix new {module} --module {Module}	mix.exs	mix test	mix format --check-formatted	tool	mix new {module} --module {Module}	flat:{module}
 elm	elm init	elm.json	elm-test	-	tool	printf 'y\n' | elm init	-
 erlang	rebar3 new lib {module}	rebar.config, src/{module}.app.src	rebar3 eunit	-	tool	rebar3 new lib {module}	flat:{module}
