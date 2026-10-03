@@ -151,7 +151,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | `ada` | `alr init --lib --in-place {module}` → `alr init --bin tests` → `alr with {module} --use=..` → `alr with aunit` (los dos últimos, dentro de `tests/`) | Licencia `GPL-3.0-or-later` en `alire.toml` y `tests/alire.toml`, y `description` del subproyecto de pruebas |
 | `clojure` | `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib :name {module} :target-dir {module}` | Sustituir el test de plantilla |
 | `common-lisp` | `ros -e '(ql:quickload :cl-project)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'` | Homologar el andamiaje con guion y no subrayado, sistema de pruebas con `fiveam` y `run-tests.lisp` |
-| `csharp` | `dotnet new sln` → `dotnet new classlib` → `dotnet new xunit` → `dotnet sln add` | `<ProjectReference>` a `src`, borrar `Class1.cs` y `UnitTest1.cs`, `.gitignore` |
+| `csharp` | `dotnet new sln` → `dotnet new classlib` → `dotnet new xunit` → `dotnet sln add` → `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj` | Borrar `Class1.cs` y `UnitTest1.cs` y añadir `.gitignore` |
 | `fsharp` | Igual que C# con `-lang F#` | Aplanar a `src/{Module}.fsproj`, `<ProjectReference>`, borrar `Library.fs` y `Tests.fs`, `.gitignore` |
 | `groovy` | `gradle init --type groovy-library --dsl groovy --use-defaults` | Borrar `Library.groovy` y `LibraryTest.groovy` |
 | `haxe` | `mkdir -p src test` → `haxelib install utest` | `build.hxml` y `RunTests.hx` son contenido del sprint |
