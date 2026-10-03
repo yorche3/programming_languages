@@ -867,3 +867,15 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`d/core/algorithms/data_structures_basics/README.md` y `d/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 9/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal)` -> `core.algorithms.data_structures_basics 🔄 10/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-03T08:42:46-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): dart
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/dart.md`, commit `1614ce8`)
+Tests y comandos / Tests and commands:
+- `dart test` -> código `0`
+- `dart analyze` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`dart/core/algorithms/data_structures_basics/README.md` y `dart/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 10/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D)` -> `core.algorithms.data_structures_basics 🔄 11/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.

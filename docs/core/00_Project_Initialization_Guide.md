@@ -94,7 +94,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **crystal** | 🔧 `crystal init lib {module}` | `shard.yml` | ✅ `crystal spec` |
 | **csharp** | ⛓️ ✅ `dotnet new sln -n {Module}` | `{Module}.slnx`, `src/{Module}/{Module}.csproj`, `test/{Module}.Tests/` | ✅ `dotnet test {Module}.slnx` |
 | **d** | ✅ `dub init {module} --format=sdl` | `dub.sdl` | ✅ `dub test` |
-| **dart** | ✅ `dart create -t package {module}` | `pubspec.yaml`, `analysis_options.yaml` | ✅ `dart test` · ✅ `dart analyze` |
+| **dart** | ✅ `dart create -t package {module}` | `pubspec.yaml`, `analysis_options.yaml` | ✅ `dart test` |
 | **elixir** | 🔧 `mix new {module} --module {Module}` | `mix.exs` | ✅ `mix test` |
 | **elm** | 🔧 `elm init` | `elm.json` | ✅ `elm-test` |
 | **erlang** | ✅ `rebar3 new lib {module}` | `rebar.config`, `src/{module}.app.src` | ✅ `rebar3 eunit` |
