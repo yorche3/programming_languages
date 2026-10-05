@@ -12,8 +12,8 @@ _glot_complete() {
     local cmd="${COMP_WORDS[1]}"
     local glot="${GLOT_CMD:-glot}"
     local words=""
-    local keys="lang phase module branch spec repo target cause model"
-    local verbs="version help doctor greet langs modules models progress completion use new save test verify evidence close validate prompt ask status pointer clean install uninstall set get unset list path"
+    local keys="lang phase module branch spec repo target cause antigravity-model shell-gpt-model"
+    local verbs="version help doctor greet langs modules models delegates progress completion use new save test verify evidence close validate prompt ask status pointer finish clean install uninstall set get unset list path"
     local i=""
     local positional=0
 
@@ -36,12 +36,15 @@ _glot_complete() {
         modules | progress)
             words="$("$glot" modules 2>/dev/null | cut -f2 | LC_ALL=C sort -u)"
             ;;
-        test | verify | evidence | close | validate)
+        test | verify | evidence | close | validate | finish)
             if ((COMP_CWORD == 2)); then
                 words="$("$glot" langs 2>/dev/null | cut -f1)"
             else
                 words="$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"
             fi
+            ;;
+        delegates)
+            words="agy sgpt"
             ;;
         save)
             if ((COMP_CWORD == 2)); then
@@ -66,11 +69,11 @@ _glot_complete() {
             # posicional se cuenta **saltando** el valor de `--delegate`, para que el encargo
             # siga completándose aunque la opción vaya delante.
             if [[ "$cur" == --delegate=* ]]; then
-                COMPREPLY=($(compgen -W "--delegate=copilot --delegate=antigravity" -- "$cur"))
+                COMPREPLY=($(compgen -W "--delegate=copilot --delegate=antigravity --delegate=shellgpt" -- "$cur"))
                 return 0
             fi
             if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "--delegate" ]]; then
-                COMPREPLY=($(compgen -W "copilot antigravity" -- "$cur"))
+                COMPREPLY=($(compgen -W "copilot antigravity shellgpt" -- "$cur"))
                 return 0
             fi
             for ((i = 2; i < COMP_CWORD; i++)); do
@@ -90,10 +93,12 @@ _glot_complete() {
         set)
             if ((COMP_CWORD == 2)); then
                 words="$keys"
-            elif [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "model" ]]; then
-                # La clave `model` es la del delegado de **AGY**: sus ids salen del catálogo en
-                # vivo (`glot models`, campo 7), como los lenguajes salen de `langs`.
-                words="$("$glot" models 2>/dev/null | cut -f7)"
+            elif [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "antigravity-model" ]]; then
+                # Las dos claves de modelo toman un **alias** de `glot delegates` (en vivo),
+                # como los lenguajes salen de `langs`.
+                words="$("$glot" delegates agy 2>/dev/null | cut -f2)"
+            elif [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "shell-gpt-model" ]]; then
+                words="$("$glot" delegates sgpt 2>/dev/null | cut -f2)"
             fi
             ;;
         get | unset)

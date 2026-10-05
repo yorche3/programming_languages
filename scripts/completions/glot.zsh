@@ -20,6 +20,7 @@ _glot_zsh() {
         'langs:catálogo de lenguajes y su comando de pruebas'
         'modules:catálogo de módulos del roadmap'
         'models:catálogo de perfiles y modelos'
+        'delegates:catálogo de alias de modelo por delegado'
         'progress:estado del roadmap'
         'completion:imprime el autocompletado'
         'use:sitúa el trabajo del sprint'
@@ -34,6 +35,7 @@ _glot_zsh() {
         'ask:envía el encargo al delegado'
         'status:submódulos, ramas y punteros'
         'pointer:prepara el puntero del submódulo'
+        'finish:cierre del monorepo: puntero + registro'
         'clean:borra artefactos del módulo y sincroniza'
         'install:copia estable, enlace, completado y bloque del rc'
         'uninstall:deshace lo que dejó install'
@@ -75,7 +77,7 @@ _glot_zsh() {
                 _describe 'módulo' modulos
             fi
             ;;
-        test | verify | evidence | close | validate)
+        test | verify | evidence | close | validate | finish)
             if ((CURRENT == 3)); then
                 lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
                 _describe 'lenguaje' lenguajes
@@ -83,6 +85,9 @@ _glot_zsh() {
                 modulos=(${(f)"$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"})
                 _describe 'módulo' modulos
             fi
+            ;;
+        delegates)
+            _values 'delegado' agy sgpt
             ;;
         prompt)
             if ((CURRENT == 3)); then
@@ -100,11 +105,11 @@ _glot_zsh() {
             # `ask` añade el delegado (v1.4.2): la opción y sus dos valores se completan, y el
             # posicional se cuenta **saltando** el valor de `--delegate`.
             if [[ "${words[CURRENT]}" == --delegate=* ]]; then
-                compadd -- --delegate=copilot --delegate=antigravity
+                compadd -- --delegate=copilot --delegate=antigravity --delegate=shellgpt
                 return 0
             fi
             if [[ "${words[CURRENT - 1]}" == "--delegate" ]]; then
-                compadd -- copilot antigravity
+                compadd -- copilot antigravity shellgpt
                 return 0
             fi
             for ((i = 2; i < CURRENT; i++)); do
@@ -132,16 +137,19 @@ _glot_zsh() {
             _values 'shell' bash zsh
             ;;
         get | unset)
-            _values 'clave' lang phase module branch spec repo target cause model
+            _values 'clave' lang phase module branch spec repo target cause antigravity-model shell-gpt-model
             ;;
         set)
-            if [[ "${words[CURRENT - 1]}" == "model" ]]; then
-                # La clave `model` es la del delegado de **AGY**: sus ids salen del catálogo en
-                # vivo (`glot models`, campo 7), como los lenguajes salen de `langs`.
-                ids=(${(f)"$("$glot" models 2>/dev/null | cut -f7)"})
-                _describe 'modelo de AGY' ids
+            if [[ "${words[CURRENT - 1]}" == "antigravity-model" ]]; then
+                # Las dos claves de modelo toman un **alias** de `glot delegates` (en vivo),
+                # como los lenguajes salen de `langs`.
+                ids=(${(f)"$("$glot" delegates agy 2>/dev/null | cut -f2)"})
+                _describe 'alias de AGY' ids
+            elif [[ "${words[CURRENT - 1]}" == "shell-gpt-model" ]]; then
+                ids=(${(f)"$("$glot" delegates sgpt 2>/dev/null | cut -f2)"})
+                _describe 'alias de shellgpt' ids
             else
-                _values 'clave' lang phase module branch spec repo target cause model
+                _values 'clave' lang phase module branch spec repo target cause antigravity-model shell-gpt-model
             fi
             ;;
     esac

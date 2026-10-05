@@ -181,6 +181,7 @@ que el modelo y su presupuesto no puedan derivar el uno del otro.
 | 4 | Tope de créditos, que `glot` pasa como `--max-ai-credits`; **30 es el mínimo que acepta el CLI** | `30` |
 | 5 | Tier de auto (`--auto-tier`), o `-` cuando el modelo es fijo | `-` |
 | 6 | Encargos que usan el perfil, separados por coma | `validate, docs-module, docs-language` |
+| 7 | Modelo del delegado de **AGY**, **id real** de `agy models` | `gemini-3.8-flash-low` |
 
 **EN:** One row per **profile**, with the **model as the key**: the template declares its
 model in the frontmatter (`model:`) and this table states the effort and the credit cap it
@@ -200,11 +201,64 @@ are still listed by the CLI (`model_available`), and the harness checks drift in
 directions between column 6 and the templates that declare each model. A `model:` missing
 here is a **missing datum** (`1`), never an invented profile.
 
-| Perfil / Profile | Modelo / Model | Esfuerzo / Effort | Créditos / Credits | Encargos / Requests |
-|---|---|---|:--:|---|
-| `economy` | `gemini-3.8-flash` | `low` | 30 | `validate`, `docs-module`, `docs-language` |
-| `balanced` | `gpt-5.6-terra` | `medium` | 90 | `scaffold`, `contract_stub`, `suite`, `fix` |
-| `deep` | `claude-sonnet-5` | `high` | 120 | `implement` |
+| Perfil / Profile | Modelo / Model | Esfuerzo / Effort | Créditos / Credits | Encargos / Requests | Modelo AGY / AGY model |
+|---|---|---|:--:|---|---|
+| `economy` | `gemini-3.8-flash` | `low` | 30 | `validate`, `docs-module`, `docs-language` | `gemini-3.8-flash-low` |
+| `balanced` | `gpt-5.6-terra` | `low` | 90 | `scaffold`, `contract_stub`, `suite`, `correct` | `gemini-3.8-flash-low` |
+| `deep` | `claude-sonnet-5` | `high` | 120 | `implement`, `fix`, `refactor` | `claude-sonnet-5-5-low` |
+
+## 🔤 `delegates.tsv` — alias de modelo por delegado / per-delegate model aliases
+
+**ES:** Una fila por **alias**, con el delegado como primera columna. Es el mapa que traduce
+lo que el autor escribe en `glot set antigravity-model` o `glot set shell-gpt-model`
+(`gemini`, `sonnet`, `default`, `qwen`, `kimi`) al **id real** que espera el CLI. **No lleva
+nada sensible**: la clave de OpenRouter de ShellGPT vive en `~/.config/shell_gpt/.sgptrc`,
+fuera del repositorio, y la orden del delegado vive en el entorno del autor.
+
+| Columna / Column | Contenido / Content | Ejemplo / Example |
+|:---:|---|---|
+| 1 | Delegado, el de `--delegate` en corto | `agy` |
+| 2 | Alias, lo que acepta la clave de estado | `gemini` |
+| 3 | Modelo, **id real** del CLI (`-` = no pasar `--model`) | `gemini-3.8-flash-low` |
+
+**ES:** El **orden de las filas de cada delegado es de más barato a más caro**: es el orden
+del autocompletado y el del escalado —cuando AGY agota su límite semanal se pasa a shellgpt
+empezando por su alias más barato (`default`) y, si el desempeño no llega, se sube al
+siguiente—. El modelo `-` (alias `default` de shellgpt) significa **no pasar `--model`**: manda
+el `DEFAULT_MODEL` del propio CLI. `doctor` informa de la cobertura (`delegate_aliases`) y, si
+`agy` está instalado, de cuántos de sus ids siguen en `agy models`
+(`delegate_model_available_agy`).
+
+**EN:** One row per **alias**, with the delegate as the first column. It is the map that turns
+what the author writes in `glot set antigravity-model` or `glot set shell-gpt-model`
+(`gemini`, `sonnet`, `default`, `qwen`, `kimi`) into the **real id** the CLI expects. It carries
+**nothing sensitive**: ShellGPT's OpenRouter key lives in `~/.config/shell_gpt/.sgptrc`, outside
+the repository, and the delegate command lives in the author's environment. Each delegate's rows
+are ordered **cheapest to most expensive**: that is the order of the completion and of the
+escalation —when AGY runs out of its weekly limit you move to shellgpt starting from its
+cheapest alias (`default`) and, if the performance is not enough, you go up to the next one—.
+The `-` model (shellgpt's `default` alias) means **not passing `--model`**: the CLI's own
+`DEFAULT_MODEL` rules.
+
+**ES:** ShellGPT 1.5.1 **no expone** ningún flag de esfuerzo de razonamiento: las únicas
+palancas contra el «sobrepensar» son `--temperature`/`--top-p` (en su `.sgptrc`) y elegir un
+modelo barato. Por eso la línea que `glot` publica desactiva el renderizado markdown
+(`--no-md`) y las llamadas a función (`--no-functions`), y deja la caché activada para
+abaratar llamadas repetidas.
+
+**EN:** ShellGPT 1.5.1 **exposes no** reasoning-effort flag: the only knobs against
+"overthinking" are `--temperature`/`--top-p` (in its `.sgptrc`) and picking a cheap model.
+That is why the line `glot` publishes turns off markdown rendering (`--no-md`) and function
+calls (`--no-functions`), and leaves the cache on to make repeated calls cheaper.
+
+| Delegado / Delegate | Alias | Modelo / Model |
+|---|---|---|
+| `agy` | `gemini` | `gemini-3.8-flash-low` |
+| `agy` | `sonnet` | `claude-sonnet-5-5-low` |
+| `sgpt` | `default` | `-` (usa el `DEFAULT_MODEL` del CLI / uses the CLI `DEFAULT_MODEL`) |
+| `sgpt` | `qwen` | `qwen/qwen3.8-max-0902` |
+| `sgpt` | `gemini` | `google/gemini-3.8-flash` |
+| `sgpt` | `kimi` | `moonshotai/kimi-k3` |
 
 ## 🧰 `toolchains.tsv` — series verificadas / verified series
 

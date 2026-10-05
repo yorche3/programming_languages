@@ -35,6 +35,7 @@ unset GLOT_DATA_DIR
 unset GLOT_DELEGATE
 unset GLOT_DELEGATE_COP
 unset GLOT_DELEGATE_AGY
+unset GLOT_DELEGATE_SGPT
 
 passed=0
 failed=0
@@ -381,11 +382,11 @@ glot_run_no_home() {
 }
 
 # glot_run_nodelegate [args...] — ejecuta glot sin ningún delegado, para que el caso no
-# dependa de lo que tenga exportado la sesión (las tres variables: los dos nombres y el
+# dependa de lo que tenga exportado la sesión (las cuatro variables: los tres nombres y el
 # alias antiguo).
 glot_run_nodelegate() {
     local rc=0
-    out="$(env -u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY \
+    out="$(env -u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY -u GLOT_DELEGATE_SGPT \
         "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc=$?
     err="$(cat -- "$WORK_DIR/stderr")"
     rc_last="$rc"
@@ -398,7 +399,7 @@ glot_run_delegates() {
     local cop="$1"
     local agy="$2"
     shift 2
-    local -a env_args=(-u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY)
+    local -a env_args=(-u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY -u GLOT_DELEGATE_SGPT)
     local rc=0
     [[ -n "$cop" ]] && env_args+=(GLOT_DELEGATE_COP="$cop")
     [[ -n "$agy" ]] && env_args+=(GLOT_DELEGATE_AGY="$agy")
@@ -648,7 +649,32 @@ assert_eq 'models con argumentos: código' '2' "$rc_last"
 glot_run help models
 assert_eq 'help models: código' '0' "$rc_last"
 assert_contains 'help models: las siete columnas' 'perfil<TAB>modelo Copilot' "$out"
-assert_contains 'help models: dónde encaja la clave' 'glot set model <id>' "$out"
+assert_contains 'help models: dónde encaja la clave' 'glot delegates' "$out"
+
+# v1.7.0: `glot delegates` publica el catálogo de alias por delegado, que es el dato del que
+# se alimenta el autocompletado de las dos claves de modelo. Se comprueba que es el catálogo
+# tal cual, con tres columnas y sin alias repetidos dentro de un delegado.
+glot_run delegates
+assert_eq 'delegates: código' '0' "$rc_last"
+assert_eq 'delegates: el catálogo tal cual' \
+    "$(awk 'NF && $1 !~ /^#/' "$TESTS_DIR/../data/delegates.tsv")" "$out"
+assert_eq 'delegates: tres columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=3')"
+assert_eq 'delegates: ningún alias repetido dentro de un delegado' '0' \
+    "$(printf '%s\n' "$out" | awk -F'\t' '{print $1"/"$2}' | LC_ALL=C sort | uniq -d | wc -l | tr -d ' ')"
+assert_eq 'delegates: shellgpt tiene un `default` con modelo `-`' '1' \
+    "$(printf '%s\n' "$out" | awk -F'\t' '$1=="sgpt" && $2=="default" && $3=="-"' | wc -l | tr -d ' ')"
+
+glot_run delegates agy
+assert_eq 'delegates agy: código' '0' "$rc_last"
+assert_eq 'delegates agy: solo sus dos filas' '2' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'delegates agy: la primera columna, el delegado' 'agy' "$(printf '%s\n' "$out" | cut -f1 | LC_ALL=C sort -u)"
+
+glot_run delegates nope
+assert_eq 'delegates con delegado desconocido: código' '2' "$rc_last"
+
+glot_run help delegates
+assert_eq 'help delegates: código' '0' "$rc_last"
+assert_contains 'help delegates: las tres columnas' 'delegado<TAB>alias<TAB>modelo' "$out"
 
 # progress: contadores globales y coherencia con el roadmap
 glot_run progress
@@ -703,9 +729,9 @@ assert_eq 'completion bash: completa el lenguaje' 'php' "$bash_comp"
 bash_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot use php alg); COMP_CWORD=3; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"' | head -1)"
 assert_eq 'completion bash: completa fase/módulo' 'algorithms/naive_sort' "$bash_comp"
 
-bash_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot get mo); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
-assert_eq 'completion bash: completa una clave reservada' 'module
-model' "$bash_comp"
+bash_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot get s); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_eq 'completion bash: completa una clave reservada' 'spec
+shell-gpt-model' "$bash_comp"
 
 # el autocompletado de zsh se verifica solo si zsh está instalado: no es una
 # dependencia del repositorio
@@ -923,7 +949,7 @@ assert_contains 'prompt con encargo desconocido: sugiere el registro' 'glot prom
 # ask: sin delegado no hay nada que enviar
 ask_nodelegate() {
     local rc=0
-    out="$(env -u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY \
+    out="$(env -u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY -u GLOT_DELEGATE_SGPT \
         "$GLOT_SH" ask "$@" 2>"$WORK_DIR/stderr")" || rc=$?
     err="$(cat -- "$WORK_DIR/stderr")"
     rc_last="$rc"
@@ -938,6 +964,7 @@ assert_contains 'ask sin delegado: explica GLOT_DELEGATE' 'GLOT_DELEGATE' "$err"
 # defined: -m`) y el marcador `{model}` lo resuelve el perfil.
 assert_contains 'ask sin delegado: imprime la línea de Copilot' "export GLOT_DELEGATE_COP='copilot -C {module_dir}" "$err"
 assert_contains 'ask sin delegado: imprime la línea de Antigravity' "export GLOT_DELEGATE_AGY='agy --model {model}" "$err"
+assert_contains 'ask sin delegado: imprime la línea de shellgpt' "export GLOT_DELEGATE_SGPT='sgpt " "$err"
 assert_contains 'ask sin delegado: dice dónde van' 'van en tu rc' "$err"
 assert_contains 'ask sin delegado: ofrece imprimir el encargo' 'glot prompt' "$err"
 assert_contains 'ask sin delegado: no ensucia stdout' '' "$out"
@@ -956,10 +983,18 @@ assert_contains 'ask --delegate antigravity: imprime su línea' "export GLOT_DEL
 assert_eq 'ask --delegate antigravity: no imprime la del otro' 'no' \
     "$([[ "$err" == *GLOT_DELEGATE_COP* ]] && echo si || echo no)"
 
-# la ayuda de `ask` trae las dos líneas, que es donde se buscan
+ask_nodelegate --delegate shellgpt implement php algorithms/naive_sort
+assert_eq 'ask --delegate shellgpt sin delegado: código' '1' "$rc_last"
+assert_contains 'ask --delegate shellgpt: nombra su variable' 'GLOT_DELEGATE_SGPT' "$err"
+assert_contains 'ask --delegate shellgpt: imprime su línea' "export GLOT_DELEGATE_SGPT='sgpt " "$err"
+assert_eq 'ask --delegate shellgpt: no imprime la de Copilot' 'no' \
+    "$([[ "$err" == *GLOT_DELEGATE_COP* ]] && echo si || echo no)"
+
+# la ayuda de `ask` trae las tres líneas, que es donde se buscan
 glot_run help ask
 assert_contains 'help ask: trae la línea de Copilot' "export GLOT_DELEGATE_COP='copilot" "$out"
 assert_contains 'help ask: trae la línea de Antigravity' "export GLOT_DELEGATE_AGY='agy" "$out"
+assert_contains 'help ask: trae la línea de shellgpt' "export GLOT_DELEGATE_SGPT='sgpt" "$out"
 assert_contains 'help ask: dice que install también las imprime' 'glot install' "$out"
 
 ask_nodelegate
@@ -979,31 +1014,59 @@ glot_run_delegate 'cat >/dev/null' -n ask implement php algorithms/naive_sort
 assert_eq 'ask -n: código' '0' "$rc_last"
 assert_contains 'ask -n: imprime el plan sin enviar' 'cat >/dev/null' "$out"
 
-# v1.6.2: el modelo del delegado de AGY se puede fijar **por sprint** (`glot set model <id>`),
-# que es lo que permite cambiarlo a mitad de módulo: los límites de AGY no se pueden consultar
-# desde su CLI. El entorno del delegado sigue ganando y Copilot no se entera.
+# v1.6.2/v1.7.0: el modelo de cada delegado se puede fijar **por sprint** con
+# `glot set antigravity-model|shell-gpt-model <alias>`, que es lo que permite cambiarlo a
+# mitad de módulo: los límites de AGY no se pueden consultar desde su CLI. El alias se
+# resuelve contra `data/delegates.tsv` y el entorno del delegado sigue ganando; Copilot no se
+# entera (su modelo sale del perfil).
 AGY_LINE='agy --model {model} -p "$(cat)" --add-dir {root}'
+SGPT_LINE='printf "M=%s\n" "$GLOT_DELEGATE_MODEL"; cat >/dev/null'
 STATE_MODEL="$WORK_DIR/state-model"
-GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set model claude-opus-4-6-thinking >/dev/null 2>&1
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set antigravity-model sonnet >/dev/null 2>&1
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_AGY="$AGY_LINE" \
     "$GLOT_SH" ask -n --delegate antigravity implement php algorithms/naive_sort 2>/dev/null || true)"
-assert_contains 'set model: el modelo fijado llega a la orden de AGY' 'agy --model claude-opus-4-6-thinking' "$out"
+assert_contains 'set antigravity-model: el alias llega resuelto a la orden de AGY' 'agy --model claude-sonnet-5-5-low' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_AGY="$AGY_LINE" GLOT_MODEL_AGY=gemini-3.7-flash-high \
     "$GLOT_SH" ask -n --delegate antigravity implement php algorithms/naive_sort 2>/dev/null || true)"
-assert_contains 'set model: el entorno del delegado gana al estado' 'agy --model gemini-3.7-flash-high' "$out"
+assert_contains 'set antigravity-model: el entorno del delegado gana al estado' 'agy --model gemini-3.7-flash-high' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_AGY="$AGY_LINE" \
     GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root}' \
     "$GLOT_SH" ask -n --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
-assert_contains 'set model: el de Copilot sigue saliendo del perfil' 'COPILOT_MODEL=claude-sonnet-5' "$out"
+assert_contains 'set antigravity-model: el de Copilot sigue saliendo del perfil' 'COPILOT_MODEL=claude-sonnet-5' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" doctor 2>/dev/null || true)"
-assert_contains 'set model: doctor informa del modelo fijado' 'model_state: claude-opus-4-6-thinking' "$out"
+assert_contains 'set antigravity-model: doctor informa del alias fijado' 'antigravity_model_state: sonnet' "$out"
 
-# doctor informa de las plantillas y del delegado
+# v1.7.0: shellgpt es el tercer delegado. Su modelo sale del alias `shell-gpt-model`: el alias
+# `default` (modelo `-`) omite `--model` —manda el DEFAULT_MODEL del CLI— y un alias concreto
+# lo pasa. El entorno del delegado gana y la clave guarda el alias, no el id.
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set shell-gpt-model qwen >/dev/null 2>&1
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_SGPT="$SGPT_LINE" \
+    "$GLOT_SH" ask --delegate shellgpt implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_eq 'shellgpt: el alias se resuelve a su id' 'M=qwen/qwen3.8-max-0902' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_SGPT="$SGPT_LINE" GLOT_MODEL_SGPT=google/gemini-3.8-flash \
+    "$GLOT_SH" ask --delegate shellgpt implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_eq 'shellgpt: el entorno del delegado gana al alias' 'M=google/gemini-3.8-flash' "$out"
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set shell-gpt-model default >/dev/null 2>&1
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_SGPT="$SGPT_LINE" \
+    "$GLOT_SH" ask --delegate shellgpt implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_eq 'shellgpt: `default` deja el modelo vacío (usa el del CLI)' 'M=' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" doctor 2>/dev/null || true)"
+assert_contains 'shellgpt: doctor informa del alias fijado' 'shell_gpt_model_state: default' "$out"
+
+# un alias inválido se rechaza **antes** de escribir, con la lista de válidos
+rc_bad=0
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set shell-gpt-model nope >/dev/null 2>&1 || rc_bad=$?
+assert_eq 'set shell-gpt-model con alias inválido: código' '2' "$rc_bad"
+
+# doctor informa de las plantillas, los catálogos y los delegados
 glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
 assert_contains 'doctor: registro de encargos' 'prompts_ok: 10 encargos / requests' "$out"
+assert_contains 'doctor: catálogo de delegados' 'delegates_file: ' "$out"
+assert_contains 'doctor: alias por delegado' 'delegate_aliases: 6 alias / aliases (2 de AGY, 4 de shellgpt)' "$out"
 assert_contains 'doctor: delegado COP sin configurar' 'delegate_cop: (sin configurar / not configured)' "$out"
 assert_contains 'doctor: delegado AGY sin configurar' 'delegate_agy: (sin configurar / not configured)' "$out"
+assert_contains 'doctor: delegado shellgpt sin configurar' 'delegate_sgpt: (sin configurar / not configured)' "$out"
 
 # --- casos de la especificación v0.9.0 (L5, creación y registro) -------------
 
@@ -1186,28 +1249,40 @@ assert_eq 'completion bash: un candidato por línea' '22' "$(printf '%s\n' "$sav
 # alineada: una clave nueva con un sitio olvidado es el fallo que dejó `target`, `cause` y
 # `model` fuera del completado.
 keys_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot get ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
-assert_eq 'completion bash: las nueve claves reservadas' \
-    'branch cause lang model module phase repo spec target' \
+assert_eq 'completion bash: las diez claves reservadas' \
+    'antigravity-model branch cause lang module phase repo shell-gpt-model spec target' \
     "$(printf '%s\n' "$keys_comp" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
 assert_contains 'completion zsh: la misma lista de claves' \
-    'lang phase module branch spec repo target cause model' "$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
+    'lang phase module branch spec repo target cause antigravity-model shell-gpt-model' "$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
 glot_run help set
 assert_contains 'help set: la misma lista de claves' \
-    'lang, phase, module, branch, spec, repo, target, cause, model' "$out"
+    'lang, phase, module, branch, spec, repo, target, cause, antigravity-model, shell-gpt-model' "$out"
 
-# v1.6.3: `set` también se completa (le faltaba la rama entera), y tras `model` salen los ids
-# del catálogo de AGY en vivo, como los lenguajes salen de `langs`.
+# v1.6.3/v1.7.0: `set` también se completa (le faltaba la rama entera), y tras cada clave de
+# modelo salen los **alias** de su delegado en vivo (`glot delegates`), como los lenguajes
+# salen de `langs`.
 set_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
 assert_eq 'completion bash: `set` completa las claves' \
-    'lang phase module branch spec repo target cause model' \
+    'lang phase module branch spec repo target cause antigravity-model shell-gpt-model' \
     "$(printf '%s\n' "$set_comp" | tr '\n' ' ' | sed 's/ $//')"
-set_model_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set model ""); COMP_CWORD=3; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
-glot_run models
-assert_eq 'completion bash: `set model` completa los ids de AGY del catálogo' \
-    "$(printf '%s\n' "$out" | cut -f7)" "$set_model_comp"
+set_agy_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set antigravity-model ""); COMP_CWORD=3; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+set_sgpt_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set shell-gpt-model ""); COMP_CWORD=3; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+glot_run delegates agy
+assert_eq 'completion bash: `set antigravity-model` completa los alias de AGY del catálogo' \
+    "$(printf '%s\n' "$out" | cut -f2)" "$set_agy_comp"
+glot_run delegates sgpt
+assert_eq 'completion bash: `set shell-gpt-model` completa los alias de shellgpt del catálogo' \
+    "$(printf '%s\n' "$out" | cut -f2)" "$set_sgpt_comp"
 verb_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot mod); COMP_CWORD=1; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
 assert_eq 'completion bash: los dos verbos del catálogo' 'modules
 models' "$verb_comp"
+
+# v1.7.0: `finish` entra en el autocompletado, con su lenguaje y su módulo como `close`
+finish_verb_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot fin); COMP_CWORD=1; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_eq 'completion bash: el verbo finish está' 'finish' "$finish_verb_comp"
+finish_pos_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot finish ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+glot_run langs
+assert_eq 'completion bash: `finish` completa el lenguaje' "$(printf '%s\n' "$out" | cut -f1)" "$finish_pos_comp"
 
 # v1.1.0: los encargos se complean **en vivo** desde el registro, así que la lista no puede
 # quedarse corta al añadir una plantilla (el fallo que dejaba `scaffold` sin descubrir)
@@ -2042,9 +2117,10 @@ glot_run_sandbox save 10 ruby algorithms/naive_sort
 assert_eq 'save 10 sin cambios: dato' 'nothing' "$out"
 assert_eq 'save 10 sin cambios: código' '0' "$rc_last"
 
-# v1.6.2: `finish` limpia el estado del sprint al terminar (salvo `model`), y en ensayo solo
-# lo anuncia. Se prepara php para el cierre —módulo y fase documentados, evidencia en verde y
-# su línea en el roadmap— y el almacén va aparte para no alterar el del resto de los casos.
+# v1.6.2/v1.7.0: `finish` limpia el estado del sprint al terminar (salvo las dos claves de
+# modelo del delegado), y en ensayo solo lo anuncia. Se prepara php para el cierre —módulo y
+# fase documentados, evidencia en verde y su línea en el roadmap— y el almacén va aparte para
+# no alterar el del resto de los casos.
 FINISH_STATE="$WORK_DIR/state-finish"
 glot_run_finish() {
     local rc=0
@@ -2082,15 +2158,18 @@ glot_run_finish set module naive_sort
 glot_run_finish set branch main
 assert_eq 'finish: el sprint está asignado' 'php' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get lang)"
-glot_run_finish set model gemini-3.7-flash-high
+glot_run_finish set antigravity-model gemini
+glot_run_finish set shell-gpt-model kimi
 
 glot_run_finish finish php algorithms/naive_sort
 assert_eq 'finish: código' '0' "$rc_last"
 assert_contains 'finish: lo dice' 'estado del sprint limpiado' "$err"
 assert_eq 'finish: el sprint se ha ido' '1' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get lang >/dev/null 2>&1; echo $?)"
-assert_eq 'finish: el modelo se queda' 'gemini-3.7-flash-high' \
-    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get model)"
+assert_eq 'finish: el modelo de AGY se queda' 'gemini' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get antigravity-model)"
+assert_eq 'finish: el modelo de shellgpt se queda' 'kimi' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get shell-gpt-model)"
 glot_run_finish save 4a
 assert_eq 'finish sin estado: hay que asignarlo otra vez' '1' "$rc_last"
 assert_contains 'finish sin estado: lo dice' 'glot use' "$err"
@@ -2248,13 +2327,14 @@ assert_eq 'cargado: save -n 7 no cambia de directorio' "$SANDBOX/php/core/algori
 glot_loaded 'source "$1"; cd /tmp; GLOT_ROOT="$2" glot use 2>/dev/null; echo "vivo"'
 assert_contains 'cargado: un use fallido no deja la shell rota' 'vivo' "$out"
 
-# v1.6.2: `glot finish` limpia el estado del sprint al terminar, para no seguir trabajando
+# v1.6.2/v1.7.0: `glot finish` limpia el estado del sprint al terminar, para no seguir trabajando
 # sobre una rama y un directorio finalizados (el `finish` completo va más abajo, con el
 # sandbox). Aquí se prueba la limpieza sola, con un almacén propio para no alterar el del
-# resto de los casos: se van las claves del sprint —y no otras— y `model` se queda.
+# resto de los casos: se van las claves del sprint —y no otras— y las dos claves de modelo del
+# delegado se quedan.
 STATE_CLEAR="$WORK_DIR/state-clear"
 for kv in lang=php phase=algorithms module=naive_sort branch=feat/algorithms/x \
-    spec=spec.md target=monorepo cause=fix model=claude-opus-4-6-thinking zap=1; do
+    spec=spec.md target=monorepo cause=fix antigravity-model=sonnet shell-gpt-model=kimi zap=1; do
     GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" set "${kv%%=*}" "${kv#*=}" >/dev/null 2>&1
 done
 assert_eq 'estado del sprint: el almacén de prueba está montado' 'php' \
@@ -2264,8 +2344,10 @@ glot_loaded "source \"\$1\"; GLOT_STATE_FILE='$STATE_CLEAR'; _glot_sprint_clear"
 assert_eq 'finish: la limpieza no falla' '0' "$rc_last"
 assert_eq 'finish: el sprint se ha ido' 'si' \
     "$(grep -qE '^(lang|phase|module|branch|spec|repo|target|cause)=' "$STATE_CLEAR" && echo no || echo si)"
-assert_eq 'finish: el modelo se queda' 'claude-opus-4-6-thinking' \
-    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get model)"
+assert_eq 'finish: el modelo de AGY se queda' 'sonnet' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get antigravity-model)"
+assert_eq 'finish: el modelo de shellgpt se queda' 'kimi' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get shell-gpt-model)"
 assert_eq 'finish: las claves del autor se quedan' '1' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get zap)"
 
@@ -2781,14 +2863,16 @@ assert_eq 'delegado: marcador sin resolver' '1' "$rc_last"
 assert_contains 'delegado: marcador sin resolver lo nombra' '{foo}' "$err"
 
 # `GLOT_DELEGATE` sigue valiendo como alias del de Copilot: es lo ya documentado
-out="$(env -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY GLOT_DELEGATE='echo ALIAS; cat >/dev/null' \
+out="$(env -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY -u GLOT_DELEGATE_SGPT GLOT_DELEGATE='echo ALIAS; cat >/dev/null' \
     "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || true
 assert_eq 'GLOT_DELEGATE es el alias de COP' 'ALIAS' "$out"
 
 # Y `doctor` informa de los dos
-out="$(env -u GLOT_DELEGATE GLOT_DELEGATE_COP='cat' GLOT_DELEGATE_AGY='cat' "$GLOT_SH" doctor 2>/dev/null)" || true
+out="$(env -u GLOT_DELEGATE -u GLOT_DELEGATE_SGPT GLOT_DELEGATE_COP='cat' GLOT_DELEGATE_AGY='cat' "$GLOT_SH" doctor 2>/dev/null)" || true
 assert_contains 'doctor: delegado COP configurado' 'delegate_cop: cat' "$out"
 assert_contains 'doctor: delegado AGY configurado' 'delegate_agy: cat' "$out"
+out="$(env -u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY GLOT_DELEGATE_SGPT='cat' "$GLOT_SH" doctor 2>/dev/null)" || true
+assert_contains 'doctor: delegado shellgpt configurado' 'delegate_sgpt: cat' "$out"
 
 # --- casos de la especificación v1.4.0 (alcance de la verificación) -----------
 
@@ -2885,7 +2969,7 @@ assert_contains 'completado ask: sigue ofreciendo los encargos' 'scaffold' "$out
 assert_contains 'completado ask: ofrece la opción del delegado' '--delegate' "$out"
 
 completion_probe ask --delegate ""
-assert_eq 'completado --delegate: los dos valores, ni uno más' 'antigravity copilot' \
+assert_eq 'completado --delegate: los tres valores, ni uno más' 'antigravity copilot shellgpt' \
     "$(printf '%s\n' "$out" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
 
 completion_probe ask --delegate=c
@@ -2894,7 +2978,7 @@ assert_eq 'completado --delegate=c: filtra por la letra' 'no' \
     "$([[ "$out" == *--delegate=antigravity* ]] && echo si || echo no)"
 
 completion_probe ask --delegate=
-assert_eq 'completado --delegate=: los dos valores' '--delegate=antigravity --delegate=copilot' \
+assert_eq 'completado --delegate=: los tres valores' '--delegate=antigravity --delegate=copilot --delegate=shellgpt' \
     "$(printf '%s\n' "$out" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
 
 completion_probe ask --delegate copilot ""
@@ -2915,13 +2999,17 @@ ZSH_COMP="$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
 # La línea que lee los ids de AGY del catálogo se comprueba por su forma —zsh no se ejecuta como
 # guion suelto: necesita `compinit` y el contexto del shell—; el comportamiento se prueba en el
 # completado de bash, que sí se puede cargar y llamar.
-ZSH_COMP_MODEL='models 2>/dev/null | cut -f7'
-assert_contains 'completado zsh: los dos valores del delegado' 'compadd -- copilot antigravity' "$ZSH_COMP"
-assert_contains 'completado zsh: la forma --delegate=' 'compadd -- --delegate=copilot --delegate=antigravity' "$ZSH_COMP"
+ZSH_COMP_AGY='delegates agy 2>/dev/null | cut -f2'
+ZSH_COMP_SGPT='delegates sgpt 2>/dev/null | cut -f2'
+assert_contains 'completado zsh: los tres valores del delegado' 'compadd -- copilot antigravity shellgpt' "$ZSH_COMP"
+assert_contains 'completado zsh: la forma --delegate=' 'compadd -- --delegate=copilot --delegate=antigravity --delegate=shellgpt' "$ZSH_COMP"
 assert_contains 'completado zsh: ask tiene su propia rama' '        ask)' "$ZSH_COMP"
 assert_contains 'completado zsh: `set` tiene su rama' '        set)' "$ZSH_COMP"
-assert_contains 'completado zsh: los ids de AGY tras `model`' "$ZSH_COMP_MODEL" "$ZSH_COMP"
+assert_contains 'completado zsh: los alias de AGY tras `antigravity-model`' "$ZSH_COMP_AGY" "$ZSH_COMP"
+assert_contains 'completado zsh: los alias de shellgpt tras `shell-gpt-model`' "$ZSH_COMP_SGPT" "$ZSH_COMP"
 assert_contains 'completado zsh: el verbo del catálogo de modelos' 'models:catálogo de perfiles y modelos' "$ZSH_COMP"
+assert_contains 'completado zsh: el verbo del catálogo de delegados' 'delegates:catálogo de alias de modelo por delegado' "$ZSH_COMP"
+assert_contains 'completado zsh: el verbo finish' 'finish:cierre del monorepo' "$ZSH_COMP"
 
 # --- puerta de entrada al archivo de versiones -------------------------------
 

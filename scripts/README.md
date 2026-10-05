@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v1.6.1** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v1.7.0** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -34,6 +34,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh langs
 ./scripts/glot.sh modules
 ./scripts/glot.sh models                         # perfiles: modelo, esfuerzo, créditos y el de AGY
+./scripts/glot.sh delegates                      # alias de modelo por delegado (agy, sgpt)
 ./scripts/glot.sh progress
 ./scripts/glot.sh test php algorithms/naive_sort    # suite del módulo / module suite
 ./scripts/glot.sh verify php algorithms/naive_sort  # sintaxis/lint del lenguaje
@@ -76,7 +77,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v1.6.2)
+├── glot.sh                  # Versión viva / live version (v1.7.0)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
@@ -98,6 +99,7 @@ scripts/
 │   ├── commits.tsv           # Un paso de sprint por fila: alias, ámbito y mensaje de commit
 │   ├── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
 │   ├── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos
+│   ├── delegates.tsv         # Alias de modelo por delegado (agy, sgpt), de más barato a más caro
 │   └── toolchains.tsv        # Serie verificada por lenguaje: comando que imprime su versión
 ├── docs/                     # Documentación del tooling
 │   ├── ROADMAP.md
@@ -130,7 +132,9 @@ scripts/
     ├── glot_1.4.2.sh
     ├── glot_1.5.0.sh
     ├── glot_1.6.0.sh
-    └── glot_1.6.1.sh
+    ├── glot_1.6.1.sh
+    ├── glot_1.6.2.sh
+    └── glot_1.7.0.sh
 ```
 
 ---
@@ -162,29 +166,32 @@ scripts/
 
 ### 🤝 Delegados de `ask` / `ask` delegates
 
-**ES:** `ask` envía el encargo a un **delegado** cuya orden vive en el entorno del autor, nunca en el repositorio: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) y `GLOT_DELEGATE_AGY` (Antigravity CLI), con `GLOT_DELEGATE` como alias del primero. Se eligen con `--delegate copilot|antigravity` (cortos `cop` y `agy`); sin el argumento, con una sola variable definida se usa esa y con las dos `ask` pide elegir (`2`). El encargo que reciben lleva **rutas absolutas** (v1.6.3): `root`, `spec`, `module_dir` y las citas de la plantilla que son relativas a la raíz del monorepo —`AGENTS.md`, `docs/…`, `scripts/…`, `{lenguaje}/…`—, porque el delegado resuelve las relativas contra *su* repositorio (el submódulo, por el `cd` del ciclo) y buscaba `{lenguaje}/docs/…`, que no existe. El modelo del delegado sale del **rol** (el perfil del encargo) y, para **AGY**, se puede **fijar por sprint** con `glot set model <id>` (los ids se completan con el TAB, desde `glot models`).
+**ES:** `ask` envía el encargo a un **delegado** cuya orden vive en el entorno del autor, nunca en el repositorio: `GLOT_DELEGATE_COP` (GitHub Copilot CLI), `GLOT_DELEGATE_AGY` (Antigravity CLI) y `GLOT_DELEGATE_SGPT` (ShellGPT, con la clave de OpenRouter en tu entorno), con `GLOT_DELEGATE` como alias del primero. Se eligen con `--delegate copilot|antigravity|shellgpt` (cortos `cop`, `agy` y `sgpt`); sin el argumento, con una sola variable definida se usa esa y con varias `ask` pide elegir (`2`). El encargo que reciben lleva **rutas absolutas** (v1.6.3): `root`, `spec`, `module_dir` y las citas de la plantilla que son relativas a la raíz del monorepo —`AGENTS.md`, `docs/…`, `scripts/…`, `{lenguaje}/…`—, porque el delegado resuelve las relativas contra *su* repositorio (el submódulo, por el `cd` del ciclo) y buscaba `{lenguaje}/docs/…`, que no existe. El modelo sale del **rol** (el perfil del encargo) y, para **AGY** y **shellgpt**, se puede **fijar por sprint** con un alias: `glot set antigravity-model <gemini|sonnet>` o `glot set shell-gpt-model <default|qwen|gemini|kimi>` (v1.7.0), que el TAB completa desde `data/delegates.tsv`.
 
-**EN:** `ask` sends the request to a **delegate** whose command lives in the author's environment, never in the repository: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) and `GLOT_DELEGATE_AGY` (Antigravity CLI), with `GLOT_DELEGATE` as an alias of the first one. They are chosen with `--delegate copilot|antigravity` (short `cop`, `agy`); with no argument, one defined variable is used and two of them make `ask` ask for the choice (`2`). The request they get carries **absolute paths** (v1.6.3): `root`, `spec`, `module_dir` and the template's citations that are relative to the monorepo root —`AGENTS.md`, `docs/…`, `scripts/…`, `{lang}/…`—, because the delegate resolves relative ones against *its* repository (the submodule, because of the cycle's `cd`) and looked for `{lang}/docs/…`, which does not exist. The delegate's model comes from the **role** (the request's profile) and, for **AGY**, it can be **pinned per sprint** with `glot set model <id>` (the ids complete with TAB, from `glot models`).
+**EN:** `ask` sends the request to a **delegate** whose command lives in the author's environment, never in the repository: `GLOT_DELEGATE_COP` (GitHub Copilot CLI), `GLOT_DELEGATE_AGY` (Antigravity CLI) and `GLOT_DELEGATE_SGPT` (ShellGPT, with the OpenRouter key in your environment), with `GLOT_DELEGATE` as an alias of the first one. They are chosen with `--delegate copilot|antigravity|shellgpt` (short `cop`, `agy`, `sgpt`); with no argument, one defined variable is used and several of them make `ask` ask for the choice (`2`). The request they get carries **absolute paths** (v1.6.3): `root`, `spec`, `module_dir` and the template's citations that are relative to the monorepo root —`AGENTS.md`, `docs/…`, `scripts/…`, `{lang}/…`—, because the delegate resolves relative ones against *its* repository (the submodule, because of the cycle's `cd`) and looked for `{lang}/docs/…`, which does not exist. The model comes from the **role** (the request's profile) and, for **AGY** and **shellgpt**, it can be **pinned per sprint** with an alias: `glot set antigravity-model <gemini|sonnet>` or `glot set shell-gpt-model <default|qwen|gemini|kimi>` (v1.7.0), which TAB completes from `data/delegates.tsv`.
 
 ```bash
 # el encargo llega por stdin y glot resuelve {root}, {module_dir} y {model}: la
-# línea no lleva tu ruta ni el modelo, así que `install` te la imprime para
-# pegarla en tu rc. En AGY la opción es `--model` (el binario **no** define `-m`)
+# línea no lleva tu ruta ni la clave, así que `install` te la imprime para
+# pegarla en tu rc. En AGY la opción es `--model` (el binario **no** define `-m`);
+# en shellgpt el `--model` va condicionado al alias (`default` = DEFAULT_MODEL del CLI)
 export GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools'
 export GLOT_DELEGATE_AGY='agy --model {model} -p "$(cat)" --add-dir {root}'
+export GLOT_DELEGATE_SGPT='sgpt ${GLOT_DELEGATE_MODEL:+--model $GLOT_DELEGATE_MODEL} --no-md --no-functions'
 ./scripts/glot.sh ask --delegate copilot contract_stub ada algorithms/data_structures_basics
 ./scripts/glot.sh ask --delegate antigravity suite ada algorithms/data_structures_basics
-./scripts/glot.sh doctor | grep '^delegate_'   # delegate_cop: / delegate_agy:
-./scripts/glot.sh set model gemini-3.7-flash-high   # modelo de AGY para este sprint
+./scripts/glot.sh doctor | grep '^delegate_'   # delegate_cop: / delegate_agy: / delegate_sgpt:
+./scripts/glot.sh set antigravity-model sonnet     # alias de AGY para este sprint
+./scripts/glot.sh set shell-gpt-model default      # alias de shellgpt (default = el del CLI)
 ```
 
-**ES:** El modelo del delegado sale del **rol** (el perfil del encargo) y, para **AGY**, se puede **fijar por sprint** con `glot set model <id>`: su CLI no expone los límites de horas o de cuota, así que un sprint puede quedarse sin él a mitad de módulo y tiene que poder cambiarse sin tocar el repositorio. Gana `--model`, después `GLOT_MODEL_AGY` y después esa clave; el perfil queda como último recurso, y el de Copilot no se ve afectado.
+**ES:** Las **dos claves de modelo** guardan un **alias** de `data/delegates.tsv` (el orden de cada delegado es de más barato a más caro, para escalar cuando se agotan límites): `antigravity-model` (gemini, sonnet) y `shell-gpt-model` (default, qwen, gemini, kimi). Su CLI no expone los límites de horas o de cuota, así que un sprint puede quedarse sin él a mitad de módulo y tiene que poder cambiarse sin tocar el repositorio; `glot finish` las **conserva** al limpiar el sprint. En la resolución gana `--model`, después el entorno del delegado (`GLOT_MODEL_AGY`/`GLOT_MODEL_SGPT` y, como alias, `GLOT_MODEL`) y después la clave; el perfil (AGY) o el `DEFAULT_MODEL` del CLI (shellgpt, alias `default`) queda como último recurso, y el de Copilot no se ve afectado.
 
-**EN:** The delegate's model comes from the **role** (the request's profile) and, for **AGY**, it can be **pinned per sprint** with `glot set model <id>`: its CLI does not expose the hourly or quota limits, so a sprint may run out of it mid-module and it has to be changeable without touching the repository. `--model` wins, then `GLOT_MODEL_AGY`, then that key; the profile is the fallback, and Copilot's is unaffected.
+**EN:** The **two model keys** store an **alias** from `data/delegates.tsv` (each delegate is ordered cheapest to most expensive, to escalate when limits run out): `antigravity-model` (gemini, sonnet) and `shell-gpt-model` (default, qwen, gemini, kimi). Its CLI does not expose the hourly or quota limits, so a sprint may run out of it mid-module and it has to be changeable without touching the repository; `glot finish` **keeps** them when it clears the sprint. In the resolution `--model` wins, then the delegate's environment (`GLOT_MODEL_AGY`/`GLOT_MODEL_SGPT` and, as an alias, `GLOT_MODEL`) and then the key; the profile (AGY) or the CLI's `DEFAULT_MODEL` (shellgpt, `default` alias) is the fallback, and Copilot's is unaffected.
 
-**ES:** `glot` no elige delegado ni guarda claves: la orden es tuya y `install` **no** la escribe en el rc —al terminar la imprime para que la pegues—, para que en el repositorio solo haya marcadores y nombres de modelo. El detalle de permisos de cada CLI está en [`docs/VALIDATION.md`](docs/VALIDATION.md).
+**ES:** `glot` no elige delegado ni guarda claves: la orden es tuya y `install` **no** la escribe en el rc —al terminar la imprime para que la pegues—, para que en el repositorio solo haya marcadores y nombres de modelo. Para shellgpt, el **único** ajuste contra el «sobrepensar» es su propio `.sgptrc` (no expone esfuerzo de razonamiento): la línea que publica `glot` desactiva el renderizado markdown y las llamadas a función, y deja la caché activada. El detalle de permisos de cada CLI está en [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
-**EN:** `glot` neither picks a delegate nor stores keys: the command is yours and `install` does **not** write it into the rc —it prints it at the end so you can paste it— so that only placeholders and model names land in the repository. Each CLI's permission details are in [`docs/VALIDATION.md`](docs/VALIDATION.md).
+**EN:** `glot` neither picks a delegate nor stores keys: the command is yours and `install` does **not** write it into the rc —it prints it at the end so you can paste it— so that only placeholders and model names land in the repository. For shellgpt the **only** knob against "overthinking" is its own `.sgptrc` (it exposes no reasoning effort): the line `glot` publishes turns off markdown rendering and function calls, and leaves the cache on. Each CLI's permission details are in [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
 ---
 
