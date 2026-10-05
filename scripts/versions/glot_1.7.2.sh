@@ -80,21 +80,15 @@
 # `GLOT_DELEGATE_AGY`, desaparecen `GLOT_DELEGATE_AIDER` y la clave `aider-model`, y el
 # marcador `{spec}` se conserva para cualquier orden de delegado. El modelo `-` (alias
 # `default`) se retira con él: ya no hay ningún delegado que pueda omitir `--model`.
-# Desde la v1.7.3 el delegado de Copilot también acepta un **alias por sprint** —
-# `glot set copilot-model <default|gemini|qwen|kimi>`, con sus filas en `data/delegates.tsv`—:
-# es la vía de los modelos de **OpenRouter** para las delegaciones de documentación. Como el id
-# de esos modelos lleva `vendedor/modelo`, `ask` y `validate` apuntan solo entonces el
-# **proveedor propio** del CLI (`COPILOT_PROVIDER_BASE_URL`, si el autor no apunta a otro) sin
-# tocar la clave —que es del autor— ni los ids de siempre, que no llevan `/`: `terra` y
-# `sonnet` siguen yendo a GitHub.
 #
-# Versión viva del script: las versiones cerradas se archivan en versions/.
+# Snapshot archivado: versión cerrada el 2026-10-05. No se edita; el código es
+# el mismo que tenía la versión viva en su cierre.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
 # monorepo se resuelve con GLOT_ROOT, el superproyecto o la raíz de git.
 # El estado vive fuera del repositorio (XDG) y se puede redirigir con GLOT_STATE_FILE.
 #
 # Uso / Usage:
-#   ./scripts/glot.sh help
+#   ./versions/glot_1.7.2.sh help
 #   ./scripts/glot.sh doctor
 #   ./scripts/glot.sh langs
 #   ./scripts/glot.sh modules algorithms
@@ -112,7 +106,6 @@
 #   GLOT_DELEGATE_COP=cat ./scripts/glot.sh ask --delegate copilot contract php algorithms/naive_sort
 #   ./scripts/glot.sh delegates
 #   ./scripts/glot.sh set antigravity-model gemini
-#   ./scripts/glot.sh set copilot-model default
 #   ./scripts/glot.sh set lang php
 #   ./scripts/glot.sh get lang
 #   ./scripts/glot.sh list
@@ -127,7 +120,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.7.3"
+GLOT_VERSION="1.7.2"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -575,27 +568,23 @@ _glot_cmd_doctor() {
                 printf 'model_available_agy: (sin agy / no agy)\n'
             fi
             # El modelo del delegado se puede fijar por sprint con `glot set
-            # antigravity-model <alias>` (AGY) y `glot set copilot-model <alias>` (Copilot, que es
-            # la vía de los modelos de OpenRouter): es lo que permite cambiarlo a mitad de
-            # módulo cuando se agotan los límites, que el CLI de AGY no expone. El del perfil
+            # antigravity-model <alias>`: es lo que permite cambiarlo a mitad de
+            # módulo cuando se agotan los límites de AGY, que su CLI no expone. El del perfil
             # manda cuando no hay nada fijado.
             printf 'antigravity_model_state: %s\n' "$(_glot_state_get antigravity-model 2>/dev/null || printf '(del perfil / from the profile)')"
-            printf 'copilot_model_state: %s\n' "$(_glot_state_get copilot-model 2>/dev/null || printf '(del perfil / from the profile)')"
         else
             printf 'models_file: (no encontrado / not found)\n'
             status=1
         fi
 
-        # Alias de modelo por delegado (`data/delegates.tsv`): es lo que aceptan `glot set
-        # antigravity-model` y `glot set copilot-model` y lo que completa el autocompletado. Los
-        # ids de AGY se comprueban contra `agy models`; los de Copilot pueden ser ids de
-        # OpenRouter, que no están en el catálogo del CLI, así que no se comprueban.
+        # Alias de modelo por delegado (`data/delegates.tsv`): es lo que acepta `glot set
+        # antigravity-model` y lo que completa el autocompletado. Los ids de AGY se
+        # comprueban contra `agy models`.
         if delegates="$(_glot_delegates_file)"; then
             printf 'delegates_file: %s\n' "$delegates"
-            printf 'delegate_aliases: %s alias / aliases (%s de AGY, %s de Copilot)\n' \
+            printf 'delegate_aliases: %s alias / aliases (%s de AGY)\n' \
                 "$(_glot_delegates_list | wc -l | tr -d ' ')" \
-                "$(_glot_delegates_list agy | wc -l | tr -d ' ')" \
-                "$(_glot_delegates_list copilot | wc -l | tr -d ' ')"
+                "$(_glot_delegates_list agy | wc -l | tr -d ' ')"
             if command -v agy >/dev/null 2>&1; then
                 local agy_catalog=""
                 local agy_ids=""
@@ -906,7 +895,7 @@ _glot_cmd_set() {
         return 2
     fi
 
-    # Las claves de modelo por delegado aceptan un **alias** de `data/delegates.tsv` (o un
+    # La clave de modelo del delegado acepta un **alias** de `data/delegates.tsv` (o un
     # id de esa misma tabla): se valida aquí, antes de escribir, para que un alias inventado no
     # llegue al estado y falle al delegar. `model` ya no es una clave reservada.
     case "$key" in
@@ -914,13 +903,6 @@ _glot_cmd_set() {
             if ! _glot_delegate_model agy "$value" >/dev/null 2>&1; then
                 _glot_error "alias de modelo desconocido para AGY / unknown AGY model alias: $value"
                 _glot_info "valen / valid: $(_glot_delegate_aliases agy | tr '\n' ' ')"
-                return 2
-            fi
-            ;;
-        copilot-model)
-            if ! _glot_delegate_model copilot "$value" >/dev/null 2>&1; then
-                _glot_error "alias de modelo desconocido para Copilot / unknown Copilot model alias: $value"
-                _glot_info "valen / valid: $(_glot_delegate_aliases copilot | tr '\n' ' ')"
                 return 2
             fi
             ;;
@@ -1067,9 +1049,8 @@ _glot_cmd_modules() {
 # _glot_cmd_models — catálogo de modelos (`data/models.tsv`) tal cual, una línea por perfil:
 #   perfil<TAB>modelo Copilot<TAB>esfuerzo<TAB>créditos<TAB>tier de auto<TAB>encargos<TAB>modelo AGY
 # El **perfil es la clave** (lo declara el frontmatter de la plantilla) y el campo 7 es el
-# modelo del delegado de AGY. Los **alias** que aceptan `glot set antigravity-model` y
-# `glot set copilot-model` los publica `glot delegates` (`data/delegates.tsv`), que es lo que
-# alimenta ese autocompletado.
+# modelo del delegado de AGY. Los **alias** que acepta `glot set antigravity-model`
+# los publica `glot delegates` (`data/delegates.tsv`), que es lo que alimenta ese autocompletado.
 _glot_cmd_models() {
     local data=""
 
@@ -1094,8 +1075,8 @@ _glot_cmd_models() {
 # _glot_cmd_delegates [delegado] — catálogo de alias de modelo por delegado
 # (`data/delegates.tsv`): delegado<TAB>alias<TAB>modelo, en el orden del archivo (de **más
 # barato a más caro**). Es el dato del que se alimenta el autocompletado de `glot set
-# antigravity-model` y `glot set copilot-model`, como `langs` alimenta el de lenguajes. Sin
-# argumento publica el catálogo entero; con `agy` o `copilot`, solo las filas de ese delegado.
+# antigravity-model`, como `langs` alimenta el de lenguajes. Sin argumento publica el
+# catálogo entero; con `agy`, solo las filas de ese delegado.
 _glot_cmd_delegates() {
     local want="${1:-}"
     local data=""
@@ -1107,7 +1088,7 @@ _glot_cmd_delegates() {
     fi
     if [[ -n "$want" ]] && ! _glot_delegate_table_known "$want"; then
         _glot_error "delegado desconocido / unknown delegate: $want"
-        _glot_info 'valen / valid: agy, copilot'
+        _glot_info 'valen / valid: agy'
         return 2
     fi
 
@@ -1843,8 +1824,6 @@ _glot_cmd_ask() {
     local base_model=""
     local env_model=""
     local state_model=""
-    local state_key=""
-    local cat_name=""
     local model=""
     local effort=""
     local credits=""
@@ -1920,30 +1899,24 @@ _glot_cmd_ask() {
     IFS=$'\t' read -r pname pmodel effort credits tier requests pagy_model <<<"$profile"
 
     # El modelo efectivo, por delegado. Precedencia: `--model`, después el entorno del
-    # delegado (`GLOT_MODEL_<DELEGADO>` y, como alias, `GLOT_MODEL`) y después la **clave de
-    # estado** del delegado (`antigravity-model` para AGY, `copilot-model` para Copilot), que
-    # guarda un **alias** de `data/delegates.tsv`; el perfil es el último recurso. El alias se
-    # resuelve aquí; si el valor guardado no fuera un alias conocido se pasa tal cual, para que un
-    # id pegado a mano siga valiendo. Para Copilot el del perfil es la columna 2 y para AGY la 7.
+    # delegado (`GLOT_MODEL_<DELEGADO>` y, como alias, `GLOT_MODEL`) y, en AGY, la
+    # clave de estado del delegado (`antigravity-model`, que guarda un
+    # **alias** de `data/delegates.tsv`); el perfil es el último recurso. El alias se resuelve
+    # aquí; si el valor guardado no fuera un alias conocido se pasa tal cual, para que un id
+    # pegado a mano siga valiendo. Para Copilot el del perfil es la columna 2 y para AGY la 7.
     state_model=""
     env_model=""
     base_model=""
-    state_key=""
-    cat_name=""
     if [[ "$delegate_eff" == "agy" ]]; then
-        cat_name="agy"
-        state_key="antigravity-model"
         base_model="$pagy_model"
         env_model="${GLOT_MODEL_AGY:-}"
+        state_model="$(_glot_state_get antigravity-model 2>/dev/null || true)"
+        if [[ -n "$state_model" ]]; then
+            state_model="$(_glot_delegate_model agy "$state_model" 2>/dev/null || printf '%s' "$state_model")"
+        fi
     else
-        cat_name="copilot"
-        state_key="copilot-model"
         base_model="$pmodel"
         env_model="${GLOT_MODEL_COP:-${GLOT_MODEL:-}}"
-    fi
-    state_model="$(_glot_state_get "$state_key" 2>/dev/null || true)"
-    if [[ -n "$state_model" ]]; then
-        state_model="$(_glot_delegate_model "$cat_name" "$state_model" 2>/dev/null || printf '%s' "$state_model")"
     fi
     model="${model_opt:-${env_model:-${state_model:-$base_model}}}"
 
@@ -1963,9 +1936,6 @@ _glot_cmd_ask() {
     if [[ -n "$model" ]]; then
         export COPILOT_MODEL="$model"
         env_prefix="COPILOT_MODEL=$model"
-        # Un modelo de OpenRouter (`vendedor/modelo`) activa el proveedor propio del CLI; es lo
-        # que hace usable el alias sin tocar los ids de siempre, que no llevan `/`.
-        _glot_delegate_provider "$delegate_eff" "$model"
     fi
     if [[ "$tier" != "-" ]]; then
         export COPILOT_AUTO_TIER="$tier"
@@ -2110,30 +2080,6 @@ _glot_delegate_model() {
     done < <(_glot_delegates_list "$delegate")
 
     return 1
-}
-
-# _glot_delegate_provider <delegado> <modelo> — apunta el **proveedor propio** del CLI cuando
-# el modelo del delegado es un id de **OpenRouter**: sus ids son siempre `vendedor/modelo`, así
-# que la barra los distingue de los que ofrece Copilot (`gpt-5.6-terra`, `claude-sonnet-5`), que
-# siguen yendo a GitHub. Activa BYOK con `COPILOT_PROVIDER_BASE_URL`, que es lo que hace usable
-# el alias; la **clave** no la toca glot —la pone el autor en su entorno, con
-# `COPILOT_PROVIDER_API_KEY` o `COPILOT_PROVIDER_API_KEY_COMMAND`—, y si el autor ya apunta a
-# otro proveedor ese valor manda: glot no lo pisa. Sin clave avisa por stderr, que es el canal
-# del diagnóstico, en vez de dejar que el CLI falle sin decir por qué.
-_glot_delegate_provider() {
-    local delegate="$1"
-    local model="$2"
-
-    [[ "$delegate" == "cop" ]] || return 0
-    [[ "$model" == */* ]] || return 0
-
-    export COPILOT_PROVIDER_BASE_URL="${COPILOT_PROVIDER_BASE_URL:-https://openrouter.ai/api/v1}"
-
-    if [[ -z "${COPILOT_PROVIDER_API_KEY:-}" && -z "${COPILOT_PROVIDER_BEARER_TOKEN:-}" && -z "${COPILOT_PROVIDER_API_KEY_COMMAND:-}" ]]; then
-        _glot_warn 'modelo de OpenRouter sin clave: define COPILOT_PROVIDER_API_KEY / OpenRouter model without a key: set COPILOT_PROVIDER_API_KEY'
-    fi
-
-    return 0
 }
 
 # _glot_profile_line <modelo|perfil> — fila del catálogo. El **modelo es la clave**: la
@@ -3457,8 +3403,8 @@ _glot_cmd_close() {
 # _glot_sprint_clear — cierra el sprint en el almacén: retira las claves que lo describen
 # (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `target` y `cause`) para que nadie siga
 # trabajando sobre una rama y un módulo ya cerrados: para continuar hay que volver a
-# asignarlos con `glot use`, que además vuelve a validar. **No** toca `antigravity-model` ni
-# `copilot-model` —el modelo del delegado es una preferencia de la herramienta y sus límites
+# asignarlos con `glot use`, que además vuelve a validar. **No** toca `antigravity-model`
+# —el modelo del delegado es una preferencia de la herramienta y sus límites
 # son por horas o por semana, no por sprint— ni ninguna clave que no sea del sprint, que son
 # del autor.
 _glot_sprint_clear() {
@@ -3475,8 +3421,8 @@ _glot_sprint_clear() {
 # Prepara y confirma el **puntero** (`save 9`) y registra el **cierre** (`close` + `save 10`),
 # en la rama activa y **sin abrir rama propia**. Son **dos commits** a propósito, para poder
 # separar el guardado del puntero del de la información; el **push lo hace el autor**. Desde
-# la v1.6.2 **limpia el estado del sprint** al terminar (salvo las claves de modelo del
-# delegado, `antigravity-model` y `copilot-model`, v1.7.0/v1.7.3), para que no se siga
+# la v1.6.2 **limpia el estado del sprint** al terminar (salvo la clave de modelo del
+# delegado, `antigravity-model`), para que no se siga
 # trabajando sobre la rama y el módulo finalizados.
 # Códigos: los de `pointer` y `close` (0 correcto · 1 entorno o dato · 3 no se pudo escribir
 # · 4 requisitos sin cumplir).
@@ -3505,7 +3451,7 @@ _glot_cmd_finish() {
     fi
 
     _glot_sprint_clear
-    _glot_info 'estado del sprint limpiado / sprint state cleared (salvo `antigravity-model` y `copilot-model` / except the model keys): para el siguiente, `glot use` / for the next one, `glot use`'
+    _glot_info 'estado del sprint limpiado / sprint state cleared (salvo `antigravity-model` / except the model key): para el siguiente, `glot use` / for the next one, `glot use`'
     return 0
 }
 
@@ -3553,7 +3499,6 @@ _glot_cmd_validate() {
     local tier=""
     local requests=""
     local pagy_model=""
-    local cop_state=""
     local cmd=""
     local response=""
     local rc=0
@@ -3591,24 +3536,15 @@ _glot_cmd_validate() {
     IFS=$'\t' read -r pname pmodel effort credits tier requests pagy_model <<<"$profile"
 
     # El validador usa el delegado de Copilot: el modelo sale del perfil, y `GLOT_MODEL` (o
-    # su alias `GLOT_MODEL_COP`), la clave de estado `copilot-model` (un alias de
-    # `data/delegates.tsv`, v1.7.3) y `GLOT_EFFORT` lo pueden cambiar para una sola corrida.
+    # su alias `GLOT_MODEL_COP`) y `GLOT_EFFORT` lo pueden cambiar para una sola corrida.
     if [[ -n "${GLOT_MODEL_COP:-${GLOT_MODEL:-}}" ]]; then
         pmodel="${GLOT_MODEL_COP:-${GLOT_MODEL:-}}"
-    else
-        cop_state="$(_glot_state_get copilot-model 2>/dev/null || true)"
-        if [[ -n "$cop_state" ]]; then
-            pmodel="$(_glot_delegate_model copilot "$cop_state" 2>/dev/null || printf '%s' "$cop_state")"
-        fi
     fi
     if [[ -n "${GLOT_EFFORT:-}" ]]; then
         effort="$GLOT_EFFORT"
     fi
 
     export COPILOT_MODEL="$pmodel"
-    # El modelo del validador puede ser un id de OpenRouter (alias `copilot-model`): entonces el
-    # proveedor propio se apunta igual que en `ask`.
-    _glot_delegate_provider cop "$pmodel"
     if [[ "$tier" != "-" ]]; then
         export COPILOT_AUTO_TIER="$tier"
     fi
@@ -3920,13 +3856,11 @@ _glot_help_verb() {
         set)
             printf 'glot set <clave> <valor> — guarda una clave en el estado (claves [A-Za-z0-9_.-])\n'
             printf 'glot set <key> <value> — stores a state key (keys [A-Za-z0-9_.-])\n'
-            printf 'Claves reservadas / reserved keys: lang, phase, module, branch, spec, repo, target, cause, antigravity-model, copilot-model\n'
-            printf '`glot finish` las limpia al cerrar el sprint, salvo las de modelo / `glot finish` clears them when the sprint closes, except the model keys\n'
-            printf 'Las de modelo toman un alias de `data/delegates.tsv` (o un id de esa tabla):\n'
-            printf 'The model keys take an alias from `data/delegates.tsv` (or an id in that table):\n'
-            printf '  antigravity-model: gemini | sonnet · copilot-model: default | gemini | qwen | kimi\n'
-            printf 'Los ids de `copilot-model` son de OpenRouter y apuntan su proveedor propio\n'
-            printf 'The `copilot-model` ids come from OpenRouter and point its custom provider\n'
+            printf 'Claves reservadas / reserved keys: lang, phase, module, branch, spec, repo, target, cause, antigravity-model\n'
+            printf '`glot finish` las limpia al cerrar el sprint, salvo la de modelo / `glot finish` clears them when the sprint closes, except the model key\n'
+            printf 'La de modelo toma un alias de `data/delegates.tsv` (o un id de esa tabla):\n'
+            printf 'The model key takes an alias from `data/delegates.tsv` (or an id in that table):\n'
+            printf '  antigravity-model: gemini | sonnet\n'
             ;;
         get)
             printf 'glot get <clave> — imprime el valor; 1 si la clave no existe\n'
@@ -3960,21 +3894,18 @@ _glot_help_verb() {
             printf 'glot models — profile and model catalogue (data/models.tsv)\n'
             printf 'Columnas / columns: perfil<TAB>modelo Copilot<TAB>esfuerzo<TAB>créditos<TAB>auto<TAB>encargos<TAB>modelo AGY\n'
             printf 'El campo 7 es el modelo de AGY del perfil / field 7 is the profile AGY model\n'
-            printf 'Los alias de `glot set antigravity-model` y `copilot-model` son de `glot delegates`\n'
-            printf 'The `glot set antigravity-model` and `copilot-model` aliases come from `glot delegates`\n'
+            printf 'Los alias de `glot set antigravity-model` son de `glot delegates`\n'
+            printf 'The `glot set antigravity-model` aliases come from `glot delegates`\n'
             ;;
         delegates)
             printf 'glot delegates [delegado] — catálogo de alias de modelo por delegado (data/delegates.tsv)\n'
             printf 'glot delegates [delegate] — per-delegate model alias catalogue (data/delegates.tsv)\n'
             printf 'Columnas / columns: delegado<TAB>alias<TAB>modelo\n'
-            printf 'Sin argumento publica el catálogo entero; con `agy` o `copilot`, solo sus filas\n'
-            printf 'With no argument it prints the whole catalogue; with `agy` or `copilot`, only its rows\n'
+            printf 'Sin argumento publica el catálogo entero; con `agy`, solo sus filas\n'
+            printf 'With no argument it prints the whole catalogue; with `agy`, only its rows\n'
             printf 'El orden de cada delegado es de más barato a más caro: es el del autocompletado y el\n'
             printf 'del escalado cuando se agotan límites / each delegate is ordered cheapest to most\n'
             printf 'expensive: that is the order of the completion and of the limit fallback\n'
-            printf 'Las filas de `copilot` son ids de OpenRouter: `ask` y `validate` apuntan entonces su\n'
-            printf 'proveedor propio (la clave la pone el autor) / the `copilot` rows are OpenRouter ids:\n'
-            printf '`ask` and `validate` then point its custom provider (the key belongs to the author)\n'
             ;;
         progress)
             printf 'glot progress [fase] — estado del roadmap, que es la fuente de verdad\n'
@@ -4108,18 +4039,16 @@ _glot_help_verb() {
             printf 'In the command, {root}, {spec} and {module_dir} are resolved by glot; the request goes over stdin\n'
             printf 'Sin delegado, o con dos configurados sin --delegate, devuelve 1 y 2\n'
             printf 'With no delegate, or two set without --delegate, it returns 1 and 2\n'
-            printf 'El modelo sale del perfil o de la clave del delegado (`antigravity-model`,\n'
-            printf '`copilot-model`), viaja como COPILOT_MODEL (y COPILOT_AUTO_TIER si el perfil lo\n'
+            printf 'El modelo sale del perfil o de la clave del delegado (`antigravity-model`),\n'
+            printf 'viaja como COPILOT_MODEL (y COPILOT_AUTO_TIER si el perfil lo\n'
             printf 'declara) junto con GLOT_ROOT, GLOT_MODULE_DIR, GLOT_DELEGATE_MODEL y\n'
             printf 'GLOT_DELEGATE_EFFORT: entorno, no flags. `--model`/`GLOT_MODEL` y `--effort`/`GLOT_EFFORT`\n'
-            printf 'lo cambian para una corrida; `glot set antigravity-model|copilot-model <alias>` lo\n'
+            printf 'lo cambian para una corrida; `glot set antigravity-model <alias>` lo\n'
             printf 'fija por sprint / the model comes from the profile or the delegate key, travels as\n'
             printf 'COPILOT_MODEL (and COPILOT_AUTO_TIER when the profile declares it) together with\n'
             printf 'GLOT_ROOT, GLOT_MODULE_DIR, GLOT_DELEGATE_MODEL and GLOT_DELEGATE_EFFORT:\n'
             printf 'environment, not flags. `--model`/`GLOT_MODEL` and `--effort`/`GLOT_EFFORT` change it\n'
-            printf 'for one run; `glot set antigravity-model|copilot-model <alias>` sets it per sprint\n'
-            printf 'Un id de OpenRouter en Copilot (`vendedor/modelo`) apunta el proveedor propio del CLI\n'
-            printf 'An OpenRouter id on Copilot (`vendor/model`) points the CLI custom provider\n'
+            printf 'for one run; `glot set antigravity-model <alias>` sets it per sprint\n'
             ;;
         use)
             printf 'glot use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint\n'
@@ -4186,10 +4115,10 @@ _glot_help_verb() {
             printf 'Prepares and commits the pointer (`save 9`) and records the closure\n'
             printf '(`close` + `save 10`), on the active branch, opening no branch\n'
             printf 'Deja el estado en `target=monorepo`. Dos commits; el push es tuyo. Al terminar\n'
-            printf '**limpia el estado del sprint** (salvo `antigravity-model` y `copilot-model`): para\n'
+            printf '**limpia el estado del sprint** (salvo `antigravity-model`): para\n'
             printf 'el siguiente, `glot use`\n'
             printf 'It leaves the state in `target=monorepo`. Two commits; the push is yours. When\n'
-            printf 'done it **clears the sprint state** (except `antigravity-model` and `copilot-model`):\n'
+            printf 'done it **clears the sprint state** (except `antigravity-model`):\n'
             printf 'for the next one, `glot use`\n'
             printf 'Códigos / codes: 0 correcto · 1 entorno o dato · 3 no se pudo escribir · 4 requisitos sin cumplir\n'
             ;;
