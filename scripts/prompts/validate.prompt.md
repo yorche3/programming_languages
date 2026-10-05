@@ -1,7 +1,7 @@
 ---
 name: validate
 step: 6
-model: gemini-3.8-flash
+model: qwen/qwen3.7-plus
 description: Comprueba el módulo terminado contra su especificación y su README y emite un veredicto legible por máquina
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/README_Template.md, docs/WORKFLOW.md
 mode: agent

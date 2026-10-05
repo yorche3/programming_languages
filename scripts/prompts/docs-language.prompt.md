@@ -1,7 +1,7 @@
 ---
 name: docs-language
 step: 8
-model: gemini-3.8-flash
+model: qwen/qwen3.7-plus
 description: Actualiza los índices de Nivel 1 y 2 del lenguaje para enlazar el módulo nuevo
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/CONTRIBUTING.md
 mode: agent

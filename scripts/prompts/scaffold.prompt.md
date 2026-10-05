@@ -1,7 +1,7 @@
 ---
 name: scaffold
 step: 4a
-model: gpt-5.6-terra
+model: qwen/qwen3.7-plus
 description: Ajusta el esqueleto del módulo a lo que exige el lenguaje y el módulo, sin escribir la suite
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/core/00_Project_Initialization_Guide.md, scripts/data/languages.tsv
 mode: agent
