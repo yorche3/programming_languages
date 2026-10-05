@@ -845,3 +845,104 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`crystal/core/algorithms/data_structures_basics/README.md` y `crystal/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 7/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL, C++)` -> `core.algorithms.data_structures_basics 🔄 8/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL, C++, Crystal)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-02T19:46:38-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): csharp
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/csharp.md`, commit `5006702`)
+Tests y comandos / Tests and commands:
+- `dotnet test DataStructuresBasics.slnx` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`csharp/core/algorithms/data_structures_basics/README.md` y `csharp/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 8/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL, C++, Crystal)` -> `core.algorithms.data_structures_basics 🔄 9/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-02T22:51:15-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): d
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/d.md`, commit `6652b39`)
+Tests y comandos / Tests and commands:
+- `dub test` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`d/core/algorithms/data_structures_basics/README.md` y `d/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 9/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal)` -> `core.algorithms.data_structures_basics 🔄 10/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-03T08:42:46-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): dart
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/dart.md`, commit `1614ce8`)
+Tests y comandos / Tests and commands:
+- `dart test` -> código `0`
+- `dart analyze` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`dart/core/algorithms/data_structures_basics/README.md` y `dart/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 10/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D)` -> `core.algorithms.data_structures_basics 🔄 11/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-03T13:34:54-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): elixir
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/elixir.md`, commit `2d79670`)
+Tests y comandos / Tests and commands:
+- `mix test` -> código `0`
+- `mix format --check-formatted` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`elixir/core/algorithms/data_structures_basics/README.md` y `elixir/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 11/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart)` -> `core.algorithms.data_structures_basics 🔄 12/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-03T19:21:48-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): elm
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/elm.md`, commit `4075674`)
+Tests y comandos / Tests and commands:
+- `elm-test` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`elm/core/algorithms/data_structures_basics/README.md` y `elm/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 12/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir)` -> `core.algorithms.data_structures_basics 🔄 13/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-03T20:48:27-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): erlang
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/erlang.md`, commit `dc80601`)
+Tests y comandos / Tests and commands:
+- `rebar3 eunit` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`erlang/core/algorithms/data_structures_basics/README.md` y `erlang/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 13/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm)` -> `core.algorithms.data_structures_basics 🔄 14/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-03T21:22:39-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): forth
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/forth.md`, commit `5b22a4a`)
+Tests y comandos / Tests and commands:
+- `cd test && gforth run-tests.forth` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`forth/core/algorithms/data_structures_basics/README.md` y `forth/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 14/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang)` -> `core.algorithms.data_structures_basics 🔄 15/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-04T17:57:56-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): fsharp
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/fsharp.md`, commit `6a45159`)
+Tests y comandos / Tests and commands:
+- `dotnet test` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`fsharp/core/algorithms/data_structures_basics/README.md` y `fsharp/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 15/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth)` -> `core.algorithms.data_structures_basics 🔄 16/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-04T18:32:06-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): gleam
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/gleam.md`, commit `847deae`)
+Tests y comandos / Tests and commands:
+- `gleam test` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`gleam/core/algorithms/data_structures_basics/README.md` y `gleam/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 16/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#)` -> `core.algorithms.data_structures_basics 🔄 17/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.

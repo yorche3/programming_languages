@@ -763,6 +763,12 @@ for lang in $data_phase; do
 done
 assert_eq 'secuencias y guía: nombra los que crean la carpeta' '' "$missing_phase"
 
+# la referencia entre proyectos de C# es un paso del dato, no una nota (medido el
+# 2026-10-02: sin ella el proyecto de producción no se compila y `dotnet test` pasa
+# en verde con un caso de plantilla).
+assert_eq 'secuencias: C# enlaza el proyecto de pruebas' '1' \
+    "$(awk -F'\t' '$1 == "csharp" && $5 ~ /reference/ {n++} END {print n+0}' "$REPO/scripts/data/init_sequences.tsv")"
+
 # el conversor resuelve el id del roadmap aunque no coincida con la carpeta ni con
 # el documento: es el fallo que el fixture anterior no podía ver
 sandbox_make

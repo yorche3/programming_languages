@@ -7,7 +7,8 @@ common-lisp	1	phase	run	ros -e '(ql:quickload :cl-project :silent t)' -e '(cl-pr
 csharp	1	module	run	dotnet new sln -n {Module}	-	-	-
 csharp	2	module	run	dotnet new classlib -n {Module} -o src/{Module}	-	-	-
 csharp	3	module	run	dotnet new xunit -n {Module}.Tests -o test/{Module}.Tests	-	-	-
-csharp	4	module	run	dotnet sln add src/{Module}/{Module}.csproj test/{Module}.Tests/{Module}.Tests.csproj	-	-	ProjectReference a src en el csproj de tests, borrar Class1.cs y UnitTest1.cs y añadir .gitignore
+csharp	4	module	run	dotnet sln add src/{Module}/{Module}.csproj test/{Module}.Tests/{Module}.Tests.csproj	-	-	borrar Class1.cs y UnitTest1.cs y añadir .gitignore
+csharp	5	module	run	dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj	-	-	-
 fsharp	1	module	run	dotnet new sln -n {Module}	-	-	-
 fsharp	2	module	run	dotnet new classlib -lang F# -n {Module} -o src/{Module}	-	-	-
 fsharp	3	module	run	dotnet new xunit -lang F# -n {Module}.Tests -o test/{Module}.Tests	-	-	-
