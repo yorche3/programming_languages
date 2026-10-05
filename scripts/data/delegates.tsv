@@ -1,6 +1,2 @@
 agy	gemini	gemini-3.8-flash-low
 agy	sonnet	claude-sonnet-5-5-low
-aider	default	-
-aider	qwen	qwen/qwen3.8-max-0902
-aider	gemini	google/gemini-3.8-flash
-aider	kimi	moonshotai/kimi-k3

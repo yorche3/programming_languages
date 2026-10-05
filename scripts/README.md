@@ -34,7 +34,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh langs
 ./scripts/glot.sh modules
 ./scripts/glot.sh models                         # perfiles: modelo, esfuerzo, créditos y el de AGY
-./scripts/glot.sh delegates                      # alias de modelo por delegado (agy, aider)
+./scripts/glot.sh delegates                      # alias de modelo por delegado (agy)
 ./scripts/glot.sh progress
 ./scripts/glot.sh test php algorithms/naive_sort    # suite del módulo / module suite
 ./scripts/glot.sh verify php algorithms/naive_sort  # sintaxis/lint del lenguaje
@@ -77,7 +77,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v1.7.1)
+├── glot.sh                  # Versión viva / live version (v1.7.2)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
@@ -99,7 +99,7 @@ scripts/
 │   ├── commits.tsv           # Un paso de sprint por fila: alias, ámbito y mensaje de commit
 │   ├── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
 │   ├── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos
-│   ├── delegates.tsv         # Alias de modelo por delegado (agy, aider), de más barato a más caro
+│   ├── delegates.tsv         # Alias de modelo por delegado (agy), de más barato a más caro
 │   └── toolchains.tsv        # Serie verificada por lenguaje: comando que imprime su versión
 ├── docs/                     # Documentación del tooling
 │   ├── ROADMAP.md
@@ -167,32 +167,29 @@ scripts/
 
 ### 🤝 Delegados de `ask` / `ask` delegates
 
-**ES:** `ask` envía el encargo a un **delegado** cuya orden vive en el entorno del autor, nunca en el repositorio: `GLOT_DELEGATE_COP` (GitHub Copilot CLI), `GLOT_DELEGATE_AGY` (Antigravity CLI) y `GLOT_DELEGATE_AIDER` (Aider, agéntico y compatible con OpenRouter, con la clave también en tu entorno), con `GLOT_DELEGATE` como alias del primero. Se eligen con `--delegate copilot|antigravity|aider` (cortos `cop`, `agy` y `aid`); sin el argumento, con una sola variable definida se usa esa y con varias `ask` pide elegir (`2`). El encargo que reciben lleva **rutas absolutas** (v1.6.3): `root`, `spec`, `module_dir` y las citas de la plantilla que son relativas a la raíz del monorepo —`AGENTS.md`, `docs/…`, `scripts/…`, `{lenguaje}/…`—, porque el delegado resuelve las relativas contra *su* repositorio (el submódulo, por el `cd` del ciclo) y buscaba `{lenguaje}/docs/…`, que no existe. El modelo sale del **rol** (el perfil del encargo) y, para **AGY** y **aider**, se puede **fijar por sprint** con un alias: `glot set antigravity-model <gemini|sonnet>` o `glot set aider-model <default|qwen|gemini|kimi>` (v1.7.0), que el TAB completa desde `data/delegates.tsv`. La línea de aider cita además `{spec}` (v1.7.1): un marcador nuevo que resuelve a la especificación del sprint, para dar a Aider las fuentes por `--read`.
+**ES:** `ask` envía el encargo a un **delegado** cuya orden vive en el entorno del autor, nunca en el repositorio: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) y `GLOT_DELEGATE_AGY` (Antigravity CLI), con `GLOT_DELEGATE` como alias del primero. Se eligen con `--delegate copilot|antigravity` (cortos `cop` y `agy`); sin el argumento, con una sola variable definida se usa esa y con las dos `ask` pide elegir (`2`). El encargo que reciben lleva **rutas absolutas** (v1.6.3): `root`, `spec`, `module_dir` y las citas de la plantilla que son relativas a la raíz del monorepo —`AGENTS.md`, `docs/…`, `scripts/…`, `{lenguaje}/…`—, porque el delegado resuelve las relativas contra *su* repositorio (el submódulo, por el `cd` del ciclo) y buscaba `{lenguaje}/docs/…`, que no existe. El modelo sale del **rol** (el perfil del encargo) y, para **AGY**, se puede **fijar por sprint** con un alias: `glot set antigravity-model <gemini|sonnet>` (v1.7.0), que el TAB completa desde `data/delegates.tsv`. La v1.7.2 deja solo estos dos delegados —`shellgpt` (v1.7.0) y `aider` (v1.7.1) se retiraron— y conserva el marcador `{spec}`, que resuelve a la especificación del sprint, para cualquier orden de delegado.
 
-**EN:** `ask` sends the request to a **delegate** whose command lives in the author's environment, never in the repository: `GLOT_DELEGATE_COP` (GitHub Copilot CLI), `GLOT_DELEGATE_AGY` (Antigravity CLI) and `GLOT_DELEGATE_AIDER` (Aider, agentic and OpenRouter-compatible, with its key in your environment too), with `GLOT_DELEGATE` as an alias of the first one. They are chosen with `--delegate copilot|antigravity|aider` (short `cop`, `agy`, `aid`); with no argument, one defined variable is used and several of them make `ask` ask for the choice (`2`). The request they get carries **absolute paths** (v1.6.3): `root`, `spec`, `module_dir` and the template's citations that are relative to the monorepo root —`AGENTS.md`, `docs/…`, `scripts/…`, `{lang}/…`—, because the delegate resolves relative ones against *its* repository (the submodule, because of the cycle's `cd`) and looked for `{lang}/docs/…`, which does not exist. The model comes from the **role** (the request's profile) and, for **AGY** and **aider**, it can be **pinned per sprint** with an alias: `glot set antigravity-model <gemini|sonnet>` or `glot set aider-model <default|qwen|gemini|kimi>` (v1.7.0), which TAB completes from `data/delegates.tsv`. Aider's line also cites `{spec}` (v1.7.1): a new placeholder resolving to the sprint's specification, to feed Aider the sources via `--read`.
+**EN:** `ask` sends the request to a **delegate** whose command lives in the author's environment, never in the repository: `GLOT_DELEGATE_COP` (GitHub Copilot CLI) and `GLOT_DELEGATE_AGY` (Antigravity CLI), with `GLOT_DELEGATE` as an alias of the first one. They are chosen with `--delegate copilot|antigravity` (short `cop`, `agy`); with no argument, one defined variable is used and both of them make `ask` ask for the choice (`2`). The request they get carries **absolute paths** (v1.6.3): `root`, `spec`, `module_dir` and the template's citations that are relative to the monorepo root —`AGENTS.md`, `docs/…`, `scripts/…`, `{lang}/…`—, because the delegate resolves relative ones against *its* repository (the submodule, because of the cycle's `cd`) and looked for `{lang}/docs/…`, which does not exist. The model comes from the **role** (the request's profile) and, for **AGY**, it can be **pinned per sprint** with an alias: `glot set antigravity-model <gemini|sonnet>` (v1.7.0), which TAB completes from `data/delegates.tsv`. v1.7.2 leaves only those two delegates —`shellgpt` (v1.7.0) and `aider` (v1.7.1) were retired— and keeps the `{spec}` placeholder, resolving to the sprint's specification, for any delegate command.
 
 ```bash
 # el encargo llega por stdin y glot resuelve {root}, {spec}, {module_dir} y {model}: la
 # línea no lleva tu ruta ni la clave, así que `install` te la imprime para
-# pegarla en tu rc. En AGY la opción es `--model` (el binario **no** define `-m`);
-# en aider, `--model openrouter/<id>` va condicionado al alias (`default` = config de Aider)
+# pegarla en tu rc. En AGY la opción es `--model` (el binario **no** define `-m`)
 export GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools'
 export GLOT_DELEGATE_AGY='agy --model {model} -p "$(cat)" --add-dir {root}'
-export GLOT_DELEGATE_AIDER='aider ${GLOT_DELEGATE_MODEL:+--model openrouter/$GLOT_DELEGATE_MODEL} --message "$(cat)" --yes-always --no-auto-commits --no-check-update --no-pretty --no-stream --map-tokens 0 --read {root}/docs/README_Template.md --read {root}/docs/AGENT_Template.md --read {root}/AGENTS.md --read {root}/{spec}'
 ./scripts/glot.sh ask --delegate copilot contract_stub ada algorithms/data_structures_basics
 ./scripts/glot.sh ask --delegate antigravity suite ada algorithms/data_structures_basics
-./scripts/glot.sh doctor | grep '^delegate_'   # delegate_cop: / delegate_agy: / delegate_aider:
+./scripts/glot.sh doctor | grep '^delegate_'   # delegate_cop: / delegate_agy:
 ./scripts/glot.sh set antigravity-model sonnet     # alias de AGY para este sprint
-./scripts/glot.sh set aider-model default          # alias de aider (default = config de Aider)
 ```
 
-**ES:** Las **dos claves de modelo** guardan un **alias** de `data/delegates.tsv` (el orden de cada delegado es de más barato a más caro, para escalar cuando se agotan límites): `antigravity-model` (gemini, sonnet) y `aider-model` (default, qwen, gemini, kimi). El CLI de AGY no expone los límites de horas o de cuota, así que un sprint puede quedarse sin él a mitad de módulo y tiene que poder cambiarse sin tocar el repositorio; `glot finish` las **conserva** al limpiar el sprint. En la resolución gana `--model`, después el entorno del delegado (`GLOT_MODEL_AGY`/`GLOT_MODEL_AIDER` y, como alias, `GLOT_MODEL`) y después la clave; el perfil (AGY) o la config de Aider (aider, alias `default`) queda como último recurso, y el de Copilot no se ve afectado.
+**ES:** La **clave de modelo** guarda un **alias** de `data/delegates.tsv` (el orden del catálogo es de más barato a más caro, para escalar cuando se agotan límites): `antigravity-model` (gemini, sonnet). El CLI de AGY no expone los límites de horas o de cuota, así que un sprint puede quedarse sin él a mitad de módulo y tiene que poder cambiarse sin tocar el repositorio; `glot finish` la **conserva** al limpiar el sprint. En la resolución gana `--model`, después el entorno del delegado (`GLOT_MODEL_AGY` y, como alias, `GLOT_MODEL`) y después la clave; el perfil (columna 7 de `models.tsv`) queda como último recurso, y el de Copilot no se ve afectado.
 
-**EN:** The **two model keys** store an **alias** from `data/delegates.tsv` (each delegate is ordered cheapest to most expensive, to escalate when limits run out): `antigravity-model` (gemini, sonnet) and `aider-model` (default, qwen, gemini, kimi). AGY's CLI does not expose the hourly or quota limits, so a sprint may run out of it mid-module and it has to be changeable without touching the repository; `glot finish` **keeps** them when it clears the sprint. In the resolution `--model` wins, then the delegate's environment (`GLOT_MODEL_AGY`/`GLOT_MODEL_AIDER` and, as an alias, `GLOT_MODEL`) and then the key; the profile (AGY) or Aider's config (aider, `default` alias) is the fallback, and Copilot's is unaffected.
+**EN:** The **model key** stores an **alias** from `data/delegates.tsv` (the catalogue is ordered cheapest to most expensive, to escalate when limits run out): `antigravity-model` (gemini, sonnet). AGY's CLI does not expose the hourly or quota limits, so a sprint may run out of it mid-module and it has to be changeable without touching the repository; `glot finish` **keeps** it when it clears the sprint. In the resolution `--model` wins, then the delegate's environment (`GLOT_MODEL_AGY` and, as an alias, `GLOT_MODEL`) and then the key; the profile (column 7 of `models.tsv`) is the fallback, and Copilot's is unaffected.
 
-**ES:** `glot` no elige delegado ni guarda claves: la orden es tuya y `install` **no** la escribe en el rc —al terminar la imprime para que la pegues—, para que en el repositorio solo haya marcadores y nombres de modelo. De Aider, la clave de OpenRouter vive en `OPENROUTER_API_KEY` o en un fichero suyo bajo `$HOME`, **nunca** en el repositorio; y como Aider auto-carga `.env`/`.aider.conf.yml` del directorio actual, conviene no dejar esos ficheros en el árbol del submódulo. El detalle de cada CLI está en [`docs/VALIDATION.md`](docs/VALIDATION.md).
+**ES:** `glot` no elige delegado ni guarda claves: la orden es tuya y `install` **no** la escribe en el rc —al terminar la imprime para que la pegues—, para que en el repositorio solo haya marcadores y nombres de modelo. Las credenciales de un CLI viven en su config bajo `$HOME` (la clave de OpenRouter, por ejemplo), **nunca** en el repositorio, y quien enchufe un proveedor propio lo hace exportando sus variables antes de `glot ask` o `glot validate`. El detalle de cada CLI está en [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
-**EN:** `glot` neither picks a delegate nor stores keys: the command is yours and `install` does **not** write it into the rc —it prints it at the end so you can paste it— so that only placeholders and model names land in the repository. Aider's OpenRouter key lives in `OPENROUTER_API_KEY` or in a file of its own under `$HOME`, **never** in the repository; and since Aider auto-loads `.env`/`.aider.conf.yml` from the current directory, do not leave those files in the submodule tree. Each CLI's details are in [`docs/VALIDATION.md`](docs/VALIDATION.md).
+**EN:** `glot` neither picks a delegate nor stores keys: the command is yours and `install` does **not** write it into the rc —it prints it at the end so you can paste it— so that only placeholders and model names land in the repository. A CLI's credentials live in its config under `$HOME` (the OpenRouter key, for instance), **never** in the repository, and whoever plugs in a custom provider does it by exporting its variables before `glot ask` or `glot validate`. Each CLI's details are in [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
 ---
 
