@@ -87,7 +87,7 @@ _glot_zsh() {
             fi
             ;;
         delegates)
-            _values 'delegado' agy
+            _values 'delegado' agy copilot
             ;;
         prompt)
             if ((CURRENT == 3)); then
@@ -137,16 +137,19 @@ _glot_zsh() {
             _values 'shell' bash zsh
             ;;
         get | unset)
-            _values 'clave' lang phase module branch spec repo target cause antigravity-model
+            _values 'clave' lang phase module branch spec repo target cause antigravity-model copilot-model
             ;;
         set)
             if [[ "${words[CURRENT - 1]}" == "antigravity-model" ]]; then
-                # La clave de modelo toma un **alias** de `glot delegates` (en vivo),
+                # Cada clave de modelo toma un **alias** de `glot delegates` (en vivo),
                 # como los lenguajes salen de `langs`.
                 ids=(${(f)"$("$glot" delegates agy 2>/dev/null | cut -f2)"})
                 _describe 'alias de AGY' ids
+            elif [[ "${words[CURRENT - 1]}" == "copilot-model" ]]; then
+                ids=(${(f)"$("$glot" delegates copilot 2>/dev/null | cut -f2)"})
+                _describe 'alias de Copilot' ids
             else
-                _values 'clave' lang phase module branch spec repo target cause antigravity-model
+                _values 'clave' lang phase module branch spec repo target cause antigravity-model copilot-model
             fi
             ;;
     esac

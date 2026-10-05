@@ -34,7 +34,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh langs
 ./scripts/glot.sh modules
 ./scripts/glot.sh models                         # perfiles: modelo, esfuerzo, créditos y el de AGY
-./scripts/glot.sh delegates                      # alias de modelo por delegado (agy)
+./scripts/glot.sh delegates                      # alias de modelo por delegado (agy, copilot)
 ./scripts/glot.sh progress
 ./scripts/glot.sh test php algorithms/naive_sort    # suite del módulo / module suite
 ./scripts/glot.sh verify php algorithms/naive_sort  # sintaxis/lint del lenguaje
@@ -77,7 +77,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v1.7.2)
+├── glot.sh                  # Versión viva / live version (v1.7.3)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
@@ -99,7 +99,7 @@ scripts/
 │   ├── commits.tsv           # Un paso de sprint por fila: alias, ámbito y mensaje de commit
 │   ├── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
 │   ├── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos
-│   ├── delegates.tsv         # Alias de modelo por delegado (agy), de más barato a más caro
+│   ├── delegates.tsv         # Alias de modelo por delegado (agy, copilot), de más barato a más caro
 │   └── toolchains.tsv        # Serie verificada por lenguaje: comando que imprime su versión
 ├── docs/                     # Documentación del tooling
 │   ├── ROADMAP.md
@@ -181,15 +181,16 @@ export GLOT_DELEGATE_AGY='agy --model {model} -p "$(cat)" --add-dir {root}'
 ./scripts/glot.sh ask --delegate antigravity suite ada algorithms/data_structures_basics
 ./scripts/glot.sh doctor | grep '^delegate_'   # delegate_cop: / delegate_agy:
 ./scripts/glot.sh set antigravity-model sonnet     # alias de AGY para este sprint
+./scripts/glot.sh set copilot-model default        # alias de Copilot (OpenRouter) para este sprint
 ```
 
-**ES:** La **clave de modelo** guarda un **alias** de `data/delegates.tsv` (el orden del catálogo es de más barato a más caro, para escalar cuando se agotan límites): `antigravity-model` (gemini, sonnet). El CLI de AGY no expone los límites de horas o de cuota, así que un sprint puede quedarse sin él a mitad de módulo y tiene que poder cambiarse sin tocar el repositorio; `glot finish` la **conserva** al limpiar el sprint. En la resolución gana `--model`, después el entorno del delegado (`GLOT_MODEL_AGY` y, como alias, `GLOT_MODEL`) y después la clave; el perfil (columna 7 de `models.tsv`) queda como último recurso, y el de Copilot no se ve afectado.
+**ES:** Las **claves de modelo** guardan un **alias** de `data/delegates.tsv` (el orden del catálogo es de más barato a más caro, para escalar cuando se agotan límites): `antigravity-model` (gemini, sonnet) y `copilot-model` (default, gemini, qwen, kimi, que son los modelos de **OpenRouter** de la documentación). El CLI de AGY no expone los límites de horas o de cuota, así que un sprint puede quedarse sin él a mitad de módulo y tiene que poder cambiarse sin tocar el repositorio; `glot finish` las **conserva** al limpiar el sprint. En la resolución gana `--model`, después el entorno del delegado (`GLOT_MODEL_AGY`/`GLOT_MODEL_COP` y, como alias, `GLOT_MODEL`) y después la clave; el perfil (columna 7 de `models.tsv` para AGY, columna 2 para Copilot) queda como último recurso.
 
-**EN:** The **model key** stores an **alias** from `data/delegates.tsv` (the catalogue is ordered cheapest to most expensive, to escalate when limits run out): `antigravity-model` (gemini, sonnet). AGY's CLI does not expose the hourly or quota limits, so a sprint may run out of it mid-module and it has to be changeable without touching the repository; `glot finish` **keeps** it when it clears the sprint. In the resolution `--model` wins, then the delegate's environment (`GLOT_MODEL_AGY` and, as an alias, `GLOT_MODEL`) and then the key; the profile (column 7 of `models.tsv`) is the fallback, and Copilot's is unaffected.
+**EN:** The **model keys** store an **alias** from `data/delegates.tsv` (the catalogue is ordered cheapest to most expensive, to escalate when limits run out): `antigravity-model` (gemini, sonnet) and `copilot-model` (default, gemini, qwen, kimi, which are the **OpenRouter** models of the documentation). AGY's CLI does not expose the hourly or quota limits, so a sprint may run out of it mid-module and it has to be changeable without touching the repository; `glot finish` **keeps** them when it clears the sprint. In the resolution `--model` wins, then the delegate's environment (`GLOT_MODEL_AGY`/`GLOT_MODEL_COP` and, as an alias, `GLOT_MODEL`) and then the key; the profile (column 7 of `models.tsv` for AGY, column 2 for Copilot) is the fallback.
 
-**ES:** `glot` no elige delegado ni guarda claves: la orden es tuya y `install` **no** la escribe en el rc —al terminar la imprime para que la pegues—, para que en el repositorio solo haya marcadores y nombres de modelo. Las credenciales de un CLI viven en su config bajo `$HOME` (la clave de OpenRouter, por ejemplo), **nunca** en el repositorio, y quien enchufe un proveedor propio lo hace exportando sus variables antes de `glot ask` o `glot validate`. El detalle de cada CLI está en [`docs/VALIDATION.md`](docs/VALIDATION.md).
+**ES:** `glot` no elige delegado ni guarda claves: la orden es tuya y `install` **no** la escribe en el rc —al terminar la imprime para que la pegues—, para que en el repositorio solo haya marcadores y nombres de modelo. Las credenciales de un CLI viven en su config bajo `$HOME` (la clave de OpenRouter, por ejemplo), **nunca** en el repositorio. En **Copilot** un modelo con `/` —los de `copilot-model`— hace que `ask` y `validate` apunten el **proveedor propio** del CLI (`COPILOT_PROVIDER_BASE_URL`, si no apuntas tú a otro proveedor): la clave es tuya, se pone con `COPILOT_PROVIDER_API_KEY` o `COPILOT_PROVIDER_API_KEY_COMMAND`, y glot ni la lee ni la guarda. El detalle de cada CLI está en [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
-**EN:** `glot` neither picks a delegate nor stores keys: the command is yours and `install` does **not** write it into the rc —it prints it at the end so you can paste it— so that only placeholders and model names land in the repository. A CLI's credentials live in its config under `$HOME` (the OpenRouter key, for instance), **never** in the repository, and whoever plugs in a custom provider does it by exporting its variables before `glot ask` or `glot validate`. Each CLI's details are in [`docs/VALIDATION.md`](docs/VALIDATION.md).
+**EN:** `glot` neither picks a delegate nor stores keys: the command is yours and `install` does **not** write it into the rc —it prints it at the end so you can paste it— so that only placeholders and model names land in the repository. A CLI's credentials live in its config under `$HOME` (the OpenRouter key, for instance), **never** in the repository. In **Copilot** a model with a `/` —the `copilot-model` ones— makes `ask` and `validate` point the CLI **custom provider** (`COPILOT_PROVIDER_BASE_URL`, unless you point to another provider): the key belongs to you, set with `COPILOT_PROVIDER_API_KEY` or `COPILOT_PROVIDER_API_KEY_COMMAND`, and glot neither reads nor stores it. Each CLI's details are in [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
 ---
 

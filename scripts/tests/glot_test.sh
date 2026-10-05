@@ -661,14 +661,26 @@ assert_eq 'delegates: el catálogo tal cual' \
 assert_eq 'delegates: tres columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=3')"
 assert_eq 'delegates: ningún alias repetido dentro de un delegado' '0' \
     "$(printf '%s\n' "$out" | awk -F'\t' '{print $1"/"$2}' | LC_ALL=C sort | uniq -d | wc -l | tr -d ' ')"
-# v1.7.2: aider se retira, así que el catálogo solo tiene las filas de AGY
-assert_eq 'delegates: solo las filas de AGY (v1.7.2 retira aider)' 'agy' \
+# v1.7.2 retiró aider y la v1.7.3 añade las filas de Copilot (los modelos de OpenRouter)
+assert_eq 'delegates: los dos delegados del catálogo' 'agy
+copilot' \
     "$(printf '%s\n' "$out" | cut -f1 | LC_ALL=C sort -u)"
 
 glot_run delegates agy
 assert_eq 'delegates agy: código' '0' "$rc_last"
 assert_eq 'delegates agy: solo sus dos filas' '2' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 assert_eq 'delegates agy: la primera columna, el delegado' 'agy' "$(printf '%s\n' "$out" | cut -f1 | LC_ALL=C sort -u)"
+
+# v1.7.3: las filas de Copilot llevan ids de OpenRouter (`vendedor/modelo`), y esa barra es la
+# que distingue el modelo que viaja al proveedor propio del que viaja a GitHub
+glot_run delegates copilot
+assert_eq 'delegates copilot: código' '0' "$rc_last"
+assert_eq 'delegates copilot: sus cuatro filas' '4' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'delegates copilot: la primera columna, el delegado' 'copilot' "$(printf '%s\n' "$out" | cut -f1 | LC_ALL=C sort -u)"
+assert_eq 'delegates copilot: todos sus modelos son ids de OpenRouter' '4' \
+    "$(printf '%s\n' "$out" | awk -F'\t' '$3 ~ /\//' | wc -l | tr -d ' ')"
+assert_eq 'delegates copilot: el alias `default` es el modelo de la documentación' 'qwen/qwen3.7-plus' \
+    "$(printf '%s\n' "$out" | awk -F'\t' '$2=="default" {print $3}')"
 
 glot_run delegates nope
 assert_eq 'delegates con delegado desconocido: código' '2' "$rc_last"
@@ -1035,6 +1047,42 @@ assert_contains 'set antigravity-model: el de Copilot sigue saliendo del perfil'
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" doctor 2>/dev/null || true)"
 assert_contains 'set antigravity-model: doctor informa del alias fijado' 'antigravity_model_state: sonnet' "$out"
 
+# v1.7.3: el delegado de Copilot tiene su propia clave, `copilot-model`, y sus alias son ids de
+# **OpenRouter**: es la vía de los modelos de documentación. El modelo se resuelve igual (el alias
+# sale del catálogo) y, como el id lleva `/`, `ask` apunta el **proveedor propio** del CLI —la
+# clave es del autor, y un endpoint ya configurado manda—. Los ids de Copilot
+# (`gpt-5.6-terra`, `claude-sonnet-5`) no llevan `/`, así que siguen yendo a GitHub.
+COP_LINE='printf "P=%s|M=%s\n" "${COPILOT_PROVIDER_BASE_URL:-vacio}" "$COPILOT_MODEL"; cat >/dev/null'
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model default >/dev/null 2>&1
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
+    "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_eq 'copilot-model: el alias `default` resuelve al modelo de OpenRouter' 'P=https://openrouter.ai/api/v1|M=qwen/qwen3.7-plus' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test COPILOT_PROVIDER_BASE_URL=https://otro.example/v1 \
+    "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_eq 'copilot-model: el endpoint del autor manda sobre el de OpenRouter' 'P=https://otro.example/v1|M=qwen/qwen3.7-plus' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
+    "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>"$WORK_DIR/stderr" || true)"
+assert_eq 'copilot-model: sin clave sigue delegando' 'P=https://openrouter.ai/api/v1|M=qwen/qwen3.7-plus' "$out"
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_contains 'copilot-model: sin clave lo avisa por stderr' 'COPILOT_PROVIDER_API_KEY' "$err"
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model kimi >/dev/null 2>&1
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
+    "$GLOT_SH" -n ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_contains 'copilot-model: el alias llega resuelto a COPILOT_MODEL' 'COPILOT_MODEL=moonshotai/kimi-k3' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" doctor 2>/dev/null || true)"
+assert_contains 'copilot-model: doctor informa del alias fijado' 'copilot_model_state: kimi' "$out"
+# el perfil (sin clave de estado) no lleva `/`: ni proveedor propio ni aviso
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" unset copilot-model >/dev/null 2>&1
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
+    "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_eq 'copilot-model sin fijar: el modelo del perfil no toca el proveedor' 'P=vacio|M=claude-sonnet-5' "$out"
+rc_bad=0
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model nope >/dev/null 2>&1 || rc_bad=$?
+assert_eq 'set copilot-model con alias inválido: código' '2' "$rc_bad"
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model nope 2>"$WORK_DIR/stderr" >/dev/null || true
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_contains 'set copilot-model con alias inválido: lista los válidos' 'default gemini qwen kimi' "$err"
+
 # v1.7.2: `aider-model` deja de ser clave reservada, así que ya no se valida contra el
 # catálogo: `set` la guarda como cualquier clave del autor.
 rc_bad=0
@@ -1054,7 +1102,7 @@ glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
 assert_contains 'doctor: registro de encargos' 'prompts_ok: 10 encargos / requests' "$out"
 assert_contains 'doctor: catálogo de delegados' 'delegates_file: ' "$out"
-assert_contains 'doctor: alias por delegado' 'delegate_aliases: 2 alias / aliases (2 de AGY)' "$out"
+assert_contains 'doctor: alias por delegado' 'delegate_aliases: 6 alias / aliases (2 de AGY, 4 de Copilot)' "$out"
 assert_contains 'doctor: delegado COP sin configurar' 'delegate_cop: (sin configurar / not configured)' "$out"
 assert_contains 'doctor: delegado AGY sin configurar' 'delegate_agy: (sin configurar / not configured)' "$out"
 assert_eq 'doctor: ya no informa de un delegado aider (v1.7.2)' 'no' \
@@ -1241,26 +1289,34 @@ assert_eq 'completion bash: un candidato por línea' '22' "$(printf '%s\n' "$sav
 # alineada: una clave nueva con un sitio olvidado es el fallo que dejó `target`, `cause` y
 # `model` fuera del completado.
 keys_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot get ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
-assert_eq 'completion bash: las nueve claves reservadas' \
-    'antigravity-model branch cause lang module phase repo spec target' \
+assert_eq 'completion bash: las diez claves reservadas' \
+    'antigravity-model branch cause copilot-model lang module phase repo spec target' \
     "$(printf '%s\n' "$keys_comp" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
 assert_contains 'completion zsh: la misma lista de claves' \
-    'lang phase module branch spec repo target cause antigravity-model' "$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
+    'lang phase module branch spec repo target cause antigravity-model copilot-model' "$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
 glot_run help set
 assert_contains 'help set: la misma lista de claves' \
-    'lang, phase, module, branch, spec, repo, target, cause, antigravity-model' "$out"
+    'lang, phase, module, branch, spec, repo, target, cause, antigravity-model, copilot-model' "$out"
 
 # v1.6.3/v1.7.0: `set` también se completa (le faltaba la rama entera), y tras cada clave de
 # modelo salen los **alias** de su delegado en vivo (`glot delegates`), como los lenguajes
 # salen de `langs`.
 set_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
 assert_eq 'completion bash: `set` completa las claves' \
-    'lang phase module branch spec repo target cause antigravity-model' \
+    'lang phase module branch spec repo target cause antigravity-model copilot-model' \
     "$(printf '%s\n' "$set_comp" | tr '\n' ' ' | sed 's/ $//')"
 set_agy_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set antigravity-model ""); COMP_CWORD=3; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
 glot_run delegates agy
 assert_eq 'completion bash: `set antigravity-model` completa los alias de AGY del catálogo' \
     "$(printf '%s\n' "$out" | cut -f2)" "$set_agy_comp"
+# v1.7.3: la clave de Copilot completa los suyos, que salen del mismo catálogo
+set_cop_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set copilot-model ""); COMP_CWORD=3; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+glot_run delegates copilot
+assert_eq 'completion bash: `set copilot-model` completa los alias de Copilot del catálogo' \
+    "$(printf '%s\n' "$out" | cut -f2)" "$set_cop_comp"
+delegates_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot delegates ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
+assert_eq 'completion bash: los dos delegados del catálogo' 'agy copilot' \
+    "$(printf '%s\n' "$delegates_comp" | tr '\n' ' ' | sed 's/ $//')"
 verb_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot mod); COMP_CWORD=1; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
 assert_eq 'completion bash: los dos verbos del catálogo' 'modules
 models' "$verb_comp"
@@ -2147,6 +2203,7 @@ glot_run_finish set branch main
 assert_eq 'finish: el sprint está asignado' 'php' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get lang)"
 glot_run_finish set antigravity-model gemini
+glot_run_finish set copilot-model default
 
 glot_run_finish finish php algorithms/naive_sort
 assert_eq 'finish: código' '0' "$rc_last"
@@ -2155,6 +2212,8 @@ assert_eq 'finish: el sprint se ha ido' '1' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get lang >/dev/null 2>&1; echo $?)"
 assert_eq 'finish: el modelo de AGY se queda' 'gemini' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get antigravity-model)"
+assert_eq 'finish: el modelo de Copilot se queda' 'default' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get copilot-model)"
 glot_run_finish save 4a
 assert_eq 'finish sin estado: hay que asignarlo otra vez' '1' "$rc_last"
 assert_contains 'finish sin estado: lo dice' 'glot use' "$err"
@@ -2315,11 +2374,11 @@ assert_contains 'cargado: un use fallido no deja la shell rota' 'vivo' "$out"
 # v1.6.2/v1.7.0: `glot finish` limpia el estado del sprint al terminar, para no seguir trabajando
 # sobre una rama y un directorio finalizados (el `finish` completo va más abajo, con el
 # sandbox). Aquí se prueba la limpieza sola, con un almacén propio para no alterar el del
-# resto de los casos: se van las claves del sprint —y no otras— y la clave de modelo del
-# delegado se queda.
+# resto de los casos: se van las claves del sprint —y no otras— y las claves de modelo del
+# delegado se quedan.
 STATE_CLEAR="$WORK_DIR/state-clear"
 for kv in lang=php phase=algorithms module=naive_sort branch=feat/algorithms/x \
-    spec=spec.md target=monorepo cause=fix antigravity-model=sonnet zap=1; do
+    spec=spec.md target=monorepo cause=fix antigravity-model=sonnet copilot-model=default zap=1; do
     GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" set "${kv%%=*}" "${kv#*=}" >/dev/null 2>&1
 done
 assert_eq 'estado del sprint: el almacén de prueba está montado' 'php' \
@@ -2331,6 +2390,8 @@ assert_eq 'finish: el sprint se ha ido' 'si' \
     "$(grep -qE '^(lang|phase|module|branch|spec|repo|target|cause)=' "$STATE_CLEAR" && echo no || echo si)"
 assert_eq 'finish: el modelo de AGY se queda' 'sonnet' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get antigravity-model)"
+assert_eq 'finish: el modelo de Copilot se queda' 'default' \
+    "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get copilot-model)"
 assert_eq 'finish: las claves del autor se quedan' '1' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get zap)"
 
@@ -2984,11 +3045,14 @@ ZSH_COMP="$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
 # guion suelto: necesita `compinit` y el contexto del shell—; el comportamiento se prueba en el
 # completado de bash, que sí se puede cargar y llamar.
 ZSH_COMP_AGY='delegates agy 2>/dev/null | cut -f2'
+ZSH_COMP_COP='delegates copilot 2>/dev/null | cut -f2'
 assert_contains 'completado zsh: los dos valores del delegado' 'compadd -- copilot antigravity' "$ZSH_COMP"
 assert_contains 'completado zsh: la forma --delegate=' 'compadd -- --delegate=copilot --delegate=antigravity' "$ZSH_COMP"
 assert_contains 'completado zsh: ask tiene su propia rama' '        ask)' "$ZSH_COMP"
 assert_contains 'completado zsh: `set` tiene su rama' '        set)' "$ZSH_COMP"
 assert_contains 'completado zsh: los alias de AGY tras `antigravity-model`' "$ZSH_COMP_AGY" "$ZSH_COMP"
+assert_contains 'completado zsh: los alias de Copilot tras `copilot-model`' "$ZSH_COMP_COP" "$ZSH_COMP"
+assert_contains 'completado zsh: los dos delegados del catálogo' "_values 'delegado' agy copilot" "$ZSH_COMP"
 assert_contains 'completado zsh: el verbo del catálogo de modelos' 'models:catálogo de perfiles y modelos' "$ZSH_COMP"
 assert_contains 'completado zsh: el verbo del catálogo de delegados' 'delegates:catálogo de alias de modelo por delegado' "$ZSH_COMP"
 assert_contains 'completado zsh: el verbo finish' 'finish:cierre del monorepo' "$ZSH_COMP"

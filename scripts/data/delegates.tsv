@@ -1,2 +1,6 @@
 agy	gemini	gemini-3.8-flash-low
 agy	sonnet	claude-sonnet-5-5-low
+copilot	default	qwen/qwen3.7-plus
+copilot	gemini	google/gemini-3.8-flash
+copilot	qwen	qwen/qwen3.8-max-0902
+copilot	kimi	moonshotai/kimi-k3

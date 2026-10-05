@@ -210,42 +210,54 @@ here is a **missing datum** (`1`), never an invented profile.
 ## 🔤 `delegates.tsv` — alias de modelo por delegado / per-delegate model aliases
 
 **ES:** Una fila por **alias**, con el delegado como primera columna. Es el mapa que traduce
-lo que el autor escribe en `glot set antigravity-model`
-(`gemini`, `sonnet`) al **id real** que espera el CLI. **No lleva
-nada sensible**: las credenciales de un CLI viven en su config bajo `$HOME`, fuera del
+lo que el autor escribe en `glot set antigravity-model` (`gemini`, `sonnet`) y en
+`glot set copilot-model` (`default`, `gemini`, `qwen`, `kimi`) al **id real** que espera el CLI.
+Las filas de `copilot` (v1.7.3) son ids de **OpenRouter** —siempre `vendedor/modelo`—, que es la
+vía de los modelos de documentación: la barra es lo que distingue ese id del que ofrece Copilot.
+**No lleva nada sensible**: las credenciales de un CLI viven en su config bajo `$HOME`, fuera del
 repositorio, y la orden del delegado vive en el entorno del autor.
 
 | Columna / Column | Contenido / Content | Ejemplo / Example |
 |:---:|---|---|
-| 1 | Delegado, el de `--delegate` en corto | `agy` |
+| 1 | Delegado, el de `--delegate` | `agy` · `copilot` |
 | 2 | Alias, lo que acepta la clave de estado | `gemini` |
 | 3 | Modelo, **id real** | `gemini-3.8-flash-low` |
 
 **ES:** El **orden de las filas de cada delegado es de más barato a más caro**: es el orden
 del autocompletado. `doctor` informa de la cobertura (`delegate_aliases`) y, si
 `agy` está instalado, de cuántos de sus ids siguen en `agy models`
-(`delegate_model_available_agy`).
+(`delegate_model_available_agy`); los ids de OpenRouter **no** se comprueban contra ningún
+catálogo local, porque no lo hay.
 
 **EN:** One row per **alias**, with the delegate as the first column. It is the map that turns
-what the author writes in `glot set antigravity-model`
-(`gemini`, `sonnet`) into the **real id** the CLI expects. It carries
-**nothing sensitive**: a CLI's credentials live in its config under `$HOME`, outside the
-repository, and the delegate command lives in the author's
-environment. Each delegate's rows are ordered **cheapest to most expensive**: that is the order
-of the completion.
+what the author writes in `glot set antigravity-model` (`gemini`, `sonnet`) and in
+`glot set copilot-model` (`default`, `gemini`, `qwen`, `kimi`) into the **real id** the CLI
+expects. The `copilot` rows (v1.7.3) are **OpenRouter** ids —always `vendor/model`—, the way of
+the documentation models: the slash is what tells that id apart from the one Copilot offers.
+It carries **nothing sensitive**: a CLI's credentials live in its config under `$HOME`, outside
+the repository, and the delegate command lives in the author's environment. Each delegate's rows
+are ordered **cheapest to most expensive**: that is the order of the completion.
 
-**ES:** El delegado es un agente cuyo CLI se invoca desde la línea del entorno del autor; el
+**ES:** Cada delegado es un agente cuyo CLI se invoca desde la línea del entorno del autor; el
 catálogo solo guarda los **nombres** de modelo que esa línea usa, y las credenciales de cada
-CLI viven en su config bajo `$HOME`, nunca en el repositorio.
+CLI viven en su config bajo `$HOME`, nunca en el repositorio. En Copilot, un id con `/` hace que
+`ask` y `validate` apunten el **proveedor propio** del CLI (`COPILOT_PROVIDER_BASE_URL`), que es
+lo que hace usable el alias; la clave la pone el autor.
 
-**EN:** The delegate is an agent whose CLI is invoked from the author's environment line; the
+**EN:** Each delegate is an agent whose CLI is invoked from the author's environment line; the
 catalogue only stores the model **names** that line uses, and each CLI's credentials live in
-its config under `$HOME`, never in the repository.
+its config under `$HOME`, never in the repository. On Copilot, an id with a `/` makes `ask` and
+`validate` point the CLI **custom provider** (`COPILOT_PROVIDER_BASE_URL`), which is what makes
+the alias usable; the key belongs to the author.
 
 | Delegado / Delegate | Alias | Modelo / Model |
 |---|---|---|
 | `agy` | `gemini` | `gemini-3.8-flash-low` |
 | `agy` | `sonnet` | `claude-sonnet-5-5-low` |
+| `copilot` | `default` | `qwen/qwen3.7-plus` (OpenRouter) |
+| `copilot` | `gemini` | `google/gemini-3.8-flash` (OpenRouter) |
+| `copilot` | `qwen` | `qwen/qwen3.8-max-0902` (OpenRouter) |
+| `copilot` | `kimi` | `moonshotai/kimi-k3` (OpenRouter) |
 
 ## 🧰 `toolchains.tsv` — series verificadas / verified series
 
