@@ -176,7 +176,7 @@ que el modelo y su presupuesto no puedan derivar el uno del otro.
 | Columna / Column | Contenido / Content | Ejemplo / Example |
 |:---:|---|---|
 | 1 | Perfil, nombre de política | `economy` |
-| 2 | Modelo de Copilot, **id real** de la lista del CLI instalado | `gemini-3.8-flash` |
+| 2 | Modelo de Copilot: un **id real** de la lista del CLI, o uno de **OpenRouter** (`vendedor/modelo`, que se sirve por el proveedor propio) | `gpt-5.6-terra` |
 | 3 | Esfuerzo de razonamiento, que `glot` pasa como `--reasoning-effort` | `low` |
 | 4 | Tope de créditos, que `glot` pasa como `--max-ai-credits`; **30 es el mínimo que acepta el CLI** | `30` |
 | 5 | Tier de auto (`--auto-tier`), o `-` cuando el modelo es fijo | `-` |
@@ -193,19 +193,37 @@ its budget cannot drift apart.
 documento: `doctor` informa de la cobertura (`model_profiles`) y de cuántos modelos del
 catálogo siguen apareciendo en el CLI (`model_available`), y el harness comprueba la deriva
 en los dos sentidos entre la columna 6 y las plantillas que declaran cada modelo. Un
-`model:` que no esté aquí es un **dato que falta** (`1`), nunca un perfil inventado.
+`model:` que no esté aquí es un **dato que falta** (`1`), nunca un perfil inventado. Desde
+la **v1.7.3** el perfil `economy` declara un modelo de **OpenRouter** (lleva `/`): esos no se
+buscan en la lista del CLI, porque los sirve el proveedor propio, y por eso `model_available`
+cuenta solo los de Copilot.
 
 **EN:** The model list is owned by the **installed CLI** (`copilot help config`), not by
 this document: `doctor` reports coverage (`model_profiles`) and how many catalogue models
 are still listed by the CLI (`model_available`), and the harness checks drift in both
 directions between column 6 and the templates that declare each model. A `model:` missing
-here is a **missing datum** (`1`), never an invented profile.
+here is a **missing datum** (`1`), never an invented profile. Since **v1.7.3** the `economy`
+profile declares an **OpenRouter** model (it carries a `/`): those are not looked up in the
+CLI list, because the custom provider serves them, and that is why `model_available` counts
+only Copilot's.
 
 | Perfil / Profile | Modelo / Model | Esfuerzo / Effort | Créditos / Credits | Encargos / Requests | Modelo AGY / AGY model |
 |---|---|---|:--:|---|---|
-| `economy` | `gemini-3.8-flash` | `low` | 30 | `validate`, `docs-module`, `docs-language` | `gemini-3.8-flash-low` |
-| `balanced` | `gpt-5.6-terra` | `low` | 90 | `scaffold`, `contract_stub`, `suite`, `correct` | `gemini-3.8-flash-low` |
+| `economy` | `qwen/qwen3.7-plus` (OpenRouter) | `low` | 30 | `scaffold`, `correct`, `validate`, `docs-module`, `docs-language` | `gemini-3.8-flash-low` |
+| `balanced` | `gpt-5.6-terra` | `low` | 90 | `contract_stub`, `suite` | `gemini-3.8-flash-low` |
 | `deep` | `claude-sonnet-5` | `high` | 120 | `implement`, `fix`, `refactor` | `claude-sonnet-5-5-low` |
+
+**ES:** Los tres perfiles siguen el reparto del sprint: `balanced` escribe el **contrato** y la
+**suite** (estructuras ya homologadas, con `terra`), `deep` hace la **implementación** (con
+`sonnet`) y `economy` cubre el **andamiaje**, la **corrección** y la **documentación**, que va
+por **OpenRouter** con esfuerzo `low`. El nombre del perfil es una política de coste: el dato
+del modelo vive en la plantilla y aquí solo está su presupuesto.
+
+**EN:** The three profiles follow the sprint split: `balanced` writes the **contract** and the
+**suite** (already homologated structures, with `terra`), `deep` does the **implementation**
+(with `sonnet`) and `economy` covers the **scaffolding**, the **correction** and the
+**documentation**, which goes over **OpenRouter** at effort `low`. The profile name is a cost
+policy: the model datum lives in the template and only its budget is here.
 
 ## 🔤 `delegates.tsv` — alias de modelo por delegado / per-delegate model aliases
 

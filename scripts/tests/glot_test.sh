@@ -922,7 +922,7 @@ assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
 assert_contains 'prompt: contract_stub en el paso 4b' "$(printf 'contract_stub\t4b')" "$out"
 assert_contains 'prompt: suite después del contrato' "$(printf 'suite\t4c')" "$out"
 assert_contains 'prompt: docs-language en el paso 8' "$(printf 'docs-language\t8')" "$out"
-assert_contains 'prompt: el modelo sale del catálogo' "$(printf 'validate\t6\tgemini-3.8-flash')" "$out"
+assert_contains 'prompt: el modelo sale del catálogo' "$(printf 'validate\t6\tqwen/qwen3.7-plus')" "$out"
 
 # el encargo lleva la cabecera con el estado del sprint y la plantilla expandida
 glot_run prompt scaffold php algorithms/naive_sort
@@ -1004,6 +1004,7 @@ assert_contains 'ask --delegate aider: lista los válidos' 'copilot, antigravity
 # la ayuda de `ask` trae las tres líneas, que es donde se buscan
 glot_run help ask
 assert_contains 'help ask: trae la línea de Copilot' "export GLOT_DELEGATE_COP='copilot" "$out"
+assert_contains 'help ask: la línea de Copilot lleva el esfuerzo del perfil' '--reasoning-effort {effort}' "$out"
 assert_contains 'help ask: trae la línea de Antigravity' "export GLOT_DELEGATE_AGY='agy" "$out"
 assert_eq 'help ask: ya no trae la línea de aider (v1.7.2)' 'no' \
     "$([[ "$out" == *GLOT_DELEGATE_AIDER* ]] && echo si || echo no)"
@@ -1048,34 +1049,52 @@ out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" doctor 2>/
 assert_contains 'set antigravity-model: doctor informa del alias fijado' 'antigravity_model_state: sonnet' "$out"
 
 # v1.7.3: el delegado de Copilot tiene su propia clave, `copilot-model`, y sus alias son ids de
-# **OpenRouter**: es la vía de los modelos de documentación. El modelo se resuelve igual (el alias
-# sale del catálogo) y, como el id lleva `/`, `ask` apunta el **proveedor propio** del CLI —la
-# clave es del autor, y un endpoint ya configurado manda—. Los ids de Copilot
-# (`gpt-5.6-terra`, `claude-sonnet-5`) no llevan `/`, así que siguen yendo a GitHub.
+# **OpenRouter**: es la vía de los encargos que no son de contrato, suite ni implementación
+# (andamiaje, corrección y documentación). El alias **solo** sustituye a los modelos que ya son de
+# OpenRouter: `gpt-5.6-terra` y `claude-sonnet-5` no llevan `/` y no se tocan.
 COP_LINE='printf "P=%s|M=%s\n" "${COPILOT_PROVIDER_BASE_URL:-vacio}" "$COPILOT_MODEL"; cat >/dev/null'
 GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model default >/dev/null 2>&1
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
-    "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
+    "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
 assert_eq 'copilot-model: el alias `default` resuelve al modelo de OpenRouter' 'P=https://openrouter.ai/api/v1|M=qwen/qwen3.7-plus' "$out"
-out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test COPILOT_PROVIDER_BASE_URL=https://otro.example/v1 \
+# el alias no toca lo que ya estaba: terra (contrato y suite) ni sonnet (implementación)
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
+    "$GLOT_SH" ask --delegate copilot contract_stub php algorithms/naive_sort 2>/dev/null || true)"
+assert_eq 'copilot-model: no cambia el modelo del contrato (terra)' 'P=vacio|M=gpt-5.6-terra' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
     "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_eq 'copilot-model: no cambia el modelo de la implementación (sonnet)' 'P=vacio|M=claude-sonnet-5' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test COPILOT_PROVIDER_BASE_URL=https://otro.example/v1 \
+    "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
 assert_eq 'copilot-model: el endpoint del autor manda sobre el de OpenRouter' 'P=https://otro.example/v1|M=qwen/qwen3.7-plus' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
-    "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>"$WORK_DIR/stderr" || true)"
+    "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>"$WORK_DIR/stderr" || true)"
 assert_eq 'copilot-model: sin clave sigue delegando' 'P=https://openrouter.ai/api/v1|M=qwen/qwen3.7-plus' "$out"
 err="$(cat -- "$WORK_DIR/stderr")"
 assert_contains 'copilot-model: sin clave lo avisa por stderr' 'COPILOT_PROVIDER_API_KEY' "$err"
 GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model kimi >/dev/null 2>&1
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
-    "$GLOT_SH" -n ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
+    "$GLOT_SH" -n ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
 assert_contains 'copilot-model: el alias llega resuelto a COPILOT_MODEL' 'COPILOT_MODEL=moonshotai/kimi-k3' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" doctor 2>/dev/null || true)"
 assert_contains 'copilot-model: doctor informa del alias fijado' 'copilot_model_state: kimi' "$out"
-# el perfil (sin clave de estado) no lleva `/`: ni proveedor propio ni aviso
+# el esfuerzo del perfil viaja en la orden publicada, que es lo que lo hace efectivo: `low` en los
+# encargos de OpenRouter y en el contrato, `high` en la implementación
+COP_PUB='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools --reasoning-effort {effort}'
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_PUB" \
+    "$GLOT_SH" -n ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
+assert_contains 'el esfuerzo de OpenRouter llega a la orden' '--reasoning-effort low' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_PUB" \
+    "$GLOT_SH" -n ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
+assert_contains 'el esfuerzo de la implementación llega a la orden' '--reasoning-effort high' "$out"
+# sin clave de estado, el encargo de OpenRouter usa el modelo del perfil (y su proveedor)
 GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" unset copilot-model >/dev/null 2>&1
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
+    "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
+assert_eq 'copilot-model sin fijar: manda el modelo del perfil' 'P=https://openrouter.ai/api/v1|M=qwen/qwen3.7-plus' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
     "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
-assert_eq 'copilot-model sin fijar: el modelo del perfil no toca el proveedor' 'P=vacio|M=claude-sonnet-5' "$out"
+assert_eq 'un perfil de Copilot no toca el proveedor' 'P=vacio|M=claude-sonnet-5' "$out"
 rc_bad=0
 GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model nope >/dev/null 2>&1 || rc_bad=$?
 assert_eq 'set copilot-model con alias inválido: código' '2' "$rc_bad"
@@ -1875,7 +1894,7 @@ assert_contains 'validate por defecto: modo solo lectura' '--deny-tool write' "$
 # comprobar la especificación ni el acta y las dejó como dos notas en vez de revisarlas.
 assert_contains 'validate por defecto: la raíz del monorepo' "--add-dir $SANDBOX" "$copilot_args"
 assert_contains 'validate por defecto: tope de créditos' '--max-ai-credits 30' "$copilot_args"
-assert_contains 'validate por defecto: el modelo del perfil' '--model gemini-3.8-flash' "$copilot_args"
+assert_contains 'validate por defecto: el modelo del perfil' '--model qwen/qwen3.7-plus' "$copilot_args"
 assert_contains 'validate por defecto: el esfuerzo del perfil' '--reasoning-effort low' "$copilot_args"
 
 # errores de objetivo y de argumentos
@@ -1896,7 +1915,7 @@ err="$(cat -- "$WORK_DIR/stderr")"
 assert_eq 'validate con marcadores: código' '0' "$rc_last"
 assert_contains 'validate con marcadores: el módulo resuelto' "-C $SANDBOX/php/core/algorithms/naive_sort" "$out"
 assert_contains 'validate con marcadores: la raíz resuelta' "--add-dir $SANDBOX" "$out"
-assert_contains 'validate con marcadores: el modelo del perfil' '--model gemini-3.8-flash' "$out"
+assert_contains 'validate con marcadores: el modelo del perfil' '--model qwen/qwen3.7-plus' "$out"
 
 out="$(GLOT_ROOT="$SANDBOX" GLOT_VALIDATOR="$SANDBOX/stub/validador --model {inexistente}" \
     "$GLOT_SH" -n validate php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
@@ -1964,7 +1983,7 @@ assert_contains 'ask: anuncia el perfil' 'profile: deep' "$err"
 
 glot_run_delegate 'cat >/dev/null' -n ask validate php algorithms/naive_sort
 assert_eq 'ask -n: código' '0' "$rc_last"
-assert_contains 'ask -n: el modelo en el plan' 'COPILOT_MODEL=gemini-3.8-flash' "$out"
+assert_contains 'ask -n: el modelo en el plan' 'COPILOT_MODEL=qwen/qwen3.7-plus' "$out"
 
 # sin modelo en la plantilla y con un modelo que el catálogo no conoce: los dos son un
 # dato que falta (1), y en ningún caso se inventan esfuerzo ni créditos
@@ -1989,13 +2008,15 @@ glot_run doctor
 assert_contains 'doctor: catálogo de modelos' 'models_file: ' "$out"
 assert_contains 'doctor: cobertura de perfiles' 'model_profiles: 10 de / of 10' "$out"
 if command -v copilot >/dev/null 2>&1; then
-    assert_contains 'doctor: los modelos siguen en el CLI' 'model_available: 3 de / of 3' "$out"
+    assert_contains 'doctor: los modelos siguen en el CLI' 'model_available: 2 de / of 2' "$out"
     cli_models="$(copilot help config 2>/dev/null || true)"
     available=0
     while IFS=$'\t' read -r _ model _rest; do
+        # los ids de OpenRouter no están en el catálogo del CLI: los sirve el proveedor propio
+        [[ "$model" == */* ]] && continue
         [[ "$cli_models" == *"\"$model\""* ]] && available=$((available + 1))
     done <"$MODELS_TSV"
-    assert_eq 'modelos: los tres están en la lista del CLI instalado' '3' "$available"
+    assert_eq 'modelos: los de Copilot están en la lista del CLI instalado' '2' "$available"
 fi
 
 # --- casos de la especificación v0.12.0 (L7, higiene y punteros) --------------

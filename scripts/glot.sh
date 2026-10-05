@@ -81,12 +81,14 @@
 # marcador `{spec}` se conserva para cualquier orden de delegado. El modelo `-` (alias
 # `default`) se retira con él: ya no hay ningún delegado que pueda omitir `--model`.
 # Desde la v1.7.3 el delegado de Copilot también acepta un **alias por sprint** —
-# `glot set copilot-model <default|gemini|qwen|kimi>`, con sus filas en `data/delegates.tsv`—:
-# es la vía de los modelos de **OpenRouter** para las delegaciones de documentación. Como el id
-# de esos modelos lleva `vendedor/modelo`, `ask` y `validate` apuntan solo entonces el
-# **proveedor propio** del CLI (`COPILOT_PROVIDER_BASE_URL`, si el autor no apunta a otro) sin
-# tocar la clave —que es del autor— ni los ids de siempre, que no llevan `/`: `terra` y
-# `sonnet` siguen yendo a GitHub.
+# `glot set copilot-model <default|gemini|qwen|kimi>`, con sus filas en `data/delegates.tsv`—,
+# que es la vía de los modelos de **OpenRouter**: el reparto por encargo queda en `terra` para el
+# contrato y la suite, `sonnet` para la implementación y **OpenRouter** (`qwen/qwen3.7-plus` por
+# defecto, esfuerzo `low`) para el andamiaje, la corrección y la documentación, con el **esfuerzo
+# del perfil** viajando en la orden (`--reasoning-effort {effort}`). El alias **solo** sustituye a
+# los modelos que ya son de OpenRouter —`terra` y `sonnet` no se tocan— y `ask`/`validate` apuntan
+# el **proveedor propio** del CLI (`COPILOT_PROVIDER_BASE_URL`, si el autor no apunta a otro) solo
+# cuando el id lleva `/`, sin tocar la clave, que es del autor.
 #
 # Versión viva del script: las versiones cerradas se archivan en versions/.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
@@ -531,6 +533,7 @@ _glot_cmd_doctor() {
             printf 'models_file: %s\n' "$models"
             local profile_templates=0
             local model_rows=0
+            local model_total=0
             local prompts_dir=""
             local template=""
             local model=""
@@ -546,14 +549,19 @@ _glot_cmd_doctor() {
                 "$profile_templates" "$(_glot_prompts_list | wc -l | tr -d ' ')"
             if command -v copilot >/dev/null 2>&1; then
                 cli_models="$(copilot help config 2>/dev/null || true)"
+                model_total=0
                 while IFS= read -r model; do
                     [[ -z "$model" ]] && continue
+                    # Los modelos de OpenRouter (llevan `/`) no están en el catálogo del CLI: se
+                    # sirven por el proveedor propio, así que ni se buscan ni se cuentan aquí.
+                    [[ "$model" == */* ]] && continue
+                    model_total=$((model_total + 1))
                     if [[ "$cli_models" == *"\"$model\""* ]]; then
                         model_rows=$((model_rows + 1))
                     fi
                 done < <(_glot_models_list | cut -f2)
                 printf 'model_available: %s de / of %s en el CLI / in the CLI\n' \
-                    "$model_rows" "$(_glot_models_list | wc -l | tr -d ' ')"
+                    "$model_rows" "$model_total"
             else
                 printf 'model_available: (sin Copilot CLI / no Copilot CLI)\n'
             fi
@@ -1845,6 +1853,8 @@ _glot_cmd_ask() {
     local state_model=""
     local state_key=""
     local cat_name=""
+    local profile_model=""
+    local model_note=""
     local model=""
     local effort=""
     local credits=""
@@ -1945,6 +1955,15 @@ _glot_cmd_ask() {
     if [[ -n "$state_model" ]]; then
         state_model="$(_glot_delegate_model "$cat_name" "$state_model" 2>/dev/null || printf '%s' "$state_model")"
     fi
+    # El alias de Copilot solo sustituye a los modelos que **ya son de OpenRouter** —los perfiles de
+    # andamiaje, corrección y documentación—: los ids de Copilot (`gpt-5.6-terra`, `claude-sonnet-5`)
+    # no llevan `/` y **no se tocan**, porque una asignación de documentación no debe cambiar el
+    # modelo de un contrato, de una suite ni de una implementación. `--model`, `GLOT_MODEL_COP` y
+    # `GLOT_MODEL` sí pueden con todo: son la puerta explícita. El alias de AGY no se acota: su
+    # columna es siempre de AGY.
+    if [[ "$delegate_eff" == "cop" && -n "$state_model" && "$base_model" != */* ]]; then
+        state_model=""
+    fi
     model="${model_opt:-${env_model:-${state_model:-$base_model}}}"
 
     # Copilot y AGY exigen un modelo: su id no tiene valor por defecto y la orden lo lleva
@@ -1983,7 +2002,14 @@ _glot_cmd_ask() {
         return 0
     fi
 
-    _glot_info "perfil / profile: $pname (cop $pmodel · $delegate_eff ${model:-default}, esfuerzo / effort $effort, $credits créditos / credits)"
+    # El perfil se anuncia con **su** modelo para el delegado elegido (la columna 2 es la de Copilot
+    # y la 7 la de AGY) y con el modelo efectivo solo cuando no coincide: así una asignación o un
+    # `--model` se ven de un vistazo.
+    profile_model="$pmodel"
+    model_note=""
+    if [[ "$delegate_eff" == "agy" ]]; then profile_model="$pagy_model"; fi
+    if [[ "$model" != "$profile_model" ]]; then model_note=" → $model"; fi
+    _glot_info "perfil / profile: $pname ($delegate_eff $profile_model$model_note, esfuerzo / effort $effort, $credits créditos / credits)"
     _glot_info "delegado / delegate: $delegate_order"
     printf '%s\n' "$request" | eval "$delegate_order" || rc=$?
 
@@ -3597,7 +3623,9 @@ _glot_cmd_validate() {
         pmodel="${GLOT_MODEL_COP:-${GLOT_MODEL:-}}"
     else
         cop_state="$(_glot_state_get copilot-model 2>/dev/null || true)"
-        if [[ -n "$cop_state" ]]; then
+        # El alias solo sustituye a los modelos que ya son de OpenRouter: a un validador con id de
+        # Copilot no se le cambia el modelo por una asignación de documentación.
+        if [[ -n "$cop_state" && "$pmodel" == */* ]]; then
             pmodel="$(_glot_delegate_model copilot "$cop_state" 2>/dev/null || printf '%s' "$cop_state")"
         fi
     fi
@@ -5436,15 +5464,16 @@ _glot_rc_remove() {
 # `ask` cuando le falta el delegado, que es donde el autor se entera de que hacen falta: la
 # orden es **del autor**, así que no se escribe en el rc ni viaja en el repositorio. Con `cop`
 # o `agy` imprime solo esa línea, para el caso de que falte una de las dos. Los
-# marcadores (`{root}`, `{spec}`, `{module_dir}`, `{model}`) los resuelve `ask`, de modo que
-# tampoco queda ninguna ruta de la máquina.
+# marcadores (`{root}`, `{spec}`, `{module_dir}`, `{model}` y `{effort}`) los resuelve `ask`, de
+# modo que tampoco queda ninguna ruta de la máquina; la línea de Copilot los usa para llevar el
+# **esfuerzo del perfil** al CLI, que es la única forma de aplicarlo.
 _glot_delegates_hint() {
     local only="${1:-}"
 
     if [[ -z "$only" ]]; then
         printf 'delegados: estas dos líneas van en tu rc / delegates: these two lines go in your rc\n'
     fi
-    [[ "$only" == "agy" ]] || printf "export GLOT_DELEGATE_COP='copilot -C {module_dir} -p \"\$(cat)\" --add-dir {root} --allow-all-tools'\n"
+    [[ "$only" == "agy" ]] || printf "export GLOT_DELEGATE_COP='copilot -C {module_dir} -p \"\$(cat)\" --add-dir {root} --allow-all-tools --reasoning-effort {effort}'\n"
     [[ "$only" == "cop" ]] || printf "export GLOT_DELEGATE_AGY='agy --model {model} -p \"\$(cat)\" --add-dir {root}'\n"
 }
 
