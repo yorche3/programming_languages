@@ -87,7 +87,7 @@ _glot_zsh() {
             fi
             ;;
         delegates)
-            _values 'delegado' agy sgpt
+            _values 'delegado' agy aider
             ;;
         prompt)
             if ((CURRENT == 3)); then
@@ -105,11 +105,11 @@ _glot_zsh() {
             # `ask` añade el delegado (v1.4.2): la opción y sus dos valores se completan, y el
             # posicional se cuenta **saltando** el valor de `--delegate`.
             if [[ "${words[CURRENT]}" == --delegate=* ]]; then
-                compadd -- --delegate=copilot --delegate=antigravity --delegate=shellgpt
+                compadd -- --delegate=copilot --delegate=antigravity --delegate=aider
                 return 0
             fi
             if [[ "${words[CURRENT - 1]}" == "--delegate" ]]; then
-                compadd -- copilot antigravity shellgpt
+                compadd -- copilot antigravity aider
                 return 0
             fi
             for ((i = 2; i < CURRENT; i++)); do
@@ -137,7 +137,7 @@ _glot_zsh() {
             _values 'shell' bash zsh
             ;;
         get | unset)
-            _values 'clave' lang phase module branch spec repo target cause antigravity-model shell-gpt-model
+            _values 'clave' lang phase module branch spec repo target cause antigravity-model aider-model
             ;;
         set)
             if [[ "${words[CURRENT - 1]}" == "antigravity-model" ]]; then
@@ -145,11 +145,11 @@ _glot_zsh() {
                 # como los lenguajes salen de `langs`.
                 ids=(${(f)"$("$glot" delegates agy 2>/dev/null | cut -f2)"})
                 _describe 'alias de AGY' ids
-            elif [[ "${words[CURRENT - 1]}" == "shell-gpt-model" ]]; then
-                ids=(${(f)"$("$glot" delegates sgpt 2>/dev/null | cut -f2)"})
-                _describe 'alias de shellgpt' ids
+            elif [[ "${words[CURRENT - 1]}" == "aider-model" ]]; then
+                ids=(${(f)"$("$glot" delegates aider 2>/dev/null | cut -f2)"})
+                _describe 'alias de aider' ids
             else
-                _values 'clave' lang phase module branch spec repo target cause antigravity-model shell-gpt-model
+                _values 'clave' lang phase module branch spec repo target cause antigravity-model aider-model
             fi
             ;;
     esac
