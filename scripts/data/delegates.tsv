@@ -1,0 +1,6 @@
+agy	gemini	gemini-3.8-flash-low
+agy	sonnet	claude-sonnet-5-5-low
+sgpt	default	-
+sgpt	qwen	qwen/qwen3.8-max-0902
+sgpt	gemini	google/gemini-3.8-flash
+sgpt	kimi	moonshotai/kimi-k3
