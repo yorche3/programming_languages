@@ -958,3 +958,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`go/core/algorithms/data_structures_basics/README.md` y `go/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 17/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam)` -> `core.algorithms.data_structures_basics 🔄 18/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-05T09:10:33-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): grain
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/grain.md`, commit `936a1e3`)
+Tests y comandos / Tests and commands:
+- `make test` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`grain/core/algorithms/data_structures_basics/README.md` y `grain/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 18/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go)` -> `core.algorithms.data_structures_basics 🔄 19/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
