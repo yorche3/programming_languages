@@ -97,18 +97,15 @@
 # con `-Ilib`—, que es donde vive el código de los cuatro módulos: la fila del catálogo seguía
 # apuntando a `src/{module}.pl`, así que el acta de `evidence` salía en rojo con
 # `Can't open perl script` aunque la suite pasara.
-# Desde la v1.7.6 el andamiaje de **Perl** deja de ser `module-starter` —generaba `Makefile.PL`,
-# `lib/{module}.pm` y `t/`, que no es el layout homologado—: los cuatro módulos se crean a mano
-# con `mkdir -p lib test`, así que la fila del catálogo pasa a `manual`, el paso único sale de
-# `init_sequences.tsv` y la guía lo lee de la tabla maestra.
 #
-# Versión viva del script: las versiones cerradas se archivan en versions/.
+# Snapshot archivado: versión cerrada el 2026-10-07. No se edita; el código es
+# el mismo que tenía la versión viva en su cierre.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
 # monorepo se resuelve con GLOT_ROOT, el superproyecto o la raíz de git.
 # El estado vive fuera del repositorio (XDG) y se puede redirigir con GLOT_STATE_FILE.
 #
 # Uso / Usage:
-#   ./scripts/glot.sh help
+#   ./versions/glot_1.7.5.sh help
 #   ./scripts/glot.sh doctor
 #   ./scripts/glot.sh langs
 #   ./scripts/glot.sh modules algorithms
@@ -141,7 +138,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.7.6"
+GLOT_VERSION="1.7.5"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
