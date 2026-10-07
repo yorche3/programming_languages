@@ -790,10 +790,10 @@ assert_eq 'secuencias y guía: el marcador de secuencia coincide' '' \
     "$(comm -3 <(printf '%s\n' "$guide_chain") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"
 
 # la regla del directorio de trabajo: solo los generadores que crean la carpeta salen de
-# `module`, y la guía tiene que nombrarlos a los cuatro. La sección se lee una vez: con
+# `module`, y la guía tiene que nombrarlos a los cinco. La sección se lee una vez: con
 # `pipefail`, un `awk | grep -q` muere por SIGPIPE cuando `grep` acierta y sale antes.
 data_phase="$(awk -F'\t' '$3 == "phase" {print $1}' "$REPO/scripts/data/init_sequences.tsv" | LC_ALL=C sort -u | tr '\n' ' ')"
-assert_eq 'secuencias: los que crean la carpeta' 'clojure common-lisp julia racket ' "$data_phase"
+assert_eq 'secuencias: los que crean la carpeta' 'clojure common-lisp julia ocaml racket ' "$data_phase"
 guide_seq_body="$(awk '/^## .*Multi-step sequences/,/^## .*Reference structures/' "$GUIDE")"
 missing_phase=""
 for lang in $data_phase; do
@@ -1068,6 +1068,7 @@ out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$C
     "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
 assert_eq 'copilot-model: el endpoint del autor manda sobre el de OpenRouter' 'P=https://otro.example/v1|M=qwen/qwen3.7-plus' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
+    env -u COPILOT_PROVIDER_API_KEY -u COPILOT_PROVIDER_BASE_URL \
     "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>"$WORK_DIR/stderr" || true)"
 assert_eq 'copilot-model: sin clave sigue delegando' 'P=https://openrouter.ai/api/v1|M=qwen/qwen3.7-plus' "$out"
 err="$(cat -- "$WORK_DIR/stderr")"

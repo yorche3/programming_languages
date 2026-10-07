@@ -27,7 +27,7 @@ julia	julia -e 'using Pkg; Pkg.generate("{module}")'	Project.toml, src/{Module}.
 kotlin	gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project	build.gradle.kts, settings.gradle.kts	gradle test	-	tool	-	-
 lua	luarocks init	{module}.rockspec, .busted	busted	-	tool	luarocks init {module} 1.0.0	-
 nim	nimble init (tipo library; lo conduce expect)	{module}.nimble, src/{module}.nim, test/config.nims	nimble test	nim check src/{module}.nim	tool	-	-
-ocaml	dune init proj {module}	dune-project, src/dune, test/dune	dune runtest	-	tool	-	-
+ocaml	dune init proj {module}	dune-project, lib/dune, test/dune	dune runtest	-	tool	-	-
 perl	module-starter --module={module} --dir=.	Makefile.PL, lib/{module}.pm, t/	prove --ext=.pl test/	perl -c src/{module}.pl	tool	-	-
 php	mkdir -p src test + composer require --dev phpunit/phpunit	composer.json, phpunit.xml, .gitignore	composer test	php -l src/{Module}.php	tool	mkdir -p src test && composer require --dev phpunit/phpunit	-
 prolog	mkdir -p src test	—	cd test && swipl -q -f {suite}.pl -t halt	-	manual	mkdir -p src test	-

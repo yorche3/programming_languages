@@ -112,7 +112,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **kotlin** | ⛓️ ✅ `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | `build.gradle.kts`, `settings.gradle.kts` | ✅ `gradle test` |
 | **lua** | 🔧 `luarocks init` | `{module}.rockspec`, `.busted` | ✅ `busted` |
 | **nim** | ⛓️ ✅ `nimble init` (tipo `library`; lo conduce `expect`) | `{module}.nimble`, `src/{module}.nim`, `test/config.nims` | ✅ `nimble test` |
-| **ocaml** | ⛓️ ✅ `dune init proj {module}` (quitar `bin/` y el `.opam`) | `dune-project`, `src/dune`, `test/dune` | ✅ `dune runtest` |
+| **ocaml** | ⛓️ ✅ `dune init proj {module}` (crea la carpeta del módulo) | `dune-project`, `lib/dune`, `test/dune` | ✅ `dune runtest` |
 | **perl** | ⛓️ 🔧 `module-starter --module={module} --dir=.` | `Makefile.PL`, `lib/{module}.pm`, `t/` | ✅ `prove --ext=.pl test/` |
 | **php** | ✍️ `mkdir -p src test` + `composer require --dev phpunit/phpunit` | `composer.json`, `phpunit.xml`, `.gitignore` | ✅ `composer test` |
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ `cd test && swipl -q -f {suite}.pl -t halt` |
@@ -138,9 +138,9 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 
 ## 🔗 Secuencias de varios pasos / Multi-step sequences
 
-**ES:** Estos lenguajes necesitan más de un comando, **otro directorio de trabajo** o un **completado posterior** a mano. El comando se ejecuta desde la **carpeta del módulo** (`{lenguaje}/core/{fase}/{module}`), que es donde deja al autor `glot use`; la excepción son los **cuatro** generadores que **crean la carpeta ellos mismos** y se ejecutan desde la **fase**: `common-lisp`, `julia`, `clojure` y `racket` (medido el 2026-09-26 con `quickproject` y el **2026-09-29** con `cl-project`: los dos crean el directorio del proyecto).
+**ES:** Estos lenguajes necesitan más de un comando, **otro directorio de trabajo** o un **completado posterior** a mano. El comando se ejecuta desde la **carpeta del módulo** (`{lenguaje}/core/{fase}/{module}`), que es donde deja al autor `glot use`; la excepción son los **cinco** generadores que **crean la carpeta ellos mismos** y se ejecutan desde la **fase**: `common-lisp`, `julia`, `clojure`, `racket` y `ocaml` (medido el 2026-09-26 con `quickproject`, el **2026-09-29** con `cl-project` y el **2026-10-07** con `dune init proj`: los tres crean el directorio del proyecto).
 
-**EN:** These languages need more than one command, **another working directory** or a later **completion** by hand. The command runs from the **module folder** (`{language}/core/{phase}/{module}`), where `glot use` leaves the author; the exception is the **four** generators that **create the folder themselves** and run from the **phase**: `common-lisp`, `julia`, `clojure` and `racket` (measured on 2026-09-26 with `quickproject` and on **2026-09-29** with `cl-project`: both create the project directory).
+**EN:** These languages need more than one command, **another working directory** or a later **completion** by hand. The command runs from the **module folder** (`{language}/core/{phase}/{module}`), where `glot use` leaves the author; the exception is the **five** generators that **create the folder themselves** and run from the **phase**: `common-lisp`, `julia`, `clojure`, `racket` and `ocaml` (measured on 2026-09-26 with `quickproject`, on **2026-09-29** with `cl-project` and on **2026-10-07** with `dune init proj`: all three create the project directory).
 
 **ES:** La **fuente de verdad es el dato** [`scripts/data/init_sequences.tsv`](../../scripts/data/init_sequences.tsv): una fila por paso, con lenguaje, orden, directorio de trabajo, modo (`run`/`expect`), comando, requisito, respuestas de `expect` y lo que falta por completar. La tabla de abajo es su **lectura humana**, y el tooling comprueba que las dos no se separen.
 
@@ -158,7 +158,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | `julia` | `julia -e 'using Pkg; Pkg.generate("{module}")'` | Completar `test/` y su runner; añadir `uuid`, `[compat]`, `[extras]` y `[targets]` |
 | `kotlin` | `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | Borrar `Library.kt` y `LibraryTest.kt` |
 | `nim` | `nimble init` (tipo `library`; lo conduce `expect`) | Llevar `src/{module}/{module}.nim` a `src/{module}.nim`, `tests/` a `test/` y añadir la `task test` |
-| `ocaml` | `dune init proj {module}` | Quitar `bin/`, aplanar a `src/` y borrar el `.opam` |
+| `ocaml` | `dune init proj {module}` | El código va en `lib/` y la suite en `test/`: se usa el layout generado tal cual |
 | `perl` | `module-starter --module={module} --dir=.` | Aceptar `lib/` y `t/`, pasar el runner a `prove -l t/`; `PERL5LIB` y `PATH` |
 | `python` | `uv init --lib .` | Borrar el `.git` que crea `uv`, añadir `conftest.py` y `tests/` con configuración de pytest |
 | `racket` | `raco pkg new {module}` | Quitar `.github/` si no se usa y decidir el paso a `src/` y `test/` |
@@ -344,14 +344,17 @@ mkdir -p src/main/kotlin src/test/kotlin
 ### Ocaml — Dune
 
 ```bash
-mkdir -p src test
+dune init proj {module}
 ```
 
 ```text
 {module}/
 ├── dune-project
-├── src/dune                 # declara la librería
-├── src/{module}.ml          # (+ {module}.mli opcional)
+├── {module}.opam            # generado
+├── bin/                     # ejemplo generado
+├── lib/
+│   ├── dune                 # declara la librería
+│   └── {module}.ml          # (+ {module}.mli opcional)
 └── test/dune                # declara el ejecutable de tests
 ```
 
