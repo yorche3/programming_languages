@@ -113,7 +113,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **lua** | 🔧 `luarocks init` | `{module}.rockspec`, `.busted` | ✅ `busted` |
 | **nim** | ⛓️ ✅ `nimble init` (tipo `library`; lo conduce `expect`) | `{module}.nimble`, `src/{module}.nim`, `test/config.nims` | ✅ `nimble test` |
 | **ocaml** | ⛓️ ✅ `dune init proj {module}` (crea la carpeta del módulo) | `dune-project`, `lib/dune`, `test/dune` | ✅ `dune runtest` |
-| **perl** | ⛓️ 🔧 `module-starter --module={module} --dir=.` | `Makefile.PL`, `lib/{module}.pm`, `t/` | ✅ `prove --ext=.pl test/` |
+| **perl** | ✍️ `mkdir -p lib test` | — | ✅ `prove --ext=.pl test/` |
 | **php** | ✍️ `mkdir -p src test` + `composer require --dev phpunit/phpunit` | `composer.json`, `phpunit.xml`, `.gitignore` | ✅ `composer test` |
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ `cd test && swipl -q -f {suite}.pl -t halt` |
 | **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `spago test` |
@@ -159,7 +159,6 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | `kotlin` | `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | Borrar `Library.kt` y `LibraryTest.kt` |
 | `nim` | `nimble init` (tipo `library`; lo conduce `expect`) | Llevar `src/{module}/{module}.nim` a `src/{module}.nim`, `tests/` a `test/` y añadir la `task test` |
 | `ocaml` | `dune init proj {module}` | El código va en `lib/` y la suite en `test/`: se usa el layout generado tal cual |
-| `perl` | `module-starter --module={module} --dir=.` | Aceptar `lib/` y `t/`, pasar el runner a `prove -l t/`; `PERL5LIB` y `PATH` |
 | `python` | `uv init --lib .` | Borrar el `.git` que crea `uv`, añadir `conftest.py` y `tests/` con configuración de pytest |
 | `racket` | `raco pkg new {module}` | Quitar `.github/` si no se usa y decidir el paso a `src/` y `test/` |
 | `rescript` | `mkdir -p src test` → `npm install` | El `package.json` con el compilador y Jest va **antes** |

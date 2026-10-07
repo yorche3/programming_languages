@@ -783,7 +783,7 @@ data_seq="$(cut -f1 "$REPO/scripts/data/init_sequences.tsv" | LC_ALL=C sort -u)"
 guide_seq="$(awk '/^## .*Multi-step sequences/,/^## .*Reference structures/' "$GUIDE" |
     awk -F'|' '/^\| `/ {gsub(/[` ]/, "", $2); print $2}' | LC_ALL=C sort -u)"
 guide_chain="$(awk -F'|' -v chain="$CHAIN_MARK" '/^\| \*\*/ && index($3, chain) > 0 {gsub(/[* ]/, "", $2); print $2}' "$GUIDE" | LC_ALL=C sort -u)"
-assert_eq 'secuencias y guía: el dato trae los 18 lenguajes' '18' "$(printf '%s\n' "$data_seq" | wc -l | tr -d ' ')"
+assert_eq 'secuencias y guía: el dato trae los 17 lenguajes' '17' "$(printf '%s\n' "$data_seq" | wc -l | tr -d ' ')"
 assert_eq 'secuencias y guía: la sección lista el mismo conjunto' '' \
     "$(comm -3 <(printf '%s\n' "$guide_seq") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"
 assert_eq 'secuencias y guía: el marcador de secuencia coincide' '' \

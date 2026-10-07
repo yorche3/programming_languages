@@ -20,7 +20,6 @@ julia	1	phase	run	julia -e 'using Pkg; Pkg.generate("{module}")'	-	-	completar t
 kotlin	1	module	run	gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project	-	-	borrar src/main/kotlin/**/Library.kt y src/test/kotlin/**/LibraryTest.kt
 nim	1	module	expect	nimble init	expect	library|<defecto>|<defecto>|<defecto>|<defecto>	llevar src/{module}/{module}.nim a src/{module}.nim, tests/ a test/ y añadir la task test del .nimble
 ocaml	1	phase	run	dune init proj {module}	-	-	-
-perl	1	module	run	module-starter --module={module} --dir=. --author='Yorche <hyaoki123@gmail.com>'	env:PERL5LIB+PATH	-	aceptar lib/ y t/, pasar el runner a prove -l t/ y sustituir ignore.txt
 python	1	module	run	uv init --lib .	tool:uv	-	borrar el .git que crea uv, añadir conftest.py y tests/ con config de pytest y pasar el runner a uv run pytest
 racket	1	phase	run	raco pkg new {module}	-	-	quitar .github/ si no se usa y decidir el paso a src/ y test/
 rescript	1	module	run	mkdir -p src test	-	-	-
