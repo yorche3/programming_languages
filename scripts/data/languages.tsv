@@ -33,7 +33,7 @@ php	mkdir -p src test + composer require --dev phpunit/phpunit	composer.json, ph
 prolog	mkdir -p src test	—	cd test && swipl -q -f {suite}.pl -t halt	-	manual	mkdir -p src test	-
 purescript	spago init	spago.yaml	spago test	-	tool	spago init	-
 python	uv init --lib .	pyproject.toml, src/{module}/, conftest.py, tests/	pytest	python3 -m compileall -q src	tool	-	-
-r	mkdir -p src test	—	Rscript test/run_tests.R	Rscript -e 'invisible(lapply(list.files("src", full.names=TRUE), parse))'	manual	mkdir -p src test	-
+r	mkdir -p R tests/testthat	—	make test	Rscript -e 'invisible(lapply(list.files("R", full.names=TRUE), parse))'	manual	mkdir -p R tests/testthat	-
 racket	raco pkg new {module}	info.rkt, main.rkt, scribblings/	racket test/run_tests.rkt	-	tool	-	-
 raku	mkdir -p lib t	—	prove6 -l t/	-	manual	mkdir -p lib t	-
 rescript	mkdir -p src test	rescript.json, package.json, jest.config.js	npm test	-	manual	-	-

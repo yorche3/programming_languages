@@ -118,7 +118,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ `cd test && swipl -q -f {suite}.pl -t halt` |
 | **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `spago test` |
 | **python** | ⛓️ ✅ `uv init --lib .` | `pyproject.toml`, `src/{module}/`, `conftest.py`, `tests/` | ✅ `pytest` |
-| **r** | ✅ `mkdir -p src test` | — | ✅ `Rscript test/run_tests.R` |
+| **r** | ✅ `mkdir -p R tests/testthat` | — | ✅ `make test` |
 | **racket** | ⛓️ 🔧 `raco pkg new {module}` | `info.rkt`, `main.rkt`, `scribblings/` | ✅ `racket test/run_tests.rkt` |
 | **raku** | ✅ `mkdir -p lib t` | — | ✅ `prove6 -l t/` |
 | **rescript** | ⛓️ ✅ `mkdir -p src test` (el `package.json` va antes del `npm install`) | `rescript.json`, `package.json`, `jest.config.js` | ✅ `npm test` |
@@ -419,16 +419,23 @@ mkdir -p src tests
 └── tests/                   # conftest.py + una suite por enfoque
 ```
 
-### R — `src/` + `test/`
+### R — paquete (`R/` + `tests/testthat/`)
+
+**ES:** El módulo es un **paquete de R**: `DESCRIPTION` (nombre, versión, licencia y dependencias), `NAMESPACE` (lo que se exporta), el código en `R/` y las suites en `tests/testthat/`, con el prefijo `test-` que testthat descubre por defecto. El runner es `make test`, que llama a `testthat::test_local()` —carga el paquete con `pkgload::load_all()`, sin instalarlo— y el "verificador" analiza los fuentes de `R/` con `parse()`.
+
+**EN:** The module is an **R package**: `DESCRIPTION` (name, version, license and dependencies), `NAMESPACE` (what is exported), the code in `R/` and the suites in `tests/testthat/`, with the `test-` prefix testthat discovers by default. The runner is `make test`, which calls `testthat::test_local()` —it loads the package with `pkgload::load_all()`, without installing it— and the "verifier" analyses the sources under `R/` with `parse()`.
 
 ```bash
-mkdir -p src test
+mkdir -p R tests/testthat
 ```
 
 ```text
 {module}/
-├── src/{module}.R
-└── test/                    # suites + run_tests.R
+├── DESCRIPTION              # metadatos del paquete
+├── NAMESPACE                # lo que se exporta
+├── Makefile                 # runner: make test
+├── R/{module}.R
+└── tests/                   # testthat.R + test-*.R
 ```
 
 ### Racket — `src/` + `test/`
