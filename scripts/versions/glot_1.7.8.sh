@@ -111,13 +111,14 @@
 # tres que sí lo tienen, **salía con código 0 aunque la suite fallara** —falso verde en
 # `test`/`evidence`—, mientras `raco test` sale con 1, cuenta los casos y corre sin enlazar paquetes.
 #
-# Versión viva del script: las versiones cerradas se archivan en versions/.
+# Snapshot archivado: versión cerrada el 2026-10-08. No se edita; el código es
+# el mismo que tenía la versión viva en su cierre.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
 # monorepo se resuelve con GLOT_ROOT, el superproyecto o la raíz de git.
 # El estado vive fuera del repositorio (XDG) y se puede redirigir con GLOT_STATE_FILE.
 #
 # Uso / Usage:
-#   ./scripts/glot.sh help
+#   ./versions/glot_1.7.8.sh help
 #   ./scripts/glot.sh doctor
 #   ./scripts/glot.sh langs
 #   ./scripts/glot.sh modules algorithms

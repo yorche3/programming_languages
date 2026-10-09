@@ -21,7 +21,11 @@ kotlin	1	module	run	gradle init --type kotlin-library --dsl kotlin --project-nam
 nim	1	module	expect	nimble init	expect	library|<defecto>|<defecto>|<defecto>|<defecto>	llevar src/{module}/{module}.nim a src/{module}.nim, tests/ a test/ y añadir la task test del .nimble
 ocaml	1	phase	run	dune init proj {module}	-	-	-
 python	1	module	run	uv init --lib .	tool:uv	-	borrar el .git que crea uv, añadir conftest.py y tests/ con config de pytest y pasar el runner a uv run pytest
-racket	1	phase	run	raco pkg new {module}	-	-	quitar .github/ si no se usa y decidir el paso a src/ y test/
+racket	1	phase	run	raco new library {module}	network	-	la plantilla se clona de github.com/racket-library (paquete raco-new)
+racket	2	module	run	mv project {module} && mv project-lib {module}-lib && mv project-test {module}-test && mv project-doc {module}-doc && mv {module}-test/tests/project.rkt {module}-test/tests/{module}.rkt && mv {module}-doc/scribblings/project.scrbl {module}-doc/scribblings/{module}.scrbl	-	-	el render del template se hace aquí: su render-template.sh es interactivo y usa sed de BSD
+racket	3	module	run	sed -i 's/<project>/{module}/g; s/<username>/yorche3/g' CONTRIBUTING.rst Makefile README.rst {module}/info.rkt {module}-lib/info.rkt {module}-test/info.rkt {module}-doc/info.rkt {module}-test/tests/{module}.rkt {module}-doc/scribblings/{module}.scrbl	-	-	sin esto los info.rkt conservan <project>/<username> y los paquetes quedan inválidos
+racket	4	module	run	rm -rf .github pull_request_template.md render-template.sh profile	-	-	el CI, la plantilla de PR, el script de render y el ejemplo de profiling son del generador
+racket	5	module	run	sed -i 's|^\( *\){module})$|\1"../../{module}-lib/main.rkt")|' {module}-test/tests/{module}.rkt	-	-	el test de plantilla requiere la colección por nombre: con la ruta relativa corre sin enlazar paquetes
 rescript	1	module	run	mkdir -p src test	-	-	-
 rescript	2	module	run	npm install	network	-	el package.json con rescript y jest va antes: npm install falla sin manifiesto
 ruby	1	module	run	bundle init	-	-	-
