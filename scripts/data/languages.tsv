@@ -34,7 +34,7 @@ prolog	mkdir -p src test	—	cd test && swipl -q -f {suite}.pl -t halt	-	manual	
 purescript	spago init	spago.yaml	spago test	-	tool	spago init	-
 python	uv init --lib .	pyproject.toml, src/{module}/, conftest.py, tests/	pytest	python3 -m compileall -q src	tool	-	-
 r	mkdir -p R tests/testthat	—	make test	Rscript -e 'invisible(lapply(list.files("R", full.names=TRUE), parse))'	manual	mkdir -p R tests/testthat	-
-racket	raco new library {module}	info.rkt, main.rkt, tests/, Makefile	raco test -x .	-	tool	-	-
+racket	raco new library {module}	info.rkt, {module}.rkt (con guiones), tests/, Makefile	raco test -x .	-	tool	-	-
 raku	mkdir -p lib t	—	prove6 -l t/	-	manual	mkdir -p lib t	-
 rescript	mkdir -p src test	rescript.json, package.json, jest.config.js	npm test	-	manual	-	-
 rexx	mkdir -p src test	—	rexx test/{suite}.rexx	-	manual	mkdir -p src test	-
