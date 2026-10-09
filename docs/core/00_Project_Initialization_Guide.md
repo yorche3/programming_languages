@@ -118,8 +118,8 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ `cd test && swipl -q -f {suite}.pl -t halt` |
 | **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `spago test` |
 | **python** | ⛓️ ✅ `uv init --lib .` | `pyproject.toml`, `src/{module}/`, `conftest.py`, `tests/` | ✅ `pytest` |
-| **r** | ✅ `mkdir -p src test` | — | ✅ `Rscript test/run_tests.R` |
-| **racket** | ⛓️ 🔧 `raco pkg new {module}` | `info.rkt`, `main.rkt`, `scribblings/` | ✅ `racket test/run_tests.rkt` |
+| **r** | ✅ `mkdir -p R tests/testthat` | — | ✅ `make test` |
+| **racket** | ⛓️ 🔧 `raco new library {module}` | `info.rkt`, `main.rkt`, `tests/`, `Makefile` | ✅ `raco test -x .` |
 | **raku** | ✅ `mkdir -p lib t` | — | ✅ `prove6 -l t/` |
 | **rescript** | ⛓️ ✅ `mkdir -p src test` (el `package.json` va antes del `npm install`) | `rescript.json`, `package.json`, `jest.config.js` | ✅ `npm test` |
 | **rexx** | ✅ `mkdir -p src test` | — | ✅ `rexx test/{suite}.rexx` |
@@ -160,7 +160,7 @@ Las rutas de la columna **Manifiesto** son relativas a la carpeta del módulo.
 | `nim` | `nimble init` (tipo `library`; lo conduce `expect`) | Llevar `src/{module}/{module}.nim` a `src/{module}.nim`, `tests/` a `test/` y añadir la `task test` |
 | `ocaml` | `dune init proj {module}` | El código va en `lib/` y la suite en `test/`: se usa el layout generado tal cual |
 | `python` | `uv init --lib .` | Borrar el `.git` que crea `uv`, añadir `conftest.py` y `tests/` con configuración de pytest |
-| `racket` | `raco pkg new {module}` | Quitar `.github/` si no se usa y decidir el paso a `src/` y `test/` |
+| `racket` | `raco new library {module}` → render portátil (`mv` + `sed -i`) → `rm -rf .github pull_request_template.md render-template.sh profile` | Las suites requieren la librería por **ruta relativa** (`"../../{module}-lib/main.rkt"`) y el runner es `raco test -x .`, sin enlazar paquetes |
 | `rescript` | `mkdir -p src test` → `npm install` | El `package.json` con el compilador y Jest va **antes** |
 | `ruby` | `mkdir -p src test` → `bundle init` → `bundle install` | `rspec` en el `Gemfile` y `.rspec` |
 | `v` | `v init --lib` (lo conduce `expect`) | Quitar el `.git` anidado y llevar `tests/` a `test/` |
@@ -419,32 +419,46 @@ mkdir -p src tests
 └── tests/                   # conftest.py + una suite por enfoque
 ```
 
-### R — `src/` + `test/`
+### R — paquete (`R/` + `tests/testthat/`)
+
+**ES:** El módulo es un **paquete de R**: `DESCRIPTION` (nombre, versión, licencia y dependencias), `NAMESPACE` (lo que se exporta), el código en `R/` y las suites en `tests/testthat/`, con el prefijo `test-` que testthat descubre por defecto. El runner es `make test`, que llama a `testthat::test_local()` —carga el paquete con `pkgload::load_all()`, sin instalarlo— y el "verificador" analiza los fuentes de `R/` con `parse()`.
+
+**EN:** The module is an **R package**: `DESCRIPTION` (name, version, license and dependencies), `NAMESPACE` (what is exported), the code in `R/` and the suites in `tests/testthat/`, with the `test-` prefix testthat discovers by default. The runner is `make test`, which calls `testthat::test_local()` —it loads the package with `pkgload::load_all()`, without installing it— and the "verifier" analyses the sources under `R/` with `parse()`.
 
 ```bash
-mkdir -p src test
+mkdir -p R tests/testthat
 ```
 
 ```text
 {module}/
-├── src/{module}.R
-└── test/                    # suites + run_tests.R
+├── DESCRIPTION              # metadatos del paquete
+├── NAMESPACE                # lo que se exporta
+├── Makefile                 # runner: make test
+├── R/{module}.R
+└── tests/                   # testthat.R + test-*.R
 ```
 
-### Racket — `src/` + `test/`
+### Racket — paquete de cuatro colecciones (`{module}-lib/` + `{module}-test/`)
 
-**ES:** Herramienta (R1): `raco pkg new {module}`, desde la carpeta de la fase. Genera un **paquete** (`info.rkt`, `main.rkt`, `scribblings/`, licencias), que es la forma idiomática de distribuir una biblioteca en Racket y admite los archivos extra (R3); el módulo se actualizará al retomarlo (R6) y lo de abajo es la estructura **homologada actual**.
+**ES:** Herramienta (R1): `raco new library {module}` —de `raco-new`, que clona las plantillas de `github.com/racket-templates`—, desde la carpeta de la fase: el clon deja el proyecto ya con el nombre del módulo. Da el layout **lib/test/doc** de la comunidad (`{module}/` metapaquete, `{module}-lib/` con el código, `{module}-test/` con las suites y `{module}-doc/` con los scribblings) más `Makefile`, `.gitignore` y los documentos del template. La secuencia de `new` cierra las tres adecuaciones que el template no resuelve aquí: **1)** su `render-template.sh` es interactivo y usa `sed -i ''` (BSD), que en Linux falla con `can't read s/<project>/…` y deja los marcadores `<project>` y `<username>` en los cuatro `info.rkt`, así que el render se hace con `mv` y `sed -i` de GNU; **2)** se borran `.github/`, `pull_request_template.md`, `render-template.sh` y `profile/`, que son del generador; y **3)** las suites requieren la librería **por ruta relativa** (`(require "../../{module}-lib/main.rkt")`), no por el nombre de la colección, para que corran sin instalar ni enlazar nada. El runner es `raco test -x .`: prueba los archivos con submodule `test` y no requiere los demás, así que no necesita el `raco pkg install --link` del `Makefile` del template, sale limpio y devuelve código **1** cuando algún caso falla.
 
-**EN:** Tool (R1): `raco pkg new {module}`, from the phase folder. It generates a **package** (`info.rkt`, `main.rkt`, `scribblings/`, licences), which is Racket's idiomatic way of shipping a library and accepts the extra files (R3); the module will be updated when retaken (R6) and what follows is the **current homologated** structure.
+**EN:** Tool (R1): `raco new library {module}` —from `raco-new`, which clones the templates in `github.com/racket-templates`—, from the phase folder: the clone leaves the project already named after the module. It gives the community's **lib/test/doc** layout (`{module}/` metapackage, `{module}-lib/` with the code, `{module}-test/` with the suites and `{module}-doc/` with the scribblings) plus `Makefile`, `.gitignore` and the template's documents. `new`'s sequence closes the three adaptations the template does not solve here: **1)** its `render-template.sh` is interactive and uses BSD `sed -i ''`, which fails on Linux with `can't read s/<project>/…` and leaves the `<project>` and `<username>` placeholders in the four `info.rkt` files, so the render is done with `mv` and GNU `sed -i`; **2)** `.github/`, `pull_request_template.md`, `render-template.sh` and `profile/` are removed, as they belong to the generator; and **3)** the suites require the library **by relative path** (`(require "../../{module}-lib/main.rkt")`), not by collection name, so they run without installing or linking anything. The runner is `raco test -x .`: it tests the files with a `test` submodule and does not require the others, so it needs neither the template `Makefile`'s `raco pkg install --link` nor pollutes the output, and it returns exit code **1** when any case fails.
 
 ```bash
-mkdir -p src test
+raco new library {module}
+mv project {module} && mv project-lib {module}-lib && mv project-test {module}-test && mv project-doc {module}-doc
+sed -i 's/<project>/{module}/g; s/<username>/yorche3/g' {module}/info.rkt {module}-lib/info.rkt {module}-test/info.rkt {module}-doc/info.rkt
+rm -rf .github pull_request_template.md render-template.sh profile
 ```
 
 ```text
 {module}/
-├── src/{module}.rkt
-└── test/                    # suites + run_tests.rkt
+├── {module}/                # metapaquete (info.rkt)
+├── {module}-lib/            # el código (main.rkt)
+├── {module}-test/           # las suites (tests/)
+├── {module}-doc/            # scribblings
+├── Makefile
+└── .gitignore
 ```
 
 ### Raku — `lib/` + `t/`

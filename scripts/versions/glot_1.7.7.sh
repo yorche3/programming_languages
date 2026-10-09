@@ -105,19 +105,15 @@
 # `R/` y las suites en `tests/testthat/`, con `make test` como runner—, que es el de los cuatro
 # módulos homologados: la fila del catálogo deja de apuntar a `src/` y a `test/run_tests.R`, y el
 # verificador analiza los fuentes de `R/`.
-# Desde la v1.7.8 el estándar de **Racket** es `raco new library {module}` (el layout lib/test/doc
-# de la comunidad) con su render portátil y sus borrados, y el runner pasa a `raco test -x .`: el
-# anterior (`racket test/run_tests.rkt`) no existía en los dos módulos de un solo archivo y, en los
-# tres que sí lo tienen, **salía con código 0 aunque la suite fallara** —falso verde en
-# `test`/`evidence`—, mientras `raco test` sale con 1, cuenta los casos y corre sin enlazar paquetes.
 #
-# Versión viva del script: las versiones cerradas se archivan en versions/.
+# Snapshot archivado: versión cerrada el 2026-10-07. No se edita; el código es
+# el mismo que tenía la versión viva en su cierre.
 # No asume rutas del usuario: el script se localiza con BASH_SOURCE y la raíz del
 # monorepo se resuelve con GLOT_ROOT, el superproyecto o la raíz de git.
 # El estado vive fuera del repositorio (XDG) y se puede redirigir con GLOT_STATE_FILE.
 #
 # Uso / Usage:
-#   ./scripts/glot.sh help
+#   ./versions/glot_1.7.7.sh help
 #   ./scripts/glot.sh doctor
 #   ./scripts/glot.sh langs
 #   ./scripts/glot.sh modules algorithms
@@ -150,7 +146,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.7.8"
+GLOT_VERSION="1.7.7"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
