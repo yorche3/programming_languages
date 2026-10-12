@@ -1,0 +1,178 @@
+# 📋 Plan de Documentación / Documentation Plan
+
+> **ES:** Registro maestro para el seguimiento de la documentación en todo el monorepo. Este archivo es la fuente única de verdad sobre **qué documentación existe, en qué estado se encuentra y qué pasos siguen**. Este documento realiza seguimiento **únicamente de la documentación, no del código ni de las pruebas** —estos últimos se gestionan en el roadmap y en el ciclo de sprint de cada rama—.
+>
+> **EN:** Master tracking for documentation work across the monorepo. This file is the single source of truth for **what docs exist, what state they are in, and what is next**. It tracks **documentation only, not code or tests** —those live in the roadmap and the sprint cycle of each branch—.
+
+---
+
+## 🧭 Leyenda / Legend
+
+| Símbolo / Symbol | Significado / Meaning |
+|:---:|---|
+| ✅ | Completo / Complete |
+| 🔄 | En progreso / In progress |
+| 📋 | Planificado / Planned |
+| ⏳ | Futuro (no iniciado) / Future (not started) |
+| ❌ | No aplica a este lenguaje / Does not apply to this language |
+
+---
+
+## 1. Documentos transversales / Cross-cutting documents (all 50 languages)
+
+| Documento / Document | Propósito / Purpose | Estado / State | Responsable / Owner |
+|----------------------|---------------------|:--------------:|:-------------------:|
+| `docs/PSEUDOCODE_CONVENTION.md` | Pseudocódigo canónico y nombres conceptuales / Canonical pseudocode, conceptual names | 📋 | — |
+| `docs/LANGUAGE_CHARACTERISTICS.md` | 10 ejes por lenguaje / 10 axes per language | 📋 | — |
+| `docs/IDIOMATICITY_LEVELS.md` | Escala de 4 niveles con criterios / 4-level scale with criteria | 📋 | — |
+| `docs/DEVIATION_POLICY.md` | Política de registro de desviaciones / When/how to document deviations | 📋 | — |
+| `docs/PARADIGM_FAMILIES.md` | Familias y agrupaciones de lenguajes por paradigma / Groups of languages by paradigm | 📋 | — |
+| `data/canonical_names.tsv` | Mapeo concepto → nombre canónico por lenguaje / concept → name per language | 📋 | — |
+| `data/language_characteristics.tsv` | Ejes estructurados legibles por máquina / Machine-readable axes | 📋 | — |
+| `data/idiomaticity_state.tsv` | Nivel actual por (lenguaje, módulo) / Current level per (lang, module) | 📋 | — |
+
+---
+
+## 2. Documentos por lenguaje / Per-language documents
+
+| Lenguaje / Language | `docs/idioms/{lang}.md` | `docs/adaptations/{lang}.md` | Changelog | Estado / State | Responsable / Owner |
+|---------------------|:-----------------------:|:----------------------------:|:---------:|:--------------:|:-------------------:|
+| Ada (`ada`) | 📋 | 📋 | 📋 | 📋 | — |
+| Assembly (`assembly`) | 📋 | 📋 | 📋 | 📋 | — |
+| Ballerina (`ballerina`) | 📋 | 📋 | 📋 | 📋 | — |
+| C (`c`) | 📋 | 📋 | 📋 | 📋 | — |
+| C# (`csharp`) | 📋 | 📋 | 📋 | 📋 | — |
+| Clojure (`clojure`) | 📋 | 📋 | 📋 | 📋 | — |
+| COBOL (`cobol`) | 📋 | 📋 | 📋 | 📋 | — |
+| Common Lisp (`common-lisp`) | 📋 | 📋 | 📋 | 📋 | — |
+| C++ (`cpp`) | 📋 | 📋 | 📋 | 📋 | — |
+| Crystal (`crystal`) | 📋 | 📋 | 📋 | 📋 | — |
+| D (`d`) | 📋 | 📋 | 📋 | 📋 | — |
+| Dart (`dart`) | 📋 | 📋 | 📋 | 📋 | — |
+| Elixir (`elixir`) | 📋 | 📋 | 📋 | 📋 | — |
+| Elm (`elm`) | 📋 | 📋 | 📋 | 📋 | — |
+| Erlang (`erlang`) | 📋 | 📋 | 📋 | 📋 | — |
+| Forth (`forth`) | 📋 | 📋 | 📋 | 📋 | — |
+| F# (`fsharp`) | 📋 | 📋 | 📋 | 📋 | — |
+| Gleam (`gleam`) | 📋 | 📋 | 📋 | 📋 | — |
+| Go (`go`) | 📋 | 📋 | 📋 | 📋 | — |
+| Grain (`grain`) | 📋 | 📋 | 📋 | 📋 | — |
+| Groovy (`groovy`) | 📋 | 📋 | 📋 | 📋 | — |
+| Haskell (`haskell`) | 📋 | 📋 | 📋 | 📋 | — |
+| Haxe (`haxe`) | 📋 | 📋 | 📋 | 📋 | — |
+| Java (`java`) | 📋 | 📋 | 📋 | 📋 | — |
+| JavaScript (`javascript`) | 📋 | 📋 | 📋 | 📋 | — |
+| Julia (`julia`) | 📋 | 📋 | 📋 | 📋 | — |
+| Kotlin (`kotlin`) | 📋 | 📋 | 📋 | 📋 | — |
+| Lua (`lua`) | 📋 | 📋 | 📋 | 📋 | — |
+| Nim (`nim`) | 📋 | 📋 | 📋 | 📋 | — |
+| OCaml (`ocaml`) | 📋 | 📋 | 📋 | 📋 | — |
+| Perl (`perl`) | 📋 | 📋 | 📋 | 📋 | — |
+| PHP (`php`) | 📋 | 📋 | 📋 | 📋 | — |
+| Prolog (`prolog`) | 📋 | 📋 | 📋 | 📋 | — |
+| PureScript (`purescript`) | 📋 | 📋 | 📋 | 📋 | — |
+| Python (`python`) | 📋 | 📋 | 📋 | 📋 | — |
+| R (`r`) | 📋 | 📋 | 📋 | 📋 | — |
+| Racket (`racket`) | 📋 | 📋 | 📋 | 📋 | — |
+| Raku (`raku`) | 📋 | 📋 | 📋 | 📋 | — |
+| ReScript (`rescript`) | 📋 | 📋 | 📋 | 📋 | — |
+| REXX (`rexx`) | 📋 | 📋 | 📋 | 📋 | — |
+| Ruby (`ruby`) | 📋 | 📋 | 📋 | 📋 | — |
+| Rust (`rust`) | 📋 | 📋 | 📋 | 📋 | — |
+| Scala (`scala`) | 📋 | 📋 | 📋 | 📋 | — |
+| Scheme (`scheme`) | 📋 | 📋 | 📋 | 📋 | — |
+| Swift (`swift`) | 📋 | 📋 | 📋 | 📋 | — |
+| Tcl/Tk (`tcl-tk`) | 📋 | 📋 | 📋 | 📋 | — |
+| TypeScript (`typescript`) | 📋 | 📋 | 📋 | 📋 | — |
+| V (`v`) | 📋 | 📋 | 📋 | 📋 | — |
+| Vala (`vala`) | 📋 | 📋 | 📋 | 📋 | — |
+| Zig (`zig`) | 📋 | 📋 | 📋 | 📋 | — |
+
+---
+
+## 3. Documentos por módulo / Per-module documents
+
+| Fase / Phase | Módulo / Module | Especificación / Spec | README (N3) | Evidencia / Evidence | Estado / State | Responsable / Owner |
+|--------------|-----------------|:---------------------:|:-----------:|:--------------------:|:--------------:|:-------------------:|
+| **Fase 0 — Foundations** | `core.foundations.hello_world` | ✅ | ✅ | 📋 | ✅ | — |
+| **Fase 0 — Foundations** | `core.foundations.hello_user` | ✅ | ✅ | 📋 | ✅ | — |
+| **Fase 0 — Foundations** | `core.foundations.unit_test` | ✅ | ✅ | 📋 | ✅ | — |
+| **Fase 0 — Foundations** | `core.foundations.numbers` | ✅ | ✅ | 📋 | ✅ | — |
+| **Fase 1 — Algorithms Pure** | `core.algorithms.naive_sort` | ✅ | ✅ | ✅ | ✅ | — |
+| **Fase 1 — Algorithms Pure** | `core.algorithms.data_structures_basics` | ✅ | 🔄 | 🔄 | 🔄 | — |
+| **Fase 1 — Algorithms Pure** | `core.algorithms.data_structures_advanced` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 1 — Algorithms Pure** | `core.algorithms.efficient_sort` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 1 — Algorithms Pure** | `core.algorithms.distributed_sort` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 1 — Algorithms Pure** | `core.algorithms.searching` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 2 — Contiguous Processing** | `core.text.transformations` | ✅ | 📋 | 📋 | 🔄 | — |
+| **Fase 2 — Contiguous Processing** | `core.text.patterns` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 2 — Contiguous Processing** | `core.text.substr` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 2 — Contiguous Processing** | `core.text.input_output` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 2 — Contiguous Processing** | `core.text.etl_basico` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 3 — Algorithms on Structures** | `core.structures.graph_algorithms` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 3 — Algorithms on Structures** | `core.structures.backtracking` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 3 — Algorithms on Structures** | `core.structures.dynamic_programming` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 3 — Algorithms on Structures** | `core.structures.greedy` | ✅ | 📋 | 📋 | 📋 | — |
+| **Fase 4 — Abstraction & Persistence** | `core.data.modeling` | 📋 | 📋 | 📋 | 📋 | — |
+| **Fase 4 — Abstraction & Persistence** | `core.data.strsearch` | 📋 | 📋 | 📋 | 📋 | — |
+| **Fase 4 — Abstraction & Persistence** | `core.data.regex` | 📋 | 📋 | 📋 | 📋 | — |
+| **Fase 4 — Abstraction & Persistence** | `core.data.parsing` | 📋 | 📋 | 📋 | 📋 | — |
+| **Fase 4 — Abstraction & Persistence** | `core.data.data_base` | 📋 | 📋 | 📋 | 📋 | — |
+| **Fase 4 — Abstraction & Persistence** | `core.data.integracion_etl` | 📋 | 📋 | 📋 | 📋 | — |
+| **Fase 5 — Math** | `core.math.statistics` | 📋 | 📋 | 📋 | 📋 | — |
+| **Fase 5 — Math** | `core.math.linear_algebra` | 📋 | 📋 | 📋 | 📋 | — |
+| **Utilidades / Utilities** | `util.logging` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Utilidades / Utilities** | `util.db` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Utilidades / Utilities** | `util.data_transform` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Utilidades / Utilities** | `util.serialization` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Utilidades / Utilities** | `util.config` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Herramientas / Dev Tools** | `tools.sast_ada` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Herramientas / Dev Tools** | `tools.coverage_reporter` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Herramientas / Dev Tools** | `tools.linter_aggregator` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 6 — UI** | `ui.cliapp` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 6 — UI** | `ui.tuiapp` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 6 — UI** | `ui.guiapp` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 7 — Web** | `web.mvcapp` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 7 — Web** | `web.api` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 8 — Async** | `async.futures_and_promises` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 8 — Async** | `async.async_await` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 8 — Async** | `async.actor_model` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 8 — Async** | `async.channels` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 8 — Async** | `async.parallel` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 9 — Interop** | `interop.c_binding` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 9 — Interop** | `interop.system_calls` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+| **Fase 9 — Interop** | `interop.other_lang_bridge` | ⏳ | ⏳ | ⏳ | ⏳ | — |
+
+---
+
+## 4. Documentos de tooling / Tooling documents (glot, sprint, roadmap, agent template)
+
+| Documento / Document | Propósito / Purpose | Estado / State | Responsable / Owner |
+|----------------------|---------------------|:--------------:|:-------------------:|
+| `docs/ROADMAP.md` | Progreso por fases, especificaciones y contadores `X/50` / Phase progress, specs, and `X/50` counters | 🔄 | — |
+| `docs/WORKFLOW.md` / `scripts/docs/SPRINT.md` (`Sprint de módulo.md`) | Norma del ciclo de sprint y comandos operativos por paso / Sprint cycle policy and step-by-step commands | ✅ | — |
+| `scripts/README.md` (`glot` CLI docs) | Orquestador de desarrollo, tooling del monorepo y catálogo de datos / Development tool orchestrator and data catalog | ✅ | — |
+| `docs/AGENT_Template.md` / `AGENTS.md` | Contrato de agentes de IA, roles y calendario de adopción / AI agent contract, roles, and adoption schedule | ✅ | — |
+| `docs/ROADMAP_UPDATE_CHECKLIST.md` | Lista de verificación obligatoria para cierre de fase y módulo / Verification checklist for phase and module closure | ✅ | — |
+| `docs/README_Template.md` | Plantilla canónica de README de Nivel 3 para módulos / Canonical Level 3 module README template | ✅ | — |
+
+---
+
+## 5. Orden de trabajo / Order of work
+
+### Cadena bloqueante / Blocking chain (must exist before auditing begins)
+
+1. `docs/PSEUDOCODE_CONVENTION.md` ← **siguiente / next**
+2. `docs/IDIOMATICITY_LEVELS.md`
+3. `data/canonical_names.tsv`
+4. `docs/LANGUAGE_CHARACTERISTICS.md`
+5. `data/language_characteristics.tsv`
+
+### Cadena de soporte / Support chain (can be done in parallel)
+
+6. `docs/DEVIATION_POLICY.md`
+7. `docs/PARADIGM_FAMILIES.md`
+8. `data/idiomaticity_state.tsv`
+9. Archivos por lenguaje en `docs/idioms/{lang}.md` / Per-language `idioms/` files
+10. Archivos por lenguaje en `docs/adaptations/{lang}.md` / Per-language `adaptations/` files
+11. Changelogs por lenguaje / Per-language changelogs

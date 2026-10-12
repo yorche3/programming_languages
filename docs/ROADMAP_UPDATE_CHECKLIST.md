@@ -1297,3 +1297,28 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`zig/core/algorithms/data_structures_basics/README.md` y `zig/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 47/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript, Vala)` -> `core.algorithms.data_structures_basics 🔄 48/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript, Vala, Zig)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-12
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): common-lisp
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/common-lisp.md`, commit `a9bdf0e`, veredicto green; el módulo está en el `main` del submódulo)
+Tests y comandos / Tests and commands:
+- `ros run --load run-tests.lisp --eval '(uiop:quit)'` -> `Running test suite DATA-STRUCTURES-BASICS-SUITE`, `Did 15 checks.`, `Pass: 15 (100%)`, `Fail: 0 ( 0%)`, código de salida `0` (los quince pasos de la especificación)
+- Verificación estática: `common-lisp` no tiene verificador declarado en la columna 5 de `data/languages.tsv`, así que el acta lo registra como `verify_exit=-`
+README(s) verificado(s) / README(s) verified: yes (`common-lisp/core/algorithms/data_structures_basics/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics` 🔄 48/50 (Ada, …, TypeScript, Vala, Zig) -> 🔄 49/50 (Ada, …, COBOL, Common Lisp, C++, …, Vala, Zig)
+Observaciones / Notes: **Registro tardío**, escrito a mano el 2026-10-12 (no lo generó `glot close`): el módulo cerró el 2026-09-29 con acta verde y el puntero del monorepo se confirmó (`a259b27`), pero el contador del roadmap nunca recogió el lenguaje. Quedan dos pendientes abiertos en ese mismo contador: (1) `v` — su módulo está en el `main` del submódulo (`core/algorithms/data_structures_basics/`) pero el acta almacenada está en **rojo** (`v fmt -verify src` -> `verify_exit=1`, commit `24c577a`, anterior a la normalización `tests/` -> `test/`), así que no cumple el criterio de «finalizado» que el propio contador declara; y (2) `prolog` — está contado, pero su módulo vive solo en la rama `feat/algorithms/data-structures-basics` (publicada, acta verde `1d46d18`) y el gitlink del monorepo (`ed42ba7`) apunta al tip de esa rama sin integrar en su `main` (`69f1e9f`).
+
+Fecha / Date: 2026-10-12
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): v
+Código verificado / Code verified: yes (corregido y verificado el 2026-10-12: el fuente pasa a `src/data_structures_basics.v` con `module src` —que es lo que exige el verificador declarado del catálogo, `v fmt -verify src`— y la suite conserva `tests/`, la carpeta que crea `v init --lib`)
+Tests y comandos / Tests and commands:
+- `v fmt -verify src` -> sin salida, código `0`
+- `v -shared -check src/data_structures_basics.v` -> sin salida, código `0`
+- `v test .` -> `OK 3.209 ms …/tests/data_structures_basics_test.v`, `Summary for all V _test.v files: 1 passed, 1 total. Elapsed time: 3350 ms, on 1 job. Comptime: 3344 ms. Runtime: 3 ms.`, código `0`
+README(s) verificado(s) / README(s) verified: yes (`v/core/algorithms/data_structures_basics/README.md` con estructura, `v.mod`, comandos y salidas reales al día, y el índice de fase `v/core/algorithms/README.md` con el árbol y los casos)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics` 🔄 49/50 (Ada, …, TypeScript, Vala, Zig) -> ✅ 50/50 (Ada, …, TypeScript, V, Vala, Zig)
+Observaciones / Notes: cierre del último lenguaje del módulo. Los defectos venían del andamiaje sin normalizar: el módulo quedó con `data_structures_basics.v` en la raíz y `tests/` (forma cruda de `v init --lib`), `v.mod` con `version: '0.0.1'`/`license: 'GNU'` y la evidencia en **rojo** (`v fmt -verify src` no encontraba `src/`), así que no hubo commit de cierre y el contador no lo recogía. Corregido a mano: fuente a `src/` con `module src`, import de la suite a `data_structures_basics.src`, `v.mod` a `0.1.0`/`MIT` (patrón de `numbers`, `calculator` y `naive_sort`) y README + índice al día. **Pendiente del autor**: el acta almacenada (`docs/evidence/algorithms/data_structures_basics/v.md`, commit `24c577a`) es anterior a la corrección y sigue en rojo —conviene regenerarla al confirmar el cierre— y los cambios del submódulo están sin confirmar.

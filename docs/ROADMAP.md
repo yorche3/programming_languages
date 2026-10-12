@@ -77,7 +77,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 | Módulo | Estado | Algoritmos | Especificación |
 |--------|--------|------------|----------------|
 | `core.algorithms.naive_sort` | ✅ | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
-| `core.algorithms.data_structures_basics` | 🔄 | Node, linked_list, stack y queue construidos desde cero | [`📄 06_Data_Structures_Basics.md`](core/algorithms/06_Data_Structures_Basics.md) |
+| `core.algorithms.data_structures_basics` | ✅ | Node, linked_list, stack y queue construidos desde cero | [`📄 06_Data_Structures_Basics.md`](core/algorithms/06_Data_Structures_Basics.md) |
 | `core.algorithms.data_structures_advanced` | 📋 | Node con múltiples enlaces, binary tree y graph dirigidos construidos desde cero | [`📄 07_Data_Structures_Advanced.md`](core/algorithms/07_Data_Structures_Advanced.md) |
 | `core.algorithms.efficient_sort` | 📋 | quick, merge, heap; puede usar ADTs optimizados del lenguaje salvo `sort()` | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |
 | `core.algorithms.distributed_sort` | 📋 | radix, bucket, shell, counting | [`📄 09_Distributed_Sort.md`](core/algorithms/09_Distributed_Sort.md) |
@@ -301,9 +301,9 @@ core.foundations.hello_user           ✅ 50/50
 core.foundations.unit_test            ✅ 50/50
 core.foundations.numbers              ✅ 50/50
 
-## Fase 1 — Algorithms Pure 🔄 (fase abierta; implementados: 1/50)
+## Fase 1 — Algorithms Pure 🔄 (fase abierta; implementados: 2/50)
 core.algorithms.naive_sort            ✅ 50/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript, V, Vala, Zig)
-core.algorithms.data_structures_basics 🔄 48/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript, Vala, Zig)
+core.algorithms.data_structures_basics ✅ 50/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript, V, Vala, Zig)
 core.algorithms.data_structures_advanced 📋
 core.algorithms.efficient_sort           📋
 core.algorithms.distributed_sort         📋
