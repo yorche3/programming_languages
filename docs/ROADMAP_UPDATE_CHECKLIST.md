@@ -1274,3 +1274,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`typescript/core/algorithms/data_structures_basics/README.md` y `typescript/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 45/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk)` -> `core.algorithms.data_structures_basics 🔄 46/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-12T15:58:14-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): vala
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/vala.md`, commit `8b8c564`)
+Tests y comandos / Tests and commands:
+- `valac src/data_structures_basics.vala test/data_structures_basics_test.vala --pkg glib-2.0 -o /tmp/data_structures_basics-tests && /tmp/data_structures_basics-tests` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`vala/core/algorithms/data_structures_basics/README.md` y `vala/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 46/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript)` -> `core.algorithms.data_structures_basics 🔄 47/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme, Swift, Tcl/Tk, TypeScript, Vala)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
