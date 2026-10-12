@@ -1230,3 +1230,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`scala/core/algorithms/data_structures_basics/README.md` y `scala/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 41/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust)` -> `core.algorithms.data_structures_basics 🔄 42/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-11T20:20:38-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics
+Lenguaje(s) / Language(s): scheme
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_basics/scheme.md`, commit `635d975`)
+Tests y comandos / Tests and commands:
+- `cd test && guile --no-auto-compile -s data_structures_basics_tests_guile.scm` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`scheme/core/algorithms/data_structures_basics/README.md` y `scheme/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics 🔄 42/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala)` -> `core.algorithms.data_structures_basics 🔄 43/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy, Haskell, Haxe, Java, JavaScript, Julia, Kotlin, Lua, Nim, OCaml, Perl, PHP, Prolog, PureScript, Python, R, Racket, Raku, ReScript, REXX, Ruby, Rust, Scala, Scheme)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
