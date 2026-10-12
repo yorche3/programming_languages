@@ -57,6 +57,23 @@ the real module before running, and `-n` prints the result. The `nim`, `perl`, `
 and `ruby` rows rely on the file name, so a module not following it will need its row
 reviewed.
 
+**ES:** ⚠️ **Deuda conocida / Known debt (2026-10-11):** un runner puede devolver
+`0` con la suite en rojo. `guile --no-auto-compile -s {suite}_guile.scm` imprime el
+conteo de SRFI-64 pero no lo propaga al código de salida, así que `glot test` solo
+distingue «no se pudo ejecutar» (rojo con `rc`≠0) de «verde»: medido en `scheme`
+`core/algorithms/data_structures_basics`, con 10 aserciones en rojo, `test` imprimió
+`en verde / green` y devolvió `0`. El arreglo no es del script: o cambia el dato del
+runner, o la suite propaga su resultado (`exit` con el conteo del runner de SRFI-64).
+
+**EN:** ⚠️ **Known debt (2026-10-11):** a runner can return `0` with the suite red.
+`guile --no-auto-compile -s {suite}_guile.scm` prints the SRFI-64 count but does not
+propagate it to the exit code, so `glot test` only tells "could not run" (red with
+`rc`≠0) from "green": measured on `scheme`
+`core/algorithms/data_structures_basics`, with 10 failing assertions, `test` printed
+`en verde / green` and returned `0`. The fix is not the script's: either the runner
+data changes, or the suite propagates its result (`exit` with the SRFI-64 runner
+count).
+
 ### Columnas 6 a 8: la inicialización / Columns 6 to 8: initialisation
 
 **ES:** Estas tres columnas son la **leyenda de la guía convertida en dato**
@@ -224,6 +241,37 @@ del modelo vive en la plantilla y aquí solo está su presupuesto.
 (with `sonnet`) and `economy` covers the **scaffolding**, the **correction** and the
 **documentation**, which goes over **OpenRouter** at effort `low`. The profile name is a cost
 policy: the model datum lives in the template and only its budget is here.
+
+### 🔮 Cambio previsto para la siguiente versión / Planned change for the next version
+
+| Perfil / Profile | Modelo ahora / Model now | Modelo previsto / Planned model | Esfuerzo / Effort | Créditos / Credits |
+|---|---|---|---|---|
+| `balanced` | `gpt-5.6-terra` | `gpt-6.1-sol` | `low` | 60 |
+| `deep` | `claude-sonnet-5` | `claude-sonnet-5.5` | `medium` | 90 |
+
+**ES:** Cuando se abra la **siguiente versión de `glot`** (posterior a la 1.7.8) se cambian los
+modelos y el presupuesto de `balanced` y `deep`. Los ids de la tabla son la **propuesta del
+autor**: hay que confirmarlos contra la lista del **CLI instalado** (`copilot help config`) en el
+momento del cambio —la lista la manda el CLI, no este documento— y, si Copilot ofrece otro nombre
+para ese modelo, manda el nombre real. Lo que **no** cambia: el reparto por encargo (`balanced`
+→ `contract_stub`, `suite`; `deep` → `implement`, `fix`, `refactor`), el modelo del delegado AGY
+de cada perfil y el auto-tier (`-`). El movimiento toca, en el mismo cambio, `data/models.tsv`,
+la tabla de perfiles de arriba, la sección de **claves de modelo** de `scripts/README.md`, las
+plantillas con `model:` afectadas (`contract_stub`, `suite`, `implement`, `fix`, `refactor`) y el
+harness; la versión se archiva en `versions/` como siempre. **Mientras no se abra esa versión,
+los valores vigentes son los de la tabla de arriba y no hay nada que tocar.**
+
+**EN:** When the **next `glot` version** is opened (after 1.7.8) the models and the budget of
+`balanced` and `deep` change. The ids in the table are the **author's proposal**: they must be
+confirmed against the **installed CLI** list (`copilot help config`) at the time of the change
+—the list is owned by the CLI, not by this document— and, if Copilot offers another name for
+that model, the real name wins. What does **not** change: the split per request (`balanced` →
+`contract_stub`, `suite`; `deep` → `implement`, `fix`, `refactor`), each profile's AGY delegate
+model and the auto-tier (`-`). The move touches, in the same change, `data/models.tsv`, the
+profile table above, the **model keys** section of `scripts/README.md`, the templates with the
+affected `model:` (`contract_stub`, `suite`, `implement`, `fix`, `refactor`) and the harness;
+the version is archived in `versions/` as usual. **Until that version is opened, the values in
+force are those of the table above and there is nothing to touch.**
 
 ## 🔤 `delegates.tsv` — alias de modelo por delegado / per-delegate model aliases
 
