@@ -83,7 +83,7 @@ EN: Rules set on 2026-09-26; they decide which command appears in the table and 
 **ES:** Con R1–R6 el reparto del catálogo es **39 tool · 11 manual · 0 deferred**, y **17** de esos comandos son el primer paso de una secuencia (⛓️). Un lenguaje no se marca ✍️ por tener un generador distinto, sino solo cuando no hay herramienta de biblioteca aceptada (R2/R5) o cuando no existe generador.
 
 **EN:** Under R1–R6 the catalogue splits **39 tool · 11 manual · 0 deferred**, and **17** of those commands are the first step of a sequence (⛓️). A language is not marked ✍️ for having a different generator, but only when there is no accepted library tool (R2/R5) or no generator at all.
-📊 Tabla maestra / Master table
+## 📊 Tabla maestra / Master table
 
 Las rutas de la columna Manifiesto son relativas a la carpeta del módulo.
 Lenguaje	Comando de inicialización	Manifiesto / archivos clave	Pruebas
@@ -137,16 +137,16 @@ typescript	✅ npm init -y	package.json, tsconfig.json, jest.config.cjs	✅ npm 
 v	⛓️ ✅ v init --lib (lo conduce expect; quitar el .git anidado)	v.mod, {module}.v, test/	✅ v test .
 vala	⛓️ 🔧 meson init --language vala --type library --name {module}	meson.build, src/, test/	✅ valac src/{module}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{module}-tests && /tmp/{module}-tests
 zig	✅ zig init	build.zig	✅ zig build test
-🔗 Secuencias de varios pasos / Multi-step sequences
+## 🔗 Secuencias de varios pasos / Multi-step sequences
 
-ES: Estos lenguajes necesitan más de un comando, otro directorio de trabajo o un completado posterior a mano. El comando se ejecuta desde la carpeta del módulo ({lenguaje}/core/{fase}/{module}), que es donde deja al autor glot use; la excepción son los cinco generadores que crean la carpeta ellos mismos y se ejecutan desde la fase: common-lisp, julia, clojure, racket y ocaml (medido el 2026-09-26 con quickproject, el 2026-09-29 con cl-project y el 2026-10-07 con dune init proj: los tres crean el directorio del proyecto).
+**ES:** Estos lenguajes necesitan más de un comando (v2): los reparte `data/init_sequences.tsv`, que declara para cada fila su fase (`new` o `scaffold`) y su directorio de trabajo (`phase` o `module`). `glot new` es quien prepara el esqueleto y quien **deja al autor dentro de `{module}`**; `glot scaffold` completa lo que el generador no deja listo. La excepción de directorio siguen siendo los cinco generadores que crean la carpeta ellos mismos y se ejecutan desde la fase: common-lisp, julia, clojure, racket y ocaml (medido el 2026-09-26 con quickproject, el 2026-09-29 con cl-project y el 2026-10-07 con dune init proj: los tres crean el directorio del proyecto).
 
-EN: These languages need more than one command, another working directory or a later completion by hand. The command runs from the module folder ({language}/core/{phase}/{module}), where glot use leaves the author; the exception is the five generators that create the folder themselves and run from the phase: common-lisp, julia, clojure, racket and ocaml (measured on 2026-09-26 with quickproject, on 2026-09-29 with cl-project and on 2026-10-07 with dune init proj: all three create the project directory).
+**EN:** These languages need more than one command (v2): `data/init_sequences.tsv` splits them, declaring each row's phase (`new` or `scaffold`) and its working directory (`phase` or `module`). `glot new` is the one that prepares the skeleton and that **leaves the author inside `{module}`**; `glot scaffold` completes what the generator does not leave ready. The directory exception is still the five generators that create the folder themselves and run from the phase: common-lisp, julia, clojure, racket and ocaml (measured on 2026-09-26 with quickproject, on 2026-09-29 with cl-project and on 2026-10-07 with dune init proj: all three create the project directory).
 
 ES: La fuente de verdad es el dato scripts/data/init_sequences.tsv: una fila por paso, con lenguaje, orden, directorio de trabajo, modo (run/expect), comando, requisito, respuestas de expect y lo que falta por completar. La tabla de abajo es su lectura humana, y el tooling comprueba que las dos no se separen.
 
 EN: The source of truth is the data in scripts/data/init_sequences.tsv: one row per step, with language, order, working directory, mode (run/expect), command, requirement, expect answers and what is left to complete. The table below is its human reading, and the tooling checks that the two do not drift apart.
-Lenguaje	Secuencia	Completado posterior
+Lenguaje / Language	Secuencia de `new` / `new` sequence	Completado que hace `scaffold` / completion now run by `scaffold`
 ada	alr init --lib --in-place {module} → alr init --bin tests → alr with {module} --use=.. → alr with aunit (los dos últimos, dentro de tests/)	Licencia GPL-3.0-or-later en alire.toml y tests/alire.toml, y description del subproyecto de pruebas
 clojure	clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib :name {module} :target-dir {module}	Sustituir el test de plantilla
 common-lisp	ros -e '(ql:quickload :cl-project)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'	Homologar el andamiaje con guion y no subrayado, sistema de pruebas con fiveam y run-tests.lisp
@@ -170,7 +170,35 @@ vala	meson init --language vala --type library --name {module}	Completar src/ y 
 
 ES: Un lenguaje que no aparece aquí se resuelve con el comando único de la tabla maestra.
 EN: A language that does not appear here is handled by the single command in the master table.
-🧱 Estructuras de referencia / Reference structures
+## 🔨 Generación manual (lib) / Manual generation (lib)
+
+> **ES:** **Todo el esqueleto se puede hacer con comandos de consola**, y es lo que ejecutan `glot new` y `glot scaffold`: `mkdir -p`, `cd`, `touch` y la declaración idiomática de cada fichero. No hace falta delegado para esta parte; el delegado solo entra en lo que no es un comando (leer la especificación y escribir el código del módulo). Hoy la guía cubre el caso **lib**; bin y web se añadirán después.
+>
+> **EN:** The whole skeleton can be built with console commands, and that is what `glot new` and `glot scaffold` run: `mkdir -p`, `cd`, `touch` and each file's idiomatic declaration. No delegate is needed for this part; the delegate only enters what is not a command (reading the specification and writing the module's code). Today the guide covers the **lib** case; bin and web come later.
+
+**ES:** Para los lenguajes sin herramienta aceptada (✍️), la secuencia manual es: crear las carpetas, crear los ficheros con `touch` y pegarles la declaración idiomática del lenguaje. Ejemplos (lib):
+
+**EN:** For languages without an accepted tool (✍️), the manual sequence is: create the folders, create the files with `touch`, and give them the language's idiomatic declaration. Examples (lib):
+
+| Lenguaje / Language | Comandos / Commands | Declaración idiomática / Idiomatic declaration |
+|---|---|---|
+| `assembly` | `mkdir -p src test` · `touch src/{module}.asm` | `global {module}_init` + `.text` |
+| `c` | `mkdir -p include src test` · `touch include/{module}.h src/{module}.c` | `#ifndef {MODULE}_H` + `#define {MODULE}_H` en la cabecera; `#include "{module}.h"` en la fuente |
+| `cobol` | `mkdir -p src/copybooks src/lib test` · `touch src/lib/{module}.cbl` | `IDENTIFICATION DIVISION.` + `PROGRAM-ID. {Module}.` |
+| `forth` | `mkdir -p src test` · `touch src/{module}.forth` | `: {module}-init` |
+| `grain` | `mkdir -p src tests` · `touch src/{module}.gr` | `module {Module}` |
+| `java` | `mkdir -p src/main/java src/test/java` · `touch src/main/java/{Module}.java` | `public class {Module} { }` |
+| `perl` | `mkdir -p src test` · `touch src/{module}.pl` | `package {Module};` + `use strict;` + `use warnings;` + `1;` |
+| `php` | `mkdir -p src test` · `touch src/{Module}.php` | `<?php` + `declare(strict_types=1);` + `namespace {Module};` |
+| `prolog` | `mkdir -p src test` · `touch src/{module}.pl` | `:- module({module}, []).` |
+| `scala` | `mkdir -p src/main/scala src/test/scala project` · `touch src/main/scala/{Module}.scala` | `object {Module}` |
+| `scheme` | `mkdir -p src test` · `touch src/{module}.scm` | `(define-library ({module}) (export) (import (scheme base)))` |
+
+**ES:** En los lenguajes con herramienta, la secuencia manual equivalente es el comando de la tabla maestra seguido de sus pasos `scaffold` en `data/init_sequences.tsv`.
+
+**EN:** For languages with a tool, the equivalent manual sequence is the master table's command followed by its `scaffold` steps in `data/init_sequences.tsv`.
+
+## 🧱 Estructuras de referencia / Reference structures
 
 ES: Cuando el lenguaje no ofrece una herramienta de inicialización aceptada (R2/R5), la estructura se replica con mkdir -p; los árboles siguientes son los que usan los módulos reales de core/foundations/numbers/ y core/algorithms/naive_sort/. En los lenguajes que sí tienen herramienta, la sección correspondiente empieza diciendo cuál es y qué queda por completar: allí el árbol es el completado y la estructura que el módulo seguirá usando hasta que se retome (R6).
 
@@ -570,7 +598,7 @@ Manifiestos que mkdir no crea / Manifests mkdir does not create
 ES: Cuando el lenguaje exige un manifiesto mínimo, escríbelo a mano después del mkdir -p: Project.toml en Julia, v.mod en V, {module}.nimble en Nim, {module}.rockspec en Lua, pom.xml en Java, build.gradle(.kts) en Groovy y Kotlin.
 
 EN: When the language requires a minimal manifest, write it by hand after mkdir -p: Project.toml in Julia, v.mod in V, {module}.nimble in Nim, {module}.rockspec in Lua, pom.xml in Java, build.gradle(.kts) in Groovy and Kotlin.
-📁 Convenciones comunes / Common conventions
+## 📁 Convenciones comunes / Common conventions
 
 ES:
 
@@ -596,7 +624,7 @@ EN:
 
     Close the module with its README.md generated from README_Template.md, the record in ROADMAP_UPDATE_CHECKLIST.md, and the update of ROADMAP.md.
 
-📝 Notas / Notes
+## 📝 Notas / Notes
 
     ES: Los comandos marcados ✅ provienen de los READMEs de este repositorio; si actualizas un módulo y cambia su comando de inicialización, actualiza también esta tabla.
 
