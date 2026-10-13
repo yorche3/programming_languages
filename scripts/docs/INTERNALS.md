@@ -69,7 +69,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `unset <clave>` | El fichero de estado | Es idempotente: borrar lo que no está no es error | Confirmación por stderr | `0`, `2` o `3` |
 | `list` | El fichero de estado | Ordena por clave en `LC_ALL=C` | `clave=valor` en stdout | `0` o `3` |
 | `path` | Las variables de entorno | — | La ruta del estado en stdout | `0` |
-| `use <lenguaje> <fase>/<módulo> [tipo]` | `.gitmodules`, la fase, la especificación, el estado del árbol, las ramas y el estado del sprint | Clasifica el estado en nuevo, en curso, reanudar o cerrado | Las seis claves del sprint por stderr y la ruta del módulo en stdout | `0`, `1`, `2` o `3` |
+| `use <lenguaje> <fase>/<módulo> [tipo]` | `.gitmodules`, la fase, la especificación, el estado del árbol, las ramas y el estado del sprint | Clasifica el estado en nuevo, en curso, reanudar o cerrado | Las seis claves del sprint por stderr y la ruta de la **fase** en stdout | `0`, `1`, `2` o `3` |
 | `langs` | `.gitmodules` y `data/languages.tsv` | Cruza los lenguajes registrados con su comando nativo de pruebas | `lenguaje<TAB>prueba` ordenado en `LC_ALL=C` | `0` o `1` |
 | `modules [fase]` | El roadmap y `docs/core/` | Filtra por fase y resuelve la especificación de cada módulo | `id<TAB>fase<TAB>módulo<TAB>especificación` | `0`, `1` o `2` |
 | `progress [fase]` | El roadmap y `.gitmodules` | Agrega contadores; avisa si el contador contradice la lista o el denominador | `clave=valor`, o `modulo<TAB>estado<TAB>hechos<TAB>total` | `0`, `1` o `2` |
@@ -81,6 +81,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 | `prompt [encargo] [lenguaje] [fase/módulo]` | El registro de plantillas y el estado del sprint | Sin encargo lista; con encargo, expande los marcadores | El encargo completo en stdout | `0`, `1`, `2` o `3` |
 | `ask <encargo> [lenguaje] [fase/módulo]` | Igual, más `GLOT_DELEGATE` | Sin delegado configurado devuelve `1` | La salida del delegado en stdout | `0`, `1`, `2` o `3` |
 | `new [lenguaje] [fase/módulo]` | El estado del sprint, el catálogo de datos y el directorio del módulo | Según la columna 6: ejecuta la herramienta, crea carpetas o se aplaza; después normaliza | La ruta del módulo, o `skipped` | `0`, `1`, `2` o `4` |
+| `scaffold [lenguaje] [fase/módulo]` | Las filas `phase=scaffold` del catálogo y el directorio del módulo | Las corre en orden desde `{module}`; las filas `manual` no se ejecutan | La salida de cada comando en stdout | `0`, `1`, `2` o `4` |
 | `save <paso\|alias> [lenguaje] [fase/módulo]` | El catálogo de commits, el estado del sprint y el índice del submódulo | Resuelve el mensaje del paso; rechaza los pasos del monorepo | El SHA corto del commit, o `nothing` | `0`, `1`, `2`, `3` o `4` |
 | `evidence [lenguaje] [fase/módulo]` | El estado del sprint, el runner y el verificador | Ejecuta la suite y el verificador; captura stdout y stderr juntos | El acta en `docs/evidence/{fase}/{módulo}/{lenguaje}.md` | `0`, `1`, `2`, `3` o `4` |
 | `close [lenguaje] [fase/módulo]` | El acta de evidencia, el roadmap y `data/display.tsv` | Recalcula la línea del roadmap; exige el puntero al HEAD del submódulo | La línea del roadmap reescrita, sin confirmar | `0`, `1`, `2` o `3` |
@@ -110,7 +111,7 @@ Un `case` sobre `cmd` elige el camino; cada rama llama a un `_glot_cmd_*`:
 - **reanudar** (`dirty_work` no vacío): no toca nada; si ya estás en la rama objetivo la republica, y si no, informa de dónde estás y de la rama que falta;
 - **cerrado** (limpio, sin rama): con `kind_given` abre la rama de mantenimiento desde `main` y la publica; sin él avisa y sugiere los tipos.
 
-Para terminar escribe las seis claves del estado e imprime la ruta absoluta. Con `-n` imprime ese mismo plan sin ejecutarlo (y sin pasos cuando el estado es reanudar o cerrado sin tipo).
+Para terminar escribe las seis claves del estado e imprime la ruta absoluta de la **fase** —donde `new` espera para correr las filas `cwd=phase`— Con `-n` imprime ese mismo plan sin ejecutarlo (y sin pasos cuando el estado es reanudar o cerrado sin tipo).
 
 **EN:** `_glot_cmd_use` **validates before touching anything**: it reads the arguments (the language may be omitted inside a submodule, the default `tipo` is `feat` and whether it was given explicitly is remembered, because a closed module requires it), checks the language against `.gitmodules`, that the submodule is initialised, that the phase exists, that the specification exists (`_glot_spec_for` matches the module name against `docs/core/{phase}/{NN}_{Name}.md`) and that the tree has no uncommitted changes **outside** the module directory. Then it **reads the state and never forces it**, with two flags deciding everything: `module_exists` (does the folder exist?) and `branch_exists` (does the `{tipo}/{fase}/{módulo}` branch exist?), plus `dirty_work` (any remaining dirt, which can only be inside the module):
 

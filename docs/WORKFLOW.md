@@ -22,20 +22,24 @@
 | # | Paso | Objetivo | Artefacto obligatorio |
 |:-:|------|----------|-----------------------|
 | 1 | Reconocimiento | Saber en qué estado está el repo y el submódulo antes de tocar nada | `git status --short` y `git submodule status` leídos, sin cambios pendientes ajenos al sprint |
-| 2 | Asignación | Fijar `{lenguaje}`, `{fase}`, `{módulo}`, la rama y la especificación del sprint; `use` **crea la carpeta del módulo y deja al autor dentro de ella** | Estado del sprint registrado fuera del shell (ver «Estado del sprint») |
+| 2 | Asignación | Fijar `{lenguaje}`, `{fase}`, `{módulo}`, la rama y la especificación del sprint; `use` sienta el sprint y **deja al autor en la carpeta de la fase** (`{lenguaje}/core/{fase}/`) | Estado del sprint registrado fuera del shell (ver «Estado del sprint») |
 | 3 | Rama de trabajo | Trabajar aislado, con la rama publicada y su upstream | Rama `{tipo}/{fase}/{módulo}` en minúsculas y `kebab-case`, publicada |
-| 4 | Esqueleto, contrato y pruebas | Dejar el andamiaje (**4a**), el **contrato** (**4b**) y la suite (**4c**), **sin implementar**. El andamiaje sale de la **secuencia** del lenguaje ([`scripts/data/init_sequences.tsv`](../scripts/data/init_sequences.tsv): pasos, directorio de trabajo y completado); el contrato (tipo nuevo y firmas) es un artefacto propio y va **antes** de la suite | Estructura del lenguaje + contrato + suite que falla por falta de implementación (o pasa si el módulo es solo documental) |
+| **4a** | Esqueleto | `glot new` **prepara y entra**: corre las filas `phase=new` de [`scripts/data/init_sequences.tsv`](../scripts/data/init_sequences.tsv) respetando su `cwd` y deja al autor **dentro de `{lenguaje}/core/{fase}/{módulo}`**; `glot scaffold` completa lo que el generador no deja listo (framework de pruebas, referencias entre proyectos, limpieza de la plantilla, renombres y ficheros vacíos) con las filas `phase=scaffold` | Estructura del lenguaje decidida por el dato |
+| **4b** | Contrato | El tipo nuevo y sus firmas, **antes** de la suite | Contrato |
+| **4c** | Suite | La suite que falla por falta de implementación (o pasa si el módulo es solo documental) | Suite |
 | 5 | Implementación | Cumplir el contrato de la especificación | Código verificado por la suite, sin warnings |
+| **4d · 5b · 5c** | Corrección y ajuste | `correct` cuando lo señale la suite, la auditoría o el validador (`--cause` obligatoria), `fix` para un arreglo puntual y `refactor` para rehacer sin cambiar el contrato | Corrección aplicada |
 | 6 | Verificación | Tener evidencia real de que cumple | Salida real de la suite y del analizador, copiada sin editar |
 | 7 | Cierre documental del módulo | Documentar lo implementado | `README.md` de Nivel 3 generado desde [`README_Template.md`](README_Template.md) |
+| 8 | Documentación del lenguaje | Dejar el lenguaje y sus índices al día | `README.md` del lenguaje y los índices de Nivel 1–3 actualizados |
 | — | Integración | Que el lenguaje quede en estado concluido | Rama integrada en el `main` del submódulo; commit anotado |
 
 ## 🅱️ Fase B — en el monorepo / Phase B — in the monorepo
 
 | # | Paso | Objetivo | Artefacto obligatorio |
 |:-:|------|----------|-----------------------|
-| 8 | Puntero y cierre del lenguaje | Que el monorepo apunte al commit integrado y que el lenguaje quede cerrado | `glot pointer` deja la rama `chore/{fase}/{módulo}-pointer` preparada y publicada, con el gitlink añadido, y `glot save 9` la confirma; readmes faltantes e índices de Nivel 1–3 al día |
-| 9 | Registro del cierre | Dejar constancia verificable | Entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) y contador de [`ROADMAP.md`](ROADMAP.md) al día, en el mismo cambio |
+| **9** | Puntero | Que el monorepo apunte al commit **integrado** | `glot pointer` deja el gitlink preparado y sin confirmar; `glot save 9` lo confirma |
+| **10** | Cierre | Dejar constancia verificable | Entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) y contador de [`ROADMAP.md`](ROADMAP.md) al día, en el mismo cambio |
 
 **ES:** El puntero se actualiza **después** de integrar en el `main` del submódulo y **antes** de integrar la rama del monorepo. Nunca se apunta a una rama de trabajo no integrada.
 
@@ -49,16 +53,17 @@
 |------|:-----:|:----------------:|:------------:|
 | 1 Reconocimiento | decide | informa | — |
 | 2–3 Asignación y rama | decide | ejecuta | — |
-| 4 Esqueleto y pruebas | revisa | ejecuta | **escribe** |
+| 4a Esqueleto | revisa | **ejecuta** | — (comandos de consola) |
+| 4b–4c Contrato y suite | revisa | ejecuta | **escribe** |
 | 5 Implementación | decide | ejecuta pruebas | **puede escribir** |
 | 6 Verificación | valida | ejecuta y captura | **comprueba** |
 | 7 README del módulo | valida | encarga | **escribe** |
-| 8 Puntero e índices | decide | ejecuta | **escribe la documentación** |
-| 9 Registro del cierre | autoriza | encarga | **escribe el registro** |
+| 8 Documentación del lenguaje | valida | ejecuta | **escribe la documentación** |
+| 9–10 Puntero y cierre | decide | ejecuta | ayuda a redactar el registro |
 
-**ES:** Los pasos 4a (esqueleto), 4b (contrato), 4c (suite), 4d (corrección), 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El encargo lo arma `glot prompt <encargo>` con las plantillas **versionadas** de [`scripts/prompts/`](../scripts/prompts/). El agente **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
+**ES:** Los pasos 4b (contrato), 4c (suite), 4d (corrección), 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El **4a (esqueleto) no**: lo hacen `glot new` y `glot scaffold` ejecutando comandos de consola (`mkdir -p`, `cd`, `touch` y las declaraciones idiomáticas), sin delegado. El encargo lo arma `glot prompt <encargo>` con las plantillas **versionadas** de [`scripts/prompts/`](../scripts/prompts/). El agente **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
 
-**EN:** Steps 4a (scaffold), 4b (contract), 4c (suite), 4d (correction), 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). The request is built by `glot prompt <request>` from the **versioned** templates in [`scripts/prompts/`](../scripts/prompts/). The agent **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
+**EN:** Steps 4b (contract), 4c (suite), 4d (correction), 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). **4a (skeleton) does not**: `glot new` and `glot scaffold` run console commands (`mkdir -p`, `cd`, `touch` and the idiomatic declarations), with no delegate. The request is built by `glot prompt <request>` from the **versioned** templates in [`scripts/prompts/`](../scripts/prompts/). The agent **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
 
 **ES:** El agente que hace el paso **no ejecuta los verbos de delegación** (`glot prompt`, `glot ask`): recibe el encargo ya armado, o lee las fuentes que este declara, y **realiza** el trabajo. Delegar es opcional y tiene dos vías que conviven: el autor puede enviar el encargo a su propio delegado (configurado en su entorno, fuera del repositorio y sin versionar) o el mismo agente del editor lo ejecuta. El reparto no cambia: `glot` orquesta y ejecuta comandos, el agente escribe el artefacto y el autor decide y publica. Los detalles están en [`AGENT_Template.md`](AGENT_Template.md).
 
