@@ -194,6 +194,46 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   (Foundations, fase de texto y guía de inicialización, que además incorpora la
   fila y la estructura de `php`).
 
+## [2.0.0] - 2026-10-12
+
+### Added
+
+- **El esqueleto de un módulo se parte en dos pasos y dos commits**: `glot new` (paso `4`) crea
+  la carpeta del módulo desde las filas `phase=new` de `scripts/data/init_sequences.tsv` —y
+  avanza con el generador cuando el lenguaje lo trae—, y `glot scaffold` (paso `4a`) completa
+  la estructura idiomática desde las filas `phase=scaffold`: carpetas, ficheros con su
+  esqueleto base, renombres a la convención y borrado de lo que estorba (`.git` anidados,
+  plantillas, ejecutables de ejemplo). Las tareas que no son un comando se declaran
+  `mode=manual` y `scaffold` las anuncia por stderr.
+- **Paso `4d build`**: deja la suite compilando, enlazando y fallando por casos en los
+  lenguajes cuyo esqueleto no trae el fichero de construcción hecho. `4d correct` se recorre a
+  `4e`, y entra el encargo `build` con su plantilla y su rol.
+- Los **perfiles de modelo** se actualizan: `balanced` pasa a `gpt-6.1-sol` (esfuerzo `low`,
+  tope 60) y `deep` a `claude-sonnet-5.5` (esfuerzo `medium`, tope 90).
+
+### Changed
+
+- `scripts/data/languages.tsv` se queda con lo que solo él puede saber —lenguaje, tipo,
+  comando de pruebas y verificador—: la secuencia de inicialización, los manifiestos, el
+  comando único y la normalización estaban duplicados y ahora solo viven en
+  `scripts/data/init_sequences.tsv`.
+- `scripts/data/init_sequences.tsv` pasa al **esquema v2** de nueve columnas (`language`,
+  `phase`, `order`, `cwd`, `mode`, `command`, `requirement`, `expect_answers`, `completion`) y
+  cubre los 50 lenguajes con sus dos fases.
+- `docs/WORKFLOW.md`, `scripts/docs/SPRINT.md`, `docs/AGENT_ROLES.md`,
+  `docs/core/00_Project_Initialization_Guide.md`, `scripts/docs/INTERNALS.md` y
+  `docs/ruleset` quedan al día con el modelo de dos pasos.
+
+### Removed
+
+- El vocabulario `deferred` y el camino v1 del script (`_glot_init_run`, `_glot_init_fix`,
+  `_glot_init_normalise`, `_glot_init_flat`): un lenguaje sin fila `new` frena con código 1 en
+  vez de inventar la carpeta.
+
+### Fixed
+
+- `doctor` cuenta los verificadores y los tipos por las columnas nuevas del catálogo.
+
 ## [0.1.0] - 2026-09-11
 
 ### Added

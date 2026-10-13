@@ -17,17 +17,15 @@ language or per step, **tab-separated**, no header, sorted.
 | Columna / Column | Contenido / Content | Ejemplo / Example |
 |:---:|---|---|
 | 1 | Lenguaje, tal como aparece en `.gitmodules` | `php` |
-| 2 | Comando de inicialización del ecosistema | `mkdir -p src test + composer require --dev phpunit/phpunit` |
-| 3 | Manifiestos y archivos clave | `composer.json, phpunit.xml, .gitignore` |
-| 4 | Comando nativo de pruebas (lo ejecuta `glot test`) | `composer test` |
-| 5 | Verificador (lo ejecuta `glot verify`): **lint idiomático** de sintaxis y formato, con la herramienta del lenguaje; `-` si el lenguaje aún no tiene. **No** comprueba la suite ni busca *hardcode*, y el análisis estático de seguridad es un no-objetivo (v1.4.0) | `php -l src/{Module}.php` |
-| 6 | Tipo de inicialización (lo lee `glot new`): `tool` (hay herramienta), `manual` (esqueleto de carpetas) o `deferred` (lo escribe el agente) | `tool` |
-| 7 | Comando que ejecuta `glot new` **en el directorio del módulo**; `-` cuando el tipo es `deferred` | `mkdir -p src test && composer require --dev phpunit/phpunit` |
-| 8 | Normalización posterior (la aplica `glot new`), separada por `;`; `-` si no hace falta | `rm:{module}/.git;flat:{module}` |
+| 2 | Tipo de inicialización (lo lee `glot new`): `tool` (hay herramienta) o `manual` (esqueleto de carpetas) | `tool` |
+| 3 | Comando nativo de pruebas (lo ejecuta `glot test`) | `composer test` |
+| 4 | Verificador (lo ejecuta `glot verify`): **lint idiomático** de sintaxis y formato, con la herramienta del lenguaje; `-` si el lenguaje aún no tiene. **No** comprueba la suite ni busca *hardcode*, y el análisis estático de seguridad es un no-objetivo (v1.4.0) | `php -l src/{Module}.php` |
 
-**ES:** Las columnas 2 a 4 salen de la tabla maestra de
+**ES:** La columna 2 (tipo) y el comando de pruebas salen de la tabla maestra de
 [`docs/core/00_Project_Initialization_Guide.md`](../../docs/core/00_Project_Initialization_Guide.md),
-que sigue siendo el documento humano: aquí solo está lo que el tooling necesita.
+que sigue siendo el documento humano. El **esqueleto** no se duplica aquí: vive entero en
+[`init_sequences.tsv`](init_sequences.tsv), que fue lo que permitió retirar de este catálogo la
+secuencia v1, los manifiestos, el comando único y la normalización (v2.0.0).
 El harness comprueba que **los dos no se separan** (mismos lenguajes y mismos
 comandos de pruebas), así que si actualizas la guía hay que actualizar el TSV, y
 al revés. El número de filas tiene que ser igual a los lenguajes de `.gitmodules`;
@@ -76,31 +74,28 @@ count).
 
 ### Columnas 6 a 8: la inicialización / Columns 6 to 8: initialisation
 
-**ES:** Estas tres columnas son la **leyenda de la guía convertida en dato**
+**ES:** La columna del tipo es la **leyenda de la guía convertida en dato**
 (✅ verificado en este repo · 🔧 estándar del ecosistema · ✍️ estructura manual) y se
 mantienen **a mano**, con una regla dura: **solo se añade lo que se pudo verificar
 ejecutando el inicializador** en un directorio temporal, con la entrada cerrada (o
 conducida con `expect`, R1) y con un tiempo máximo, comprobando qué deja en el
-disco. La columna 7 es el **comando único**: un lenguaje que necesita varios pasos,
-otro directorio de trabajo o un completado aparece en `init_sequences.tsv` con la
-columna 7 en `-`, para no tener dos fuentes. `deferred` sigue en el vocabulario (un
-lenguaje que no se pueda cerrar vuelve ahí), pero hoy no lo usa ninguno. La
-cobertura se informa en `doctor` como `new_commands` y `deferred: N`.
+disco. El **esqueleto** no se declara aquí: un lenguaje con varios pasos, con otro directorio de
+trabajo o con un completado aparece en [`init_sequences.tsv`](init_sequences.tsv), y este
+catálogo solo guarda el tipo, el comando de pruebas y el verificador, sin dos fuentes. La
+cobertura se informa en `doctor` como `new_commands`.
 
-**EN:** These three columns are the **guide's legend turned into data** (✅ verified
+**EN:** The type column is the **guide's legend turned into data** (✅ verified
 in this repo · 🔧 ecosystem standard · ✍️ manual structure) and they are maintained
 **by hand**, with one hard rule: **only what could be verified by running the
 initializer** in a temporary directory, with stdin closed (or driven by `expect`,
-R1) and a timeout, and by checking what it leaves on disk gets added. Column 7 is
-the **single command**: a language needing several steps, another working directory
-or a completion appears in `init_sequences.tsv` with column 7 set to `-`, so there
-is only one source. `deferred` stays in the vocabulary (a language that cannot be
-closed goes back there), but no language uses it today. Coverage is reported by
-`doctor` as `new_commands` and `deferred: N`.
+R1) and a timeout, and by checking what it leaves on disk gets added. the **skeleton** is not declared here: a language with several steps, another working directory
+or a completion appears in [`init_sequences.tsv`](init_sequences.tsv), and this catalogue only
+keeps the type, the test command and the verifier, with no second source. Coverage is reported
+by `doctor` as `new_commands`.
 
-**ES:** Reparto de los 50 lenguajes tras la política R1–R6 (cerrada el 2026-09-26 y ya aplicada al dato): **33 `tool`**, **17 `manual`** y **0 `deferred`**. Pasan a `tool` doce lenguajes —`ada`, `groovy`, `kotlin`, `clojure`, `nim` y `python` (eran `deferred`) más `julia`, `vala`, `perl`, `common-lisp`, `racket` y `v` (eran `manual`)—, `cpp` queda `manual` (C++ mantiene Bazel, decidido el 2026-09-26) y `java` baja a `manual` por R2 (el arquetipo `quickstart` trae `main`). `doctor` lo informa como `new_commands: 50 de / of 50 (deferred: 0)`.
+**ES:** Reparto de los 50 lenguajes tras la política R1–R6 (cerrada el 2026-09-26 y ya aplicada al dato): **32 `tool`** y **18 `manual`**. Pasan a `tool` doce lenguajes —`ada`, `groovy`, `kotlin`, `clojure`, `nim` y `python` (eran `deferred`, vocabulario retirado en la 2.0.0) más `julia`, `vala`, `perl`, `common-lisp`, `racket` y `v` (eran `manual`)—, `cpp` queda `manual` (C++ mantiene Bazel, decidido el 2026-09-26) y `java` baja a `manual` por R2 (el arquetipo `quickstart` trae `main`). `doctor` lo informa como `new_commands: 50 de / of 50`.
 
-**EN:** Split of the 50 languages after policy R1–R6 (closed on 2026-09-26 and already applied to the data): **33 `tool`**, **17 `manual`** and **0 `deferred`**. Twelve languages move to `tool` —`ada`, `groovy`, `kotlin`, `clojure`, `nim` and `python` (were `deferred`) plus `julia`, `vala`, `perl`, `common-lisp`, `racket` and `v` (were `manual`)—, `cpp` stays `manual` (C++ keeps Bazel, decided on 2026-09-26) and `java` moves down to `manual` under R2 (the `quickstart` archetype ships `main`). `doctor` reports it as `new_commands: 50 de / of 50 (deferred: 0)`.
+**EN:** Split of the 50 languages after policy R1–R6 (closed on 2026-09-26 and already applied to the data): **32 `tool`** and **18 `manual`**. Twelve languages move to `tool` —`ada`, `groovy`, `kotlin`, `clojure`, `nim` and `python` (they were `deferred`, a vocabulary retired in 2.0.0) plus `julia`, `vala`, `perl`, `common-lisp`, `racket` and `v` (they were `manual`)—, `cpp` stays `manual` (C++ keeps Bazel, decided on 2026-09-26) and `java` moves down to `manual` under R2 (the `quickstart` archetype ships `main`). `doctor` reports it as `new_commands: 50 de / of 50`.
 
 **ES:** Normalización declarada: `flat:<sub>` sube al directorio del módulo el
 contenido de `<sub>` (incluidos los archivos ocultos) y borra `<sub>`; `rm:<ruta>`
@@ -127,7 +122,23 @@ no declared operation is untouched: it is a data decision, not the script's.
 | 3 | Directorio de trabajo del paso: `module` (la carpeta del módulo que crea `use`) o `phase` (cuando el generador crea la carpeta él mismo) | `module` |
 | 4 | Modo: `run` (se ejecuta) o `expect` (se conduce con `expect`) | `run` |
 | 5 | Comando con los marcadores del tooling (`{module}`, `{Module}`) | `alr -n init --lib --in-place {module}` |
-| 6 | Requisito del paso: `-`, `expect`, `network`, `env:PERL5LIB+PATH` o `tool:uv` | `-` |
+| 6 | Requisito del paso: `-`, `expect`, `env:PERL5LIB+PATH` o `tool:uv` | `-` |
+
+**ES:** La secuencia de inicialización **no descarga bibliotecas**: crea el proyecto y deja los
+manifiestos que las **declaran** (`package.json` con jest, `composer.json` con phpunit,
+`pyproject.toml` con pytest, el proyecto de .NET con xunit…). Quien las baja es el **`build`**
+(paso 4d) o el propio `test` al resolverlas, así que en cuanto la caché del lenguaje está
+caliente se trabaja sin red. Si un paso **sí** necesita bajar algo —el generador de `clojure` o
+`racket`, el paquete de `haxe`, Quicklisp de `common-lisp`—, eso no se marca como requisito: va
+como **nota de completado**, que es el sitio del *hint* para el autor.
+
+**EN:** The initialisation sequence **downloads no libraries**: it creates the project and leaves
+the manifests that **declare** them (`package.json` with jest, `composer.json` with phpunit,
+`pyproject.toml` with pytest, the .NET project with xunit…). What pulls them is **`build`** (step
+4d) or `test` itself when it resolves them, so as soon as the language's cache is warm you work
+offline. If a step **does** need to pull something —the `clojure` or `racket` generator, the `haxe`
+package, Quicklisp for `common-lisp`—, it is not marked as a requirement: it goes as a
+**completion note**, which is where the *hint* for the author belongs.
 | 7 | Respuestas de `expect`, separadas por `|`; `-` en los demás modos | `library|<defecto>|<defecto>|<defecto>|<defecto>` |
 | 8 | Lo que hay que **completar a mano** después (el generador no lo crea); `-` si no falta nada | `borrar el .git que crea uv` |
 
@@ -193,7 +204,7 @@ que el modelo y su presupuesto no puedan derivar el uno del otro.
 | Columna / Column | Contenido / Content | Ejemplo / Example |
 |:---:|---|---|
 | 1 | Perfil, nombre de política | `economy` |
-| 2 | Modelo de Copilot: un **id real** de la lista del CLI, o uno de **OpenRouter** (`vendedor/modelo`, que se sirve por el proveedor propio) | `gpt-5.6-terra` |
+| 2 | Modelo de Copilot: un **id real** de la lista del CLI, o uno de **OpenRouter** (`vendedor/modelo`, que se sirve por el proveedor propio) | `gpt-6.1-sol` |
 | 3 | Esfuerzo de razonamiento, que `glot` pasa como `--reasoning-effort` | `low` |
 | 4 | Tope de créditos, que `glot` pasa como `--max-ai-credits`; **30 es el mínimo que acepta el CLI** | `30` |
 | 5 | Tier de auto (`--auto-tier`), o `-` cuando el modelo es fijo | `-` |
@@ -227,51 +238,20 @@ only Copilot's.
 | Perfil / Profile | Modelo / Model | Esfuerzo / Effort | Créditos / Credits | Encargos / Requests | Modelo AGY / AGY model |
 |---|---|---|:--:|---|---|
 | `economy` | `qwen/qwen3.7-plus` (OpenRouter) | `low` | 30 | `scaffold`, `correct`, `validate`, `docs-module`, `docs-language` | `gemini-3.8-flash-low` |
-| `balanced` | `gpt-5.6-terra` | `low` | 90 | `contract_stub`, `suite` | `gemini-3.8-flash-low` |
-| `deep` | `claude-sonnet-5` | `high` | 120 | `implement`, `fix`, `refactor` | `claude-sonnet-5-5-low` |
+| `balanced` | `gpt-6.1-sol` | `low` | 60 | `contract_stub`, `suite`, `build` | `gemini-3.8-flash-low` |
+| `deep` | `claude-sonnet-5.5` | `medium` | 90 | `implement`, `fix`, `refactor` | `claude-sonnet-5-5-low` |
 
-**ES:** Los tres perfiles siguen el reparto del sprint: `balanced` escribe el **contrato** y la
-**suite** (estructuras ya homologadas, con `terra`), `deep` hace la **implementación** (con
-`sonnet`) y `economy` cubre el **andamiaje**, la **corrección** y la **documentación**, que va
-por **OpenRouter** con esfuerzo `low`. El nombre del perfil es una política de coste: el dato
-del modelo vive en la plantilla y aquí solo está su presupuesto.
+**ES:** Los tres perfiles siguen el reparto del sprint: `balanced` escribe el **contrato**, la
+**suite** y la **construcción** (estructuras ya homologadas), `deep` hace la **implementación** y
+`economy` cubre el **andamiaje**, la **corrección** y la **documentación**, que va por
+**OpenRouter** con esfuerzo `low`. El nombre del perfil es una política de coste: el dato del
+modelo vive en la plantilla y aquí solo está su presupuesto.
 
-**EN:** The three profiles follow the sprint split: `balanced` writes the **contract** and the
-**suite** (already homologated structures, with `terra`), `deep` does the **implementation**
-(with `sonnet`) and `economy` covers the **scaffolding**, the **correction** and the
-**documentation**, which goes over **OpenRouter** at effort `low`. The profile name is a cost
-policy: the model datum lives in the template and only its budget is here.
-
-### 🔮 Cambio previsto para la siguiente versión / Planned change for the next version
-
-| Perfil / Profile | Modelo ahora / Model now | Modelo previsto / Planned model | Esfuerzo / Effort | Créditos / Credits |
-|---|---|---|---|---|
-| `balanced` | `gpt-5.6-terra` | `gpt-6.1-sol` | `low` | 60 |
-| `deep` | `claude-sonnet-5` | `claude-sonnet-5.5` | `medium` | 90 |
-
-**ES:** Cuando se abra la **siguiente versión de `glot`** (posterior a la 1.7.8) se cambian los
-modelos y el presupuesto de `balanced` y `deep`. Los ids de la tabla son la **propuesta del
-autor**: hay que confirmarlos contra la lista del **CLI instalado** (`copilot help config`) en el
-momento del cambio —la lista la manda el CLI, no este documento— y, si Copilot ofrece otro nombre
-para ese modelo, manda el nombre real. Lo que **no** cambia: el reparto por encargo (`balanced`
-→ `contract_stub`, `suite`; `deep` → `implement`, `fix`, `refactor`), el modelo del delegado AGY
-de cada perfil y el auto-tier (`-`). El movimiento toca, en el mismo cambio, `data/models.tsv`,
-la tabla de perfiles de arriba, la sección de **claves de modelo** de `scripts/README.md`, las
-plantillas con `model:` afectadas (`contract_stub`, `suite`, `implement`, `fix`, `refactor`) y el
-harness; la versión se archiva en `versions/` como siempre. **Mientras no se abra esa versión,
-los valores vigentes son los de la tabla de arriba y no hay nada que tocar.**
-
-**EN:** When the **next `glot` version** is opened (after 1.7.8) the models and the budget of
-`balanced` and `deep` change. The ids in the table are the **author's proposal**: they must be
-confirmed against the **installed CLI** list (`copilot help config`) at the time of the change
-—the list is owned by the CLI, not by this document— and, if Copilot offers another name for
-that model, the real name wins. What does **not** change: the split per request (`balanced` →
-`contract_stub`, `suite`; `deep` → `implement`, `fix`, `refactor`), each profile's AGY delegate
-model and the auto-tier (`-`). The move touches, in the same change, `data/models.tsv`, the
-profile table above, the **model keys** section of `scripts/README.md`, the templates with the
-affected `model:` (`contract_stub`, `suite`, `implement`, `fix`, `refactor`) and the harness;
-the version is archived in `versions/` as usual. **Until that version is opened, the values in
-force are those of the table above and there is nothing to touch.**
+**EN:** The three profiles follow the sprint split: `balanced` writes the **contract**, the
+**suite** and the **build** (already homologated structures), `deep` does the **implementation**
+and `economy` covers the **scaffolding**, the **correction** and the **documentation**, which
+goes over **OpenRouter** at effort `low`. The profile name is a cost policy: the model datum
+lives in the template and only its budget is here.
 
 ## 🔤 `delegates.tsv` — alias de modelo por delegado / per-delegate model aliases
 

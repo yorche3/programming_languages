@@ -1,7 +1,7 @@
 ---
 name: implement
 step: 5
-model: claude-sonnet-5
+model: claude-sonnet-5.5
 description: Implementa el módulo en src/ siguiendo la especificación y deja la suite en verde
 sources: AGENTS.md, docs/AGENT_ROLES.md
 mode: agent

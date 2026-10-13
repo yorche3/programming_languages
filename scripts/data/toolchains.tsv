@@ -36,6 +36,7 @@ python	python3 --version	3.12
 r	Rscript --version	4.3
 racket	racket --version	9.1
 raku	raku --version	2026.07
+rescript	rescript --version	12.3
 rexx	rexx -v	5.2
 ruby	ruby --version	3.4
 rust	rustc --version	1.98

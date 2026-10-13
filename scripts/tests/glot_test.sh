@@ -768,44 +768,52 @@ assert_contains 'doctor: autocompletado zsh' 'completion_zsh: yes' "$out"
 # el catálogo de datos y la guía de inicialización no se pueden separar
 guide_langs="$(awk -F'|' '/^\| \*\*[a-z]/ {gsub(/\*/,"",$2); gsub(/[ \t]/,"",$2); print $2}' "$GUIDE")"
 data_langs="$(cut -f1 "$REPO/scripts/data/languages.tsv")"
+# v2: la tabla maestra de la guía es un **bloque de texto alineado** —el lenguaje es el primer
+# campo de la línea y el comando de pruebas va tras el último ✅—, así que no se lee como
+# markdown: se lee el bloque.
+GUIDE_MASTER='/^## .*Master table/,/^## .*Multi-step sequences/'
+guide_langs="$(awk "$GUIDE_MASTER" "$GUIDE" | grep -oE '^[a-z][a-z0-9-]*')"
 assert_eq 'catálogo y guía: mismos lenguajes' "$guide_langs" "$data_langs"
 
 guide_tests="$(awk -F'|' '/^\| \*\*[a-z]/ {print $5}' "$GUIDE" |
     LC_ALL=C sed 's/`//g; s/  */ /g; s/^ //; s/ $//; s/\xef\xb8\x8f//g; s/\xe2\x9c\x85//g; s/\xf0\x9f\x94\xa7//g; s/\xe2\x9c\x8d//g; s/  */ /g; s/^ //; s/ $//')"
-data_tests="$(cut -f4 "$REPO/scripts/data/languages.tsv")"
+guide_tests="$(awk "$GUIDE_MASTER" "$GUIDE" | LC_ALL=C sed -n 's/.*✅ *//p' | sed 's/ *$//')"
+data_tests="$(cut -f3 "$REPO/scripts/data/languages.tsv")"
 assert_eq 'catálogo y guía: mismos comandos de pruebas' "$guide_tests" "$data_tests"
 
 # deriva: la sección «Secuencias de varios pasos» no la comparaba nadie, y ahí vivió una
 # secuencia imposible sin aviso (medido el 2026-09-26). Son tres vistas del mismo conjunto:
 # la sección, el marcador de secuencia de la tabla maestra y el dato de secuencias.
 CHAIN_MARK="$(printf '\xe2\x9b\x93')"
-data_seq="$(cut -f1 "$REPO/scripts/data/init_sequences.tsv" | LC_ALL=C sort -u)"
-guide_seq="$(awk '/^## .*Multi-step sequences/,/^## .*Reference structures/' "$GUIDE" |
-    awk -F'|' '/^\| `/ {gsub(/[` ]/, "", $2); print $2}' | LC_ALL=C sort -u)"
-guide_chain="$(awk -F'|' -v chain="$CHAIN_MARK" '/^\| \*\*/ && index($3, chain) > 0 {gsub(/[* ]/, "", $2); print $2}' "$GUIDE" | LC_ALL=C sort -u)"
-assert_eq 'secuencias y guía: el dato trae los 17 lenguajes' '17' "$(printf '%s\n' "$data_seq" | wc -l | tr -d ' ')"
-assert_eq 'secuencias y guía: la sección lista el mismo conjunto' '' \
-    "$(comm -3 <(printf '%s\n' "$guide_seq") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"
-assert_eq 'secuencias y guía: el marcador de secuencia coincide' '' \
-    "$(comm -3 <(printf '%s\n' "$guide_chain") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"
+data_seq="$(awk -F'\t' 'FNR > 1 {print $1}' "$REPO/scripts/data/init_sequences.tsv" | LC_ALL=C sort -u)"
+guide_seq="$(awk '/^## .*Multi-step sequences/,/^## .*Manual generation/' "$GUIDE" | grep -oE '^[a-z][a-z0-9-]*' | LC_ALL=C sort -u)"
+guide_chain="$(awk "$GUIDE_MASTER" "$GUIDE" | grep -F -- "$CHAIN_MARK" | grep -oE '^[a-z][a-z0-9-]*' | LC_ALL=C sort -u)"
+assert_eq 'secuencias y guía: el dato trae los 50 lenguajes' '50' "$(printf '%s\n' "$data_seq" | wc -l | tr -d ' ')"
+assert_eq 'secuencias y guía: la sección no inventa lenguajes' '' \
+    "$(comm -23 <(printf '%s\n' "$guide_seq") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"
+assert_eq 'secuencias y guía: lo marcado con la cadena está en el dato' '' \
+    "$(comm -23 <(printf '%s\n' "$guide_chain") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"
 
 # la regla del directorio de trabajo: solo los generadores que crean la carpeta salen de
 # `module`, y la guía tiene que nombrarlos a los cinco. La sección se lee una vez: con
 # `pipefail`, un `awk | grep -q` muere por SIGPIPE cuando `grep` acierta y sale antes.
-data_phase="$(awk -F'\t' '$3 == "phase" {print $1}' "$REPO/scripts/data/init_sequences.tsv" | LC_ALL=C sort -u | tr '\n' ' ')"
-assert_eq 'secuencias: los que crean la carpeta' 'clojure common-lisp julia ocaml racket ' "$data_phase"
-guide_seq_body="$(awk '/^## .*Multi-step sequences/,/^## .*Reference structures/' "$GUIDE")"
+# la regla del directorio de trabajo (v2): los generadores que crean la carpeta por su cuenta
+# corren desde la fase (`cwd = phase`) y la guía los nombra uno a uno en esa sección.
+CREATORS='ballerina clojure common-lisp crystal d dart elixir erlang gleam julia ocaml racket'
+guide_seq_body="$(awk '/^## .*Multi-step sequences/,/^## .*Manual generation/' "$GUIDE")"
 missing_phase=""
-for lang in $data_phase; do
-    grep -q -- "$lang" <<<"$guide_seq_body" || missing_phase+="$lang "
+for lang in $CREATORS; do
+    awk -F'\t' -v l="$lang" 'FNR > 1 && $1 == l && $2 == "new" && $4 == "phase" {s = 1} END {exit !s}' \
+        "$REPO/scripts/data/init_sequences.tsv" || missing_phase+="dato:$lang "
+    grep -q -- "$lang" <<<"$guide_seq_body" || missing_phase+="guía:$lang "
 done
-assert_eq 'secuencias y guía: nombra los que crean la carpeta' '' "$missing_phase"
+assert_eq 'secuencias: los creadores de carpeta salen de la fase' '' "$missing_phase"
 
 # la referencia entre proyectos de C# es un paso del dato, no una nota (medido el
 # 2026-10-02: sin ella el proyecto de producción no se compila y `dotnet test` pasa
 # en verde con un caso de plantilla).
 assert_eq 'secuencias: C# enlaza el proyecto de pruebas' '1' \
-    "$(awk -F'\t' '$1 == "csharp" && $5 ~ /reference/ {n++} END {print n+0}' "$REPO/scripts/data/init_sequences.tsv")"
+    "$(awk -F'\t' '$1 == "csharp" && $6 ~ /reference/ {n++} END {print n+0}' "$REPO/scripts/data/init_sequences.tsv")"
 
 # el conversor resuelve el id del roadmap aunque no coincida con la carpeta ni con
 # el documento: es el fallo que el fixture anterior no podía ver
@@ -916,7 +924,7 @@ assert_contains 'doctor: hay verificadores' 'verify_commands: 14 de / of 50' "$o
 # registro de encargos: nombre<TAB>paso<TAB>descripción, leído del frontmatter
 glot_run prompt
 assert_eq 'prompt: código' '0' "$rc_last"
-assert_eq 'prompt: diez encargos' '10' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'prompt: once encargos' '11' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 assert_eq 'prompt: cuatro columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=4')"
 assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
 assert_contains 'prompt: contract_stub en el paso 4b' "$(printf 'contract_stub\t4b')" "$out"
@@ -1060,10 +1068,10 @@ assert_eq 'copilot-model: el alias `default` resuelve al modelo de OpenRouter' '
 # el alias no toca lo que ya estaba: terra (contrato y suite) ni sonnet (implementación)
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
     "$GLOT_SH" ask --delegate copilot contract_stub php algorithms/naive_sort 2>/dev/null || true)"
-assert_eq 'copilot-model: no cambia el modelo del contrato (terra)' 'P=vacio|M=gpt-5.6-terra' "$out"
+assert_eq 'copilot-model: no cambia el modelo del contrato (balanced)' 'P=vacio|M=gpt-6.1-sol' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
     "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
-assert_eq 'copilot-model: no cambia el modelo de la implementación (sonnet)' 'P=vacio|M=claude-sonnet-5' "$out"
+assert_eq 'copilot-model: no cambia el modelo de la implementación (deep)' 'P=vacio|M=claude-sonnet-5.5' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test COPILOT_PROVIDER_BASE_URL=https://otro.example/v1 \
     "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
 assert_eq 'copilot-model: el endpoint del autor manda sobre el de OpenRouter' 'P=https://otro.example/v1|M=qwen/qwen3.7-plus' "$out"
@@ -1087,7 +1095,7 @@ out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$C
 assert_contains 'el esfuerzo de OpenRouter llega a la orden' '--reasoning-effort low' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_PUB" \
     "$GLOT_SH" -n ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
-assert_contains 'el esfuerzo de la implementación llega a la orden' '--reasoning-effort high' "$out"
+assert_contains 'el esfuerzo de la implementación llega a la orden' '--reasoning-effort medium' "$out"
 # sin clave de estado, el encargo de OpenRouter usa el modelo del perfil (y su proveedor)
 GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" unset copilot-model >/dev/null 2>&1
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
@@ -1095,7 +1103,7 @@ out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$C
 assert_eq 'copilot-model sin fijar: manda el modelo del perfil' 'P=https://openrouter.ai/api/v1|M=qwen/qwen3.7-plus' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
     "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
-assert_eq 'un perfil de Copilot no toca el proveedor' 'P=vacio|M=claude-sonnet-5' "$out"
+assert_eq 'un perfil de Copilot no toca el proveedor' 'P=vacio|M=claude-sonnet-5.5' "$out"
 rc_bad=0
 GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model nope >/dev/null 2>&1 || rc_bad=$?
 assert_eq 'set copilot-model con alias inválido: código' '2' "$rc_bad"
@@ -1120,7 +1128,7 @@ assert_contains 'copilot: `{module_dir}` se resuelve al módulo' '/php/core/algo
 # doctor informa de las plantillas, los catálogos y los delegados
 glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
-assert_contains 'doctor: registro de encargos' 'prompts_ok: 10 encargos / requests' "$out"
+assert_contains 'doctor: registro de encargos' 'prompts_ok: 11 encargos / requests' "$out"
 assert_contains 'doctor: catálogo de delegados' 'delegates_file: ' "$out"
 assert_contains 'doctor: alias por delegado' 'delegate_aliases: 6 alias / aliases (2 de AGY, 4 de Copilot)' "$out"
 assert_contains 'doctor: delegado COP sin configurar' 'delegate_cop: (sin configurar / not configured)' "$out"
@@ -1133,51 +1141,53 @@ assert_eq 'doctor: ya no informa de un delegado aider (v1.7.2)' 'no' \
 DATA_DIR="$TESTS_DIR/../data"
 
 # el catálogo de inicialización es dato, y el dato tiene que cuadrar
-assert_eq 'catálogo de inicialización: 8 columnas por fila' '0' \
-    "$(awk -F'\t' 'NF != 8' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
+assert_eq 'catálogo de inicialización: 4 columnas por fila' '0' \
+    "$(awk -F'\t' 'NF != 4' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
 assert_eq 'catálogo de inicialización: tipos válidos' '0' \
-    "$(awk -F'\t' '$6 != "tool" && $6 != "manual" && $6 != "deferred"' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
-assert_eq 'catálogo de inicialización: deferred sin comando' '0' \
-    "$(awk -F'\t' '$6 == "deferred" && $7 != "-"' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
-assert_eq 'catálogo de inicialización: los demás con comando o secuencia' '0' \
-    "$(comm -23 <(awk -F'\t' '$6 != "deferred" && $7 == "-" {print $1}' "$DATA_DIR/languages.tsv" | sort) \
-                  <(cut -f1 "$DATA_DIR/init_sequences.tsv" | sort -u) | wc -l | tr -d ' ')"
+    "$(awk -F'\t' '$2 != "tool" && $2 != "manual"' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
+# v2.0.0: `init_sequences.tsv` es la única fuente del esqueleto, así que cada lenguaje del
+# catálogo tiene que traer sus dos fases: la carpeta (`new`) y la estructura (`scaffold`).
+assert_eq 'catálogo de inicialización: cada lenguaje con su fase new' '0' \
+    "$(comm -23 <(cut -f1 "$DATA_DIR/languages.tsv" | sort) \
+                  <(awk -F'\t' 'FNR > 1 && $2 == "new" {print $1}' "$DATA_DIR/init_sequences.tsv" | sort -u) | wc -l | tr -d ' ')"
+assert_eq 'catálogo de inicialización: cada lenguaje con su fase scaffold' '0' \
+    "$(comm -23 <(cut -f1 "$DATA_DIR/languages.tsv" | sort) \
+                  <(awk -F'\t' 'FNR > 1 && $2 == "scaffold" {print $1}' "$DATA_DIR/init_sequences.tsv" | sort -u) | wc -l | tr -d ' ')"
 assert_eq 'catálogo de inicialización: la secuencia es de lenguajes del catálogo' '0' \
     "$(comm -13 <(cut -f1 "$DATA_DIR/languages.tsv" | sort) \
-                  <(cut -f1 "$DATA_DIR/init_sequences.tsv" | sort -u) | wc -l | tr -d ' ')"
-assert_eq 'secuencias de inicialización: 8 columnas por fila' '0' \
-    "$(awk -F'\t' 'NF != 8' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+                  <(awk -F'\t' 'FNR > 1 {print $1}' "$DATA_DIR/init_sequences.tsv" | sort -u) | wc -l | tr -d ' ')"
+assert_eq 'secuencias de inicialización: 9 columnas por fila' '0' \
+    "$(awk -F'\t' 'NF != 9' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+assert_eq 'secuencias de inicialización: fases válidas' '0' \
+    "$(awk -F'\t' 'FNR > 1 && $2 != "new" && $2 != "scaffold"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
 assert_eq 'secuencias de inicialización: directorios de trabajo válidos' '0' \
-    "$(awk -F'\t' '$3 != "module" && $3 != "phase"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+    "$(awk -F'\t' 'FNR > 1 && $4 != "module" && $4 != "phase"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
 assert_eq 'secuencias de inicialización: modos válidos' '0' \
-    "$(awk -F'\t' '$4 != "run" && $4 != "expect"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+    "$(awk -F'\t' 'FNR > 1 && $5 != "run" && $5 != "expect" && $5 != "manual"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
 assert_eq 'secuencias de inicialización: modo expect con requisito expect' '0' \
-    "$(awk -F'\t' '$4 == "expect" && $6 != "expect"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
-# v1.3.0: el orden tiene que ser 1..n por lenguaje. Un hueco o un repetido rompe el plan
-# sin que nadie lo note (el `read` de `new` se queda con una línea de menos).
-assert_eq 'secuencias de inicialización: órdenes contiguos por lenguaje' '0' \
-    "$(awk -F'\t' '{rows[$1]++; if ($2 > top[$1]) top[$1] = $2} END {for (k in rows) if (rows[k] != top[k]) bad++; print bad + 0}' "$DATA_DIR/init_sequences.tsv")"
-# la columna 8 no puede quedar vacía: una fila de 7 campos manda el completado a
+    "$(awk -F'\t' '$5 == "expect" && $7 != "expect"' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+# v1.3.0, en v2 por fase: el orden tiene que ser 1..n **dentro de cada fase**. Un hueco o
+# un repetido rompe el plan sin que nadie lo note.
+assert_eq 'secuencias de inicialización: órdenes contiguos por fase' '0' \
+    "$(awk -F'\t' 'FNR > 1 {k = $1 "/" $2; rows[k]++; if ($3 > top[k]) top[k] = $3} END {for (k in rows) if (rows[k] != top[k]) bad++; print bad + 0}' "$DATA_DIR/init_sequences.tsv")"
+# la novena columna no puede quedar vacía: una fila corta desplaza el completado a
 # «respuestas» y lo silencia (medido el 2026-09-26: 3 filas de Ada con 7 campos)
-assert_eq 'secuencias de inicialización: la columna 8 nunca queda vacía' '0' \
-    "$(awk -F'\t' '$8 == ""' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+assert_eq 'secuencias de inicialización: la columna 9 nunca queda vacía' '0' \
+    "$(awk -F'\t' '$9 == ""' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
 # El generador **plano** de Common Lisp quedó fuera del dato (v1.6.1): `cl-project` es el
 # de la comunidad y deja `src/` y `tests/`, pero **exige un *pathname*** —con una cadena
 # abre el depurador—, así que el `#p` no es opcional (medido el 2026-09-29 y el 2026-09-30).
 assert_eq 'secuencias: common-lisp genera con cl-project y con pathname' '1' \
-    "$(awk -F'\t' '$1 == "common-lisp" && index($5, "cl-project:make-project") > 0 && index($5, "#p") > 0 {print "1"}' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
+    "$(awk -F'\t' '$1 == "common-lisp" && index($6, "cl-project:make-project") > 0 && index($6, "#p") > 0 {print "1"}' "$DATA_DIR/init_sequences.tsv" | wc -l | tr -d ' ')"
 assert_eq 'secuencias: sin el generador plano de common-lisp' '' \
-    "$(awk -F'\t' 'index($5, "quickproject") > 0 {print $1}' "$DATA_DIR/init_sequences.tsv")"
-assert_eq 'catálogo de inicialización: operaciones conocidas' '0' \
-    "$(awk -F'\t' '{n = split($8, ops, ";"); for (i = 1; i <= n; i++) if (ops[i] != "-" && ops[i] !~ /^(flat|rm):[^:]+$/) print $1}' "$DATA_DIR/languages.tsv" | wc -l | tr -d ' ')"
-
+    "$(awk -F'\t' 'index($6, "quickproject") > 0 {print $1}' "$DATA_DIR/init_sequences.tsv")"
 # el catálogo de commits: paso, alias, ámbito y mensaje
 assert_eq 'catálogo de commits: 4 columnas por fila' '0' \
     "$(awk -F'\t' 'NF != 4' "$DATA_DIR/commits.tsv" | wc -l | tr -d ' ')"
 assert_eq 'catálogo de commits: ámbitos válidos' '0' \
     "$(awk -F'\t' '$3 != "submodule" && $3 != "monorepo"' "$DATA_DIR/commits.tsv" | wc -l | tr -d ' ')"
 assert_eq 'catálogo de commits: mensajes en Conventional Commits' '0' \
-    "$(awk -F'\t' '$4 !~ /^(feat|fix|docs|chore|refactor|test)\(/ && $4 !~ /^(feat|fix|docs|chore|refactor|test):/' "$DATA_DIR/commits.tsv" | wc -l | tr -d ' ')"
+    "$(awk -F'\t' '$4 !~ /^(feat|fix|docs|chore|refactor|test|build)\(/ && $4 !~ /^(feat|fix|docs|chore|refactor|test|build):/' "$DATA_DIR/commits.tsv" | wc -l | tr -d ' ')"
 
 # deriva: cada mensaje del catálogo tiene que estar en la tabla del sprint
 # (la tabla es la fuente; el catálogo, la copia que usa `save`)
@@ -1302,7 +1312,7 @@ assert_eq 'completion bash: los pasos del monorepo están' 'si' \
     "$(printf '%s\n' "$save_comp" | grep -qx '9' && printf '%s\n' "$save_comp" | grep -qx '10' && echo si || echo no)"
 assert_contains 'completion bash: el alias del puntero' 'pointer' "$save_comp"
 assert_contains 'completion bash: el alias del cierre' 'close' "$save_comp"
-assert_eq 'completion bash: un candidato por línea' '22' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
+assert_eq 'completion bash: un candidato por línea' '26' "$(printf '%s\n' "$save_comp" | wc -l | tr -d ' ')"
 
 # v1.6.2: `get`/`set`/`unset` complean **todas** las claves reservadas. La lista vive en tres
 # sitios —el completado de bash, el de zsh y la ayuda del verbo— y estos casos la mantienen
@@ -1360,13 +1370,13 @@ assert_contains 'completion bash: el contrato entre los encargos' 'contract_stub
 # new: con herramienta, el plan es el comando del catálogo y el directorio del módulo
 glot_run -n new php algorithms/naive_sort
 assert_eq 'new tool -n: código' '0' "$rc_last"
-assert_contains 'new tool -n: comando del catálogo' 'mkdir -p src test && composer require --dev phpunit/phpunit' "$out"
-assert_contains 'new tool -n: en el directorio del módulo' '/php/core/algorithms/naive_sort && ' "$out"
+assert_contains 'new tool -n: comando del catálogo' 'cd ' "$out"
+assert_contains 'new tool -n: crea la carpeta del módulo' 'mkdir -p naive_sort' "$out"
 assert_contains 'new tool -n: imprime la ruta como dato' '/php/core/algorithms/naive_sort' "$out"
 
 # new: la normalización declarada se enseña en el plan
 glot_run -n new crystal algorithms/naive_sort
-assert_contains 'new -n: normalización en el plan' 'rm:naive_sort/.git;flat:naive_sort' "$out"
+assert_eq 'new -n: sin restos de normalización' '' "$(printf '%s\n' "$out" | grep -E 'flat:|rm:' || true)"
 glot_run -n new erlang algorithms/naive_sort
 assert_contains 'new -n: aplanar el nido' 'rebar3 new lib naive_sort' "$out"
 
@@ -1382,33 +1392,36 @@ glot_run new -x -n php algorithms/naive_sort
 assert_eq 'new: la opción desconocida sigue dando 2' '2' "$rc_last"
 
 # new: sin inicializador validado no se inventa nada: skipped, como verify. El
-# catálogo real ya no tiene lenguajes `deferred` (R1/R6: todos traen herramienta o
-# estructura manual), así que el caso se prueba con un catálogo inyectado.
+# v2: el esqueleto solo lo declara `init_sequences.tsv`; un lenguaje sin fila `new` es un
+# catálogo incompleto y `new` **no adivina** la carpeta: frena con código 1 y remite al dato.
+# Se prueba con un catálogo inyectado al que se le quita la fila.
 sandbox_make
 glot_run_sandbox use python algorithms/naive_sort
-assert_eq 'new deferred: use deja el módulo' '0' "$rc_last"
+assert_eq 'new sin secuencia: use deja el módulo' '0' "$rc_last"
 
-DEF_DIR="$WORK_DIR/deferred-data"
-mkdir -p "$DEF_DIR"
-awk -F'\t' 'BEGIN {OFS="\t"} {if ($1 == "python") {$6 = "deferred"; $7 = "-"; $8 = "-"}; print}' \
-    "$DATA_DIR/languages.tsv" >"$DEF_DIR/languages.tsv"
+BLANK_DIR="$WORK_DIR/sin-secuencia"
+mkdir -p "$BLANK_DIR"
+cp -- "$DATA_DIR/languages.tsv" "$BLANK_DIR/languages.tsv"
+awk -F'\t' 'BEGIN {OFS="\t"} $1 != "python" || $2 != "new"' \
+    "$DATA_DIR/init_sequences.tsv" >"$BLANK_DIR/init_sequences.tsv"
 rc_last=0
-out="$(GLOT_ROOT="$SANDBOX" GLOT_DATA_DIR="$DEF_DIR" "$GLOT_SH" new python algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+out="$(GLOT_ROOT="$SANDBOX" GLOT_DATA_DIR="$BLANK_DIR" "$GLOT_SH" new python algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
 err="$(cat -- "$WORK_DIR/stderr")"
-assert_eq 'new deferred: código' '0' "$rc_last"
-assert_eq 'new deferred: dato' 'skipped' "$out"
-assert_contains 'new deferred: lo escribe el agente' 'no verified initializer' "$err"
-assert_contains 'new deferred: encargo sugerido' 'glot prompt scaffold' "$err"
+assert_eq 'new sin secuencia: código' '1' "$rc_last"
+assert_contains 'new sin secuencia: lo explica' 'steps in the catalogue' "$err"
+assert_contains 'new sin secuencia: remite al dato' 'scripts/data/init_sequences.tsv' "$err"
 
-# v1.3.0: el completado del dato (columna 8) tiene que llegar al autor. Antes se imprimía
-# dentro del bucle de pasos y la salida de los propios comandos se lo comía; medido el
-# 2026-09-26, el `tests/alire.toml` de Ada quedó sin `[[depends-on]]`, `[[pins]]` ni `aunit`
-# hasta aplicarlo a mano. Ahora va en un bloque al final, y este caso lo comprueba con un
-# dato inyectado (el comando es `mkdir`, así que no depende de la red).
+# v1.3.0, en v2 por fase: el completado del dato (columna 9) tiene que llegar al autor.
+# Antes se imprimía dentro del bucle de pasos y la salida de los propios comandos se lo
+# comía; medido el 2026-09-26, el `tests/alire.toml` de Ada quedó sin `[[depends-on]]`,
+# `[[pins]]` ni `aunit` hasta aplicarlo a mano. Ahora va en un bloque al final, y este caso
+# lo comprueba con un dato inyectado (el comando es `mkdir`, así que no depende de la red).
 SEQ_DIR="$WORK_DIR/sequence-data"
 mkdir -p "$SEQ_DIR"
 cp -R "$DATA_DIR/." "$SEQ_DIR/"
-printf 'java\t1\tmodule\trun\tmkdir -p src test\t-\t-\tnota-de-completado-de-prueba\n' \
+awk -F'\t' 'BEGIN {OFS="\t"} NR == 1 || !($1 == "java" && $2 == "new")' \
+    "$DATA_DIR/init_sequences.tsv" >"$SEQ_DIR/init_sequences.tsv"
+printf 'java\tnew\t1\tmodule\trun\tmkdir -p src test\t-\t-\tnota-de-completado-de-prueba\n' \
     >>"$SEQ_DIR/init_sequences.tsv"
 glot_run_sandbox use java algorithms/naive_sort
 assert_eq 'new con secuencia: use deja el módulo' '0' "$rc_last"
@@ -1430,7 +1443,7 @@ assert_eq 'new con demasiados argumentos: código' '2' "$rc_last"
 glot_run -n new php algorithms/naive_sort -x
 assert_eq 'new con opción desconocida: código' '2' "$rc_last"
 
-# new: ejecución real en el sandbox, en modo manual (crea carpetas, no suite).
+# new: ejecución real en el sandbox (v2: `new` crea la carpeta y `scaffold` la estructura).
 # Se usa `java` porque su comando es `mkdir` y no depende de la red; `ruby` tiene
 # secuencia con Bundler y se reserva para `save`.
 sandbox_make
@@ -1442,12 +1455,14 @@ assert_eq 'sandbox new: use deja el módulo de java' '0' "$rc_last"
 RB="$SANDBOX/ruby/core/algorithms/naive_sort"
 JB="$SANDBOX/java/core/algorithms/naive_sort"
 glot_run_sandbox new java algorithms/naive_sort
-assert_eq 'sandbox new manual: código' '0' "$rc_last"
-assert_eq 'sandbox new manual: dato = ruta del módulo' "$JB" "$out"
-assert_eq 'sandbox new manual: crea src/main/java' 'si' "$([[ -d "$JB/src/main/java" ]] && echo si || echo no)"
-assert_eq 'sandbox new manual: crea src/test/java' 'si' "$([[ -d "$JB/src/test/java" ]] && echo si || echo no)"
-assert_eq 'sandbox new manual: no escribe la suite' '0' "$(find "$JB/src/test/java" -type f | wc -l | tr -d ' ')"
-assert_contains 'sandbox new manual: remite al encargo' 'glot prompt scaffold' "$err"
+assert_eq 'sandbox new: código' '0' "$rc_last"
+assert_eq 'sandbox new: dato = ruta del módulo' "$JB" "$out"
+assert_eq 'sandbox new: crea la carpeta vacía' 'si' "$([[ -d "$JB" && -z "$(ls -A "$JB")" ]] && echo si || echo no)"
+glot_run_sandbox scaffold java algorithms/naive_sort
+assert_eq 'sandbox scaffold: código' '0' "$rc_last"
+assert_eq 'sandbox scaffold: crea src/main/java' 'si' "$([[ -d "$JB/src/main/java" ]] && echo si || echo no)"
+assert_eq 'sandbox scaffold: crea src/test/java' 'si' "$([[ -d "$JB/src/test/java" ]] && echo si || echo no)"
+assert_eq 'sandbox scaffold: no escribe la suite' '0' "$(find "$JB/src/test/java" -type f | wc -l | tr -d ' ')"
 
 # con contenido, el esqueleto ya está hecho: no se pisa nada
 glot_run_sandbox new java algorithms/naive_sort
@@ -1463,13 +1478,13 @@ printf 'x\n' >"$RB/src/x.rb"
 glot_run_sandbox -n save 4a ruby algorithms/naive_sort
 assert_eq 'save -n: código' '0' "$rc_last"
 assert_contains 'save -n: añade el submódulo' "git -C $SANDBOX/ruby add -A" "$out"
-assert_contains 'save -n: mensaje de la tabla' "commit -m 'chore(algorithms): add scaffold for naive_sort'" "$out"
+assert_contains 'save -n: mensaje de la tabla' "commit -m 'chore(algorithms): scaffold naive_sort'" "$out"
 assert_eq 'save -n: no confirma nada' '' "$(git -C "$SANDBOX/ruby" log --oneline main..HEAD 2>/dev/null)"
 
 glot_run_sandbox save 4a ruby algorithms/naive_sort
 assert_eq 'save: código' '0' "$rc_last"
 assert_eq 'save: dato = SHA corto' '7' "${#out}"
-assert_eq 'save: asunto del commit' 'chore(algorithms): add scaffold for naive_sort' \
+assert_eq 'save: asunto del commit' 'chore(algorithms): scaffold naive_sort' \
     "$(git -C "$SANDBOX/ruby" log -1 --format=%s)"
 assert_eq 'save: confirma en el submódulo' 'si' \
     "$(git -C "$SANDBOX/ruby" log -1 --format=%s | grep -q '^chore' && echo si || echo no)"
@@ -1485,11 +1500,11 @@ assert_eq 'save con alias y nada que confirmar: dato' 'nothing' "$out"
 printf 'y\n' >"$RB/src/y.rb"
 glot_run_sandbox -n save contract_stub ruby algorithms/naive_sort
 assert_eq 'save -n contrato: código' '0' "$rc_last"
-assert_contains 'save -n contrato: mensaje del catálogo' "commit -m 'chore(algorithms): add contract for naive_sort'" "$out"
+assert_contains 'save -n contrato: mensaje del catálogo' "commit -m 'chore(algorithms): define naive_sort contract'" "$out"
 # v1.3.0: el mismo flag, detrás del verbo (antes tomaba `-n` por el paso)
 glot_run_sandbox save -n contract_stub ruby algorithms/naive_sort
 assert_eq 'save -n detrás del verbo: código' '0' "$rc_last"
-assert_contains 'save -n detrás del verbo: mensaje del catálogo' "commit -m 'chore(algorithms): add contract for naive_sort'" "$out"
+assert_contains 'save -n detrás del verbo: mensaje del catálogo' "commit -m 'chore(algorithms): define naive_sort contract'" "$out"
 # v1.5.0: el alias viejo `contract` ya no resuelve; el ordinal `4b` sigue siendo la forma estable
 glot_run_sandbox -n save contract ruby algorithms/naive_sort
 assert_eq 'save con el alias viejo: código' '2' "$rc_last"
@@ -1502,27 +1517,27 @@ rm -f -- "$RB/src/y.rb"
 # segundo `-m` del commit: es el registro del retrabajo. Medido el 2026-09-26: en Ada hubo
 # que corregir el contrato (4b) y la suite (4c) después de confirmarlos, y `save` los habría
 # metido en un solo commit sin decir por qué.
-glot_run_sandbox -n save 4d ruby algorithms/naive_sort
-assert_eq 'save 4d sin causa: código' '2' "$rc_last"
-assert_contains 'save 4d sin causa: lo explica' 'necesita su causa' "$err"
+glot_run_sandbox -n save 4e ruby algorithms/naive_sort
+assert_eq 'save 4e sin causa: código' '2' "$rc_last"
+assert_contains 'save 4e sin causa: lo explica' 'necesita su causa' "$err"
 printf 'z\n' >"$RB/src/z.rb"
-glot_run_sandbox -n save 4d --cause 'la suite no cubría el caso vacío' ruby algorithms/naive_sort
-assert_eq 'save 4d con causa: código' '0' "$rc_last"
-assert_contains 'save 4d: el mensaje sale del catálogo' "commit -m 'chore(algorithms): correct naive_sort'" "$out"
-assert_contains 'save 4d: la causa va al cuerpo del commit' "-m 'la suite no cubría el caso vacío'" "$out"
+glot_run_sandbox -n save 4e --cause 'la suite no cubría el caso vacío' ruby algorithms/naive_sort
+assert_eq 'save 4e con causa: código' '0' "$rc_last"
+assert_contains 'save 4e: el mensaje sale del catálogo' "commit -m 'fix(algorithms): correct naive_sort'" "$out"
+assert_contains 'save 4e: la causa va al cuerpo del commit' "-m 'la suite no cubría el caso vacío'" "$out"
 # v1.5.0: la opción va en inglés, como el resto del CLI; `--causa` se acepta como alias
-glot_run_sandbox -n save 4d --causa 'la causa en español sigue valiendo' ruby algorithms/naive_sort
-assert_eq 'save 4d con --causa (alias): código' '0' "$rc_last"
-assert_contains 'save 4d con --causa: la causa llega' "-m 'la causa en español sigue valiendo'" "$out"
-glot_run_sandbox -n save 4d --cause='la causa con igual' ruby algorithms/naive_sort
-assert_eq 'save 4d con --cause= (pegado): código' '0' "$rc_last"
-assert_contains 'save 4d con --cause=: la causa llega' "-m 'la causa con igual'" "$out"
-glot_run_sandbox -n save 4d --cause
-assert_eq 'save 4d con --cause sin texto: código' '2' "$rc_last"
-assert_contains 'save 4d con --cause sin texto: lo explica' 'falta el texto de --cause' "$err"
+glot_run_sandbox -n save 4e --causa 'la causa en español sigue valiendo' ruby algorithms/naive_sort
+assert_eq 'save 4e con --causa (alias): código' '0' "$rc_last"
+assert_contains 'save 4e con --causa: la causa llega' "-m 'la causa en español sigue valiendo'" "$out"
+glot_run_sandbox -n save 4e --cause='la causa con igual' ruby algorithms/naive_sort
+assert_eq 'save 4e con --cause= (pegado): código' '0' "$rc_last"
+assert_contains 'save 4e con --cause=: la causa llega' "-m 'la causa con igual'" "$out"
+glot_run_sandbox -n save 4e --cause
+assert_eq 'save 4e con --cause sin texto: código' '2' "$rc_last"
+assert_contains 'save 4e con --cause sin texto: lo explica' 'falta el texto de --cause' "$err"
 glot_run_sandbox -n save fix --cause 'la causa' ruby algorithms/naive_sort
 assert_eq 'save con el alias fix: código' '0' "$rc_last"
-assert_contains 'save con el alias fix: el mismo mensaje' "commit -m 'fix(algorithms): correct naive_sort'" "$out"
+assert_contains 'save con el alias fix: el mismo mensaje' "commit -m 'fix(algorithms): fix naive_sort'" "$out"
 rm -f -- "$RB/src/z.rb"
 
 # save -n con el árbol ya limpio: no hay plan que enseñar, y lo dice como la ejecución real
@@ -1543,9 +1558,8 @@ assert_eq 'save sin paso: código' '2' "$rc_last"
 glot_run doctor
 assert_contains 'doctor: cobertura de inicializadores' 'new_commands: ' "$out"
 assert_contains 'doctor: inicializadores verificados' 'new_commands: 50 de / of 50' "$out"
-assert_contains 'doctor: ya no hay aplazadas' '(deferred: 0)' "$out"
 assert_contains 'doctor: catálogo de commits' 'commits_file: ' "$out"
-assert_contains 'doctor: pasos de commit' 'commit_steps: 11 de / of which 9 son del submódulo' "$out"
+assert_contains 'doctor: pasos de commit' 'commit_steps: 13 de / of which 11 son del submódulo' "$out"
 
 # --- casos de la especificación v0.10.0 (L6, evidencia y cierre) -------------
 
@@ -1979,7 +1993,7 @@ assert_eq 'modelos: deriva entre el catálogo y las plantillas' '' "$models_drif
 # leer sin que haya que inyectarle flags
 glot_run_delegate 'cat >/dev/null; printf "%s\n" "$COPILOT_MODEL"' ask implement php algorithms/naive_sort
 assert_eq 'ask: código con delegado' '0' "$rc_last"
-assert_eq 'ask: el modelo del perfil llega por entorno' 'claude-sonnet-5' "$out"
+assert_eq 'ask: el modelo del perfil llega por entorno' 'claude-sonnet-5.5' "$out"
 assert_contains 'ask: anuncia el perfil' 'profile: deep' "$err"
 
 glot_run_delegate 'cat >/dev/null' -n ask validate php algorithms/naive_sort
@@ -2007,7 +2021,7 @@ assert_contains 'modelo fuera del catálogo: lo dice' 'sin perfil en el catálog
 # doctor informa de la cobertura del catálogo y del envejecimiento contra el CLI
 glot_run doctor
 assert_contains 'doctor: catálogo de modelos' 'models_file: ' "$out"
-assert_contains 'doctor: cobertura de perfiles' 'model_profiles: 10 de / of 10' "$out"
+assert_contains 'doctor: cobertura de perfiles' 'model_profiles: 11 de / of 11' "$out"
 if command -v copilot >/dev/null 2>&1; then
     assert_contains 'doctor: los modelos siguen en el CLI' 'model_available: 2 de / of 2' "$out"
     cli_models="$(copilot help config 2>/dev/null || true)"
@@ -2780,14 +2794,6 @@ glot_run set lang ruby
 glot_run doctor
 assert_contains 'doctor: la serie del lenguaje del sprint' 'toolchain_ruby: ' "$out"
 assert_eq 'doctor: un sprint sin fila declarada no rompe' '0' "$rc_last"
-# `rescript` es el lenguaje que sigue **sin fila** (su toolchain no está instalada aquí):
-# con él se prueba que un sprint sin serie declarada se dice y no rompe nada. Antes este
-# caso usaba `ada`, hasta que su fila se midió el 2026-09-27.
-glot_run set lang rescript
-glot_run doctor
-assert_eq 'doctor: sin serie declarada, código' '0' "$rc_last"
-assert_contains 'doctor: sin serie declarada, se dice' 'toolchain_rescript: - (sin serie declarada' "$out"
-
 # inyectando el catálogo se prueban los tres estados sin tocar el dato del repositorio
 cp -f -- "$TOOLCHAINS" "$INJECTED/differs.tsv"
 sed -i 's/^ruby\truby --version\t.*/ruby\truby --version\t9.9/' "$INJECTED/differs.tsv"
@@ -2807,6 +2813,15 @@ printf 'klingon\tglot-no-existe --version\t1.0\n' >>"$INJECTED/unknown.tsv"
 glot_run_tc "$INJECTED/unknown.tsv" doctor
 assert_eq 'toolchains: una fila fuera de .gitmodules cambia el código' '1' "$rc_last"
 assert_contains 'toolchains: la fila fuera de .gitmodules se nombra' 'toolchain_klingon: unknown' "$out"
+
+# Desde el 2026-10-13 los **50** lenguajes tienen serie declarada, así que el caso «sprint sin
+# serie» se prueba quitándole la fila a `rescript` en el catálogo inyectado.
+cp -f -- "$TOOLCHAINS" "$INJECTED/sin-serie.tsv"
+sed -i '/^rescript\t/d' "$INJECTED/sin-serie.tsv"
+glot_run set lang rescript
+glot_run_tc "$INJECTED/sin-serie.tsv" doctor
+assert_eq 'doctor: sin serie declarada, código' '0' "$rc_last"
+assert_contains 'doctor: sin serie declarada, se dice' 'toolchain_rescript: - (sin serie declarada' "$out"
 
 glot_run_tc "$WORK_DIR/no-existe.tsv" doctor
 assert_eq 'toolchains: sin fichero de datos no es un fallo' '0' "$rc_last"
@@ -2985,8 +3000,9 @@ assert_contains 'toolchains: ada con su serie medida' "$(printf 'ada\talr --vers
 assert_contains 'toolchains: common-lisp con su serie medida' "$(printf 'common-lisp\tros run -- --version\t2.6')" "$(cat -- "$TOOLCHAINS")"
 assert_contains 'toolchains: rexx con su serie medida' "$(printf 'rexx\trexx -v\t5.2')" "$(cat -- "$TOOLCHAINS")"
 assert_contains 'toolchains: scala con su serie medida' "$(printf 'scala\tscalac -version\t3.9')" "$(cat -- "$TOOLCHAINS")"
-assert_eq 'toolchains: rescript sigue sin fila (no medible aquí)' '0' \
-    "$(grep -c '^rescript' "$TOOLCHAINS" || true)"
+# rescript: su compilador se midió primero dentro del `node_modules` del módulo (11.1.4) y el
+# 2026-10-13 se instaló en global (`npm i -g rescript`), así que ya declara fila propia.
+assert_contains 'toolchains: rescript con su serie medida' "$(printf 'rescript\trescript --version\t12.3')" "$(cat -- "$TOOLCHAINS")"
 
 # Punto 6 del plan: la tabla de módulos del roadmap es una **vista manual** y no lleva
 # contador —así ningún número puede quedarse atrás en silencio—; el recuento de verdad vive

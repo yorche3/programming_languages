@@ -1,9 +1,9 @@
 ---
 name: suite
 step: 4c
-model: gpt-5.6-terra
+model: gpt-6.1-sol
 description: Escribe la suite de pruebas unitarias del módulo desde su especificación, sobre el contrato ya declarado
-sources: AGENTS.md, docs/AGENT_ROLES.md, scripts/data/languages.tsv
+sources: AGENTS.md, docs/AGENT_ROLES.md, docs/ruleset/PSEUDOCODE_CONVENTION.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/data/canonical_names.tsv, docs/ruleset/data/language_characteristics.tsv, scripts/data/languages.tsv
 mode: agent
 ---
 
@@ -48,7 +48,7 @@ otra cosa: eso **no** lo detiene. Ver el paso 5.
 4. **README del módulo** (`{module_dir}/README.md`), si ya existe — su sección «Algoritmos y
    operaciones» documenta los mismos casos resueltos en ese lenguaje. Es la vista documentada
    del contrato, no la fuente: si no coincide con `{spec}`, **gana `{spec}`** y lo avisas.
-5. **`scripts/data/languages.tsv`** — comando nativo de pruebas de `{lang}` (columna 4).
+5. **`scripts/data/languages.tsv`** — comando nativo de pruebas de `{lang}` (columna 3).
 6. **`AGENTS.md`** — límites de actuación y flujo de cierre.
 
 **Resolución de conflictos:** el *qué* (casos y valores) lo manda la especificación; el *cómo*

@@ -38,6 +38,7 @@
 | 1.7.6 | 2026-10-07 | [`versions/glot_1.7.6.sh`](../versions/glot_1.7.6.sh) | **El andamiaje de Perl pasa a `manual`**: `module-starter` generaba `Makefile.PL`, `lib/{module}.pm` y `t/`, que no es el layout homologado, así que la fila del catálogo queda con `mkdir -p lib test`, el paso único sale de `init_sequences.tsv` y la guía lo lee de la tabla maestra; cierra la corrección de Perl que abrió la v1.7.5 | ✅ cerrada |
 | 1.7.7 | 2026-10-07 | [`versions/glot_1.7.7.sh`](../versions/glot_1.7.7.sh) | **El layout de R es el de un paquete**: la fila del catálogo apuntaba a `src/` y a `Rscript test/run_tests.R`, rutas que desaparecieron al homologar los cuatro módulos de R a `DESCRIPTION` + `NAMESPACE` + `R/` + `tests/testthat/`, así que el andamiaje pasa a `mkdir -p R tests/testthat`, el runner a `make test` (`testthat::test_local()`, que carga el paquete sin instalarlo) y el verificador a los fuentes de `R/`; la guía de inicialización lo documenta | ✅ cerrada |
 | 1.7.8 | 2026-10-08 | [`versions/glot_1.7.8.sh`](../versions/glot_1.7.8.sh) | **El estándar de Racket es `raco new library {module}`** —el layout lib/test/doc de la comunidad— con las tres adecuaciones que su plantilla no resuelve aquí: render portátil (`mv` + `sed -i` de GNU, porque su `render-template.sh` es interactivo y de BSD y dejaba los marcadores `<project>`/`<username>` en los cuatro `info.rkt`), borrado de `.github/`, `pull_request_template.md`, `render-template.sh` y `profile/`, y suites que requieren la librería **por ruta relativa** para correr sin enlazar paquetes. El runner pasa a **`raco test -x .`**: `racket test/run_tests.rkt` no existía en los dos módulos de un solo archivo y, en los tres que sí lo tienen, **salía con código 0 aunque un test fallara** (falso verde en `test`/`evidence`), mientras `raco test` sale con 1, cuenta los casos y no contamina la salida | ✅ cerrada |
+| 2.0.0 | 2026-10-12 | [`versions/glot_2.0.0.sh`](../versions/glot_2.0.0.sh) | **El esqueleto se parte en dos pasos y dos commits** (paso `4`, la carpeta del módulo, y paso `4a`, la estructura idiomática) y entra el **paso `4d build`**, con `4d correct` recorrido a `4e`; `languages.tsv` se queda con cuatro columnas (lenguaje, tipo, pruebas y verificador) y `init_sequences.tsv` con todo el esqueleto en nueve, así que se retira el vocabulario `deferred` y el camino v1 del script (`_glot_init_run`, `_glot_init_fix`, `_glot_init_normalise`, `_glot_init_flat`); los perfiles de modelo pasan a `gpt-6.1-sol` (low, 60) y `claude-sonnet-5.5` (medium, 90) | ✅ cerrada |
 
 ---
 
@@ -343,6 +344,22 @@
 - **La línea de perfil aclara las asignaciones**: imprime el modelo del perfil **del delegado elegido** (columna 2 para Copilot, 7 para AGY) y añade `→ <modelo>` solo cuando el efectivo no coincide.
 - **Verificación:** `./scripts/tests/glot_test.sh` → `glot tests: 1002 passed, 0 failed` (rc `0`); los casos cubren el reparto por encargo, la resolución del alias, el alcance del alias (contrato y suite con `terra`, implementación con `sonnet`), el proveedor que solo aparece con `/`, el endpoint del autor que manda, el aviso sin clave, el esfuerzo en la orden, el alias inválido, los completados y las dos limpiezas del sprint.
 - **Snapshot:** [`versions/glot_1.7.3.sh`](../versions/glot_1.7.3.sh), archivado al cerrar la versión; su cabecera solo cambia el bloque de archivado y la primera línea de uso.
+
+---
+
+## 2.0.0 — 2026-10-12 (cerrada)
+
+**ES:** El esqueleto se parte en **dos pasos y dos commits** (`4` la carpeta, `4a` la
+estructura idiomática) y entra el paso **`4d build`**, con `4d correct` recorrido a `4e`.
+`languages.tsv` se queda con cuatro columnas y `init_sequences.tsv` con todo el esqueleto en
+nueve; se retira el vocabulario `deferred` y el camino v1 del script. Perfiles de modelo al
+día (`gpt-6.1-sol` / `claude-sonnet-5.5`).
+
+**EN:** The skeleton is split into **two steps and two commits** (`4` the folder, `4a` the
+idiomatic structure) and step **`4d build`** comes in, with `4d correct` shifted to `4e`.
+`languages.tsv` keeps four columns and `init_sequences.tsv` holds the whole skeleton in nine;
+the `deferred` vocabulary and the script's v1 path are removed. Model profiles up to date
+(`gpt-6.1-sol` / `claude-sonnet-5.5`).
 
 ---
 

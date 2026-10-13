@@ -1,6 +1,6 @@
 ---
 name: correct
-step: 4d
+step: 4e
 model: qwen/qwen3.7-plus
 description: Corrige un artefacto anterior a la implementación (esqueleto, contrato o suite) y deja constancia de la causa
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md

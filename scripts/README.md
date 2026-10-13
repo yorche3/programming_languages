@@ -77,7 +77,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v1.7.3)
+├── glot.sh                  # Versión viva / live version (v2.0.0)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
@@ -85,7 +85,8 @@ scripts/
 │   ├── scaffold.prompt.md        # Paso 4a · esqueleto
 │   ├── contract_stub.prompt.md   # Paso 4b · contrato y esqueletos del módulo
 │   ├── suite.prompt.md           # Paso 4c · suite de pruebas
-│   ├── correct.prompt.md         # Paso 4d · corrección de un artefacto anterior al 5
+│   ├── build.prompt.md           # Paso 4d · construcción y enlace de la suite
+│   ├── correct.prompt.md         # Paso 4e · corrección de un artefacto anterior al 5
 │   ├── implement.prompt.md       # Paso 5 · implementación
 │   ├── fix.prompt.md             # Paso 5b · defecto de comportamiento del paso 5
 │   ├── refactor.prompt.md        # Paso 5c · reelaboración sin cambio de comportamiento
@@ -184,9 +185,9 @@ export GLOT_DELEGATE_AGY='agy --model {model} -p "$(cat)" --add-dir {root}'
 ./scripts/glot.sh set copilot-model default        # alias de Copilot (OpenRouter) para este sprint
 ```
 
-**ES:** Las **claves de modelo** guardan un **alias** de `data/delegates.tsv` (el orden del catálogo es de más barato a más caro, para escalar cuando se agotan límites): `antigravity-model` (gemini, sonnet) y `copilot-model` (default, gemini, qwen, kimi, que son los modelos de **OpenRouter**). `glot finish` las **conserva** al limpiar el sprint. En la resolución gana `--model`, después el entorno del delegado (`GLOT_MODEL_AGY`/`GLOT_MODEL_COP` y, como alias, `GLOT_MODEL`) y después la clave; el perfil queda como último recurso. La de Copilot **solo sustituye a los modelos que ya son de OpenRouter**: el reparto por encargo es `gpt-5.6-terra` para el contrato y la suite, `claude-sonnet-5` para la implementación y `qwen/qwen3.7-plus` para el andamiaje, la corrección y la documentación, así que el alias cambia de modelo dentro de ese perfil y **nunca** toca `terra` ni `sonnet`. El **esfuerzo del perfil viaja en la orden** (`--reasoning-effort {effort}`): los encargos de OpenRouter y el contrato van a `low` y la implementación a `high`.
+**ES:** Las **claves de modelo** guardan un **alias** de `data/delegates.tsv` (el orden del catálogo es de más barato a más caro, para escalar cuando se agotan límites): `antigravity-model` (gemini, sonnet) y `copilot-model` (default, gemini, qwen, kimi, que son los modelos de **OpenRouter**). `glot finish` las **conserva** al limpiar el sprint. En la resolución gana `--model`, después el entorno del delegado (`GLOT_MODEL_AGY`/`GLOT_MODEL_COP` y, como alias, `GLOT_MODEL`) y después la clave; el perfil queda como último recurso. La de Copilot **solo sustituye a los modelos que ya son de OpenRouter**: el reparto por encargo es `gpt-6.1-sol` para el contrato, la suite y la construcción, `claude-sonnet-5.5` para la implementación y `qwen/qwen3.7-plus` para el andamiaje, la corrección y la documentación, así que el alias cambia de modelo dentro de ese perfil y **nunca** toca los perfiles `balanced` ni `deep`. El **esfuerzo del perfil viaja en la orden** (`--reasoning-effort {effort}`): los encargos de OpenRouter y el contrato van a `low` y la implementación a `medium`.
 
-**EN:** The **model keys** store an **alias** from `data/delegates.tsv` (the catalogue is ordered cheapest to most expensive, to escalate when limits run out): `antigravity-model` (gemini, sonnet) and `copilot-model` (default, gemini, qwen, kimi, which are the **OpenRouter** models). `glot finish` **keeps** them when it clears the sprint. In the resolution `--model` wins, then the delegate's environment (`GLOT_MODEL_AGY`/`GLOT_MODEL_COP` and, as an alias, `GLOT_MODEL`) and then the key; the profile is the fallback. The Copilot one **only replaces models that already are OpenRouter ones**: the split per request is `gpt-5.6-terra` for the contract and the suite, `claude-sonnet-5` for the implementation and `qwen/qwen3.7-plus` for the scaffolding, the correction and the documentation, so the alias switches models inside that profile and **never** touches `terra` or `sonnet`. The **profile's effort travels in the command** (`--reasoning-effort {effort}`): the OpenRouter requests and the contract go at `low` and the implementation at `high`.
+**EN:** The **model keys** store an **alias** from `data/delegates.tsv` (the catalogue is ordered cheapest to most expensive, to escalate when limits run out): `antigravity-model` (gemini, sonnet) and `copilot-model` (default, gemini, qwen, kimi, which are the **OpenRouter** models). `glot finish` **keeps** them when it clears the sprint. In the resolution `--model` wins, then the delegate's environment (`GLOT_MODEL_AGY`/`GLOT_MODEL_COP` and, as an alias, `GLOT_MODEL`) and then the key; the profile is the fallback. The Copilot one **only replaces models that already are OpenRouter ones**: the split per request is `gpt-6.1-sol` for the contract, the suite and the build, `claude-sonnet-5.5` for the implementation and `qwen/qwen3.7-plus` for the scaffolding, the correction and the documentation, so the alias switches models inside that profile and **never** touches the `balanced` or `deep` profiles. The **profile's effort travels in the command** (`--reasoning-effort {effort}`): the OpenRouter requests and the contract go at `low` and the implementation at `medium`.
 
 **ES:** **Cambiar de modelo no toca el repositorio.** Hay tres palancas y solo la tercera versiona algo: `--model <id>` (o `GLOT_MODEL_COP=<id>`) para **una corrida**; `glot set copilot-model <alias>` para **fijarlo** —vive en el estado (XDG), sobrevive a `glot finish` y se revierte con `glot unset copilot-model`—; y editar la plantilla junto con `data/models.tsv` solo cuando lo que se quiere cambiar es el **default que se envía**. Las dos primeras no piden `install` ni commit: el estado no viaja en la copia ni en el repositorio.
 

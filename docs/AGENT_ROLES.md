@@ -86,7 +86,8 @@ marked `—`.
 | `scaffold` | 4a | Language-Specific SME | DevOps / Release Engineer, SDET | `balanced` |
 | `contract_stub` | 4b | Software Architect | Computer Scientist, Language-Specific SME | `balanced` |
 | `suite` | 4c | SDET | Language-Specific SME | `balanced` |
-| `correct` | 4d | Senior Software Developer | Language-Specific SME, SDET | `balanced` |
+| `build` | 4d | Language-Specific SME | DevOps / Release Engineer, Senior Software Developer | `balanced` |
+| `correct` | 4e | Senior Software Developer | Language-Specific SME, SDET | `balanced` |
 | `implement` | 5 | Senior Software Developer | Language-Specific SME, Computer Scientist | `deep` |
 | `fix` | 5b | Senior Software Developer | SDET, Language-Specific SME | `deep` |
 | `refactor` | 5c | Software Architect | Senior Software Developer, Language-Specific SME | `deep` |

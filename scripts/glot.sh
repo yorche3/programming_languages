@@ -28,7 +28,7 @@
 # fusionar dejaba el módulo entero fuera del puntero, en silencio— y `close` exige que el
 # gitlink apunte al commit integrado, porque el paso 8 se confirma dentro del submódulo y
 # puede ir después.
-# Desde la v1.6.0 el retrabajo se reparte por momento: `4d correct` corrige un artefacto
+# Desde la v1.6.0 el retrabajo se reparte por momento: `4e correct` corrige un artefacto
 # **anterior** a la implementación, `5b fix` un defecto de comportamiento de la
 # implementación y `5c refactor` un cambio de forma que no altera lo observable; los tres
 # exigen `--cause`, que `save` toma de la opción o de la clave de estado `cause` que el
@@ -150,7 +150,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.7.8"
+GLOT_VERSION="2.0.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -504,7 +504,6 @@ _glot_cmd_doctor() {
     local covered=0
     local verifiers=0
     local runnable=0
-    local deferred=0
     local commits=""
     local prompts=""
     local data=""
@@ -514,11 +513,10 @@ _glot_cmd_doctor() {
             printf 'data_file: %s\n' "$data"
             covered="$(awk -F'\t' 'END {print NR}' "$data")"
             printf 'native_commands: %s de / of %s\n' "$covered" "$registered"
-            verifiers="$(awk -F'\t' '$5 != "-"' "$data" | wc -l | tr -d ' ')"
+            verifiers="$(awk -F'\t' '$4 != "-"' "$data" | wc -l | tr -d ' ')"
             printf 'verify_commands: %s de / of %s\n' "$verifiers" "$registered"
-            runnable="$(awk -F'\t' '$6 == "tool" || $6 == "manual"' "$data" | wc -l | tr -d ' ')"
-            deferred="$(awk -F'\t' '$6 == "deferred"' "$data" | wc -l | tr -d ' ')"
-            printf 'new_commands: %s de / of %s (deferred: %s)\n' "$runnable" "$registered" "$deferred"
+            runnable="$(awk -F'\t' '$2 == "tool" || $2 == "manual"' "$data" | wc -l | tr -d ' ')"
+            printf 'new_commands: %s de / of %s\n' "$runnable" "$registered"
             if ((covered != registered)); then
                 _glot_warn 'el catálogo de datos no cubre los lenguajes registrados / the data catalogue does not cover the registered languages'
                 status=1
@@ -1378,8 +1376,8 @@ _glot_cmd_run() {
     shift
 
     case "$kind" in
-        test) field=4 ;;
-        verify) field=5 ;;
+        test) field=3 ;;
+        verify) field=4 ;;
         *)
             _glot_error "verbo de ejecución desconocido / unknown execution verb: $kind"
             return 2
@@ -2499,83 +2497,13 @@ _glot_cmd_pointer() {
 
 # --- creación y registro (L5) ------------------------------------------------
 
-# _glot_init_flat <directorio> <sub> — sube al directorio del módulo el contenido de
-# `<sub>` (incluidos los archivos ocultos) y borra `<sub>`. Es la normalización de los
-# inicializadores que crean el proyecto como hijo del directorio donde se ejecutan
-# (`crystal init lib {module}` dentro de `{module}/` anida dos veces).
-_glot_init_flat() {
-    local dir="$1"
-    local sub="$2"
-    local entry=""
-    local rc=0
-
-    [[ -d "$dir/$sub" ]] || return 0
-
-    shopt -s dotglob nullglob
-    for entry in "$dir/$sub"/*; do
-        if ! mv -f -- "$entry" "$dir/"; then
-            rc=1
-            break
-        fi
-    done
-    shopt -u dotglob nullglob
-
-    ((rc == 0)) || return 1
-    rmdir -- "$dir/$sub" 2>/dev/null || true
-    return 0
-}
-
-# _glot_init_normalise <directorio> <módulo> <operaciones> — aplica la normalización
-# declarada en el catálogo, en orden. Cada operación admite `{module}` y `{Module}`.
-# Ninguna adivina: si el catálogo no la trae, no se toca nada.
-_glot_init_normalise() {
-    local dir="$1"
-    local module="$2"
-    local ops="$3"
-    local op=""
-    local path=""
-    local stage_err=""
-    local commit_err=""
-    local sub=""
-    local IFS=';'
-
-    for op in $ops; do
-        [[ -n "$op" ]] || continue
-        op="$(_glot_expand_command "$dir" "$module" "$op")" || return 1
-
-        case "$op" in
-            flat:*)
-                sub="${op#flat:}"
-                _glot_info "normalizar / normalise: flat $sub"
-                _glot_init_flat "$dir" "$sub" || {
-                    _glot_error "no se pudo aplanar / cannot flatten: $dir/$sub"
-                    return 1
-                }
-                ;;
-            rm:*)
-                path="${op#rm:}"
-                _glot_info "normalizar / normalise: rm $path"
-                rm -rf -- "$dir/$path" 2>/dev/null || true
-                ;;
-            *)
-                _glot_error "operación de normalización desconocida / unknown normalisation operation: $op"
-                _glot_info 'solo valen flat:<sub> y rm:<ruta> / only flat:<sub> and rm:<path> are valid'
-                return 1
-                ;;
-        esac
-    done
-
-    return 0
-}
-
-# _glot_cmd_new [lenguaje] [fase/módulo] — inicializador y esqueleto mecánico del
-# módulo. Ejecuta el comando del catálogo en el directorio del módulo cuando el
-# lenguaje tiene herramienta (`tool`), crea la estructura de carpetas cuando el
-# esqueleto es manual (`manual`) y normaliza lo que deja la herramienta (aplanar el
-# nido, quitar el `.git` anidado, descartar el vendoring que el repositorio rechaza).
+# _glot_cmd_new [lenguaje] [fase/módulo] — la carpeta del módulo y, si el lenguaje trae
+# herramienta que además la genera, el avance de antemano con ella (v2). Ejecuta las filas
+# `phase=new` de `data/init_sequences.tsv` respetando su `cwd`: lo mínimo es crear la
+# carpeta del módulo. La estructura idiomática la completa `scaffold` (paso 4a).
 # No escribe la suite —eso es el encargo `suite`— y no confirma nada: eso es `save`.
 # El directorio del módulo lo prepara `use`; si no está, `new` no lo inventa.
-# Códigos: 0 correcto (o `skipped`) · 1 entorno · 2 uso · 4 el inicializador falló.
+# Códigos: 0 correcto · 1 entorno o catálogo incompleto · 2 uso · 4 el inicializador falló.
 _glot_cmd_new() {
     local target=""
     local lang=""
@@ -2584,8 +2512,6 @@ _glot_cmd_new() {
     local root=""
     local dir=""
     local kind=""
-    local run=""
-    local fix=""
     local cmd=""
     local rc=0
     local seq=""
@@ -2638,44 +2564,48 @@ _glot_cmd_new() {
             ;;
     esac
 
-    # La secuencia del dato manda cuando el lenguaje aparece en `init_sequences.tsv`;
-    # si no, se usa el comando único de la columna 7 con su normalización (columna 8).
-    seq="$(_glot_init_sequence "$lang")"
-    run=""
-    fix=""
+    # La secuencia sale de `init_sequences.tsv`: las filas de la fase `new` con su
+    # directorio de trabajo. La fase `scaffold` la cubre el verbo `scaffold` (paso 4a).
+    seq="$(_glot_init_sequence "$lang" new)" || {
+        _glot_error "catálogo de inicialización mal formado / malformed initialisation catalogue: $lang"
+        _glot_info 'revisa / check: scripts/data/init_sequences.tsv'
+        return 1
+    }
+    # v2: `init_sequences.tsv` es la única fuente del esqueleto. Sin filas `new` el
+    # catálogo está incompleto y no se adivina: la carpeta no se crea a ciegas.
     if [[ -z "$seq" ]]; then
-        run="$(_glot_init_run "$lang")" || run="-"
-        fix="$(_glot_init_fix "$lang")" || fix="-"
-        if [[ "$run" == "-" || -z "$run" ]]; then
-            _glot_error "el catálogo no trae comando de inicialización / no initialisation command in the catalogue: $lang"
-            _glot_info 'revisa / check: scripts/data/languages.tsv'
-            return 1
-        fi
+        _glot_error "el catálogo no trae pasos \`new\` / no \`new\` steps in the catalogue: $lang"
+        _glot_info 'revisa / check: scripts/data/init_sequences.tsv'
+        return 1
     fi
 
     # Plan: cada paso con su directorio de trabajo (`module` o `phase`), su modo y lo
-    # que queda por completar. Sin secuencia declarada el plan es un único paso.
-    if [[ -n "$seq" ]]; then
-        while IFS=$'\t' read -r order workdir mode command answers complete; do
+    # que queda por completar. La secuencia la declara `init_sequences.tsv` (fase `new`).
+    while IFS=$'\t' read -r order workdir mode command answers complete; do
             [[ -n "$order" ]] || continue
             step_dir="$dir"
             [[ "$workdir" == "phase" ]] && step_dir="$root/$lang/core/$phase"
-            step_cmd="$(_glot_expand_command "$step_dir" "$module" "$command")" || return 1
+            # Las filas `manual` no llevan comando (`-`): lo que se anuncia es lo que queda
+            # por completar, expandido, y nunca se ejecuta.
+            if [[ "$mode" == "manual" ]]; then
+                step_cmd="$(_glot_expand_command "$step_dir" "$module" "$complete")" || return 1
+            else
+                step_cmd="$(_glot_expand_command "$step_dir" "$module" "$command")" || return 1
+            fi
             steps+="$step_dir"$'\t'"$mode"$'\t'"$step_cmd"$'\t'"$answers"$'\t'"$complete"$'\n'
-        done <<<"$seq"
-    else
-        step_cmd="$(_glot_expand_command "$dir" "$module" "$run")" || return 1
-        steps="$dir"$'\t'"run"$'\t'"$step_cmd"$'\t'"-"$'\t'"-"$'\n'
-    fi
+    done <<<"$seq"
 
     # Ensayo: el plan, sin tocar el disco.
     if ((_glot_dry_run)); then
         while IFS=$'\t' read -r step_dir step_mode step_cmd step_answers step_complete; do
             [[ -n "$step_dir" ]] || continue
+            if [[ "$step_mode" == "manual" ]]; then
+                printf '# manual (lo hace el autor / the author does it): %s\n' "$step_cmd"
+                continue
+            fi
             printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
             [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
         done <<<"$steps"
-        [[ -n "$fix" && "$fix" != "-" ]] && printf '# normalizar / normalise: %s\n' "$(_glot_expand_command "$dir" "$module" "$fix")"
         [[ "$kind" == "manual" ]] && printf '# el manifiesto y la suite son del encargo / manifest and suite belong to the request\n'
         _glot_init_completion_report "$steps" "$module"
         printf '%s\n' "$dir"
@@ -2697,6 +2627,11 @@ _glot_cmd_new() {
         # fase) choca con la carpeta vacía que dejó `use`: se retira antes.
         if [[ "$step_dir" != "$dir" && -d "$dir" && -z "$(ls -A -- "$dir" 2>/dev/null)" ]]; then
             rmdir -- "$dir" 2>/dev/null || true
+        fi
+
+        if [[ "$step_mode" == "manual" ]]; then
+            _glot_info "manual (lo hace el autor / the author does it): $step_cmd"
+            continue
         fi
 
         _glot_info "new: $step_cmd"
@@ -2721,17 +2656,132 @@ _glot_cmd_new() {
         fi
     done <<<"$steps"
 
-    if [[ -n "$fix" && "$fix" != "-" ]]; then
-        if ! _glot_init_normalise "$dir" "$module" "$fix"; then
-            _glot_warn "new falló al normalizar / failed while normalising: $lang $phase/$module"
-            return 4
-        fi
-    fi
-
     if [[ "$kind" == "manual" ]]; then
         _glot_info "estructura manual creada / manual layout created: $dir"
         _glot_info "el manifiesto y la suite son del encargo / manifest and suite belong to the request: glot prompt scaffold $lang $phase/$module"
     fi
+
+    _glot_init_completion_report "$steps" "$module"
+
+    printf '%s\n' "$dir"
+    return 0
+}
+
+# _glot_cmd_scaffold [lenguaje] [fase/módulo] — completa el esqueleto que `new` deja a
+# medias: asigna el framework de pruebas, enlaza proyectos entre sí, limpia los ficheros
+# de plantilla, renombra a las convenciones del lenguaje y crea los ficheros vacíos que el
+# repositorio exige. Lee las filas `phase=scaffold` de `data/init_sequences.tsv`, en orden,
+# y corre desde el directorio del módulo; las filas `mode=manual` no se ejecutan: se
+# anuncian para que las haga el autor. No escribe la suite —eso es el encargo `suite`— y no
+# confirma nada: eso es `save`.
+# Códigos: 0 correcto (o sin filas) · 1 entorno o catálogo mal formado · 2 uso · 4 un paso falló.
+_glot_cmd_scaffold() {
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local root=""
+    local dir=""
+    local seq=""
+    local steps=""
+    local order=""
+    local workdir=""
+    local mode=""
+    local command=""
+    local answers=""
+    local complete=""
+    local step_dir=""
+    local step_mode=""
+    local step_cmd=""
+    local step_answers=""
+    local step_complete=""
+    local rc=0
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    dir="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    if [[ ! -d "$dir" ]]; then
+        _glot_error "el módulo no existe / module not found: $dir"
+        _glot_info "prepáralo primero / prepare it first: glot new $lang $phase/$module"
+        return 1
+    fi
+
+    seq="$(_glot_init_sequence "$lang" scaffold)" || {
+        _glot_error "catálogo de inicialización mal formado / malformed initialisation catalogue: $lang"
+        _glot_info 'revisa / check: scripts/data/init_sequences.tsv'
+        return 1
+    }
+
+    # Sin filas de `scaffold` no hay nada que completar: se dice por stderr y se imprime
+    # el directorio, que es lo que la capa cargable usa para dejar al autor dentro.
+    if [[ -z "$seq" ]]; then
+        _glot_info "sin pasos de scaffold / no scaffold steps: $lang"
+        printf '%s\n' "$dir"
+        return 0
+    fi
+
+    while IFS=$'\t' read -r order workdir mode command answers complete; do
+        [[ -n "$order" ]] || continue
+        step_dir="$dir"
+        step_dir="$dir"
+        [[ "$workdir" == "phase" ]] && step_dir="$root/$lang/core/$phase"
+        if [[ "$mode" == "manual" ]]; then
+            step_cmd="$(_glot_expand_command "$step_dir" "$module" "$complete")" || return 1
+        else
+            step_cmd="$(_glot_expand_command "$step_dir" "$module" "$command")" || return 1
+        fi
+        steps+="$step_dir"$'\t'"$mode"$'\t'"$step_cmd"$'\t'"$answers"$'\t'"$complete"$'\n'
+    done <<<"$seq"
+
+    if ((_glot_dry_run)); then
+        while IFS=$'\t' read -r step_dir step_mode step_cmd step_answers step_complete; do
+            [[ -n "$step_dir" ]] || continue
+            if [[ "$step_mode" == "manual" ]]; then
+                printf '# manual (lo hace el autor / the author does it): %s\n' "$step_cmd"
+                continue
+            fi
+            printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
+            [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
+        done <<<"$steps"
+        printf '%s\n' "$dir"
+        return 0
+    fi
+
+    while IFS=$'\t' read -r step_dir step_mode step_cmd step_answers step_complete; do
+        [[ -n "$step_dir" ]] || continue
+
+        if [[ "$step_mode" == "manual" ]]; then
+            _glot_info "manual (lo hace el autor / the author does it): $step_cmd"
+            continue
+        fi
+
+        _glot_info "scaffold: $step_cmd"
+        rc=0
+        case "$step_mode" in
+            run)
+                (cd -- "$step_dir" && eval "$step_cmd") </dev/null || rc=$?
+                ;;
+            expect)
+                (cd -- "$step_dir" && _glot_expect_run "$step_cmd" "$step_answers") </dev/null || rc=$?
+                ;;
+            *)
+                _glot_error "modo de inicialización desconocido / unknown initialisation mode: $step_mode ($lang)"
+                return 1
+                ;;
+        esac
+
+        if ((rc != 0)); then
+            _glot_warn "scaffold falló / failed: $lang $phase/$module (código / code $rc)"
+            _glot_info "el directorio queda como está / the directory is left as it is: $dir"
+            return 4
+        fi
+    done <<<"$steps"
 
     _glot_init_completion_report "$steps" "$module"
 
@@ -2826,13 +2876,13 @@ _glot_cmd_save() {
 
     msg="$(_glot_expand_state "$lang" "$phase" "$module" "$(_glot_commit_field "$step" 4)")" || return $?
 
-    # Los pasos de retrabajo (correct 4d, fix 5b, refactor 5c) exigen su causa. `save` la toma
+    # Los pasos de retrabajo (correct 4e, fix 5b, refactor 5c) exigen su causa. `save` la toma
     # de `--cause` y, si no, de la clave de estado `cause`, que el propio encargo deja puesta
     # con `glot set cause "…"` (v1.6.0): así no queda ningún fichero de trabajo en el módulo.
     # La causa es el registro del retrabajo, y el único sitio donde queda por qué se corrige
     # lo que ya se había confirmado.
     case "$step" in
-        4d | correct | 5b | fix | 5c | refactor)
+        4e | correct | 5b | fix | 5c | refactor)
             if [[ -z "$cause" ]]; then
                 cause="$(_glot_state_get cause 2>/dev/null || true)"
             fi
@@ -3063,11 +3113,11 @@ _glot_cmd_evidence() {
         return 1
     fi
 
-    template="$(_glot_lang_field "$lang" 4)" || {
+    template="$(_glot_lang_field "$lang" 3)" || {
         _glot_error "lenguaje fuera del catálogo de datos / language missing from the data catalogue: $lang"
         return 1
     }
-    verify_template="$(_glot_lang_field "$lang" 5)" || verify_template="-"
+    verify_template="$(_glot_lang_field "$lang" 4)" || verify_template="-"
 
     cmd="$(_glot_expand_command "$dir" "$module" "$template")" || return 1
     if [[ "$verify_template" != "-" ]]; then
@@ -3878,11 +3928,20 @@ Verbos / Verbs:
                      skeleton: runs the catalogue initializer (or creates the folders
                      when the skeleton is manual) and normalises what it leaves. It
                      does not write the suite
+  scaffold [lenguaje] [fase/módulo]
+                     Completa lo que `new` deja a medias: framework de pruebas,
+                     referencias entre proyectos, limpieza de la plantilla, renombres a la
+                     convención del lenguaje y ficheros vacíos. Las filas manual del dato
+                     no se ejecutan: se anuncian al autor
+                     Completes what `new` leaves half done: test framework, cross-project
+                     references, template cleanup, renames to the language convention and
+                     empty files. The catalogue's manual rows are not executed: they are
+                     announced to the author
   save <paso|alias> [lenguaje] [fase/módulo] [--cause "<texto>"]
                      Confirma con el mensaje de la convención del repositorio, que sale
                      del catálogo de commits. Los pasos del monorepo (9 y 10) añaden
                      solo sus rutas. --cause añade el cuerpo del commit y es obligatoria
-                     en el retrabajo (4d correct, 5b fix, 5c refactor), que también la
+                     en el retrabajo (4e correct, 5b fix, 5c refactor), que también la
                      toma de la clave de estado `cause`; --causa se acepta como alias.
                      Sin push. Con la capa cargable, confirmar el paso 7 u 8 deja al autor
                      en la raíz del lenguaje, que es donde se integra el submódulo
@@ -4196,6 +4255,20 @@ _glot_help_verb() {
             printf 'Con el módulo ya cerrado hay que indicar el tipo / with a closed module the type must be given\n'
             printf 'Desde dentro de un submódulo se puede omitir el lenguaje / the language can be omitted inside a submodule\n'
             ;;
+        scaffold)
+            printf 'glot scaffold [lenguaje] [fase/módulo] — completa el esqueleto que deja new\n'
+            printf 'glot scaffold [language] [phase/module] — completes the skeleton new leaves\n'
+            printf 'Corre, en orden, las filas phase=scaffold de data/init_sequences.tsv desde el\n'
+            printf 'directorio del módulo: framework de pruebas, referencias entre proyectos,\n'
+            printf 'limpieza de la plantilla, renombres a la convención del lenguaje y ficheros\n'
+            printf 'vacíos. Las filas manual no se ejecutan: se anuncian al autor. No escribe la\n'
+            printf 'suite (eso es glot prompt suite) ni confirma nada (eso es save)\n'
+            printf 'Runs, in order, the phase=scaffold rows of data/init_sequences.tsv from the\n'
+            printf 'module directory: test framework, cross-project references, template cleanup,\n'
+            printf 'renames to the language convention and empty files. manual rows are not\n'
+            printf 'executed: they are announced to the author. It writes neither the suite\n'
+            printf '(that is glot prompt suite) nor a commit (that is save)\n'
+            ;;
         new)
             printf 'glot new [lenguaje] [fase/módulo] — inicializador y esqueleto del módulo\n'
             printf 'glot new [language] [phase/module] — initializer and module skeleton\n'
@@ -4217,7 +4290,7 @@ _glot_help_verb() {
             printf 'se escribe a mano. Añade el submódulo al índice y confirma en el submódulo\n'
             printf 'The message comes from the commit catalogue (the sprint table in data); it\n'
             printf 'is not written by hand. It stages the submodule and commits in it\n'
-            printf '%s\n' '--cause añade el cuerpo del commit (obligatoria en el retrabajo 4d/5b/5c);'
+            printf '%s\n' '--cause añade el cuerpo del commit (obligatoria en el retrabajo 4e/5b/5c);'
             printf '%s\n' '--causa se acepta como alias'
             printf '%s\n' '--cause adds the commit body (required in rework 4d/5b/5c);'
             printf '%s\n' '--causa is accepted as an alias'
@@ -4374,8 +4447,9 @@ _glot_data_file() {
 }
 
 # _glot_sequences_file <lenguaje> — archivo de secuencias de inicialización
-# (v1.1.0): una fila por paso, en orden. Es la fuente de la secuencia cuando el
-# lenguaje aparece en él; `languages.tsv` (columna 7) queda para el comando único.
+# (v1.1.0; esquema v2 desde la 2.0.0): una fila por paso, con su fase (`new` o
+# `scaffold`). Es la **única** fuente del esqueleto: `languages.tsv` solo guarda el
+# tipo, el comando de pruebas y el verificador.
 _glot_sequences_file() {
     local dir=""
 
@@ -4458,7 +4532,7 @@ _glot_tool_of() {
 }
 
 # _glot_lang_field <lenguaje> <campo> — campo del catálogo de datos:
-# 1 lenguaje · 2 inicialización · 3 manifiestos · 4 pruebas.
+# 1 lenguaje · 2 tipo · 3 pruebas · 4 verificador.
 _glot_lang_field() {
     local lang="$1"
     local field="$2"
@@ -4479,40 +4553,41 @@ _glot_lang_field() {
 
 # _glot_native_test <lenguaje> — comando nativo de pruebas, que consume `test` (L3).
 _glot_native_test() {
-    _glot_lang_field "$1" 4
+    _glot_lang_field "$1" 3
 }
 
-# _glot_init_kind <lenguaje> — tipo de inicialización (columna 6 del catálogo):
-#   tool     — hay herramienta y su comando se ejecuta tal cual
-#   manual   — no hay herramienta; se crean las carpetas del esqueleto
-#   deferred — sin inicializador validado: lo escribe el agente (nunca se adivina)
+# _glot_init_kind <lenguaje> — tipo de inicialización (columna 2 del catálogo):
+#   tool   — hay herramienta y su comando se ejecuta tal cual
+#   manual — no hay herramienta; se crean las carpetas del esqueleto
 _glot_init_kind() {
-    _glot_lang_field "$1" 6
-}
-
-# _glot_init_run <lenguaje> — comando que ejecuta `new` (columna 7). En modo manual es
-# la creación de carpetas; `-` cuando el tipo es `deferred`.
-_glot_init_run() {
-    _glot_lang_field "$1" 7
-}
-
-# _glot_init_fix <lenguaje> — normalización posterior a la herramienta (columna 8):
-# operaciones separadas por `;`, `-` si no hace falta ninguna.
-#   flat:<sub>        — sube el contenido de <sub> al directorio del módulo y lo borra
-#   rm:<ruta>         — elimina (tolerante: si no está, no pasa nada)
-_glot_init_fix() {
-    _glot_lang_field "$1" 8
+    _glot_lang_field "$1" 2
 }
 
 # _glot_init_sequence <lenguaje> — pasos de la secuencia de inicialización de ese
 # lenguaje, en orden, como `orden<TAB>directorio<TAB>modo<TAB>comando<TAB>respuestas<TAB>completado`.
-# Sale con 1 si el lenguaje no aparece: entonces manda la columna 7 de `languages.tsv`.
+# Sale con 1 si el lenguaje no aparece: el único sitio donde se declara el esqueleto es
+# `init_sequences.tsv` (v2), así que una fila ausente es un catálogo incompleto.
 _glot_init_sequence() {
     local lang="$1"
+    local sp="$2"
     local file=""
+    local bad=0
 
     file="$(_glot_sequences_file)" || return 1
-    awk -F'\t' -v lang="$lang" '$1 == lang {print $2 "\t" $3 "\t" $4 "\t" $5 "\t" $7 "\t" $8}' "$file" | sort -n -k1,1
+    # v2: el esquema es language|phase|order|cwd|mode|command|requirement|expect_answers|completion.
+    # La fase (`new` o `scaffold`) filtra las filas, `order` las resuelve en secuencia y una
+    # fila con `cwd` o `mode` fuera de catálogo es un catálogo mal formado (no se adivina).
+    awk -F'\t' -v lang="$lang" -v sp="$sp" '
+        $1 == lang && $2 == sp {
+            if (NF < 9 || ($4 != "module" && $4 != "phase") || ($5 != "run" && $5 != "expect" && $5 != "manual")) {
+                print "init_sequences.tsv: fila mal formada / malformed row: " $0 > "/dev/stderr"
+                bad = 1
+                next
+            }
+            print $3 "\t" $4 "\t" $5 "\t" $6 "\t" $8 "\t" $9
+        }
+        END { exit bad }
+    ' "$file" | sort -n -k1,1
 }
 
 # _glot_init_sequence_has <lenguaje> — ¿el lenguaje tiene secuencia declarada?
@@ -5892,6 +5967,10 @@ _glot_main() {
         new)
             # Inicializa el lenguaje y crea el esqueleto / initialises the language and creates the skeleton
             _glot_cmd_new "$@"
+            ;;
+        scaffold)
+            # Completa el esqueleto que deja `new` / Completes the skeleton `new` leaves behind
+            _glot_cmd_scaffold "$@"
             ;;
         save)
             # Confirma con la convención del repositorio / commits with the repository convention
