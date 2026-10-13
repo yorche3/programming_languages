@@ -22,20 +22,24 @@
 
 | Documento / Document | Propósito / Purpose | Estado / State | Responsable / Owner |
 |----------------------|---------------------|:--------------:|:-------------------:|
-| `docs/PSEUDOCODE_CONVENTION.md` | Pseudocódigo canónico y nombres conceptuales / Canonical pseudocode, conceptual names | 📋 | — |
-| `docs/LANGUAGE_CHARACTERISTICS.md` | 10 ejes por lenguaje / 10 axes per language | 📋 | — |
-| `docs/IDIOMATICITY_LEVELS.md` | Escala de 4 niveles con criterios / 4-level scale with criteria | 📋 | — |
-| `docs/DEVIATION_POLICY.md` | Política de registro de desviaciones / When/how to document deviations | 📋 | — |
-| `docs/PARADIGM_FAMILIES.md` | Familias y agrupaciones de lenguajes por paradigma / Groups of languages by paradigm | 📋 | — |
-| `data/canonical_names.tsv` | Mapeo concepto → nombre canónico por lenguaje / concept → name per language | 📋 | — |
-| `data/language_characteristics.tsv` | Ejes estructurados legibles por máquina / Machine-readable axes | 📋 | — |
-| `data/idiomaticity_state.tsv` | Nivel actual por (lenguaje, módulo) / Current level per (lang, module) | 📋 | — |
+| `docs/ruleset/PSEUDOCODE_CONVENTION.md` | Pseudocódigo canónico, nombres conceptuales y casos medidos / Canonical pseudocode, conceptual names, measured cases | ✅ | Software Architect (apoyo: Language-Specific SME) |
+| `docs/ruleset/LANGUAGE_CHARACTERISTICS.md` | 11 ejes por lenguaje / 11 axes per language | ✅ | Language-Specific SME |
+| `docs/ruleset/IDIOMATICITY_LEVELS.md` | Escala de 4 niveles con 9 ejes de evaluación / 4-level scale with 9 evaluation axes | ✅ | Software Architect (apoyo: SDET) |
+| `docs/ruleset/DEVIATION_POLICY.md` | Política de registro de desviaciones / When/how to document deviations | 📋 | Software Architect |
+| `docs/ruleset/PARADIGM_FAMILIES.md` | Familias y agrupaciones de lenguajes por paradigma / Groups of languages by paradigm | 📋 | Software Architect |
+| `docs/ruleset/data/canonical_names.tsv` | Mapeo concepto → nombre canónico por lenguaje / concept → name per language | ✅ | Language-Specific SME |
+| `docs/ruleset/data/language_characteristics.tsv` | Ejes estructurados legibles por máquina / Machine-readable axes | ✅ | Language-Specific SME |
+| `docs/ruleset/data/idiomaticity_state.tsv` | Nivel actual por (lenguaje, módulo) / Current level per (lang, module) | 📋 | SDET |
 
 ---
 
 ## 2. Documentos por lenguaje / Per-language documents
 
-| Lenguaje / Language | `docs/idioms/{lang}.md` | `docs/adaptations/{lang}.md` | Changelog | Estado / State | Responsable / Owner |
+> **ES:** Alcance **técnico**: `idioms` (el *cómo* idiomático) y `adaptations` (cada desviación y su motivo) son el soporte por lenguaje de la convención de pseudocódigo. El `Responsable` de las 50 filas es el **Language-Specific SME** (apoyo: *Technical Writer* en la redacción del README). La columna `Changelog` y el estado editorial quedan **fuera del alcance técnico**; el registro técnico medido vive en *Casos medidos en la homologación*, en `PSEUDOCODE_CONVENTION.md`.
+>
+> **EN:** **Technical** scope: `idioms` (the idiomatic *how*) and `adaptations` (each deviation and its reason) are the per-language support of the pseudocode convention. The 50 rows' `Owner` is the **Language-Specific SME** (support: *Technical Writer* for README wording). The `Changelog` column and editorial state are **out of technical scope**; the measured technical record lives in *Cases measured during homologation*, in `PSEUDOCODE_CONVENTION.md`.
+
+| Lenguaje / Language | `docs/ruleset/idioms/{lang}.md` | `docs/ruleset/adaptations/{lang}.md` | Changelog | Estado / State | Responsable / Owner |
 |---------------------|:-----------------------:|:----------------------------:|:---------:|:--------------:|:-------------------:|
 | Ada (`ada`) | 📋 | 📋 | 📋 | 📋 | — |
 | Assembly (`assembly`) | 📋 | 📋 | 📋 | 📋 | — |
@@ -99,7 +103,7 @@
 | **Fase 0 — Foundations** | `core.foundations.unit_test` | ✅ | ✅ | 📋 | ✅ | — |
 | **Fase 0 — Foundations** | `core.foundations.numbers` | ✅ | ✅ | 📋 | ✅ | — |
 | **Fase 1 — Algorithms Pure** | `core.algorithms.naive_sort` | ✅ | ✅ | ✅ | ✅ | — |
-| **Fase 1 — Algorithms Pure** | `core.algorithms.data_structures_basics` | ✅ | 🔄 | 🔄 | 🔄 | — |
+| **Fase 1 — Algorithms Pure** | `core.algorithms.data_structures_basics` | ✅ | ✅ | ✅ | ✅ | Software Architect (apoyo: Language-Specific SME, SDET) |
 | **Fase 1 — Algorithms Pure** | `core.algorithms.data_structures_advanced` | ✅ | 📋 | 📋 | 📋 | — |
 | **Fase 1 — Algorithms Pure** | `core.algorithms.efficient_sort` | ✅ | 📋 | 📋 | 📋 | — |
 | **Fase 1 — Algorithms Pure** | `core.algorithms.distributed_sort` | ✅ | 📋 | 📋 | 📋 | — |
@@ -162,17 +166,17 @@
 
 ### Cadena bloqueante / Blocking chain (must exist before auditing begins)
 
-1. `docs/PSEUDOCODE_CONVENTION.md` ← **siguiente / next**
-2. `docs/IDIOMATICITY_LEVELS.md`
-3. `data/canonical_names.tsv`
-4. `docs/LANGUAGE_CHARACTERISTICS.md`
-5. `data/language_characteristics.tsv`
+1. `docs/ruleset/PSEUDOCODE_CONVENTION.md` → **hecho / done** ✅
+2. `docs/ruleset/IDIOMATICITY_LEVELS.md` → **hecho / done** ✅
+3. `docs/ruleset/data/canonical_names.tsv` → **hecho / done** ✅
+4. `docs/ruleset/LANGUAGE_CHARACTERISTICS.md` → **hecho / done** ✅
+5. `docs/ruleset/data/language_characteristics.tsv` → **hecho / done** ✅
 
 ### Cadena de soporte / Support chain (can be done in parallel)
 
-6. `docs/DEVIATION_POLICY.md`
-7. `docs/PARADIGM_FAMILIES.md`
-8. `data/idiomaticity_state.tsv`
-9. Archivos por lenguaje en `docs/idioms/{lang}.md` / Per-language `idioms/` files
-10. Archivos por lenguaje en `docs/adaptations/{lang}.md` / Per-language `adaptations/` files
+6. `docs/ruleset/DEVIATION_POLICY.md`
+7. `docs/ruleset/PARADIGM_FAMILIES.md`
+8. `docs/ruleset/data/idiomaticity_state.tsv`
+9. Archivos por lenguaje en `docs/ruleset/idioms/{lang}.md` / Per-language `idioms/` files
+10. Archivos por lenguaje en `docs/ruleset/adaptations/{lang}.md` / Per-language `adaptations/` files
 11. Changelogs por lenguaje / Per-language changelogs
