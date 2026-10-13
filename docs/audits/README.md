@@ -29,7 +29,7 @@ docs/audits/
 | 🔴 | **Fallo**: incumple un criterio y hay que refactorizar el código | Bloquea el estado homologado del lenguaje en ese módulo |
 | 🟡 | **Advertencia**: cumple el contrato pero se desvía de la fidelidad algorítmica, del aislamiento de tests o del rendimiento prometido | Se corrige; no bloquea el cierre si el autor lo acepta por escrito |
 | 🔵 | **Arreglado sin integrar**: el código ya cumple, pero el cambio está en el árbol de trabajo y **no** commiteado en el submódulo | No cuenta como 🟢 hasta commitearlo e integrarlo en el `main` del submódulo |
-| 🟢 | **Homologado**: cumple los cuatro criterios con evidencia | — |
+| 🟢 | **Homologado**: cumple las **dos capas** con evidencia | — |
 
 > **ES:** Un lenguaje solo vuelve a 🟢 cuando el arreglo está aplicado **y** la suite nativa se ha ejecutado con salida real.
 > **EN:** A language only returns to 🟢 once the fix is applied **and** the native suite has been run with real output.
@@ -38,10 +38,19 @@ docs/audits/
 
 ## 📋 Criterios de evaluación / Evaluation criteria
 
-1. **Fidelidad algorítmica e idiomática.** La implementación refleja el pseudocódigo imperativo paso a paso (comparaciones e intercambios *in-place*). Solo un lenguaje **sin mutabilidad nativa razonable** puede sustituirlo por recursión, orden superior o copias, con el mismo principio temporal $O(n^2)$. **Prohibido** invocar cualquier rutina de ordenamiento o de **selección** de la biblioteca estándar (`sort`, `sorted`, `Arrays.sort`, `std::sort`, `qsort`, `lsort`, `lists:sort`, `min`, `max` para el paso de selección…).
-2. **Contrato de errores.** Entrada nula o inválida → indicador de fallo básico del lenguaje (`null`, `nil`, `#f`, `-1`, `None`). **Prohibido** `Option`/`Optional`/`Maybe`/`Result` y **prohibido** lanzar excepciones en esta fase. Si el tipo no admite `null`, se documenta la representación equivalente.
-3. **Aislamiento de tests.** Framework nativo/idiomático; un subconjunto de los 8 casos de la especificación (estándar, ordenado, inverso, idénticos, negativos, un elemento, vacío y nulo/inválido); **cada caso opera sobre una copia** del fixture cuando la función ordena *in-place*.
-4. **Documentación.** Comentarios simples de función (entrada y salida), sin generadores formales (JSDoc, Doxygen…). README del módulo basado en [`README_Template.md`](../README_Template.md): se exigen sus secciones obligatorias y, si hubo desviación del pseudocódigo o de la ubicación esperada, la **nota aclaratoria** que la justifique.
+**ES:** Los criterios son **los mismos para todos los módulos** y tienen dos capas:
+
+- **Capa del módulo:** los criterios de aceptación de su especificación y el techo de complejidad del módulo. Cambia con cada módulo y está declarada, módulo a módulo, en la tabla **Alcance por módulo** de este documento; el detalle de cada pase vive en su registro.
+- **Capa del lenguaje:** los **9 ejes** de [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md) —`construction`, `naming`, `failure`, `access`, `encapsulation`, `unsafe`, `complexity`, `documentation` y `tests`—, con el nivel derivado del **mínimo de los ejes aplicables** y la severidad de cada desviación fijada por [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md). Es común a todos.
+
+**EN:** The criteria are **the same for every module** and have two layers: the **module layer** (the specification's acceptance criteria and the module's complexity ceiling, declared per module in the **Scope per module** table, with each pass's detail in its own record) and the **language layer** (the **9 axes** of [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md), with the level derived from the **minimum over applicable axes** and each deviation's severity set by [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md)).
+
+**ES:** Nada se audita contra reglas que no estén en una de las dos capas: lo que no esté en la especificación no se le puede exigir, y lo que la especificación exija de más se corrige en ella y se avisa en el registro del pase.
+
+**EN:** Nothing is audited against rules outside those two layers: what is not in the specification cannot be demanded of a module, and anything the specification demands beyond it is fixed in the specification and noted in the pass's record.
+
+> **ES:** Los registros anteriores a este marco se **regeneran** en vez de adaptarse: un módulo auditado con criterios propios se pasa de nuevo con los de arriba, y su registro viejo se retira del árbol (queda en git). El histórico de cada regeneración se anota al final de este documento.
+> **EN:** Records predating this frame are **regenerated** rather than adapted: a module audited with its own criteria is passed again with the ones above, and its old record is removed from the tree (it stays in git). Each regeneration's history is noted at the end of this document.
 
 ---
 
@@ -96,7 +105,7 @@ done
 | `core.foundations.hello_user` | ⏳ pendiente | [`02_Audited_Hello_User.md`](02_Audited_Hello_User.md) |
 | `core.foundations.unit_test_calculator` | ⏳ pendiente | [`03_Audited_Unit_Test_Calculator.md`](03_Audited_Unit_Test_Calculator.md) |
 | `core.foundations.numbers` | ⏳ pendiente | [`04_Audited_Numbers.md`](04_Audited_Numbers.md) |
-| `core.algorithms.naive_sort` | 🟢 50 · 🟡 0 · 🔴 0 | [`05_Audited_Naive_Sort.md`](05_Audited_Naive_Sort.md) |
+| `core.algorithms.naive_sort` | ⏳ pendiente | [`05_Audited_Naive_Sort.md`](05_Audited_Naive_Sort.md) |
 | `core.algorithms.data_structures_basics` | 🔄 en curso | [`06_Audited_Data_Structures_Basics.md`](06_Audited_Data_Structures_Basics.md) |
 
 ---
@@ -117,5 +126,19 @@ done
 | `06 data_structures_basics` | `Node`, `LinkedList`, `Stack` y `Queue` desde cero, política de resultados por operación, sin colección de biblioteca, suite | $O(1)$ por operación |
 
 **ES:** Un módulo se audita **solo** contra su capa declarada aquí más los 9 ejes: lo que no esté en la especificación no se le puede exigir, y lo que la especificación exija de más se corrige en ella y se avisa en el registro del pase.
+
+**EN:** A module is audited **only** against the layer declared here plus the 9 axes: what is not in the specification cannot be demanded of it, and anything the specification demands beyond it is fixed in the specification and noted in the pass's record.
+
+---
+
+## 📜 Histórico de regeneraciones / Regeneration history
+
+**ES:** Registros retirados del árbol al pasar su módulo a este marco. El contenido viejo **no se pierde**: queda en el commit que se cita y vuelve a leerse con `git show {commit}:{ruta}`.
+
+**EN:** Records removed from the tree when their module moved to this frame. The old content is **not lost**: it stays in the cited commit and is read back with `git show {commit}:{path}`.
+
+| Fecha / Date | Módulo / Module | Qué se retiró / What was removed | Dónde está / Where it is |
+|---|---|---|---|
+| 2026-10-13 | `core.algorithms.naive_sort` | La pasada del 2026-09-21, con sus propios cuatro criterios; sus hallazgos (8 arreglos de comentarios y 4 de fidelidad o de aislamiento) siguen integrados en el `main` de sus submódulos | `git show f800c7b:docs/audits/05_Audited_Naive_Sort.md` |
 
 **EN:** A module is audited **only** against the layer declared here plus the 9 axes: what is not in the specification cannot be demanded of it, and anything the specification demands beyond it is fixed in the specification and noted in the pass's record.
