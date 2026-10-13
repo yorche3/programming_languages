@@ -1,12 +1,12 @@
 language	lineage	first_release	spec_standard	file_extension	build_tool	paradigm	mutability	types	memory	failure	construction	naming	concurrency	variant	reserved_summary	notes
 ada	ALGOL	1983	ISO/IEC 8652	.adb;.ads	alire/gnatmake	procedural	mutable	estatico-fuerte	manual	sentinel	constructor-special	PascalCase-fn	tasks	V1	next	OO via tagged types
 assembly	machine-code	1947	-	.s;.asm	nasm/gas/masm	procedural	mutable	estatico-fuerte	manual	sentinel	literal	snake_case	threads	V1	next;size	Platform-dependent
-ballerina	C-family+network-DSL	2017	-	.bal	bal	multi-paradigma	mixta	dependiente	gc	null	keyword-new	camelCase	actors	V3	size	Network-oriented
+ballerina	C-family+network-DSL	2017	-	.bal	bal	multi-paradigma	mixta	dependiente	gc	null	keyword-new	camelCase	actors	V1	size	Network-oriented
 c	ALGOL	1972	ISO/IEC 9899	.c;.h	make/cmake	procedural	mutable	estatico-fuerte	manual	sentinel	literal	snake_case	threads	V1	next	No OOP natively
 clojure	Lisp	2007	-	.clj	lein/deps.edn	lisp	inmutable	dinamico	gc	null	apply	kebab-case	stm	V2	delete	Lisp dialect on JVM
 cobol	COBOL	1959	ISO/IEC 1989	.cob;.cbl	gnuCOBOL	procedural	mutable	estatico-fuerte	manual	sentinel	constructor-special	PascalCase-fn	none	V1	value;next;size	Fixed-format business
 common-lisp	Lisp	1984	ANSI X3.226-1994	.lisp;.lsp	asdf/quicklisp	lisp	inmutable	dinamico	gc	null	make-*	lisp-case	multi	V2	-	Multi-paradigm lisp
-cpp	C+Simula	1985	ISO/IEC 14882	.cpp;.hpp	cmake	multi-paradigma	mixta	estatico-fuerte	raii	null	keyword-new	snake_case	threads	V3	next;size;delete	Selects V1 for pedagogy
+cpp	C+Simula	1985	ISO/IEC 14882	.cpp;.hpp	cmake	multi-paradigma	mixta	estatico-fuerte	raii	null	keyword-new	snake_case	threads	V1	next;size;delete	Selects V1 for pedagogy
 crystal	Ruby+C	2014	-	.cr	shards	oo-puro	mutable	estatico-fuerte	gc	null	method-new	snake_case	fibers	V1	delete;size	Ruby-like syntax, typed
 csharp	C-family+Java	2000	ECMA-334;ISO/IEC 23270	.cs	dotnet	oo-puro	mutable	null-safety-sound	gc	null	keyword-new	camelCase	async-await	V1	value;Node;Stack;Queue;LinkedList	NRT by default
 d	C++	2001	-	.d	dub	multi-paradigma	mutable	estatico-fuerte	gc	sentinel	keyword-new	camelCase	threads	V1	delete;init	delete is keyword
@@ -15,7 +15,7 @@ elixir	Erlang+Ruby	2012	-	.ex;.exs	mix	funcional	inmutable	dinamico	beam	result	
 elm	Haskell	2012	-	.elm	elm	funcional	inmutable	estatico-fuerte	gc	option	static-factory	camelCase	dataflow	V2	-	No runtime effects
 erlang	Prolog+ML	1986	-	.erl;.hrl	rebar3	funcional	inmutable	dinamico	beam	result	static-factory	snake_case	actors	V2	-	BEAM VM
 forth	Forth	1970	ANSI X3.215-1994	.fs;.fth	gforth	procedural	mutable	dinamico	manual	sentinel	constructor-special	kebab-case	none	V1	next;size	Stack-based
-fsharp	ML+.NET	2005	-	.fs;.fsx	dotnet	funcional	mixta	estatico-fuerte	gc	option	static-factory	camelCase	async-await	V3	-	.NET functional
+fsharp	ML+.NET	2005	-	.fs;.fsx	dotnet	funcional	mixta	estatico-fuerte	gc	option	static-factory	camelCase	async-await	V2	-	.NET functional
 gleam	ML/Haskell+BEAM	2016	-	.gleam	gleam	funcional	inmutable	estatico-fuerte	beam	result	static-factory	snake_case	actors	V2	-	BEAM, typed
 go	C+CSP+Newsqueak	2009	-	.go	go-mod	sistemas	mutable	estatico-fuerte	gc	tupla-(value, ok)	literal	camelCase	csp	V1	value;delete;size	Goroutines + channels
 grain	ML+WASM	2019	-	.gr	grain	funcional	inmutable	estatico-fuerte	gc	result	static-factory	camelCase	async-await	V2	-	Wasm-oriented functional
@@ -27,7 +27,7 @@ javascript	Scheme+Self	1995	ECMA-262;ISO/IEC 16262	.js	npm	dinamico-scripting	mu
 julia	Lisp+MATLAB+Python	2012	-	.jl	Pkg	multi-paradigma	mutable	estatico-fuerte	gc	option	static-factory	snake_case	multi	V1	size;delete	Multiple dispatch
 kotlin	Java+Scala+Groovy	2011	-	.kt;.kts	gradle/maven	oo-puro	mutable	null-safety-sound	gc	null	static-factory	camelCase	async-await	V1	Queue;Stack;LinkedList	Coroutines
 lua	Scheme+Sol	1993	-	.lua	luarocks	dinamico-scripting	mutable	dinamico	gc	null	method-new	snake_case	fibers	V1	next	Metatables
-nim	Python+Ada+Modula+Lisp	2008	-	.nim	nimble	multi-paradigma	mixta	estatico-fuerte	gc	option	static-factory	camelCase	async-await	V3	delete;size	Compiles to C/C++/JS
+nim	Python+Ada+Modula+Lisp	2008	-	.nim	nimble	multi-paradigma	mixta	estatico-fuerte	gc	option	static-factory	camelCase	async-await	V1	delete;size	Compiles to C/C++/JS
 ocaml	ML	1996	-	.ml;.mli	dune	funcional	inmutable	estatico-fuerte	gc	option	static-factory	snake_case	multi	V2	size	Modules + functors
 perl	Shell+awk+sed	1987	-	.pl;.pm	cpan/cpanm	dinamico-scripting	mutable	dinamico	gc	null	method-new	snake_case	threads	V1	next;delete	CPAN ecosystem
 php	C+Perl	1995	PHP spec (informal)	.php	composer	dinamico-scripting	mutable	dinamico	gc	null	keyword-new	camelCase	threads	V1	list;size	Server-oriented
@@ -36,16 +36,16 @@ purescript	Haskell	2013	-	.purs	spago	funcional	inmutable	estatico-fuerte	gc	opt
 python	ABC+Modula-3+C	1991	Python Reference (informal)	.py	pip/poetry	dinamico-scripting	mutable	dinamico	gc	mixto	static-factory	snake_case	multi	V1	Queue;Stack;LinkedList;list;next	Exceptions + None
 r	S	1993	-	.r;.R	R-CMD/renv	dinamico-scripting	mutable	dinamico	gc	null	static-factory	snake_case	multi	V1	size;value;next	Statistical
 racket	Scheme	1995	-	.rkt	raco	lisp	inmutable	dinamico	gc	null	make-*	kebab-case	multi	V2	delete;size	Scheme descendant
-raku	Perl-6	2015	Raku spec (informal)	.raku;.rakumod	zef	multi-paradigma	mixta	gradual	gc	null	method-new	kebab-case	multi	V3	size;delete	Gradual typing
+raku	Perl-6	2015	Raku spec (informal)	.raku;.rakumod	zef	multi-paradigma	mixta	gradual	gc	null	method-new	kebab-case	multi	V1	size;delete	Gradual typing
 rescript	OCaml+JavaScript	2020	-	.res	rescript	funcional	inmutable	null-safety-sound	gc	option	static-factory	camelCase	async-await	V2	-	OCaml-like for JS
 rexx	PL/I+EXEC-2	1979	ANSI X3.274-1996	.rexx;.rex	ooRexx	procedural	mutable	dinamico	gc	null	method-new	snake_case	none	V1	-	OO via .Nil
 ruby	Perl+Smalltalk+Lisp+Ada	1995	ISO/IEC 30170:2012	.rb	bundler/rake	oo-puro	mutable	dinamico	gc	null	method-new	snake_case	multi	V1	delete;size;next	Blocks + fibers
-rust	ML+C++	2010	Rust Reference (informal)	.rs	cargo	multi-paradigma	mixta	ownership	raii	result	static-factory	snake_case	multi	V3	next;size	Borrow checker; 1.0 in 2015
-scala	Java+Haskell+ML+Smalltalk	2004	-	.scala	sbt	multi-paradigma	mixta	estatico-fuerte	gc	option	apply	camelCase	actors	V3	size	JVM, functional + OO
+rust	ML+C++	2010	Rust Reference (informal)	.rs	cargo	multi-paradigma	mixta	ownership	raii	result	static-factory	snake_case	multi	V1	next;size	Borrow checker; 1.0 in 2015
+scala	Java+Haskell+ML+Smalltalk	2004	-	.scala	sbt	multi-paradigma	mixta	estatico-fuerte	gc	option	apply	camelCase	actors	V1	size	JVM, functional + OO
 scheme	Lisp	1975	IEEE 1178-1990;R7RS	.scm;.ss	guile/mit-scheme	lisp	inmutable	dinamico	gc	option	make-*	kebab-case	none	V2	-	Minimal lisp
 swift	Objective-C+Rust+Haskell+Python	2014	-	.swift	swift-pm	oo-puro	mixta	null-safety-sound	arc	option	static-factory	camelCase	async-await	V1	size	ARC memory
 tcl-tk	Lisp+Shell	1988	-	.tcl	tclsh	dinamico-scripting	mutable	dinamico	gc	sentinel	constructor-special	snake_case	threads	V1	next;delete;size	TclOO
 typescript	JavaScript+C#	2012	-	.ts	npm/tsc	oo-puro	mutable	gradual	gc	null	keyword-new	camelCase	async-await	V1	delete;value	JS with types
-v	Go+Rust+Python+Oberon	2019	-	.v	v	sistemas	mixta	estatico-fuerte	raii	option	static-factory	snake_case	threads	V3	size	Compiles to C
+v	Go+Rust+Python+Oberon	2019	-	.v	v	sistemas	mixta	estatico-fuerte	raii	option	static-factory	snake_case	threads	V1	size	Compiles to C
 vala	C#+GObject	2006	-	.vala	meson	oo-puro	mutable	estatico-fuerte	raii	null	keyword-new	camelCase	threads	V1	-	GNOME, compiles to C
 zig	C+Rust+LLVM	2016	-	.zig	zig	sistemas	mutable	estatico-fuerte	manual	option	static-factory	camelCase	threads	V1	delete;size	Explicit allocators

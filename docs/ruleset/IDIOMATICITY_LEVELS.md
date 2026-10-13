@@ -199,9 +199,9 @@ text
 >
 > **EN:** **Technical** scope: the scale measures how idiomatic an implementation is and records the deviation when it is not. It defines **9 evaluation axes**. Signed by **Software Architect** (support: *SDET*). Editorial tracking (changelog, closure records) is out of scope; see [`AGENT_ROLES.md`](../AGENT_ROLES.md).
 
-**ES:** El resultado se escribe en `docs/ruleset/data/idiomaticity_state.tsv` (**por crear / to be created**). Los 50 lenguajes se agrupan en las cuatro variantes de [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 34 · V2 14 · V3 5 · V4 1 = 50 únicos— y el nivel se evalúa por (lenguaje, módulo), no por lenguaje. Los casos ya medidos que alimentan esta escala están en la sección *Casos medidos en la homologación* de ese mismo documento.
+**ES:** El resultado se escribe en `docs/ruleset/data/idiomaticity_state.tsv` (**por crear / to be created**). Los 50 lenguajes se agrupan en las cuatro variantes de [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 35 · V2 14 · V4 1 = 50, con V3 como clase transversal— y el nivel se evalúa por (lenguaje, módulo), no por lenguaje. Los casos ya medidos que alimentan esta escala están en la sección *Casos medidos en la homologación* de ese mismo documento.
 
-**EN:** The result is written to `docs/ruleset/data/idiomaticity_state.tsv` (**to be created**). The 50 languages are grouped into the four variants of [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 34 · V2 14 · V3 5 · V4 1 = 50 unique— and the level is evaluated per (language, module), not per language. The cases already measured that feed this scale are in the *Cases measured during homologation* section of that same document.
+**EN:** The result is written to `docs/ruleset/data/idiomaticity_state.tsv` (**to be created**). The 50 languages are grouped into the four variants of [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 35 · V2 14 · V4 1 = 50, with V3 as a cross-cutting class— and the level is evaluated per (language, module), not per language. The cases already measured that feed this scale are in the *Cases measured during homologation* section of that same document.
 
 | `language` | `module` | `level` | `blocking_axis` | `notes` | `commit` | `date` |
 |-----------|----------|:-------:|:---------------:|---------|----------|--------|

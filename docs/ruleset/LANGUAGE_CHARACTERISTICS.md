@@ -350,12 +350,12 @@
 |---------------------|-------------------|:--------:|
 | `mutable` | cualquiera salvo `logico` | V1 |
 | `inmutable` | `funcional`/`lisp` | V2 |
-| `mixta` | `multi-paradigma` | V3 |
+| `mixta` | cualquiera (clase **V3** si es `multi-paradigma`) | **V1** o **V2**: una sola, declarada en el README |
 | cualquiera | `logico` | V4 |
 
-**ES:** Esta tabla es la regla de asignación. Si un lenguaje es `mixta` pero el módulo elige V1, se documenta en el README del lenguaje.
+**ES:** Esta tabla es la regla de asignación: **una sola variante por lenguaje**, sin explorar alternativas; la elección se documenta en el README del lenguaje.
 
-**EN:** This table is the assignment rule. If a language is `mixta` but the module chooses V1, it is documented in the language README.
+**EN:** This table is the assignment rule: **a single variant per language**, with no alternatives explored; the choice is documented in the language README.
 
 ---
 

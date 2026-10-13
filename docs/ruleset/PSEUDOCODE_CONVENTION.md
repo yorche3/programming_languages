@@ -46,7 +46,7 @@ type Node
         this.next = n
         return this
 ```
-Aplica a / Applies to: ada, assembly, ballerina, c, cobol, cpp, crystal, csharp, d, dart, forth, go, groovy, haxe, java, javascript, julia, kotlin, lua, nim, perl, php, python, r, raku, rexx, ruby, scala, swift, tcl-tk, typescript, v, vala, zig.
+Aplica a / Applies to: ada, assembly, ballerina, c, cobol, cpp, crystal, csharp, d, dart, forth, go, groovy, haxe, java, javascript, julia, kotlin, lua, nim, perl, php, python, r, raku, rexx, ruby, rust, scala, swift, tcl-tk, typescript, v, vala, zig.
 V2 — Inmutable / Funcional
 
 ES: Para lenguajes donde los valores no se mutan: cada operación devuelve un valor nuevo. La ausencia se representa con Option/Maybe o el tipo suma del lenguaje. La operación "set" se reemplaza por with_* (copia modificada).
@@ -70,7 +70,7 @@ ES: Para lenguajes que permiten ambos estilos y donde el módulo elige una varia
 
 EN: For languages allowing both styles and where the module chooses a concrete variant (usually V1 if the goal is imperative pedagogy, V2 if it is to showcase the language's functional paradigm). The decision is documented in the language README.
 
-Aplica a / Applies to: rust, scala, swift, cpp, nim.
+Aplica a / Applies to: rust, scala, swift, cpp, nim (clase transversal: cada uno implementa **V1**; no se exploran variantes).
 V4 — Lógico / Declarativo
 
 ES: Para lenguajes basados en unificación y backtracking. No hay constructores ni métodos: hay hechos y reglas. La operación "init" se expresa como un hecho; "get" como una regla que unifica el campo.
@@ -92,15 +92,15 @@ Aplica a / Applies to: prolog.
 >
 > **EN:** **Technical** scope: this document defines how the pseudocode is written and how it translates to each language so the implementation is idiomatic. Signed by **Software Architect** (support: *Language-Specific SME*). Process, pedagogy, or visual-content documents are out of scope (see [`AGENT_ROLES.md`](../AGENT_ROLES.md)).
 
-**ES:** Verificado contra los 50 submódulos (`.gitmodules`): la unión de las listas «Aplica a» tiene **50 entradas únicas** —34 + 14 + 5 + 1—, sin lenguajes ausentes ni sobrantes. V3 se solapa a propósito con V1/V2 y **rust solo aparece en V3**: el módulo declara allí su variante en el README del lenguaje.
+**ES:** Verificado contra los 50 submódulos (`.gitmodules`): **cada lenguaje implementa una sola variante**, sin explorar alternativas. El reparto por variante implementada es **35 V1 + 14 V2 + 1 V4 = 50**. V3 es una **clase transversal** (lenguajes multi-paradigma: rust, scala, swift, cpp, nim), que en este monorepo resuelven a **V1** y lo documentan en el README del lenguaje.
 
-**EN:** Verified against the 50 submodules (`.gitmodules`): the union of the "Applies to" lists has **50 unique entries** —34 + 14 + 5 + 1—, with no missing or extra languages. V3 overlaps V1/V2 on purpose and **rust appears only in V3**: the module declares its variant there in the language README.
+**EN:** Verified against the 50 submodules (`.gitmodules`): **each language implements a single variant**, with no alternatives explored. The distribution by implemented variant is **35 V1 + 14 V2 + 1 V4 = 50**. V3 is a **cross-cutting class** (multi-paradigm languages: rust, scala, swift, cpp, nim), which in this monorepo resolve to **V1** and document it in the language README.
 
 | Variante / Variant | Nº | Lenguajes / Languages |
 |---|:--:|---|
-| V1 Mutable / Imperativo / OO | 34 | ada, assembly, ballerina, c, cobol, cpp, crystal, csharp, d, dart, forth, go, groovy, haxe, java, javascript, julia, kotlin, lua, nim, perl, php, python, r, raku, rexx, ruby, scala, swift, tcl-tk, typescript, v, vala, zig |
+| V1 Mutable / Imperativo / OO | 35 | ada, assembly, ballerina, c, cobol, cpp, crystal, csharp, d, dart, forth, go, groovy, haxe, java, javascript, julia, kotlin, lua, nim, perl, php, python, r, raku, rexx, ruby, rust, scala, swift, tcl-tk, typescript, v, vala, zig |
 | V2 Inmutable / Funcional | 14 | clojure, common-lisp, elixir, elm, erlang, fsharp, gleam, grain, haskell, ocaml, purescript, racket, rescript, scheme |
-| V3 Mixto | 5 | rust, scala, swift, cpp, nim |
+| V3 Mixto (clase transversal) | 5 | rust, scala, swift, cpp, nim — cada uno implementa **V1** |
 | V4 Lógico / Declarativo | 1 | prolog |
 
 ### 🧩 Indicador de fallo: qué queda fuera / Failure indicator: what stays out
