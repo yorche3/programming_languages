@@ -246,9 +246,9 @@ text
 | `mostly-idiomatic` → `idiomatic` | Se eliminan las últimas desviaciones de nombre |
 | `idiomatic` → `mostly-idiomatic` | Se introduce una nueva desviación (raro; solo si cambia la spec) |
 
-**ES:** Las transiciones **nunca son automáticas**. Requieren un commit que cambie el código y un commit que actualice `idiomaticity_state.tsv`. La justificación va en el changelog del lenguaje.
+**ES:** Las transiciones **nunca son automáticas**. Requieren un commit que cambie el código y un commit que actualice `idiomaticity_state.tsv`. La justificación va a la ficha del lenguaje ("docs/ruleset/idioms/{lang}.md") y el «cuándo» al registro de verificaciones del pase, con la fecha y el commit por lenguaje.
 
-**EN:** Transitions are **never automatic**. They require a commit changing the code and a commit updating `idiomaticity_state.tsv`. The justification goes in the language's changelog.
+**EN:** Transitions are **never automatic**. They require a commit changing the code and a commit updating `idiomaticity_state.tsv`. The justification goes to the language's record (`docs/ruleset/idioms/{lang}.md`) and the "when" goes to the pass's verification log, with the date and commit per language.
 
 ---
 

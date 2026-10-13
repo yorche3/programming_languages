@@ -766,18 +766,16 @@ assert_contains 'doctor: autocompletado bash' 'completion_bash: yes' "$out"
 assert_contains 'doctor: autocompletado zsh' 'completion_zsh: yes' "$out"
 
 # el catálogo de datos y la guía de inicialización no se pueden separar
-guide_langs="$(awk -F'|' '/^\| \*\*[a-z]/ {gsub(/\*/,"",$2); gsub(/[ \t]/,"",$2); print $2}' "$GUIDE")"
-data_langs="$(cut -f1 "$REPO/scripts/data/languages.tsv")"
-# v2: la tabla maestra de la guía es un **bloque de texto alineado** —el lenguaje es el primer
-# campo de la línea y el comando de pruebas va tras el último ✅—, así que no se lee como
-# markdown: se lee el bloque.
+# v3: la tabla maestra de la guía es una **tabla markdown** —lenguaje en negrita en la segunda
+# celda, comando de pruebas en la última— así que se lee con `awk -F'|'`, acotada a su sección.
 GUIDE_MASTER='/^## .*Master table/,/^## .*Multi-step sequences/'
-guide_langs="$(awk "$GUIDE_MASTER" "$GUIDE" | grep -oE '^[a-z][a-z0-9-]*')"
+guide_langs="$(awk "$GUIDE_MASTER" "$GUIDE" | awk -F'|' '/^\| \*\*[a-z]/ {gsub(/\*/,"",$2); gsub(/[ \t]/,"",$2); print $2}')"
+data_langs="$(cut -f1 "$REPO/scripts/data/languages.tsv")"
 assert_eq 'catálogo y guía: mismos lenguajes' "$guide_langs" "$data_langs"
 
-guide_tests="$(awk -F'|' '/^\| \*\*[a-z]/ {print $5}' "$GUIDE" |
+guide_tests="$(awk "$GUIDE_MASTER" "$GUIDE" |
+    awk -F'|' '/^\| \*\*[a-z]/ {print $5}' |
     LC_ALL=C sed 's/`//g; s/  */ /g; s/^ //; s/ $//; s/\xef\xb8\x8f//g; s/\xe2\x9c\x85//g; s/\xf0\x9f\x94\xa7//g; s/\xe2\x9c\x8d//g; s/  */ /g; s/^ //; s/ $//')"
-guide_tests="$(awk "$GUIDE_MASTER" "$GUIDE" | LC_ALL=C sed -n 's/.*✅ *//p' | sed 's/ *$//')"
 data_tests="$(cut -f3 "$REPO/scripts/data/languages.tsv")"
 assert_eq 'catálogo y guía: mismos comandos de pruebas' "$guide_tests" "$data_tests"
 
@@ -786,8 +784,8 @@ assert_eq 'catálogo y guía: mismos comandos de pruebas' "$guide_tests" "$data_
 # la sección, el marcador de secuencia de la tabla maestra y el dato de secuencias.
 CHAIN_MARK="$(printf '\xe2\x9b\x93')"
 data_seq="$(awk -F'\t' 'FNR > 1 {print $1}' "$REPO/scripts/data/init_sequences.tsv" | LC_ALL=C sort -u)"
-guide_seq="$(awk '/^## .*Multi-step sequences/,/^## .*Manual generation/' "$GUIDE" | grep -oE '^[a-z][a-z0-9-]*' | LC_ALL=C sort -u)"
-guide_chain="$(awk "$GUIDE_MASTER" "$GUIDE" | grep -F -- "$CHAIN_MARK" | grep -oE '^[a-z][a-z0-9-]*' | LC_ALL=C sort -u)"
+guide_seq="$(awk '/^## .*Multi-step sequences/,/^## .*Manual generation/' "$GUIDE" | awk -F'|' '/^\| \*\*[a-z]/ {gsub(/\*/,"",$2); gsub(/[ \t]/,"",$2); print $2}' | LC_ALL=C sort -u)"
+guide_chain="$(awk "$GUIDE_MASTER" "$GUIDE" | grep -F -- "$CHAIN_MARK" | awk -F'|' '/^\| \*\*[a-z]/ {gsub(/\*/,"",$2); gsub(/[ \t]/,"",$2); print $2}' | LC_ALL=C sort -u)"
 assert_eq 'secuencias y guía: el dato trae los 50 lenguajes' '50' "$(printf '%s\n' "$data_seq" | wc -l | tr -d ' ')"
 assert_eq 'secuencias y guía: la sección no inventa lenguajes' '' \
     "$(comm -23 <(printf '%s\n' "$guide_seq") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"

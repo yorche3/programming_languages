@@ -241,21 +241,24 @@
 │       └── NO → 🟡 Aceptable con documentación.
 └── NO → Revisar manualmente.
 
-📂 Dónde vive cada desviación / Where each deviation lives
+## 📂 Dónde vive cada desviación / Where each deviation lives
 
-ES: Las desviaciones viven en cuatro lugares, con propósitos distintos.
+**ES:** Las desviaciones viven en **cuatro** lugares, con propósitos distintos.
 
-EN: Deviations live in four places, with different purposes.
-Lugar	Qué contiene	Frecuencia de actualización
-README.md del lenguaje (en docs/ruleset/idioms/{lang}.md)	La desviación completa con plantilla	Cuando se introduce o se corrige
-data/idiomaticity_state.tsv	El nivel derivado y el eje bloqueante	Cuando cambia el nivel
-docs/changelogs/{lang}.md	El registro histórico de cuándo se corrigió	Al cerrar cada corrección
-Commit de código	La implementación real	Al implementar
+**EN:** Deviations live in **four** places, with different purposes.
 
-ES: La fuente de verdad de la desviación es el README.md del lenguaje. Los otros tres son índices o registros.
+| Lugar / Place | Qué contiene / What it holds | Cuándo se actualiza / Updated when |
+|---|---|---|
+| [`idioms/{lang}.md`](idioms/) | La desviación completa, con su plantilla | Cuando se introduce o se corrige |
+| `data/idiomaticity_state.tsv` | El nivel derivado, el eje bloqueante, la fecha y el commit verificado | Cuando cambia el nivel |
+| `docs/audits/{NN}_Audited_{Modulo}.md` | El registro de verificaciones del pase: fecha, alcance, comando y resultado | En cada pase de auditoría |
+| Commit de código / Code commit | La implementación real | Al implementar / When implementing |
 
-EN: The source of truth for the deviation is the language README.md. The other three are indexes or logs.
-🔍 Validación / Validation
+**ES:** La fuente de verdad de la desviación es la ficha del lenguaje; el estado, el registro del pase y el commit son índices o registros. **No hay changelog aparte**: el «cuándo se corrigió» ya está en el registro de verificaciones del pase y en la fecha y el commit de la fila del estado, y el historial de git queda como respaldo, no como un artefacto más que mantener.
+
+**EN:** The source of truth for a deviation is the language's record; the state, the pass record and the commit are indexes or logs. **There is no separate changelog**: the "when it was fixed" already sits in the pass's verification log and in the state row's date and commit, and git history stays as a backup rather than one more artefact to maintain.
+
+## 🔍 Validación / Validation
 
 ES: La documentación de desviaciones se valida con dos mecanismos.
 

@@ -151,8 +151,8 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 
 **EN:** **No** `align` is opened when the use is **mandated by the language**: importing to compare in functional languages, an `N/A` axis, or a name that **is** the idiomatic one. That is an **accepted deviation**, not a fix: it is documented with its template and 🟢 `informational` or 🟡 `warning` severity, and the language is left untouched. A language with no 🔴 finding **gets no `align` branch**: its row keeps the computed level, its commit and its date, and the pass moves on.
 
-> **ES:** Dos hogares que la política de desviaciones exige **todavía no existen**: `docs/ruleset/idioms/{lang}.md` (la fuente de verdad de una desviación) y `docs/changelogs/{lang}.md` (cuándo se corrigió). Sin ellos, una desviación aceptada no tiene dónde vivir y volverá a discutirse en el pase siguiente: conviene crearlos **antes** del primer `align`.
-> **EN:** Two homes required by the deviation policy **do not exist yet**: `docs/ruleset/idioms/{lang}.md` (the source of truth of a deviation) and `docs/changelogs/{lang}.md` (when it was fixed). Without them an accepted deviation has nowhere to live and will be discussed again in the next pass: create them **before** the first `align`.
+> **ES:** Un hogar que la política de desviaciones exige **todavía no existe**: `docs/ruleset/idioms/{lang}.md`, la fuente de verdad de una desviación aceptada. Sin él, tu excepción —el uso **obligado por el lenguaje**— no tiene dónde constar y se vuelve a discutir en el pase siguiente. El «cuándo se corrigió» **no** necesita carpeta propia: vive en el registro de verificaciones de este pase y en la fecha y el commit de la fila del estado.
+> **EN:** One home required by the deviation policy **does not exist yet**: `docs/ruleset/idioms/{lang}.md`, the source of truth of an accepted deviation. Without it, your exception —the use **mandated by the language**— has nowhere to live and is discussed again in the next pass. The "when it was fixed" **needs no folder of its own**: it lives in this pass's verification log and in the state row's date and commit.
 
 ---
 
