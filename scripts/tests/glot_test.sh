@@ -2794,14 +2794,6 @@ glot_run set lang ruby
 glot_run doctor
 assert_contains 'doctor: la serie del lenguaje del sprint' 'toolchain_ruby: ' "$out"
 assert_eq 'doctor: un sprint sin fila declarada no rompe' '0' "$rc_last"
-# `rescript` es el lenguaje que sigue **sin fila** (su toolchain no está instalada aquí):
-# con él se prueba que un sprint sin serie declarada se dice y no rompe nada. Antes este
-# caso usaba `ada`, hasta que su fila se midió el 2026-09-27.
-glot_run set lang rescript
-glot_run doctor
-assert_eq 'doctor: sin serie declarada, código' '0' "$rc_last"
-assert_contains 'doctor: sin serie declarada, se dice' 'toolchain_rescript: - (sin serie declarada' "$out"
-
 # inyectando el catálogo se prueban los tres estados sin tocar el dato del repositorio
 cp -f -- "$TOOLCHAINS" "$INJECTED/differs.tsv"
 sed -i 's/^ruby\truby --version\t.*/ruby\truby --version\t9.9/' "$INJECTED/differs.tsv"
@@ -2821,6 +2813,15 @@ printf 'klingon\tglot-no-existe --version\t1.0\n' >>"$INJECTED/unknown.tsv"
 glot_run_tc "$INJECTED/unknown.tsv" doctor
 assert_eq 'toolchains: una fila fuera de .gitmodules cambia el código' '1' "$rc_last"
 assert_contains 'toolchains: la fila fuera de .gitmodules se nombra' 'toolchain_klingon: unknown' "$out"
+
+# Desde el 2026-10-13 los **50** lenguajes tienen serie declarada, así que el caso «sprint sin
+# serie» se prueba quitándole la fila a `rescript` en el catálogo inyectado.
+cp -f -- "$TOOLCHAINS" "$INJECTED/sin-serie.tsv"
+sed -i '/^rescript\t/d' "$INJECTED/sin-serie.tsv"
+glot_run set lang rescript
+glot_run_tc "$INJECTED/sin-serie.tsv" doctor
+assert_eq 'doctor: sin serie declarada, código' '0' "$rc_last"
+assert_contains 'doctor: sin serie declarada, se dice' 'toolchain_rescript: - (sin serie declarada' "$out"
 
 glot_run_tc "$WORK_DIR/no-existe.tsv" doctor
 assert_eq 'toolchains: sin fichero de datos no es un fallo' '0' "$rc_last"
@@ -2999,8 +3000,9 @@ assert_contains 'toolchains: ada con su serie medida' "$(printf 'ada\talr --vers
 assert_contains 'toolchains: common-lisp con su serie medida' "$(printf 'common-lisp\tros run -- --version\t2.6')" "$(cat -- "$TOOLCHAINS")"
 assert_contains 'toolchains: rexx con su serie medida' "$(printf 'rexx\trexx -v\t5.2')" "$(cat -- "$TOOLCHAINS")"
 assert_contains 'toolchains: scala con su serie medida' "$(printf 'scala\tscalac -version\t3.9')" "$(cat -- "$TOOLCHAINS")"
-assert_eq 'toolchains: rescript sigue sin fila (no medible aquí)' '0' \
-    "$(grep -c '^rescript' "$TOOLCHAINS" || true)"
+# rescript: su compilador se midió primero dentro del `node_modules` del módulo (11.1.4) y el
+# 2026-10-13 se instaló en global (`npm i -g rescript`), así que ya declara fila propia.
+assert_contains 'toolchains: rescript con su serie medida' "$(printf 'rescript\trescript --version\t12.3')" "$(cat -- "$TOOLCHAINS")"
 
 # Punto 6 del plan: la tabla de módulos del roadmap es una **vista manual** y no lleva
 # contador —así ningún número puede quedarse atrás en silencio—; el recuento de verdad vive
