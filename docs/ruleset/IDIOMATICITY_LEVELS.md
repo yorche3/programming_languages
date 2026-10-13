@@ -329,9 +329,9 @@ text
 
 - [`ruleset/PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) — El contrato del pseudocódigo.
 - [`ruleset/LANGUAGE_CHARACTERISTICS.md`](LANGUAGE_CHARACTERISTICS.md) — Los 11 ejes por lenguaje.
-- `ruleset/DEVIATION_POLICY.md` (por crear / to be created) — Cómo documentar cada desviación.
+- [`ruleset/DEVIATION_POLICY.md`](DEVIATION_POLICY.md) — Cómo documentar cada desviación.
 - [`ruleset/PARADIGM_FAMILIES.md`](PARADIGM_FAMILIES.md) — La agrupación de los 50 lenguajes.
-- `ruleset/data/idiomaticity_state.tsv` (por crear / to be created) — El estado actual por (lenguaje, módulo).
+- [`ruleset/data/idiomaticity_state.tsv`](data/idiomaticity_state.tsv) — El estado actual por (lenguaje, módulo).
 - [`ruleset/data/canonical_names.tsv`](data/canonical_names.tsv) — La tabla de traducción máquina-legible.
 
 ---

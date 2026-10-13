@@ -198,6 +198,14 @@
 
 ---
 
+## 🧪 Después del sprint: la auditoría / After the sprint: the audit
+
+**ES:** Un módulo que cierra a `50/50` no se da por homogéneo: entra en el **segundo ciclo**, el de la auditoría, que verifica la capa de idiomaticidad y devuelve al mismo estado a los lenguajes que se hayan desviado antes de arrancar el **módulo siguiente**. Ese ciclo tiene su propia norma —[`AUDIT_WORKFLOW.md`](AUDIT_WORKFLOW.md), con las ramas `audit/{fase}/{módulo}` y `align/{fase}/{módulo}`— y **no reabre** el cierre del sprint: son dos capas, con registros y estados distintos.
+
+**EN:** A module that closes at `50/50` is not taken as homogeneous yet: it enters the **second cycle**, the audit, which verifies the idiomaticity layer and brings any deviating languages back to the same state before the **next module** starts. That cycle has its own policy —[`AUDIT_WORKFLOW.md`](AUDIT_WORKFLOW.md), with the `audit/{phase}/{module}` and `align/{phase}/{module}` branches— and it does **not reopen** the sprint closure: they are two layers, with different records and states.
+
+---
+
 ## 🔗 Relación con otras normas / Relation to other policies
 
 | Documento | Qué manda |
@@ -209,3 +217,4 @@
 | [`AGENT_Template.md`](AGENT_Template.md) | Cómo genera documentación el agente |
 | [`../AGENTS.md`](../AGENTS.md) | Límites de actuación del agente: qué puede y qué no |
 | [`../scripts/docs/SPRINT.md`](../scripts/docs/SPRINT.md) | Los mismos pasos, con el comando de `glot` que los cubre |
+| [`AUDIT_WORKFLOW.md`](AUDIT_WORKFLOW.md) | El segundo ciclo: la auditoría del módulo cerrado y el `align` por lenguaje |

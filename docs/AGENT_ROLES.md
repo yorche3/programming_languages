@@ -95,6 +95,12 @@ marked `—`.
 | `docs-module` | 7 | Technical Writer | Language-Specific SME, Documentation Architect | `economy` |
 | `docs-language` | 8 | Documentation Architect | Technical Writer | `economy` |
 | `finish` (puntero + cierre) | 9–10 | Technical Product Manager | Documentation Architect | `economy` |
+| `audit-pass` — manual, sin `glot prompt` | A | Language-Specific SME | Computer Scientist, Technical Writer, Software Architect | `balanced` |
+| `audit-align` — manual, sin `glot prompt` | B | Senior Software Developer | Language-Specific SME, SDET | `balanced` · `deep` si es estructural |
+
+**ES:** Las dos últimas filas son del **ciclo de auditoría** ([`AUDIT_WORKFLOW.md`](AUDIT_WORKFLOW.md)), que es **manual**: no tienen plantilla en `scripts/prompts/` ni `glot save` que las confirme, y por eso **no cuentan** para los recuentos de encargos y de perfiles de `doctor`. Su reparto por paso —barrido, lectura, complejidad, ejecución, desviaciones, registro, nivel, adecuación, aceptación de una desviación, verificación y cierre— está en la tabla «Quién firma cada paso» de ese documento.
+
+**EN:** The last two rows belong to the **audit cycle** ([`AUDIT_WORKFLOW.md`](AUDIT_WORKFLOW.md)), which is **manual**: they have no template under `scripts/prompts/` and no `glot save` to confirm them, which is why they **do not count** towards `doctor`'s request and profile tallies. Their per-step split —sweep, code reading, complexity, execution, deviations, record, level, alignment, deviation acceptance, verification and closure— is in that document's "Who signs each step" table.
 
 **ES:** Fuera del ciclo de un módulo, el **Computer Scientist** con el **Software
 Architect** firman las especificaciones de `docs/core/`; el **DevOps / Release

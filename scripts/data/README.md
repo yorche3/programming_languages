@@ -21,6 +21,10 @@ language or per step, **tab-separated**, no header, sorted.
 | 3 | Comando nativo de pruebas (lo ejecuta `glot test`) | `composer test` |
 | 4 | Verificador (lo ejecuta `glot verify`): **lint idiomático** de sintaxis y formato, con la herramienta del lenguaje; `-` si el lenguaje aún no tiene. **No** comprueba la suite ni busca *hardcode*, y el análisis estático de seguridad es un no-objetivo (v1.4.0) | `php -l src/{Module}.php` |
 
+**ES:** Este catálogo **no** guarda los datos del `ruleset`. El estado de idiomaticidad, los nombres canónicos y las características por lenguaje viven en [`docs/ruleset/data/`](../../docs/ruleset/data/) —`idiomaticity_state.tsv`, `canonical_names.tsv` y `language_characteristics.tsv`—, que es la **única copia versionada**; las copias duplicadas que había en este directorio se retiraron el 2026-10-13 porque no las consumía ninguna herramienta ni las documentaba este README.
+
+**EN:** This catalogue does **not** hold the `ruleset` data. The idiomaticity state, the canonical names and the per-language characteristics live in [`docs/ruleset/data/`](../../docs/ruleset/data/) — `idiomaticity_state.tsv`, `canonical_names.tsv` and `language_characteristics.tsv` — which is the **single versioned copy**; the duplicate copies kept in this directory were removed on 2026-10-13 because no tool consumed them and this README did not document them.
+
 **ES:** La columna 2 (tipo) y el comando de pruebas salen de la tabla maestra de
 [`docs/core/00_Project_Initialization_Guide.md`](../../docs/core/00_Project_Initialization_Guide.md),
 que sigue siendo el documento humano. El **esqueleto** no se duplica aquí: vive entero en

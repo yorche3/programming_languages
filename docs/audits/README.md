@@ -17,7 +17,7 @@ docs/audits/
 - **El nombre del registro no repite el de la especificación**: `05_Naive_Sort.md` es la especificación y `05_Audited_Naive_Sort.md` su registro. Así se distinguen por el nombre y no solo por la carpeta.
 - Un registro por módulo, no por lenguaje: los lenguajes son filas del estado.
 - Cuando el módulo cierra del todo (todos los lenguajes en 🟢) el registro se conserva como histórico; el cierre se anota en [`ROADMAP_UPDATE_CHECKLIST.md`](../ROADMAP_UPDATE_CHECKLIST.md).
-- El ciclo con el que se corrige cada lenguaje es el de [`WORKFLOW.md`](../WORKFLOW.md).
+- El ciclo con el que se audita el módulo y se corrige cada lenguaje es el de [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md) —ramas `audit/{fase}/{módulo}` y `align/{fase}/{módulo}`—; el ciclo del sprint sigue siendo [`WORKFLOW.md`](../WORKFLOW.md).
 - **Una auditoría se abre cuando el roadmap marca el módulo homologado en los 50 lenguajes** (`50/50`): antes de eso no hay deuda técnica que registrar, y los hallazgos sobre una especificación sin implementar se resuelven revisándola.
 
 ---

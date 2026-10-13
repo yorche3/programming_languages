@@ -55,6 +55,22 @@ The same convention applies inside a submodule and in the monorepo. The branch
 type must match the main change type. Do not use generic branches such as
 `feature`, `work`, `changes`, or names without a phase and module.
 
+**Ciclos con prefijo propio:** los dos ciclos del monorepo tienen, además de los
+tipos, un prefijo declarado. El pase de auditoría de un módulo ya cerrado usa
+`audit/{fase}/{modulo}` en el monorepo, y el arreglo de un lenguaje usa
+`align/{fase}/{modulo}` en su submódulo: ver
+[`AUDIT_WORKFLOW.md`](AUDIT_WORKFLOW.md). Los commits de esas ramas siguen siendo
+Conventional Commits —`docs` en el pase y `fix` o `refactor` en el `align`—, así
+que el prefijo nombra el ciclo, no el tipo del cambio.
+
+**Cycles with their own prefix:** both monorepo cycles have a declared prefix
+besides the types. The audit pass of an already closed module uses
+`audit/{phase}/{module}` in the monorepo, and a language's fix uses
+`align/{phase}/{module}` in its submodule: see
+[`AUDIT_WORKFLOW.md`](AUDIT_WORKFLOW.md). Commits on those branches stay
+Conventional Commits —`docs` in the pass, `fix` or `refactor` in the
+`align`—, so the prefix names the cycle, not the change type.
+
 **Tooling (`glot`):** una versión se cierra en `chore/repo/glot-vX.Y.Z`, y un **fix** o un
 **refactor** usan `fix/repo/glot-vX.Y.Z` —una rama que **ya lleva el número de la entrega**
 que cierra: `fix/repo/glot-v1.6.1` cierra como **1.6.1**—. La rama dice a qué versión se le
