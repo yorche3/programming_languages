@@ -141,6 +141,27 @@
 
 ---
 
+## 🧭 Los dos ejes principales / The two principal axes
+
+**ES:** El estado de idiomaticidad se lee en **dos ejes principales**, y el detalle de los nueve ejes explica *por qué* cada uno está donde está.
+
+**EN:** The idiomaticity state is read on **two principal axes**, and the detail of the nine axes explains *why* each one sits where it sits.
+
+| Eje principal / Principal axis | Qué mide / What it measures | Valores / Values | Dónde vive / Where it lives |
+|---|---|---|---|
+| **1 — `idiomatic_target`** (objetivo idiomático pleno) | Estructura, variante de implementación, guardas, manejo de errores y uso de lo que dicen las buenas prácticas del lenguaje | `pendiente` · `en-curso` · `cumplido` | Es el **propósito final**: hoy los 50 están en `pendiente`. Cuando un lenguaje deje de estarlo, se añade la columna `idiomatic_target` al TSV |
+| **2 — `module_fidelity`** (cercanía a lo que pide el módulo) | Cuánto se acerca la implementación a **lo que exige el módulo** y a las **idioms del lenguaje** | `idiomatic` · `mostly-idiomatic` · `transitional` · `workaround` · `not-audited` · `not-started` | Columna `module_fidelity` de `data/idiomaticity_state.tsv` |
+
+**ES:** El **eje 2** es el que calcula el algoritmo de la sección siguiente ( mínimo de los ejes aplicables). El **eje 1** se revisa aparte: no depende de un módulo, depende del dominio de las prácticas del lenguaje, y por eso arranca en `pendiente` para todos.
+
+**EN:** **Axis 2** is what the algorithm in the next section computes (minimum over applicable axes). **Axis 1** is reviewed separately: it does not depend on a module, it depends on mastery of the language's practices, which is why it starts at `pendiente` for everyone.
+
+**ES:** Los **9 ejes de detalle** (`construction`, `naming`, `failure`, `access`, `encapsulation`, `unsafe`, `complexity`, `documentation`, `tests`) alimentan a los dos principales: su mínimo da el eje 2, y los que quedan bajos señalan exactamente qué separa al módulo del eje 1.
+
+**EN:** The **9 detail axes** (`construction`, `naming`, `failure`, `access`, `encapsulation`, `unsafe`, `complexity`, `documentation`, `tests`) feed the two principal ones: their minimum yields axis 2, and the low ones point to exactly what separates the module from axis 1.
+
+---
+
 ## 🔬 Evaluación por eje / Per-axis evaluation
 
 **ES:** Para calcular el nivel de un (lenguaje, módulo), se evalúa cada eje de forma **independiente** y se toma el **mínimo**.
@@ -195,19 +216,20 @@ document the lowest axis as the "blocking axis"
 text
 
 
-> **ES:** Alcance **técnico**: la escala sirve para medir cuán idiomática es una implementación y para registrar la desviación cuando no lo es. Define **9 ejes de evaluación**. La firma **Software Architect** (apoyo: *SDET*). El seguimiento editorial (changelog, actas de cierre) queda fuera de su alcance; ver [`AGENT_ROLES.md`](../AGENT_ROLES.md).
+> **ES:** Alcance **técnico**: la escala sirve para medir cuán idiomática es una implementación y para registrar la desviación cuando no lo es. Define **2 ejes principales** —objetivo idiomático y fidelidad al módulo— y **9 ejes de detalle** que los alimentan. La firma **Software Architect** (apoyo: *SDET*). El seguimiento editorial (changelog, actas de cierre) queda fuera de su alcance; ver [`AGENT_ROLES.md`](../AGENT_ROLES.md).
 >
-> **EN:** **Technical** scope: the scale measures how idiomatic an implementation is and records the deviation when it is not. It defines **9 evaluation axes**. Signed by **Software Architect** (support: *SDET*). Editorial tracking (changelog, closure records) is out of scope; see [`AGENT_ROLES.md`](../AGENT_ROLES.md).
+> **EN:** **Technical** scope: the scale measures how idiomatic an implementation is and records the deviation when it is not. It defines **2 principal axes** —idiomatic target and module fidelity— and **9 detail axes** feeding them. Signed by **Software Architect** (support: *SDET*). Editorial tracking (changelog, closure records) is out of scope; see [`AGENT_ROLES.md`](../AGENT_ROLES.md).
 
-**ES:** El resultado se escribe en `docs/ruleset/data/idiomaticity_state.tsv` (**por crear / to be created**). Los 50 lenguajes se agrupan en las cuatro variantes de [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 35 · V2 14 · V4 1 = 50, con V3 como clase transversal— y el nivel se evalúa por (lenguaje, módulo), no por lenguaje. Los casos ya medidos que alimentan esta escala están en la sección *Casos medidos en la homologación* de ese mismo documento.
+**ES:** El resultado se escribe en `docs/ruleset/data/idiomaticity_state.tsv` (**ya creado**, con la auditoría del módulo `data_structures_basics`). La columna `module_fidelity` es el eje principal 2; el eje principal 1 (`idiomatic_target`) es `pendiente` en los 50 y se documenta arriba. Los 50 lenguajes se agrupan en las cuatro variantes de [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 35 · V2 14 · V4 1 = 50, con V3 como clase transversal— y el nivel se evalúa por (lenguaje, módulo), no por lenguaje. Los casos ya medidos que alimentan esta escala están en la sección *Casos medidos en la homologación* de ese mismo documento.
 
-**EN:** The result is written to `docs/ruleset/data/idiomaticity_state.tsv` (**to be created**). The 50 languages are grouped into the four variants of [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 35 · V2 14 · V4 1 = 50, with V3 as a cross-cutting class— and the level is evaluated per (language, module), not per language. The cases already measured that feed this scale are in the *Cases measured during homologation* section of that same document.
+**EN:** The result is written to `docs/ruleset/data/idiomaticity_state.tsv` (**already created**, with the `data_structures_basics` audit). The `module_fidelity` column is principal axis 2; principal axis 1 (`idiomatic_target`) is `pendiente` for all 50 and is documented above. The 50 languages are grouped into the four variants of [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 35 · V2 14 · V4 1 = 50, with V3 as a cross-cutting class— and the level is evaluated per (language, module), not per language. The cases already measured that feed this scale are in the *Cases measured during homologation* section of that same document.
 
-| `language` | `module` | `level` | `blocking_axis` | `notes` | `commit` | `date` |
-|-----------|----------|:-------:|:---------------:|---------|----------|--------|
-| `csharp` | `data_structures_basics` | `idiomatic` | — | Todo conforme | `ed24829` | 2026-10-12 |
-| `kotlin` | `data_structures_basics` | `transitional` | `naming` | `get_value` en vez de `value` | `b7ae5fa` | 2026-10-12 |
-| `rust` | `data_structures_basics` | `workaround` | `unsafe` | `*mut Node` en vez de `Option<Box<Node>>` | `3e8204a` | 2026-10-12 |
+| `language` | `module` | `idiomatic_target` | `module_fidelity` | `blocking_axis` | `notes` | `commit` | `last_updated` |
+|-----------|----------|:------------------:|:-----------------:|:---------------:|---------|----------|----------------|
+| `csharp` | `data_structures_basics` | `pendiente` | `mostly-idiomatic` | `naming` | Revisado con el autor; desviaciones sin documentar | `ed24829` | 2026-10-12 |
+| `kotlin` | `data_structures_basics` | `pendiente` | `transitional` | `naming` | `get_value` en vez de `value` | `b7ae5fa` | 2026-10-12 |
+| `rust` | `data_structures_basics` | `pendiente` | `workaround` | `unsafe` | `*mut Node` en vez de `Option<Box<Node>>` | `3e8204a` | 2026-10-12 |
+| `elm` | `data_structures_basics` | `pendiente` | `workaround` | `construction` | Constructores vacíos; sin `Maybe` | `1fc72c2` | 2026-10-12 |
 
 ---
 

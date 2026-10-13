@@ -29,7 +29,7 @@
 | `docs/ruleset/PARADIGM_FAMILIES.md` | 9 familias prácticas y pseudocódigo ajustado por familia / 9 practical families and per-family adjusted pseudocode | ✅ | Software Architect (apoyo: Language-Specific SME) |
 | `docs/ruleset/data/canonical_names.tsv` | Mapeo concepto → nombre canónico por lenguaje / concept → name per language | ✅ | Language-Specific SME |
 | `docs/ruleset/data/language_characteristics.tsv` | Ejes estructurados legibles por máquina / Machine-readable axes | ✅ | Language-Specific SME |
-| `docs/ruleset/data/idiomaticity_state.tsv` | Nivel actual por (lenguaje, módulo) / Current level per (lang, module) | 📋 | SDET |
+| `docs/ruleset/data/idiomaticity_state.tsv` | Estado por (lenguaje, módulo): 2 ejes principales (objetivo idiomático y fidelidad al módulo) / State per (lang, module): 2 principal axes | 🔄 | SDET |
 
 ---
 
@@ -180,7 +180,7 @@
 
 6. `docs/ruleset/DEVIATION_POLICY.md` → **hecho / done** ✅
 7. `docs/ruleset/PARADIGM_FAMILIES.md` → **hecho / done** ✅
-8. `docs/ruleset/data/idiomaticity_state.tsv`
+8. `docs/ruleset/data/idiomaticity_state.tsv` → **en curso / in progress** 🔄
 9. Archivos por lenguaje en `docs/ruleset/idioms/{lang}.md` / Per-language `idioms/` files
 10. Archivos por lenguaje en `docs/ruleset/adaptations/{lang}.md` / Per-language `adaptations/` files
 11. Changelogs por lenguaje / Per-language changelogs

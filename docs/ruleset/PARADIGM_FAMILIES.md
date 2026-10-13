@@ -671,7 +671,7 @@ ES: Perfiles individuales:
 
     cpp: RAII, plantillas, multi-paradigma histórico. El módulo elige V1 por pedagogía.
 
-    scala: JVM, funcional + OO, con Option/Either. Implementa V1 (V3 es su clase). (puede ir por V1 con class o V2 con case class).
+    scala: JVM, funcional + OO, con Option/Either. Implementa V1 (V3 es su clase). (Se implementó en V1; no se explora la alternativa.)
 
     raku: graduales, multi-paradigma, con Nil y tipos opcionales. Implementa V1 (V3 es su clase).
 
@@ -681,7 +681,7 @@ EN: Individual profiles:
 
     cpp: RAII, templates, historic multi-paradigm. The module chooses V1 for pedagogy.
 
-    scala: JVM, functional + OO, with Option/Either. It implements V1 (V3 is its class). (V1 with class or V2 with case class).
+    scala: JVM, functional + OO, with Option/Either. It implements V1 (V3 is its class). (Implemented in V1; the alternative is not explored.)
 
     raku: gradual, multi-paradigm, with Nil and optional types. It implements V1 (V3 is its class).
 
