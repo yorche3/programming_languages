@@ -2,8 +2,8 @@
 name: scaffold
 step: 4a
 model: qwen/qwen3.7-plus
-description: Ajusta el esqueleto del módulo a lo que exige el lenguaje y el módulo, sin escribir la suite
-sources: AGENTS.md, docs/AGENT_ROLES.md, docs/core/00_Project_Initialization_Guide.md, scripts/data/languages.tsv
+description: Revisa el esqueleto que dejan `glot new` y `glot scaffold` y completa, con el idioma del lenguaje, lo que los comandos no cubren
+sources: AGENTS.md, docs/AGENT_ROLES.md, docs/core/00_Project_Initialization_Guide.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/data/language_characteristics.tsv, docs/ruleset/DEVIATION_POLICY.md, scripts/data/init_sequences.tsv, scripts/data/languages.tsv
 mode: agent
 ---
 

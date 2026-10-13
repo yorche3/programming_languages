@@ -1,11 +1,12 @@
-4a	scaffold	submodule	chore({phase}): add scaffold for {module}
-4b	contract_stub	submodule	chore({phase}): add contract for {module}
-4c	suite	submodule	chore({phase}): add suite for {module}
-4d	correct	submodule	chore({phase}): correct {module}
-5	implement	submodule	feat({phase}): add {module} implementation
-5b	fix	submodule	fix({phase}): correct {module}
+4	new	submodule	chore({phase}): create {module} module
+4a	scaffold	submodule	chore({phase}): scaffold {module}
+4b	contract_stub	submodule	chore({phase}): define {module} contract
+4c	suite	submodule	test({phase}): add {module} suite
+4d	correct	submodule	fix({phase}): correct {module}
+5	implement	submodule	feat({phase}): implement {module}
+5b	fix	submodule	fix({phase}): fix {module}
 5c	refactor	submodule	refactor({phase}): rework {module}
-7	docs-module	submodule	docs({module}): add README for {module} module
-8	docs-language	submodule	docs: add README for {phase} and update indexes
+7	docs-module	submodule	docs({module}): add module README
+8	docs-language	submodule	docs({phase}): update indexes and language README
 9	pointer	monorepo	chore(submodule): update {lang} pointer
 10	close	monorepo	docs(roadmap): close {phase}/{module} for {lang}

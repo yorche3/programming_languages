@@ -5,36 +5,36 @@ ada	scaffold	2	module	run	cd tests && alr with {module} --use=..	-	-	-
 ada	scaffold	3	module	run	cd tests && alr with aunit	-	-	licencia GPL-3.0-or-later en alire.toml y tests/alire.toml, y description del subproyecto de pruebas
 clojure	new	1	phase	run	clojure -Sdeps '{:deps {io.github.seancorfield/deps-new {:git/tag "v0.9.0" :git/sha "da2f764f71da871224ae639656d52ccedfb0020c"}}}' -Tnew create :template lib :name {module} :target-dir {module}	network	-	sustituir el test de plantilla que falla a propósito
 common-lisp	new	1	phase	run	ros -e '(ql:quickload :cl-project :silent t)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'	network	-	-
-common-lisp	scaffold	1	module	manual	-	-	-	homologar andamiaje: ficheros con guion y no subrayado ({module}.asd, src/{module}.lisp, tests/{module}-test.lisp), .asd con defsystem/test-op y uiop:symbol-call, sistema de pruebas con fiveam y escribir run-tests.lisp
+common-lisp	scaffold	1	module	run	mv src/main.lisp src/{module}.lisp && mv tests/main.lisp tests/{module}-test.lisp && touch run-tests.lisp	-	-	homologar el .asd (defsystem/test-op y uiop:symbol-call), el paquete con guion y el sistema de pruebas sobre fiveam
 csharp	new	1	module	run	dotnet new sln -n {Module}	-	-	-
 csharp	new	2	module	run	dotnet new classlib -n {Module} -o src/{Module}	-	-	-
 csharp	new	3	module	run	dotnet new xunit -n {Module}.Tests -o test/{Module}.Tests	-	-	-
 csharp	new	4	module	run	dotnet sln add src/{Module}/{Module}.csproj test/{Module}.Tests/{Module}.Tests.csproj	-	-	-
 csharp	new	5	module	run	dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj	-	-	-
 csharp	scaffold	1	module	run	rm -f src/{Module}/Class1.cs test/{Module}.Tests/UnitTest1.cs	-	-	-
-csharp	scaffold	2	module	manual	-	-	-	añadir .gitignore
+csharp	scaffold	2	module	run	touch .gitignore	-	-	-
 fsharp	new	1	module	run	dotnet new sln -n {Module}	-	-	-
 fsharp	new	2	module	run	dotnet new classlib -lang F# -n {Module} -o src/{Module}	-	-	-
 fsharp	new	3	module	run	dotnet new xunit -lang F# -n {Module}.Tests -o test/{Module}.Tests	-	-	-
 fsharp	new	4	module	run	dotnet sln add src/{Module}/{Module}.fsproj test/{Module}.Tests/{Module}.Tests.fsproj	-	-	-
-fsharp	scaffold	1	module	manual	-	-	-	aplanar a src/{Module}.fsproj, ProjectReference a ..\src\{Module}.fsproj, borrar Library.fs y Tests.fs y añadir .gitignore
+fsharp	scaffold	1	module	run	mv src/{Module}/{Module}.fsproj src/{Module}.fsproj && rm -f src/{Module}/Library.fs test/{Module}.Tests/Tests.fs && rmdir src/{Module} 2>/dev/null; touch .gitignore	-	-	ajustar el ProjectReference del proyecto de pruebas a ..\src\{Module}.fsproj
 groovy	new	1	module	run	gradle init --type groovy-library --dsl groovy --project-name {module} --package {module} --use-defaults	-	-	-
-groovy	scaffold	1	module	manual	-	-	-	borrar lib/src/main/groovy/**/Library.groovy y lib/src/test/groovy/**/LibraryTest.groovy
+groovy	scaffold	1	module	run	find lib -name 'Library*.groovy' -delete	-	-	-
 haxe	scaffold	1	module	run	mkdir -p src test	-	-	-
 haxe	scaffold	2	module	run	haxelib install utest	network	-	build.hxml y RunTests.hx son contenido del sprint
 julia	new	1	phase	run	julia -e 'using Pkg; Pkg.generate("{module}")'	-	-	-
 julia	scaffold	1	module	run	mkdir -p test	-	-	-
-julia	scaffold	2	module	manual	-	-	-	completar test/ y su runner y añadir uuid, [compat], [extras] y [targets] a Project.toml
+julia	scaffold	2	module	run	touch test/run_tests.jl	-	-	completar test/ y su runner y añadir uuid, [compat], [extras] y [targets] a Project.toml
 kotlin	new	1	module	run	gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project	-	-	-
-kotlin	scaffold	1	module	manual	-	-	-	borrar src/main/kotlin/**/Library.kt y src/test/kotlin/**/LibraryTest.kt
+kotlin	scaffold	1	module	run	find src -name 'Library*.kt' -delete	-	-	-
 nim	new	1	module	expect	nimble init	expect	library|<defecto>|<defecto>|<defecto>|<defecto>	-
 nim	scaffold	1	module	run	mv src/{module}/{module}.nim src/{module}.nim	-	-	-
 nim	scaffold	2	module	run	mv tests test	-	-	-
-nim	scaffold	3	module	manual	-	-	-	añadir la task test del .nimble
+nim	scaffold	3	module	run	printf 'task test, "Run the suite":\n  exec "nim c -r test/config.nims"\n' >> {module}.nimble	-	-	revisar la task test y sus rutas
 ocaml	new	1	phase	run	dune init proj {module}	-	-	-
 python	new	1	module	run	uv init --lib .	tool:uv	-	-
 python	scaffold	1	module	run	rm -rf .git	-	-	-
-python	scaffold	2	module	manual	-	-	-	añadir conftest.py y tests/ con config de pytest y pasar el runner a uv run pytest
+python	scaffold	2	module	run	touch conftest.py && mkdir -p tests	-	-	añadir la config de pytest y pasar el runner a uv run pytest
 racket	new	1	phase	run	raco new library {module}	network	-	la plantilla se clona de github.com/racket-library (paquete raco-new)
 racket	new	2	module	run	mv project {module} && mv project-lib {module}-lib && mv project-test {module}-test && mv project-doc {module}-doc && mv {module}-test/tests/project.rkt {module}-test/tests/{module}.rkt && mv {module}-doc/scribblings/project.scrbl {module}-doc/scribblings/{module}.scrbl && mv {module}-lib/main.rkt {module}-lib/$(printf '%s' {module} | tr '_' '-').rkt	-	-	el render del template se hace aquí: su render-template.sh es interactivo y usa sed de BSD; el código queda con el nombre del módulo y guiones, la convención de Racket
 racket	new	3	module	run	sed -i 's/<project>/{module}/g; s/<username>/yorche3/g' CONTRIBUTING.rst Makefile README.rst {module}/info.rkt {module}-lib/info.rkt {module}-test/info.rkt {module}-doc/info.rkt {module}-test/tests/{module}.rkt {module}-doc/scribblings/{module}.scrbl	-	-	sin esto los info.rkt conservan <project>/<username> y los paquetes quedan inválidos
@@ -49,4 +49,75 @@ v	new	1	module	expect	v init --lib	expect	<vacio>|0.1.0|<defecto>	-
 v	scaffold	1	module	run	rm -rf .git	-	-	-
 v	scaffold	2	module	run	mv tests test	-	-	-
 vala	new	1	module	run	meson init --language vala --type library --name {module}	-	-	-
-vala	scaffold	1	module	manual	-	-	-	completar src/ y test/ y decidir el build con meson
+vala	scaffold	1	module	run	mkdir -p src test	-	-	decidir el build con meson
+assembly	new	1	phase	run	mkdir -p {module}	-	-	-
+ballerina	new	1	phase	run	bal new {module}	-	-	-
+c	new	1	phase	run	mkdir -p {module}	-	-	-
+cobol	new	1	phase	run	mkdir -p {module}	-	-	-
+cpp	new	1	phase	run	mkdir -p {module}	-	-	-
+crystal	new	1	phase	run	crystal init lib {module}	-	-	-
+d	new	1	phase	run	dub init {module} --format=sdl	-	-	-
+dart	new	1	phase	run	dart create -t package {module}	-	-	-
+elixir	new	1	phase	run	mix new {module} --module {Module}	-	-	-
+elm	new	1	module	run	elm init	-	-	-
+erlang	new	1	phase	run	rebar3 new lib {module}	-	-	-
+forth	new	1	phase	run	mkdir -p {module}	-	-	-
+gleam	new	1	phase	run	gleam new {module}	network	-	-
+go	new	1	module	run	go mod init example.com/{module}	-	-	-
+grain	new	1	phase	run	mkdir -p {module}	-	-	-
+haskell	new	1	module	run	cabal init --lib	-	-	-
+java	new	1	phase	run	mkdir -p {module}	-	-	-
+javascript	new	1	module	run	npm init -y	network	-	-
+lua	new	1	module	run	luarocks init	-	-	-
+perl	new	1	phase	run	mkdir -p {module}	-	-	-
+php	new	1	phase	run	mkdir -p {module}	-	-	-
+prolog	new	1	phase	run	mkdir -p {module}	-	-	-
+purescript	new	1	module	run	spago init	-	-	-
+r	new	1	phase	run	mkdir -p {module}	-	-	-
+raku	new	1	phase	run	mkdir -p {module}	-	-	-
+rexx	new	1	phase	run	mkdir -p {module}	-	-	-
+rust	new	1	module	run	cargo init --lib	-	-	-
+scala	new	1	phase	run	mkdir -p {module}	-	-	-
+scheme	new	1	phase	run	mkdir -p {module}	-	-	-
+swift	new	1	module	run	swift package init --type library	-	-	-
+tcl-tk	new	1	phase	run	mkdir -p {module}	-	-	-
+typescript	new	1	module	run	npm init -y	network	-	-
+zig	new	1	module	run	zig init	-	-	-
+assembly	scaffold	1	module	run	mkdir -p src test && printf 'global {module}_init\n\n.text\n' > src/{module}.asm && touch test/run_tests.asm	-	-	-
+ballerina	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	revisar tests/ generado
+c	scaffold	1	module	run	mkdir -p include src test && printf '#ifndef {Module}_H\n#define {Module}_H\n\n#endif\n' > include/{module}.h && printf '#include "{module}.h"\n' > src/{module}.c	-	-	-
+cobol	scaffold	1	module	run	mkdir -p src/copybooks src/lib test && printf '       IDENTIFICATION DIVISION.\n       PROGRAM-ID. {Module}.\n' > src/lib/{module}.cbl	-	-	-
+cpp	scaffold	1	module	run	mkdir -p src include test && touch MODULE.bazel BUILD .bazelversion .gitignore	-	-	-
+crystal	scaffold	1	module	run	rm -rf .git && touch .gitignore && mkdir -p test	-	-	revisar spec/ frente a test/
+d	scaffold	1	module	run	rm -f source/app.d && rm -rf .git && touch .gitignore	-	-	-
+dart	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	revisar example/ y lib/{module}.dart
+elixir	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	-
+elm	scaffold	1	module	run	rm -rf .git && touch .gitignore && mkdir -p tests	-	-	-
+erlang	scaffold	1	module	run	rm -rf .git && touch .gitignore && mkdir -p test	-	-	-
+forth	scaffold	1	module	run	mkdir -p src test && printf ': {module}-init\n' > src/{module}.forth && touch test/run-tests.forth	-	-	-
+gleam	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	-
+go	scaffold	1	module	run	mkdir -p test && touch .gitignore	-	-	la suite va junto al paquete: {module}_test.go
+grain	scaffold	1	module	run	mkdir -p src tests && printf 'module {Module}\n' > src/{module}.gr	-	-	-
+haskell	scaffold	1	module	run	mkdir -p src test && touch .gitignore	-	-	revisar {module}.cabal generado
+java	scaffold	1	module	run	mkdir -p src/main/java src/test/java && printf 'public class {Module} { }\n' > src/main/java/{Module}.java && touch pom.xml .gitignore	-	-	-
+javascript	scaffold	1	module	run	npm install --save-dev jest && mkdir -p src test && touch jest.config.js .gitignore	network	-	-
+lua	scaffold	1	module	run	mkdir -p src test && touch .gitignore	-	-	-
+perl	scaffold	1	module	run	mkdir -p src test && printf 'package {Module};\n\nuse strict;\nuse warnings;\n\n1;\n' > src/{module}.pl	-	-	-
+php	scaffold	1	module	run	composer require --dev phpunit/phpunit && mkdir -p src test && printf '<?php\n\ndeclare(strict_types=1);\n' > src/{Module}.php && touch phpunit.xml .gitignore	network	-	-
+prolog	scaffold	1	module	run	mkdir -p src test && printf ':- module({module}, []).\n' > src/{module}.pl	-	-	-
+purescript	scaffold	1	module	run	mkdir -p src test && touch .gitignore	-	-	-
+r	scaffold	1	module	run	mkdir -p R tests/testthat && touch DESCRIPTION NAMESPACE && printf 'testthat::test_local()\n' > tests/testthat.R	-	-	completar DESCRIPTION, NAMESPACE y el Makefile
+raku	scaffold	1	module	run	mkdir -p lib t && printf 'unit module {Module};\n' > lib/{Module}.rakumod	-	-	-
+rexx	scaffold	1	module	run	mkdir -p src test && touch src/{module}.rexx	-	-	-
+rust	scaffold	1	module	run	mv src/lib.rs src/{module}.rs && touch .gitignore	-	-	-
+scala	scaffold	1	module	run	mkdir -p src/main/scala src/test/scala project && printf 'object {Module}\n' > src/main/scala/{Module}.scala && touch build.sbt project/build.properties	-	-	-
+scheme	scaffold	1	module	run	mkdir -p src test && printf '(define-library ({module}) (export) (import (scheme base)))\n' > src/{module}.scm	-	-	-
+swift	scaffold	1	module	run	touch .gitignore && mkdir -p Tests	-	-	revisar Sources/{Module}/ y el nombre del fichero
+tcl-tk	scaffold	1	module	run	mkdir -p src test && touch src/{module}.tcl src/pkgIndex.tcl	-	-	-
+typescript	scaffold	1	module	run	npm install --save-dev typescript jest @types/jest && mkdir -p src test && touch tsconfig.json jest.config.cjs .gitignore	network	-	-
+zig	scaffold	1	module	run	rm -f src/main.zig && touch .gitignore	-	-	-
+haxe	new	1	phase	run	mkdir -p {module}	-	-	-
+rescript	new	1	phase	run	mkdir -p {module}	-	-	-
+clojure	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	sustituir el test de plantilla que falla a propósito
+ocaml	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	usar el layout generado tal cual: el código en lib/ y la suite en test/
+racket	scaffold	1	module	run	touch .gitignore	-	-	las suites requieren la librería por ruta relativa y el runner es raco test -x .
