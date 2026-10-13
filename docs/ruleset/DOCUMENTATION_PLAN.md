@@ -27,6 +27,7 @@
 | `docs/ruleset/IDIOMATICITY_LEVELS.md` | Escala de 4 niveles con 9 ejes de evaluación / 4-level scale with 9 evaluation axes | ✅ | Software Architect (apoyo: SDET) |
 | `docs/ruleset/DEVIATION_POLICY.md` | Política de registro de desviaciones / When/how to document deviations | ✅ | Software Architect |
 | `docs/ruleset/PARADIGM_FAMILIES.md` | 9 familias prácticas y pseudocódigo ajustado por familia / 9 practical families and per-family adjusted pseudocode | ✅ | Software Architect (apoyo: Language-Specific SME) |
+| `docs/ruleset/Idioms_Template.md` | Plantilla de `docs/ruleset/idioms/{lang}.md` (ficha rápida, nombres, construcción, desviaciones) / Template for `idioms/{lang}.md` | ✅ | Documentation Architect (contenido: Language-Specific SME) |
 | `docs/ruleset/data/canonical_names.tsv` | Mapeo concepto → nombre canónico por lenguaje / concept → name per language | ✅ | Language-Specific SME |
 | `docs/ruleset/data/language_characteristics.tsv` | Ejes estructurados legibles por máquina / Machine-readable axes | ✅ | Language-Specific SME |
 | `docs/ruleset/data/idiomaticity_state.tsv` | Estado por (lenguaje, módulo): 2 ejes principales (objetivo idiomático y fidelidad al módulo) / State per (lang, module): 2 principal axes | 🔄 | SDET |
@@ -35,62 +36,12 @@
 
 ## 2. Documentos por lenguaje / Per-language documents
 
-> **ES:** Alcance **técnico**: `idioms` (el *cómo* idiomático) y `adaptations` (cada desviación y su motivo) son el soporte por lenguaje de la convención de pseudocódigo. El `Responsable` de las 50 filas es el **Language-Specific SME** (apoyo: *Technical Writer* en la redacción del README). La columna `Changelog` y el estado editorial quedan **fuera del alcance técnico**; el registro técnico medido vive en *Casos medidos en la homologación*, en `PSEUDOCODE_CONVENTION.md`.
+> **ES:** **No se generan 50 ficheros.** Los datos del lenguaje (nombres, ejes, toolchain, palabras reservadas) son los TSV de `data/`; el *cómo* compartido es `PARADIGM_FAMILIES.md` (9 familias). `docs/ruleset/idioms/{lang}.md` es **a demanda**: se crea con `Idioms_Template.md` solo cuando ese lenguaje tenga algo que no quepa en su familia ni en el TSV (filosofía, trampas, causa de sus desviaciones). **No hay `adaptations/{lang}.md`**: la desviación concreta se justifica en el README del módulo, con el formato de `DEVIATION_POLICY.md`. **No hay changelog por lenguaje**: la historia la lleva git y el estado `idiomaticity_state.tsv`. Responsable si se crea: **Language-Specific SME** (apoyo: *Technical Writer*); la plantilla es del **Documentation Architect**.
 >
-> **EN:** **Technical** scope: `idioms` (the idiomatic *how*) and `adaptations` (each deviation and its reason) are the per-language support of the pseudocode convention. The 50 rows' `Owner` is the **Language-Specific SME** (support: *Technical Writer* for README wording). The `Changelog` column and editorial state are **out of technical scope**; the measured technical record lives in *Cases measured during homologation*, in `PSEUDOCODE_CONVENTION.md`.
+> **EN:** **No 50 files are generated.** The language facts (names, axes, toolchain, reserved words) are the TSVs under `data/`; the shared *how* is `PARADIGM_FAMILIES.md` (9 families). `docs/ruleset/idioms/{lang}.md` is **on demand**: created from `Idioms_Template.md` only when that language has something that fits neither its family nor the TSV (philosophy, pitfalls, cause of its deviations). **There is no `adaptations/{lang}.md`**: the concrete deviation is justified in the module README, using the `DEVIATION_POLICY.md` format. **There is no per-language changelog**: history lives in git and state in `idiomaticity_state.tsv`. Owner if created: **Language-Specific SME** (support: *Technical Writer*); the template belongs to the **Documentation Architect**.
 
-| Lenguaje / Language | `docs/ruleset/idioms/{lang}.md` | `docs/ruleset/adaptations/{lang}.md` | Changelog | Estado / State | Responsable / Owner |
-|---------------------|:-----------------------:|:----------------------------:|:---------:|:--------------:|:-------------------:|
-| Ada (`ada`) | 📋 | 📋 | 📋 | 📋 | — |
-| Assembly (`assembly`) | 📋 | 📋 | 📋 | 📋 | — |
-| Ballerina (`ballerina`) | 📋 | 📋 | 📋 | 📋 | — |
-| C (`c`) | 📋 | 📋 | 📋 | 📋 | — |
-| C# (`csharp`) | 📋 | 📋 | 📋 | 📋 | — |
-| Clojure (`clojure`) | 📋 | 📋 | 📋 | 📋 | — |
-| COBOL (`cobol`) | 📋 | 📋 | 📋 | 📋 | — |
-| Common Lisp (`common-lisp`) | 📋 | 📋 | 📋 | 📋 | — |
-| C++ (`cpp`) | 📋 | 📋 | 📋 | 📋 | — |
-| Crystal (`crystal`) | 📋 | 📋 | 📋 | 📋 | — |
-| D (`d`) | 📋 | 📋 | 📋 | 📋 | — |
-| Dart (`dart`) | 📋 | 📋 | 📋 | 📋 | — |
-| Elixir (`elixir`) | 📋 | 📋 | 📋 | 📋 | — |
-| Elm (`elm`) | 📋 | 📋 | 📋 | 📋 | — |
-| Erlang (`erlang`) | 📋 | 📋 | 📋 | 📋 | — |
-| Forth (`forth`) | 📋 | 📋 | 📋 | 📋 | — |
-| F# (`fsharp`) | 📋 | 📋 | 📋 | 📋 | — |
-| Gleam (`gleam`) | 📋 | 📋 | 📋 | 📋 | — |
-| Go (`go`) | 📋 | 📋 | 📋 | 📋 | — |
-| Grain (`grain`) | 📋 | 📋 | 📋 | 📋 | — |
-| Groovy (`groovy`) | 📋 | 📋 | 📋 | 📋 | — |
-| Haskell (`haskell`) | 📋 | 📋 | 📋 | 📋 | — |
-| Haxe (`haxe`) | 📋 | 📋 | 📋 | 📋 | — |
-| Java (`java`) | 📋 | 📋 | 📋 | 📋 | — |
-| JavaScript (`javascript`) | 📋 | 📋 | 📋 | 📋 | — |
-| Julia (`julia`) | 📋 | 📋 | 📋 | 📋 | — |
-| Kotlin (`kotlin`) | 📋 | 📋 | 📋 | 📋 | — |
-| Lua (`lua`) | 📋 | 📋 | 📋 | 📋 | — |
-| Nim (`nim`) | 📋 | 📋 | 📋 | 📋 | — |
-| OCaml (`ocaml`) | 📋 | 📋 | 📋 | 📋 | — |
-| Perl (`perl`) | 📋 | 📋 | 📋 | 📋 | — |
-| PHP (`php`) | 📋 | 📋 | 📋 | 📋 | — |
-| Prolog (`prolog`) | 📋 | 📋 | 📋 | 📋 | — |
-| PureScript (`purescript`) | 📋 | 📋 | 📋 | 📋 | — |
-| Python (`python`) | 📋 | 📋 | 📋 | 📋 | — |
-| R (`r`) | 📋 | 📋 | 📋 | 📋 | — |
-| Racket (`racket`) | 📋 | 📋 | 📋 | 📋 | — |
-| Raku (`raku`) | 📋 | 📋 | 📋 | 📋 | — |
-| ReScript (`rescript`) | 📋 | 📋 | 📋 | 📋 | — |
-| REXX (`rexx`) | 📋 | 📋 | 📋 | 📋 | — |
-| Ruby (`ruby`) | 📋 | 📋 | 📋 | 📋 | — |
-| Rust (`rust`) | 📋 | 📋 | 📋 | 📋 | — |
-| Scala (`scala`) | 📋 | 📋 | 📋 | 📋 | — |
-| Scheme (`scheme`) | 📋 | 📋 | 📋 | 📋 | — |
-| Swift (`swift`) | 📋 | 📋 | 📋 | 📋 | — |
-| Tcl/Tk (`tcl-tk`) | 📋 | 📋 | 📋 | 📋 | — |
-| TypeScript (`typescript`) | 📋 | 📋 | 📋 | 📋 | — |
-| V (`v`) | 📋 | 📋 | 📋 | 📋 | — |
-| Vala (`vala`) | 📋 | 📋 | 📋 | 📋 | — |
-| Zig (`zig`) | 📋 | 📋 | 📋 | 📋 | — |
+
+
 
 ---
 
@@ -181,6 +132,6 @@
 6. `docs/ruleset/DEVIATION_POLICY.md` → **hecho / done** ✅
 7. `docs/ruleset/PARADIGM_FAMILIES.md` → **hecho / done** ✅
 8. `docs/ruleset/data/idiomaticity_state.tsv` → **en curso / in progress** 🔄
-9. Archivos por lenguaje en `docs/ruleset/idioms/{lang}.md` / Per-language `idioms/` files
-10. Archivos por lenguaje en `docs/ruleset/adaptations/{lang}.md` / Per-language `adaptations/` files
+9. Plantilla lista: `docs/ruleset/Idioms_Template.md` → **hecho / done** ✅ · archivos por lenguaje en `docs/ruleset/idioms/{lang}.md` / Per-language `idioms/` files
+10. ~~`docs/ruleset/adaptations/{lang}.md`~~ → **no se crean / not created**: la desviación concreta se justifica en el README del módulo / the concrete deviation is justified in the module README
 11. Changelogs por lenguaje / Per-language changelogs

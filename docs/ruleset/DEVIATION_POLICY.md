@@ -247,7 +247,7 @@ ES: Las desviaciones viven en cuatro lugares, con propósitos distintos.
 
 EN: Deviations live in four places, with different purposes.
 Lugar	Qué contiene	Frecuencia de actualización
-README.md del lenguaje (en docs/idioms/{lang}.md)	La desviación completa con plantilla	Cuando se introduce o se corrige
+README.md del lenguaje (en docs/ruleset/idioms/{lang}.md)	La desviación completa con plantilla	Cuando se introduce o se corrige
 data/idiomaticity_state.tsv	El nivel derivado y el eje bloqueante	Cuando cambia el nivel
 docs/changelogs/{lang}.md	El registro histórico de cuándo se corrigió	Al cerrar cada corrección
 Commit de código	La implementación real	Al implementar
@@ -267,7 +267,7 @@ ES: Un script que verifica que cada desviación en el README del lenguaje tiene 
 EN: A script that verifies every deviation in the language README has the full template.
 text
 
-for each docs/idioms/{lang}.md:
+for each docs/ruleset/idioms/{lang}.md:
     read file
     find section "Deviations from the canonical pseudocode"
 
@@ -295,7 +295,7 @@ for each row in idiomaticity_state.tsv:
     lang = row.language
     module = row.module
 
-    read docs/idioms/{lang}.md
+    read docs/ruleset/idioms/{lang}.md
     deviations = [d for d in file if d.module == module]
 
     expected_level = derive_level(deviations)
