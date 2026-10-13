@@ -28,8 +28,9 @@
 | **4a** | Esqueleto: la estructura idiomática | `glot scaffold` corre las filas `phase=scaffold`: completa las carpetas y los ficheros con su esqueleto base, renombra a la convención del lenguaje y **borra lo que estorba** (`.git` anidados, `main` de ejemplo, plantillas) | Estructura idiomática **confirmada con su commit** (paso `4a`) |
 | **4b** | Contrato | El tipo nuevo y sus firmas, **antes** de la suite | Contrato |
 | **4c** | Suite | La suite que falla por falta de implementación (o pasa si el módulo es solo documental) | Suite |
+| **4d** | Construcción y enlace | Dejar la suite **ejecutable**: el fichero que compila y enlaza en los lenguajes cuyo esqueleto no lo trae hecho (en los demás el paso se cierra sin cambios) | Fichero de construcción correcto y `glot test` compilando y enlazando |
 | 5 | Implementación | Cumplir el contrato de la especificación | Código verificado por la suite, sin warnings |
-| **4d · 5b · 5c** | Corrección y ajuste | `correct` cuando lo señale la suite, la auditoría o el validador (`--cause` obligatoria), `fix` para un arreglo puntual y `refactor` para rehacer sin cambiar el contrato | Corrección aplicada |
+| **4e · 5b · 5c** | Corrección y ajuste | `correct` cuando lo señale la suite, la auditoría o el validador (`--cause` obligatoria), `fix` para un arreglo puntual y `refactor` para rehacer sin cambiar el contrato | Corrección aplicada |
 | 6 | Verificación | Tener evidencia real de que cumple | Salida real de la suite y del analizador, copiada sin editar |
 | 7 | Cierre documental del módulo | Documentar lo implementado | `README.md` de Nivel 3 generado desde [`README_Template.md`](README_Template.md) |
 | 8 | Documentación del lenguaje | Dejar el lenguaje y sus índices al día | `README.md` del lenguaje y los índices de Nivel 1–3 actualizados |
@@ -54,17 +55,18 @@
 |------|:-----:|:----------------:|:------------:|
 | 1 Reconocimiento | decide | informa | — |
 | 2–3 Asignación y rama | decide | ejecuta | — |
-| 4a Esqueleto | revisa | **ejecuta** | — (comandos de consola) |
+| 4–4a Esqueleto | revisa | **ejecuta** | — (comandos de consola) |
 | 4b–4c Contrato y suite | revisa | ejecuta | **escribe** |
+| 4d Construcción y enlace | revisa | encarga | **escribe** |
 | 5 Implementación | decide | ejecuta pruebas | **puede escribir** |
 | 6 Verificación | valida | ejecuta y captura | **comprueba** |
 | 7 README del módulo | valida | encarga | **escribe** |
 | 8 Documentación del lenguaje | valida | ejecuta | **escribe la documentación** |
 | 9–10 Puntero y cierre | decide | ejecuta | ayuda a redactar el registro |
 
-**ES:** Los pasos 4b (contrato), 4c (suite), 4d (corrección), 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El **4a (esqueleto) no**: lo hacen `glot new` y `glot scaffold` ejecutando comandos de consola (`mkdir -p`, `cd`, `touch` y las declaraciones idiomáticas), sin delegado. El encargo lo arma `glot prompt <encargo>` con las plantillas **versionadas** de [`scripts/prompts/`](../scripts/prompts/). El agente **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
+**ES:** Los pasos 4b (contrato), 4c (suite), 4d (construcción y enlace), 4e (corrección), 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El **esqueleto (4 y 4a) no**: lo hacen `glot new` y `glot scaffold` ejecutando comandos de consola (`mkdir -p`, `cd`, `touch` y las declaraciones idiomáticas), sin delegado. El encargo lo arma `glot prompt <encargo>` con las plantillas **versionadas** de [`scripts/prompts/`](../scripts/prompts/). El agente **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
 
-**EN:** Steps 4b (contract), 4c (suite), 4d (correction), 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). **4a (skeleton) does not**: `glot new` and `glot scaffold` run console commands (`mkdir -p`, `cd`, `touch` and the idiomatic declarations), with no delegate. The request is built by `glot prompt <request>` from the **versioned** templates in [`scripts/prompts/`](../scripts/prompts/). The agent **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
+**EN:** Steps 4b (contract), 4c (suite), 4d (build and link), 4e (correction), 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). **The skeleton (4 and 4a) does not**: `glot new` and `glot scaffold` run console commands (`mkdir -p`, `cd`, `touch` and the idiomatic declarations), with no delegate. The request is built by `glot prompt <request>` from the **versioned** templates in [`scripts/prompts/`](../scripts/prompts/). The agent **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
 
 **ES:** El agente que hace el paso **no ejecuta los verbos de delegación** (`glot prompt`, `glot ask`): recibe el encargo ya armado, o lee las fuentes que este declara, y **realiza** el trabajo. Delegar es opcional y tiene dos vías que conviven: el autor puede enviar el encargo a su propio delegado (configurado en su entorno, fuera del repositorio y sin versionar) o el mismo agente del editor lo ejecuta. El reparto no cambia: `glot` orquesta y ejecuta comandos, el agente escribe el artefacto y el autor decide y publica. Los detalles están en [`AGENT_Template.md`](AGENT_Template.md).
 

@@ -17,17 +17,15 @@ language or per step, **tab-separated**, no header, sorted.
 | Columna / Column | Contenido / Content | Ejemplo / Example |
 |:---:|---|---|
 | 1 | Lenguaje, tal como aparece en `.gitmodules` | `php` |
-| 2 | Comando de inicialización del ecosistema | `mkdir -p src test + composer require --dev phpunit/phpunit` |
-| 3 | Manifiestos y archivos clave | `composer.json, phpunit.xml, .gitignore` |
-| 4 | Comando nativo de pruebas (lo ejecuta `glot test`) | `composer test` |
-| 5 | Verificador (lo ejecuta `glot verify`): **lint idiomático** de sintaxis y formato, con la herramienta del lenguaje; `-` si el lenguaje aún no tiene. **No** comprueba la suite ni busca *hardcode*, y el análisis estático de seguridad es un no-objetivo (v1.4.0) | `php -l src/{Module}.php` |
-| 6 | Tipo de inicialización (lo lee `glot new`): `tool` (hay herramienta), `manual` (esqueleto de carpetas) o `deferred` (lo escribe el agente) | `tool` |
-| 7 | Comando que ejecuta `glot new` **en el directorio del módulo**; `-` cuando el tipo es `deferred` | `mkdir -p src test && composer require --dev phpunit/phpunit` |
-| 8 | Normalización posterior (la aplica `glot new`), separada por `;`; `-` si no hace falta | `rm:{module}/.git;flat:{module}` |
+| 2 | Tipo de inicialización (lo lee `glot new`): `tool` (hay herramienta) o `manual` (esqueleto de carpetas) | `tool` |
+| 3 | Comando nativo de pruebas (lo ejecuta `glot test`) | `composer test` |
+| 4 | Verificador (lo ejecuta `glot verify`): **lint idiomático** de sintaxis y formato, con la herramienta del lenguaje; `-` si el lenguaje aún no tiene. **No** comprueba la suite ni busca *hardcode*, y el análisis estático de seguridad es un no-objetivo (v1.4.0) | `php -l src/{Module}.php` |
 
-**ES:** Las columnas 2 a 4 salen de la tabla maestra de
+**ES:** La columna 2 (tipo) y el comando de pruebas salen de la tabla maestra de
 [`docs/core/00_Project_Initialization_Guide.md`](../../docs/core/00_Project_Initialization_Guide.md),
-que sigue siendo el documento humano: aquí solo está lo que el tooling necesita.
+que sigue siendo el documento humano. El **esqueleto** no se duplica aquí: vive entero en
+[`init_sequences.tsv`](init_sequences.tsv), que fue lo que permitió retirar de este catálogo la
+secuencia v1, los manifiestos, el comando único y la normalización (v2.0.0).
 El harness comprueba que **los dos no se separan** (mismos lenguajes y mismos
 comandos de pruebas), así que si actualizas la guía hay que actualizar el TSV, y
 al revés. El número de filas tiene que ser igual a los lenguajes de `.gitmodules`;
@@ -76,31 +74,28 @@ count).
 
 ### Columnas 6 a 8: la inicialización / Columns 6 to 8: initialisation
 
-**ES:** Estas tres columnas son la **leyenda de la guía convertida en dato**
+**ES:** La columna del tipo es la **leyenda de la guía convertida en dato**
 (✅ verificado en este repo · 🔧 estándar del ecosistema · ✍️ estructura manual) y se
 mantienen **a mano**, con una regla dura: **solo se añade lo que se pudo verificar
 ejecutando el inicializador** en un directorio temporal, con la entrada cerrada (o
 conducida con `expect`, R1) y con un tiempo máximo, comprobando qué deja en el
-disco. La columna 7 es el **comando único**: un lenguaje que necesita varios pasos,
-otro directorio de trabajo o un completado aparece en `init_sequences.tsv` con la
-columna 7 en `-`, para no tener dos fuentes. `deferred` sigue en el vocabulario (un
-lenguaje que no se pueda cerrar vuelve ahí), pero hoy no lo usa ninguno. La
-cobertura se informa en `doctor` como `new_commands` y `deferred: N`.
+disco. El **esqueleto** no se declara aquí: un lenguaje con varios pasos, con otro directorio de
+trabajo o con un completado aparece en [`init_sequences.tsv`](init_sequences.tsv), y este
+catálogo solo guarda el tipo, el comando de pruebas y el verificador, sin dos fuentes. La
+cobertura se informa en `doctor` como `new_commands`.
 
-**EN:** These three columns are the **guide's legend turned into data** (✅ verified
+**EN:** The type column is the **guide's legend turned into data** (✅ verified
 in this repo · 🔧 ecosystem standard · ✍️ manual structure) and they are maintained
 **by hand**, with one hard rule: **only what could be verified by running the
 initializer** in a temporary directory, with stdin closed (or driven by `expect`,
-R1) and a timeout, and by checking what it leaves on disk gets added. Column 7 is
-the **single command**: a language needing several steps, another working directory
-or a completion appears in `init_sequences.tsv` with column 7 set to `-`, so there
-is only one source. `deferred` stays in the vocabulary (a language that cannot be
-closed goes back there), but no language uses it today. Coverage is reported by
-`doctor` as `new_commands` and `deferred: N`.
+R1) and a timeout, and by checking what it leaves on disk gets added. the **skeleton** is not declared here: a language with several steps, another working directory
+or a completion appears in [`init_sequences.tsv`](init_sequences.tsv), and this catalogue only
+keeps the type, the test command and the verifier, with no second source. Coverage is reported
+by `doctor` as `new_commands`.
 
-**ES:** Reparto de los 50 lenguajes tras la política R1–R6 (cerrada el 2026-09-26 y ya aplicada al dato): **33 `tool`**, **17 `manual`** y **0 `deferred`**. Pasan a `tool` doce lenguajes —`ada`, `groovy`, `kotlin`, `clojure`, `nim` y `python` (eran `deferred`) más `julia`, `vala`, `perl`, `common-lisp`, `racket` y `v` (eran `manual`)—, `cpp` queda `manual` (C++ mantiene Bazel, decidido el 2026-09-26) y `java` baja a `manual` por R2 (el arquetipo `quickstart` trae `main`). `doctor` lo informa como `new_commands: 50 de / of 50 (deferred: 0)`.
+**ES:** Reparto de los 50 lenguajes tras la política R1–R6 (cerrada el 2026-09-26 y ya aplicada al dato): **32 `tool`** y **18 `manual`**. Pasan a `tool` doce lenguajes —`ada`, `groovy`, `kotlin`, `clojure`, `nim` y `python` (eran `deferred`, vocabulario retirado en la 2.0.0) más `julia`, `vala`, `perl`, `common-lisp`, `racket` y `v` (eran `manual`)—, `cpp` queda `manual` (C++ mantiene Bazel, decidido el 2026-09-26) y `java` baja a `manual` por R2 (el arquetipo `quickstart` trae `main`). `doctor` lo informa como `new_commands: 50 de / of 50`.
 
-**EN:** Split of the 50 languages after policy R1–R6 (closed on 2026-09-26 and already applied to the data): **33 `tool`**, **17 `manual`** and **0 `deferred`**. Twelve languages move to `tool` —`ada`, `groovy`, `kotlin`, `clojure`, `nim` and `python` (were `deferred`) plus `julia`, `vala`, `perl`, `common-lisp`, `racket` and `v` (were `manual`)—, `cpp` stays `manual` (C++ keeps Bazel, decided on 2026-09-26) and `java` moves down to `manual` under R2 (the `quickstart` archetype ships `main`). `doctor` reports it as `new_commands: 50 de / of 50 (deferred: 0)`.
+**EN:** Split of the 50 languages after policy R1–R6 (closed on 2026-09-26 and already applied to the data): **32 `tool`** and **18 `manual`**. Twelve languages move to `tool` —`ada`, `groovy`, `kotlin`, `clojure`, `nim` and `python` (they were `deferred`, a vocabulary retired in 2.0.0) plus `julia`, `vala`, `perl`, `common-lisp`, `racket` and `v` (they were `manual`)—, `cpp` stays `manual` (C++ keeps Bazel, decided on 2026-09-26) and `java` moves down to `manual` under R2 (the `quickstart` archetype ships `main`). `doctor` reports it as `new_commands: 50 de / of 50`.
 
 **ES:** Normalización declarada: `flat:<sub>` sube al directorio del módulo el
 contenido de `<sub>` (incluidos los archivos ocultos) y borra `<sub>`; `rm:<ruta>`

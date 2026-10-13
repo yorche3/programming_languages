@@ -33,8 +33,9 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 ## Fuentes de verdad (en este orden de prioridad)
 
 1. **`{spec}`** — contrato del módulo: funciones expuestas, casos de prueba y criterios.
-2. **`scripts/data/languages.tsv`** — para `{lang}`: tipo de inicialización (`tool`, `manual`,
-   `deferred`), comando de inicialización y normalización ya aplicada por `glot new`.
+2. **`scripts/data/init_sequences.tsv`** — las filas de `{lang}` en la fase `scaffold`: es el
+esqueleto que el catálogo **sí** puede dejar hecho con un comando. Si algo de lo que falta se
+resuelve con un comando, dilo en el informe para que se corrija el dato.
 3. **`docs/core/00_Project_Initialization_Guide.md`** — comando de inicialización y comando
    nativo de pruebas para `{lang}`. Respeta su leyenda:
    ✅ verificado en este repo · 🔧 estándar del ecosistema · ✍️ estructura manual.
@@ -50,10 +51,12 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
 ## Punto de partida
 
-`glot new` **ya hizo la parte mecánica**: con `tool` ejecutó el inicializador y normalizó el
-resultado (aplanó el nido, quitó el `.git` anidado, descartó el vendoring que el repositorio
-rechaza); con `manual` creó las carpetas del esqueleto. Los lenguajes marcados `deferred` no
-tienen inicializador validado: ahí el esqueleto lo construyes tú.
+`glot new` **ya hizo su parte** (paso 4): creó la carpeta del módulo y, cuando el lenguaje trae
+una herramienta que además la genera, dejó ese avance hecho. `glot scaffold` (paso 4a) **ya
+corrió las filas `phase=scaffold`** del dato: framework de pruebas, referencias entre proyectos,
+limpieza de plantilla, renombres y los ficheros vacíos que el repositorio exige. Lo que **no**
+cubre ningún comando del catálogo es lo tuyo, y lo que el dato declara como nota (`mode=manual`)
+lo verás anunciado al terminar.
 
 ## Contrato del encargo / Deliverable
 
@@ -92,7 +95,7 @@ detecta cada caso:
 | **Layout divergente** | El inicializador creó `bin/`+`lib/` y este repositorio usa `src/`+`test/` en ese lenguaje, o al revés | Dejar **una** disposición: la que ya usan los módulos homologados |
 | **Andamiaje de otro fin** | CI propia del inicializador, *samples*, `example/`, utilidades que el módulo no usa | Conservar si el repositorio también lo conserva en otros módulos del lenguaje; quitar solo lo que rompe o contradice la convención, y decirlo |
 | **Referencia entre proyectos ausente** | El comando de pruebas **arranca** pero el proyecto de producción **ni se compila** —su código defectuoso es invisible— y la suite no compila: «clase o símbolo no encontrado» (`CS0246`/`CS0103` en C#) aunque el tipo exista en `src/` | Añadir la referencia del proyecto de pruebas al de producción (`dotnet add <pruebas.csproj> reference <produccion.csproj>`) y **volver a ejecutar**: con el enlace, el compilador ya revisa `src/` y lo que diga es del paso que escribió ese código |
-| **Lenguaje `deferred`** | La columna 6 del catálogo dice `deferred` y `glot new` imprimió `skipped` | Construir el esqueleto completo (`mkdir -p` + manifiesto) según la guía y los módulos existentes |
+| **Fichero de construcción incompleto** | El esqueleto deja el manifiesto o el `Makefile` como plantilla y la suite no compila ni enlaza | Completarlo **solo hasta que compile y enlace**; si hace falta más que eso, es el paso `build` (4d) y se **reporta**, no se resuelve aquí |
 
 **Regla de conservación:** lo que el inicializador haga bien se queda (estructura de pruebas,
 manifiesto, `LICENSE`, el `README` generado si el módulo no tiene el suyo). Solo se cambia lo

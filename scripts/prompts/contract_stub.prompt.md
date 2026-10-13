@@ -1,7 +1,7 @@
 ---
 name: contract_stub
 step: 4b
-model: gpt-5.6-terra
+model: gpt-6.1-sol
 description: Declara el contrato del módulo (tipo nuevo, firmas e indicador natural) y los esqueletos de todas sus operaciones, para que la suite compile y enlace
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md, docs/core/00_Project_Initialization_Guide.md, docs/ruleset/PSEUDOCODE_CONVENTION.md, docs/ruleset/LANGUAGE_CHARACTERISTICS.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/data/canonical_names.tsv, scripts/data/languages.tsv
 mode: agent

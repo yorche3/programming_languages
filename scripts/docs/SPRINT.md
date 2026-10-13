@@ -15,12 +15,14 @@
 | # | Paso | Comando | Evidencia / artefacto | Quién |
 |:-:|------|---------|-----------------------|-------|
 | 1 | Reconocimiento | `git status --short`, `git submodule status`, `glot progress` (0.6.0), `glot status` (0.12.0) | — | autor / script |
-| 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo **creado**; la capa cargable deja al autor en la **carpeta de la fase** —el andamiaje del `4a` arranca ahí— y desde ahí funcionan `git`, `glot test`, `save` y `pointer`; estado `lang/phase/module/branch/spec/repo` | script |
+| 2 | **Situar** | `glot use php algorithms/naive_sort` (0.5.0) | Directorio del módulo **creado**; la capa cargable deja al autor en la **carpeta de la fase** —el paso `4` arranca ahí— y desde ahí funcionan `git`, `glot test`, `save` y `pointer`; estado `lang/phase/module/branch/spec/repo` | script |
 | 3 | Rama publicada | incluido en `use`: `git push -u origin feat/algorithms/naive-sort` | Rama `feat/{fase}/{módulo}` con upstream | script |
-| 4a | Esqueleto | `glot new` (0.9.0; secuencia desde la 1.1.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (0.9.0) | Estructura de compilación y de pruebas según la **secuencia** del dato [`data/init_sequences.tsv`](../data/init_sequences.tsv) (pasos, directorio de trabajo y completado) y con el **runner arrancando sin casos** —el runner es de este paso—, sin ejecutables de ejemplo; `.gitignore` verificado. **`new` baja al autor al directorio del módulo** (con la capa cargable) | script + **agente** |
+| 4 | **Esqueleto: la carpeta** | `glot new` (0.9.0; v2 desde la 2.0.0) · `glot save 4` (2.0.0) | La **carpeta del módulo**: las filas `phase=new` de [`data/init_sequences.tsv`](../data/init_sequences.tsv) la crean y, cuando el lenguaje trae una herramienta que además la genera, avanzan de antemano con ella. **`new` baja al autor al directorio del módulo** (con la capa cargable) | script |
+| 4a | **Esqueleto: la estructura idiomática** | `glot scaffold` (2.0.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (2.0.0) | La estructura que el lenguaje espera, desde las filas `phase=scaffold`: carpetas y ficheros con su esqueleto base, renombres a la convención del lenguaje y **borrado de lo que estorba** (`.git` anidados, plantillas, ejecutables de ejemplo); con el **runner arrancando sin casos** —el runner es de este paso— y `.gitignore` verificado | script + **agente** |
 | 4b | **Contrato y esqueletos** (artefacto propio, antes de la suite) | `glot prompt contract_stub` (1.5.0) · `glot save 4b` (1.1.0) | Tipo nuevo, firmas del contrato (en Ada, `src/*.ads`) y **esqueleto de cada operación** (en Ada, `src/*.adb`), con el **indicador natural** del lenguaje: sin el cuerpo, la suite no compila **ni enlaza** | **agente** |
 | 4c | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4c` (1.1.0) | Suite unitaria derivada de la especificación, **sobre el contrato y sus esqueletos del paso 4b** (no los declara: los usa) y **sin crear el runner**, que es del 4a: si falta o no arranca, se detiene. Con salida real. Desde la v1.5.0 el `4b` deja el cuerpo vacío, así que compila **y enlaza**; si el contrato llegara **sin esqueletos**, se admite la **compilación sin enlace** y la ejecución se traslada al acta del paso 6, pero eso es un **defecto del `4b`**, no del contrato | **agente** |
-| 4d | **Corrección previa a la implementación** (un artefacto `4a`/`4b`/`4c` confirmado resultó defectuoso) | `glot prompt correct` (1.6.0) · `glot save 4d` (1.6.0) | El artefacto corregido y la **causa en el cuerpo del commit** (obligatoria): el registro del retrabajo. Solo artefactos **anteriores** a la implementación | **agente** |
+| 4d | **Construcción y enlace** (el esqueleto no deja la suite ejecutable) | `glot prompt build` (2.0.0) · `glot save 4d` (2.0.0) | El fichero de construcción del lenguaje y su enlace, justo hasta que `glot test` **compila, enlaza y falla por casos**; en los lenguajes cuya herramienta ya lo deja hecho, el paso se cierra sin cambios. No toca la suite ni la implementación | **agente** |
+| 4e | **Corrección previa a la implementación** (un artefacto `4a`/`4b`/`4c`/`4d` confirmado resultó defectuoso) | `glot prompt correct` (1.6.0) · `glot save 4e` (2.0.0) | El artefacto corregido y la **causa en el cuerpo del commit** (obligatoria): el registro del retrabajo. Solo artefactos **anteriores** a la implementación | **agente** |
 | 5 | Implementación | `glot prompt implement` (0.8.0) + `glot test` (0.7.0) · `glot save 5` (0.9.0) | `feat(algorithms): add naive sort implementation`; suite en verde | autor / **agente** |
 | 5b | **Defecto de la implementación** (un test en rojo, un criterio incumplido) | `glot prompt fix` (1.6.0) · `glot save 5b` (1.6.0) | El defecto corregido y la **causa** en el commit (obligatoria); el paso 6 se repite | **agente** |
 | 5c | **Reelaboración** sin cambio de comportamiento | `glot prompt refactor` (1.6.0) · `glot save 5c` (1.6.0) | La forma reelaborada y el **motivo** en el commit (obligatorio); suite verde antes y después, sin tocarla | **agente** |
@@ -40,9 +42,9 @@
 
 **EN:** When Phase A ends, the submodule change is merged into **its** `main` and the resulting commit is noted (the **Integration** section below); then the monorepo records it with steps 9 and 10 (Phase B).
 
-**ES:** **Numeración de pasos:** cuando un paso nuevo entra **en medio**, se le asigna el ordinal libre y **los siguientes se recorren**: el paso 4 se partió en `4a` (esqueleto) y `4b` (suite) en la v0.9.0; en la v1.1.0 el contrato entró como `4b` con la suite desplazada a `4c`; y en la **v1.6.0** llegaron los tres pasos del **retrabajo** —`4d correct` (un artefacto `4a`/`4b`/`4c` anterior a la implementación), `5b fix` (un defecto de comportamiento del paso 5) y `5c refactor` (una forma nueva sin cambio observable)—, que toman el ordinal libre **junto a su paso de origen**. La numeración es **contrato del tooling**: el mismo ordinal vale para esta tabla, para [`data/commits.tsv`](../data/commits.tsv) y para el `step:` del frontmatter de cada plantilla, y se cambia en los tres sitios a la vez.
+**ES:** **Numeración de pasos:** cuando un paso nuevo entra **en medio**, se le asigna el ordinal libre y **los siguientes se recorren**: el paso 4 se partió en `4a` (esqueleto) y `4b` (suite) en la v0.9.0; en la v1.1.0 el contrato entró como `4b` con la suite desplazada a `4c`; y en la **v1.6.0** llegaron los tres pasos del **retrabajo** —`4d correct` (un artefacto `4a`/`4b`/`4c` anterior a la implementación), `5b fix` (un defecto de comportamiento del paso 5) y `5c refactor` (una forma nueva sin cambio observable)—, que toman el ordinal libre **junto a su paso de origen**. En la **v2.0.0** el esqueleto se partió en **dos commits** —paso `4` (la carpeta del módulo) y `4a` (la estructura idiomática)— y el **`4d build`** entró antes de la corrección, con **`4d correct` recorrido a `4e`**. La numeración es **contrato del tooling**: el mismo ordinal vale para esta tabla, para [`data/commits.tsv`](../data/commits.tsv) y para el `step:` del frontmatter de cada plantilla, y se cambia en los tres sitios a la vez.
 
-**EN:** **Step numbering:** when a new step goes **in the middle**, it takes the free ordinal and **the following ones shift**: step 4 was split into `4a` (scaffold) and `4b` (suite) in v0.9.0; in v1.1.0 the contract came in as `4b` with the suite shifted to `4c`; and in **v1.6.0** the three **rework** steps arrived —`4d correct` (an artefact `4a`/`4b`/`4c` from before the implementation), `5b fix` (a behaviour defect of step 5) and `5c refactor` (a new shape with no observable change)—, taking the free ordinal **next to their source step**. The numbering is a **tooling contract**: the same ordinal holds for this table, for [`data/commits.tsv`](../data/commits.tsv) and for the `step:` frontmatter of each template, and the three change at once.
+**EN:** **Step numbering:** when a new step goes **in the middle**, it takes the free ordinal and **the following ones shift**: step 4 was split into `4a` (scaffold) and `4b` (suite) in v0.9.0; in v1.1.0 the contract came in as `4b` with the suite shifted to `4c`; and in **v1.6.0** the three **rework** steps arrived —`4d correct` (an artefact `4a`/`4b`/`4c` from before the implementation), `5b fix` (a behaviour defect of step 5) and `5c refactor` (a new shape with no observable change)—, taking the free ordinal **next to their source step**. In **v2.0.0** the skeleton was split into **two commits** —step `4` (the module folder) and `4a` (the idiomatic structure)— and **`4d build`** came in before the correction, with **`4d correct` shifted to `4e`**. The numbering is a **tooling contract**: the same ordinal holds for this table, for [`data/commits.tsv`](../data/commits.tsv) and for the `step:` frontmatter of each template, and the three change at once.
 
 ---
 
@@ -89,15 +91,17 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 
 | Paso | Mensaje |
 |------|---------|
-| Esqueleto | `chore({phase}): add scaffold for {module}` |
-| Contrato del módulo | `chore({phase}): add contract for {module}` |
-| Suite de pruebas | `chore({phase}): add suite for {module}` |
-| Corrección previa a la implementación | `chore({phase}): correct {module}` |
-| Implementación | `feat({phase}): add {module} implementation` |
-| Defecto de la implementación | `fix({phase}): correct {module}` |
+| La carpeta del módulo | `chore({phase}): create {module} module` |
+| Esqueleto idiomático | `chore({phase}): scaffold {module}` |
+| Contrato del módulo | `chore({phase}): define {module} contract` |
+| Suite de pruebas | `test({phase}): add {module} suite` |
+| Construcción y enlace de la suite | `build({phase}): make {module} suite runnable` |
+| Corrección previa a la implementación | `fix({phase}): correct {module}` |
+| Implementación | `feat({phase}): implement {module}` |
+| Defecto de la implementación | `fix({phase}): fix {module}` |
 | Reelaboración sin cambio de comportamiento | `refactor({phase}): rework {module}` |
-| README del módulo | `docs({module}): add README for {module} module` |
-| Índices y lenguaje | `docs: add README for {phase} and update indexes` |
+| README del módulo | `docs({module}): add module README` |
+| Índices y lenguaje | `docs({phase}): update indexes and language README` |
 | Puntero en el monorepo | `chore(submodule): update {lang} pointer` |
 | Cierre del roadmap | `docs(roadmap): close {phase}/{module} for {lang}` |
 
@@ -129,25 +133,32 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 | 8 | **Guarda el estado** `lang/phase/module/branch/spec/repo` e imprime **la carpeta de la fase** (`{lenguaje}/core/{fase}`) en stdout, que es donde la capa cargable deja al autor |
 | 9 | Recuerda que el `cd` real solo llega con la **capa cargable** (`glot install`) y **nunca dentro de una tubería**: ahí corre en un subshell |
 
-### `glot new [lenguaje] [fase/módulo]` — el esqueleto del lenguaje
+### `glot new [lenguaje] [fase/módulo]` — la carpeta del módulo (paso 4)
 
 | # | Qué hace / What it does |
 |:-:|---|
 | 1 | Resuelve el destino (argumentos → estado del sprint → directorio) y **comprueba que el módulo ya existe** (`use` lo creó): si hay contenido del sprint, no lo pisa |
-| 2 | Busca la **secuencia** del lenguaje en [`data/init_sequences.tsv`](../data/init_sequences.tsv); si no la hay, el **comando único** de `languages.tsv`; si el lenguaje es `manual`, crea las carpetas |
-| 3 | **`-n`**: imprime el plan —pasos, directorio de trabajo de cada uno y completado— sin ejecutar nada |
-| 4 | **Ejecuta cada paso en orden** dentro del directorio del módulo (subshell: **no mueve al autor**), con `expect` cuando el dato lo pide |
-| 5 | Aplica la **normalización** declarada (aplanar el nido del inicializador, quitar el `.git` anidado, descartar el vendoring que el repositorio rechaza) |
-| 6 | Imprime **en un solo bloque final** el **completado**: lo que el dato declara como nota y el autor aplica a mano |
-| 7 | **No** escribe la suite ni el contrato: son los pasos `4b` y `4c` |
-| 8 | Deja al autor **en el directorio del módulo**: con la capa cargable es `new` quien baja a él, y en modo programa lo recuerda su salida |
+| 2 | Ejecuta las filas `phase=new` de [`data/init_sequences.tsv`](../data/init_sequences.tsv) respetando su `cwd`: **lo mínimo es crear la carpeta del módulo** y, si el lenguaje trae herramienta que además la genera, avanza de antemano con ella |
+| 3 | **`-n`**: imprime el plan (paso, directorio de trabajo y comando) sin ejecutar nada |
+| 4 | **No** completa la estructura idiomática ni escribe el contrato o la suite: son los pasos `4a`, `4b` y `4c` |
+| 5 | Deja al autor **en el directorio del módulo**: con la capa cargable es `new` quien baja a él, y en modo programa lo recuerda su salida |
+
+### `glot scaffold [lenguaje] [fase/módulo]` — la estructura idiomática (paso 4a)
+
+| # | Qué hace / What it does |
+|:-:|---|
+| 1 | Resuelve el destino y corre las filas `phase=scaffold` del dato **desde el directorio del módulo**, en el orden declarado |
+| 2 | **Ejecuta cada paso** en un subshell (no mueve al autor): carpetas y ficheros con su esqueleto base, renombres a la convención del lenguaje y **borrado de lo que estorba** (`.git` anidados, plantillas, ejecutables de ejemplo) |
+| 3 | Con `mode=manual` **no ejecuta y lo anuncia** por stderr: es una tarea del autor y no se pierde |
+| 4 | **`-n`** imprime el plan; el `cwd` del dato decide si un paso corre en la carpeta de la fase o dentro del módulo |
+| 5 | Códigos: `0` con todo ejecutado · `1` catálogo mal formado · `4` un comando falló. **No confirma**: el commit es `save 4a` |
 
 ### `glot test` · `glot verify` — ejecutar
 
 | # | Qué hace / What it does |
 |:-:|---|
 | 1 | Resuelve el destino (argumentos → estado → directorio) |
-| 2 | Lee el comando nativo de `languages.tsv` (`test` la columna 4, `verify` la columna 5) y lo ejecuta **en el directorio del módulo**, vengas de donde vengas |
+| 2 | Lee el comando nativo de `languages.tsv` (`test` la columna 3, `verify` la columna 4) y lo ejecuta **en el directorio del módulo**, vengas de donde vengas |
 | 3 | `test`: `0` en verde y `4` en rojo. `verify`: si la celda es `-`, imprime `skipped` y sale `0`; con hallazgos, `4` |
 | 4 | Imprime **la salida real** del comando y su código. `verify` es *lint* idiomático: no comprueba la suite ni busca *hardcode* (ver el reparto del paso 6) |
 
@@ -168,7 +179,7 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 | 2 | Resuelve el destino del sprint y comprueba que la rama activa del submódulo sea la del estado (avisa si no) |
 | 3 | **Ámbito `submodule`**: `git add -A` del submódulo entero, avisando de lo que entra de fuera del módulo. **Ámbito `monorepo`**: añade **solo las rutas del paso** (el gitlink, o roadmap + checklist + evidencia) |
 | 4 | **`-n`**: imprime el plan (`git add` y `git commit` con su mensaje) sin tocar el índice |
-| 5 | Confirma con el mensaje del catálogo e imprime el **SHA corto**. El **retrabajo** (`4d`, `5b`, `5c`) **exige causa**: sale de `--cause` —`--causa` vale como alias— o de la **clave de estado `cause`**, que el propio encargo deja con `glot set cause "…"`, y viaja como **segundo `-m`**; al confirmar, `save` **retira la clave** para que no se cuele en el commit siguiente |
+| 5 | Confirma con el mensaje del catálogo e imprime el **SHA corto**. El **retrabajo** (`4e`, `5b`, `5c`) **exige causa**: sale de `--cause` —`--causa` vale como alias— o de la **clave de estado `cause`**, que el propio encargo deja con `glot set cause "…"`, y viaja como **segundo `-m`**; al confirmar, `save` **retira la clave** para que no se cuele en el commit siguiente |
 | 6 | **Nunca hace push**. Y en los pasos `7` y `8`, si la rama del sprint no está integrada, imprime el bloque de **integración** |
 | 7 | Con la capa cargable, confirmar el **`7` o el `8` deja al autor en la raíz del lenguaje**, que es donde se integra: la carpeta del módulo no existe en el `main` del submódulo, así que un `switch` desde ahí dejaría un directorio sin contenido |
 
@@ -210,37 +221,38 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 
 | Qué / What | Cómo / How |
 |---|---|
-| **Aplicar el completado** de `new` cuando el dato lo declara como nota y no como comando | A mano, en el módulo; `new` lo imprime en un bloque al final |
+| **Aplicar lo que el catálogo deja como nota** (`mode=manual` y el completado de `init_sequences.tsv`) | A mano, en el módulo; `scaffold` lo anuncia por stderr al terminar |
 | **Integrar el submódulo**: fusionar la rama del sprint en su `main` y publicarlo | `git -C {lang} switch main && git -C {lang} merge --no-ff {rama} && git -C {lang} push origin main` |
 | **Publicar el monorepo** | `glot` **nunca** hace push del monorepo (`use` publica la rama de trabajo del submódulo; el resto es del autor) |
 | **La revisión cualitativa**: pseudocódigo, divergencias idiomáticas y si el README dice la verdad | Leer; `validate` revisa contrato, README, enlaces, cobertura y *hardcode*, pero no juzga |
 
-**EN:** `glot` does not do these four things, and that is not a defect: it is the split. When the time comes it **says so** (the integration block and the pointer remedy); here they are together: apply `new`'s completion notes by hand; **integrate the submodule** (merge the sprint branch into its `main` and push it); **push the monorepo** (`glot` never pushes it); and the **qualitative review** (pseudocode, idiomatic divergences and whether the README tells the truth).
+**EN:** `glot` does not do these four things, and that is not a defect: it is the split. When the time comes it **says so** (the integration block and the pointer remedy); here they are together: apply by hand whatever the catalogue leaves as a note (`scaffold` announces it on stderr); **integrate the submodule** (merge the sprint branch into its `main` and push it); **push the monorepo** (`glot` never pushes it); and the **qualitative review** (pseudocode, idiomatic divergences and whether the README tells the truth).
 
 ---
 
 ## 🤖 Los pasos con IA, y por qué / The AI-assisted steps, and why
 
-**ES:** Los pasos 4a, 4b, 4c, 4d, 5, 5b, 5c, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/).
+**ES:** Los pasos 4a, 4b, 4c, 4d, 4e, 5, 5b, 5c, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/).
 
-**EN:** Steps 4a, 4b, 4c, 4d, 5, 5b, 5c, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Since v0.8.0 the request is built by `glot prompt <request>` from the sprint state, and the templates are **versioned** in [`scripts/prompts/`](../../scripts/prompts/).
+**EN:** Steps 4a, 4b, 4c, 4d, 4e, 5, 5b, 5c, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Since v0.8.0 the request is built by `glot prompt <request>` from the sprint state, and the templates are **versioned** in [`scripts/prompts/`](../../scripts/prompts/).
 
-| Encargo previsto | Plantilla versionada | Paso | Modelo (v1.7.3) |
+| Encargo previsto | Plantilla versionada | Paso | Modelo (v2.0.0) |
 |------------------|----------------------|:----:|-----------------|
 | `scaffold` | [`scaffold.prompt.md`](../../scripts/prompts/scaffold.prompt.md) | 4a | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
-| `contract_stub` | [`contract_stub.prompt.md`](../../scripts/prompts/contract_stub.prompt.md) | 4b | `gpt-5.6-terra` |
-| `suite` | [`suite.prompt.md`](../../scripts/prompts/suite.prompt.md) | 4c | `gpt-5.6-terra` |
-| `correct` | [`correct.prompt.md`](../../scripts/prompts/correct.prompt.md) | 4d | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
-| `implement` | [`implement.prompt.md`](../../scripts/prompts/implement.prompt.md) | 5 | `claude-sonnet-5` |
-| `fix` | [`fix.prompt.md`](../../scripts/prompts/fix.prompt.md) | 5b | `claude-sonnet-5` |
-| `refactor` | [`refactor.prompt.md`](../../scripts/prompts/refactor.prompt.md) | 5c | `claude-sonnet-5` |
+| `contract_stub` | [`contract_stub.prompt.md`](../../scripts/prompts/contract_stub.prompt.md) | 4b | `gpt-6.1-sol` |
+| `suite` | [`suite.prompt.md`](../../scripts/prompts/suite.prompt.md) | 4c | `gpt-6.1-sol` |
+| `build` | [`build.prompt.md`](../../scripts/prompts/build.prompt.md) | 4d | `gpt-6.1-sol` |
+| `correct` | [`correct.prompt.md`](../../scripts/prompts/correct.prompt.md) | 4e | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
+| `implement` | [`implement.prompt.md`](../../scripts/prompts/implement.prompt.md) | 5 | `claude-sonnet-5.5` |
+| `fix` | [`fix.prompt.md`](../../scripts/prompts/fix.prompt.md) | 5b | `claude-sonnet-5.5` |
+| `refactor` | [`refactor.prompt.md`](../../scripts/prompts/refactor.prompt.md) | 5c | `claude-sonnet-5.5` |
 | `validate` | [`validate.prompt.md`](../../scripts/prompts/validate.prompt.md) | 6 | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
 | `docs-module` | [`docs-module.prompt.md`](../../scripts/prompts/docs-module.prompt.md) | 7 | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
 | `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
 
 **ES:** Desde la v0.11.0 cada plantilla **declara su modelo** en el frontmatter (`model:`, con el id real que ofrece Copilot) y el catálogo [`data/models.tsv`](../../scripts/data/models.tsv) fija el esfuerzo, el tope de créditos y el tier de auto de ese modelo. El **modelo es la clave del perfil**: no hay una clave `profile:` que pueda derivar. Las plantillas siguen siendo **genéricas**: el modelo es política de coste, no dato de un módulo. Desde la **v1.6.0** el catálogo añade la **séptima columna** con el modelo del **delegado de AGY** —sus ids no son los de Copilot—, así que el modelo se elige **por rol** y viaja también con `--delegate antigravity`; `--model`/`GLOT_MODEL` (`_COP`/`_AGY`) y `--effort`/`GLOT_EFFORT` lo cambian **para una corrida** sin tocar el dato (los perfiles: `economy` → `gemini-3.8-flash-low`, `balanced` → `gemini-3.8-flash-low`, `deep` → `claude-sonnet-5-5-low`). Desde la v1.0.0 declaran además sus **fuentes** (`sources:`, rutas relativas a la raíz del monorepo, que la cabecera del encargo trae como `root`) y `glot prompt` **avisa** por stderr de las que falten: el encargo dice qué documentos necesita como dato comprobable, en vez de nombrar el monorepo en prosa.
 
-**EN:** Since v0.11.0 every template **declares its model** in the frontmatter (`model:`, with the real id Copilot offers) and the [`data/models.tsv`](../../scripts/data/models.tsv) catalogue states the effort, the credit cap and the auto tier for that model. The **model is the profile key**: there is no `profile:` key that could drift. Templates stay **generic**: the model is cost policy, not module data. Since **v1.6.0** the catalogue adds the **seventh column** with the **AGY delegate's** model —its ids are not Copilot's—, so the model is chosen **by role** and travels with `--delegate antigravity` too; `--model`/`GLOT_MODEL` (`_COP`/`_AGY`) and `--effort`/`GLOT_EFFORT` change it **for one run** without touching the datum (the profiles: `economy` → `gemini-3.8-flash-low`, `balanced` → `gemini-3.8-flash-low`, `deep` → `claude-sonnet-5-5-low`). Since **v1.7.0** the **AGY** one can be **pinned per sprint** with `glot set antigravity-model <alias>` (the `antigravity-model` state key, an alias from `data/delegates.tsv`: `gemini`, `sonnet`): it beats the profile and loses to `--model`/`GLOT_MODEL_AGY`; it is what lets it be changed mid-module when the hourly or quota limits run out, which the CLI does not expose. Since **v1.7.3** the **Copilot** one can be pinned the same way with `glot set copilot-model <alias>` (`default`, `gemini`, `qwen`, `kimi`), whose ids are **OpenRouter** models: the alias **only** replaces models that already are OpenRouter ones, so the split per request stands —`terra` for the contract and the suite, `sonnet` for the implementation, OpenRouter for the scaffolding, the correction and the documentation— and `ask`/`validate` point the CLI custom provider only for those ids. The **profile's effort** travels in the command (`--reasoning-effort {effort}`): `low` there, `high` in the implementation. Since v1.0.0 they also declare their **sources** (`sources:`, paths relative to the monorepo root, which the request header carries as `root`) and `glot prompt` **warns** on stderr about the missing ones: the request states which documents it needs as checkable data, instead of naming the monorepo in prose.
+**EN:** Since v0.11.0 every template **declares its model** in the frontmatter (`model:`, with the real id Copilot offers) and the [`data/models.tsv`](../../scripts/data/models.tsv) catalogue states the effort, the credit cap and the auto tier for that model. The **model is the profile key**: there is no `profile:` key that could drift. Templates stay **generic**: the model is cost policy, not module data. Since **v1.6.0** the catalogue adds the **seventh column** with the **AGY delegate's** model —its ids are not Copilot's—, so the model is chosen **by role** and travels with `--delegate antigravity` too; `--model`/`GLOT_MODEL` (`_COP`/`_AGY`) and `--effort`/`GLOT_EFFORT` change it **for one run** without touching the datum (the profiles: `economy` → `gemini-3.8-flash-low`, `balanced` → `gemini-3.8-flash-low`, `deep` → `claude-sonnet-5-5-low`). Since **v1.7.0** the **AGY** one can be **pinned per sprint** with `glot set antigravity-model <alias>` (the `antigravity-model` state key, an alias from `data/delegates.tsv`: `gemini`, `sonnet`): it beats the profile and loses to `--model`/`GLOT_MODEL_AGY`; it is what lets it be changed mid-module when the hourly or quota limits run out, which the CLI does not expose. Since **v1.7.3** the **Copilot** one can be pinned the same way with `glot set copilot-model <alias>` (`default`, `gemini`, `qwen`, `kimi`), whose ids are **OpenRouter** models: the alias **only** replaces models that already are OpenRouter ones, so the split per request stands —`balanced` for the contract, the suite and the build, `deep` for the implementation, and OpenRouter for the scaffolding, the correction and the documentation— and `ask`/`validate` point the CLI custom provider only for those ids. The **profile's effort** travels in the command (`--reasoning-effort {effort}`): `low` there, `high` in the implementation. Since v1.0.0 they also declare their **sources** (`sources:`, paths relative to the monorepo root, which the request header carries as `root`) and `glot prompt` **warns** on stderr about the missing ones: the request states which documents it needs as checkable data, instead of naming the monorepo in prose.
 
 **ES:** Las plantillas son **genéricas**: no llevan datos de ningún módulo concreto (ni casos de prueba ni nombres de archivo). Cada encargo **lee** lo que necesita de la especificación del módulo y de los módulos ya homologados del lenguaje; el harness comprueba que ninguna plantilla vuelva a llevar datos de un módulo.
 

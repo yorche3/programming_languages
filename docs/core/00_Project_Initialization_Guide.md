@@ -80,9 +80,9 @@ EN: Rules set on 2026-09-26; they decide which command appears in the table and 
 
     R6 — When the tool imposes another structure, the already-homologated module is updated when that language is retaken: it is declared debt, not work for the phase in progress.
 
-**ES:** Con R1–R6 el reparto del catálogo es **39 tool · 11 manual · 0 deferred**, y **17** de esos comandos son el primer paso de una secuencia (⛓️). Un lenguaje no se marca ✍️ por tener un generador distinto, sino solo cuando no hay herramienta de biblioteca aceptada (R2/R5) o cuando no existe generador.
+**ES:** Con R1–R6 el reparto del catálogo es **32 tool · 18 manual**, y **los 50** lenguajes traen ya su esqueleto declarado en `scripts/data/init_sequences.tsv`, en dos fases: `new` (la carpeta) y `scaffold` (la estructura idiomática). Un lenguaje no se marca ✍️ por tener un generador distinto, sino solo cuando no hay herramienta de biblioteca aceptada (R2/R5) o cuando no existe generador.
 
-**EN:** Under R1–R6 the catalogue splits **39 tool · 11 manual · 0 deferred**, and **17** of those commands are the first step of a sequence (⛓️). A language is not marked ✍️ for having a different generator, but only when there is no accepted library tool (R2/R5) or no generator at all.
+**EN:** Under R1–R6 the catalogue splits **32 tool · 18 manual**, and **all 50** languages already declare their skeleton in `scripts/data/init_sequences.tsv`, in two phases: `new` (the folder) and `scaffold` (the idiomatic structure). A language is not marked ✍️ for having a different generator, but only when there is no accepted library tool (R2/R5) or no generator at all.
 ## 📊 Tabla maestra / Master table
 
 Las rutas de la columna Manifiesto son relativas a la carpeta del módulo.

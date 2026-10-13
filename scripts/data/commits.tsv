@@ -1,8 +1,9 @@
-4	new	submodule	chore({phase}): create {module} module
+4	-	submodule	chore({phase}): create {module} module
 4a	scaffold	submodule	chore({phase}): scaffold {module}
 4b	contract_stub	submodule	chore({phase}): define {module} contract
 4c	suite	submodule	test({phase}): add {module} suite
-4d	correct	submodule	fix({phase}): correct {module}
+4d	build	submodule	build({phase}): make {module} suite runnable
+4e	correct	submodule	fix({phase}): correct {module}
 5	implement	submodule	feat({phase}): implement {module}
 5b	fix	submodule	fix({phase}): fix {module}
 5c	refactor	submodule	refactor({phase}): rework {module}

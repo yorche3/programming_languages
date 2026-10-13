@@ -1,7 +1,7 @@
 ---
 name: fix
 step: 5b
-model: claude-sonnet-5
+model: claude-sonnet-5.5
 description: Corrige un defecto de comportamiento de la implementación y deja constancia de la causa
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md
 mode: agent
