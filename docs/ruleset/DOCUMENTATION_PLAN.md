@@ -25,8 +25,8 @@
 | `docs/ruleset/PSEUDOCODE_CONVENTION.md` | Pseudocódigo canónico, nombres conceptuales y casos medidos / Canonical pseudocode, conceptual names, measured cases | ✅ | Software Architect (apoyo: Language-Specific SME) |
 | `docs/ruleset/LANGUAGE_CHARACTERISTICS.md` | 11 ejes por lenguaje / 11 axes per language | ✅ | Language-Specific SME |
 | `docs/ruleset/IDIOMATICITY_LEVELS.md` | Escala de 4 niveles con 9 ejes de evaluación / 4-level scale with 9 evaluation axes | ✅ | Software Architect (apoyo: SDET) |
-| `docs/ruleset/DEVIATION_POLICY.md` | Política de registro de desviaciones / When/how to document deviations | 📋 | Software Architect |
-| `docs/ruleset/PARADIGM_FAMILIES.md` | Familias y agrupaciones de lenguajes por paradigma / Groups of languages by paradigm | 📋 | Software Architect |
+| `docs/ruleset/DEVIATION_POLICY.md` | Política de registro de desviaciones / When/how to document deviations | ✅ | Software Architect |
+| `docs/ruleset/PARADIGM_FAMILIES.md` | 9 familias prácticas y pseudocódigo ajustado por familia / 9 practical families and per-family adjusted pseudocode | ✅ | Software Architect (apoyo: Language-Specific SME) |
 | `docs/ruleset/data/canonical_names.tsv` | Mapeo concepto → nombre canónico por lenguaje / concept → name per language | ✅ | Language-Specific SME |
 | `docs/ruleset/data/language_characteristics.tsv` | Ejes estructurados legibles por máquina / Machine-readable axes | ✅ | Language-Specific SME |
 | `docs/ruleset/data/idiomaticity_state.tsv` | Nivel actual por (lenguaje, módulo) / Current level per (lang, module) | 📋 | SDET |
@@ -95,6 +95,10 @@
 ---
 
 ## 3. Documentos por módulo / Per-module documents
+
+> **ES:** Pendiente registrado (revisión posterior): alinear los README de módulo (`{lenguaje}/core/{fase}/{módulo}/README.md`) con `PARADIGM_FAMILIES.md` — manteniendo su pseudocódigo canónico y su didáctica y añadiendo el enlace a la familia — y revisar el impacto en `docs/ROADMAP.md` y `docs/ROADMAP_UPDATE_CHECKLIST.md`. **Nada de eso se ha modificado en este cambio.**
+>
+> **EN:** Registered pending item (later review): align module READMEs (`{lang}/core/{phase}/{module}/README.md`) with `PARADIGM_FAMILIES.md` — keeping their canonical pseudocode and teaching material and adding the family link — and review the impact on `docs/ROADMAP.md` and `docs/ROADMAP_UPDATE_CHECKLIST.md`. **None of that has been modified in this change.**
 
 | Fase / Phase | Módulo / Module | Especificación / Spec | README (N3) | Evidencia / Evidence | Estado / State | Responsable / Owner |
 |--------------|-----------------|:---------------------:|:-----------:|:--------------------:|:--------------:|:-------------------:|
@@ -174,8 +178,8 @@
 
 ### Cadena de soporte / Support chain (can be done in parallel)
 
-6. `docs/ruleset/DEVIATION_POLICY.md`
-7. `docs/ruleset/PARADIGM_FAMILIES.md`
+6. `docs/ruleset/DEVIATION_POLICY.md` → **hecho / done** ✅
+7. `docs/ruleset/PARADIGM_FAMILIES.md` → **hecho / done** ✅
 8. `docs/ruleset/data/idiomaticity_state.tsv`
 9. Archivos por lenguaje en `docs/ruleset/idioms/{lang}.md` / Per-language `idioms/` files
 10. Archivos por lenguaje en `docs/ruleset/adaptations/{lang}.md` / Per-language `adaptations/` files

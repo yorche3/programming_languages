@@ -392,7 +392,7 @@
 
 - [`ruleset/PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) — El contrato del pseudocódigo.
 - [`ruleset/IDIOMATICITY_LEVELS.md`](IDIOMATICITY_LEVELS.md) — La escala de 4 niveles.
-- `ruleset/DEVIATION_POLICY.md` (por crear / to be created) — Cómo documentar cada desviación.
+- [`ruleset/DEVIATION_POLICY.md`](DEVIATION_POLICY.md) — Cómo documentar cada desviación.
 - `ruleset/PARADIGM_FAMILIES.md` (por crear / to be created) — La agrupación de los 50 lenguajes.
 - [`data/language_characteristics.tsv`](data/language_characteristics.tsv) — La clasificación máquina-legible.
 - [`data/canonical_names.tsv`](data/canonical_names.tsv) — La tabla de traducción.

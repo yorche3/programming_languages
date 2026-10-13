@@ -311,7 +311,7 @@ Desviaciones NO permitidas / Not allowed deviations:
 
     DEVIATION_POLICY.md — Cómo documentar cada desviación.
 
-    PARADIGM_FAMILIES.md — La agrupación de los 50 lenguajes.
+    PARADIGM_FAMILIES.md — Las 9 familias prácticas y el pseudocódigo ajustado por familia.
 
     docs/ruleset/data/canonical_names.tsv — La tabla de traducción en formato máquina-legible.
 
