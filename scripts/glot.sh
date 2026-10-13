@@ -150,7 +150,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="1.7.8"
+GLOT_VERSION="2.0.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -2638,9 +2638,14 @@ _glot_cmd_new() {
             ;;
     esac
 
-    # La secuencia del dato manda cuando el lenguaje aparece en `init_sequences.tsv`;
-    # si no, se usa el comando único de la columna 7 con su normalización (columna 8).
-    seq="$(_glot_init_sequence "$lang")"
+    # La secuencia del dato manda cuando el lenguaje aparece en `init_sequences.tsv`
+    # con filas de la fase `new`; si no, se usa el comando único de la columna 7 con su
+    # normalización (columna 8). La fase `scaffold` la cubre el verbo `scaffold`.
+    seq="$(_glot_init_sequence "$lang" new)" || {
+        _glot_error "catálogo de inicialización mal formado / malformed initialisation catalogue: $lang"
+        _glot_info 'revisa / check: scripts/data/init_sequences.tsv'
+        return 1
+    }
     run=""
     fix=""
     if [[ -z "$seq" ]]; then
@@ -2660,7 +2665,13 @@ _glot_cmd_new() {
             [[ -n "$order" ]] || continue
             step_dir="$dir"
             [[ "$workdir" == "phase" ]] && step_dir="$root/$lang/core/$phase"
-            step_cmd="$(_glot_expand_command "$step_dir" "$module" "$command")" || return 1
+            # Las filas `manual` no llevan comando (`-`): lo que se anuncia es lo que queda
+            # por completar, expandido, y nunca se ejecuta.
+            if [[ "$mode" == "manual" ]]; then
+                step_cmd="$(_glot_expand_command "$step_dir" "$module" "$complete")" || return 1
+            else
+                step_cmd="$(_glot_expand_command "$step_dir" "$module" "$command")" || return 1
+            fi
             steps+="$step_dir"$'\t'"$mode"$'\t'"$step_cmd"$'\t'"$answers"$'\t'"$complete"$'\n'
         done <<<"$seq"
     else
@@ -2672,6 +2683,10 @@ _glot_cmd_new() {
     if ((_glot_dry_run)); then
         while IFS=$'\t' read -r step_dir step_mode step_cmd step_answers step_complete; do
             [[ -n "$step_dir" ]] || continue
+            if [[ "$step_mode" == "manual" ]]; then
+                printf '# manual (lo hace el autor / the author does it): %s\n' "$step_cmd"
+                continue
+            fi
             printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
             [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
         done <<<"$steps"
@@ -2697,6 +2712,11 @@ _glot_cmd_new() {
         # fase) choca con la carpeta vacía que dejó `use`: se retira antes.
         if [[ "$step_dir" != "$dir" && -d "$dir" && -z "$(ls -A -- "$dir" 2>/dev/null)" ]]; then
             rmdir -- "$dir" 2>/dev/null || true
+        fi
+
+        if [[ "$step_mode" == "manual" ]]; then
+            _glot_info "manual (lo hace el autor / the author does it): $step_cmd"
+            continue
         fi
 
         _glot_info "new: $step_cmd"
@@ -2732,6 +2752,128 @@ _glot_cmd_new() {
         _glot_info "estructura manual creada / manual layout created: $dir"
         _glot_info "el manifiesto y la suite son del encargo / manifest and suite belong to the request: glot prompt scaffold $lang $phase/$module"
     fi
+
+    _glot_init_completion_report "$steps" "$module"
+
+    printf '%s\n' "$dir"
+    return 0
+}
+
+# _glot_cmd_scaffold [lenguaje] [fase/módulo] — completa el esqueleto que `new` deja a
+# medias: asigna el framework de pruebas, enlaza proyectos entre sí, limpia los ficheros
+# de plantilla, renombra a las convenciones del lenguaje y crea los ficheros vacíos que el
+# repositorio exige. Lee las filas `phase=scaffold` de `data/init_sequences.tsv`, en orden,
+# y corre desde el directorio del módulo; las filas `mode=manual` no se ejecutan: se
+# anuncian para que las haga el autor. No escribe la suite —eso es el encargo `suite`— y no
+# confirma nada: eso es `save`.
+# Códigos: 0 correcto (o sin filas) · 1 entorno o catálogo mal formado · 2 uso · 4 un paso falló.
+_glot_cmd_scaffold() {
+    local target=""
+    local lang=""
+    local phase=""
+    local module=""
+    local root=""
+    local dir=""
+    local seq=""
+    local steps=""
+    local order=""
+    local workdir=""
+    local mode=""
+    local command=""
+    local answers=""
+    local complete=""
+    local step_dir=""
+    local step_mode=""
+    local step_cmd=""
+    local step_answers=""
+    local step_complete=""
+    local rc=0
+
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+
+    dir="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    if [[ ! -d "$dir" ]]; then
+        _glot_error "el módulo no existe / module not found: $dir"
+        _glot_info "prepáralo primero / prepare it first: glot new $lang $phase/$module"
+        return 1
+    fi
+
+    seq="$(_glot_init_sequence "$lang" scaffold)" || {
+        _glot_error "catálogo de inicialización mal formado / malformed initialisation catalogue: $lang"
+        _glot_info 'revisa / check: scripts/data/init_sequences.tsv'
+        return 1
+    }
+
+    # Sin filas de `scaffold` no hay nada que completar: se dice por stderr y se imprime
+    # el directorio, que es lo que la capa cargable usa para dejar al autor dentro.
+    if [[ -z "$seq" ]]; then
+        _glot_info "sin pasos de scaffold / no scaffold steps: $lang"
+        printf '%s\n' "$dir"
+        return 0
+    fi
+
+    while IFS=$'\t' read -r order workdir mode command answers complete; do
+        [[ -n "$order" ]] || continue
+        step_dir="$dir"
+        step_dir="$dir"
+        [[ "$workdir" == "phase" ]] && step_dir="$root/$lang/core/$phase"
+        if [[ "$mode" == "manual" ]]; then
+            step_cmd="$(_glot_expand_command "$step_dir" "$module" "$complete")" || return 1
+        else
+            step_cmd="$(_glot_expand_command "$step_dir" "$module" "$command")" || return 1
+        fi
+        steps+="$step_dir"$'\t'"$mode"$'\t'"$step_cmd"$'\t'"$answers"$'\t'"$complete"$'\n'
+    done <<<"$seq"
+
+    if ((_glot_dry_run)); then
+        while IFS=$'\t' read -r step_dir step_mode step_cmd step_answers step_complete; do
+            [[ -n "$step_dir" ]] || continue
+            if [[ "$step_mode" == "manual" ]]; then
+                printf '# manual (lo hace el autor / the author does it): %s\n' "$step_cmd"
+                continue
+            fi
+            printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
+            [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
+        done <<<"$steps"
+        printf '%s\n' "$dir"
+        return 0
+    fi
+
+    while IFS=$'\t' read -r step_dir step_mode step_cmd step_answers step_complete; do
+        [[ -n "$step_dir" ]] || continue
+
+        if [[ "$step_mode" == "manual" ]]; then
+            _glot_info "manual (lo hace el autor / the author does it): $step_cmd"
+            continue
+        fi
+
+        _glot_info "scaffold: $step_cmd"
+        rc=0
+        case "$step_mode" in
+            run)
+                (cd -- "$step_dir" && eval "$step_cmd") </dev/null || rc=$?
+                ;;
+            expect)
+                (cd -- "$step_dir" && _glot_expect_run "$step_cmd" "$step_answers") </dev/null || rc=$?
+                ;;
+            *)
+                _glot_error "modo de inicialización desconocido / unknown initialisation mode: $step_mode ($lang)"
+                return 1
+                ;;
+        esac
+
+        if ((rc != 0)); then
+            _glot_warn "scaffold falló / failed: $lang $phase/$module (código / code $rc)"
+            _glot_info "el directorio queda como está / the directory is left as it is: $dir"
+            return 4
+        fi
+    done <<<"$steps"
 
     _glot_init_completion_report "$steps" "$module"
 
@@ -3878,6 +4020,15 @@ Verbos / Verbs:
                      skeleton: runs the catalogue initializer (or creates the folders
                      when the skeleton is manual) and normalises what it leaves. It
                      does not write the suite
+  scaffold [lenguaje] [fase/módulo]
+                     Completa lo que `new` deja a medias: framework de pruebas,
+                     referencias entre proyectos, limpieza de la plantilla, renombres a la
+                     convención del lenguaje y ficheros vacíos. Las filas manual del dato
+                     no se ejecutan: se anuncian al autor
+                     Completes what `new` leaves half done: test framework, cross-project
+                     references, template cleanup, renames to the language convention and
+                     empty files. The catalogue's manual rows are not executed: they are
+                     announced to the author
   save <paso|alias> [lenguaje] [fase/módulo] [--cause "<texto>"]
                      Confirma con el mensaje de la convención del repositorio, que sale
                      del catálogo de commits. Los pasos del monorepo (9 y 10) añaden
@@ -4196,6 +4347,20 @@ _glot_help_verb() {
             printf 'Con el módulo ya cerrado hay que indicar el tipo / with a closed module the type must be given\n'
             printf 'Desde dentro de un submódulo se puede omitir el lenguaje / the language can be omitted inside a submodule\n'
             ;;
+        scaffold)
+            printf 'glot scaffold [lenguaje] [fase/módulo] — completa el esqueleto que deja new\n'
+            printf 'glot scaffold [language] [phase/module] — completes the skeleton new leaves\n'
+            printf 'Corre, en orden, las filas phase=scaffold de data/init_sequences.tsv desde el\n'
+            printf 'directorio del módulo: framework de pruebas, referencias entre proyectos,\n'
+            printf 'limpieza de la plantilla, renombres a la convención del lenguaje y ficheros\n'
+            printf 'vacíos. Las filas manual no se ejecutan: se anuncian al autor. No escribe la\n'
+            printf 'suite (eso es glot prompt suite) ni confirma nada (eso es save)\n'
+            printf 'Runs, in order, the phase=scaffold rows of data/init_sequences.tsv from the\n'
+            printf 'module directory: test framework, cross-project references, template cleanup,\n'
+            printf 'renames to the language convention and empty files. manual rows are not\n'
+            printf 'executed: they are announced to the author. It writes neither the suite\n'
+            printf '(that is glot prompt suite) nor a commit (that is save)\n'
+            ;;
         new)
             printf 'glot new [lenguaje] [fase/módulo] — inicializador y esqueleto del módulo\n'
             printf 'glot new [language] [phase/module] — initializer and module skeleton\n'
@@ -4509,10 +4674,25 @@ _glot_init_fix() {
 # Sale con 1 si el lenguaje no aparece: entonces manda la columna 7 de `languages.tsv`.
 _glot_init_sequence() {
     local lang="$1"
+    local sp="$2"
     local file=""
+    local bad=0
 
     file="$(_glot_sequences_file)" || return 1
-    awk -F'\t' -v lang="$lang" '$1 == lang {print $2 "\t" $3 "\t" $4 "\t" $5 "\t" $7 "\t" $8}' "$file" | sort -n -k1,1
+    # v2: el esquema es language|phase|order|cwd|mode|command|requirement|expect_answers|completion.
+    # La fase (`new` o `scaffold`) filtra las filas, `order` las resuelve en secuencia y una
+    # fila con `cwd` o `mode` fuera de catálogo es un catálogo mal formado (no se adivina).
+    awk -F'\t' -v lang="$lang" -v sp="$sp" '
+        $1 == lang && $2 == sp {
+            if (NF < 9 || ($4 != "module" && $4 != "phase") || ($5 != "run" && $5 != "expect" && $5 != "manual")) {
+                print "init_sequences.tsv: fila mal formada / malformed row: " $0 > "/dev/stderr"
+                bad = 1
+                next
+            }
+            print $3 "\t" $4 "\t" $5 "\t" $6 "\t" $8 "\t" $9
+        }
+        END { exit bad }
+    ' "$file" | sort -n -k1,1
 }
 
 # _glot_init_sequence_has <lenguaje> — ¿el lenguaje tiene secuencia declarada?
@@ -5892,6 +6072,10 @@ _glot_main() {
         new)
             # Inicializa el lenguaje y crea el esqueleto / initialises the language and creates the skeleton
             _glot_cmd_new "$@"
+            ;;
+        scaffold)
+            # Completa el esqueleto que deja `new` / Completes the skeleton `new` leaves behind
+            _glot_cmd_scaffold "$@"
             ;;
         save)
             # Confirma con la convención del repositorio / commits with the repository convention
