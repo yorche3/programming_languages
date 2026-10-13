@@ -6,7 +6,25 @@
 
 ---
 
-## 🧱 Contrato de todos los verbos / Every-verb contract
+## � Frontera con la documentación / Boundary with the documentation
+
+**ES:** `glot` es la **herramienta de apoyo** del ciclo; `docs/` es la documentación que consulta el usuario (GitHub Pages y las plantillas del ciclo). La frontera es una sola regla: **el dato que `glot` necesita para decidir vive en `scripts/`**, en su catálogo; de `docs/` no lee datos ni contrasta documentos.
+
+**EN:** `glot` is the cycle's **support tool**; `docs/` is the documentation the user reads (GitHub Pages and the cycle's templates). The boundary is one rule: **the data `glot` needs in order to decide lives in `scripts/`**, in its catalogue; it reads no data from `docs/` and checks no documents there.
+
+| Interacción / Interaction | Qué es / What it is |
+|---|---|
+| `scripts/data/*.tsv` | La **única entrada de datos**: comandos, secuencias, commits, perfiles, toolchains |
+| `docs/core/{fase}/…_{módulo}.md` | **Puerta de entrada** de `use`: el sprint no arranca sin especificación (se comprueba que exista, no se lee su contenido) |
+| `docs/evidence/{fase}/{módulo}/…` | **Salida**: el acta que escribe `evidence`, que es lo que cierra un módulo |
+| `docs/ROADMAP.md`, `docs/ROADMAP_UPDATE_CHECKLIST.md` | **Salida**: los contadores y el registro que edita `close` (política de cierre del roadmap) |
+| `docs/tests/docs_check.sh` | Las comprobaciones **de documentos** (guía ↔ catálogo, plantilla ↔ encargo, política de CI) viven aquí, no en el harness del tooling |
+
+**ES:** Consecuencia práctica: `scripts/tests/glot_test.sh` **no lee nada fuera de `scripts/`**. Si una comprobación necesita un documento, es del lado de la documentación; si un dato no tiene uso real en la documentación, vive en `scripts/data/` y no se duplica. El caso que obligó a escribir esta regla: la guía de inicialización se leía desde el harness para que no derivara del catálogo, y eso es lo que mantenía dos copias del mismo dato.
+
+**EN:** Practical consequence: `scripts/tests/glot_test.sh` **reads nothing outside `scripts/`**. If a check needs a document, it belongs to the documentation side; if a datum has no real use in the documentation, it lives in `scripts/data/` and is not duplicated. The case that forced this rule: the initialisation guide was read from the harness so it would not drift from the catalogue, and that is what kept two copies of the same datum.
+
+## �🧱 Contrato de todos los verbos / Every-verb contract
 
 | Regla | Detalle |
 |-------|---------|

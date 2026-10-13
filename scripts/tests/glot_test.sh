@@ -12,7 +12,6 @@ set -euo pipefail
 TESTS_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 GLOT_SH="$TESTS_DIR/../glot.sh"
 REPO="$(cd -- "$TESTS_DIR/../.." && pwd -P)"
-GUIDE="$REPO/docs/core/00_Project_Initialization_Guide.md"
 WORK_DIR="$(mktemp -d)"
 trap 'rm -rf -- "$WORK_DIR"' EXIT
 
@@ -765,32 +764,14 @@ assert_contains 'doctor: módulos del roadmap' 'roadmap_modules: ' "$out"
 assert_contains 'doctor: autocompletado bash' 'completion_bash: yes' "$out"
 assert_contains 'doctor: autocompletado zsh' 'completion_zsh: yes' "$out"
 
-# el catálogo de datos y la guía de inicialización no se pueden separar
-# v3: la tabla maestra de la guía es una **tabla markdown** —lenguaje en negrita en la segunda
-# celda, comando de pruebas en la última— así que se lee con `awk -F'|'`, acotada a su sección.
-GUIDE_MASTER='/^## .*Master table/,/^## .*Multi-step sequences/'
-guide_langs="$(awk "$GUIDE_MASTER" "$GUIDE" | awk -F'|' '/^\| \*\*[a-z]/ {gsub(/\*/,"",$2); gsub(/[ \t]/,"",$2); print $2}')"
-data_langs="$(cut -f1 "$REPO/scripts/data/languages.tsv")"
-assert_eq 'catálogo y guía: mismos lenguajes' "$guide_langs" "$data_langs"
+# el catálogo solo se comprueba contra sí mismo: la guía de inicialización es su lectura
+# humana y quien la contrasta es `docs/tests/docs_check.sh`. El harness del tooling **no
+# lee nada fuera de `scripts/`** (2026-10-13): un dato que el tooling necesite vive aquí.
 
-guide_tests="$(awk "$GUIDE_MASTER" "$GUIDE" |
-    awk -F'|' '/^\| \*\*[a-z]/ {print $5}' |
-    LC_ALL=C sed 's/`//g; s/  */ /g; s/^ //; s/ $//; s/\xef\xb8\x8f//g; s/\xe2\x9c\x85//g; s/\xf0\x9f\x94\xa7//g; s/\xe2\x9c\x8d//g; s/  */ /g; s/^ //; s/ $//')"
-data_tests="$(cut -f3 "$REPO/scripts/data/languages.tsv")"
-assert_eq 'catálogo y guía: mismos comandos de pruebas' "$guide_tests" "$data_tests"
-
-# deriva: la sección «Secuencias de varios pasos» no la comparaba nadie, y ahí vivió una
-# secuencia imposible sin aviso (medido el 2026-09-26). Son tres vistas del mismo conjunto:
-# la sección, el marcador de secuencia de la tabla maestra y el dato de secuencias.
-CHAIN_MARK="$(printf '\xe2\x9b\x93')"
+# deriva interna del catálogo: mismos lenguajes en `languages.tsv` y en las dos fases de
+# `init_sequences.tsv` (ya comprobado arriba con `comm`), y las secuencias al completo
 data_seq="$(awk -F'\t' 'FNR > 1 {print $1}' "$REPO/scripts/data/init_sequences.tsv" | LC_ALL=C sort -u)"
-guide_seq="$(awk '/^## .*Multi-step sequences/,/^## .*Manual generation/' "$GUIDE" | awk -F'|' '/^\| \*\*[a-z]/ {gsub(/\*/,"",$2); gsub(/[ \t]/,"",$2); print $2}' | LC_ALL=C sort -u)"
-guide_chain="$(awk "$GUIDE_MASTER" "$GUIDE" | grep -F -- "$CHAIN_MARK" | awk -F'|' '/^\| \*\*[a-z]/ {gsub(/\*/,"",$2); gsub(/[ \t]/,"",$2); print $2}' | LC_ALL=C sort -u)"
-assert_eq 'secuencias y guía: el dato trae los 50 lenguajes' '50' "$(printf '%s\n' "$data_seq" | wc -l | tr -d ' ')"
-assert_eq 'secuencias y guía: la sección no inventa lenguajes' '' \
-    "$(comm -23 <(printf '%s\n' "$guide_seq") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"
-assert_eq 'secuencias y guía: lo marcado con la cadena está en el dato' '' \
-    "$(comm -23 <(printf '%s\n' "$guide_chain") <(printf '%s\n' "$data_seq") | tr -d '\t' | tr -d ' ' | tr '\n' ' ')"
+assert_eq 'secuencias: el dato trae los 50 lenguajes' '50' "$(printf '%s\n' "$data_seq" | wc -l | tr -d ' ')"
 
 # la regla del directorio de trabajo: solo los generadores que crean la carpeta salen de
 # `module`, y la guía tiene que nombrarlos a los cinco. La sección se lee una vez: con
@@ -798,12 +779,10 @@ assert_eq 'secuencias y guía: lo marcado con la cadena está en el dato' '' \
 # la regla del directorio de trabajo (v2): los generadores que crean la carpeta por su cuenta
 # corren desde la fase (`cwd = phase`) y la guía los nombra uno a uno en esa sección.
 CREATORS='ballerina clojure common-lisp crystal d dart elixir erlang gleam julia ocaml racket'
-guide_seq_body="$(awk '/^## .*Multi-step sequences/,/^## .*Manual generation/' "$GUIDE")"
 missing_phase=""
 for lang in $CREATORS; do
     awk -F'\t' -v l="$lang" 'FNR > 1 && $1 == l && $2 == "new" && $4 == "phase" {s = 1} END {exit !s}' \
         "$REPO/scripts/data/init_sequences.tsv" || missing_phase+="dato:$lang "
-    grep -q -- "$lang" <<<"$guide_seq_body" || missing_phase+="guía:$lang "
 done
 assert_eq 'secuencias: los creadores de carpeta salen de la fase' '' "$missing_phase"
 
@@ -1278,18 +1257,8 @@ assert_contains 'suite: si falta el runner, se detiene' 'detente y avísalo' "$s
 assert_contains 'SPRINT: el 4a deja el runner arrancando' 'runner arrancando sin casos' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
 assert_contains 'SPRINT: el 4c no crea el runner' 'sin crear el runner' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
 
-# v1.1.0: el encargo del README remite a la plantilla en vez de copiar su lista de secciones.
-# Una lista copiada se queda atrás en cuanto la plantilla crece (pasó: la plantilla llegó a
-# 13 secciones y el encargo seguía enumerando seis)
-docs_module_prompt="$(cat -- "$PROMPTS_DIR/docs-module.prompt.md")"
-assert_contains 'docs-module: remite a la plantilla' 'todas las secciones obligatorias de `docs/README_Template.md`' "$docs_module_prompt"
-sections_named=0
-while IFS= read -r title; do
-    [[ -n "$title" ]] || continue
-    grep -qF -- "$title" <<<"$docs_module_prompt" && sections_named=$((sections_named + 1))
-done < <(sed -n 's/^## [^ ]* \(.*\) \/ .*$/\1/p' "$REPO/docs/README_Template.md")
-assert_eq 'docs-module: no vuelve a enumerar las secciones' 'si' \
-    "$([[ "$sections_named" -le 2 ]] && echo si || echo no)"
+# Quien comprueba que el encargo del README no vuelva a enumerar las secciones de la
+# plantilla es `docs/tests/docs_check.sh`: allí se lee la plantilla, que es un documento.
 
 # la plantilla de validación define el contrato del veredicto que `validate` lee
 validate_prompt="$(cat -- "$PROMPTS_DIR/validate.prompt.md")"
@@ -2977,18 +2946,9 @@ assert_contains 'data/README: la columna 5 es lint' 'lint idiomático' "$(cat --
 
 # --- casos de la especificación v1.4.0 (política de CI) ----------------------
 #
-# La política de CI está escrita **antes** de añadir workflows (v1.4.0), y lo que decide es
-# comprobable: el comando sale del catálogo en vez de copiarse, la CI comprueba y **no**
-# firma el acta de `docs/evidence/`, y el SAST del repositorio no es el verbo `verify`.
-CI_POLICY="$REPO/docs/WORKFLOW.md"
-assert_contains 'CI: la política vive donde vive el ciclo' 'CI por submódulo' "$(cat -- "$CI_POLICY")"
-assert_contains 'CI: el comando no se copia del catálogo' 'no se copia del catálogo, se le pide al catálogo' "$(cat -- "$CI_POLICY")"
-assert_contains 'CI: llama a los verbos del catálogo' '`glot test`' "$(cat -- "$CI_POLICY")"
-assert_contains 'CI: la CI comprueba y no firma' 'la CI comprueba y no firma' "$(cat -- "$CI_POLICY")"
-assert_contains 'CI: la CI no escribe el acta' 'no escribe' "$(cat -- "$CI_POLICY")"
-assert_contains 'CI: el SAST del repositorio no es verify' 'no el verbo `verify`' "$(cat -- "$CI_POLICY")"
-assert_contains 'CI: el workflow que copia queda como excepción' 'excepción declarada' "$(cat -- "$CI_POLICY")"
-assert_contains 'CI: la excepción se nombra' 'ada/.github/workflows/tests.yml' "$(cat -- "$CI_POLICY")"
+# La política de CI es **documentación**: dice que el comando sale del catálogo en vez de
+# copiarse, que la CI comprueba y no firma el acta y que el SAST no es el verbo `verify`.
+# La comprueba `docs/tests/docs_check.sh`; aquí solo queda el dato, no el documento.
 
 # Punto 5 del plan: las filas de `toolchains.tsv` que se pueden medir en este entorno ya
 # están (`ada`, `common-lisp`, `rexx`, `scala`), y `rescript` queda como excepción

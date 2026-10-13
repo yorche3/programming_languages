@@ -92,4 +92,30 @@ done
 
 | Módulo | Estado global | Registro |
 |--------|---------------|----------|
+| `core.foundations.hello_world` | ⏳ pendiente | [`01_Audited_Hello_World.md`](01_Audited_Hello_World.md) |
+| `core.foundations.hello_user` | ⏳ pendiente | [`02_Audited_Hello_User.md`](02_Audited_Hello_User.md) |
+| `core.foundations.unit_test_calculator` | ⏳ pendiente | [`03_Audited_Unit_Test_Calculator.md`](03_Audited_Unit_Test_Calculator.md) |
+| `core.foundations.numbers` | ⏳ pendiente | [`04_Audited_Numbers.md`](04_Audited_Numbers.md) |
 | `core.algorithms.naive_sort` | 🟢 50 · 🟡 0 · 🔴 0 | [`05_Audited_Naive_Sort.md`](05_Audited_Naive_Sort.md) |
+| `core.algorithms.data_structures_basics` | 🔄 en curso | [`06_Audited_Data_Structures_Basics.md`](06_Audited_Data_Structures_Basics.md) |
+
+---
+
+## 🎯 Alcance por módulo / Scope per module
+
+**ES:** El alcance de un pase son **dos capas**: la **fidelidad al módulo** —lo que exige la especificación, con sus criterios de aceptación y el techo de complejidad del módulo— y la **idiomaticidad del lenguaje** —los 9 ejes de [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md), con la severidad de [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md)—. La capa del lenguaje es común a los seis; la del módulo cambia con cada especificación.
+
+**EN:** A pass's scope has **two layers**: **module fidelity** —what the specification demands, with its acceptance criteria and the module's complexity ceiling— and **language idiomaticity** —the 9 axes of [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md), with the severity of [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md)—. The language layer is shared by all six; the module layer changes with each specification.
+
+| Módulo / Module | Capa del módulo: qué se audita / Module layer: what is audited | Techo de complejidad / Complexity ceiling |
+|---|---|---|
+| `01 hello_world` | Salida exacta, sin `main` de ejemplo en librería, suite en verde, README N3 | Sin coste algorítmico |
+| `02 hello_user` | Lectura de entrada, salida exacta, contrato de fallo ante entrada vacía, suite, README | Sin coste algorítmico |
+| `03 unit_test_calculator` | Las cuatro operaciones, indicador de fallo de la división por cero, suite propia del módulo, separación `src/`-`test/`, README | $O(1)$ por operación |
+| `04 numbers` | Las tres variantes (`rec` / `acc` / `ite`), sin biblioteca para sumatorias ni MCD, suite por variante, README | $O(n)$ y $O(\log n)$ según operación |
+| `05 naive_sort` | Los tres algoritmos sin biblioteca de ordenamiento **ni de selección**, salida temprana de la burbuja, indicador de fallo, aislamiento de tests | $O(n^2)$ estricto |
+| `06 data_structures_basics` | `Node`, `LinkedList`, `Stack` y `Queue` desde cero, política de resultados por operación, sin colección de biblioteca, suite | $O(1)$ por operación |
+
+**ES:** Un módulo se audita **solo** contra su capa declarada aquí más los 9 ejes: lo que no esté en la especificación no se le puede exigir, y lo que la especificación exija de más se corrige en ella y se avisa en el registro del pase.
+
+**EN:** A module is audited **only** against the layer declared here plus the 9 axes: what is not in the specification cannot be demanded of it, and anything the specification demands beyond it is fixed in the specification and noted in the pass's record.
