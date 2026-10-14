@@ -18,6 +18,7 @@ docs/audits/
 - Un registro por módulo, no por lenguaje: los lenguajes son filas del estado.
 - Cuando el módulo cierra del todo (todos los lenguajes en 🟢) el registro se conserva como histórico; el cierre se anota en [`ROADMAP_UPDATE_CHECKLIST.md`](../ROADMAP_UPDATE_CHECKLIST.md).
 - El ciclo con el que se audita el módulo y se corrige cada lenguaje es el de [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md) —ramas `audit/{fase}/{módulo}` y `align/{fase}/{módulo}`—; el ciclo del sprint sigue siendo [`WORKFLOW.md`](../WORKFLOW.md).
+- **El encargo del pase está versionado en [`audit.prompt.md`](audit.prompt.md)**: es **genérico** —vale para cualquier módulo a `50/50`— y se lanza **a mano**, porque la auditoría no es un encargo de `glot` y no vive en su catálogo de plantillas.
 - **Una auditoría se abre cuando el roadmap marca el módulo homologado en los 50 lenguajes** (`50/50`): antes de eso no hay deuda técnica que registrar, y los hallazgos sobre una especificación sin implementar se resuelven revisándola.
 
 ---
@@ -26,13 +27,21 @@ docs/audits/
 
 | Estado | Significado | Qué implica |
 |:------:|-------------|-------------|
-| 🔴 | **Fallo**: incumple un criterio y hay que refactorizar el código | Bloquea el estado homologado del lenguaje en ese módulo |
-| 🟡 | **Advertencia**: cumple el contrato pero se desvía de la fidelidad algorítmica, del aislamiento de tests o del rendimiento prometido | Se corrige; no bloquea el cierre si el autor lo acepta por escrito |
-| 🔵 | **Arreglado sin integrar**: el código ya cumple, pero el cambio está en el árbol de trabajo y **no** commiteado en el submódulo | No cuenta como 🟢 hasta commitearlo e integrarlo en el `main` del submódulo |
+| 🔴 | **Fallo**: incumple un criterio y hay que refactorizar el código | Bloquea el estado homologado del lenguaje en ese módulo **mientras no se arregle o el autor no lo acepte** (🔵) |
+| 🟡 | **Advertencia**: cumple el contrato pero se desvía de la fidelidad algorítmica, del aislamiento de tests o del rendimiento prometido | Se corrige; si el autor la acepta, pasa a 🔵 |
+| 🔵 | **Aceptado**: la desviación queda **como está por decisión del autor**, declarada con su plantilla en la ficha del lenguaje | Cierra el hallazgo **sin tocar código**; no es 🟢 ni un pendiente |
 | 🟢 | **Homologado**: cumple las **dos capas** con evidencia | — |
 
 > **ES:** Un lenguaje solo vuelve a 🟢 cuando el arreglo está aplicado **y** la suite nativa se ha ejecutado con salida real.
 > **EN:** A language only returns to 🟢 once the fix is applied **and** the native suite has been run with real output.
+
+**ES:** **El «arreglado sin integrar» no es un estado de esta carpeta** (se retiró el 2026-10-13). Mientras un arreglo no esté **integrado** en el `main` de su submódulo, el lenguaje sigue en el estado que le corresponde y el `align` sigue abierto: el árbol de trabajo lo lleva git, no este registro. Por eso no hay barridos de integración —el registro solo dice **qué se verificó** y con qué fecha— y por eso el nivel solo sube cuando el cambio está integrado.
+
+**EN:** **"Fixed but not integrated" is not a state of this folder** (retired on 2026-10-13). While a fix is not **integrated** into its submodule's `main`, the language stays in the state it has and the `align` stays open: the working tree is git's business, not this record's. That is why there are no integration sweeps —the record only says **what was verified**, and when— and why the level only moves up once the change is integrated.
+
+**ES:** 🔵 **Aceptado** lo decide el autor (Tech Lead) y se declara **por escrito** en la ficha del lenguaje, `docs/ruleset/idioms/{lang}.md`, con la plantilla de la desviación y su severidad. Aceptar **no** es homologar: el lenguaje no pasa a 🟢, pero el hallazgo queda **cerrado** y no se vuelve a discutir en el pase siguiente. Es la vía para lo que el lenguaje **obliga** y para lo que el autor decide mantener tal cual.
+
+**EN:** 🔵 **Accepted** is decided by the author (Tech Lead) and declared **in writing** in the language's record, `docs/ruleset/idioms/{lang}.md`, with the deviation's template and its severity. Accepting is **not** homologating: the language does not become 🟢, but the finding is **closed** and is not discussed again in the next pass. It is the route for what the language **mandates** and for what the author decides to keep as is.
 
 ---
 
@@ -89,7 +98,8 @@ done
 ## Estado por Lenguaje / Status by Language
 ### 🔴 Requieren Refactorización / Require Refactoring
 ### 🟡 Advertencias / Warnings
-### 🟢 Homologados / Homologated
+### � Aceptados por el autor / Accepted by the author
+### �🟢 Homologados / Homologated
 ## Deuda por lenguaje / Debt per language   (una sub-tarea por lenguaje y hallazgo)
 ## Plan de cierre / Closure plan
 ## Registro de verificaciones / Verification log   (fecha · alcance · comando · resultado)

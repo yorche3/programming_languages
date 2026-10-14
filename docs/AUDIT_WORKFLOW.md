@@ -50,9 +50,9 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 
 ## 🅰️ Fase A — el pase de auditoría / Phase A — the audit pass
 
-**ES:** Se lleva **entero** en la rama `audit/{fase}/{modulo}` del monorepo y **no toca código**. El método reproducible y los criterios están en [`audits/README.md`](audits/README.md); estos son los cinco pasos y lo que deja cada uno.
+**ES:** Se lleva **entero** en la rama `audit/{fase}/{modulo}` del monorepo y **no toca código**. El método reproducible y los criterios están en [`audits/README.md`](audits/README.md); estos son los cinco pasos y lo que deja cada uno. El **encargo** que ejecuta el agente —genérico, y por eso no un encargo de `glot`— está versionado en [`audits/audit.prompt.md`](audits/audit.prompt.md).
 
-**EN:** It runs **entirely** on the monorepo's `audit/{fase}/{module}` branch and **touches no code**. The reproducible method and criteria are in [`audits/README.md`](audits/README.md); these are the five steps and what each leaves.
+**EN:** It runs **entirely** on the monorepo's `audit/{fase}/{module}` branch and **touches no code**. The reproducible method and criteria are in [`audits/README.md`](audits/README.md); these are the five steps and what each leaves. The **request** the agent runs —generic, and therefore not a `glot` request— is versioned in [`audits/audit.prompt.md`](audits/audit.prompt.md).
 
 | # | Paso / Step | Comando / Command | Artefacto / Artefact |
 |:-:|-------------|-------------------|----------------------|
@@ -64,7 +64,7 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 
 **ES:** El pase deja **tres** artefactos, todos versionados en la misma rama:
 
-- el **registro** `docs/audits/{NN}_Audited_{Modulo}.md`, con los estados 🔴🟡🔵🟢 y el «Plan de cierre»;
+- el **registro** `docs/audits/{NN}_Audited_{Modulo}.md`, con los estados 🔴 fallo, 🟡 advertencia, 🔵 aceptado y 🟢 homologado, y el «Plan de cierre»;
 - las **filas del estado** en [`ruleset/data/idiomaticity_state.tsv`](ruleset/data/idiomaticity_state.tsv), una por `(lenguaje, módulo)`: nivel, eje bloqueante, desviaciones documentadas y commit verificado;
 - el **índice** de [`audits/README.md`](audits/README.md), con el recuento 🟢/🟡/🔴 del módulo.
 
@@ -110,7 +110,7 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 
 1. el **registro** cierra: «Plan de cierre» y «Registro de verificaciones» al día, con fecha, comando y resultado por lenguaje;
 2. el **estado** queda con la fecha y el commit de la verificación de cada lenguaje;
-3. el **índice** de [`audits/README.md`](audits/README.md) refleja el módulo (por ejemplo `🟢 50 · 🟡 0 · 🔴 0`);
+3. el **índice** de [`audits/README.md`](audits/README.md) refleja el módulo (por ejemplo `🟢 50 · 🟡 0 · � 0 · �🔴 0`);
 4. [`ROADMAP.md`](ROADMAP.md): el módulo **sigue** en su estado y su contador `X/50` —la auditoría no toca el contador del sprint— y la **nota** del módulo nombra la auditoría cerrada con su fecha;
 5. [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md): una entrada del pase, con alcance, lenguajes alineados, lenguajes sin cambios y la evidencia.
 
@@ -218,7 +218,7 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 
 | Documento / Document | Qué manda / What it governs |
 |----------------------|------------------------------|
-| [`audits/README.md`](audits/README.md) | Convención de los registros, estados 🔴🟡🔵🟢, criterios y método reproducible |
+| [`audits/README.md`](audits/README.md) | Convención de los registros, estados (fallo, advertencia, aceptado, homologado), criterios y método reproducible |
 | [`ruleset/IDIOMATICITY_LEVELS.md`](ruleset/IDIOMATICITY_LEVELS.md) | La escala de 4 niveles y su lista de verificación binaria por eje |
 | [`ruleset/DEVIATION_POLICY.md`](ruleset/DEVIATION_POLICY.md) | Cuándo una desviación es aceptable y cómo se documenta |
 | [`WORKFLOW.md`](WORKFLOW.md) | El ciclo del sprint: código, pruebas, README y cierre con evidencia |

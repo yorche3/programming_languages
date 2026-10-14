@@ -39,7 +39,11 @@ Registro de deuda técnica del módulo `02_Hello_User`. / Technical debt record 
 
 - ⏳ pendiente / pending
 
-### 🟢 Homologados / Homologated
+### � Aceptados por el autor / Accepted by the author
+
+- — (todavía ninguno / none yet)
+
+### �🟢 Homologados / Homologated
 
 - ⏳ pendiente / pending
 
