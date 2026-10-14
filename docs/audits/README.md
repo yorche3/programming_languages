@@ -111,7 +111,7 @@ done
 
 | Módulo | Estado global | Registro |
 |--------|---------------|----------|
-| `core.foundations.hello_world` | ⏳ pendiente | [`01_Audited_Hello_World.md`](01_Audited_Hello_World.md) |
+| `core.foundations.hello_world` | 🔴 34 · 🟡 1 · 🔵 0 · 🟢 15 | [`01_Audited_Hello_World.md`](01_Audited_Hello_World.md) |
 | `core.foundations.hello_user` | ⏳ pendiente | [`02_Audited_Hello_User.md`](02_Audited_Hello_User.md) |
 | `core.foundations.unit_test_calculator` | ⏳ pendiente | [`03_Audited_Unit_Test_Calculator.md`](03_Audited_Unit_Test_Calculator.md) |
 | `core.foundations.numbers` | ⏳ pendiente | [`04_Audited_Numbers.md`](04_Audited_Numbers.md) |
@@ -128,7 +128,7 @@ done
 
 | Módulo / Module | Capa del módulo: qué se audita / Module layer: what is audited | Techo de complejidad / Complexity ceiling |
 |---|---|---|
-| `01 hello_world` | Salida exacta, sin `main` de ejemplo en librería, suite en verde, README N3 | Sin coste algorítmico |
+| `01 hello_world` | Mensaje exacto `Hello, World! from {Lenguaje}!`, solo biblioteca estándar, fichero `hello_world.ext`/`HelloWorld.ext`, ejecución sin errores, README N3 | Sin coste algorítmico |
 | `02 hello_user` | Lectura de entrada, salida exacta, contrato de fallo ante entrada vacía, suite, README | Sin coste algorítmico |
 | `03 unit_test_calculator` | Las cuatro operaciones, indicador de fallo de la división por cero, suite propia del módulo, separación `src/`-`test/`, README | $O(1)$ por operación |
 | `04 numbers` | Las tres variantes (`rec` / `acc` / `ite`), sin biblioteca para sumatorias ni MCD, suite por variante, README | $O(n)$ y $O(\log n)$ según operación |
