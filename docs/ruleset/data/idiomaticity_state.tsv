@@ -50,52 +50,52 @@ python	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	
 r	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
 racket	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
 ada	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	171b749	2026-10-13
-assembly	hello_world	foundations	idiomatic	-	pending	module: output has no final '!'	0cd2c95	2026-10-13
-ballerina	hello_world	foundations	idiomatic	-	pending	module: output is 'Hello, World!' (missing 'from Ballerina!')	9cb2f55	2026-10-13
-c	hello_world	foundations	idiomatic	-	0	Clean	04498d6	2026-10-13
-clojure	hello_world	foundations	idiomatic	-	0	Clean	4147053	2026-10-13
-cobol	hello_world	foundations	idiomatic	-	pending	module: 'Hello World! from Cobol!' (comma and display name)	768f142	2026-10-13
-common-lisp	hello_world	foundations	idiomatic	-	pending	module: output has no final '!'	d241cb2	2026-10-13
-cpp	hello_world	foundations	idiomatic	-	0	Clean	e34e175	2026-10-13
-crystal	hello_world	foundations	idiomatic	-	0	Clean	2681869	2026-10-13
-csharp	hello_world	foundations	idiomatic	-	pending	module: file 'Program.cs' instead of hello_world/HelloWorld	ed24829	2026-10-13
-d	hello_world	foundations	idiomatic	-	pending	module: 'Hello World! from D' (comma and final '!')	2f6b871	2026-10-13
-dart	hello_world	foundations	idiomatic	-	0	Clean	1614ce8	2026-10-13
-elixir	hello_world	foundations	idiomatic	-	0	Clean	08ed882	2026-10-13
-erlang	hello_world	foundations	idiomatic	-	pending	module: 'Hello world! from Erlang' (case and final '!')	3e063d2	2026-10-13
-forth	hello_world	foundations	idiomatic	-	0	Clean	b06663a	2026-10-13
-fsharp	hello_world	foundations	idiomatic	-	pending	module: no final '!'; file 'hello-world.fsx'	7d1bdc2	2026-10-13
-go	hello_world	foundations	idiomatic	-	0	Clean	1d4bba8	2026-10-13
-grain	hello_world	foundations	idiomatic	-	pending	module: README documents 'grain run', which fails; the working command is 'grain hello_world.gr'	3e26355	2026-10-13
-groovy	hello_world	foundations	idiomatic	-	pending	module: stray comma before 'from'	09698a7	2026-10-13
-haskell	hello_world	foundations	idiomatic	-	0	Clean	d6919aa	2026-10-13
-java	hello_world	foundations	idiomatic	-	pending	module: README misses one of the four applicable template sections	3f09cd5	2026-10-13
-javascript	hello_world	foundations	idiomatic	-	pending	module: README misses one applicable template section	249d601	2026-10-13
-julia	hello_world	foundations	idiomatic	-	pending	module: file 'helloworld.jl'	b049a83	2026-10-13
-kotlin	hello_world	foundations	idiomatic	-	0	Clean	b7ae5fa	2026-10-13
-lua	hello_world	foundations	idiomatic	-	pending	module: file 'helloworld.lua'	699f49a	2026-10-13
-nim	hello_world	foundations	idiomatic	-	pending	module: file 'helloworld.nim'	80b7f8c	2026-10-13
-ocaml	hello_world	foundations	idiomatic	-	pending	module: 'Ocaml' must be 'OCaml'; file 'helloworld.ml'	5c9d1ce	2026-10-13
-perl	hello_world	foundations	idiomatic	-	pending	module: file 'helloworld.pl'	88b2d97	2026-10-13
-php	hello_world	foundations	idiomatic	-	0	Clean	e97e324	2026-10-13
-prolog	hello_world	foundations	idiomatic	-	pending	module: no final '!'; file 'helloworld.pl'	8cec0f0	2026-10-13
-purescript	hello_world	foundations	idiomatic	-	pending	module: no final '!'; file 'src/Main.purs'	d87ecd2	2026-10-13
-python	hello_world	foundations	idiomatic	-	pending	module: file 'helloworld.py'	3b50f28	2026-10-13
-raku	hello_world	foundations	idiomatic	-	pending	module: output has no final '!'	64998a5	2026-10-13
-rescript	hello_world	foundations	idiomatic	-	pending	module: output has no final '!'	b48b0d7	2026-10-13
-rexx	hello_world	foundations	idiomatic	-	pending	module: 'Rexx' must be 'REXX' and no final '!'	e62aae0	2026-10-13
-ruby	hello_world	foundations	idiomatic	-	pending	module: no final '!'; file 'helloworld.rb'	c4da9bd	2026-10-13
-rust	hello_world	foundations	idiomatic	-	pending	module: file 'helloworld.rs'	3e8204a	2026-10-13
-scala	hello_world	foundations	idiomatic	-	pending	module: file 'helloworld.scala'	144b501	2026-10-13
-scheme	hello_world	foundations	idiomatic	-	pending	module: no final '!'; README misses one applicable section	5fe1428	2026-10-13
-swift	hello_world	foundations	idiomatic	-	pending	module: file 'helloworld.swift'	a8cec70	2026-10-13
-tcl-tk	hello_world	foundations	idiomatic	-	pending	module: 'TCL/TK' must be 'Tcl/Tk' and no final '!'; README misses one section	0670f07	2026-10-13
-typescript	hello_world	foundations	idiomatic	-	pending	module: file 'helloworld.ts'	c3ce5f2	2026-10-13
-v	hello_world	foundations	idiomatic	-	pending	module: 'VLang' must be 'V' and no final '!'	d3443a7	2026-10-13
-vala	hello_world	foundations	idiomatic	-	pending	module: file 'helloworld.vala'	70a0473	2026-10-13
-gleam	hello_world	foundations	mostly-idiomatic	tests	pending	template test asserts a made-up greeting; file 'helloworld.gleam'	6b10fba	2026-10-13
-haxe	hello_world	foundations	mostly-idiomatic	documentation	pending	uses trace (debug mechanism) instead of Sys.println; deviation undocumented	8a00e5e	2026-10-13
-r	hello_world	foundations	mostly-idiomatic	documentation	pending	print() adds '[1] ' and quotes; cat() is the idiomatic text output; message misses the comma	11f6122	2026-10-13
-racket	hello_world	foundations	mostly-idiomatic	documentation	pending	println prints the value with quotes; displayln is the text output	79c9160	2026-10-13
-elm	hello_world	foundations	workaround	unsafe	pending	Debug.log for output (dev mechanism) plus a run.js harness; output 'from Elm: ()'	1fc72c2	2026-10-13
-zig	hello_world	foundations	workaround	unsafe	pending	std.debug.print writes to stderr; 'Hello, world!' (case and final '!')	257c65f	2026-10-13
+assembly	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	5554c50	2026-10-13
+ballerina	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	52f6046	2026-10-13
+c	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	8d5fb33	2026-10-13
+clojure	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	4147053	2026-10-13
+cobol	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	2e30b93	2026-10-13
+common-lisp	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	d62d128	2026-10-13
+cpp	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	261af46	2026-10-13
+crystal	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	2681869	2026-10-13
+csharp	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	f945f2a	2026-10-13
+d	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	963e66e	2026-10-13
+dart	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	1614ce8	2026-10-13
+elixir	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	08ed882	2026-10-13
+erlang	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	055195d	2026-10-13
+forth	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	b06663a	2026-10-13
+fsharp	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	f46e5a1	2026-10-13
+go	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	1d4bba8	2026-10-13
+grain	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	aaa3e73	2026-10-13
+groovy	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	2f03c25	2026-10-13
+haskell	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	d6919aa	2026-10-13
+java	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	9dbb202	2026-10-13
+javascript	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	84937f4	2026-10-13
+julia	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	2804411	2026-10-13
+kotlin	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	e6984c0	2026-10-13
+lua	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	a0907d8	2026-10-13
+nim	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	4e91d08	2026-10-13
+ocaml	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	c7fa35b	2026-10-13
+perl	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	34266a5	2026-10-13
+php	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	e97e324	2026-10-13
+prolog	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	a0517ca	2026-10-13
+purescript	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	4ec94bf	2026-10-13
+python	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	9a153cc	2026-10-13
+raku	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	8e098c8	2026-10-13
+rescript	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	77af58a	2026-10-13
+rexx	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	766ec23	2026-10-13
+ruby	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	eca878f	2026-10-13
+rust	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	42368a0	2026-10-13
+scala	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	f9709ed	2026-10-13
+scheme	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	edf0ad1	2026-10-13
+swift	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	6bd47fe	2026-10-13
+tcl-tk	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	86136e7	2026-10-13
+typescript	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	6fd5518	2026-10-13
+v	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	b4f8869	2026-10-13
+vala	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	ea8fb14	2026-10-13
+gleam	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	ff75ebb	2026-10-13
+haxe	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	22cda2b	2026-10-13
+r	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	d9665a9	2026-10-13
+racket	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	7f5be54	2026-10-13
+elm	hello_world	foundations	mostly-idiomatic	-	1	Debug.log for output (no stdout in Elm stdlib; the ': ()' comes from the debug facility); accepted by the author: docs/ruleset/idioms/elm.md	7691158	2026-10-13
+zig	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	9cd126d	2026-10-13

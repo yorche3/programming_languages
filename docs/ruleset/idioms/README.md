@@ -42,11 +42,11 @@ docs/ruleset/idioms/
 
 | Lenguaje / Language | Ficha / Record | Desviaciones activas / Active deviations |
 |---|---|---|
-| — | Todavía ninguna / None yet | — |
+| `elm` | [`elm.md`](elm.md) | 1 aceptada / 1 accepted: salida por `Debug.log` (rareza del lenguaje, aceptada en el registro de `hello_world`) |
 
-**ES:** Ninguna ficha creada todavía. La primera tanda es la de los módulos ya a `50/50` —`hello_world`, `hello_user`, `unit_test_calculator`, `numbers`, `naive_sort` y `data_structures_basics`—, que son los que va a recorrer el pase de auditoría.
+**ES:** El pase de auditoría abre la ficha de un lenguaje cuando lo recorre o cuando introduce su primera desviación documentada. `elm` es la primera: la salida por consola de `hello_world`, que la stdlib solo ofrece como utilidad de depuración.
 
-**EN:** No record created yet. The first batch is the one for the modules already at `50/50` —`hello_world`, `hello_user`, `unit_test_calculator`, `numbers`, `naive_sort` and `data_structures_basics`—, which are the ones the audit pass will walk through.
+**EN:** The audit pass creates a language's record when it walks it or when it introduces its first documented deviation. `elm` is the first one: `hello_world`'s console output, which the stdlib only offers as a debug facility.
 
 ---
 
