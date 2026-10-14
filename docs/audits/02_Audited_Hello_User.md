@@ -16,7 +16,7 @@ Registro de deuda técnica del módulo `02_Hello_User`. / Technical debt record 
 
 **EN:** Two layers. The **module** layer comes from its specification's acceptance criteria; the **language** layer from the ruleset's 9 axes.
 
-1. **Fidelidad al módulo.** Lectura de la entrada, saludo exacto en la salida, contrato declarado para la entrada vacía o inválida, suite en verde y README de Nivel 3. Sin coste algorítmico.
+1. **Fidelidad al módulo.** (a) El programa pide el nombre por consola y su salida **contiene** el prompt `What is your name?` —se admite que lo siga un espacio o un salto de línea— y **responde con el nombre ingresado** en el saludo (`Hello, John!` para la entrada `John`); los saltos de línea que introduzcan la lectura o la impresión del lenguaje son suyos y no se penalizan, y **no** se normaliza la entrada (nada de `trim`); (b) usa **solo** la biblioteca estándar; (c) el fichero fuente sigue la convención `hello_user.ext` o `HelloUser.ext`. Sin coste algorítmico: no hay complejidad que auditar. La suite —cuando exista— y el README se evalúan en los ejes `tests` y `documentation`, y cualquier otra desviación de eje se anota para corregirla en el `align`.
 2. **Idiomaticidad del lenguaje.** `construction`, `naming`, `failure`, `access`, `encapsulation`, `unsafe`, `complexity`, `documentation` y `tests`, con la severidad de [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md).
 
 ## Alcance y método de esta verificación / Scope and method
@@ -24,8 +24,8 @@ Registro de deuda técnica del módulo `02_Hello_User`. / Technical debt record 
 | Paso / Step | Alcance / Scope | Resultado / Result |
 |-------------|-----------------|--------------------|
 | 1. Barrido léxico | 50 lenguajes, solo archivos rastreados por git | ⏳ pendiente / pending |
-| 2. Lectura de código | Entrada/salida, contrato de fallo, construcción y comentarios | ⏳ pendiente / pending |
-| 3. Ejecución de suites | Comando nativo del catálogo por lenguaje | ⏳ pendiente / pending |
+| 2. Lectura de código | Entrada/salida y cómo se guarda lo ingresado, construcción y comentarios | ⏳ pendiente / pending |
+| 3. Ejecución | El comando documentado en cada README, con la entrada del módulo (`John`), y el nativo del catálogo cuando el README no lo traiga | ⏳ pendiente / pending |
 | 4. Documentación | README del módulo y comentarios del código | ⏳ pendiente / pending |
 | 5. Estado del árbol | `git status --short` en los 50 submódulos | ⏳ pendiente / pending |
 
@@ -39,11 +39,11 @@ Registro de deuda técnica del módulo `02_Hello_User`. / Technical debt record 
 
 - ⏳ pendiente / pending
 
-### � Aceptados por el autor / Accepted by the author
+### 🔵 Aceptados por el autor / Accepted by the author
 
 - — (todavía ninguno / none yet)
 
-### �🟢 Homologados / Homologated
+### 🟢 Homologados / Homologated
 
 - ⏳ pendiente / pending
 

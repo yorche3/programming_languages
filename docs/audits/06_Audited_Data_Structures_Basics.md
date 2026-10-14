@@ -44,11 +44,11 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 
 - 🔄 en curso / in progress: las desviaciones de nombre y de acceso sin documentar
 
-### � Aceptados por el autor / Accepted by the author
+### 🔵 Aceptados por el autor / Accepted by the author
 
 - ⏳ pendiente de la decisión del autor / pending the author's decision
 
-### �🟢 Homologados / Homologated
+### 🟢 Homologados / Homologated
 
 - ⏳ pendiente / pending
 

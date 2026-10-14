@@ -43,11 +43,11 @@ Registro de deuda técnica del módulo `05_Naive_Sort`. / Technical debt record 
 
 - ⏳ pendiente / pending
 
-### � Aceptados por el autor / Accepted by the author
+### 🔵 Aceptados por el autor / Accepted by the author
 
 - — (todavía ninguno / none yet)
 
-### �🟢 Homologados / Homologated
+### 🟢 Homologados / Homologated
 
 - ⏳ pendiente / pending
 

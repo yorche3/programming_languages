@@ -98,8 +98,8 @@ done
 ## Estado por Lenguaje / Status by Language
 ### 🔴 Requieren Refactorización / Require Refactoring
 ### 🟡 Advertencias / Warnings
-### � Aceptados por el autor / Accepted by the author
-### �🟢 Homologados / Homologated
+### 🔵 Aceptados por el autor / Accepted by the author
+### 🟢 Homologados / Homologated
 ## Deuda por lenguaje / Debt per language   (una sub-tarea por lenguaje y hallazgo)
 ## Plan de cierre / Closure plan
 ## Registro de verificaciones / Verification log   (fecha · alcance · comando · resultado)
@@ -129,7 +129,7 @@ done
 | Módulo / Module | Capa del módulo: qué se audita / Module layer: what is audited | Techo de complejidad / Complexity ceiling |
 |---|---|---|
 | `01 hello_world` | Mensaje exacto `Hello, World! from {Lenguaje}!`, solo biblioteca estándar, fichero `hello_world.ext`/`HelloWorld.ext`, ejecución sin errores, README N3 | Sin coste algorítmico |
-| `02 hello_user` | Lectura de entrada, salida exacta, contrato de fallo ante entrada vacía, suite, README | Sin coste algorítmico |
+| `02 hello_user` | La salida **contiene** el prompt `What is your name?` (se admite espacio o salto de línea detrás) y **responde con el nombre ingresado** en el saludo; solo biblioteca estándar; fichero `hello_user.ext`/`HelloUser.ext`; README N3 | Sin coste algorítmico |
 | `03 unit_test_calculator` | Las cuatro operaciones, indicador de fallo de la división por cero, suite propia del módulo, separación `src/`-`test/`, README | $O(1)$ por operación |
 | `04 numbers` | Las tres variantes (`rec` / `acc` / `ite`), sin biblioteca para sumatorias ni MCD, suite por variante, README | $O(n)$ y $O(\log n)$ según operación |
 | `05 naive_sort` | Los tres algoritmos sin biblioteca de ordenamiento **ni de selección**, salida temprana de la burbuja, indicador de fallo, aislamiento de tests | $O(n^2)$ estricto |
