@@ -64,9 +64,9 @@ mode: agent
 
 | # | Paso | Cómo / How |
 |:-:|------|-----------|
-| 1 | **Barrido léxico** | `git -C {lang} ls-files "core/{fase}/{modulo}"`, filtrado por extensiones, y `grep` de los patrones de cada eje: ordenamiento o **selección** de biblioteca, `Option`/`Maybe`/`Result`, excepciones en el camino de contrato, `unsafe`/`unwrap`/`!!`/`fatalError`, generadores formales de documentación (`@param`, `///`, `/**`, Haddock, dartdoc…) |
-| 2 | **Lectura de código** | Lo que señale el barrido, más: constructor, nombres, indicador de fallo, acceso (propiedad o método), encapsulación y la **complejidad real** del camino caliente, contrastada con el techo del módulo |
-| 3 | **Ejecución** | El comando de `languages.tsv` por lenguaje, **copiado sin editar**. Si sale en rojo, se escribe en rojo: la evidencia es lo que pasó |
+| 1 | **Barrido léxico** | `git -C {lang} ls-files "core/{fase}/{modulo}"`, filtrado por extensiones, y `grep` de los patrones de cada eje: ordenamiento o **selección** de biblioteca, `Option`/`Maybe`/`Result`, excepciones en el camino de contrato, `unsafe`/`unwrap`/`!!`/`fatalError`, generadores formales de documentación (`@param`, `///`, `/**`, Haddock, dartdoc…) y, en los módulos con entrada, los patrones de lectura (`input`, `Scanner`, `readLine`, `gets`…) y de escritura del prompt |
+| 2 | **Lectura de código** | Lo que señale el barrido, más: constructor, nombres, indicador de fallo, acceso (propiedad o método), encapsulación y la **complejidad real** del camino caliente, contrastada con el techo del módulo. En los módulos **interactivos** la salida se compara **por contenido**, no literalmente: se admite el espacio o el salto de línea que siga al prompt y los saltos que introduzcan la lectura o la impresión del propio lenguaje, y la entrada **no** se normaliza (nada de `trim`): lo que se valida es que responda con lo ingresado |
+| 3 | **Ejecución** | El comando de `languages.tsv` por lenguaje, **copiado sin editar**, y en los módulos con entrada se le pasa la del módulo (en `hello_user`, `John`). Si sale en rojo, se escribe en rojo: la evidencia es lo que pasó |
 | 4 | **Documentación** | README del módulo contra [`README_Template.md`](../../README_Template.md) —secciones obligatorias y, si hubo desviación, su nota aclaratoria— y los comentarios del código (entrada y salida, sin generadores formales) |
 | 5 | **Estado del árbol** | `git -C {lang} status --short` en cada submódulo: los cambios locales sin confirmar también se anotan |
 
@@ -80,7 +80,7 @@ mode: agent
 
 **ES:** Tres artefactos, ninguno de código:
 
-1. **El registro** `{registro}`, rellenando sus secciones: criterios, tabla de alcance y método **con el resultado de cada paso**, estado por lenguaje en 🔴 / 🟡 / � / 🟢, deuda por lenguaje (una sub-tarea por hallazgo), plan de cierre y una fila por comando en el **registro de verificaciones** (fecha · alcance · comando · resultado). Es un **snapshot**: dice lo que se encontró, no lo que se arregló después. Un hallazgo que el autor acepte se anota en 🔵, **no** desaparece.
+1. **El registro** `{registro}`, rellenando sus secciones: criterios, tabla de alcance y método **con el resultado de cada paso**, estado por lenguaje en 🔴 / 🟡 / 🔵 / 🟢, deuda por lenguaje (una sub-tarea por hallazgo), plan de cierre y una fila por comando en el **registro de verificaciones** (fecha · alcance · comando · resultado). Es un **snapshot**: dice lo que se encontró, no lo que se arregló después. Un hallazgo que el autor acepte se anota en 🔵, **no** desaparece.
 2. **El bloque del estado** en [`docs/ruleset/data/idiomaticity_state.tsv`](../../ruleset/data/idiomaticity_state.tsv): **una fila por lenguaje** del módulo, con las mismas columnas y el mismo orden que el bloque que ya existe (`language`, `module`, `phase`, `module_fidelity`, `blocking_axis`, `deviations_documented`, `notes`, `commit`, `last_updated`). El `commit` es el del submódulo que se ha verificado y `last_updated` la fecha de la verificación; lo que no se haya verificado no se inventa.
 3. **Las fichas de lenguaje** que hagan falta en [`docs/ruleset/idioms/{lang}.md`](../../ruleset/idioms/), escritas desde [`Idioms_Template.md`](../../ruleset/Idioms_Template.md) —una por lenguaje con desviación aceptada u obligada por el lenguaje—, y el índice de esa carpeta al día.
 
@@ -123,6 +123,15 @@ Y contesta en dos líneas: cuántos lenguajes quedan en cada estado, y qué bloq
 {capa del módulo}  salida exacta, sin main de ejemplo en librería, suite en verde, README N3; sin coste algorítmico
 ```
 
-Después, en orden: `02 hello_user`, `03 unit_test_calculator`, `04 numbers`, `05 naive_sort` y `06 data_structures_basics`. `06` ya tiene su bloque de estado abierto: se **completa**, no se duplica.
+Y `hello_user`, con `{NN}=02`:
 
-**EN:** `hello_world` with `{phase}=foundations`, `{NN}=01`, then in order `02`, `03`, `04`, `05` and `06`. `06` already has its state block open: it gets **completed**, not duplicated.
+```text
+{registro}  docs/audits/02_Audited_Hello_User.md
+{capa del módulo}  la salida contiene el prompt `Enter your name: ` y responde con el nombre ingresado (`Hello, John!`); solo biblioteca estándar; fichero hello_user.ext/HelloUser.ext; README N3
+{entrada}   John
+{nota}      los saltos que introduzca el lenguaje se toleran y la entrada no se normaliza; el resto de ejes se anota para el align
+```
+
+Después, en orden: `03 unit_test_calculator`, `04 numbers`, `05 naive_sort` y `06 data_structures_basics`. `06` ya tiene su bloque de estado abierto: se **completa**, no se duplica.
+
+**EN:** `hello_world` with `{phase}=foundations`, `{NN}=01`, and `hello_user` with `{NN}=02`; then in order `03`, `04`, `05` and `06`. `06` already has its state block open: it gets **completed**, not duplicated.

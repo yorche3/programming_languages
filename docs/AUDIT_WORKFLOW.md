@@ -110,7 +110,7 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 
 1. el **registro** cierra: «Plan de cierre» y «Registro de verificaciones» al día, con fecha, comando y resultado por lenguaje;
 2. el **estado** queda con la fecha y el commit de la verificación de cada lenguaje;
-3. el **índice** de [`audits/README.md`](audits/README.md) refleja el módulo (por ejemplo `🟢 50 · 🟡 0 · � 0 · �🔴 0`);
+3. el **índice** de [`audits/README.md`](audits/README.md) refleja el módulo (por ejemplo `🟢 50 · 🟡 0 · 🔵 0 · 🔴 0`);
 4. [`ROADMAP.md`](ROADMAP.md): el módulo **sigue** en su estado y su contador `X/50` —la auditoría no toca el contador del sprint— y la **nota** del módulo nombra la auditoría cerrada con su fecha;
 5. [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md): una entrada del pase, con alcance, lenguajes alineados, lenguajes sin cambios y la evidencia.
 

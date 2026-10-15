@@ -98,8 +98,8 @@ done
 ## Estado por Lenguaje / Status by Language
 ### 🔴 Requieren Refactorización / Require Refactoring
 ### 🟡 Advertencias / Warnings
-### � Aceptados por el autor / Accepted by the author
-### �🟢 Homologados / Homologated
+### 🔵 Aceptados por el autor / Accepted by the author
+### 🟢 Homologados / Homologated
 ## Deuda por lenguaje / Debt per language   (una sub-tarea por lenguaje y hallazgo)
 ## Plan de cierre / Closure plan
 ## Registro de verificaciones / Verification log   (fecha · alcance · comando · resultado)
@@ -112,7 +112,7 @@ done
 | Módulo | Estado global | Registro |
 |--------|---------------|----------|
 | `core.foundations.hello_world` | 🔴 0 · 🟡 0 · 🔵 1 (`elm`, desviación aceptada en `docs/ruleset/idioms/elm.md`) · 🟢 49 — **cerrado**: 40 commits de `align` + 27 de corrección, integrados y empujados | [`01_Audited_Hello_World.md`](01_Audited_Hello_World.md) |
-| `core.foundations.hello_user` | ⏳ pendiente | [`02_Audited_Hello_User.md`](02_Audited_Hello_User.md) |
+| `core.foundations.hello_user` | 🔴 0 · 🟡 0 · 🔵 1 (`grain`, sin stdin: [`idioms/grain.md`](../ruleset/idioms/grain.md)) · 🟢 49 — **cerrado**: 34 commits en 32 submódulos, integrados y empujados | [`02_Audited_Hello_User.md`](02_Audited_Hello_User.md) |
 | `core.foundations.unit_test_calculator` | ⏳ pendiente | [`03_Audited_Unit_Test_Calculator.md`](03_Audited_Unit_Test_Calculator.md) |
 | `core.foundations.numbers` | ⏳ pendiente | [`04_Audited_Numbers.md`](04_Audited_Numbers.md) |
 | `core.algorithms.naive_sort` | ⏳ pendiente | [`05_Audited_Naive_Sort.md`](05_Audited_Naive_Sort.md) |
@@ -129,7 +129,7 @@ done
 | Módulo / Module | Capa del módulo: qué se audita / Module layer: what is audited | Techo de complejidad / Complexity ceiling |
 |---|---|---|
 | `01 hello_world` | Mensaje exacto `Hello, World! from {Lenguaje}!`, solo biblioteca estándar, fichero `hello_world.ext`/`HelloWorld.ext`, ejecución sin errores, README N3 | Sin coste algorítmico |
-| `02 hello_user` | Lectura de entrada, salida exacta, contrato de fallo ante entrada vacía, suite, README | Sin coste algorítmico |
+| `02 hello_user` | La salida **contiene** el prompt `Enter your name: ` y **responde con el nombre ingresado** en el saludo (`Hello, John!` para la entrada `John`); solo biblioteca estándar; fichero `hello_user.ext`/`HelloUser.ext`; README N3. *(Criterio corregido el 2026-10-14: antes citaba `What is your name?`; el cambio queda anotado en la especificación.)* | Sin coste algorítmico |
 | `03 unit_test_calculator` | Las cuatro operaciones, indicador de fallo de la división por cero, suite propia del módulo, separación `src/`-`test/`, README | $O(1)$ por operación |
 | `04 numbers` | Las tres variantes (`rec` / `acc` / `ite`), sin biblioteca para sumatorias ni MCD, suite por variante, README | $O(n)$ y $O(\log n)$ según operación |
 | `05 naive_sort` | Los tres algoritmos sin biblioteca de ordenamiento **ni de selección**, salida temprana de la burbuja, indicador de fallo, aislamiento de tests | $O(n^2)$ estricto |

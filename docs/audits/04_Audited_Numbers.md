@@ -39,11 +39,11 @@ Registro de deuda técnica del módulo `04_Numbers`. / Technical debt record for
 
 - ⏳ pendiente / pending
 
-### � Aceptados por el autor / Accepted by the author
+### 🔵 Aceptados por el autor / Accepted by the author
 
 - — (todavía ninguno / none yet)
 
-### �🟢 Homologados / Homologated
+### 🟢 Homologados / Homologated
 
 - ⏳ pendiente / pending
 

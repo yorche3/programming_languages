@@ -39,11 +39,11 @@ Registro de deuda técnica del módulo `03_Unit_Test_Calculator`. / Technical de
 
 - ⏳ pendiente / pending
 
-### � Aceptados por el autor / Accepted by the author
+### 🔵 Aceptados por el autor / Accepted by the author
 
 - — (todavía ninguno / none yet)
 
-### �🟢 Homologados / Homologated
+### 🟢 Homologados / Homologated
 
 - ⏳ pendiente / pending
 

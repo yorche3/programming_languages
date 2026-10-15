@@ -43,6 +43,7 @@ docs/ruleset/idioms/
 | Lenguaje / Language | Ficha / Record | Desviaciones activas / Active deviations |
 |---|---|---|
 | `elm` | [`elm.md`](elm.md) | 1 aceptada / 1 accepted: salida por `Debug.log` (rareza del lenguaje, aceptada en el registro de `hello_world`) |
+| `grain` | [`grain.md`](grain.md) | 1 aceptada / 1 accepted: sin stdin, el módulo interactivo no se puede implementar (aceptada en el registro de `hello_user`) |
 
 **ES:** El pase de auditoría abre la ficha de un lenguaje cuando lo recorre o cuando introduce su primera desviación documentada. `elm` es la primera: la salida por consola de `hello_world`, que la stdlib solo ofrece como utilidad de depuración.
 
