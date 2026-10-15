@@ -37,16 +37,20 @@ Una línea de texto ingresada por el usuario (nombre del usuario).
 ### Salida esperada / Expected Output
 
 ```text
-What is your name? John
+Enter your name: John
 Hello, John!
 ```
+
+> **📝 Nota histórica / Historical note — 2026-10-14:** esta especificación pedía antes el prompt `What is your name?`. El texto correcto del módulo es **`Enter your name: `**, que es lo que implementan los lenguajes; el criterio de la auditoría de `hello_user` se corrigió a esa cadena.
+>
+> **EN:** This specification previously asked for the `What is your name?` prompt. The module's correct text is **`Enter your name: `**, which is what the languages implement; the `hello_user` audit criterion was corrected to that string.
 
 > **ES:** Reemplaza "John" por cualquier nombre que ingrese el usuario.  
 > **EN:** Replace "John" with whatever name the user enters.
 
 ## ✅ Criterios de aceptación / Acceptance Criteria
 
-- [ ] **ES:** El programa se ejecuta sin errores y muestra el mensaje exacto.  
+- [ ] **ES:** El programa se ejecuta sin errores y muestra el mensaje exacto: el prompt `Enter your name: ` y, con la entrada `John`, `Hello, John!`.  
       **EN:** The program runs without errors and displays the exact message.
 - [ ] **ES:** Usa únicamente la biblioteca estándar del lenguaje (sin dependencias externas).  
       **EN:** Uses only the language's standard library (no external dependencies).
@@ -60,7 +64,7 @@ Hello, John!
 ### Pseudocódigo / Pseudocode
 
 ```pseudocode
-ask "What is your name?" 
+ask "Enter your name: "
 store user's answer/input in variable 'name'
 show "Hello, " + name + "!"
 ```
@@ -69,7 +73,7 @@ show "Hello, " + name + "!"
 
 ```python
 # hello_user.py
-name = input("What is your name? ")
+name = input("Enter your name: ")
 print("Hello, " + name + "!")
 ```
 
@@ -82,7 +86,7 @@ import java.util.Scanner;
 public class HelloUser {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("What is your name? ");
+        System.out.print("Enter your name: ");
         String name = scanner.nextLine();
         System.out.println("Hello, " + name + "!");
     }

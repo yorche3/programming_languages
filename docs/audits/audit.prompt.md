@@ -127,9 +127,9 @@ Y `hello_user`, con `{NN}=02`:
 
 ```text
 {registro}  docs/audits/02_Audited_Hello_User.md
-{capa del módulo}  la salida contiene el prompt `What is your name?` y responde con el nombre ingresado (`Hello, John!`); solo biblioteca estándar; fichero hello_user.ext/HelloUser.ext; README N3
+{capa del módulo}  la salida contiene el prompt `Enter your name: ` y responde con el nombre ingresado (`Hello, John!`); solo biblioteca estándar; fichero hello_user.ext/HelloUser.ext; README N3
 {entrada}   John
-{nota}      el espacio o salto de línea tras el prompt y los saltos que introduzca el lenguaje son suyos: no se normaliza la entrada, y el resto de ejes se anota para el align
+{nota}      los saltos que introduzca el lenguaje se toleran y la entrada no se normaliza; el resto de ejes se anota para el align
 ```
 
 Después, en orden: `03 unit_test_calculator`, `04 numbers`, `05 naive_sort` y `06 data_structures_basics`. `06` ya tiene su bloque de estado abierto: se **completa**, no se duplica.
