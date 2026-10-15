@@ -112,7 +112,7 @@ done
 | Módulo | Estado global | Registro |
 |--------|---------------|----------|
 | `core.foundations.hello_world` | 🔴 0 · 🟡 0 · 🔵 1 (`elm`, desviación aceptada en `docs/ruleset/idioms/elm.md`) · 🟢 49 — **cerrado**: 40 commits de `align` + 27 de corrección, integrados y empujados | [`01_Audited_Hello_World.md`](01_Audited_Hello_World.md) |
-| `core.foundations.hello_user` | ⏳ pendiente | [`02_Audited_Hello_User.md`](02_Audited_Hello_User.md) |
+| `core.foundations.hello_user` | 🔴 0 · 🟡 0 · 🔵 1 (`grain`, sin stdin: [`idioms/grain.md`](../ruleset/idioms/grain.md)) · 🟢 49 — **cerrado**: 34 commits en 32 submódulos, integrados y empujados | [`02_Audited_Hello_User.md`](02_Audited_Hello_User.md) |
 | `core.foundations.unit_test_calculator` | ⏳ pendiente | [`03_Audited_Unit_Test_Calculator.md`](03_Audited_Unit_Test_Calculator.md) |
 | `core.foundations.numbers` | ⏳ pendiente | [`04_Audited_Numbers.md`](04_Audited_Numbers.md) |
 | `core.algorithms.naive_sort` | ⏳ pendiente | [`05_Audited_Naive_Sort.md`](05_Audited_Naive_Sort.md) |
