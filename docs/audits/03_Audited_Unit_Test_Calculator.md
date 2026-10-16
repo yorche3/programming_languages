@@ -30,7 +30,7 @@ Registro de deuda técnica del módulo `03_Unit_Test_Calculator`. / Technical de
 | Paso / Step | Alcance / Scope | Resultado / Result |
 |-------------|-----------------|--------------------|
 | 1. Barrido léxico | 50 lenguajes, solo archivos rastreados por git | 50/50 con las cinco operaciones en su fuente; las 20 líneas que el barrido de operadores señaló eran comentarios, rutas de `#include` y manifiestos: **ninguna aritmética de biblioteca** en las implementaciones |
-| 2. Lectura de código | Las cinco operaciones, la forma educativa, el camino de la división por cero y los comentarios | 50/50 implementan multiplicación como suma repetitiva, división como resta repetitiva y módulo con ambas; 9 lenguajes con restos de plantilla (código, nombres o comentarios) |
+| 2. Lectura de código | Las cinco operaciones, la forma educativa, el camino de la división por cero y los comentarios | 50/50 implementan multiplicación como suma repetitiva, división como resta repetitiva y módulo con ambas; 14 lenguajes con deuda de idiomaticidad (5 de nombres, 6 de comentarios de plantilla y 3 de README), ya retirados los cuatro hallazgos que resultaron ser convención del repositorio |
 | 3. Ejecución de suites | El comando de [`languages.tsv`](../../scripts/data/languages.tsv), copiado sin editar, en el directorio del módulo | **49/50 en verde con 5 pruebas**; `ocaml` rc=1 (`dune runtest` no compila `bin/`); 3 desajustes de catálogo (`forth`, `grain`, `julia`) resueltos con ejecución dirigida y 5 pruebas reales cada uno |
 | 4. Documentación | Los 50 `README.md` contra [`README_Template.md`](../README_Template.md) y los comentarios del código | **47/50 con las cuatro secciones aplicables**; faltan en `erlang` (2/4), `scheme` (3/4) y `tcl-tk` (3/4), las tres por cabeceras renombradas |
 | 5. Estado del árbol | `git status --short` en los 50 submódulos | **50/50 limpios** y en `main`, sin ramas de trabajo abiertas |
@@ -46,10 +46,13 @@ Registro de deuda técnica del módulo `03_Unit_Test_Calculator`. / Technical de
 
 **ES:** Cumplen el contrato del módulo —cinco operaciones educativas, suite en verde, separación código/pruebas— pero arrastran deuda de idiomaticidad. Ninguna exige refactorizar las operaciones.
 
-- **Nombres y ficheros de plantilla (8):** `csharp` (clase `Class1` en `src/Class1.cs` y `tests/UnitTest1.cs`), `fsharp` (`src/Library.fs`, `test/Tests.fs`), `dart` (`lib/src/calculator_base.dart`), `haxe` (`package src`), `v` (`module src` con `v.mod` declarando `calculator`), `julia` (runner `test/CalculatorTest.jl` en vez de `test/run_tests.jl`), `forth` (`run_tests.forth` en vez de `run-tests.forth`) y `grain` (`Makefile` sin target `test`: la suite corre con `make run`).
-- **Comentarios y textos de plantilla (5):** `ballerina` (`+ a - parameter description` en las cinco operaciones), `clojure` (`FIXME: my new library.` en `build.clj` y un `TODO` en `doc/intro.md`), `common-lisp` (`;; blah blah blah.`), `cpp` (tres `// TODO: Implement …` sobre código ya implementado) y `crystal` (dos `# TODO:`).
+- **Nombres y ficheros de plantilla (5):** `csharp` (clase `Class1` en `src/Class1.cs` y `tests/UnitTest1.cs`), `fsharp` (`src/Library.fs`, `test/Tests.fs`), `julia` (runner `test/CalculatorTest.jl` donde el catálogo —y `04_Numbers`— usan `test/run_tests.jl`), `forth` (`run_tests.forth` en vez de `run-tests.forth`) y `grain` (`Makefile` sin target `test`: la suite corre con `make run`).
+- **Comentarios y textos de plantilla (6):** `ballerina` (`+ a - parameter description` en las cinco operaciones), `dart` (`/// Support for doing something awesome.`, `/// Checks if you are awesome.` y dos `TODO` en `lib/`), `clojure` (`FIXME: my new library.` en `build.clj` y un `TODO` en `doc/intro.md`), `common-lisp` (`;; blah blah blah.`), `cpp` (tres `// TODO: Implement …` sobre código ya implementado) y `crystal` (dos `# TODO:`).
 - **Cabeceras del README (3):** `erlang` (renombra `📂 Archivos y estructura` y `🛠️ Enfoque y construcción`) y `scheme` y `tcl-tk` (`🚀 Ejecución` en vez de `🚀 Compilación y ejecución`).
-- **Dependencia de pruebas evitable (1):** `go` usa `github.com/stretchr/testify` aunque la biblioteca estándar trae `testing`; además el paquete se llama `src`, no `calculator`.
+
+> **ES:** **Hallazgos retirados el 2026-10-16** al comprobar la convención en los módulos hermanos homologados (`04_Numbers`): el módulo o paquete `src` de `v`, `go` y `haxe` —y el fichero `calculator_base.dart` de `dart`— **son la convención del repositorio**, no una desviación (V y Haxe la exigen por la ruta, Go la repite en `numbers` y Dart repite `*_base.dart`); `testify` en `go` es el framework documentado de sus módulos. Se retiraron del estado y de la deuda, y `dart` conserva solo el hallazgo de comentarios de plantilla.
+>
+> **EN:** Findings **retired on 2026-10-16** after checking the convention in the homologated sibling modules (`04_Numbers`): the `src` module/package in `v`, `go` and `haxe` —and `dart`'s `calculator_base.dart`— **are the repository's convention**, not a deviation; `testify` in `go` is those modules' documented framework. They were removed from the state and the debt, and `dart` keeps only the template-comment finding.
 
 > **ES:** Nota informativa, **no** es deuda: siete lenguajes (`assembly`, `scheme`, `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`) protegen la división por cero con su indicador de fallo o su aserción (`-1`, `error`, `precondition`, `RangeError`, `@panic`, `assert_not_reached`). La capa del módulo no lo pide (decisión del autor, 2026-10-16) y la especificación no lo declara, así que solo se anota para el eje `failure` del ruleset.
 
@@ -59,7 +62,7 @@ Registro de deuda técnica del módulo `03_Unit_Test_Calculator`. / Technical de
 
 ### 🟢 Homologados / Homologated
 
-- **32 lenguajes** con las dos capas cumplidas y evidencia de ejecución: `ada`, `assembly`, `c`, `cobol`, `d`, `elixir`, `elm`, `gleam`, `groovy`, `haskell`, `java`, `javascript`, `kotlin`, `lua`, `nim`, `perl`, `php`, `prolog`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `swift`, `typescript`, `vala` y `zig`.
+- **35 lenguajes** con las dos capas cumplidas y evidencia de ejecución: `ada`, `assembly`, `c`, `cobol`, `d`, `elixir`, `elm`, `gleam`, `go`, `groovy`, `haskell`, `haxe`, `java`, `javascript`, `kotlin`, `lua`, `nim`, `perl`, `php`, `prolog`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `swift`, `typescript`, `v`, `vala` y `zig`.
 - `perl` y `racket` documentan su desviación de ubicación en el propio README (`📍 Desviaciones respecto a la ubicación esperada` y `🔀 Adaptaciones idiomáticas`): el orden `lib/`+`test/` y los paquetes de Racket son su convención, no una deuda.
 
 ## Deuda por lenguaje / Debt per language
@@ -67,19 +70,16 @@ Registro de deuda técnica del módulo `03_Unit_Test_Calculator`. / Technical de
 | # | Deuda / Debt | Arreglo / Fix | Lenguaje(s) | Estado / Status |
 |:-:|--------------|---------------|-------------|-----------------|
 | 1 | `dune runtest` no compila: `bin/dune` declara `main` sin `bin/main.ml` | Retirar `bin/` o añadir el `main.ml` que falta | `ocaml` | ⏳ pendiente |
-| 2 | Nombres de plantilla en clase y suite | Renombrar a `Calculator`/`CalculatorTests` (y los ficheros con ellos) | `csharp`, `fsharp` | ⏳ pendiente |
-| 3 | Paquete o módulo llamado `src` | Nombrar como el lenguaje espera y alinear `v.mod` con el módulo | `haxe`, `v`, `go` (paquete) | ⏳ pendiente |
-| 4 | Fichero base de plantilla (`calculator_base.dart`) | Renombrar al nombre del módulo | `dart` | ⏳ pendiente |
-| 5 | Runner del módulo fuera de la convención del repo | `test/run_tests.jl` (`julia`), `run-tests.forth` (`forth`) y target `test` en el `Makefile` (`grain`) | `julia`, `forth`, `grain` | ⏳ pendiente |
-| 6 | Comentarios y textos de plantilla en el código | Limpiar los marcadores y escribir la documentación que anuncian | `ballerina`, `clojure`, `common-lisp`, `cpp`, `crystal`, `dart` | ⏳ pendiente |
-| 7 | Dependencia de pruebas evitable | Usar `testing` de la biblioteca estándar | `go` | ⏳ pendiente |
-| 8 | Cabeceras obligatorias del README renombradas | Restaurar los nombres de la plantilla | `erlang`, `scheme`, `tcl-tk` | ⏳ pendiente |
+| 2 | Nombres de plantilla en clase y suite | Renombrar a `Calculator`/`CalculatorTests` (y los ficheros con ellos) | `csharp`, `fsharp` | ⏳ corregida en `align/foundations/unit-test-calculator`, pendiente de integrar |
+| 3 | Runner del módulo fuera de la convención del repo | `test/run_tests.jl` (`julia`), `run-tests.forth` (`forth`) y target `test` en el `Makefile` (`grain`) | `julia`, `forth`, `grain` | ⏳ corregida en `align/foundations/unit-test-calculator`, pendiente de integrar |
+| 4 | Comentarios y textos de plantilla en el código | Limpiar los marcadores y escribir la documentación que anuncian | `ballerina`, `clojure`, `common-lisp`, `cpp`, `crystal`, `dart` | ⏳ pendiente |
+| 5 | Cabeceras obligatorias del README renombradas | Restaurar los nombres de la plantilla | `erlang`, `scheme`, `tcl-tk` | ⏳ pendiente |
 
 ## Plan de cierre / Closure plan
 
-**ES:** El pase de verificación **ya está hecho** (5 pasos, 2026-10-16): las 50 suites ejecutadas y su evidencia en el registro de verificaciones. Queda el arreglo: un `align` por lenguaje con hallazgo —`ocaml` primero, que es el único 🔴— y los 17 🟡, que el autor puede corregir o aceptar como desviación con su ficha en `docs/ruleset/idioms/`. El módulo se cierra cuando los 18 estén integrados en el `main` de su submódulo (o aceptados), los punteros del monorepo sincronizados y el índice de [`README.md`](README.md) refleje el cierre. Ver [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
+**ES:** El pase de verificación **ya está hecho** (5 pasos, 2026-10-16): las 50 suites ejecutadas y su evidencia en el registro de verificaciones. Queda el arreglo: un `align` por lenguaje con hallazgo —`ocaml` primero, que es el único 🔴— y los 14 🟡, que el autor puede corregir o aceptar como desviación con su ficha en `docs/ruleset/idioms/`. El módulo se cierra cuando los 15 estén integrados en el `main` de su submódulo (o aceptados), los punteros del monorepo sincronizados y el índice de [`README.md`](README.md) refleje el cierre. Ver [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
 
-**EN:** The verification pass **is done** (5 steps, 2026-10-16): 50/50 suites executed with evidence in the verification log. What remains is the fix: one `align` per language with a finding —`ocaml` first, the only 🔴— and the 17 🟡, which the author may fix or accept as a deviation with its record under `docs/ruleset/idioms/`. The module closes once the 18 are integrated into their submodule's `main` (or accepted), the monorepo pointers are synced and the index in [`README.md`](README.md) reflects the closure.
+**EN:** The verification pass **is done** (5 steps, 2026-10-16): 50/50 suites executed with evidence in the verification log. What remains is the fix: one `align` per language with a finding —`ocaml` first, the only 🔴— and the 14 🟡, which the author may fix or accept as a deviation with its record under `docs/ruleset/idioms/`. The module closes once the 15 are integrated into their submodule's `main` (or accepted), the monorepo pointers are synced and the index in [`README.md`](README.md) reflects the closure.
 
 ## Registro de verificaciones / Verification log
 
@@ -92,3 +92,4 @@ Registro de deuda técnica del módulo `03_Unit_Test_Calculator`. / Technical de
 | 2026-10-16 | Ejecución de suites (lotes 4 y 5) | `make test` · `raco test -x .` · `prove6 -l t/` · `npm test` · `rexx` · `bundle exec rspec` · `cargo test` · `sbt -batch -no-colors test` · `guile` · `swift test` · `tclsh9.0` · `v test .` · `valac` · `zig build test` | 15/15 rc=0, cinco pruebas en cada uno |
 | 2026-10-16 | Ejecución dirigida donde había duda | `./gradlew test --rerun-tasks` · `gradle test --rerun-tasks` · `zig build test --summary all --cache-dir /tmp/…` · `julia --project=. test/CalculatorTest.jl` · `gforth run_tests.forth` · `make run` (grain) · `dune build @test/runtest` | Pruebas realmente ejecutadas: 5 en `groovy` y `kotlin` (informe XML), 5/5 en `zig`, 5 en `julia`, `Tests run: 5 Passed: 5` en `forth`, 5 `PASSED` en `grain`; `ocaml` compila su suite con el target propio (rc=0) |
 | 2026-10-16 | Restos de plantilla | `git grep -nIE 'TODO\|FIXME\|parameter description\|blah blah\|awesome'` y `git ls-files` de nombres de plantilla | 9 lenguajes: `ballerina`, `clojure`, `common-lisp`, `cpp`, `crystal`, `dart`, `csharp`, `fsharp` y `haxe` (`src`); `v` y `go` por el módulo/paquete `src` |
+| 2026-10-16 | Revisión de los hallazgos de convención | `git ls-files` y `git show` de `04_Numbers` en `v`, `go`, `haxe` y `dart` | Cuatro hallazgos retirados: el `src` como módulo o paquete es la convención del repositorio (V y Haxe la exigen por la ruta; Go la repite en `numbers`), lo mismo que `*_base.dart` en Dart y `testify` en Go |

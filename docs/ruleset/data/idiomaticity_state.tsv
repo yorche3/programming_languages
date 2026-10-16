@@ -160,18 +160,18 @@ cpp	unit_test_calculator	foundations	mostly-idiomatic	documentation	0	Three TODO
 crystal	unit_test_calculator	foundations	mostly-idiomatic	documentation	0	Two scaffold TODOs in src/calculator.cr	2681869	2026-10-16
 csharp	unit_test_calculator	foundations	mostly-idiomatic	naming	0	Scaffold names: Class1 in src/Class1.cs and UnitTest1.cs in tests/	abbb439	2026-10-16
 d	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	963e66e	2026-10-16
-dart	unit_test_calculator	foundations	mostly-idiomatic	naming	0	Scaffold names and comments: lib/src/calculator_base.dart with template TODOs	1614ce8	2026-10-16
+dart	unit_test_calculator	foundations	mostly-idiomatic	documentation	0	Template comments in lib/ ("Support for doing something awesome", "Checks if you are awesome", two TODOs)	1614ce8	2026-10-16
 elixir	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	8c8017d	2026-10-16
 elm	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	7691158	2026-10-16
 erlang	unit_test_calculator	foundations	mostly-idiomatic	documentation	0	README renamed two mandatory sections (Archivos, Enfoque)	eeb8fd9	2026-10-16
 forth	unit_test_calculator	foundations	mostly-idiomatic	naming	0	Test entry point run_tests.forth instead of the repo convention run-tests.forth	6cf64b9	2026-10-16
 fsharp	unit_test_calculator	foundations	mostly-idiomatic	naming	0	Scaffold names: src/Library.fs and test/Tests.fs	7ecba9c	2026-10-16
 gleam	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	3956ed9	2026-10-16
-go	unit_test_calculator	foundations	mostly-idiomatic	tests	0	Test dependency on stretchr/testify although the stdlib has testing; package named src	1d4bba8	2026-10-16
+go	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	1d4bba8	2026-10-16
 grain	unit_test_calculator	foundations	mostly-idiomatic	naming	0	Makefile without a test target (the suite runs with make run)	aaa3e73	2026-10-16
 groovy	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	e0451dc	2026-10-16
 haskell	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	08e8c32	2026-10-16
-haxe	unit_test_calculator	foundations	mostly-idiomatic	naming	0	Haxe package named src (src/Calculator.hx)	0002bf1	2026-10-16
+haxe	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	0002bf1	2026-10-16
 java	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	9dbb202	2026-10-16
 javascript	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	e59749d	2026-10-16
 julia	unit_test_calculator	foundations	mostly-idiomatic	naming	0	Test entry point test/CalculatorTest.jl instead of the repo convention test/run_tests.jl	0e31a2d	2026-10-16
@@ -196,6 +196,6 @@ scheme	unit_test_calculator	foundations	mostly-idiomatic	documentation	0	README 
 swift	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	31a4206	2026-10-16
 tcl-tk	unit_test_calculator	foundations	mostly-idiomatic	documentation	0	README renames the build section as Ejecucion	a6b08cc	2026-10-16
 typescript	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	99f9ef7	2026-10-16
-v	unit_test_calculator	foundations	mostly-idiomatic	naming	0	module src while v.mod declares calculator	b4f8869	2026-10-16
+v	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	b4f8869	2026-10-16
 vala	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	ea8fb14	2026-10-16
 zig	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	9cd126d	2026-10-16
