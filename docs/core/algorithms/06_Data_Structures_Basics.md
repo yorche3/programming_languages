@@ -22,6 +22,14 @@ Este módulo enseña cómo un elemento enlaza con el siguiente y cómo una secue
 
 This module teaches how one element links to the next and how a sequence of `Node`s produces structures with different access contracts. The goal is to implement the structure, not replace it with a standard-library collection.
 
+---
+
+## 🧭 Cómo leer este módulo / How to read this module
+
+> **ES:** Esta página fija **qué** se exige. Para el **cómo** y el **porqué** de cada familia de lenguajes (celda mutable o inmutable, `init` como constructor o procedimiento, coste real de los extremos), la guía del módulo: [`implementations/06_Data_Structures_Basics.md`](../../implementations/06_Data_Structures_Basics.md). Para **qué** se verificó en los 50 lenguajes, su registro de auditoría: [`06_Audited_Data_Structures_Basics.md`](../../audits/06_Audited_Data_Structures_Basics.md).
+>
+> **EN:** This page fixes **what** is required. For the **how** and the **why** of each language family (mutable or immutable cell, `init` as a constructor or a procedure, the real cost of the ends), see the module guide: [`implementations/06_Data_Structures_Basics.md`](../../implementations/06_Data_Structures_Basics.md). For **what** was verified across the 50 languages, its audit record: [`06_Audited_Data_Structures_Basics.md`](../../audits/06_Audited_Data_Structures_Basics.md).
+
 ## 📖 Concepto: `Node` / Concept: `Node`
 
 Un `Node` es un tipo nuevo con un valor y un enlace al siguiente `Node` o a la representación de ausencia del lenguaje. El recorrido pasa del nodo actual al nodo enlazado; una secuencia se construye encadenando esos enlaces.
@@ -66,6 +74,16 @@ The type may be called `Node`, `Cell`, `Link` or another valid name when there i
 Las instancias se declaran primero **sin valores iniciales definidos por la especificación** y se inicializan mediante `init`: `Node.init(value)` asigna su valor y deja `next` ausente; las otras tres operaciones `init()` asignan sus enlaces ausentes y contadores a cero. `is_empty()` solo se invoca después de `init`; devuelve verdadero exactamente cuando el tamaño es cero y se vuelve falso tras insertar el primer elemento.
 
 Instances are first declared **without values defined by this specification**, then initialized through `init`: `Node.init(value)` sets its value and leaves `next` absent; the other three `init()` operations set links to absent and counters to zero. Call `is_empty()` only after `init`; it returns true exactly when size is zero and becomes false after the first insertion.
+
+> **ES:** Precisión de la auditoría 06 (2026-10-17), sobre dos puntos que el contrato deja implícitos:
+>
+> 1. **Los extremos finales solo son $O(1)$ con celda mutable.** `insert_tail` y `enqueue` escriben el enlace del último nodo; cuando la celda es inmutable el camino hasta el último nodo se reconstruye y la operación es $O(n)$. Esa cota, **declarada en el README del lenguaje**, es conforme y no se marca como desviación.
+> 2. **La ausencia del enlace puede usar el tipo opcional nativo** (`Maybe`, `option`, `Optional`), porque eso es la representación de la ausencia en esa familia. Nunca se usa como **resultado de operación**: las operaciones devuelven el centinela del tipo de retorno o el booleano de éxito/fallo que declare el README.
+>
+> **EN:** Audit 06 precision (2026-10-17), on two points the contract leaves implicit:
+>
+> 1. **End operations are $O(1)$ only with a mutable cell.** `insert_tail` and `enqueue` write the last node's link; when the cell is immutable the path to the last node is rebuilt and the operation is $O(n)$. That bound, **declared in the language's README**, is conforming and is not flagged as a deviation.
+> 2. **Link absence may use the native optional type** (`Maybe`, `option`, `Optional`), because that is the absence representation of that family. It is never used as an **operation result**: operations return the return type's sentinel or the success/failure boolean declared in the README.
 
 ## 📋 Política de resultados / Result policy
 

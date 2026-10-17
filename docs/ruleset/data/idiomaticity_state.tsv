@@ -1,54 +1,54 @@
 language	module	phase	module_fidelity	blocking_axis	deviations_documented	notes	commit	last_updated
-ada	data_structures_basics	algorithms	not-audited	-	pending	Declared done in ROADMAP (old workflow); pending audit against new criteria	171b749	2026-10-12
-assembly	data_structures_basics	algorithms	not-audited	-	pending	Declared done in ROADMAP (old workflow); pending audit against new criteria	0cd2c95	2026-10-12
-ballerina	data_structures_basics	algorithms	not-audited	-	pending	Declared done in ROADMAP (old workflow); pending audit against new criteria	9cb2f55	2026-10-12
-c	data_structures_basics	algorithms	not-audited	-	pending	Declared done in ROADMAP (old workflow); pending audit against new criteria	04498d6	2026-10-12
-clojure	data_structures_basics	algorithms	not-audited	-	pending	Declared done in ROADMAP (old workflow); pending audit against new criteria	4147053	2026-10-12
-cobol	data_structures_basics	algorithms	not-audited	-	pending	Declared done in ROADMAP (old workflow); pending audit against new criteria	768f142	2026-10-12
-cpp	data_structures_basics	algorithms	not-audited	-	pending	Declared done in ROADMAP (old workflow); pending audit against new criteria	e34e175	2026-10-12
-crystal	data_structures_basics	algorithms	not-audited	-	pending	Declared done in ROADMAP (old workflow); pending audit against new criteria	2681869	2026-10-12
-csharp	data_structures_basics	algorithms	mostly-idiomatic	naming	pending	Reviewed with user; user applied fixes after review; deviations pending documentation	ed24829	2026-10-12
-d	data_structures_basics	algorithms	transitional	construction	pending	init() as method instead of constructor; pending rewrite	2f6b871	2026-10-12
-dart	data_structures_basics	algorithms	transitional	failure	pending	bool? in delete; init() as method; get_value instead of value	1614ce8	2026-10-12
-elixir	data_structures_basics	algorithms	mostly-idiomatic	naming	pending	Reviewed with user; user fixed dequeue/enqueue with result tuples	08ed882	2026-10-12
-elm	data_structures_basics	algorithms	workaround	construction	0	Empty constructors (data LinkedList = LinkedList); null-like approach instead of Maybe	1fc72c2	2026-10-12
-erlang	data_structures_basics	algorithms	transitional	construction	0	undefined in stubs breaks contract; -opaque/-spec correct	3e063d2	2026-10-12
-fsharp	data_structures_basics	algorithms	workaround	construction	0	[<AllowNullLiteral>] and Unchecked.defaultof used as C# workarounds	7d1bdc2	2026-10-12
-gleam	data_structures_basics	algorithms	workaround	failure	0	List(Node) instead of Option(Node); types are structurally wrong	6b10fba	2026-10-12
-go	data_structures_basics	algorithms	transitional	failure	pending	init() as method; -1 sentinel instead of (int, bool)	1d4bba8	2026-10-12
-grain	data_structures_basics	algorithms	workaround	failure	0	List(Node) instead of Option(Node); same as Gleam	3e26355	2026-10-12
-groovy	data_structures_basics	algorithms	transitional	construction	pending	init() as method; get_value(); Boolean? in isEmpty; missing @CompileStatic	09698a7	2026-10-12
-haskell	data_structures_basics	algorithms	workaround	construction	0	Empty constructors (data LinkedList = LinkedList); no Option used	6d919aa	2026-10-12
-haxe	data_structures_basics	algorithms	workaround	failure	0	null returned from Int on static targets; init() as method	8a00e5e	2026-10-12
-javascript	data_structures_basics	algorithms	transitional	construction	pending	init() as method; no # private fields	249d601	2026-10-12
-julia	data_structures_basics	algorithms	transitional	construction	pending	init! as method; missing Base import for push!/pop!	4b04a83	2026-10-12
-kotlin	data_structures_basics	algorithms	transitional	naming	pending	get_value() instead of value property; is_empty() instead of isEmpty	7bae5fa	2026-10-12
-lua	data_structures_basics	algorithms	workaround	construction	0	No metatables; init() method doesn't construct anything	699f49a	2026-10-12
-nim	data_structures_basics	algorithms	transitional	construction	pending	init as method; option correct in some methods	80b7f8c	2026-10-12
-ocaml	data_structures_basics	algorithms	transitional	failure	pending	int instead of int option in get_head, pop, dequeue	5c9d1ce	2026-10-12
-perl	data_structures_basics	algorithms	workaround	construction	0	No bless in init; multiple packages in one file	88b2d97	2026-10-12
-raku	data_structures_basics	algorithms	workaround	construction	0	Mu typed attributes; Nil as stub; init instead of new	64998a5	2026-10-12
-rescript	data_structures_basics	algorithms	workaround	failure	0	Js.Nullable.t instead of option; mutable inconsistent	7bae5fa	2026-10-12
-rexx	data_structures_basics	algorithms	workaround	construction	0	init returns .Nil (breaks new); no attributes declared	3e8204a	2026-10-12
-ruby	data_structures_basics	algorithms	transitional	construction	pending	init() as method; missing attr_accessor; is_empty instead of empty?	8a00e5e	2026-10-12
-rust	data_structures_basics	algorithms	workaround	unsafe	0	*mut Node and ptr::null_mut() used; no Option<Box<Node>>	3e8204a	2026-10-12
-scala	data_structures_basics	algorithms	transitional	construction	pending	null used; -1 sentinel; init() companion instead of apply	144b501	2026-10-12
-scheme	data_structures_basics	algorithms	transitional	construction	pending	init as method; missing define-library	5fe1428	2026-10-12
-swift	data_structures_basics	algorithms	workaround	construction	0	fatalError in init (breaks instantiation); -1 sentinel	0a8cec7	2026-10-12
-typescript	data_structures_basics	algorithms	transitional	construction	pending	init() as method; ! assertions; bool|null in delete	c3ce5f2	2026-10-12
-tcl-tk	data_structures_basics	algorithms	workaround	construction	0	init as method instead of constructor; no instance variables	0670f07	2026-10-12
-v	data_structures_basics	algorithms	transitional	construction	pending	init() as method; unsafe{nil} instead of ?&Node	ed42ba7	2026-10-12
-vala	data_structures_basics	algorithms	transitional	naming	pending	init() as method; get_value() instead of property	d3443a7	2026-10-12
-zig	data_structures_basics	algorithms	workaround	construction	0	init returns undefined (UB); no allocator	257c65f	2026-10-12
-common-lisp	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
-forth	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
-java	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
-php	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
-prolog	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
-purescript	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
-python	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
-r	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
-racket	data_structures_basics	algorithms	not-started	-	pending	Not reviewed yet	-	2026-10-12
+ada	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	bb616df	2026-10-17
+assembly	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	e892bd5	2026-10-17
+ballerina	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	a305f94	2026-10-17
+c	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	8d5fb33	2026-10-17
+clojure	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	43b2a6c	2026-10-17
+cobol	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	f4f875f	2026-10-17
+cpp	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	0ce4627	2026-10-17
+crystal	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	28ea346	2026-10-17
+csharp	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	e845f3a	2026-10-17
+d	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	963e66e	2026-10-17
+dart	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	839f2f1	2026-10-17
+elixir	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	8c8017d	2026-10-17
+elm	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	068bb3e	2026-10-17
+erlang	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	fce588b	2026-10-17
+fsharp	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	f53aaee	2026-10-17
+gleam	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	3956ed9	2026-10-17
+go	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	1d4bba8	2026-10-17
+grain	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	dcbdf4b	2026-10-17
+groovy	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	51a4e0e	2026-10-17
+haskell	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	e843b27	2026-10-17
+haxe	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	86f80e3	2026-10-17
+javascript	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	e59749d	2026-10-17
+julia	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	26d7238	2026-10-17
+kotlin	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	e6984c0	2026-10-17
+lua	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	ed9acb0	2026-10-17
+nim	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	1a80d72	2026-10-17
+ocaml	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	d2d841e	2026-10-17
+perl	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	6c02b41	2026-10-17
+raku	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	55c3402	2026-10-17
+rescript	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	7a6b149	2026-10-17
+rexx	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	17aa9d1	2026-10-17
+ruby	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	598c97a	2026-10-17
+rust	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	531873f	2026-10-17
+scala	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	faef3cc	2026-10-17
+scheme	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	75fe6c0	2026-10-17
+swift	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	31a4206	2026-10-17
+typescript	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	99f9ef7	2026-10-17
+tcl-tk	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	9734da3	2026-10-17
+v	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	b4f8869	2026-10-17
+vala	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	ea8fb14	2026-10-17
+zig	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	9cd126d	2026-10-17
+common-lisp	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	e4f2497	2026-10-17
+forth	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	37cd6ee	2026-10-17
+java	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	9dbb202	2026-10-17
+php	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	440e818	2026-10-17
+prolog	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	683d19f	2026-10-17
+purescript	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	1c28b5b	2026-10-17
+python	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	8201986	2026-10-17
+r	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	79fffb2	2026-10-17
+racket	data_structures_basics	algorithms	idiomatic	-	0	Clean: single shared Node, no delegation, init before is_empty, per-type indicators, O(1) except delete, 15 case steps	466d32a	2026-10-17
 ada	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	171b749	2026-10-13
 assembly	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	5554c50	2026-10-13
 ballerina	hello_world	foundations	idiomatic	-	0	Clean: exact output, conventional file name, idiomatic print	52f6046	2026-10-13

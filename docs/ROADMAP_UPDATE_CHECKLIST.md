@@ -40,6 +40,20 @@ Sin pendientes a 2026-09-28: la implementación, la documentación y el registro
 ```text
 Fecha / Date: 2026-10-17
 Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_basics (especificación 06_Data_Structures_Basics)
+Lenguaje(s) / Language(s): 50 auditados; 10 con hallazgo corregido (ocaml, groovy, nim, common-lisp, fsharp, haskell, haxe, php, purescript, python)
+Código verificado / Code verified: yes (auditoría en docs/audits/06_Audited_Data_Structures_Basics.md)
+Tests y comandos / Tests and commands:
+- Las 50 suites del catálogo -> 50/50 rc=0
+- Re-ejecución sobre el `main` integrado de los diez -> `dune runtest --force` 4 tests; `dotnet test` 23; groovy 4 (XML); `cabal test` PASS; haxe 4 bloques; `nimble test` todas; `composer test` 4 tests y 15 aserciones; `spago test` 5; `pytest` 4; common-lisp 15 comprobaciones
+README(s) verificado(s) / README(s) verified: yes (los 50 README del módulo contra la plantilla de Nivel 3; `groovy` declara `lib/bin` como salida generada y `common-lisp` deja un solo README)
+Cambio en ROADMAP.md / ROADMAP.md change: core.algorithms.data_structures_basics sigue en ✅ 50/50; se añade a la nota del módulo el cierre de la auditoría 06 (el contador del sprint no se toca)
+Observaciones / Notes: Cierre de la pasada 06. El pase verificó las 50 implementaciones (un solo `Node` compartido, sin delegación entre estructuras ni colecciones de biblioteca, `init` antes de `is_empty`, indicador por tipo de retorno, `O(1)` salvo `delete` y los 15 pasos de caso) y dejó 10 hallazgos, todos corregidos e integrados en 10 commits de `align`. `ocaml` devolvía `int option` en las cuatro lecturas: se comprobó en la documentación oficial que era convención y no restricción del lenguaje, y pasa al centinela `-1` dejando `option` solo en los enlaces. Además, `lib/bin` de `groovy` y el binario `.out` de `nim` salen del índice, `common-lisp` queda con un README y ocho lenguajes pierden sus cabeceras de andamiaje del paso 4b.
+```
+
+```text
+Fecha / Date: 2026-10-17
+Fase / Phase: core.algorithms
 Módulo(s) / Module(s): core.algorithms.naive_sort (especificación 05_Naive_Sort)
 Lenguaje(s) / Language(s): 50 auditados; 4 con hallazgo corregido (ocaml, scheme, haskell, cobol)
 Código verificado / Code verified: yes (auditoría en docs/audits/05_Audited_Naive_Sort.md)
