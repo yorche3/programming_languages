@@ -16,7 +16,11 @@ Registro de deuda técnica del módulo `04_Numbers`. / Technical debt record for
 
 **EN:** Two layers. The **module** layer comes from its specification's acceptance criteria; the **language** layer from the ruleset's 9 axes.
 
-1. **Fidelidad al módulo.** Las **tres variantes** (`_rec`, `_acc`, `_ite`) implementadas y probadas por separado, sin delegar las sumatorias ni el MCD en una rutina de biblioteca, trabajo sobre la **secuencia indexable** que declara la especificación, y README de Nivel 3. Techo: el coste declarado por operación ($O(n)$ en las sumatorias y el factorial, $O(\log n)$ en el MCD).
+1. **Fidelidad al módulo.** Los **cinco algoritmos** (suma de los primeros `n`, factorial, Fibonacci, MCD y MCM) en las variantes que el lenguaje permita: `_rec` **siempre**; `_acc` **solo si el lenguaje garantiza TCO**; `_ite` **solo si ofrece iteración nativa**; y el README de Nivel 3 **declarando la combinación aplicada y por qué** (33, 22 o 11 pruebas). `_rec` es recursión directa, `_acc` lleva acumulador (estilo tail-call) y `_ite` usa bucles con memoria constante. Sin delegar los cinco algoritmos en una rutina de biblioteca, separación del código respecto de las pruebas (`src/`-`test/` o la disposición idiomática equivalente) y solo biblioteca estándar. Techo: $O(n)$ en las sumatorias y el factorial y $O(\log n)$ en el MCD; `fibonacci_rec` es $O(2^n)$ **por diseño educativo** y no es una desviación.
+
+> **ES:** Capa corregida el **2026-10-16** al abrir el pase: antes pedía «las tres variantes implementadas y probadas por separado» —contra la regla condicional de la especificación— y «trabajo sobre la secuencia indexable», que ningún algoritmo de este módulo recibe como entrada: la especificación introduce esa primitiva para los módulos posteriores. El histórico queda aquí porque los pases cerrados no se reescriben.
+>
+> **EN:** Layer corrected on **2026-10-16**: it used to ask for the three variants implemented and tested unconditionally, and for work over the indexable sequence, which this module's algorithms never take as input.
 2. **Idiomaticidad del lenguaje.** `construction`, `naming`, `failure`, `access`, `encapsulation`, `unsafe`, `complexity`, `documentation` y `tests`, con la severidad de [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md).
 
 ## Alcance y método de esta verificación / Scope and method
