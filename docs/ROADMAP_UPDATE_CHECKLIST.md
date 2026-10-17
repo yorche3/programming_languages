@@ -38,6 +38,20 @@ Sin pendientes a 2026-09-28: la implementación, la documentación y el registro
 <!-- Las entradas cerradas se conservan debajo con su fecha y evidencia. -->
 
 ```text
+Fecha / Date: 2026-10-16
+Fase / Phase: core.foundations
+Módulo(s) / Module(s): core.foundations.numbers (especificación 04_Numbers)
+Lenguaje(s) / Language(s): 50 auditados; 7 con hallazgo corregido (ballerina, clojure, crystal, dart, elm, ocaml, tcl-tk)
+Código verificado / Code verified: yes (auditoría en docs/audits/04_Audited_Numbers.md)
+Tests y comandos / Tests and commands:
+- Los comandos del catálogo sobre el `main` integrado de los siete -> 8/8 rc=0 (clojure: 33 aserciones; elm: 33 pruebas; crystal y dart: 10 cada uno; tcl-tk: Total 11 Passed 11 por suite)
+- `dune runtest` en `ocaml/` -> rc=0 tras añadir `bin/main.ml`; `dune exec numbers` imprime los cinco resultados
+README(s) verificado(s) / README(s) verified: yes (los 50 README del módulo contra la plantilla de Nivel 3; `elm` reestructurado y `tcl-tk` con la cabecera de compilación restaurada)
+Cambio en ROADMAP.md / ROADMAP.md change: core.foundations.numbers sigue en ✅ 50/50; la nota del módulo pasa a nombrar la auditoría 04 cerrada (el contador del sprint no se toca)
+Observaciones / Notes: Cierre de la pasada 04. El pase verificó las 50 implementaciones (los cinco algoritmos en las variantes que cada lenguaje permite, con la combinación de suites declarada en el README y los 11 casos por variante cubiertos) y dejó 7 hallazgos, todos corregidos e integrados en 7 commits de `align`. Dos hallazgos provisionales se retiraron al comprobarlos: `ada` (sus tres suites llevan 11 aserciones agrupadas en 5 procedimientos de AUnit) y `common-lisp` (su `run-tests` sí ejecuta las tres suites: 33 checks).
+```
+
+```text
 Fecha / Date: 2026-10-14
 Fase / Phase: core.foundations
 Módulo(s) / Module(s): core.foundations.hello_user (especificación 02_Hello_User)
