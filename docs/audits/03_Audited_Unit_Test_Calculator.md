@@ -42,6 +42,10 @@ Registro de deuda técnica del módulo `03_Unit_Test_Calculator`. / Technical de
 - **`ocaml`** — el comando del catálogo no llega a ejecutar la suite: `dune runtest` (rc=1) falla al compilar el ejecutable de `bin/`, cuyo `bin/dune` declara `(name main)` sin que exista `bin/main.ml`. La suite del módulo sí compila y pasa por su propio target (`dune build @test/runtest`, rc=0 el 2026-10-16), así que el defecto está en el andamiaje del módulo, no en las operaciones ni en las pruebas.
   **Arreglo / Fix:** retirar `bin/` (o añadir `bin/main.ml`) para que `dune runtest` —el comando del catálogo— termine en verde.
 
+> **ES:** El **mismo `bin/dune` huérfano está en el módulo homologado `04_Numbers`** del propio submódulo (comprobado el 2026-10-16: `dune runtest` falla igual allí), así que esa mitad de la deuda le toca a la auditoría 04 y no se arregla en este pase.
+>
+> **EN:** The **same orphan `bin/dune` sits in the homologated `04_Numbers` module** of the same submodule (checked on 2026-10-16: `dune runtest` fails there too), so that half of the debt belongs to audit 04 and is not fixed in this pass.
+
 ### 🟡 Advertencias / Warnings
 
 **ES:** Cumplen el contrato del módulo —cinco operaciones educativas, suite en verde, separación código/pruebas— pero arrastran deuda de idiomaticidad. Ninguna exige refactorizar las operaciones.
@@ -69,11 +73,11 @@ Registro de deuda técnica del módulo `03_Unit_Test_Calculator`. / Technical de
 
 | # | Deuda / Debt | Arreglo / Fix | Lenguaje(s) | Estado / Status |
 |:-:|--------------|---------------|-------------|-----------------|
-| 1 | `dune runtest` no compila: `bin/dune` declara `main` sin `bin/main.ml` | Retirar `bin/` o añadir el `main.ml` que falta | `ocaml` | ⏳ pendiente |
+| 1 | `dune runtest` no compila: `bin/dune` declara `main` sin `bin/main.ml` | Añadido el punto de entrada de demostración que la stanza espera | `ocaml` | ⏳ corregida en `align/foundations/unit-test-calculator`, pendiente de integrar |
 | 2 | Nombres de plantilla en clase y suite | Renombrar a `Calculator`/`CalculatorTests` (y los ficheros con ellos) | `csharp`, `fsharp` | ⏳ corregida en `align/foundations/unit-test-calculator`, pendiente de integrar |
 | 3 | Runner del módulo fuera de la convención del repo | `test/run_tests.jl` (`julia`), `run-tests.forth` (`forth`) y target `test` en el `Makefile` (`grain`) | `julia`, `forth`, `grain` | ⏳ corregida en `align/foundations/unit-test-calculator`, pendiente de integrar |
-| 4 | Comentarios y textos de plantilla en el código | Limpiar los marcadores y escribir la documentación que anuncian | `ballerina`, `clojure`, `common-lisp`, `cpp`, `crystal`, `dart` | ⏳ pendiente |
-| 5 | Cabeceras obligatorias del README renombradas | Restaurar los nombres de la plantilla | `erlang`, `scheme`, `tcl-tk` | ⏳ pendiente |
+| 4 | Comentarios y textos de plantilla en el código | Limpiar los marcadores y escribir la documentación que anuncian | `ballerina`, `clojure`, `common-lisp`, `cpp`, `crystal`, `dart` | ⏳ corregida en `align/foundations/unit-test-calculator`, pendiente de integrar |
+| 5 | Cabeceras obligatorias del README renombradas | Restaurar los nombres de la plantilla | `erlang`, `scheme`, `tcl-tk` | ⏳ corregida en `align/foundations/unit-test-calculator`, pendiente de integrar |
 
 ## Plan de cierre / Closure plan
 
@@ -93,3 +97,4 @@ Registro de deuda técnica del módulo `03_Unit_Test_Calculator`. / Technical de
 | 2026-10-16 | Ejecución dirigida donde había duda | `./gradlew test --rerun-tasks` · `gradle test --rerun-tasks` · `zig build test --summary all --cache-dir /tmp/…` · `julia --project=. test/CalculatorTest.jl` · `gforth run_tests.forth` · `make run` (grain) · `dune build @test/runtest` | Pruebas realmente ejecutadas: 5 en `groovy` y `kotlin` (informe XML), 5/5 en `zig`, 5 en `julia`, `Tests run: 5 Passed: 5` en `forth`, 5 `PASSED` en `grain`; `ocaml` compila su suite con el target propio (rc=0) |
 | 2026-10-16 | Restos de plantilla | `git grep -nIE 'TODO\|FIXME\|parameter description\|blah blah\|awesome'` y `git ls-files` de nombres de plantilla | 9 lenguajes: `ballerina`, `clojure`, `common-lisp`, `cpp`, `crystal`, `dart`, `csharp`, `fsharp` y `haxe` (`src`); `v` y `go` por el módulo/paquete `src` |
 | 2026-10-16 | Revisión de los hallazgos de convención | `git ls-files` y `git show` de `04_Numbers` en `v`, `go`, `haxe` y `dart` | Cuatro hallazgos retirados: el `src` como módulo o paquete es la convención del repositorio (V y Haxe la exigen por la ruta; Go la repite en `numbers`), lo mismo que `*_base.dart` en Dart y `testify` en Go |
+| 2026-10-16 | Arreglo del 🔴 de `ocaml` | `dune exec test/test_calculator.exe` y `dune runtest` tras añadir `bin/main.ml` | 5 pruebas de Alcotest en verde y `dune runtest` rc=0 (antes: `Error: Module "Main" doesn't exist`); `dune exec calculator` imprime las cinco operaciones |
