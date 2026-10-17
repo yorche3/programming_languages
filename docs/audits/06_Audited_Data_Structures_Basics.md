@@ -58,14 +58,17 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 
 ### 🔴 Requieren Refactorización (Fallo) / Require Refactoring (Fail)
 
-- **`ocaml`** — `head`, `pop` y `peek` devuelven `int option` (`val head : t -> int option`), es decir, el tipo opcional aparece como **resultado de operación**, no solo en el enlace; el criterio lo admite únicamente en `next`. La propia `.mli` lo declara como decisión: «*Absent links and fallible operations use [option], never sentinels*».
+- **`ocaml`** — `head`, `pop`, `peek` y `dequeue` devolvían `int option`, es decir, el tipo opcional como **resultado de operación**, no solo en el enlace; el criterio lo admite únicamente en `next`. La propia `.mli` lo declaraba como decisión: «*Absent links and fallible operations use [option], never sentinels*».
+  - **Comprobado en la documentación de OCaml (2026-10-17):** no es una restricción del lenguaje. El manual presenta `Option` como «*Option values explicitly indicate the presence or absence of a value*» —la convención para la ausencia, no la única forma de señalarla— y `-1` es un `int` válido. La desviación era de diseño, no de lenguaje.
+  - **Corregido** en `b549ce8`: las cuatro lecturas devuelven `int` con `-1`; `option` queda en los enlaces; interfaz, implementación, suite (20 comprobaciones) y README actualizados. `dune runtest --force` → 4 tests OK.
+- **`ocaml` (andamiaje)** — `bin/main.ml` era un `print_endline` de saludo, ajeno al módulo. **Corregido** en `a94f918`: demo real de las cuatro estructuras que muestra el indicador `-1` al consultar vacío.
 
 ### 🟡 Advertencias / Warnings
 
-- **`groovy`** — `lib/bin/` con las cinco clases compiladas **rastreadas por git** (`lib/bin/main/.../*.groovy`); el `.gitignore` ignora `build` pero no `lib/bin`, y el README no lo declara.
-- **`nim`** — `src/data_structures_basics.out` es un **binario compilado rastreado**.
-- **`common-lisp`** — tres variantes de README en el módulo (`README.md`, `README.markdown`, `README.org`); solo la primera es la convención del repo y el submódulo no la repite en otros módulos.
-- **Comentarios de andamiaje obsoletos (8)** — `fsharp`, `groovy` (también en `lib/src`), `haskell`, `haxe`, `nim`, `php`, `purescript` y `python` conservan cabeceras del tipo «*Contract stub (step 4b)… the algorithm is written in step 5*» o «*Implementación pendiente: la escribe el autor*», falsas desde que existen los cuerpos.
+- **`groovy`** — `lib/bin/` con las cinco clases compiladas **rastreadas por git**; el `.gitignore` ignoraba `build` pero no `lib/bin`, y el README no lo declaraba. **Corregido** en `a221b83`: fuera del índice, `lib/bin` en el `.gitignore` y declarado como salida generada.
+- **`nim`** — `src/data_structures_basics.out` era un **binario compilado rastreado**. **Corregido** en `1b2d936`: fuera del índice y añadido al `.gitignore`.
+- **`common-lisp`** — tres variantes de README (`README.md`, `README.markdown`, `README.org`); solo la primera es la convención del repo. **Corregido** en `3aa7115`: se retiran las dos variantes sobrantes.
+- **Comentarios de andamiaje obsoletos (8)** — `fsharp`, `groovy`, `haskell`, `haxe`, `nim`, `php`, `purescript` y `python` conservaban cabeceras del tipo «*Contract stub (step 4b)… the algorithm is written in step 5*» o «*Implementación pendiente: la escribe el autor*». **Corregidos**: `69829ca` (fsharp), `58fc2cd` (groovy), `61b42bb` (haskell), `8dd9209` (haxe), `5bfbdf2` (nim), `e34bd1f` (php), `cf79a42` (purescript), `10e3616` (python). Verificado con `grep`: no queda ninguna de esas frases en los 50.
 
 ### 🔵 Aceptados por el autor / Accepted by the author
 
@@ -77,14 +80,18 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 
 ## Deuda por lenguaje / Debt per language
 
-| Lenguaje / Language | Estado / Status | Eje / Axis | Qué falta / What is missing |
-|---|---|---|---|
-| `ocaml` | 🔴 | `failure` | Devolver el centinela (`-1`) o el booleano en `head`, `pop` y `peek`, y reservar `option` para los enlaces |
-| `groovy` | 🟡 | `construction` | Sacar `lib/bin/` del índice, añadirlo al `.gitignore` y declarar la disposición en el README |
-| `nim` | 🟡 | `construction` | Sacar `src/data_structures_basics.out` del índice |
-| `common-lisp` | 🟡 | `documentation` | Dejar un solo README (el `.md`) y retirar las variantes `.markdown` y `.org` |
-| `fsharp`, `haskell`, `haxe`, `php`, `purescript`, `python` | 🟡 | `documentation` | Retirar la cabecera de andamiaje y describir el estado real |
-| `groovy`, `nim` | 🟡 | `documentation` | Ídem, además del artefacto ya anotado |
+| Lenguaje / Language | Estado / Status | Eje / Axis | `align` | Qué se hizo / What was done |
+|---|---|---|---|---|
+| `ocaml` | ✅ align hecho | `failure` | `b549ce8`, `a94f918` | Centinela `-1` en las cuatro lecturas y `option` solo en enlaces; demo real en `bin/main.ml` |
+| `groovy` | ✅ align hecho | `construction` | `a221b83`, `58fc2cd` | `lib/bin` fuera del índice y en el `.gitignore`; cabeceras de andamiaje retiradas |
+| `nim` | ✅ align hecho | `construction` | `1b2d936`, `5bfbdf2` | Binario `.out` fuera del índice; cabecera de andamiaje retirada |
+| `common-lisp` | ✅ align hecho | `documentation` | `3aa7115` | Un solo README (`.md`) |
+| `fsharp` | ✅ align hecho | `documentation` | `69829ca` | Cabecera de andamiaje retirada |
+| `haskell` | ✅ align hecho | `documentation` | `61b42bb` | Cabecera de andamiaje retirada |
+| `haxe` | ✅ align hecho | `documentation` | `8dd9209` | Cuatro cabeceras de andamiaje retiradas |
+| `php` | ✅ align hecho | `documentation` | `e34bd1f` | Cabecera de andamiaje retirada |
+| `purescript` | ✅ align hecho | `documentation` | `cf79a42` | Cabecera de andamiaje retirada |
+| `python` | ✅ align hecho | `documentation` | `10e3616` | Tres docstrings de andamiaje retirados |
 
 ## Plan de cierre / Closure plan
 
@@ -105,6 +112,9 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 | 2026-10-17 | Los casos de la especificación | `grep` de los valores 10, 20, 30, 40 y 99 en las suites | 5/5 en los 50 |
 | 2026-10-17 | Suites nativas (50) | Comando del catálogo [`scripts/data/languages.tsv`](../../scripts/data/languages.tsv) | 50/50 rc=0 |
 | 2026-10-17 | Estado del árbol (50) | `git status --short` | 50/50 limpios; `ballerina` escribió `Dependencies.toml` y se revirtió |
+| 2026-10-17 | `align` de `ocaml` | `dune build`, `dune runtest --force`, `dune exec data_structures_basics` | `b549ce8`: 4 tests OK; `a94f918`: la demo recorre las cuatro estructuras y muestra `-1` en vacío |
+| 2026-10-17 | `align` de los nueve restantes | Suite nativa tras cada cambio | `fsharp` 23 · `groovy` 4 (XML) · `haskell` PASS · `haxe` 4 bloques · `nim` todas · `php` 4/15 · `purescript` 5 · `python` 4 · `common-lisp` 15 comprobaciones |
+| 2026-10-17 | Artefactos y andamiaje tras el `align` | `git ls-files` y `grep` de las frases de andamiaje | `lib/bin` y `.out` fuera del índice; una sola README en `common-lisp`; cero cabeceras obsoletas en los 50 |
 
 ### Resultado de las suites por lenguaje / Suite result per language
 
