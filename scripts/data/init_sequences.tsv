@@ -1,8 +1,8 @@
 language	phase	order	cwd	mode	command	requirement	expect_answers	completion
 ada	new	1	module	run	alr -n init --lib --in-place {module}	-	-	-
 ada	scaffold	1	module	run	alr -n init --bin tests	-	-	-
-ada	scaffold	2	module	run	cd tests && alr with {module} --use=..	-	-	-
-ada	scaffold	3	module	run	cd tests && alr with aunit	-	-	licencia GPL-3.0-or-later en alire.toml y tests/alire.toml, y description del subproyecto de pruebas
+ada	scaffold	2	module	run	cd tests && alr -n with {module} --use=..	-	-	-
+ada	scaffold	3	module	run	cd tests && alr -n with aunit	-	-	licencia GPL-3.0-or-later en alire.toml y tests/alire.toml, y description del subproyecto de pruebas
 assembly	new	1	phase	run	mkdir -p {module}	-	-	-
 assembly	scaffold	1	module	run	mkdir -p src test && printf 'global {module}_init\n\n.text\n' > src/{module}.asm && touch test/run_tests.asm	-	-	-
 ballerina	new	1	phase	run	bal new {module}	-	-	-

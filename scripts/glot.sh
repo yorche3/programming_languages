@@ -150,7 +150,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="2.0.0"
+GLOT_VERSION="2.0.1"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -2638,10 +2638,10 @@ _glot_cmd_new() {
         rc=0
         case "$step_mode" in
             run)
-                (cd -- "$step_dir" && eval "$step_cmd") </dev/null || rc=$?
+                (cd -- "$step_dir" && eval "$step_cmd") </dev/null 1>&2 || rc=$?
                 ;;
             expect)
-                (cd -- "$step_dir" && _glot_expect_run "$step_cmd" "$step_answers") </dev/null || rc=$?
+                (cd -- "$step_dir" && _glot_expect_run "$step_cmd" "$step_answers") </dev/null 1>&2 || rc=$?
                 ;;
             *)
                 _glot_error "modo de inicialización desconocido / unknown initialisation mode: $step_mode ($lang)"
@@ -2765,10 +2765,10 @@ _glot_cmd_scaffold() {
         rc=0
         case "$step_mode" in
             run)
-                (cd -- "$step_dir" && eval "$step_cmd") </dev/null || rc=$?
+                (cd -- "$step_dir" && eval "$step_cmd") </dev/null 1>&2 || rc=$?
                 ;;
             expect)
-                (cd -- "$step_dir" && _glot_expect_run "$step_cmd" "$step_answers") </dev/null || rc=$?
+                (cd -- "$step_dir" && _glot_expect_run "$step_cmd" "$step_answers") </dev/null 1>&2 || rc=$?
                 ;;
             *)
                 _glot_error "modo de inicialización desconocido / unknown initialisation mode: $step_mode ($lang)"
@@ -6068,10 +6068,12 @@ else
             done
         fi
 
-        # `use` y `new` imprimen la carpeta donde dejan al autor —la fase y el módulo—, así
-        # que aquí el `cd` es el del dato. En modo programa no hay `cd`: el recordatorio del
-        # propio verbo dice cómo hacerlo.
-        if [[ ("$verb" == "use" || "$verb" == "new") && "$dry" -eq 0 ]]; then
+        # `use`, `new` y `scaffold` imprimen la carpeta donde dejan al autor —la fase, y el
+        # módulo, que es la misma en los dos últimos—, así que aquí el `cd` es el del dato:
+        # `scaffold` se lanza a menudo desde la raíz del monorepo y sin esto el autor se
+        # queda fuera. En modo programa no hay `cd`: el recordatorio del propio verbo dice
+        # cómo hacerlo.
+        if [[ ("$verb" == "use" || "$verb" == "new" || "$verb" == "scaffold") && "$dry" -eq 0 ]]; then
             path="$(GLOT_LOADED=1 "$BASH" "$_GLOT_SELF" "$@")" || rc=$?
             ((rc == 0)) || return "$rc"
             if [[ -n "$path" && -d "$path" ]]; then

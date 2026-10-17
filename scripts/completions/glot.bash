@@ -13,7 +13,7 @@ _glot_complete() {
     local glot="${GLOT_CMD:-glot}"
     local words=""
     local keys="lang phase module branch spec repo target cause antigravity-model copilot-model"
-    local verbs="version help doctor greet langs modules models delegates progress completion use new save test verify evidence close validate prompt ask status pointer finish clean install uninstall set get unset list path"
+    local verbs="version help doctor greet langs modules models delegates progress completion use new scaffold save test verify evidence close validate prompt ask status pointer finish clean install uninstall set get unset list path"
     local i=""
     local positional=0
 
@@ -36,7 +36,7 @@ _glot_complete() {
         modules | progress)
             words="$("$glot" modules 2>/dev/null | cut -f2 | LC_ALL=C sort -u)"
             ;;
-        test | verify | evidence | close | validate | finish)
+        test | verify | evidence | close | validate | finish | scaffold)
             if ((COMP_CWORD == 2)); then
                 words="$("$glot" langs 2>/dev/null | cut -f1)"
             else

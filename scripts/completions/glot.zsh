@@ -25,6 +25,7 @@ _glot_zsh() {
         'completion:imprime el autocompletado'
         'use:sitúa el trabajo del sprint'
         'new:inicializa el lenguaje y crea el esqueleto'
+        'scaffold:completa la estructura idiomática del módulo'
         'save:confirma con la convención del repositorio'
         'test:ejecuta la suite del módulo asignado'
         'verify:ejecuta el verificador del lenguaje'
@@ -77,7 +78,7 @@ _glot_zsh() {
                 _describe 'módulo' modulos
             fi
             ;;
-        test | verify | evidence | close | validate | finish)
+        test | verify | evidence | close | validate | finish | scaffold)
             if ((CURRENT == 3)); then
                 lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
                 _describe 'lenguaje' lenguajes
