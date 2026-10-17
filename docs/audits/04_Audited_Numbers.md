@@ -45,12 +45,13 @@ Registro de deuda técnica del módulo `04_Numbers`. / Technical debt record for
 **ES:** Cumplen el contrato del módulo —la combinación de variantes que declara su README, con las suites en verde y los 11 casos por variante— pero arrastran deuda.
 
 - **Cabeceras del README (2):** `elm` no usa la plantilla de Nivel 3 en ninguna de sus cuatro secciones aplicables (su README va con `📦 Módulo Numbers`, `🧠 Paradigmas explicados`, `🧪 Tests`, `🚀 Uso`…) y trae el typo `🏗️ Concectos clave de Elm demostrados`; `tcl-tk` renombra `🚀 Compilación y ejecución` como `🚀 Ejecución`.
-- **Punto de entrada de las suites (1):** `common-lisp` llama a un único `run-tests` y la ejecución da `Pass 5`: los tres ficheros de `tests/` declaran y exportan `run-tests` en el mismo paquete, así que solo entra el último cargado y la ejecución cubre 11 casos de los 33 (cada suite sí tiene sus 11).
 - **Comentarios de plantilla (4, heredados de la auditoría 03):** `ballerina` (`+ a - parameter description`), `clojure` (`FIXME: my new library.`), `crystal` (`# TODO: Write documentation…`) y `dart` (`/// Support for doing something awesome.`). La 03 los anotó para este pase porque los módulos hermanos homologados los comparten.
 
-> **ES:** **Hallazgo retirado el 2026-10-16:** `ada` no incumple nada — sus tres suites llevan las **11 aserciones** agrupadas en 5 procedimientos de AUnit, así que el «5» de su resumen es el recuento del framework, no la cobertura. Se retira del estado y de la deuda, y el snapshot queda aquí porque el registro no se reescribe.
+> **ES:** **Hallazgo retirado el 2026-10-16:** `ada` no incumple nada — sus tres suites llevan las **11 aserciones** agrupadas en 5 procedimientos de AUnit, así que el «5» de su resumen es el recuento del framework, no la cobertura.
 >
-> **EN:** Finding **retired on 2026-10-16**: `ada` does not breach anything — its three suites carry the 11 assertions grouped in 5 AUnit procedures, so the `5` in its summary is the framework count, not the coverage.
+> **ES:** **Hallazgo retirado el 2026-10-16:** `common-lisp` tampoco incumple: su `run-tests` sí llama a los tres runners y la ejecución completa da **33 checks en 3 suites** (11 por suite, `Pass: 11 (100%)` ×3). El `Pass 5` / `Did 11 checks` que anoté era el último de los tres resúmenes de FiveAM, que `tail` recortaba.
+>
+> **EN:** Findings **retired on 2026-10-16**: `ada` does not breach anything (its three suites carry the 11 assertions grouped in 5 AUnit procedures) and neither does `common-lisp` (its `run-tests` calls the three runners: 33 checks in 3 suites).
 
 ### 🔵 Aceptados por el autor / Accepted by the author
 
@@ -58,22 +59,21 @@ Registro de deuda técnica del módulo `04_Numbers`. / Technical debt record for
 
 ### 🟢 Homologados / Homologated
 
-- **42 lenguajes** con las dos capas cumplidas y evidencia de ejecución: `ada`, `assembly`, `c`, `cobol`, `cpp`, `csharp`, `d`, `elixir`, `erlang`, `forth`, `fsharp`, `gleam`, `go`, `grain`, `groovy`, `haskell`, `haxe`, `java`, `javascript`, `julia`, `kotlin`, `lua`, `nim`, `perl`, `php`, `prolog`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `scheme`, `swift`, `typescript`, `v`, `vala` y `zig`.
+- **43 lenguajes** con las dos capas cumplidas y evidencia de ejecución: `ada`, `assembly`, `c`, `cobol`, `common-lisp`, `cpp`, `csharp`, `d`, `elixir`, `erlang`, `forth`, `fsharp`, `gleam`, `go`, `grain`, `groovy`, `haskell`, `haxe`, `java`, `javascript`, `julia`, `kotlin`, `lua`, `nim`, `perl`, `php`, `prolog`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `scheme`, `swift`, `typescript`, `v`, `vala` y `zig`.
 - Los 50 declaran su combinación en el README y cubren los 11 casos por variante implementada: 33 pruebas con las tres (`assembly`, `clojure`, `grain`, `haskell`, `racket`, `scheme`…), 22 con dos (`C`, `C++`, `Go`, `Forth`, `Groovy`, `Julia`, `R`, `Zig`…) y ninguna con una sola variante.
 
 ## Deuda por lenguaje / Debt per language
 
-| 1 | `dune runtest` no compila: `bin/dune` declara `main` sin `bin/main.ml` | Añadir `bin/main.ml`, como se hizo en `unit_test/calculator` durante la auditoría 03 | `ocaml` | ⏳ pendiente |
+| 1 | `dune runtest` no compila: `bin/dune` declara `main` sin `bin/main.ml` | Añadir `bin/main.ml`, como se hizo en `unit_test/calculator` durante la auditoría 03 | `ocaml` | ⏳ corregida en `align/foundations/numbers`, pendiente de integrar |
 | 2 | README fuera de la plantilla de Nivel 3 | Reescribir las secciones con los nombres de la plantilla (y corregir `Concectos`) | `elm` | ⏳ pendiente |
-| 3 | Cabecera obligatoria renombrada | `🚀 Ejecución` → `🚀 Compilación y ejecución` | `tcl-tk` | ⏳ pendiente |
-| 4 | El punto de entrada solo ejecuta una de las tres suites | Que `run-tests` orqueste las tres (un paquete o una función por suite) | `common-lisp` | ⏳ pendiente |
-| 5 | Comentarios y textos de plantilla | Sustituirlos por documentación real del módulo | `ballerina`, `clojure`, `crystal`, `dart` | ⏳ pendiente |
+| 3 | Cabecera obligatoria renombrada | `🚀 Ejecución` → `🚀 Compilación y ejecución` | `tcl-tk` | ⏳ corregida en `align/foundations/numbers`, pendiente de integrar |
+| 4 | Comentarios y textos de plantilla | Sustituirlos por documentación real del módulo | `ballerina`, `clojure`, `crystal`, `dart` | ⏳ pendiente |
 
 ## Plan de cierre / Closure plan
 
-**ES:** El pase está **verificado** (2026-10-16): 50/50 lenguajes con los cinco pasos hechos y evidencia real. Queda el arreglo de los 8 hallazgos —el 🔴 de `ocaml` y los 7 🟡—, que el autor puede corregir en su `align` o aceptar como desviación con su ficha en `docs/ruleset/idioms/`, y el cierre cuando estén integrados. Ver [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
+**ES:** El pase está **verificado** (2026-10-16): 50/50 lenguajes con los cinco pasos hechos y evidencia real. Queda el arreglo de los 7 hallazgos —el 🔴 de `ocaml` y los 6 🟡—, que el autor puede corregir en su `align` o aceptar como desviación con su ficha en `docs/ruleset/idioms/`, y el cierre cuando estén integrados. Ver [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
 
-**EN:** The pass is **verified** (2026-10-16): 50/50 languages with the five steps done and real evidence. What remains is fixing the 8 findings —the `ocaml` 🔴 and the 7 🟡—, which the author may fix in their `align` or accept as a deviation with its record under `docs/ruleset/idioms/`, and the closure once they are integrated. See [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
+**EN:** The pass is **verified** (2026-10-16): 50/50 languages with the five steps done and real evidence. What remains is fixing the 7 findings —the `ocaml` 🔴 and the 6 🟡—, which the author may fix in their `align` or accept as a deviation with its record under `docs/ruleset/idioms/`, and the closure once they are integrated. See [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
 
 ## Registro de verificaciones / Verification log
 
@@ -86,3 +86,4 @@ Registro de deuda técnica del módulo `04_Numbers`. / Technical debt record for
 | 2026-10-16 | Suites múltiples y re-ejecución dirigida | `swipl -q -f {iterative,recursive,recursive_with_acc}_tests.pl -t halt` · `rexx test/{iterative,recursive}_tests.rexx` · `guile --no-auto-compile -s {…}_guile.scm` ×3 · `valac src/numbers.vala test/{iterative,recursive}_tests.vala …` ×2 · `tclsh9.0 {iterative,recursive}.test` ×2 · `zig build test --summary all --cache-dir /tmp/…` | 12/12 rc=0 (tcl-tk `Total 11 Passed 11` por suite; `zig`: 5/5 y 10 pruebas reales) |
 | 2026-10-16 | Recuentos por framework | `grep` de los resúmenes de los 50 registros y de los informes XML de `kotlin` | La mayoría agrupa dos casos por función de test (`php`: `10 tests, 22 assertions`; `erlang`: `10 tests` con 11 casos por suite) |
 | 2026-10-16 | Verificación caso a caso de los 11 casos por variante | Lectura de las suites con la marca propia de cada framework (`Assert.Equal`, `cr_expect_eq`, `expect`, `assert`, `?assertEqual`, `assert-equals`, `shouldBe`, `is(`, `test-equal`, `^test`, `MOVE … EXPECTED`, tablas de casos…) en los 50 | **50/50 cubren los 11 casos por variante implementada** (33, 22 o 11 según la combinación del README); se retira el hallazgo provisional de `ada`, que era el recuento de AUnit (5 procedimientos con 11 aserciones cada uno) |
+| 2026-10-16 | Revisión de los dos hallazgos provisionales | `ros run --load run-tests.lisp` en `common-lisp`, con recuento de resúmenes | **33 checks en 3 suites** (11 por suite, `Pass: 11 (100%)` ×3): el agregador sí orquesta las tres y el hallazgo se **retira** |

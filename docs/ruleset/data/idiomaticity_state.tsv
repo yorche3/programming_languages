@@ -205,7 +205,7 @@ ballerina	numbers	foundations	mostly-idiomatic	documentation	0	Doc placeholders 
 c	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	8d5fb33	2026-10-16
 clojure	numbers	foundations	mostly-idiomatic	documentation	0	Scaffold text: FIXME in build.clj and TODO in doc/intro.md	c183521	2026-10-16
 cobol	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	9f39437	2026-10-16
-common-lisp	numbers	foundations	mostly-idiomatic	tests	0	The entry point calls a single run-tests, so only one of the three suites runs (11 of 33 cases)	76e1c9d	2026-10-16
+common-lisp	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant (33 checks in 3 suites)	76e1c9d	2026-10-16
 cpp	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	0ce4627	2026-10-16
 crystal	numbers	foundations	mostly-idiomatic	documentation	0	Two scaffold TODOs in src/numbers.cr	4228bd1	2026-10-16
 csharp	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	e845f3a	2026-10-16
