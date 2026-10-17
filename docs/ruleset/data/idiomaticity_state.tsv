@@ -249,3 +249,53 @@ typescript	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combi
 v	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	b4f8869	2026-10-16
 vala	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	ea8fb14	2026-10-16
 zig	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	9cd126d	2026-10-16
+ada	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	bb616df	2026-10-17
+assembly	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	e892bd5	2026-10-17
+ballerina	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	a305f94	2026-10-17
+c	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	8d5fb33	2026-10-17
+clojure	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	43b2a6c	2026-10-17
+cobol	naive_sort	algorithms	idiomatic	-	0	Clean: README documents the equivalent representation for invalid input; 78/78 assertions	f4f875f	2026-10-17
+common-lisp	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	76e1c9d	2026-10-17
+cpp	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	0ce4627	2026-10-17
+crystal	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	28ea346	2026-10-17
+csharp	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	e845f3a	2026-10-17
+d	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	963e66e	2026-10-17
+dart	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	839f2f1	2026-10-17
+elixir	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	8c8017d	2026-10-17
+elm	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	068bb3e	2026-10-17
+erlang	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	fce588b	2026-10-17
+forth	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	37cd6ee	2026-10-17
+fsharp	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	d332dd8	2026-10-17
+gleam	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	3956ed9	2026-10-17
+go	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	1d4bba8	2026-10-17
+grain	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	dcbdf4b	2026-10-17
+groovy	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	e0451dc	2026-10-17
+haskell	naive_sort	algorithms	idiomatic	-	0	Clean: pickMin takes the first element separately, no error branch; cabal test PASS	90d919c	2026-10-17
+haxe	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	0002bf1	2026-10-17
+java	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	9dbb202	2026-10-17
+javascript	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	e59749d	2026-10-17
+julia	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	26d7238	2026-10-17
+kotlin	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	e6984c0	2026-10-17
+lua	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	ed9acb0	2026-10-17
+nim	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	4159352	2026-10-17
+ocaml	naive_sort	algorithms	idiomatic	-	0	Clean: bin/main.ml restores the demo entry point; dune runtest --force 3 tests	578fcdb	2026-10-17
+perl	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	6c02b41	2026-10-17
+php	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	e97e324	2026-10-17
+prolog	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	683d19f	2026-10-17
+purescript	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	b76bebf	2026-10-17
+python	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	8c791c8	2026-10-17
+r	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	79fffb2	2026-10-17
+racket	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	466d32a	2026-10-17
+raku	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	55c3402	2026-10-17
+rescript	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	7a6b149	2026-10-17
+rexx	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	17aa9d1	2026-10-17
+ruby	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	598c97a	2026-10-17
+rust	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	531873f	2026-10-17
+scala	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	faef3cc	2026-10-17
+scheme	naive_sort	algorithms	idiomatic	-	0	Clean: min-element replaces (apply min) with a step-by-step scan; Guile 24 checks	75fe6c0	2026-10-17
+swift	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	31a4206	2026-10-17
+tcl-tk	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	9734da3	2026-10-17
+typescript	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	99f9ef7	2026-10-17
+v	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	b4f8869	2026-10-17
+vala	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	ea8fb14	2026-10-17
+zig	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	9cd126d	2026-10-17

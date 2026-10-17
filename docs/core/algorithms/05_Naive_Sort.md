@@ -22,6 +22,14 @@ grand_parent: Core
 
 ---
 
+## 🧭 Cómo leer este módulo / How to read this module
+
+> **ES:** Esta página fija **qué** se exige. Para el **cómo** y el **porqué** de cada familia de lenguajes (in-place o copia, bandera de corte, indicador de fallo), la guía del módulo: [`implementations/05_Naive_Sort.md`](../../implementations/05_Naive_Sort.md). Para **qué** se verificó en los 50 lenguajes, su registro de auditoría: [`05_Audited_Naive_Sort.md`](../../audits/05_Audited_Naive_Sort.md).
+>
+> **EN:** This page fixes **what** is required. For the **how** and the **why** of each language family (in-place or copy, early-exit flag, failure indicator), see the module guide: [`implementations/05_Naive_Sort.md`](../../implementations/05_Naive_Sort.md). For **what** was verified across the 50 languages, its audit record: [`05_Audited_Naive_Sort.md`](../../audits/05_Audited_Naive_Sort.md).
+
+---
+
 ## 📝 Especificación / Specification
 
 ### 📋 Enunciado / Problem Statement
@@ -31,11 +39,19 @@ grand_parent: Core
 
 ### Implementaciones esperadas
 
-| Algoritmo | Estrategia | Complejidad temporal | In-place |
+| Algoritmo | Estrategia | Complejidad temporal | Mutación / Mutation |
 | ----------- | ------------ | --------------------- | :--------: |
-| `selection_sort(arr)` | Encuentra iterativamente el mínimo del resto no ordenado y lo ubica al inicio | $O(n^2)$ siempre | ✅ |
-| `bubble_sort(arr)` | Compara e intercambia adyacentes; optimizado con bandera si no hay swaps | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ |
-| `insertion_sort(arr)` | Construye la sub-secuencia ordenada insertando cada elemento en su posición | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ |
+| `selection_sort(arr)` | Encuentra iterativamente el mínimo del resto no ordenado y lo ubica al inicio | $O(n^2)$ siempre | ✅ in-place<br>✅ copia / copy |
+| `bubble_sort(arr)` | Compara e intercambia adyacentes; optimizado con bandera si no hay swaps | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ in-place<br>✅ copia / copy |
+| `insertion_sort(arr)` | Construye la sub-secuencia ordenada insertando cada elemento en su posición | $O(n^2)$ peor/promedio, $O(n)$ mejor | ✅ in-place<br>✅ copia / copy |
+
+> **ES:** Las dos formas son válidas y se marcan igual: ordenar la secuencia recibida (in-place) o devolver una copia ordenada. La columna no premia una sobre otra; lo que se verifica es que la elegida esté **declarada en el README** del lenguaje.
+>
+> **EN:** Both forms are valid and are marked the same: sorting the received sequence (in-place) or returning a sorted copy. The column does not favour one over the other; what is verified is that the chosen one is **declared in the language's README**.
+
+> **ES:** Columna corregida el **2026-10-17** al abrir la auditoría 05: antes las tres filas decían sólo `✅`, contra el enunciado («in-place **o** retornando una copia ordenada según el paradigma») y contra las familias cuyo tipo de secuencia es inmutable. El histórico queda aquí porque los pases ya cerrados no se reescriben.
+>
+> **EN:** Column corrected on **2026-10-17** when audit 05 opened: the three rows previously said only `✅`, against the statement ("in-place **or** returning a sorted copy depending on the language paradigm") and against the families whose sequence type is immutable. The history stays here because closed passes are not rewritten.
 
 ### Pseudocódigo / Pseudocode
 
@@ -114,13 +130,17 @@ Las pruebas unitarias deben validar los siguientes casos para cada uno de los tr
       **EN:** All three algorithms (`selection_sort`, `bubble_sort`, `insertion_sort`) are implemented without invoking native sort libraries.
 - [ ] **ES:** `bubble_sort` incluye la optimización de salida temprana con bandera de intercambio (`swapped`).  
       **EN:** `bubble_sort` includes the early-exit optimization with a swap flag (`swapped`).
-- [ ] **ES:** Casos inválidos/nulos retornan el indicador de fallo del lenguaje/API (`-1`, `null`, `Option/Maybe` vacío, `Result` de error o equivalente) sin lanzar excepciones.
-    **EN:** Invalid/null cases return the language/API failure indicator (`-1`, `null`, empty `Option/Maybe`, error `Result`, or equivalent) without throwing exceptions.
+- [ ] **ES:** Casos inválidos/nulos retornan el indicador de fallo del lenguaje o de la API (`-1`, `null`, un centinela o equivalente) sin lanzar excepciones y **sin** `Option`/`Maybe`/`Result`, que llegan en la Fase 4.
+      **EN:** Invalid/null cases return the language or API failure indicator (`-1`, `null`, a sentinel or equivalent) without throwing exceptions and **without** `Option`/`Maybe`/`Result`, which arrive in Phase 4.
 - [ ] **ES:** El proyecto separa el código fuente (`src/`) de las pruebas (`test/`).  
       **EN:** The project separates source code (`src/`) from tests (`test/`).
 
 > **ES:** En esta fase los casos inválidos son entradas controladas del contrato y no errores inesperados. Las excepciones y validaciones idiomáticas se introducen posteriormente en `core/text`; más adelante se formalizan retornos `Option`/`Result` en la fase de abstracción y persistencia.
 > **EN:** In this phase, invalid cases are controlled contract inputs, not unexpected errors. Idiomatic exceptions and validation are introduced later in `core/text`; `Option`/`Result` returns are formalized afterward in the abstraction and persistence phase.
+
+> **ES:** Criterio corregido el **2026-10-17** al abrir la auditoría 05: la versión anterior del criterio admitía un `Option/Maybe` vacío o un `Result` de error, contra el enunciado y esta misma nota de fase. El histórico queda aquí porque los pases ya cerrados no se reescriben.
+>
+> **EN:** Criterion corrected on **2026-10-17** when audit 05 opened: the previous wording allowed an empty `Option/Maybe` or an error `Result`, contradicting the statement and this phase note. The history stays here because closed passes are not rewritten.
 
 ---
 

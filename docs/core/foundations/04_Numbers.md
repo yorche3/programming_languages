@@ -22,6 +22,14 @@ grand_parent: Core
 
 ---
 
+## 🧭 Cómo leer este módulo / How to read this module
+
+> **ES:** Esta página fija **qué** se exige. Para el **cómo** y el **porqué** de cada familia de lenguajes (y el coste en memoria de los tres enfoques), la guía del módulo: [`implementations/04_Numbers.md`](../../implementations/04_Numbers.md). Para **qué** se verificó en los 50 lenguajes, su registro de auditoría: [`04_Audited_Numbers.md`](../../audits/04_Audited_Numbers.md).
+>
+> **EN:** This page fixes **what** is required. For the **how** and the **why** of each language family (and the memory cost of the three approaches), see the module guide: [`implementations/04_Numbers.md`](../../implementations/04_Numbers.md). For **what** was verified across the 50 languages, its audit record: [`04_Audited_Numbers.md`](../../audits/04_Audited_Numbers.md).
+
+---
+
 ## 📝 Especificación / Specification
 
 ### 📋 Enunciado / Problem Statement

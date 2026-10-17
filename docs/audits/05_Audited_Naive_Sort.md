@@ -6,7 +6,7 @@ Registro de deuda técnica del módulo `05_Naive_Sort`. / Technical debt record 
 - **Especificación / Specification:** [`05_Naive_Sort.md`](../core/algorithms/05_Naive_Sort.md)
 - **Convención de esta carpeta / Folder convention:** [`README.md`](README.md)
 - **Alcance / Scope:** capa del módulo en [`README.md`](README.md) + los 9 ejes de [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md)
-- **Última verificación / Last verification:** — (pendiente / pending)
+- **Última verificación / Last verification:** 2026-10-17
 
 ---
 
@@ -19,15 +19,38 @@ Registro de deuda técnica del módulo `05_Naive_Sort`. / Technical debt record 
 1. **Fidelidad al módulo.** Los tres algoritmos (`selection_sort`, `bubble_sort`, `insertion_sort`) paso a paso sobre el pseudocódigo, **sin** invocar ordenamiento ni **selección** de la biblioteca estándar (`sort`, `sorted`, `Arrays.sort`, `std::sort`, `qsort`, `lsort`, `lists:sort`, `min`/`max` para el paso interno), con la salida temprana de la burbuja (bandera `swapped`), el indicador de fallo del lenguaje ante entrada nula o inválida —**sin** excepciones ni `Option`/`Maybe`/`Result` en esta fase—, cada caso sobre una **copia** del fixture cuando la función ordena *in-place*, separación `src/`-`test/` y README de Nivel 3. Techo: $O(n^2)$ estricto; solo un lenguaje **sin mutabilidad nativa razonable** puede usar recursión, orden superior o copias, con el mismo principio temporal.
 2. **Idiomaticidad del lenguaje.** `construction`, `naming`, `failure`, `access`, `encapsulation`, `unsafe`, `complexity`, `documentation` y `tests`, con la severidad de [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md).
 
+> **ES:** La prohibición de `min`/`max` para el paso interno se ancla al **enunciado** de la especificación («utilizando comparaciones e intercambios **paso a paso**», «sin estructuras auxiliares complejas») y no a un criterio de aceptación propio: por eso se audita como parte de la fidelidad al algoritmo (decisión del autor, 2026-10-17). El indicador de fallo sigue la regla de fase: `-1`, `null` o centinela, **sin** excepciones ni `Option`/`Maybe`/`Result`, que llegan en la Fase 4 (criterio de la especificación corregido el 2026-10-17). La tabla de implementaciones esperadas marca **las dos formas de mutación** —in-place o copia ordenada— con la misma marca `✅`, porque las dos son válidas y lo único exigible es que el README declare cuál se usa (columna corregida el 2026-10-17).
+>
+> **EN:** The ban on `min`/`max` for the internal step is anchored on the specification's **statement** ("using step-by-step comparisons and swaps", "no complex auxiliary structures"), not on its own acceptance criterion, so it is audited as part of the algorithm's fidelity (author's decision, 2026-10-17). The failure indicator follows the phase rule: `-1`, `null` or a sentinel, **without** exceptions or `Option`/`Maybe`/`Result`, which arrive in Phase 4 (specification criterion corrected on 2026-10-17). The expected-implementations table marks **both mutation forms** —in-place or sorted copy— with the same `✅`, because both are valid and the only requirement is that the README declares which one is used (column corrected on 2026-10-17).
+
+## Comprobaciones por lenguaje / Per-language checks
+
+**ES:** Con los criterios ya fijados, el paso 2 se reduce a seis comprobaciones por lenguaje. Las tres primeras son de fidelidad al módulo; la cuarta y la quinta, de forma; la sexta, de documentación.
+
+**EN:** With the criteria settled, step 2 boils down to six checks per language: the first three cover module fidelity, the fourth and fifth cover form, and the sixth covers documentation.
+
+| # | Comprobación / Check | Cómo se verifica / How it is verified |
+|---|---|---|
+| 1 | La burbuja corta de verdad cuando una pasada no cambia nada / Bubble really stops when a pass changes nothing | Bandera, valor devuelto por la pasada o pasada recursiva; lo que no vale es no mirar si hubo cambios / A flag, a value returned by the pass, or a recursive pass; not looking at whether anything changed does not count |
+| 2 | Indicador de fallo sin excepciones ni `Option`/`Result` / Failure indicator without exceptions or `Option`/`Result` | Devuelto o **declarado** en el README cuando el tipo no admite ausencia / Returned, or **declared** in the README when the type admits no absence |
+| 3 | Sin ordenamiento ni selección de biblioteca / No library sort or selection | `sort`, `sorted`, `qsort`, `lsort`, `lists:sort`, `Arrays.sort`, `std::sort`, `min`/`max` para el paso interno / library calls, including `min`/`max` for the internal step |
+| 4 | Los 7 casos, sobre copia del fixture si ordena in-place / The 7 cases, on a copy of the fixture when sorting in-place | Conteo de aserciones por algoritmo y presencia del fixture reutilizado en cada caso / Assertions per algorithm and a fresh fixture per case |
+| 5 | Separación código/pruebas / Source-test split | `src`/`test` o la disposición equivalente del lenguaje, declarada en el README / `src`/`test` or the language's equivalent layout, declared in the README |
+| 6 | README de Nivel 3 / Level 3 README | Las cuatro secciones de la plantilla / The template's four sections |
+
+**ES:** El comando de suite de cada lenguaje sale del catálogo [`scripts/data/languages.tsv`](../../scripts/data/languages.tsv) (columna `test`); los que figuran como `manual` se ejecutan con el comando que declare su README.
+
+**EN:** Each language's suite command comes from the [`scripts/data/languages.tsv`](../../scripts/data/languages.tsv) catalog (`test` column); entries marked `manual` run with the command their README declares.
+
 ## Alcance y método de esta verificación / Scope and method
 
 | Paso / Step | Alcance / Scope | Resultado / Result |
 |-------------|-----------------|--------------------|
-| 1. Barrido léxico | 50 lenguajes, solo archivos rastreados por git | ⏳ pendiente / pending |
-| 2. Lectura de código | Los tres algoritmos, los intercambios y el aislamiento de cada caso | ⏳ pendiente / pending |
-| 3. Ejecución de suites | Comando nativo del catálogo por lenguaje | ⏳ pendiente / pending |
-| 4. Documentación | README del módulo y comentarios del código | ⏳ pendiente / pending |
-| 5. Estado del árbol | `git status --short` en los 50 submódulos | ⏳ pendiente / pending |
+| 1. Barrido léxico | 50 lenguajes, solo archivos rastreados por git | ✅ 50/50 auditados |
+| 2. Lectura de código | Los tres algoritmos, los intercambios y el aislamiento de cada caso | ✅ 6 comprobaciones por lenguaje, 1 hallazgo de biblioteca |
+| 3. Ejecución de suites | Comando nativo del catálogo por lenguaje | ✅ 50/50 en verde tras el `align` |
+| 4. Documentación | README del módulo y comentarios del código | ✅ 4/4 secciones en los 50 y representación equivalente declarada donde aplica |
+| 5. Estado del árbol | `git status --short` en los 50 submódulos | ✅ 50/50 limpios |
 
 **ES:** El barrido usa **solo archivos rastreados por git**, que es lo que descarta los artefactos de build (`target/`, `bin/`, `elm-stuff/`, `.cpcache/`, `vendor/`…). El paso 3 es obligatorio antes de declarar un 🟢.
 
@@ -37,32 +60,111 @@ Registro de deuda técnica del módulo `05_Naive_Sort`. / Technical debt record 
 
 ### 🔴 Requieren Refactorización (Fallo) / Require Refactoring (Fail)
 
-- ⏳ pendiente / pending
+- — (ninguno: los dos del pase, `ocaml` y `scheme`, quedaron corregidos, integrados y verificados)
 
 ### 🟡 Advertencias / Warnings
 
-- ⏳ pendiente / pending
+- — (ninguna: `haskell` y `cobol` quedaron corregidos, integrados y verificados)
 
 ### 🔵 Aceptados por el autor / Accepted by the author
 
-- — (todavía ninguno / none yet)
+- — (ninguno / none)
 
 ### 🟢 Homologados / Homologated
 
-- ⏳ pendiente / pending
+- **50 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`, `common-lisp`, `cpp`, `crystal`, `csharp`, `d`, `dart`, `elixir`, `elm`, `erlang`, `forth`, `fsharp`, `gleam`, `go`, `grain`, `groovy`, `haskell`, `haxe`, `java`, `javascript`, `julia`, `kotlin`, `lua`, `nim`, `ocaml`, `perl`, `php`, `prolog`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `scheme`, `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
 
 ## Deuda por lenguaje / Debt per language
 
-⏳ pendiente / pending
+**ES:** Las cuatro sub-tareas del pase están cerradas, con su commit de `align` y su verificación.
+**EN:** All four sub-tasks of this pass are closed, each with its `align` commit and its verification.
+
+| Lenguaje / Language | Estado / Status | `align` | Integración / Merge | Arreglo / Fix | Verificación / Verification |
+|---|---|---|---|---|---|
+| `ocaml` | ✅ | `9d51ae8` | `578fcdb` | `bin/main.ml` de demostración para el ejecutable que ya declaraba `bin/dune` | `dune build`, `dune runtest --force` (3 tests), `dune exec naive_sort` |
+| `scheme` | ✅ | `4f66cb2` | `75fe6c0` | `min-element` recorre la lista comparando paso a paso en lugar de `(apply min …)` | Suite de Guile, 24 comprobaciones |
+| `haskell` | ✅ | `b12bf3d` | `90d919c` | `pickMin` recibe el primer elemento por separado: el caso imposible con `error` desaparece | `cabal test` PASS |
+| `cobol` | ✅ | `2b81217` | `f4f875f` | README: representación equivalente (`OCCURS` + `WS-LENGTH`, longitud 0 = secuencia vacía) y ausencia de excepciones | `make test` 78/78 |
+
+> **ES:** Retirado en este pase: el `.github/workflows/test.yml` de `gleam` no se marca. El submódulo lo tiene en sus **cinco** módulos, así que es convención del repositorio de `gleam`, no un artefacto de este módulo.
+>
+> **EN:** Retracted in this pass: `gleam`'s `.github/workflows/test.yml` is not flagged. The submodule has it in **all five** modules, so it is a convention of the `gleam` repository rather than an artifact of this module.
 
 ## Plan de cierre / Closure plan
 
-**ES:** Orden previsto: el pase completo (5 pasos), luego un `align` por lenguaje con hallazgo 🔴 —y por 🟠 si el autor lo prioriza—, y el cierre cuando todos estén integrados. El bloque de 50 filas de `data/idiomaticity_state.tsv` se abre con este pase. Ver [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
+**ES:** **Cerrado el 2026-10-17.** El pase completo se ejecutó el 2026-10-17 sobre los 50 lenguajes, los cuatro hallazgos se corrigieron en cuatro commits de `align` (uno por submódulo), se integraron con `--no-ff` en el `main` de cada uno y se empujaron, y las cuatro suites se re-ejecutaron sobre el código integrado. El bloque de 50 filas de `data/idiomaticity_state.tsv` queda abierto con este pase. Ver [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
 
-**EN:** Planned order: the full pass (5 steps), then one `align` per language with a 🔴 finding —and per 🟠 if the author prioritises it—, and closure once all are integrated. The 50-row block in `data/idiomaticity_state.tsv` opens with this pass. See [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
+**EN:** **Closed on 2026-10-17.** The full pass ran on 2026-10-17 across the 50 languages, the four findings were fixed in four `align` commits (one per submodule), merged with `--no-ff` into each `main` and pushed, and the four suites were re-run against the integrated code. The 50-row block in `data/idiomaticity_state.tsv` is opened by this pass. See [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
 
 ## Registro de verificaciones / Verification log
 
 | Fecha / Date | Alcance / Scope | Comando / Command | Resultado / Result |
 |--------------|-----------------|-------------------|--------------------|
-| — | — | — | — |
+| 2026-10-17 | Estructura del módulo (50) | `git ls-files core/algorithms/naive_sort` | Los tres algoritmos presentes en los 50; las cuatro secciones del README, 4/4 en los 50; disposición código/pruebas declarada en los 50 |
+| 2026-10-17 | Salida temprana de la burbuja (50) | Lectura de los 50 cuerpos | 50/50 con corte real: bandera, valor devuelto por la pasada o pasada recursiva |
+| 2026-10-17 | Ordenamiento y selección de biblioteca (50) | `grep` de `sort`, `sorted`, `qsort`, `lsort`, `lists:sort`, `Arrays.sort`, `std::sort`, `min`/`max`, `minBy`, `minimum`, `argmin`… | 1 hallazgo: `scheme` (`apply min`) |
+| 2026-10-17 | Excepciones en la fuente (50) | `grep` de `throw`, `raise`, `panic`, `error`, `abort` | 1 hallazgo: `haskell` (`error` en rama inalcanzable) |
+| 2026-10-17 | Indicador de fallo y su declaración (50) | Lectura de fuentes y README | 1 hallazgo: `cobol` (no declara la representación equivalente) |
+| 2026-10-17 | Los 7 casos y su aislamiento | `grep` de los valores de la tabla + lectura de los mutables | 7/7 en los 50 (`cobol` en tabla `OCCURS 7 TIMES`); fixture nuevo por caso (`crystal` `.dup`, `common-lisp` `copy-seq`, `tcl-tk` por valor, `racket` inmutable, `forth` buffer de trabajo) |
+| 2026-10-17 | Suites nativas (50) | Comando del catálogo [`scripts/data/languages.tsv`](../../scripts/data/languages.tsv) | 49 rc=0; `ocaml` rc=1 (`Module "Main" doesn't exist`) |
+| 2026-10-17 | Estado del árbol (50) | `git status --short` | 50/50 limpios; `ballerina` escribió `Dependencies.toml` y se revirtió |
+| 2026-10-17 | `align` de `ocaml` | `dune build`, `dune runtest --force`, `dune exec naive_sort` | 3 tests OK; la demo imprime las tres listas ordenadas |
+| 2026-10-17 | `align` de `scheme` | Suite de Guile tras el cambio | 24 comprobaciones en verde; sin `min`/`max` de biblioteca |
+| 2026-10-17 | `align` de `haskell` | `cabal test` | PASS; el módulo ya no contiene `error` |
+| 2026-10-17 | `align` de `cobol` | `make test` | 78/78 |
+| 2026-10-17 | Integración (4 submódulos) | Re-ejecución sobre `main` | `ocaml` 3 tests · `scheme` 24 · `haskell` PASS · `cobol` 78 |
+
+### Resultado de las suites por lenguaje / Suite result per language
+
+| Lenguaje | Comando / Command | Resultado / Result |
+|---|---|---|
+| `ada` | `alr -C tests run` | 3 tests, 0 errores |
+| `assembly` | `make run` | 24 aserciones, 0 fallos |
+| `ballerina` | `bal test` | 0 fallos, 0 omitidos |
+| `c` | `make test` | 3 de 3 |
+| `clojure` | `clojure -T:build test` | 6 tests, 48 aserciones, 0 fallos |
+| `cobol` | `make test` | 78 aserciones, 0 fallos |
+| `common-lisp` | `ros run --load run-tests.lisp` | 24 comprobaciones, 100% |
+| `cpp` | `bazelisk test //...` | 1 test, PASSED |
+| `crystal` | `crystal spec` | 3 ejemplos, 0 fallos |
+| `csharp` | `dotnet test NaiveSort.slnx` | 3 tests, 0 fallos |
+| `d` | `dub test` | 1 módulo, 0 fallos |
+| `dart` | `dart test` | 3 tests, todos pasan |
+| `elixir` | `mix test` | 3 pasan |
+| `elm` | `elm-test` | 21 pasan, 0 fallan |
+| `erlang` | `rebar3 eunit` | 21 tests, 0 fallos |
+| `forth` | `gforth run-tests.forth` | 78 pasan, 0 fallan |
+| `fsharp` | `dotnet test` | 3 tests, 0 fallos |
+| `gleam` | `gleam test` | 3 pasan, sin fallos |
+| `go` | `go test ./...` | ok |
+| `grain` | `make test` | 21 pasan, 0 fallan |
+| `groovy` | `./gradlew test` | 3 tests, 0 fallos (XML) |
+| `haskell` | `cabal test` | PASS |
+| `haxe` | `haxe build.hxml` | 3 OK |
+| `java` | `mvn test` | 3 tests, 0 fallos (surefire) |
+| `javascript` | `npm test` | 3 pasan |
+| `julia` | `julia --project=. test/run_tests.jl` | 24 pasan |
+| `kotlin` | `gradle test` | 3 tests, 0 fallos (XML) |
+| `lua` | `busted` | 3 éxitos, 0 fallos |
+| `nim` | `nimble test` | 3 OK |
+| `ocaml` | `dune runtest` | **falla**: `Module "Main" doesn't exist` |
+| `perl` | `prove --ext=.pl test/` | 3 tests, PASS |
+| `php` | `composer test` | 3 tests, 21 aserciones |
+| `prolog` | `swipl -q -f naive_sort_tests.pl -t halt` | 3 pasan |
+| `purescript` | `spago test` | 3 pasan |
+| `python` | `pytest` | 3 pasan |
+| `r` | `make test` | 24 pasan |
+| `racket` | `raco test -x .` | 24 pasan |
+| `raku` | `prove6 -l t/` | 3 tests, PASS |
+| `rescript` | `npm test` | 21 pasan |
+| `rexx` | `rexx test/naive_sort_tests.rexx` | 24 aserciones, 0 fallos |
+| `ruby` | `bundle exec rspec` | 3 ejemplos, 0 fallos |
+| `rust` | `cargo test` | 3 pasan |
+| `scala` | `sbt -batch test` | 3 pasan |
+| `scheme` | `guile -s naive_sort_tests_guile.scm` | 24 pasan |
+| `swift` | `swift test` | 3 XCTest, 0 fallos |
+| `tcl-tk` | `tclsh9.0 naive_sort.test` | 21 pasan, 0 fallan |
+| `typescript` | `npm test` | 24 pasan |
+| `v` | `v test .` | 1 archivo, pasa |
+| `vala` | `valac … && /tmp/…` | 3 ok |
+| `zig` | `zig build test` | rc=0, sin fallos |

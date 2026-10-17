@@ -115,7 +115,7 @@ done
 | `core.foundations.hello_user` | 🔴 0 · 🟡 0 · 🔵 1 (`grain`, sin stdin: [`idioms/grain.md`](../ruleset/idioms/grain.md)) · 🟢 49 — **cerrado**: 34 commits en 32 submódulos, integrados y empujados | [`02_Audited_Hello_User.md`](02_Audited_Hello_User.md) |
 | `core.foundations.unit_test_calculator` | 🔴 0 · 🟡 0 · 🔵 0 · 🟢 50 — **cerrado**: las 50 suites ejecutadas y los 15 hallazgos corregidos en 15 commits de `align` (uno por submódulo), integrados y empujados el 2026-10-16 | [`03_Audited_Unit_Test_Calculator.md`](03_Audited_Unit_Test_Calculator.md) |
 | `core.foundations.numbers` | 🔴 0 · 🟡 0 · 🔵 0 · 🟢 50 — **cerrado**: las 50 suites ejecutadas, los 11 casos por variante comprobados y los 7 hallazgos corregidos en 7 commits de `align`, integrados y empujados el 2026-10-16 | [`04_Audited_Numbers.md`](04_Audited_Numbers.md) |
-| `core.algorithms.naive_sort` | ⏳ pendiente | [`05_Audited_Naive_Sort.md`](05_Audited_Naive_Sort.md) |
+| `core.algorithms.naive_sort` | 🔴 0 · 🟡 0 · 🔵 0 · 🟢 50 — **cerrado**: las 50 suites ejecutadas, 4 hallazgos corregidos en 4 commits de `align` (uno por submódulo), integrados y empujados el 2026-10-17 | [`05_Audited_Naive_Sort.md`](05_Audited_Naive_Sort.md) |
 | `core.algorithms.data_structures_basics` | 🔄 en curso | [`06_Audited_Data_Structures_Basics.md`](06_Audited_Data_Structures_Basics.md) |
 
 ---
