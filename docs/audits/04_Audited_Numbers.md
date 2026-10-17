@@ -6,7 +6,7 @@ Registro de deuda técnica del módulo `04_Numbers`. / Technical debt record for
 - **Especificación / Specification:** [`04_Numbers.md`](../core/foundations/04_Numbers.md)
 - **Convención de esta carpeta / Folder convention:** [`README.md`](README.md)
 - **Alcance / Scope:** capa del módulo en [`README.md`](README.md) + los 9 ejes de [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md)
-- **Última verificación / Last verification:** 2026-10-16 (pase completo, 50/50)
+- **Última verificación / Last verification:** 2026-10-16 (pase completo y **cerrado**, 50/50)
 
 ---
 
@@ -59,21 +59,21 @@ Registro de deuda técnica del módulo `04_Numbers`. / Technical debt record for
 
 ### 🟢 Homologados / Homologated
 
-- **43 lenguajes** con las dos capas cumplidas y evidencia de ejecución: `ada`, `assembly`, `c`, `cobol`, `common-lisp`, `cpp`, `csharp`, `d`, `elixir`, `erlang`, `forth`, `fsharp`, `gleam`, `go`, `grain`, `groovy`, `haskell`, `haxe`, `java`, `javascript`, `julia`, `kotlin`, `lua`, `nim`, `perl`, `php`, `prolog`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `scheme`, `swift`, `typescript`, `v`, `vala` y `zig`.
+- **50 lenguajes** con las dos capas cumplidas y evidencia de ejecución: los **43** que ya estaban más `ballerina`, `clojure`, `crystal`, `dart`, `elm`, `ocaml` y `tcl-tk`, cuyos hallazgos se corrigieron e integraron durante el cierre.
 - Los 50 declaran su combinación en el README y cubren los 11 casos por variante implementada: 33 pruebas con las tres (`assembly`, `clojure`, `grain`, `haskell`, `racket`, `scheme`…), 22 con dos (`C`, `C++`, `Go`, `Forth`, `Groovy`, `Julia`, `R`, `Zig`…) y ninguna con una sola variante.
 
 ## Deuda por lenguaje / Debt per language
 
-| 1 | `dune runtest` no compila: `bin/dune` declara `main` sin `bin/main.ml` | Añadir `bin/main.ml`, como se hizo en `unit_test/calculator` durante la auditoría 03 | `ocaml` | ⏳ corregida en `align/foundations/numbers`, pendiente de integrar |
-| 2 | README fuera de la plantilla de Nivel 3 | Reescribir las secciones con los nombres de la plantilla (y corregir `Concectos`) | `elm` | ⏳ pendiente |
-| 3 | Cabecera obligatoria renombrada | `🚀 Ejecución` → `🚀 Compilación y ejecución` | `tcl-tk` | ⏳ corregida en `align/foundations/numbers`, pendiente de integrar |
-| 4 | Comentarios y textos de plantilla | Sustituirlos por documentación real del módulo | `ballerina`, `clojure`, `crystal`, `dart` | ⏳ pendiente |
+| 1 | `dune runtest` no compila: `bin/dune` declara `main` sin `bin/main.ml` | Añadir `bin/main.ml`, como se hizo en `unit_test/calculator` durante la auditoría 03 | `ocaml` | ✅ integrada |
+| 2 | README fuera de la plantilla de Nivel 3 | Reescribir las secciones con los nombres de la plantilla (y corregir `Concectos`) | `elm` | ✅ integrada |
+| 3 | Cabecera obligatoria renombrada | `🚀 Ejecución` → `🚀 Compilación y ejecución` | `tcl-tk` | ✅ integrada |
+| 4 | Comentarios y textos de plantilla | Sustituirlos por documentación real del módulo | `ballerina`, `clojure`, `crystal`, `dart` | ✅ integrada |
 
 ## Plan de cierre / Closure plan
 
-**ES:** El pase está **verificado** (2026-10-16): 50/50 lenguajes con los cinco pasos hechos y evidencia real. Queda el arreglo de los 7 hallazgos —el 🔴 de `ocaml` y los 6 🟡—, que el autor puede corregir en su `align` o aceptar como desviación con su ficha en `docs/ruleset/idioms/`, y el cierre cuando estén integrados. Ver [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
+**ES:** El pase está **cerrado** (2026-10-16): las 50 suites ejecutadas, los 11 casos por variante comprobados y los 7 hallazgos integrados en el `main` de sus 7 submódulos y empujados, con los punteros del monorepo sincronizados. El módulo queda 🟢 50/50: sin 🔴, sin 🟡 y sin desviaciones aceptadas, así que no hay fichas nuevas en `docs/ruleset/idioms/`. El cierre queda registrado en [`ROADMAP_UPDATE_CHECKLIST.md`](../ROADMAP_UPDATE_CHECKLIST.md) y en la nota del módulo en [`ROADMAP.md`](../ROADMAP.md) —el contador del sprint no se toca—.
 
-**EN:** The pass is **verified** (2026-10-16): 50/50 languages with the five steps done and real evidence. What remains is fixing the 7 findings —the `ocaml` 🔴 and the 6 🟡—, which the author may fix in their `align` or accept as a deviation with its record under `docs/ruleset/idioms/`, and the closure once they are integrated. See [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
+**EN:** The pass is **closed** (2026-10-16): 50/50 suites executed, the 11 cases per variant checked and the 7 findings integrated into their 7 submodules' `main` and pushed, with the monorepo pointers synced. The module sits at 🟢 50/50: no 🔴, no 🟡 and no accepted deviations, so no new records under `docs/ruleset/idioms/`. The closure is logged in [`ROADMAP_UPDATE_CHECKLIST.md`](../ROADMAP_UPDATE_CHECKLIST.md) and in the module's note in [`ROADMAP.md`](../ROADMAP.md) —the sprint counter is untouched—.
 
 ## Registro de verificaciones / Verification log
 
@@ -87,3 +87,4 @@ Registro de deuda técnica del módulo `04_Numbers`. / Technical debt record for
 | 2026-10-16 | Recuentos por framework | `grep` de los resúmenes de los 50 registros y de los informes XML de `kotlin` | La mayoría agrupa dos casos por función de test (`php`: `10 tests, 22 assertions`; `erlang`: `10 tests` con 11 casos por suite) |
 | 2026-10-16 | Verificación caso a caso de los 11 casos por variante | Lectura de las suites con la marca propia de cada framework (`Assert.Equal`, `cr_expect_eq`, `expect`, `assert`, `?assertEqual`, `assert-equals`, `shouldBe`, `is(`, `test-equal`, `^test`, `MOVE … EXPECTED`, tablas de casos…) en los 50 | **50/50 cubren los 11 casos por variante implementada** (33, 22 o 11 según la combinación del README); se retira el hallazgo provisional de `ada`, que era el recuento de AUnit (5 procedimientos con 11 aserciones cada uno) |
 | 2026-10-16 | Revisión de los dos hallazgos provisionales | `ros run --load run-tests.lisp` en `common-lisp`, con recuento de resúmenes | **33 checks en 3 suites** (11 por suite, `Pass: 11 (100%)` ×3): el agregador sí orquesta las tres y el hallazgo se **retira** |
+| 2026-10-16 | **Integración y re-ejecución de los siete** | `bal test` · `clojure -T:build test` · `crystal spec` · `dart test` · `elm-test` · `dune runtest` · `tclsh9.0 {iterative,recursive}.test`, todos sobre el `main` integrado | **8/8 rc=0** (33 aserciones en Clojure, 33 pruebas en Elm, 10 en Crystal y Dart, `Total 11 Passed 11` por suite en Tcl-Tk); 7 commits de `align` fusionados y empujados, sin ramas de trabajo y con los punteros sincronizados |

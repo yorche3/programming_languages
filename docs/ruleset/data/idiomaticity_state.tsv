@@ -201,18 +201,18 @@ vala	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educ
 zig	unit_test_calculator	foundations	idiomatic	-	0	Clean: five operations, educational implementations, src/test split	9cd126d	2026-10-16
 ada	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	bb616df	2026-10-16
 assembly	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	e892bd5	2026-10-16
-ballerina	numbers	foundations	mostly-idiomatic	documentation	0	Doc placeholders ("+ a - parameter description") on every operation	eb347c6	2026-10-16
+ballerina	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	a305f94	2026-10-16
 c	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	8d5fb33	2026-10-16
-clojure	numbers	foundations	mostly-idiomatic	documentation	0	Scaffold text: FIXME in build.clj and TODO in doc/intro.md	c183521	2026-10-16
+clojure	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	43b2a6c	2026-10-16
 cobol	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	9f39437	2026-10-16
 common-lisp	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant (33 checks in 3 suites)	76e1c9d	2026-10-16
 cpp	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	0ce4627	2026-10-16
-crystal	numbers	foundations	mostly-idiomatic	documentation	0	Two scaffold TODOs in src/numbers.cr	4228bd1	2026-10-16
+crystal	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	28ea346	2026-10-16
 csharp	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	e845f3a	2026-10-16
 d	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	963e66e	2026-10-16
-dart	numbers	foundations	mostly-idiomatic	documentation	0	Template comments in lib/ ("Support for doing something awesome", "Checks if you are awesome", two TODOs)	914a0c6	2026-10-16
+dart	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	839f2f1	2026-10-16
 elixir	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	8c8017d	2026-10-16
-elm	numbers	foundations	mostly-idiomatic	documentation	0	README outside the Level 3 template (0/4 sections) plus a typo in a heading	7691158	2026-10-16
+elm	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	068bb3e	2026-10-16
 erlang	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	fce588b	2026-10-16
 forth	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	37cd6ee	2026-10-16
 fsharp	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	d332dd8	2026-10-16
@@ -228,7 +228,7 @@ julia	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combinatio
 kotlin	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	e6984c0	2026-10-16
 lua	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	ed9acb0	2026-10-16
 nim	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	4159352	2026-10-16
-ocaml	numbers	foundations	transitional	tests	0	dune runtest fails: bin/dune declares main without bin/main.ml (the same orphan stanza already fixed in unit_test/calculator; the suite builds with its own target)	1210161	2026-10-16
+ocaml	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	3851239	2026-10-16
 perl	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	6c02b41	2026-10-16
 php	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	e97e324	2026-10-16
 prolog	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	683d19f	2026-10-16
@@ -244,7 +244,7 @@ rust	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination
 scala	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	faef3cc	2026-10-16
 scheme	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	2131c07	2026-10-16
 swift	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	31a4206	2026-10-16
-tcl-tk	numbers	foundations	mostly-idiomatic	documentation	0	README renames the build section as Ejecucion	15084b0	2026-10-16
+tcl-tk	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	9734da3	2026-10-16
 typescript	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	99f9ef7	2026-10-16
 v	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	b4f8869	2026-10-16
 vala	numbers	foundations	idiomatic	-	0	Clean: five algorithms, suite combination declared in the README, 11 cases per variant	ea8fb14	2026-10-16
