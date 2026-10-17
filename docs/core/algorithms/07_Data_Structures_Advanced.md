@@ -18,9 +18,17 @@ grand_parent: Core
 |---|---|
 | Construir estructuras que requieren más de un enlace por nodo: un árbol binario de búsqueda y un grafo dirigido. | Build structures that require more than one link per node: a binary search tree and a directed graph. |
 
-Este módulo declara y verifica `TreeNode` y `GraphNode` en contextos distintos: enlaces izquierdo/derecho para el ABB y adyacencias dirigidas para el grafo. No importa ni reutiliza código de `data_structures_basics`; se reutiliza el concepto de nodo, no un tipo o una implementación compartidos.
+Este módulo declara una **base `Node` con el valor** y dos nodos derivados: `TreeNode` (enlaces izquierdo/derecho) y `GraphNode` (adyacencias dirigidas). La base **no valida nada** —no tiene enlaces ni indicadores de fallo—: cada hijo valida los suyos. No importa ni reutiliza código de `data_structures_basics`: la base es local al módulo, y el `Node` del 06 (`value` + `next`) no es el mismo tipo.
 
-This module declares and verifies `TreeNode` and `GraphNode` in different contexts: left/right links for the BST and directed adjacency for the graph. It does not import or reuse code from `data_structures_basics`; it reuses the concept of a node, not a shared type or implementation.
+This module declares a **`Node` base carrying the value** and two derived nodes: `TreeNode` (left/right links) and `GraphNode` (directed adjacency). The base **validates nothing** — it has no links and no failure indicators; each child validates its own. It does not import or reuse code from `data_structures_basics`: the base is local to this module, and module 06's `Node` (`value` + `next`) is not the same type.
+
+---
+
+## 🧭 Cómo leer este módulo / How to read this module
+
+> **ES:** Esta página fija **qué** se exige. Para el **cómo** y el **porqué** de cada familia de lenguajes (base con valor por herencia o embebida, mutabilidad de los enlaces, capacidad e instancia inutilizable), la guía del módulo: [`implementations/07_Data_Structures_Advanced.md`](../../implementations/07_Data_Structures_Advanced.md).
+>
+> **EN:** This page fixes **what** is required. For the **how** and the **why** of each language family (value base through inheritance or embedding, link mutability, capacity and the unusable instance), see the module guide: [`implementations/07_Data_Structures_Advanced.md`](../../implementations/07_Data_Structures_Advanced.md).
 
 ## 📖 Concepto: múltiples referencias / Concept: multiple links
 
@@ -28,19 +36,23 @@ Un `TreeNode` tiene `Value`, `Left` y `Right`. Un `GraphNode` tiene una `Label` 
 
 A `TreeNode` has `Value`, `Left` and `Right`. A `GraphNode` has a `Label` and its own sequence of neighbour labels. Names and concrete representations are idiomatic, but values, links and invariants are observed through each structure's API.
 
+La base es **`Node(value)`**: solo el valor, sin enlaces y **sin validaciones**; no se instancia por sí sola. Admite **dos formas**: herencia real del tipo base donde el lenguaje la tenga, o **valor embebido** (el valor declarado dentro del propio nodo hijo, sin tipo base). Las dos son válidas y el README declara cuál se usa.
+
+The base is **`Node(value)`**: only the value, no links and **no validations**; it is not instantiated on its own. It admits **two forms**: real inheritance from the base type where the language has it, or an **embedded value** (the value declared inside the child node itself, with no base type). Both are valid and the README declares which one is used.
+
 La `LinkedList<T>` de la biblioteca estándar puede almacenar la secuencia de vecinos de `GraphNode`; esa lista no sustituye al `Graph` ni cambia sus complejidades (`O(d(u))` para insertar, consultar o copiar vecinos). `BinaryTree` y las operaciones de `Graph` siguen siendo implementaciones propias; no se usan algoritmos de alto nivel que oculten el aprendizaje.
 
 The standard library's `LinkedList<T>` may store `GraphNode`'s neighbour sequence; that list does not replace `Graph` or change its complexities (`O(d(u))` to insert, look up or copy neighbours). `BinaryTree` and `Graph` operations remain the implementation under study; no high-level algorithms may hide the learning objective.
 
 ## 📐 Contrato común y aislamiento / Common contract and isolation
 
-1. `TreeNode` es un tipo nuevo o equivalente idiomático con valor y enlaces `Left` y `Right`. `GraphNode` es un tipo nuevo con una etiqueta y su propia secuencia de adyacencia.
+1. El módulo declara una base `Node` que **solo** contiene el valor (`init(value)`, `get_value()`), sin enlaces y sin validaciones; no se instancia. `TreeNode` deriva de ella y añade los enlaces `Left`/`Right`, validando ambos. `GraphNode` deriva de ella y añade su secuencia de adyacencia, validando orden creciente y ausencia de duplicados. La reutilización del valor se hace por herencia o por valor embebido, según declare el README.
 2. `BinaryTree` y `Graph` tienen tipos nuevos y constructores equivalentes a `init`. `Graph` puede usar el `LinkedList<T>` de la biblioteca estándar como almacenamiento de vecinos, pero implementa manualmente sus propias operaciones e invariantes; la colección no sustituye al ADT `Graph`.
 3. Los indicadores de éxito y fallo son los valores representables y no ambiguos que declare el README de cada lenguaje. No se fuerza `-1`, `null`, `nil`, `Option` o `Result` cuando el lenguaje o la fase no los admiten.
 4. Los valores de prueba son enteros positivos o el subtipo entero equivalente que evite colisiones con los indicadores del lenguaje.
 5. Cada adaptación de mutabilidad, ausencia, índices, vecinos o capacidad se documenta como adaptación idiomática.
 
-1. `TreeNode` is a new type or idiomatic equivalent with a value and `Left` and `Right` links. `GraphNode` is a new type with a label and its own adjacency sequence.
+1. The module declares a `Node` base that holds **only** the value (`init(value)`, `get_value()`), with no links and no validations; it is not instantiated. `TreeNode` derives from it and adds the `Left`/`Right` links, validating both. `GraphNode` derives from it and adds its adjacency sequence, validating ascending order and absence of duplicates. The value is reused through inheritance or an embedded value, as declared in the README.
 2. `BinaryTree` and `Graph` have new types and constructors equivalent to `init`. `Graph` may use the standard library's `LinkedList<T>` as neighbour storage, but it manually implements its own operations and invariants; the collection does not replace the `Graph` ADT.
 3. Success and failure indicators are the representable, unambiguous values documented in each language README. `-1`, `null`, `nil`, `Option` or `Result` are not forced when the language or phase does not admit them.
 4. Test values are positive integers or the equivalent integer subtype that avoids collisions with the language's indicators.
@@ -50,10 +62,15 @@ The standard library's `LinkedList<T>` may store `GraphNode`'s neighbour sequenc
 
 | Estructura / Structure | Operaciones / Operations | Contrato e invariantes / Contract and invariants | Complejidad / Complexity |
 |---|---|---|---|
+| `Node` | `init(value)`, `get_value()` | Base local del módulo: **solo el valor**. Sin enlaces, sin validaciones y sin instancias propias; el valor se reutiliza por herencia o embebido. | `O(1)` |
 | `TreeNode` | `init(value)`, `get_value()`, `get_left()`, `get_right()`, `set_left(node)`, `set_right(node)` | Nodo propio del ABB; un enlace ausente representa un subárbol vacío. | `O(1)` |
 | `BinaryTree` | `init(capacity)`, `insert(value)`, `contains(value)`, `is_empty()`, `size()` | ABB: valores menores a la izquierda y mayores a la derecha; duplicados no aumentan el tamaño; capacidad máxima de nodos. `contains` es pertenencia por la invariante del ABB, no búsqueda sobre secuencias (módulo `searching`). | `init`, vacío y tamaño: `O(1)`; insertar y pertenencia: `O(h)`, `h` = altura actual |
 | `GraphNode` | `init(label)` (interno a `Graph`) | Nodo propio del grafo; `label` identifica el vértice; conserva su secuencia de vecinos en orden creciente y sin duplicados. | `O(1)` |
 | `Graph` | `init(capacity)`, `add_edge(u,v)`, `has_edge(u,v)`, `get_neighbors(u)`, `is_empty()`, `size()` | Grafo dirigido con etiquetas `0 .. capacity - 1`; cuenta aristas dirigidas distintas; la adyacencia de cada vértice está ordenada. `is_empty()` significa que no hay aristas; `size()` cuenta aristas distintas, no vértices. | `init`: `O(V)`; `add_edge` y `has_edge`: `O(d(u))`; `get_neighbors`: `O(d(u))`; vacío y tamaño: `O(1)` |
+
+> **ES:** Decisión del **2026-10-17**: la base es `Node(value)`, **solo el valor y sin validaciones** —no tiene enlaces ni indicador de fallo— y no se instancia. `TreeNode` y `GraphNode` la reutilizan por **herencia** (donde el lenguaje la tenga) o por **valor embebido** (composición), y **cada hijo valida sus propios enlaces**. Las dos formas son válidas y el README declara cuál se usa. No se confunde con el `Node` del módulo 06, que es `value + next` y pertenece a otro contrato.
+>
+> **EN:** Decision of **2026-10-17**: the base is `Node(value)`, **value only and no validations** — no links and no failure indicator — and it is not instantiated. `TreeNode` and `GraphNode` reuse it through **inheritance** (where the language has it) or an **embedded value** (composition), and **each child validates its own links**. Both forms are valid and the README declares which one is used. It is not to be confused with module 06's `Node`, which is `value + next` and belongs to another contract.
 
 En este módulo `capacity` es el máximo de nodos del árbol o vértices del grafo. Una capacidad inválida (menor que 1 o no representable) deja la instancia **inutilizable**, y ese estado es observable: `is_empty()` devuelve verdadero, `size()` devuelve cero y las operaciones de consulta o mutación devuelven el indicador de fallo del lenguaje. Una capacidad agotada rechaza la creación de un valor nuevo o una arista nueva sin cambiar el estado. Un duplicado de ABB sigue siendo éxito aunque el árbol esté lleno, porque no crea un nodo.
 
@@ -88,18 +105,25 @@ In this module `capacity` is the maximum number of tree nodes or graph vertices.
 ## 🧠 Modelo conceptual / Conceptual model
 
 ```pseudocode
-type TreeNode
+type Node
     value
+
+    init(value)
+        this.value = value
+        return this
+
+    get_value() = return this.value
+
+type TreeNode extends Node
     left = absent
     right = absent
 
     init(value)
-        this.value = value
+        super(value)                # el valor vive en la base
         this.left = absent
         this.right = absent
         return this
 
-    get_value() = return this.value
     get_left()  = return this.left
     get_right() = return this.right
 
@@ -168,12 +192,11 @@ type NeighborNode
     label
     next = absent
 
-type GraphNode
-    label
-    neighbours = absent
+type GraphNode extends Node
+    neighbours = absent             # la etiqueta es el valor heredado
 
     init(label)
-        this.label = label
+        super(label)
         this.neighbours = absent
         return this
 
@@ -290,6 +313,7 @@ Tests are grouped by abstraction: first `TreeNode`, then `BinaryTree` and `Graph
 
 ## ✅ Criterios de aceptación / Acceptance criteria
 
+- [ ] Existe una base `Node` con el valor y **sin** validaciones; `TreeNode` y `GraphNode` la reutilizan por herencia o por valor embebido, y **cada hijo** valida sus propios enlaces.
 - [ ] `TreeNode` y `GraphNode` son tipos propios; `BinaryTree` y `Graph` mantienen sus nodos, estado y contratos independientes.
 - [ ] `Graph` puede usar `LinkedList<T>` de biblioteca solo para su adyacencia; el ADT y sus operaciones se implementan manualmente y conservan la complejidad declarada.
 - [ ] Los tests verifican el contrato del nodo, las invariantes y el comportamiento observable.

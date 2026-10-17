@@ -38,6 +38,20 @@ grand_parent: Core
 | `bucket_sort(arr)` | Distribución en cubetas con secuencias auxiliares + ordenamiento interno | $O(n + k)$ promedio | Distribución uniforme de valores |
 | `shell_sort(arr)` | Insertion sort generalizado con brechas decrecientes ($gap = \lfloor gap / 2 \rfloor$) | $O(n^{3/2})$ o $O(n \log^2 n)$ | Comparativo, sin memoria extra |
 
+## 🔌 Declaración del contrato / Contract declaration
+
+**ES:** Los cuatro algoritmos comparten **una sola firma** —`sort(secuencia) → secuencia ordenada`—, así que el módulo declara **una forma de contrato común** y cada algoritmo la cumple. Valen las dos formas: la **nativa** del lenguaje (`interface`, `trait`, `protocol`, `behaviour`, `type class`, interfaz de Ada…) o su **equivalente declarado** (cabecera con puntero a función en C, clase con métodos puros en C++, registro de funciones en un lenguaje funcional, tabla de despacho…). El README declara cuál se usa y la suite recorre las cuatro implementaciones a través de ella.
+
+**EN:** The four algorithms share **a single signature** —`sort(sequence) → sorted sequence`— so the module declares **one common contract form** and every algorithm fulfils it. Both forms are valid: the language's **native** one (`interface`, `trait`, `protocol`, `behaviour`, `type class`, Ada's interface…) or its **declared equivalent** (a C header with a function pointer, a C++ class with pure methods, a record of functions in a functional language, a dispatch table…). The README declares which one is used and the suite walks the four implementations through it.
+
+> **ES:** Es el **primer módulo del roadmap** donde la regla de [`AGENT_Template.md`](../../AGENT_Template.md) —un tipo de contrato aparte solo cuando hay **más de una implementación real**— se cumple: cuatro algoritmos con la misma firma. En el 06 había una implementación por estructura y por eso no se exigía.
+>
+> **EN:** It is the **first roadmap module** where the [`AGENT_Template.md`](../../AGENT_Template.md) rule —a separate contract type only with **more than one real implementation**— actually holds: four algorithms with the same signature. Module 06 had one implementation per structure, which is why it was not required there.
+
+> **ES:** Las precondiciones **no se borran**: `counting_sort` exige rango acotado, `radix_sort` enteros no negativos, `bucket_sort` distribución uniforme y `shell_sort` es comparativo. Los casos compartidos son los que cumplen todas; los específicos se prueban por algoritmo.
+>
+> **EN:** Preconditions are **not erased**: `counting_sort` needs a bounded range, `radix_sort` non-negative integers, `bucket_sort` a uniform distribution, and `shell_sort` is comparative. Shared cases are those meeting all of them; specific ones are tested per algorithm.
+
 ### Pseudocódigo / Pseudocode
 
 ```pseudocode
