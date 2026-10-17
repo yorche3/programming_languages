@@ -38,6 +38,48 @@ Sin pendientes a 2026-09-28: la implementación, la documentación y el registro
 <!-- Las entradas cerradas se conservan debajo con su fecha y evidencia. -->
 
 ```text
+Fecha / Date: 2026-10-14
+Fase / Phase: core.foundations
+Módulo(s) / Module(s): core.foundations.hello_user (especificación 02_Hello_User)
+Lenguaje(s) / Language(s): 50 auditados; 32 con hallazgo corregido (11 de prompt/saludo y 20 de nombre de fichero, con solapes) y `grain` aceptado
+Código verificado / Code verified: yes (auditoría en docs/audits/02_Audited_Hello_User.md)
+Tests y comandos / Tests and commands:
+- Los comandos documentados por módulo, con la entrada `John` (`Ada` en `rexx`) -> 49/50 rc=0; `grain` no tiene módulo porque el lenguaje no lee de stdin
+- Re-ejecución tras los arreglos -> 49/50 rc=0 con la salida del criterio
+README(s) verificado(s) / README(s) verified: yes (los 50 README del módulo contra la plantilla de Nivel 3)
+Cambio en ROADMAP.md / ROADMAP.md change: core.foundations.hello_user sigue en ✅ 50/50; la nota del módulo pasa a nombrar la auditoría 02 cerrada (el contador del sprint no se toca)
+Observaciones / Notes: Cierre de la pasada 02. Criterio del módulo corregido durante el pase: el prompt de la especificación pasó de «What is your name?» a «Enter your name: », porque el autor lo había documentado mal; el cambio quedó anotado con fecha en la especificación y en los documentos afectados. Desviación aceptada: `grain` no tiene stdin, así que el módulo interactivo no existe (docs/ruleset/idioms/grain.md). Se corrigieron además `rexx` (`parse pull` en vez de `pull`, que pasa el texto a mayúsculas), `rescript` (`Js.log` con concatenación, porque `Js.log3` inserta espacios) y `forth` (una línea suelta que rompía la ejecución). 34 commits en 32 submódulos, integrados y empujados.
+```
+
+```text
+Fecha / Date: 2026-10-13
+Fase / Phase: core.foundations
+Módulo(s) / Module(s): core.foundations.hello_world (especificación 01_Hello_World)
+Lenguaje(s) / Language(s): 50 auditados; 35 con hallazgo corregido (34 del módulo y `haxe`)
+Código verificado / Code verified: yes (auditoría en docs/audits/01_Audited_Hello_World.md)
+Tests y comandos / Tests and commands:
+- La ejecución del programa en los 50 lenguajes con su comando documentado -> 50/50 rc=0
+- Re-ejecución tras los arreglos -> 50/50 rc=0, con el mensaje exacto salvo `elm` (`: ()`), `r` (`[1] "…"`) y `zig` (que lo escribe por stderr)
+README(s) verificado(s) / README(s) verified: yes (los 50 README del módulo contra la plantilla de Nivel 3; 5 completados y 14 citas del mensaje corregidas)
+Cambio en ROADMAP.md / ROADMAP.md change: core.foundations.hello_world sigue en ✅ 50/50; la nota del módulo pasa a nombrar la auditoría 01 cerrada (el contador del sprint no se toca)
+Observaciones / Notes: Cierre de la pasada 01. 40 commits de `align` (21 por el mensaje exacto y 20 por el nombre del fichero, 7 en las dos listas) y 27 de corrección en una segunda pasada (impresión en `r`, `racket` y `zig`, `.gitignore` de artefactos en 14 lenguajes, 5 READMEs y el nombre del paquete de `purescript`). Desviación aceptada: `elm` no tiene salida por consola en su biblioteca estándar y usa `Debug.log` (docs/ruleset/idioms/elm.md).
+```
+
+```text
+Fecha / Date: 2026-10-16
+Fase / Phase: core.foundations
+Módulo(s) / Module(s): core.foundations.unit_test (especificación 03_Unit_Test_Calculator)
+Lenguaje(s) / Language(s): 50 auditados; 15 con hallazgo corregido (ballerina, clojure, common-lisp, cpp, crystal, csharp, dart, erlang, fsharp, forth, grain, julia, ocaml, scheme, tcl-tk)
+Código verificado / Code verified: yes (auditoría en docs/audits/03_Audited_Unit_Test_Calculator.md)
+Tests y comandos / Tests and commands:
+- Los 15 comandos del catálogo sobre el `main` integrado -> 15/15 rc=0 con 5 pruebas cada uno
+- `dune runtest` en `ocaml/` -> rc=0 tras añadir `bin/main.ml`; `dune exec test/test_calculator.exe` -> `Test Successful in 0.001s. 5 tests run.`
+README(s) verificado(s) / README(s) verified: yes (los 50 README del módulo contra la plantilla de Nivel 3: 50/50 con las cuatro secciones aplicables)
+Cambio en ROADMAP.md / ROADMAP.md change: core.foundations.unit_test sigue en ✅ 50/50; se añade a la nota del módulo el cierre de la auditoría 03 (el contador del sprint no se toca)
+Observaciones / Notes: Cierre de la pasada 03. El pase verificó las 50 implementaciones (cinco operaciones, multiplicación por suma repetitiva, división por resta repetitiva y módulo construido con ambas, solo biblioteca estándar) y dejó 15 hallazgos, todos corregidos e integrados: 5 de nombres, 6 de comentarios de plantilla, 3 de cabeceras de README y el `bin/dune` huérfano de `ocaml`. Cuatro hallazgos se retiraron al comprobar la convención en el módulo hermano homologado `04_Numbers` (`src` como módulo o paquete en `v`, `go` y `haxe`, `*_base.dart` en `dart` y `testify` en `go`). Deuda heredada por la auditoría 04: los mismos placeholders de plantilla y el mismo `bin/dune` huérfano en `04_Numbers`.
+```
+
+```text
 Fecha / Date: 2026-09-28
 Fase / Phase: core.algorithms
 Módulo(s) / Module(s): core.algorithms.data_structures_basics
