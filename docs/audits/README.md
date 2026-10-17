@@ -116,7 +116,7 @@ done
 | `core.foundations.unit_test_calculator` | 🔴 0 · 🟡 0 · 🔵 0 · 🟢 50 — **cerrado**: las 50 suites ejecutadas y los 15 hallazgos corregidos en 15 commits de `align` (uno por submódulo), integrados y empujados el 2026-10-16 | [`03_Audited_Unit_Test_Calculator.md`](03_Audited_Unit_Test_Calculator.md) |
 | `core.foundations.numbers` | 🔴 0 · 🟡 0 · 🔵 0 · 🟢 50 — **cerrado**: las 50 suites ejecutadas, los 11 casos por variante comprobados y los 7 hallazgos corregidos en 7 commits de `align`, integrados y empujados el 2026-10-16 | [`04_Audited_Numbers.md`](04_Audited_Numbers.md) |
 | `core.algorithms.naive_sort` | 🔴 0 · 🟡 0 · 🔵 0 · 🟢 50 — **cerrado**: las 50 suites ejecutadas, 4 hallazgos corregidos en 4 commits de `align` (uno por submódulo), integrados y empujados el 2026-10-17 | [`05_Audited_Naive_Sort.md`](05_Audited_Naive_Sort.md) |
-| `core.algorithms.data_structures_basics` | ⏳ preparación: guía de implementación y criterios fijados el 2026-10-17, barrido pendiente | [`06_Audited_Data_Structures_Basics.md`](06_Audited_Data_Structures_Basics.md) |
+| `core.algorithms.data_structures_basics` | 🔴 1 (`ocaml`) · 🟡 9 (`groovy`, `nim`, `common-lisp`, `fsharp`, `haskell`, `haxe`, `php`, `purescript`, `python`) · 🔵 0 · 🟢 40 — **pase completo**: 50 lenguajes auditados y 50 suites en verde el 2026-10-17, pendiente de `align` | [`06_Audited_Data_Structures_Basics.md`](06_Audited_Data_Structures_Basics.md) |
 
 ---
 

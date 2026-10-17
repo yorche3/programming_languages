@@ -7,7 +7,7 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 - **Convención de esta carpeta / Folder convention:** [`README.md`](README.md)
 - **Alcance / Scope:** capa del módulo en [`README.md`](README.md) + los 9 ejes de [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md)
 - **Estado parcial / Partial state:** [`data/idiomaticity_state.tsv`](../ruleset/data/idiomaticity_state.tsv)
-- **Última verificación / Last verification:** — (preparación del pase / pass preparation)
+- **Última verificación / Last verification:** 2026-10-17
 
 ---
 
@@ -44,11 +44,11 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 
 | Paso / Step | Alcance / Scope | Resultado / Result |
 |-------------|-----------------|--------------------|
-| 1. Barrido léxico | 50 lenguajes, solo archivos rastreados por git | ⏳ pendiente / pending |
-| 2. Lectura de código | Constructor, enlaces, indicador de fallo y comentarios | ⏳ pendiente / pending |
-| 3. Ejecución de suites | Comando nativo del catálogo por lenguaje | ⏳ pendiente / pending |
-| 4. Documentación | README del módulo y comentarios del código | ⏳ pendiente / pending |
-| 5. Estado del árbol | `git status --short` en los 50 submódulos | ⏳ pendiente / pending |
+| 1. Barrido léxico | 50 lenguajes, solo archivos rastreados por git | ✅ 50/50 auditados |
+| 2. Lectura de código | Constructor, enlaces, indicador de fallo y comentarios | ✅ 7 comprobaciones por lenguaje |
+| 3. Ejecución de suites | Comando nativo del catálogo por lenguaje | ✅ 50/50 en verde |
+| 4. Documentación | README del módulo y comentarios del código | ⚠️ 4/4 secciones en los 50; 8 con comentarios de andamiaje obsoletos |
+| 5. Estado del árbol | `git status --short` en los 50 submódulos | ✅ 50/50 limpios tras revertir el artefacto de `ballerina` |
 
 **ES:** Las **50 filas** que ya existen en el estado son **heredadas del flujo antiguo** (16 `transitional`, 15 `workaround`, 9 `not-started`, 8 `not-audited` y 2 `mostly-idiomatic`; ninguna en `idiomatic`) y se **reescriben** con el resultado real de este pase, incluido el commit de cada submódulo.
 
@@ -58,34 +58,105 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 
 ### 🔴 Requieren Refactorización (Fallo) / Require Refactoring (Fail)
 
-- ⏳ pendiente del barrido / pending the sweep
+- **`ocaml`** — `head`, `pop` y `peek` devuelven `int option` (`val head : t -> int option`), es decir, el tipo opcional aparece como **resultado de operación**, no solo en el enlace; el criterio lo admite únicamente en `next`. La propia `.mli` lo declara como decisión: «*Absent links and fallible operations use [option], never sentinels*».
 
 ### 🟡 Advertencias / Warnings
 
-- ⏳ pendiente del barrido / pending the sweep
+- **`groovy`** — `lib/bin/` con las cinco clases compiladas **rastreadas por git** (`lib/bin/main/.../*.groovy`); el `.gitignore` ignora `build` pero no `lib/bin`, y el README no lo declara.
+- **`nim`** — `src/data_structures_basics.out` es un **binario compilado rastreado**.
+- **`common-lisp`** — tres variantes de README en el módulo (`README.md`, `README.markdown`, `README.org`); solo la primera es la convención del repo y el submódulo no la repite en otros módulos.
+- **Comentarios de andamiaje obsoletos (8)** — `fsharp`, `groovy` (también en `lib/src`), `haskell`, `haxe`, `nim`, `php`, `purescript` y `python` conservan cabeceras del tipo «*Contract stub (step 4b)… the algorithm is written in step 5*» o «*Implementación pendiente: la escribe el autor*», falsas desde que existen los cuerpos.
 
 ### 🔵 Aceptados por el autor / Accepted by the author
 
-- ⏳ pendiente de la decisión del autor / pending the author's decision
+- — (ninguno / none)
 
 ### 🟢 Homologados / Homologated
 
-- ⏳ pendiente / pending
+- **40 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`, `cpp`, `crystal`, `csharp`, `d`, `dart`, `elixir`, `elm`, `erlang`, `forth`, `gleam`, `go`, `grain`, `java`, `javascript`, `julia`, `kotlin`, `lua`, `perl`, `prolog`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `scheme`, `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
 
 ## Deuda por lenguaje / Debt per language
 
-**ES:** Se detalla por lenguaje en el estado (`blocking_axis` y `notes`) y se irá bajando con cada `align`. La deuda de documentación —la que no exige tocar código— se resuelve escribiendo la ficha del lenguaje en [`docs/ruleset/idioms/`](../ruleset/idioms/).
-
-**EN:** Detailed per language in the state (`blocking_axis` and `notes`) and paid down with each `align`. Documentation debt —the kind that does not require touching code— is settled by writing the language's record under [`docs/ruleset/idioms/`](../ruleset/idioms/).
+| Lenguaje / Language | Estado / Status | Eje / Axis | Qué falta / What is missing |
+|---|---|---|---|
+| `ocaml` | 🔴 | `failure` | Devolver el centinela (`-1`) o el booleano en `head`, `pop` y `peek`, y reservar `option` para los enlaces |
+| `groovy` | 🟡 | `construction` | Sacar `lib/bin/` del índice, añadirlo al `.gitignore` y declarar la disposición en el README |
+| `nim` | 🟡 | `construction` | Sacar `src/data_structures_basics.out` del índice |
+| `common-lisp` | 🟡 | `documentation` | Dejar un solo README (el `.md`) y retirar las variantes `.markdown` y `.org` |
+| `fsharp`, `haskell`, `haxe`, `php`, `purescript`, `python` | 🟡 | `documentation` | Retirar la cabecera de andamiaje y describir el estado real |
+| `groovy`, `nim` | 🟡 | `documentation` | Ídem, además del artefacto ya anotado |
 
 ## Plan de cierre / Closure plan
 
-**ES:** Terminar los pasos 1 y 2 sobre los 50, ejecutar las 50 suites, cerrar el registro y abrir `align` solo donde haya 🔴. El módulo queda homogéneo cuando todos los `align` estén integrados y el estado no tenga 🔴.
+**ES:** El pase completo está hecho (5 pasos, 50 suites en verde). Orden previsto: un `align` por lenguaje con hallazgo —`ocaml` primero por ser el único 🔴— y cierre cuando los diez estén integrados. El estado ya refleja el pase con sus 50 filas reescritas.
 
-**EN:** Finish steps 1 and 2 over the 50, run the 50 suites, close the record and open `align` only where there is a 🔴. The module is homogeneous once every `align` is integrated and the state holds no 🔴.
+**EN:** The full pass is done (5 steps, 50 suites green). Planned order: one `align` per language with a finding —`ocaml` first as the only 🔴— and closure once all ten are integrated. The state already reflects the pass with its 50 rows rewritten.
 
 ## Registro de verificaciones / Verification log
 
 | Fecha / Date | Alcance / Scope | Comando / Command | Resultado / Result |
 |--------------|-----------------|-------------------|--------------------|
-| — | — | — | — |
+| 2026-10-17 | Estructura del módulo (50) | `git ls-files core/algorithms/data_structures_basics` | Cuatro estructuras presentes en los 50; README con las cuatro secciones, 4/4 en los 50 |
+| 2026-10-17 | Un solo `Node` y sin delegación (50) | `grep` de tipos de celda alternativos y de `insert_*` en pila/cola | Sin tipos duplicados; 0 archivos de `Stack`/`Queue` llaman a operaciones de la lista |
+| 2026-10-17 | Colecciones de biblioteca (50) | `grep` de `java.util.*`, `collections.deque`, `std::collections`, `VecDeque`, `Data.Sequence`… | Sin uso; los `new LinkedList()` son la clase propia del módulo |
+| 2026-10-17 | Indicador por tipo de retorno (50) | Lectura de fuentes y README | 1 hallazgo: `ocaml` usa `int option` en lecturas |
+| 2026-10-17 | Artefactos rastreados (50) | `git ls-files` filtrado por directorios de build y binarios | 2 hallazgos: `groovy` (`lib/bin/`) y `nim` (`.out`) |
+| 2026-10-17 | Comentarios de andamiaje (50) | `grep` de `step 4b`, `Contract stub`, «Implementación pendiente», «Esqueleto» | 8 hallazgos |
+| 2026-10-17 | Los casos de la especificación | `grep` de los valores 10, 20, 30, 40 y 99 en las suites | 5/5 en los 50 |
+| 2026-10-17 | Suites nativas (50) | Comando del catálogo [`scripts/data/languages.tsv`](../../scripts/data/languages.tsv) | 50/50 rc=0 |
+| 2026-10-17 | Estado del árbol (50) | `git status --short` | 50/50 limpios; `ballerina` escribió `Dependencies.toml` y se revirtió |
+
+### Resultado de las suites por lenguaje / Suite result per language
+
+| Lenguaje | Comando / Command | Resultado / Result |
+|---|---|---|
+| `ada` | `alr -C tests run` | 4 tests, 0 errores |
+| `assembly` | `make run` | 15 aserciones |
+| `ballerina` | `bal test` | 0 fallos, 0 omitidos |
+| `c` | `make test` | 4 de 4 |
+| `clojure` | `clojure -T:build test` | 4 tests, 46 aserciones |
+| `cobol` | `make test` | 49 aserciones |
+| `common-lisp` | `ros run --load run-tests.lisp` | 15 comprobaciones, 4 tests |
+| `cpp` | `bazelisk test //...` | 1 test, PASSED |
+| `crystal` | `crystal spec` | 4 ejemplos |
+| `csharp` | `dotnet test DataStructuresBasics.slnx` | 4 tests |
+| `d` | `dub test` | 1 módulo |
+| `dart` | `dart test` | 4 tests |
+| `elixir` | `mix test` | 4 pasan |
+| `elm` | `elm-test` | 4 pasan |
+| `erlang` | `rebar3 eunit` | 23 tests |
+| `forth` | `gforth run-tests.forth` | 114 aserciones |
+| `fsharp` | `dotnet test` | 23 tests |
+| `gleam` | `gleam test` | 4 pasan |
+| `go` | `go test ./...` | ok |
+| `grain` | `make test` | 51 casos |
+| `groovy` | `./gradlew test` | 4 tests (XML) |
+| `haskell` | `cabal test` | PASS |
+| `haxe` | `haxe build.hxml` | 4 bloques OK |
+| `java` | `mvn test` | 23 tests (surefire) |
+| `javascript` | `npm test` | 4 pasan |
+| `julia` | `julia --project=. test/run_tests.jl` | 51 pasan |
+| `kotlin` | `gradle test` | 4 tests (XML) |
+| `lua` | `busted` | 4 éxitos |
+| `nim` | `nimble test` | todas pasan |
+| `ocaml` | `dune runtest --force` | 4 tests |
+| `perl` | `prove --ext=.pl test/` | 4 tests, PASS |
+| `php` | `composer test` | 4 tests, 15 aserciones |
+| `prolog` | `swipl -q -f data_structures_basics_tests.pl -t halt` | 23 pasan |
+| `purescript` | `spago test` | 5 pasan |
+| `python` | `pytest` | 4 pasan |
+| `r` | `make test` | 55 pasan |
+| `racket` | `raco test -x .` | 53 pasan |
+| `raku` | `prove6 -l t/` | 4 archivos, PASS |
+| `rescript` | `npm test` | 15 pasan |
+| `rexx` | `rexx test/data_structures_basics_tests.rexx` | 23 ejecuciones, 106 aserciones |
+| `ruby` | `bundle exec rspec` | 4 ejemplos |
+| `rust` | `cargo test` | 22 pasan |
+| `scala` | `sbt -batch test` | 19 pasan |
+| `scheme` | `guile -s data_structures_basics_tests_guile.scm` | 85 pasan |
+| `swift` | `swift test` | 4 XCTest |
+| `tcl-tk` | `tclsh9.0 data_structures_basics.test` | 19 pasan |
+| `typescript` | `npm test` | 5 pasan |
+| `v` | `v test .` | 1 archivo, pasa |
+| `vala` | `valac … && /tmp/…` | 4 ok |
+| `zig` | `zig build test` | rc=0 |
