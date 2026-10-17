@@ -47,7 +47,7 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 | 1. Barrido léxico | 50 lenguajes, solo archivos rastreados por git | ✅ 50/50 auditados |
 | 2. Lectura de código | Constructor, enlaces, indicador de fallo y comentarios | ✅ 7 comprobaciones por lenguaje |
 | 3. Ejecución de suites | Comando nativo del catálogo por lenguaje | ✅ 50/50 en verde |
-| 4. Documentación | README del módulo y comentarios del código | ⚠️ 4/4 secciones en los 50; 8 con comentarios de andamiaje obsoletos |
+| 4. Documentación | README del módulo y comentarios del código | ✅ 4/4 secciones en los 50 y sin comentarios de andamiaje tras el `align` |
 | 5. Estado del árbol | `git status --short` en los 50 submódulos | ✅ 50/50 limpios tras revertir el artefacto de `ballerina` |
 
 **ES:** Las **50 filas** que ya existen en el estado son **heredadas del flujo antiguo** (16 `transitional`, 15 `workaround`, 9 `not-started`, 8 `not-audited` y 2 `mostly-idiomatic`; ninguna en `idiomatic`) y se **reescriben** con el resultado real de este pase, incluido el commit de cada submódulo.
@@ -58,17 +58,11 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 
 ### 🔴 Requieren Refactorización (Fallo) / Require Refactoring (Fail)
 
-- **`ocaml`** — `head`, `pop`, `peek` y `dequeue` devolvían `int option`, es decir, el tipo opcional como **resultado de operación**, no solo en el enlace; el criterio lo admite únicamente en `next`. La propia `.mli` lo declaraba como decisión: «*Absent links and fallible operations use [option], never sentinels*».
-  - **Comprobado en la documentación de OCaml (2026-10-17):** no es una restricción del lenguaje. El manual presenta `Option` como «*Option values explicitly indicate the presence or absence of a value*» —la convención para la ausencia, no la única forma de señalarla— y `-1` es un `int` válido. La desviación era de diseño, no de lenguaje.
-  - **Corregido** en `b549ce8`: las cuatro lecturas devuelven `int` con `-1`; `option` queda en los enlaces; interfaz, implementación, suite (20 comprobaciones) y README actualizados. `dune runtest --force` → 4 tests OK.
-- **`ocaml` (andamiaje)** — `bin/main.ml` era un `print_endline` de saludo, ajeno al módulo. **Corregido** en `a94f918`: demo real de las cuatro estructuras que muestra el indicador `-1` al consultar vacío.
+- — (ninguno: `ocaml` quedó corregido en `b549ce8` y `a94f918`, integrado y verificado)
 
 ### 🟡 Advertencias / Warnings
 
-- **`groovy`** — `lib/bin/` con las cinco clases compiladas **rastreadas por git**; el `.gitignore` ignoraba `build` pero no `lib/bin`, y el README no lo declaraba. **Corregido** en `a221b83`: fuera del índice, `lib/bin` en el `.gitignore` y declarado como salida generada.
-- **`nim`** — `src/data_structures_basics.out` era un **binario compilado rastreado**. **Corregido** en `1b2d936`: fuera del índice y añadido al `.gitignore`.
-- **`common-lisp`** — tres variantes de README (`README.md`, `README.markdown`, `README.org`); solo la primera es la convención del repo. **Corregido** en `3aa7115`: se retiran las dos variantes sobrantes.
-- **Comentarios de andamiaje obsoletos (8)** — `fsharp`, `groovy`, `haskell`, `haxe`, `nim`, `php`, `purescript` y `python` conservaban cabeceras del tipo «*Contract stub (step 4b)… the algorithm is written in step 5*» o «*Implementación pendiente: la escribe el autor*». **Corregidos**: `69829ca` (fsharp), `58fc2cd` (groovy), `61b42bb` (haskell), `8dd9209` (haxe), `5bfbdf2` (nim), `e34bd1f` (php), `cf79a42` (purescript), `10e3616` (python). Verificado con `grep`: no queda ninguna de esas frases en los 50.
+- — (ninguna: `groovy`, `nim`, `common-lisp`, `fsharp`, `haskell`, `haxe`, `php`, `purescript` y `python` quedaron corregidos, integrados y verificados)
 
 ### 🔵 Aceptados por el autor / Accepted by the author
 
@@ -76,28 +70,31 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 
 ### 🟢 Homologados / Homologated
 
-- **40 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`, `cpp`, `crystal`, `csharp`, `d`, `dart`, `elixir`, `elm`, `erlang`, `forth`, `gleam`, `go`, `grain`, `java`, `javascript`, `julia`, `kotlin`, `lua`, `perl`, `prolog`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `scheme`, `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
+- **50 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`, `common-lisp`, `cpp`, `crystal`, `csharp`, `d`, `dart`, `elixir`, `elm`, `erlang`, `forth`, `fsharp`, `gleam`, `go`, `grain`, `groovy`, `haskell`, `haxe`, `java`, `javascript`, `julia`, `kotlin`, `lua`, `nim`, `ocaml`, `perl`, `php`, `prolog`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `scheme`, `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
 
 ## Deuda por lenguaje / Debt per language
 
-| Lenguaje / Language | Estado / Status | Eje / Axis | `align` | Qué se hizo / What was done |
+**ES:** Las diez sub-tareas del pase están cerradas: diez commits de `align` (dos en `ocaml`, `groovy` y `nim`), integrados con `--no-ff` y empujados, y las diez suites re-ejecutadas sobre el `main` integrado.
+**EN:** All ten sub-tasks of this pass are closed: ten `align` commits (two each in `ocaml`, `groovy` and `nim`), merged with `--no-ff` and pushed, and the ten suites re-run against the integrated `main`.
+
+| Lenguaje / Language | Estado / Status | `align` | Integración / Merge | Qué se hizo / What was done |
 |---|---|---|---|---|
-| `ocaml` | ✅ align hecho | `failure` | `b549ce8`, `a94f918` | Centinela `-1` en las cuatro lecturas y `option` solo en enlaces; demo real en `bin/main.ml` |
-| `groovy` | ✅ align hecho | `construction` | `a221b83`, `58fc2cd` | `lib/bin` fuera del índice y en el `.gitignore`; cabeceras de andamiaje retiradas |
-| `nim` | ✅ align hecho | `construction` | `1b2d936`, `5bfbdf2` | Binario `.out` fuera del índice; cabecera de andamiaje retirada |
-| `common-lisp` | ✅ align hecho | `documentation` | `3aa7115` | Un solo README (`.md`) |
-| `fsharp` | ✅ align hecho | `documentation` | `69829ca` | Cabecera de andamiaje retirada |
-| `haskell` | ✅ align hecho | `documentation` | `61b42bb` | Cabecera de andamiaje retirada |
-| `haxe` | ✅ align hecho | `documentation` | `8dd9209` | Cuatro cabeceras de andamiaje retiradas |
-| `php` | ✅ align hecho | `documentation` | `e34bd1f` | Cabecera de andamiaje retirada |
-| `purescript` | ✅ align hecho | `documentation` | `cf79a42` | Cabecera de andamiaje retirada |
-| `python` | ✅ align hecho | `documentation` | `10e3616` | Tres docstrings de andamiaje retirados |
+| `ocaml` | ✅ | `b549ce8`, `a94f918` | `d2d841e` | Centinela `-1` en las cuatro lecturas y `option` solo en enlaces; demo real en `bin/main.ml` |
+| `groovy` | ✅ | `a221b83`, `58fc2cd` | `51a4e0e` | `lib/bin` fuera del índice y en el `.gitignore`; cabeceras de andamiaje retiradas |
+| `nim` | ✅ | `1b2d936`, `5bfbdf2` | `1a80d72` | Binario `.out` fuera del índice; cabecera de andamiaje retirada |
+| `common-lisp` | ✅ | `3aa7115` | `e4f2497` | Un solo README (`.md`) |
+| `fsharp` | ✅ | `69829ca` | `f53aaee` | Cabecera de andamiaje retirada |
+| `haskell` | ✅ | `61b42bb` | `e843b27` | Cabecera de andamiaje retirada |
+| `haxe` | ✅ | `8dd9209` | `86f80e3` | Cuatro cabeceras de andamiaje retiradas |
+| `php` | ✅ | `e34bd1f` | `440e818` | Cabecera de andamiaje retirada |
+| `purescript` | ✅ | `cf79a42` | `1c28b5b` | Cabecera de andamiaje retirada |
+| `python` | ✅ | `10e3616` | `8201986` | Tres docstrings de andamiaje retirados |
 
 ## Plan de cierre / Closure plan
 
-**ES:** El pase completo está hecho (5 pasos, 50 suites en verde). Orden previsto: un `align` por lenguaje con hallazgo —`ocaml` primero por ser el único 🔴— y cierre cuando los diez estén integrados. El estado ya refleja el pase con sus 50 filas reescritas.
+**ES:** **Cerrado el 2026-10-17.** El pase completo se ejecutó sobre los 50 lenguajes (5 pasos, 50 suites en verde), los diez hallazgos se corrigieron en diez commits de `align`, se integraron con `--no-ff` en el `main` de cada submódulo y se empujaron, y las diez suites se re-ejecutaron sobre el código integrado. El bloque de 50 filas de `data/idiomaticity_state.tsv` queda en `idiomatic` con el commit de integración de cada lenguaje.
 
-**EN:** The full pass is done (5 steps, 50 suites green). Planned order: one `align` per language with a finding —`ocaml` first as the only 🔴— and closure once all ten are integrated. The state already reflects the pass with its 50 rows rewritten.
+**EN:** **Closed on 2026-10-17.** The full pass ran across the 50 languages (5 steps, 50 suites green), the ten findings were fixed in ten `align` commits, merged with `--no-ff` into each submodule's `main` and pushed, and the ten suites were re-run against the integrated code. The 50-row block in `data/idiomaticity_state.tsv` is `idiomatic` with each language's integration commit.
 
 ## Registro de verificaciones / Verification log
 
@@ -115,6 +112,7 @@ Registro de deuda técnica del módulo `06_Data_Structures_Basics`. / Technical 
 | 2026-10-17 | `align` de `ocaml` | `dune build`, `dune runtest --force`, `dune exec data_structures_basics` | `b549ce8`: 4 tests OK; `a94f918`: la demo recorre las cuatro estructuras y muestra `-1` en vacío |
 | 2026-10-17 | `align` de los nueve restantes | Suite nativa tras cada cambio | `fsharp` 23 · `groovy` 4 (XML) · `haskell` PASS · `haxe` 4 bloques · `nim` todas · `php` 4/15 · `purescript` 5 · `python` 4 · `common-lisp` 15 comprobaciones |
 | 2026-10-17 | Artefactos y andamiaje tras el `align` | `git ls-files` y `grep` de las frases de andamiaje | `lib/bin` y `.out` fuera del índice; una sola README en `common-lisp`; cero cabeceras obsoletas en los 50 |
+| 2026-10-17 | Integración (10 submódulos) | Re-ejecución sobre `main` | `ocaml` 4 · `fsharp` 23 · `groovy` 4 · `haskell` PASS · `haxe` 4 bloques · `nim` todas · `php` 4/15 · `purescript` 5 · `python` 4 · `common-lisp` 15 |
 
 ### Resultado de las suites por lenguaje / Suite result per language
 
