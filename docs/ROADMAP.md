@@ -76,7 +76,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 
 | Módulo | Estado | Algoritmos | Especificación |
 |--------|--------|------------|----------------|
-| `core.algorithms.naive_sort` | ✅ | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) |
+| `core.algorithms.naive_sort` | ✅ | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) · auditoría 05 cerrada el 2026-10-17 (🟢 50) |
 | `core.algorithms.data_structures_basics` | ✅ | Node, linked_list, stack y queue construidos desde cero | [`📄 06_Data_Structures_Basics.md`](core/algorithms/06_Data_Structures_Basics.md) |
 | `core.algorithms.data_structures_advanced` | 📋 | Node con múltiples enlaces, binary tree y graph dirigidos construidos desde cero | [`📄 07_Data_Structures_Advanced.md`](core/algorithms/07_Data_Structures_Advanced.md) |
 | `core.algorithms.efficient_sort` | 📋 | quick, merge, heap; puede usar ADTs optimizados del lenguaje salvo `sort()` | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |

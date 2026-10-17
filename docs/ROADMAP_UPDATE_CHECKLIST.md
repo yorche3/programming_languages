@@ -38,6 +38,20 @@ Sin pendientes a 2026-09-28: la implementación, la documentación y el registro
 <!-- Las entradas cerradas se conservan debajo con su fecha y evidencia. -->
 
 ```text
+Fecha / Date: 2026-10-17
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.naive_sort (especificación 05_Naive_Sort)
+Lenguaje(s) / Language(s): 50 auditados; 4 con hallazgo corregido (ocaml, scheme, haskell, cobol)
+Código verificado / Code verified: yes (auditoría en docs/audits/05_Audited_Naive_Sort.md)
+Tests y comandos / Tests and commands:
+- Las 50 suites del catálogo antes del `align` -> 49 rc=0; `ocaml` rc=1 (`Module "Main" doesn't exist`)
+- Re-ejecución sobre el `main` integrado -> `dune runtest --force` 3 tests; suite de Guile 24 comprobaciones; `cabal test` PASS; `make test` de `cobol` 78/78
+README(s) verificado(s) / README(s) verified: yes (los 50 README del módulo contra la plantilla de Nivel 3; `cobol` documenta la representación equivalente de la entrada inválida)
+Cambio en ROADMAP.md / ROADMAP.md change: core.algorithms.naive_sort sigue en ✅ 50/50; se añade a la nota del módulo el cierre de la auditoría 05 (el contador del sprint no se toca)
+Observaciones / Notes: Cierre de la pasada 05. El pase verificó las 50 implementaciones (los tres algoritmos, corte temprano real de la burbuja, indicador de fallo, los 7 casos sobre fixture nuevo y la separación código/pruebas) y dejó 4 hallazgos, todos corregidos e integrados en 4 commits de `align`: el `bin/dune` huérfano de `ocaml` (tercera aparición del caso), `(apply min …)` de biblioteca en `scheme`, un `error` inalcanzable en `haskell` y la representación de entrada inválida sin documentar en `cobol`. Se retiró un hallazgo provisional: el `.github/workflows/test.yml` de `gleam` es convención de sus cinco módulos. Al abrir el pase se corrigieron tres criterios de la especificación: el indicador de fallo sin `Option`/`Result`, la prohibición de `min`/`max` anclada al enunciado y las dos formas de mutación marcadas con `✅`.
+```
+
+```text
 Fecha / Date: 2026-10-16
 Fase / Phase: core.foundations
 Módulo(s) / Module(s): core.foundations.numbers (especificación 04_Numbers)

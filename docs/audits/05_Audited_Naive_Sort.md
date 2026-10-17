@@ -48,8 +48,8 @@ Registro de deuda técnica del módulo `05_Naive_Sort`. / Technical debt record 
 |-------------|-----------------|--------------------|
 | 1. Barrido léxico | 50 lenguajes, solo archivos rastreados por git | ✅ 50/50 auditados |
 | 2. Lectura de código | Los tres algoritmos, los intercambios y el aislamiento de cada caso | ✅ 6 comprobaciones por lenguaje, 1 hallazgo de biblioteca |
-| 3. Ejecución de suites | Comando nativo del catálogo por lenguaje | ⚠️ 49/50 en verde; `ocaml` no compila |
-| 4. Documentación | README del módulo y comentarios del código | ⚠️ 4/4 secciones en los 50; `cobol` no declara la representación equivalente |
+| 3. Ejecución de suites | Comando nativo del catálogo por lenguaje | ✅ 50/50 en verde tras el `align` |
+| 4. Documentación | README del módulo y comentarios del código | ✅ 4/4 secciones en los 50 y representación equivalente declarada donde aplica |
 | 5. Estado del árbol | `git status --short` en los 50 submódulos | ✅ 50/50 limpios |
 
 **ES:** El barrido usa **solo archivos rastreados por git**, que es lo que descarta los artefactos de build (`target/`, `bin/`, `elm-stuff/`, `.cpcache/`, `vendor/`…). El paso 3 es obligatorio antes de declarar un 🟢.
@@ -60,13 +60,11 @@ Registro de deuda técnica del módulo `05_Naive_Sort`. / Technical debt record 
 
 ### 🔴 Requieren Refactorización (Fallo) / Require Refactoring (Fail)
 
-- **`ocaml`** — `bin/dune` declara `(executable (public_name naive_sort) (name main))` sin `bin/main.ml`, así que `dune runtest` falla con `Error: Module "Main" doesn't exist.` y el paso 3 no puede ejecutarse. Es la **tercera aparición** del mismo caso (auditorías 03 y 04).
-- **`scheme`** — `selection-sort` localiza el mínimo con `(apply min unsorted)` de la biblioteca estándar, contra el criterio anclado al enunciado («comparaciones **paso a paso**», sin selección de biblioteca). El resto de la variante está bien: `remove-first` es helper propio y la burbuja corta con su bandera.
+- — (ninguno: los dos del pase, `ocaml` y `scheme`, quedaron corregidos, integrados y verificados)
 
 ### 🟡 Advertencias / Warnings
 
-- **`haskell`** — `pickMin [] = error "Cannot pick minimum from an empty list"`. La rama es **inalcanzable** (`selectionSort` cubre `[]` y `[x]` antes de llamarla), pero deja un `error` en un módulo cuyo contrato dice «no lanza excepciones». Se puede totalizar sin tocar el algoritmo.
-- **`cobol`** — El tipo de secuencia no admite ausencia y la especificación pide **documentar la representación equivalente**; el README describe `RETURN-CODE` y las cláusulas `OCCURS`, pero no qué ocurre con una entrada nula o inválida.
+- — (ninguna: `haskell` y `cobol` quedaron corregidos, integrados y verificados)
 
 ### 🔵 Aceptados por el autor / Accepted by the author
 
@@ -74,16 +72,19 @@ Registro de deuda técnica del módulo `05_Naive_Sort`. / Technical debt record 
 
 ### 🟢 Homologados / Homologated
 
-- 46 lenguajes: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `common-lisp`, `cpp`, `crystal`, `csharp`, `d`, `dart`, `elixir`, `elm`, `erlang`, `forth`, `fsharp`, `gleam`, `go`, `grain`, `groovy`, `haxe`, `java`, `javascript`, `julia`, `kotlin`, `lua`, `nim`, `perl`, `php`, `prolog`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
+- **50 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`, `common-lisp`, `cpp`, `crystal`, `csharp`, `d`, `dart`, `elixir`, `elm`, `erlang`, `forth`, `fsharp`, `gleam`, `go`, `grain`, `groovy`, `haskell`, `haxe`, `java`, `javascript`, `julia`, `kotlin`, `lua`, `nim`, `ocaml`, `perl`, `php`, `prolog`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `scheme`, `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
 
 ## Deuda por lenguaje / Debt per language
 
-| Lenguaje / Language | Estado / Status | Eje / Axis | Qué falta / What is missing |
-|---|---|---|---|
-| `ocaml` | 🔴 | `construction` | Restaurar el `bin/main.ml` de demostración para que el ejecutable de `bin/dune` exista y `dune runtest` compile |
-| `scheme` | 🔴 | `construction` | Sustituir `(apply min …)` por un recorrido paso a paso que devuelva el elemento mínimo |
-| `haskell` | 🟡 | `failure` | Totalizar `pickMin` (caso `[]` explícito) sin usar `error` |
-| `cobol` | 🟡 | `documentation` | Declarar en el README qué ocurre con entrada inválida y con secuencia vacía |
+**ES:** Las cuatro sub-tareas del pase están cerradas, con su commit de `align` y su verificación.
+**EN:** All four sub-tasks of this pass are closed, each with its `align` commit and its verification.
+
+| Lenguaje / Language | Estado / Status | `align` | Integración / Merge | Arreglo / Fix | Verificación / Verification |
+|---|---|---|---|---|---|
+| `ocaml` | ✅ | `9d51ae8` | `578fcdb` | `bin/main.ml` de demostración para el ejecutable que ya declaraba `bin/dune` | `dune build`, `dune runtest --force` (3 tests), `dune exec naive_sort` |
+| `scheme` | ✅ | `4f66cb2` | `75fe6c0` | `min-element` recorre la lista comparando paso a paso en lugar de `(apply min …)` | Suite de Guile, 24 comprobaciones |
+| `haskell` | ✅ | `b12bf3d` | `90d919c` | `pickMin` recibe el primer elemento por separado: el caso imposible con `error` desaparece | `cabal test` PASS |
+| `cobol` | ✅ | `2b81217` | `f4f875f` | README: representación equivalente (`OCCURS` + `WS-LENGTH`, longitud 0 = secuencia vacía) y ausencia de excepciones | `make test` 78/78 |
 
 > **ES:** Retirado en este pase: el `.github/workflows/test.yml` de `gleam` no se marca. El submódulo lo tiene en sus **cinco** módulos, así que es convención del repositorio de `gleam`, no un artefacto de este módulo.
 >
@@ -91,9 +92,9 @@ Registro de deuda técnica del módulo `05_Naive_Sort`. / Technical debt record 
 
 ## Plan de cierre / Closure plan
 
-**ES:** Orden previsto: un `align` por lenguaje con hallazgo 🔴 (`ocaml`, `scheme`) y por 🟡 si el autor lo prioriza (`haskell`, `cobol`), integración en el `main` de cada submódulo y cierre cuando estén los cuatro. El bloque de 50 filas de `data/idiomaticity_state.tsv` se abre con este pase. Ver [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
+**ES:** **Cerrado el 2026-10-17.** El pase completo se ejecutó el 2026-10-17 sobre los 50 lenguajes, los cuatro hallazgos se corrigieron en cuatro commits de `align` (uno por submódulo), se integraron con `--no-ff` en el `main` de cada uno y se empujaron, y las cuatro suites se re-ejecutaron sobre el código integrado. El bloque de 50 filas de `data/idiomaticity_state.tsv` queda abierto con este pase. Ver [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
 
-**EN:** Planned order: one `align` per language with a 🔴 finding (`ocaml`, `scheme`) and per 🟡 if the author prioritises them (`haskell`, `cobol`), integration into each submodule's `main`, and closure once all four are done. The 50-row block in `data/idiomaticity_state.tsv` opens with this pass. See [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
+**EN:** **Closed on 2026-10-17.** The full pass ran on 2026-10-17 across the 50 languages, the four findings were fixed in four `align` commits (one per submodule), merged with `--no-ff` into each `main` and pushed, and the four suites were re-run against the integrated code. The 50-row block in `data/idiomaticity_state.tsv` is opened by this pass. See [`AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md).
 
 ## Registro de verificaciones / Verification log
 
@@ -107,6 +108,11 @@ Registro de deuda técnica del módulo `05_Naive_Sort`. / Technical debt record 
 | 2026-10-17 | Los 7 casos y su aislamiento | `grep` de los valores de la tabla + lectura de los mutables | 7/7 en los 50 (`cobol` en tabla `OCCURS 7 TIMES`); fixture nuevo por caso (`crystal` `.dup`, `common-lisp` `copy-seq`, `tcl-tk` por valor, `racket` inmutable, `forth` buffer de trabajo) |
 | 2026-10-17 | Suites nativas (50) | Comando del catálogo [`scripts/data/languages.tsv`](../../scripts/data/languages.tsv) | 49 rc=0; `ocaml` rc=1 (`Module "Main" doesn't exist`) |
 | 2026-10-17 | Estado del árbol (50) | `git status --short` | 50/50 limpios; `ballerina` escribió `Dependencies.toml` y se revirtió |
+| 2026-10-17 | `align` de `ocaml` | `dune build`, `dune runtest --force`, `dune exec naive_sort` | 3 tests OK; la demo imprime las tres listas ordenadas |
+| 2026-10-17 | `align` de `scheme` | Suite de Guile tras el cambio | 24 comprobaciones en verde; sin `min`/`max` de biblioteca |
+| 2026-10-17 | `align` de `haskell` | `cabal test` | PASS; el módulo ya no contiene `error` |
+| 2026-10-17 | `align` de `cobol` | `make test` | 78/78 |
+| 2026-10-17 | Integración (4 submódulos) | Re-ejecución sobre `main` | `ocaml` 3 tests · `scheme` 24 · `haskell` PASS · `cobol` 78 |
 
 ### Resultado de las suites por lenguaje / Suite result per language
 
