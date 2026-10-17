@@ -194,6 +194,20 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   (Foundations, fase de texto y guía de inicialización, que además incorpora la
   fila y la estructura de `php`).
 
+## [2.0.1] - 2026-10-17
+
+### Fixed
+
+- `glot new` y `glot scaffold` no cambiaban al directorio del módulo cuando un
+  paso escribía en la salida estándar (caso de `alr`): la salida de los pasos se
+  redirige a la salida de error, así que la ruta que devuelve el paso llega
+  limpia al cambio de directorio.
+- El andamiaje de `ada` se detenía en el segundo `alr with`: las dos filas de
+  `scaffold` que lo invocan llevan `-n` y ya no piden confirmación.
+- `scaffold` faltaba en el autocompletado de `bash` y de `zsh`.
+- `glot scaffold` imprime la carpeta del módulo, pero el envoltorio de shell no
+  cambiaba a ella: ahora hace el `cd` igual que `use` y `new`.
+
 ## [2.0.0] - 2026-10-12
 
 ### Added
