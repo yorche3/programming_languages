@@ -67,10 +67,11 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 - Inspecciona: el esqueleto del módulo, el módulo `numbers/` del mismo lenguaje, la suite del paso
   4c y el comando nativo de pruebas de `{lang}`.
 - Comprueba el estado real antes de tocar nada: `glot test`. Este paso **no es fijo**: se ejecuta
-  cuando el **4c** no pudo alcanzar la **fase roja** por un fallo de construcción —target ausente,
-  dependencia de pruebas sin declarar, símbolos sin resolver— o cuando la suite arranca con **0
-  casos** porque el runner de ejemplo no está enlazado. Si ya compila, enlaza, ejecuta los casos y
-  falla **por aserciones**, **detente y avísalo**: el paso se cierra sin cambios.
+  cuando el **4c** no pudo alcanzar la **fase roja** por un fallo de **construcción** —target
+  ausente, dependencia de pruebas sin declarar, símbolos sin resolver, el runner o la suite fuera
+  del proyecto—. El runner del módulo **no** es asunto de este paso: lo escribe el 4c. Si ya
+  compila, enlaza, ejecuta los casos y falla **por aserciones**, **detente y avísalo**: el paso se
+  cierra sin cambios.
 - Anota **qué** impide ejecutar la suite y **por qué**: fichero ausente, plantilla vacía, regla que
   no alcanza a `test/`, enlace roto, ruta de salida mal declarada.
 

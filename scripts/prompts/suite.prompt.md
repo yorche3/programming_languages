@@ -76,11 +76,10 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
   módulo tiene más de una implementación y hay que separar la suite—, el esqueleto que
   dejó el encargo `scaffold` (paso 4a) —directorio de pruebas, **runner** y manifiesto— y el
   **contrato con sus esqueletos** que dejó el encargo `contract_stub` (paso 4b): tipo, firmas,
-  **cuerpo vacío de cada operación** y ubicación. El runner es **condición de entrada** por su
-  **presencia**: si no existe, no lo escribas tú, detente. Que **no arranque todavía** no es un
-  bloqueo: si falla porque referencia la suite de este paso —el paquete, módulo o fichero que
-  estás a punto de escribir—, ese es el estado normal de la entrega, y lo que haces es crear la
-  suite que lo deja arrancando.
+  **cuerpo vacío de cada operación** y ubicación.
+- Decide **quién es el runner de la suite** con la tabla del paso 4. Un `main` de ejemplo
+  (`null;`, «Hello, World!») **no** es un bloqueo ni una condición de entrada: es la pieza que
+  falta, y la escribes tú.
 - Determina y anota: framework de pruebas idiomático, dónde vive la suite, si existe un
   `run_tests` propio y si el tipo de secuencia admite nulos o cuál es su indicador de fallo.
 
@@ -125,11 +124,19 @@ escribir y anótalas:
 ### 4. Escribir la suite
 
 En el directorio de pruebas que use el lenguaje (`test/`, `tests/`, `spec/`, `t/`), con el
-patrón obligatorio de más abajo. Aquí **no se crea ni se reescribe el runner**: si falta,
-**detente y avísalo**. Si existe pero no compila porque referencia la suite que estás
-escribiendo, ese es el estado normal de la entrega: sigue y crea los paquetes, módulos o ficheros
-de la suite con ese nombre, de modo que el runner los recoja. Dejar el runner compilando y
-arrancando es del paso 4d.
+patrón obligatorio de más abajo. El **runner es parte de esta entrega**: sin runner que agregue la
+suite no hay fase roja, y su ausencia **no** es motivo para detenerse.
+
+| Lo que hay en el esqueleto | Qué haces |
+|---|---|
+| El comando nativo **recoge por convención** (`pytest` con `test_*.py`, `cargo test` con `#[test]`, `go test`, `dotnet test`, `rspec` con `spec/`, `mix test`…) | Nada: coloca la suite donde la convención la espera |
+| Hay un **runner de ejemplo** (`null;`, `main` vacío, «Hello, World!») que no recoge nada | **Sustitúyelo** por el runner del framework, en el **mismo fichero y ruta** que compila el comando nativo, para que agregue la suite |
+| **No hay** fichero de runner y el comando nativo necesita uno | **Escríbelo**, mínimo, con la forma del módulo base (`tests.adb` con AUnit en Ada, `test/run_tests.jl` en Julia…) |
+| El fichero del runner lo **genera la construcción** (plantilla de `make`, `dune`, `cabal`) | No lo toques: pide el cambio en el paso 4d y dilo en el reporte |
+
+Sustituir el `main` de ejemplo **no** es reescribir un artefacto ajeno: es la entrega de este paso.
+Solo se detiene si el comando nativo no compila ese fichero por una razón de construcción —falta el
+target, falta la dependencia, no está en el proyecto—: eso es del **4d**.
 
 ### 5. Verificación: la fase roja
 
@@ -156,7 +163,7 @@ resumir).
 | Compila, enlaza, ejecuta N casos y falla por aserciones | — | **Nada más**: el andamiaje está listo y el módulo pasa al **paso 5** (`implement`) |
 | Falla la **construcción**: target ausente, dependencia de pruebas sin declarar, `undefined reference`, `cannot find`, símbolos sin resolver | Del **4d** (`build`); del **4b** si el contrato llegó sin esqueletos | **Detente y avísalo** con la salida real: es el disparador del paso 4d, no un defecto de la suite |
 | No compila por un **error en tus propios ficheros** (un `with`/import, un nombre, una sintaxis, una línea cortada) | **Del 4c**, tuyo | Corrígelo aquí y repite la verificación: no se manda al 4d ni al 4b |
-| Arranca pero ejecuta **0 casos** (runner de ejemplo, suite no recogida) | Del **4d** | Avísalo con la salida: sin casos no se puede declarar la fase roja |
+| Arranca pero ejecuta **0 casos** (quedó el `main` de ejemplo) | **Del 4c**, tuyo | Escribe el runner que agrega la suite (paso 4) y repite: sin casos no hay fase roja |
 
 **Única excepción, y es del 4b**: si el comando nativo falla por **símbolos sin resolver** porque
 el contrato llegó **sin esqueletos**, la suite no se puede ejecutar todavía. Se admite entonces la
@@ -241,7 +248,7 @@ test con todas las aserciones que no diga cuál falló.
 | Naming | Convención del lenguaje (`snake_case`, `camelCase`, `PascalCase`, `kebab-case`) |
 | Aserciones | Las del framework (`assertEqual`, `is`, `Assert`, `expect`, …) |
 | Dependencias | Solo las estándar del lenguaje o las ya presentes en `numbers/` |
-| Runner | El comando de la columna 4 del catálogo: la suite tiene que ser **recogida por el runner que hay**, sin configuración extra y sin reescribirlo; si el inicializador dejó un `main` de ejemplo, quien lo sustituye es el paso 4d |
+| Runner | El comando de la columna 4 del catálogo: la suite tiene que quedar **recogida sin configuración extra**. Si el inicializador dejó un `main` de ejemplo, **lo sustituye este paso**; el 4d solo entra si ese fichero lo genera la construcción |
 | Determinismo | Sin aleatoriedad, sin reloj y sin depender del orden del sistema de ficheros: las mismas entradas dan siempre el mismo veredicto |
 | Datos | Los *fixtures* se construyen en la propia suite: nada leído de ficheros externos ni de la red |
 

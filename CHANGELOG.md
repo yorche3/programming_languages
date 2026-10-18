@@ -196,6 +196,14 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- El **runner del módulo** pasa a ser entrega del encargo `suite` (4c) cuando el lenguaje lo exige.
+  Antes el prompt decía a la vez «el runner es condición de entrada» y «no se crea ni se reescribe»,
+  y el delegado se detenía con un falso bloqueo del paso 4d: el esqueleto deja un `main` de ejemplo
+  (`null;`), la ejecución da **0 casos** y la suite quedaba sin fase roja. Ahora hay una tabla de
+  decisión explícita (convención del framework, `main` de ejemplo que se sustituye, fichero de
+  runner que se escribe, o fichero generado por la construcción que se pide al 4d) y el triaje
+  manda «0 casos» al propio 4c. El rol **SDET** declara ese runner como suyo en
+  `docs/AGENT_ROLES.md`, y `SPRINT.md`/`WORKFLOW.md` cuentan lo mismo.
 - La verificación del encargo `suite` (4c) deja de ser un «falla» genérico y pasa a ser la **fase
   roja** con cuatro datos copiados al reporte: compila y enlaza sin warnings, **N casos
   ejecutados** (cero casos no es rojo), **M fallos todos de aserción** —una excepción de ejecución

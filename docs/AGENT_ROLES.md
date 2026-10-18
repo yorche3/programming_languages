@@ -61,7 +61,7 @@ list, and no one is bound by it beyond every artefact having **one clear owner**
 | **Software Architect** | Contrato, fronteras, abstracción e interfaces; **cuándo** una abstracción está justificada (calendario por fase de [`AGENT_Template.md`](AGENT_Template.md)) | Implementar el algoritmo, redactar el README, decidir el roadmap |
 | **Senior Software Developer** | Construir y corregir el código que cumple el contrato, con la suite en verde y las adaptaciones idiomáticas mínimas | Cambiar el contrato, decidir el rumbo del roadmap, commit ni push |
 | **Language-Specific SME** | El *cómo* idiomático del lenguaje: paradigma, convenciones, límites reales y toolchain | Cambiar el *qué* (contrato y especificación) ni el cierre |
-| **SDET** | El diseño de la suite: equivalencia de casos, patrón, aislamiento y contra-verificación | Escribir la implementación, el runner del andamiaje ni el README |
+| **SDET** | El diseño de la suite: equivalencia de casos, patrón, aislamiento y contra-verificación; y el **runner del módulo** cuando el lenguaje lo exige | Escribir la implementación; el runner **del andamiaje** (paso 4a) ni el README |
 | **Technical Writer** | Redactar la documentación desde las plantillas, bilingüe y con salidas reales | Inventar resultados, decidir el contenido técnico ni el roadmap |
 | **Documentation Architect** | El **sistema** documental: niveles N1–N3, plantillas, índices, navegación y enlaces | Redactar el detalle de cada módulo ni tocar código |
 | **Technical Product Manager (TPM)** | Priorizar el roadmap, el orden de la fase y los criterios de cierre y registro | Decidir arquitectura ni implementar |
