@@ -1217,6 +1217,25 @@ assert_contains 'suite: no declara el contrato por su cuenta' 'no los declara' "
 assert_contains 'suite: el contrato ya deja esqueletos' 'contrato con sus esqueletos' "$suite_prompt"
 assert_contains 'suite: el enlace roto es defecto del 4b' 'defecto del paso 4b' "$suite_prompt"
 
+# 2026-10-17: la salida del 4c es la **fase roja** con cuatro datos, no un «falla» genérico. El
+# caso que faltaba es el de los casos base, que **coinciden con el centinela** y pasan por
+# casualidad: medido en `data_structures_advanced`, 2 de 17 tests salían verdes contra el contrato
+# en stubs. Se declaran, no se tocan, para que el paso 5 compruebe que el conjunto no crece.
+assert_contains 'suite: la salida es la fase roja' 'Verificación: la fase roja' "$suite_prompt"
+assert_contains 'suite: exige casos ejecutados' 'cero casos** no está en rojo' "$suite_prompt"
+assert_contains 'suite: separa aserción de excepción' 'Assertion_Error' "$suite_prompt"
+assert_contains 'suite: declara los verdes por centinela' 'coinciden con el centinela' "$suite_prompt"
+assert_contains 'suite: el defecto de la propia suite se corrige aquí' 'Corrígelo aquí y repite' "$suite_prompt"
+assert_contains 'suite: el triaje manda la construcción al 4d' 'es el disparador del paso 4d' "$suite_prompt"
+
+# el encargo de build es **condicional**: solo entra cuando el 4c no pudo alcanzar la fase roja
+# (medido: cero commits del paso 4d en los cincuenta submódulos, y los enganches de pruebas los
+# deja el andamiaje), y su éxito es la misma terna de datos.
+build_prompt="$(cat -- "$PROMPTS_DIR/build.prompt.md")"
+assert_contains 'build: el paso no es fijo' 'no es fijo' "$build_prompt"
+assert_contains 'build: lo dispara la construcción del 4c' 'no pudo alcanzar la **fase roja**' "$build_prompt"
+assert_contains 'build: su éxito son los cuatro datos' 'cuatro datos' "$build_prompt"
+
 # v1.5.0: el encargo del contrato se llama `contract_stub` y exige, además del contrato,
 # el **esqueleto** de cada operación, para que el `4c` compile y enlace aunque el algoritmo
 # sea del paso 5 (era el bloqueo que detuvo dos veces al delegado del `4c`)

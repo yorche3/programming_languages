@@ -196,6 +196,17 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- La verificación del encargo `suite` (4c) deja de ser un «falla» genérico y pasa a ser la **fase
+  roja** con cuatro datos copiados al reporte: compila y enlaza sin warnings, **N casos
+  ejecutados** (cero casos no es rojo), **M fallos todos de aserción** —una excepción de ejecución
+  no cuenta como rojo— y la **lista de casos que pasan por coincidir con el centinela** (estado
+  vacío, `size` = 0, ausencia), que se declaran para que el paso 5 compruebe que el conjunto no
+  crece. El triaje del fallo tiene ahora tres dueños: construcción (4d, o 4b si el contrato llegó
+  sin esqueletos), defecto de los ficheros de la suite (4c) y casos ejecutados (4d).
+- El encargo `build` (4d) deja de ser un paso fijo: entra **solo** cuando el 4c no pudo alcanzar la
+  fase roja por un fallo de construcción o por cero casos ejecutados, y su éxito es la misma terna
+  de datos. Medido antes del cambio: cero commits del paso 4d en los cincuenta submódulos y los
+  enganches de pruebas ya los deja el andamiaje.
 - `glot install` **retira de la copia** lo que el clon ya no tiene en `data/`, `prompts/` y
   `completions/`. `cp -R` no borra, así que un fichero retirado del clon se quedaba en la copia
   para siempre y la huella no volvía a cuadrar: `doctor` decía `install_stale: yes` **justo

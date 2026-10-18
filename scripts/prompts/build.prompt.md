@@ -66,8 +66,11 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
   status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
 - Inspecciona: el esqueleto del módulo, el módulo `numbers/` del mismo lenguaje, la suite del paso
   4c y el comando nativo de pruebas de `{lang}`.
-- Comprueba el estado real antes de tocar nada: `glot test`. Si ya compila, enlaza y arranca,
-  **detente y avísalo** — el paso se cierra sin cambios.
+- Comprueba el estado real antes de tocar nada: `glot test`. Este paso **no es fijo**: se ejecuta
+  cuando el **4c** no pudo alcanzar la **fase roja** por un fallo de construcción —target ausente,
+  dependencia de pruebas sin declarar, símbolos sin resolver— o cuando la suite arranca con **0
+  casos** porque el runner de ejemplo no está enlazado. Si ya compila, enlaza, ejecuta los casos y
+  falla **por aserciones**, **detente y avísalo**: el paso se cierra sin cambios.
 - Anota **qué** impide ejecutar la suite y **por qué**: fichero ausente, plantilla vacía, regla que
   no alcanza a `test/`, enlace roto, ruta de salida mal declarada.
 
@@ -88,9 +91,12 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 ### 3. Comprobación (salida real)
 
-- Ejecuta `glot test` y enseña su **salida real** y su código: compila, enlaza y **falla por casos**,
-  no por construcción. Un fallo de aserción es el resultado correcto en este punto; un error de
-  compilación o de enlace **no** lo es.
+- Ejecuta `glot test` y enseña su **salida real** y su código con los **cuatro datos** de la fase
+  roja: compila y enlaza sin warnings; **N casos ejecutados**, con N > 0 y los de la suite; **M
+  fallos, todos de aserción** —cero excepciones de ejecución, cero errores de construcción—; y la
+  lista de casos que siguen pasando por coincidir con el centinela. Un fallo de aserción es el
+  resultado correcto en este punto; un error de compilación, de enlace o una excepción de ejecución
+  **no** lo es.
 - Si el lenguaje tiene verificador, ejecuta `glot verify` y deja también su salida.
 - Si el comando nativo de `languages.tsv` (columna 3) no es el que arranca la suite, **detente y
   avísalo** con el comando correcto: el dato lo corrige el autor.

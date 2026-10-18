@@ -131,41 +131,55 @@ escribiendo, ese es el estado normal de la entrega: sigue y crea los paquetes, m
 de la suite con ese nombre, de modo que el runner los recoja. Dejar el runner compilando y
 arrancando es del paso 4d.
 
-### 5. Verificación
+### 5. Verificación: la fase roja
 
-Ejecuta el comando nativo de pruebas y **copia la salida real** (sin editar, sin resumir).
-El build no debe producir warnings ni errores.
+La suite está bien cuando **falla por la razón correcta**. El criterio no es «falla»: son **cuatro
+datos** que se copian al reporte junto a la salida real del comando nativo (sin editar, sin
+resumir).
 
-**Desde la v1.5.0 el contrato (paso 4b) deja sus esqueletos**, así que el módulo compila **y
-enlaza** aunque el algoritmo sea del paso 5: no deberías encontrarte el enlace roto. Si el
-comando nativo falla por **símbolos sin resolver**, entonces el `4b` entregó el contrato **sin
-esqueletos** y es un **defecto del paso 4b**, no de la suite: avísalo. Como mitigación se admite
-la **compilación sin enlace** —sintaxis y chequeo de tipos—, con el comando que el lenguaje
-permita para eso (`gprbuild -c -cargs -gnatc` en Ada), y lo **declaras** en el reporte: qué se
-comprobó, con qué comando, su salida real y qué queda pendiente. La **ejecución** de la suite y
-su contra-verificación se trasladan entonces al **acta del paso 6** (`glot evidence`), cuando ya
-exista el cuerpo: aquí **no** se dan por hechas.
+1. **Compila y enlaza**: sin warnings, sin errores de compilación y sin errores de enlace.
+2. **N casos ejecutados**, con N = los casos de la especificación que cubre la suite. Una suite que
+   ejecuta **cero casos** no está en rojo: no se está ejecutando.
+3. **M fallos, todos de aserción**: `Assertion_Error` y nada más. Una excepción de ejecución
+   (`Constraint_Error`, acceso nulo, desbordamiento, pila agotada) **no** es un fallo de aserción
+   y no se cuenta como rojo.
+4. **La lista de casos que ya salen en verde** con el contrato en valores centinela. Los casos
+   base —estado vacío, `size` = 0, ausencia, «falla»— **coinciden con el centinela** y pasan por
+   casualidad. No los toques ni los descartes: **decláralos** (nombre del caso y qué comparte con
+   el centinela) para que el paso 5 compruebe que ese conjunto **no crece** y que cada uno se
+   vuelve significativo cuando exista el cuerpo.
 
-Si el comando nativo **arranca pero no recoge casos** —porque el runner sigue siendo el `main`
-de ejemplo que dejó el inicializador y el paso 4d todavía no lo ha sustituido—, tampoco es un
-bloqueo: la suite es correcta y el que falta es el enlace del runner. Se aplica el mismo criterio
-que en el párrafo anterior, con dos matices: la comprobación es que el proyecto **compila y
-enlaza con la suite**, y la ejecución con casos y la contra-verificación se **trasladan al acta
-del paso 6**, declarándolo así en el reporte.
+**Triaje del fallo** —decide a quién pertenece lo que has visto y qué haces:
+
+| Lo que ves | De quién es | Qué haces |
+|---|---|---|
+| Compila, enlaza, ejecuta N casos y falla por aserciones | — | **Nada más**: el andamiaje está listo y el módulo pasa al **paso 5** (`implement`) |
+| Falla la **construcción**: target ausente, dependencia de pruebas sin declarar, `undefined reference`, `cannot find`, símbolos sin resolver | Del **4d** (`build`); del **4b** si el contrato llegó sin esqueletos | **Detente y avísalo** con la salida real: es el disparador del paso 4d, no un defecto de la suite |
+| No compila por un **error en tus propios ficheros** (un `with`/import, un nombre, una sintaxis, una línea cortada) | **Del 4c**, tuyo | Corrígelo aquí y repite la verificación: no se manda al 4d ni al 4b |
+| Arranca pero ejecuta **0 casos** (runner de ejemplo, suite no recogida) | Del **4d** | Avísalo con la salida: sin casos no se puede declarar la fase roja |
+
+**Única excepción, y es del 4b**: si el comando nativo falla por **símbolos sin resolver** porque
+el contrato llegó **sin esqueletos**, la suite no se puede ejecutar todavía. Se admite entonces la
+**compilación sin enlace** —sintaxis y chequeo de tipos—, con el comando que el lenguaje permita
+para eso (`gprbuild -c -cargs -gnatc` en Ada), y se **declara** en el reporte (qué se comprobó, con
+qué comando, su salida real y qué queda pendiente): es un **defecto del paso 4b**, no de la suite.
+La fase roja y la contra-verificación se trasladan entonces al **acta del paso 6**
+(`glot evidence`), cuando exista el cuerpo. Aquí **no** se dan por hechas.
 
 ### 6. Contra-verificación (obligatoria)
 
 Rompe a propósito **una** comparación del código bajo prueba o de un ejecutor compartido y
 confirma que la suite falla señalando el test correcto. Después **revierte** el cambio y vuelve
-a verificar que todo pasa. Sin este paso no puedes declarar la tarea terminada.
+a verificar que todo pasa. Sin este paso no se declara la tarea terminada, salvo el caso del
+párrafo siguiente, donde se **traslada** en vez de omitirse.
 
-Si te encontraste el caso anterior —el contrato llegó **sin esqueletos** y la suite solo
-compila sin enlace— o el runner **todavía no recoge casos**, la suite **no se puede ejecutar**:
-la contra-verificación no se omite, se **traslada**. Se hace sobre el ejecutor compartido o
-sobre el código bajo prueba en cuanto el runner esté enlazado (paso 4d) y exista el cuerpo, y
-queda registrada en el **acta del paso 6** (`glot evidence`). Lo que no vale es darla por hecha
-ni dar la suite por buena: lo que entregas aquí está **compilado**, sin casos ejecutados, y así
-lo dices tanto en el reporte como al hablar de la cobertura.
+Con el contrato en esqueletos **todo** falla, así que romper algo más no distingue nada: la
+contra-verificación —comprobar que la suite señala **el test correcto**— solo tiene sentido cuando
+existe el cuerpo. En ese caso no se omite, se **traslada**: se hace sobre el ejecutor compartido o
+sobre el código bajo prueba en cuanto exista la implementación y el runner esté enlazado, y queda
+registrada en el **acta del paso 6** (`glot evidence`). Lo que no vale es darla por hecha ni dar la
+suite por buena: lo que entregas aquí está **compilado y ejecutado con fallos de aserción**, con la
+lista de casos que pasan por centinela declarada, y así se dice en el reporte.
 
 ### 7. Cierre
 
