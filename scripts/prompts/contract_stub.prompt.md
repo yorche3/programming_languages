@@ -79,7 +79,9 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 ### 1. Reconocimiento (no escribas nada todavía)
 
-- `git status --short` y `git submodule status` en la raíz del monorepo.
+- `git status --short` y `git branch --show-current` **en el submódulo del lenguaje** (el directorio
+  donde ya estás). El monorepo y sus cincuenta submódulos **no se recorren**: `git submodule
+  status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
 - `git -C {repo} status --short` para ver qué dejó `glot new` y qué ajustó `scaffold`.
 - Inspecciona: la especificación, el contrato del módulo `numbers/` del mismo lenguaje y
   cualquier `{lang}/core/{phase}/*/` que exponga un tipo propio.

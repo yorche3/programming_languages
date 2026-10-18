@@ -196,6 +196,18 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- `glot install` **retira de la copia** lo que el clon ya no tiene en `data/`, `prompts/` y
+  `completions/`. `cp -R` no borra, así que un fichero retirado del clon se quedaba en la copia
+  para siempre y la huella no volvía a cuadrar: `doctor` decía `install_stale: yes` **justo
+  después de instalar**, anunciando como remedio el `install` que se acababa de ejecutar
+  (medido el 2026-10-17: tres ficheros de `data/` de una versión anterior en la copia del autor).
+- Los encargos de artefacto (`scaffold`, `contract_stub`, `suite`, `build`, `correct`, `fix`,
+  `refactor`) ya no recorren los cincuenta submódulos del monorepo: el reconocimiento se limita
+  al **submódulo del lenguaje**, porque en un paso de módulo `git submodule status` en la raíz
+  solo añade ruido. El encargo `suite` fija además sus **dos** referencias: el módulo base de
+  la misma fase (en `core.algorithms`, `data_structures_basics` para
+  `data_structures_advanced`) y `foundations/numbers/` solo para la **separación** de la suite
+  en una pareja `<impl>_suite` + `<impl>_tests` por implementación.
 - El encargo `suite` (paso 4c) ya no se bloquea cuando el runner existe pero **todavía no
   recoge la suite**: es el caso del runner pre-cableado que referencia el paquete que este
   propio paso crea. La condición de entrada pasa a ser la **presencia** del runner, la

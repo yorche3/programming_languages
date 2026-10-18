@@ -57,7 +57,9 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 ### 1. Reconocimiento (no escribas nada todavía)
 
-- `git status --short` y `git submodule status` en la raíz del monorepo.
+- `git status --short` y `git branch --show-current` **en el submódulo del lenguaje** (el directorio
+  donde ya estás). El monorepo y sus cincuenta submódulos **no se recorren**: `git submodule
+  status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
 - `glot test {lang} {phase}/{module}`: la suite **tiene que estar verde ya**. Si no lo está,
   no es `refactor`: **detente** y avísalo (es `fix`).
 - Anota **qué** vas a cambiar y **por qué**, con el módulo homologado como referencia.

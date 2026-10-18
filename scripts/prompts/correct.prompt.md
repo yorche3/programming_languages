@@ -56,7 +56,9 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 ### 1. Reconocimiento (no escribas nada todavía)
 
-- `git status --short` y `git submodule status` en la raíz del monorepo.
+- `git status --short` y `git branch --show-current` **en el submódulo del lenguaje** (el directorio
+  donde ya estás). El monorepo y sus cincuenta submódulos **no se recorren**: `git submodule
+  status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
 - Lee el artefacto defectuoso, `{spec}` y el módulo homologado del lenguaje (`numbers/` y
   los demás `{lang}/core/{phase}/*/`), que es la **autoridad del cómo**.
 - Reproduce el defecto con el comando nativo (columna 4 de `scripts/data/languages.tsv`) y

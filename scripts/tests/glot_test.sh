@@ -2614,6 +2614,21 @@ src_install doctor
 assert_contains 'doctor: reinstalar desde la fuente la pone al día' 'install_source_state: ok' "$out"
 assert_contains 'doctor: tras reinstalar no queda deriva' 'install_stale: no' "$out"
 
+# 2026-10-17: `cp -R` no borra. Un fichero que el clon retiró se quedaba en la copia para
+# siempre, así que la huella no volvía a cuadrar y `doctor` decía `install_stale: yes` **justo
+# después de instalar**, anunciando como remedio el `install` que se acababa de ejecutar
+# (medido en la copia del autor: tres ficheros de `data/` de una versión anterior). Instalar
+# tiene que retirar de la copia lo que el clon ya no trae.
+: >"$SRC_HOME/.local/share/glot/data/fantasma.tsv"
+src_install doctor
+assert_contains 'doctor: un fichero que sobra en la copia marca deriva' 'install_stale: yes' "$out"
+src_install install >/dev/null
+assert_contains 'install: dice cuántos ficheros retira' 'retirados de la copia' "$err"
+assert_eq 'install: el fichero que sobra ya no está' 'no' \
+    "$([[ -e "$SRC_HOME/.local/share/glot/data/fantasma.tsv" ]] && echo si || echo no)"
+src_install doctor
+assert_contains 'doctor: tras instalar, el que sobraba ya no da deriva' 'install_stale: no' "$out"
+
 # orilla de la copia: el retoque está en la copia y la fuente sigue igual
 printf '\n# retoque en la copia / copy tweak\n' >>"$SRC_HOME/.local/share/glot/data/commits.tsv"
 src_install doctor

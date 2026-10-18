@@ -61,7 +61,9 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 ### 1. Reconocimiento (no escribas nada todavía)
 
-- `git status --short` y `git submodule status` en la raíz del monorepo.
+- `git status --short` y `git branch --show-current` **en el submódulo del lenguaje** (el directorio
+  donde ya estás). El monorepo y sus cincuenta submódulos **no se recorren**: `git submodule
+  status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
 - Inspecciona: el esqueleto del módulo, el módulo `numbers/` del mismo lenguaje, la suite del paso
   4c y el comando nativo de pruebas de `{lang}`.
 - Comprueba el estado real antes de tocar nada: `glot test`. Si ya compila, enlaza y arranca,

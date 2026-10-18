@@ -5447,6 +5447,32 @@ _glot_install_files() {
     fi
 }
 
+# _glot_install_prune <origen> <copia> <subcarpeta> — retira de la copia lo que el clon ya no
+# tiene. `cp -R` no borra: sin esto, un fichero retirado del clon se queda en la copia y la
+# huella no vuelve a cuadrar nunca (medido el 2026-10-17: `data/canonical_names.tsv` y dos más,
+# de una versión anterior, hacían que `doctor` dijera `install_stale: yes` justo después de
+# instalar, y el remedio que anunciaba —reinstalar— no lo arreglaba).
+_glot_install_prune() {
+    local src="$1"
+    local dst="$2"
+    local sub="$3"
+    local rel=""
+    local count=0
+
+    [[ -d "$src/$sub" && -d "$dst/$sub" ]] || return 0
+    while IFS= read -r -d '' rel; do
+        rel="${rel#./}"
+        [[ -e "$src/$sub/$rel" ]] && continue
+        if rm -f -- "$dst/$sub/$rel" 2>/dev/null; then
+            count=$((count + 1))
+        fi
+    done < <(cd -- "$dst/$sub" && find . -type f -print0 2>/dev/null)
+    if ((count > 0)); then
+        _glot_info "retirados de la copia / pruned from the copy: $count en / in $sub"
+    fi
+    return 0
+}
+
 # _glot_install_fingerprint <dir> [script|data] — huella de lo instalado. Desde la v1.1.0
 # `install` guarda la huella **completa** y no solo la de `glot.sh`: una copia con el
 # `data/` o las plantillas viejos deja de pasar por buena (medido el 2026-09-25: la copia
@@ -5615,6 +5641,7 @@ _glot_cmd_install() {
         printf 'cp %s/glot.sh %s/glot.sh\n' "$src" "$dir"
         for shell in data prompts completions; do
             [[ -d "$src/$shell" ]] && printf 'cp -R %s/%s %s/%s\n' "$src" "$shell" "$dir" "$shell"
+        printf '# retirar de la copia lo que el clon ya no trae / prune what the clone no longer has\n'
         done
         printf 'chmod +x %s/glot.sh\n' "$dir"
         printf 'ln -sf %s/glot.sh %s\n' "$dir" "$bin"
@@ -5662,6 +5689,9 @@ _glot_cmd_install() {
             _glot_error "no se pudo copiar / cannot copy: $src/$shell"
             return 3
         fi
+    done
+    for shell in data prompts completions; do
+        _glot_install_prune "$src" "$dir" "$shell"
     done
     chmod +x -- "$dir/glot.sh" 2>/dev/null || true
     _glot_info "copia estable / stable copy: $dir"

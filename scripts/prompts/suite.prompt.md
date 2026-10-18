@@ -34,10 +34,17 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 1. **`{spec}`** — contrato del módulo. Su sección **«Casos de prueba / Test Cases»** es la
    **autoridad única de los casos**: qué se prueba, con qué entradas y con qué salidas. Todas
    las especificaciones del repositorio tienen esa sección.
-2. **Módulos ya homologados del mismo lenguaje** — `{lang}/core/foundations/numbers/` y
-   cualquier `{lang}/core/{phase}/*/`. Son la **autoridad del cómo**: el tipo de secuencia
-   canónico, el framework, el naming, el layout de `test/`, el runner y el `.gitignore`. La
-   suite homologada más parecida al módulo es el mejor punto de partida.
+2. **Módulos ya homologados del mismo lenguaje**, con **dos** referencias y ninguna más:
+   - **El módulo base**: el homologado de la **misma fase** y la estructura equivalente —no el
+     primero de la carpeta—. Es la **autoridad del cómo**: el tipo de secuencia canónico, el
+     framework, el naming, el layout de las pruebas, el runner y el `.gitignore`. En
+     `core.algorithms`, el módulo base de `data_structures_advanced` es
+     `data_structures_basics`.
+   - **La separación de la suite**: `{lang}/core/foundations/numbers/`, donde la suite se parte
+     **una pareja por implementación** (`<impl>_suite` + `<impl>_tests`, con las
+     especificaciones en `src/ispec/` y los cuerpos en `src/impl/`) y el runner agrega un
+     `Test_Runner` por suite. Es la referencia **solo** cuando el módulo tiene más de una
+     implementación que probar; con una sola, manda el módulo base.
 3. **El contrato del módulo** — el tipo nuevo y las firmas que dejó el encargo `contract_stub`
    (paso 4b), en el archivo donde viva según el lenguaje. Es la **autoridad del tipo**: la suite
    **usa** esos nombres y esas firmas, no los declara. Si el contrato **no existe**, **no
@@ -62,8 +69,11 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 ### 1. Reconocimiento (no escribas nada todavía)
 
-- `git status --short` y `git submodule status` en la raíz del monorepo.
-- Inspecciona: la especificación, el módulo `numbers/` del mismo lenguaje, el esqueleto que
+- `git status --short` y `git branch --show-current` **en el submódulo del lenguaje** (el directorio
+  donde ya estás). El monorepo y sus cincuenta submódulos **no se recorren**: `git submodule
+  status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
+- Inspecciona: la especificación, el **módulo base** del mismo lenguaje —y `numbers/` solo si el
+  módulo tiene más de una implementación y hay que separar la suite—, el esqueleto que
   dejó el encargo `scaffold` (paso 4a) —directorio de pruebas, **runner** y manifiesto— y el
   **contrato con sus esqueletos** que dejó el encargo `contract_stub` (paso 4b): tipo, firmas,
   **cuerpo vacío de cada operación** y ubicación. El runner es **condición de entrada** por su
