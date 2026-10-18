@@ -64,10 +64,13 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 - `git status --short` y `git submodule status` en la raíz del monorepo.
 - Inspecciona: la especificación, el módulo `numbers/` del mismo lenguaje, el esqueleto que
-  dejó el encargo `scaffold` (paso 4a) —directorio de pruebas, **runner que arranca** y
-  manifiesto— y el **contrato con sus esqueletos** que dejó el encargo `contract_stub` (paso
-  4b): tipo, firmas, **cuerpo vacío de cada operación** y ubicación. El runner es **condición
-  de entrada**: si falta, no lo escribas tú, detente.
+  dejó el encargo `scaffold` (paso 4a) —directorio de pruebas, **runner** y manifiesto— y el
+  **contrato con sus esqueletos** que dejó el encargo `contract_stub` (paso 4b): tipo, firmas,
+  **cuerpo vacío de cada operación** y ubicación. El runner es **condición de entrada** por su
+  **presencia**: si no existe, no lo escribas tú, detente. Que **no arranque todavía** no es un
+  bloqueo: si falla porque referencia la suite de este paso —el paquete, módulo o fichero que
+  estás a punto de escribir—, ese es el estado normal de la entrega, y lo que haces es crear la
+  suite que lo deja arrancando.
 - Determina y anota: framework de pruebas idiomático, dónde vive la suite, si existe un
   `run_tests` propio y si el tipo de secuencia admite nulos o cuál es su indicador de fallo.
 
@@ -112,8 +115,11 @@ escribir y anótalas:
 ### 4. Escribir la suite
 
 En el directorio de pruebas que use el lenguaje (`test/`, `tests/`, `spec/`, `t/`), con el
-patrón obligatorio de más abajo. El **runner es del paso 4a**: si no existe o no arranca,
-**detente y avísalo** —no lo crees aquí—; esta suite solo añade casos sobre el que ya hay.
+patrón obligatorio de más abajo. Aquí **no se crea ni se reescribe el runner**: si falta,
+**detente y avísalo**. Si existe pero no compila porque referencia la suite que estás
+escribiendo, ese es el estado normal de la entrega: sigue y crea los paquetes, módulos o ficheros
+de la suite con ese nombre, de modo que el runner los recoja. Dejar el runner compilando y
+arrancando es del paso 4d.
 
 ### 5. Verificación
 
@@ -130,6 +136,13 @@ comprobó, con qué comando, su salida real y qué queda pendiente. La **ejecuci
 su contra-verificación se trasladan entonces al **acta del paso 6** (`glot evidence`), cuando ya
 exista el cuerpo: aquí **no** se dan por hechas.
 
+Si el comando nativo **arranca pero no recoge casos** —porque el runner sigue siendo el `main`
+de ejemplo que dejó el inicializador y el paso 4d todavía no lo ha sustituido—, tampoco es un
+bloqueo: la suite es correcta y el que falta es el enlace del runner. Se aplica el mismo criterio
+que en el párrafo anterior, con dos matices: la comprobación es que el proyecto **compila y
+enlaza con la suite**, y la ejecución con casos y la contra-verificación se **trasladan al acta
+del paso 6**, declarándolo así en el reporte.
+
 ### 6. Contra-verificación (obligatoria)
 
 Rompe a propósito **una** comparación del código bajo prueba o de un ejecutor compartido y
@@ -137,11 +150,12 @@ confirma que la suite falla señalando el test correcto. Después **revierte** e
 a verificar que todo pasa. Sin este paso no puedes declarar la tarea terminada.
 
 Si te encontraste el caso anterior —el contrato llegó **sin esqueletos** y la suite solo
-compila sin enlace—, la suite **todavía no se puede ejecutar**: la contra-verificación no se
-omite, se **traslada**. Se hace sobre el ejecutor compartido o sobre el código bajo prueba en
-cuanto exista el cuerpo, y queda registrada en el **acta del paso 6** (`glot evidence`). Lo que
-no vale es darla por hecha ni dar la suite por buena: lo que entregas aquí está **compilado sin
-enlace**, y así lo dices tanto en el reporte como al hablar de la cobertura.
+compila sin enlace— o el runner **todavía no recoge casos**, la suite **no se puede ejecutar**:
+la contra-verificación no se omite, se **traslada**. Se hace sobre el ejecutor compartido o
+sobre el código bajo prueba en cuanto el runner esté enlazado (paso 4d) y exista el cuerpo, y
+queda registrada en el **acta del paso 6** (`glot evidence`). Lo que no vale es darla por hecha
+ni dar la suite por buena: lo que entregas aquí está **compilado**, sin casos ejecutados, y así
+lo dices tanto en el reporte como al hablar de la cobertura.
 
 ### 7. Cierre
 
@@ -203,7 +217,7 @@ test con todas las aserciones que no diga cuál falló.
 | Naming | Convención del lenguaje (`snake_case`, `camelCase`, `PascalCase`, `kebab-case`) |
 | Aserciones | Las del framework (`assertEqual`, `is`, `Assert`, `expect`, …) |
 | Dependencias | Solo las estándar del lenguaje o las ya presentes en `numbers/` |
-| Runner | El comando de la columna 4 del catálogo, que **ya dejó arrancando** el paso 4a: la suite tiene que ser recogida por él **sin configuración extra** |
+| Runner | El comando de la columna 4 del catálogo: la suite tiene que ser **recogida por el runner que hay**, sin configuración extra y sin reescribirlo; si el inicializador dejó un `main` de ejemplo, quien lo sustituye es el paso 4d |
 | Determinismo | Sin aleatoriedad, sin reloj y sin depender del orden del sistema de ficheros: las mismas entradas dan siempre el mismo veredicto |
 | Datos | Los *fixtures* se construyen en la propia suite: nada leído de ficheros externos ni de la red |
 

@@ -74,7 +74,11 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 - Escribe o adecúa **el fichero de construcción del lenguaje** (el que usa su toolchain: manifiesto,
   `Makefile`, proyecto, script de compilación) con las reglas que compilan la fuente del módulo,
   compilan la suite y **enlazan ambas**.
-- Deja el **runner** que ya existe (paso 4a) como punto de entrada: no lo reescribas.
+- Deja el **runner** como punto de entrada. Si el inicializador del paso 4a dejó un `main` de
+  ejemplo —el «Hello, World!» o el `null` del lenguaje—, **sustitúyelo** por el runner del
+  framework de pruebas, con la forma que tenga el módulo homologado (en Ada, el `Runner` de
+  AUnit que instancia el paquete `Suite` del módulo): eso es exactamente «dejar el paso 4c
+  ejecutable». Si ya es el runner del framework, no lo reescribas.
 - Si la suite necesita una **dependencia de pruebas** (framework, aserción, ejecutor), declárala en el
   fichero que corresponda a ese lenguaje, con la misma forma que el módulo homologado.
 - No escribas la suite, no escribas la implementación y no cambies el contrato: si el problema está

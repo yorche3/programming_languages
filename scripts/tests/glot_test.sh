@@ -1252,8 +1252,9 @@ assert_contains 'scaffold: exige que arranque sin casos' 'arranca sin casos' "$s
 assert_contains 'scaffold: lo escribe si el framework no lo trae' 'escríbelo aquí' "$scaffold_prompt"
 assert_eq 'suite: ya no dice que crea el runner' 'no' \
     "$([[ "$suite_prompt" == *'Si el framework no incluye runner propio'* ]] && echo si || echo no)"
-assert_contains 'suite: el runner es del paso 4a' 'runner es del paso 4a' "$suite_prompt"
-assert_contains 'suite: si falta el runner, se detiene' 'detente y avísalo' "$suite_prompt"
+assert_contains 'suite: el runner no se crea ni se reescribe aquí' 'no se crea ni se reescribe el runner' "$suite_prompt"
+assert_contains 'suite: si falta el runner, se detiene' '**detente y avísalo**' "$suite_prompt"
+assert_contains 'suite: si no compila por la suite, sigue' 'referencia la suite que estás' "$suite_prompt"
 assert_contains 'SPRINT: el 4a deja el runner arrancando' 'runner arrancando sin casos' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
 assert_contains 'SPRINT: el 4c no crea el runner' 'sin crear el runner' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
 

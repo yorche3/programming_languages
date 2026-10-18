@@ -194,6 +194,14 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   (Foundations, fase de texto y guía de inicialización, que además incorpora la
   fila y la estructura de `php`).
 
+### Fixed
+
+- El encargo `suite` (paso 4c) ya no se bloquea cuando el runner existe pero **todavía no
+  recoge la suite**: es el caso del runner pre-cableado que referencia el paquete que este
+  propio paso crea. La condición de entrada pasa a ser la **presencia** del runner, la
+  ejecución con casos se traslada al acta del paso 6 y el paso `build` (4d) es quien sustituye
+  el `main` de ejemplo por el runner del framework cuando el inicializador no lo trae.
+
 ## [2.0.1] - 2026-10-17
 
 ### Fixed
