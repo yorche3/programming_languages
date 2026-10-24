@@ -74,14 +74,14 @@ Conventional Commits —`docs` in the pass, `fix` or `refactor` in the
 **Tooling (`glot`):** una versión se cierra en `chore/repo/glot-vX.Y.Z`, y un **fix** o un
 **refactor** usan `fix/repo/glot-vX.Y.Z` —una rama que **ya lleva el número de la entrega**
 que cierra: `fix/repo/glot-v1.6.1` cierra como **1.6.1**—. La rama dice a qué versión se le
-hace el fix y el número del parche se **nombra, no se deduce**. La regla completa está en
-[`../scripts/docs/VERSIONS.md`](../scripts/docs/VERSIONS.md).
+hace el fix y el número del parche se **nombra, no se deduce**. Es una convención
+de la herramienta personal del autor, cuya documentación permanece separada.
 
 **Tooling (`glot`):** a version is closed on `chore/repo/glot-vX.Y.Z`, and a **fix** or a
 **refactor** use `fix/repo/glot-vX.Y.Z` —a branch that **already carries the number of the
 release it closes**: `fix/repo/glot-v1.6.1` closes as **1.6.1**—. The branch names the
-version the fix is for and the patch number is **named, not derived**. The full rule is in
-[`../scripts/docs/VERSIONS.md`](../scripts/docs/VERSIONS.md).
+version the fix is for and the patch number is **named, not derived**. This is a
+convention of the author's personal tool, whose documentation remains separate.
 
 ```text
 main -> <type>/<phase>/<module> -> review -> main

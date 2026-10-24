@@ -75,7 +75,7 @@ agent only covers the ones presented to it as a request.
 1. Ejecutar `git status --short` y `git submodule status` en la raíz.
 2. Comprobar la rama del submódulo afectado.
 3. Leer la especificación y `docs/ROADMAP.md`.
-4. No tocar una rama `feature/*` activa sin autorización.
+4. No tocar una rama de trabajo activa (`feat/...`, `fix/...`, etc.) sin autorización.
 5. Verificar que el estado indicado en el roadmap corresponde a código, tests y
    documentación existentes.
 
@@ -88,6 +88,44 @@ agent only covers the ones presented to it as a request.
 | 3 — Módulo / Module | `{lenguaje}/core/{fase}/{modulo}/README.md` | [`README_Template.md`](README_Template.md) |
 
 ## Reglas / Rules
+
+### Autoridad, bases y conflictos / Authority, references and conflicts
+
+**ES:** Las instrucciones de actuación delimitan qué puede hacer el agente.
+Dentro de ese alcance, la especificación fija operaciones, casos, resultados,
+invariantes y complejidad; las reglas de fase fijan los mecanismos educativos
+permitidos. Las capacidades verificadas del lenguaje determinan cómo expresarlos,
+no autorizan cambiar el contrato. Si la especificación y la fase se contradicen,
+o el lenguaje no puede cumplirlas, se bloquea el artefacto afectado y se consulta
+al autor antes de cambiarlo. Una convención preferida no es una imposibilidad.
+Las desviaciones se tramitan mediante
+[`ruleset/DEVIATION_POLICY.md`](ruleset/DEVIATION_POLICY.md).
+
+**EN:** Acting instructions limit what the agent may do. Within that scope, the
+specification defines operations, cases, results, invariants and complexity;
+phase rules define the educational mechanisms allowed. Verified language
+capabilities determine their expression, not permission to change the contract.
+If specification and phase conflict, or the language cannot satisfy them, block
+the affected artefact and consult the author before changing it. A preferred
+convention is not an impossibility. Use the deviation policy linked above.
+
+**ES:** Para la forma, las bases del mismo lenguaje son, en orden persistente:
+`{lenguaje}/core/algorithms/data_structures_basics/` y
+`{lenguaje}/core/foundations/numbers/`, hasta cambiar explícitamente esta regla.
+Inspecciona código, pruebas, runner, manifiesto y README pertinentes. Son
+referencias, no moldes: Numbers puede aportar un patrón que Basics no ejercita.
+Justifica por aspecto lo reutilizado según los temas y variantes del módulo.
+Si una base falta, no está homologada o es el propio módulo, decláralo; usa la otra
+si basta o reporta el bloqueo, sin inventar un reemplazo.
+
+**EN:** For form, same-language references have persistent priority:
+`{language}/core/algorithms/data_structures_basics/`, then
+`{language}/core/foundations/numbers/`, until this rule is explicitly changed.
+Inspect relevant code, tests, runner, manifest and README. They are references,
+not moulds: Numbers can supply a pattern absent from Basics. Justify reuse per
+aspect according to module topics and variants. Declare a missing, unhomologated
+or self-referencing base; use the other if sufficient, otherwise report a blocker
+without inventing a replacement.
 
 - Mantener el formato bilingüe español/inglés.
 - Usar enlaces GitHub Pages donde lo exijan las guías de documentación.
@@ -175,7 +213,7 @@ plantillas paralelas con nombres distintos.
 
 1. **El contrato manda.** La adaptación cambia la **forma**, nunca el resultado observable: mismos casos, mismo orden, misma complejidad prometida. Si cambia el resultado, es un defecto y se reporta.
 2. **Sin atajos de biblioteca.** En Fase 1 están prohibidas las rutinas de ordenamiento, búsqueda o **selección** (`sort`, `min`, `max`…) de la biblioteca estándar para el paso interno del algoritmo.
-3. **Sin envoltorios de error.** El contrato se declara con el indicador **natural** del lenguaje (`null`, `nil`, `None`, `#f`, `-1`, `nothing`); `Option`/`Maybe`/`Result` y las excepciones llegan en fases posteriores, según la tabla de evolución por fase.
+3. **Mecanismos según la fase.** En Fase 1, el contrato se declara con un indicador compatible con el tipo de retorno (`null`, `nil`, `None`, `#f`, `-1`, `nothing` cuando sea representable). No se añaden `Option`/`Maybe`/`Result` ni excepciones por preferencia idiomática; se introducen según la tabla de evolución por fase. La restricción no prohíbe los opcionales nativos permitidos ni los enlaces opcionales internos de una estructura.
 4. **Una fila por desviación**, con qué dice la especificación, qué hace el código y por qué.
 5. **Los tests también se adaptan y se declaran.** Si un caso no es representable, se **omite** y se dice en _Cobertura de pruebas_; no se sustituye por otro caso ni se inventa un centinela imposible.
 6. **Nunca se silencia.** Una línea del pseudocódigo que no se puede seguir se cita en la justificación, tal cual; no se esconde en un comentario del código.
@@ -190,7 +228,7 @@ plantillas paralelas con nombres distintos.
 |---|---|---|
 | Sin mutación razonable | Haskell, Elm, Erlang, Gleam, PureScript, Scheme, Clojure, Common Lisp, Prolog, F# | Devolver una colección **nueva** o recurrir sobre listas, con la misma complejidad prometida |
 | Sin índices enteros ni bucles | Prolog, Haskell, Erlang, Scheme, Common Lisp, Forth | Recursión sobre lista (con acumulador cuando no haya TCO) y cabeza/cola |
-| Sin `null`/`nil` en un tipo de valor | Haskell, Elm, Erlang, Gleam, Rust, Swift, V, Vala, Zig, C++, OCaml, PureScript, Tcl/Tk… | **No representable**: el caso se omite con nota; no se introduce `Option`/`Maybe` antes de su fase |
+| Sin `null`/`nil` en un tipo de valor | Haskell, Elm, Erlang, Gleam, Rust, Swift, V, Vala, Zig, C++, OCaml, PureScript, Tcl/Tk… | El caso de entrada nula no representable se omite solo según la cláusula de adaptación; los demás fallos conservan el indicador del contrato si el tipo lo admite. No se introduce `Option`/`Maybe` antes de su fase |
 | Opcional nativo disponible | C#, F#, Ballerina, Kotlin, Nim, Crystal, TypeScript | Usar el opcional del lenguaje como indicador, sin envoltorios añadidos |
 | Capacidad fija y overflow | C, Ada, Assembly, COBOL, Forth | Presupuesto de memoria declarado; el overflow es un caso probado, no un accidente |
 | Centinela `-1` y tipos de índice | lenguajes con índices sin signo o basados en 1 | El indicador nativo del lenguaje y su fila en la tabla de adaptaciones |

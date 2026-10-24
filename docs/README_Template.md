@@ -165,6 +165,22 @@ incluyas dependencias ni capacidades que no hayas verificado.
 
 **EN:** **Case → test** traceability: one row per case in the specification's "Test Cases" table. Omitted cases (not representable) go in as `Omitted` with the reason, never blank. The total number of tests is also stated in the real output of the build section.
 
+**ES:** En las filas y notas identifica `unidad/variante → casos aplicables →
+grupo lógico → archivo/suite → runner`. Documenta la organización existente,
+no la rediseñes: una suite agregada o varias suites son válidas si el runner
+ejecuta todos los grupos y propaga fallos. Solo las variantes del mismo contrato
+comparten sus casos; no multipliques los casos por operaciones ajenas. Distingue
+casos/escenarios de la especificación, tests o filas del framework y aserciones;
+explica su correspondencia sin exigir que los contadores sean iguales.
+
+**EN:** In rows and notes identify `unit/variant → applicable cases → logical
+group → file/suite → runner`. Describe existing organisation rather than
+redesigning it: aggregate or separate suites are valid when the runner executes
+all groups and propagates failures. Only variants of the same contract share
+its cases; do not multiply cases by unrelated operations. Distinguish specification
+cases/scenarios, framework tests or rows, and assertions; explain their mapping
+without requiring equal counts.
+
 ## ⚠️ Limitaciones conocidas / Known limitations
 
 | Limitación / Limitation | Impacto / Impact | Alternativa o plan / Workaround or plan |
@@ -205,7 +221,8 @@ repository to see the other versions.
 | Tipo / Kind | Referencia / Reference |
 |---|---|
 | Especificación / Specification | [`{NN}_{Modulo}.md`]({ruta relativa a docs/core}) |
-| Módulo homologado del lenguaje / Homologated module | [`{lenguaje}/core/foundations/numbers/`]({ruta relativa}) |
+| Primera base del lenguaje / First language reference | `data_structures_basics` — `{enlace relativo a la base consultada}` |
+| Segunda base del lenguaje / Second language reference | `numbers` — `{enlace relativo a la base consultada}` |
 | Guía de inicialización / Initialisation guide | [`core/00_Project_Initialization_Guide.md`](core/00_Project_Initialization_Guide.md) |
 | Adaptaciones idiomáticas / Idiomatic adaptations | [`AGENT_Template.md`](AGENT_Template.md) |
 | Validación de la documentación / Documentation validation | [`WORKFLOW.md`](WORKFLOW.md) |
@@ -214,3 +231,11 @@ repository to see the other versions.
 **ES:** Solo referencias que se hayan consultado de verdad y sigan resolviendo. Los enlaces a documentación oficial son los únicos enlaces externos permitidos en un README de módulo.
 
 **EN:** Only references actually consulted and still resolving. Links to official documentation are the only external links allowed in a module README.
+
+**ES:** Las bases siguen la prioridad de [`AGENT_Template.md`](AGENT_Template.md),
+sin sustituir la especificación ni imponer su agrupamiento. Declara una base
+ausente, no homologada o autorreferente sin crear un enlace roto.
+
+**EN:** References follow the priority in the agent guide, without replacing the
+specification or imposing their grouping. Declare a missing, unhomologated or
+self-referencing base without creating a broken link.

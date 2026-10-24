@@ -151,16 +151,16 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 
 **EN:** **No** `align` is opened when the use is **mandated by the language**: importing to compare in functional languages, an `N/A` axis, or a name that **is** the idiomatic one. That is an **accepted deviation**, not a fix: it is documented with its template and 🟢 `informational` or 🟡 `warning` severity, and the language is left untouched. A language with no 🔴 finding **gets no `align` branch**: its row keeps the computed level, its commit and its date, and the pass moves on.
 
-> **ES:** Un hogar que la política de desviaciones exige **todavía no existe**: `docs/ruleset/idioms/{lang}.md`, la fuente de verdad de una desviación aceptada. Sin él, tu excepción —el uso **obligado por el lenguaje**— no tiene dónde constar y se vuelve a discutir en el pase siguiente. El «cuándo se corrigió» **no** necesita carpeta propia: vive en el registro de verificaciones de este pase y en la fecha y el commit de la fila del estado.
-> **EN:** One home required by the deviation policy **does not exist yet**: `docs/ruleset/idioms/{lang}.md`, the source of truth of an accepted deviation. Without it, your exception —the use **mandated by the language**— has nowhere to live and is discussed again in the next pass. The "when it was fixed" **needs no folder of its own**: it lives in this pass's verification log and in the state row's date and commit.
+> **ES:** El hogar de las desviaciones aceptadas es [`ruleset/idioms/`](ruleset/idioms/), con fichas por lenguaje cuando corresponda; no se presupone una ficha para cada lenguaje. No confundas una convención con una obligación: aplica la precedencia de [`AGENT_Template.md`](AGENT_Template.md) y registra la decisión del autor. El «cuándo se corrigió» vive en el registro del pase y en la fecha y el commit de la fila del estado.
+> **EN:** Accepted deviations live under [`ruleset/idioms/`](ruleset/idioms/), with language records where needed; do not assume every language has one. Distinguish convention from necessity: apply the agent guide's precedence and record the author's decision. The "when it was fixed" lives in the pass log and in the state row's date and commit.
 
 ---
 
 ## 👥 Quién firma cada paso / Who signs each step
 
-**ES:** El pase y el `align` **no inventan roles**: usan el catálogo de [`AGENT_ROLES.md`](AGENT_ROLES.md), con **un dueño por artefacto**. El perfil es la política de coste del rol en ese paso, no una etiqueta del módulo; los perfiles viven en [`../scripts/data/models.tsv`](../scripts/data/models.tsv).
+**ES:** El pase y el `align` **no inventan roles**: usan el catálogo de [`AGENT_ROLES.md`](AGENT_ROLES.md), con **un dueño por artefacto**. El perfil orienta capacidad y coste según el riesgo, no es una etiqueta del módulo ni exige una herramienta o un modelo concreto.
 
-**EN:** The pass and the `align` **invent no roles**: they use the catalogue in [`AGENT_ROLES.md`](AGENT_ROLES.md), with **one owner per artefact**. The profile is the role's cost policy for that step, not a label of the module; profiles live in [`../scripts/data/models.tsv`](../scripts/data/models.tsv).
+**EN:** The pass and the `align` **invent no roles**: they use the role catalogue, with **one owner per artefact**. Profiles guide capability and cost according to risk, not a module label or a requirement for a particular tool or model.
 
 | Paso / Step | Rol principal / Principal role | Apoyo / Support | Perfil / Profile | Artefacto / Artefact |
 |---|:--|:--|:--:|---|
@@ -176,9 +176,19 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 | B Verificación y acta | Validator | SDET, DevOps / Release Engineer | `economy` | `docs/evidence/{fase}/{modulo}/{lang}.md` |
 | C Cierre del pase | Technical Product Manager | Documentation Architect | `economy` | Registro, checklist y nota del roadmap |
 
-**ES:** Dos reglas del catálogo que aquí mandan: **un rol reporta lo que no le toca** en vez de arreglarlo —el hallazgo se arregla en el `align`, no en el pase— y **el rol decide el modelo**, no el número del paso. Por eso el pase corre casi entero en `economy`, paga `balanced` en el juicio idiomático y en el cálculo del nivel, y solo paga `deep` cuando el veredicto de complejidad o la representación de la estructura cambian: es el mismo criterio con el que el sprint usa `correct` en `balanced` y `fix`/`refactor` en `deep`.
+**ES:** Un rol reporta lo que no le toca: el hallazgo se corrige en el `align`,
+no en el pase. Los perfiles se eligen por riesgo: ejecución y registro pueden usar
+`economy`, juicio idiomático `balanced` y análisis estructural o de complejidad
+`deep`. En el sprint la asignación actual de `correct` es `economy`, y la de
+`fix`/`refactor` es `deep`; no cambia la responsabilidad del rol ni sustituye la
+revisión del autor. El trabajo manual no requiere un modelo.
 
-**EN:** Two rules of the catalogue govern here: **a role reports what is not its job** instead of fixing it —the finding is fixed in the `align`, not in the pass— and **the role picks the model**, not the step number. That is why the pass runs almost entirely on `economy`, pays `balanced` for the idiomatic judgement and the level computation, and pays `deep` only when the complexity verdict or the structure's representation change: the same criterion the sprint uses when it runs `correct` on `balanced` and `fix`/`refactor` on `deep`.
+**EN:** Roles report out-of-scope issues: findings are fixed in `align`, not in
+the pass. Profiles follow risk: execution and records can use `economy`, idiomatic
+judgement `balanced`, structural or complexity analysis `deep`. Current sprint
+allocation uses `economy` for `correct` and `deep` for `fix`/`refactor`; this
+neither changes role responsibility nor replaces author review. Manual work
+requires no model.
 
 ---
 
@@ -188,7 +198,7 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 |---------------|-------------|
 | Pasos de auditoría y de `align` | **No existen**: el pase y el `align` son manuales |
 | Deshacer un cierre | **No hay verbo**: `close` y `finish` solo suman, así que retirar o rehacer un módulo es `git rm` + editar el contador a mano |
-| Portón del puntero | El atajo documentado en [`../scripts/docs/SPRINT.md`](../scripts/docs/SPRINT.md) **lo salta**, y `status`/`doctor` no marcan el gitlink cuya rama no está integrada en el `main` del submódulo |
+| Portón del puntero | Se comprueba con Git que el commit pertenece al `main` integrado del submódulo; un atajo de tooling no sustituye esa comprobación |
 | Lo que sí se usa | `glot test`, `glot verify`, `glot evidence`, `glot pointer` y `glot save 9`: el mismo sitio de siempre |
 
 **ES:** Mientras estas piezas no existan, este ciclo **no se delega** a `glot`: se lleva con `git` y con evidencia real. Lo que no cambia es la regla de fondo: **nada pasa a 🟢 sin la suite en verde y el acta escrita**.
@@ -197,20 +207,19 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 
 ---
 
-## 🔢 Alcance hoy / Scope today
+## 🔢 Alcance y estado / Scope and status
 
-| Módulo / Module | `50/50` | Registro / Record | Estado / State |
-|-----------------|:-------:|-------------------|----------------|
-| `core.foundations.hello_world` | Sí / Yes | Falta / Missing (`01_Audited_Hello_World.md`) | Por abrir / To open |
-| `core.foundations.hello_user` | Sí / Yes | Falta / Missing (`02_Audited_Hello_User.md`) | Por abrir / To open |
-| `core.foundations.unit_test_calculator` | Sí / Yes | Falta / Missing (`03_Audited_Unit_Test_Calculator.md`) | Por abrir / To open |
-| `core.foundations.numbers` | Sí / Yes | Falta / Missing (`04_Audited_Numbers.md`) | Por abrir / To open |
-| `core.algorithms.naive_sort` | Sí / Yes | Escrito / Written (`05_Audited_Naive_Sort.md`, 🟢 50) | Re-verificar y cerrar / Re-verify and close |
-| `core.algorithms.data_structures_basics` | Sí / Yes | Falta / Missing (`06_Audited_Data_Structures_Basics.md`) | Pase en curso / Pass in progress (49 filas de estado) |
+**ES:** Esta norma no duplica una tabla de progreso: el estado actual del sprint
+y las notas de cierre están en [`ROADMAP.md`](ROADMAP.md), los registros del pase
+en [`audits/README.md`](audits/README.md) y las decisiones de cierre en
+[`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md). Consulta esas fuentes
+antes de abrir un pase; que el módulo esté a `50/50` no significa que su auditoría
+esté pendiente ni que todos los lenguajes estén en 🟢.
 
-**ES:** Orden acordado: se termina `06`, se re-verifica y cierra `05` y se abren `01`–`04`; con los seis homogéneos arranca el sprint de `07 data_structures_advanced`.
-
-**EN:** Agreed order: finish `06`, re-verify and close `05`, then open `01`–`04`; with all six homogeneous, the `07 data_structures_advanced` sprint starts.
+**EN:** This policy does not duplicate progress tables: current sprint status and
+closure notes live in the roadmap, pass records in the audit index and closure
+decisions in the checklist linked above. Consult them before opening a pass;
+`50/50` does not mean the audit is pending or every language is 🟢.
 
 ---
 

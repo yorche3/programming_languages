@@ -140,7 +140,7 @@ git submodule update --init --recursive
 | 2️⃣ | Lee el `README.md` del lenguaje para instalar dependencias / Read the language's `README.md` to install dependencies |
 | 3️⃣ | Sigue el flujo desde [`01_Hello_World.md`](core/foundations/01_Hello_World.md) / Follow the flow from `01_Hello_World.md` |
 | 4️⃣ | Implementa, prueba y avanza al siguiente documento numerado / Implement, test, and advance to the next numbered document |
-| 5️⃣ | (Opcional) Carga las herramientas del monorepo: [`scripts/README.md`](https://github.com/yorche3/programming_languages/blob/main/scripts/README.md) / (Optional) Load the monorepo tooling |
+| 5️⃣ | Sigue el ciclo de evidencia y cierre de [`WORKFLOW.md`](WORKFLOW.md), sin requerir glot / Follow the evidence and closure cycle without requiring glot |
 
 ---
 

@@ -32,6 +32,21 @@
 
 ## 🧭 Principio rector / Governing principle
 
+**ES:** La autoridad por aspecto está en
+[`../AGENT_Template.md`](../AGENT_Template.md): especificación para el contrato,
+fase para los mecanismos permitidos y capacidades verificadas para su expresión.
+Las bases homologadas orientan la forma, no sustituyen esas reglas. Tener un
+mecanismo nativo no obliga a introducirlo antes de su fase; una preferencia de la
+comunidad no demuestra que otra representación sea imposible. Si estas fuentes
+son incompatibles, se reporta el bloqueo al autor antes de cambiar el artefacto.
+
+**EN:** Authority per aspect is defined in the agent guide: specification for the
+contract, phase for allowed mechanisms, verified capabilities for expression.
+Homologated references guide form, not replacements for those rules. A native
+mechanism need not be introduced before its phase; a community preference does
+not prove another representation impossible. Report incompatible sources to the
+author before changing the affected artefact.
+
 **ES:** La desviación documentada es **contrato verificable**; la desviación silenciosa es **deuda oculta**.
 
 **EN:** A documented deviation is **verifiable contract**; a silent deviation is **hidden debt**.
@@ -87,13 +102,22 @@
 
 **Ejemplos NO legítimos (van contra la representación declarada):**
 
-- `absent` → `-1` en Rust, Zig, V, Nim, OCaml, Haskell (lenguajes con Option/Maybe nativo).
-- `absent` → `null` en Scala 3 (el lenguaje desaconseja `null`).
+- `absent` → `-1` cuando el contrato exige un opcional, el tipo no representa `-1` o este colisiona con un resultado válido.
+- `absent` → `null` cuando el tipo o el contrato no lo admite; que el lenguaje lo desaconseje no basta por sí solo para prohibirlo.
 - `absent` → `fatalError` en Swift `init` (rompe la construcción).
 
-**ES:** **Tratamiento:** permitida si el mecanismo es el idiomático del lenguaje; prohibida si contradice una capacidad nativa del lenguaje.
+**ES:** **Tratamiento:** permitida si respeta contrato, fase y tipo de retorno.
+Por ejemplo, un centinela `-1` representable y exigido por el contrato no es un
+defecto por existir Option/Maybe en el lenguaje. Los opcionales internos para
+enlaces no obligan a envolver los resultados públicos. Omitir un caso solo es
+válido bajo la cláusula de adaptación de la especificación y con su justificación;
+si no está autorizado, se solicita decisión al autor.
 
-**EN:** **Treatment:** allowed if the mechanism is the language's idiomatic one; forbidden if it contradicts a native capability of the language.
+**EN:** **Treatment:** allowed when consistent with contract, phase and return
+type. A representable `-1` sentinel required by the contract is not a defect
+merely because Option/Maybe exists. Internal optional links do not require wrapped
+public results. Omit a case only under the specification's adaptation clause,
+with justification; otherwise request an author decision.
 
 ### C3 — Desviación de construcción / Construction deviation
 
@@ -157,9 +181,15 @@
 - Cambiar O(n) a O(n²) sin justificación.
 - Declarar O(1) cuando la implementación real es O(n) (mentir en el README).
 
-**ES:** **Tratamiento:** permitida solo si la complejidad real se declara **explícitamente** en el README del lenguaje, con justificación y, si aplica, alternativa descartada.
+**ES:** **Tratamiento:** una complejidad distinta requiere autorización de la
+especificación o decisión explícita del autor, además de declararse en el README
+con justificación y alternativa descartada cuando aplique. Documentar un coste
+superior no elimina un incumplimiento del techo exigido.
 
-**EN:** **Treatment:** allowed only if the real complexity is **explicitly** declared in the language README, with justification and, if applicable, discarded alternative.
+**EN:** **Treatment:** a different complexity requires specification permission
+or an explicit author decision, as well as a README declaration with justification
+and a discarded alternative where applicable. Documenting a higher cost does
+not cure a breach of the required bound.
 
 ### C6 — Desviación de encapsulación / Encapsulation deviation
 
@@ -215,14 +245,14 @@
 ├── SÍ → 🔴 NO aceptable. Es un defecto, no una desviación.
 └── NO ↓
 
-¿El lenguaje tiene un mecanismo nativo que evita la desviación?
-├── SÍ → 🔴 NO aceptable. Úsalo. (Ej. Option en Rust, constructor en Swift)
+¿El lenguaje tiene un mecanismo nativo permitido por la fase y compatible con el contrato que evita la desviación?
+├── SÍ → Usarlo, salvo adaptación autorizada; no confundir preferencia con imposibilidad.
 └── NO ↓
 
 ¿La desviación cambia la complejidad declarada?
-├── SÍ → ¿Está documentada con justificación y alternativa descartada?
+├── SÍ → ¿Está autorizada y documentada con justificación y alternativa descartada?
 │       ├── SÍ → 🟠 Aceptable con documentación.
-│       └── NO → 🔴 NO aceptable. Documentar primero.
+│       └── NO → 🔴 NO aceptable. Solicitar decisión antes de continuar.
 └── NO ↓
 
 ¿La desviación usa un mecanismo peligroso (unsafe, @Suppress, fatalError)?
@@ -240,6 +270,7 @@
 │       ├── SÍ → 🟢 Aceptable sin marcar.
 │       └── NO → 🟡 Aceptable con documentación.
 └── NO → Revisar manualmente.
+```
 
 ## 📂 Dónde vive cada desviación / Where each deviation lives
 
@@ -338,9 +369,9 @@ markdown
 
 **Motivo:** funciona.
 
-ES: Falta: categoría, severidad, estado, evidencia y la justificación idiomática. Además, -1 en Rust es probablemente 🔴, no 🟢.
+ES: Falta: categoría, severidad, estado, evidencia y justificación frente al contrato y la fase. El lenguaje por sí solo no determina la severidad de `-1`.
 
-EN: Missing: category, severity, state, evidence and idiomatic justification. Additionally, -1 in Rust is probably 🔴, not 🟢.
+EN: Missing: category, severity, state, evidence and justification against contract and phase. The language alone does not determine the severity of `-1`.
 Anti-ejemplo 3 — Dos desviaciones mezcladas / Two deviations merged
 markdown
 

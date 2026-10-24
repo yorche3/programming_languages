@@ -16,9 +16,13 @@ La implementación de código nuevo requiere una petición explícita del autor.
 - `docs/AGENT_Template.md` es la guía detallada para agentes.
 - `docs/WORKFLOW.md` describe el ciclo de trabajo de un módulo (sprint): pasos,
   evidencia de cada paso y reparto entre autor, tooling y agente.
-- `scripts/README.md` es la fuente de verdad del tooling del repositorio
-  (herramienta `glot`), que no es un módulo del roadmap y no altera los
-  contadores `X/50`.
+- glot es una herramienta personal de apoyo al autor, no un módulo académico
+  ni un requisito del monorepo. Su documentación en `scripts/README.md` permanece
+  separada: se referencia sin enlaces directos desde la documentación del
+  monorepo. Su desarrollo no altera los contadores `X/50`.
+- `docs/AGENT_Template.md` fija la autoridad por aspecto y la prioridad
+  persistente de bases del mismo lenguaje: `data_structures_basics`, después
+  `numbers`. Son referencias de forma, no sustitutos del contrato ni de la fase.
 
 ## Antes de trabajar
 
@@ -33,7 +37,7 @@ La implementación de código nuevo requiere una petición explícita del autor.
 
 - Generar o corregir documentación usando la plantilla vigente.
 - Revisar código, tests y documentación ya existentes.
-- Verificar el tooling de `scripts/` (herramientas del repositorio, fuera del
+- Verificar el tooling de `scripts/` (herramienta personal del autor, fuera del
   roadmap) y documentarlo en `scripts/README.md`.
 - Refactorizar o implementar código solo cuando el autor lo solicite.
 - No ejecutar `git push` ni crear commits salvo instrucción explícita; tampoco

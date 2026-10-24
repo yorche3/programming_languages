@@ -64,7 +64,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 | `core.foundations.numbers` | ✅ | [`📄 04_Numbers.md`](core/foundations/04_Numbers.md) | Algoritmos numéricos recursivos e iterativos · auditoría 04 cerrada el 2026-10-16 (🟢 50) |
 
 > **ES:** Los **50 submódulos registrados en `.gitmodules`** tienen los cuatro módulos de Foundations homologados y documentados. Foundations queda cerrada; la siguiente fase visible es Algorithms Pure.
-> **EN:** All **49 submodules registered in `.gitmodules`** have the four Foundations modules standardized and documented. Foundations is complete; Algorithms Pure is the next visible phase.
+> **EN:** All **50 submodules registered in `.gitmodules`** have the four Foundations modules standardized and documented. Foundations is complete; Algorithms Pure is the next visible phase.
 
 ---
 

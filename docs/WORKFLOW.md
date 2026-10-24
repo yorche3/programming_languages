@@ -11,6 +11,18 @@
 
 ## 🧭 Principio de partida / Starting principle
 
+**ES:** El ciclo es independiente de herramientas y puede realizarlo el autor
+manualmente con Git y el toolchain nativo. glot es una herramienta auxiliar
+personal del autor, no un módulo académico ni un requisito del monorepo.
+Sus comandos, cuando se mencionan, son atajos equivalentes: no sustituyen estas
+normas ni su evidencia. Su documentación permanece separada.
+
+**EN:** The cycle is tool-independent: the author can perform it manually with
+Git and the native toolchain. glot is the author's personal helper, not an
+academic module or a monorepo requirement. Any commands mentioned are equivalent
+shortcuts, not replacements for these policies or their evidence. Its
+documentation remains separate.
+
 **ES:** Un sprint empieza **siempre** desde el `main` del submódulo, que guarda el estado concluido del lenguaje, y siempre desde una **especificación existente** en `docs/core/{fase}/`. Si falta la especificación, el sprint no empieza: se escribe antes.
 
 **EN:** A sprint **always** starts from the submodule's `main`, which holds the language's closed state, and always from an **existing specification** in `docs/core/{phase}/`. If the specification is missing, the sprint does not start: it is written first.
@@ -22,15 +34,15 @@
 | # | Paso | Objetivo | Artefacto obligatorio |
 |:-:|------|----------|-----------------------|
 | 1 | Reconocimiento | Saber en qué estado está el repo y el submódulo antes de tocar nada | `git status --short` y `git submodule status` leídos, sin cambios pendientes ajenos al sprint |
-| 2 | Asignación | Fijar `{lenguaje}`, `{fase}`, `{módulo}`, la rama y la especificación del sprint; `use` sienta el sprint y **deja al autor en la carpeta de la fase** (`{lenguaje}/core/{fase}/`) | Estado del sprint registrado fuera del shell (ver «Estado del sprint») |
+| 2 | Asignación | Fijar `{lenguaje}`, `{fase}`, `{módulo}`, la rama y la especificación del sprint | Contexto del trabajo registrado y comprobable (ver «Estado del sprint») |
 | 3 | Rama de trabajo | Trabajar aislado, con la rama publicada y su upstream | Rama `{tipo}/{fase}/{módulo}` en minúsculas y `kebab-case`, publicada |
-| **4** | Esqueleto: la carpeta | `glot new` ejecuta las filas `phase=new` de [`scripts/data/init_sequences.tsv`](../scripts/data/init_sequences.tsv) respetando su `cwd`: como mínimo crea la carpeta del módulo y, si el lenguaje tiene herramienta que además la genera, avanza de antemano; deja al autor **dentro de `{lenguaje}/core/{fase}/{módulo}`** | Carpeta del módulo creada y **confirmada con su commit** (paso `4`) |
-| **4a** | Esqueleto: la estructura idiomática | `glot scaffold` corre las filas `phase=scaffold`: completa las carpetas y los ficheros con su esqueleto base, renombra a la convención del lenguaje y **borra lo que estorba** (`.git` anidados, `main` de ejemplo, plantillas) | Estructura idiomática **confirmada con su commit** (paso `4a`) |
+| **4** | Esqueleto: la carpeta | Crear el módulo con las herramientas nativas desde la fase, respetando su directorio de trabajo (atajo: `glot new`) | Carpeta del módulo creada y **confirmada con su commit** (paso `4`) |
+| **4a** | Esqueleto: la estructura idiomática | Completar la estructura nativa, revisar los ejemplos generados y retirar solo lo ajeno al módulo, sin borrar trabajo existente (atajo: `glot scaffold`) | Estructura idiomática ejecutable sin casos del módulo, **confirmada con su commit** (paso `4a`) |
 | **4b** | Contrato | El tipo nuevo y sus firmas, **antes** de la suite | Contrato |
 | **4c** | Suite | La suite **con su runner** (cuando el lenguaje lo exige), que falla por falta de implementación —la fase roja—, o pasa si el módulo es solo documental | Suite |
-| **4d** | Construcción y enlace | Dejar la suite **ejecutable**: el fichero que compila y enlaza en los lenguajes cuyo esqueleto no lo trae hecho (en los demás el paso se cierra sin cambios). El runner del módulo **no** es suyo: lo escribe el 4c | Fichero de construcción correcto y `glot test` compilando y enlazando |
+| **4d** | Construcción y enlace | Dejar la suite **ejecutable**: configurar compilación y enlace cuando haga falta, sin reescribir el runner del 4c; si el toolchain genera el runner, configurar su generación | Construcción correcta y suite nativa compilando y enlazando; rojo por contrato pendiente, no por infraestructura |
 | 5 | Implementación | Cumplir el contrato de la especificación | Código verificado por la suite, sin warnings |
-| **4e · 5b · 5c** | Corrección y ajuste | `correct` cuando lo señale la suite, la auditoría o el validador (`--cause` obligatoria), `fix` para un arreglo puntual y `refactor` para rehacer sin cambiar el contrato | Corrección aplicada |
+| **4e · 5b · 5c** | Corrección y ajuste | Corregir el artefacto previo a implementación (`correct`), reparar la implementación (`fix`) o refactorizar sin cambiar contrato ni cobertura (`refactor`); registrar siempre la causa | Corrección aplicada y verificada en el artefacto correspondiente |
 | 6 | Verificación | Tener evidencia real de que cumple | Salida real de la suite y del analizador, copiada sin editar |
 | 7 | Cierre documental del módulo | Documentar lo implementado | `README.md` de Nivel 3 generado desde [`README_Template.md`](README_Template.md) |
 | 8 | Documentación del lenguaje | Dejar el lenguaje y sus índices al día | `README.md` del lenguaje y los índices de Nivel 1–3 actualizados |
@@ -40,7 +52,7 @@
 
 | # | Paso | Objetivo | Artefacto obligatorio |
 |:-:|------|----------|-----------------------|
-| **9** | Puntero | Que el monorepo apunte al commit **integrado** | `glot pointer` deja el gitlink preparado y sin confirmar; `glot save 9` lo confirma |
+| **9** | Puntero | Que el monorepo apunte al commit **integrado** | Gitlink revisado y confirmado por el autor (atajos: `glot pointer` y `glot save 9`) |
 | **10** | Cierre | Dejar constancia verificable | Entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) y contador de [`ROADMAP.md`](ROADMAP.md) al día, en el mismo cambio |
 
 **ES:** El puntero se actualiza **después** de integrar en el `main` del submódulo y **antes** de integrar la rama del monorepo. Nunca se apunta a una rama de trabajo no integrada.
@@ -51,11 +63,11 @@
 
 ## 👥 Quién hace cada paso / Who does each step
 
-| Paso | Autor | Tooling (`glot`) | Agente de IA |
+| Paso | Autor | Tooling opcional / Optional tooling | Agente de IA |
 |------|:-----:|:----------------:|:------------:|
 | 1 Reconocimiento | decide | informa | — |
 | 2–3 Asignación y rama | decide | ejecuta | — |
-| 4–4a Esqueleto | revisa | **ejecuta** | — (comandos de consola) |
+| 4–4a Esqueleto | ejecuta o revisa | **ejecuta comandos nativos** | revisa/completa si se solicita |
 | 4b–4c Contrato y suite | revisa | ejecuta | **escribe** |
 | 4d Construcción y enlace | revisa | encarga | **escribe** |
 | 5 Implementación | decide | ejecuta pruebas | **puede escribir** |
@@ -64,9 +76,53 @@
 | 8 Documentación del lenguaje | valida | ejecuta | **escribe la documentación** |
 | 9–10 Puntero y cierre | decide | ejecuta | ayuda a redactar el registro |
 
-**ES:** Los pasos 4b (contrato), 4c (suite), 4d (construcción y enlace), 4e (corrección), 5, 7 y 8 usan IA porque exigen **leer y comparar** (especificación contra código, plantilla contra README, roadmap contra el estado real). El **esqueleto (4 y 4a) no**: lo hacen `glot new` y `glot scaffold` ejecutando comandos de consola (`mkdir -p`, `cd`, `touch` y las declaraciones idiomáticas), sin delegado. El encargo lo arma `glot prompt <encargo>` con las plantillas **versionadas** de [`scripts/prompts/`](../scripts/prompts/). El agente **nunca** ejecuta `git add`, `git commit` ni `git push`: eso lo decide y lo hace el autor.
+**ES:** El autor puede realizar cualquier paso o encargarlo expresamente a un
+agente. Leer y comparar exige criterio, no obliga a usar IA ni a ejecutar un
+agente distinto por rol. El tooling ejecuta comandos y prepara encargos, pero no
+toma decisiones técnicas. En 4a, un agente puede revisar o completar el esqueleto
+nativo sin adelantar contrato ni casos. Commits y publicación corresponden al
+autor; el agente no los realiza salvo autorización explícita.
 
-**EN:** Steps 4b (contract), 4c (suite), 4d (build and link), 4e (correction), 5, 7 and 8 use AI because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). **The skeleton (4 and 4a) does not**: `glot new` and `glot scaffold` run console commands (`mkdir -p`, `cd`, `touch` and the idiomatic declarations), with no delegate. The request is built by `glot prompt <request>` from the **versioned** templates in [`scripts/prompts/`](../scripts/prompts/). The agent **never** runs `git add`, `git commit` or `git push`: the author decides and does that.
+**EN:** The author can perform any step or explicitly assign it to an agent.
+Reading and comparing requires judgement, not mandatory AI or a separate agent
+per role. Tooling runs commands and prepares requests, not technical decisions.
+At 4a an agent can review or complete native scaffolding without introducing
+contracts or cases. Commits and publication belong to the author; agents do not
+perform them without explicit authorisation.
+
+### Traspasos y bloqueos / Handoffs and blockers
+
+**ES:** Las responsabilidades las fija [`AGENT_ROLES.md`](AGENT_ROLES.md).
+Cada entrega cita sus entradas y lo comprobado; el siguiente responsable verifica
+lo necesario antes de apoyarse en ella:
+
+**EN:** Responsibilities are defined by the role catalogue. Each delivery cites
+its inputs and checks; the next owner verifies what is needed before relying on it:
+
+| Entrega / Delivery | Condición de aceptación / Acceptance condition |
+|---|---|
+| Contrato / Contract | Operaciones, semántica y representación compatibles con especificación y fase / Operations, semantics and representation match specification and phase |
+| Suite y runner / Suite and runner | Mapa unidad/variante → casos → grupo → archivo/suite → runner; aislamiento, todos los grupos ejecutados y fallos propagados / Traceable mapping, isolation, all groups executed and failures propagated |
+| Construcción / Build | Compila y enlaza; distingue fallos de infraestructura del rojo esperado / Compiles and links; distinguishes infrastructure failure from expected red tests |
+| Implementación / Implementation | Contrato satisfecho sin acomodar suite ni omitir casos / Contract satisfied without tailoring the suite or omitting cases |
+| README | Describe código, agrupamiento y evidencia reales / Describes actual code, grouping and evidence |
+| Validación / Validation | Separa comprobado, no comprobado y hallazgos que bloquean el cierre / Separates checked, unchecked and closure-blocking findings |
+
+**ES:** Una suite agregada y varias suites son equivalentes si preservan casos,
+variantes aplicables y aislamiento; separación lógica no exige archivos separados.
+El agrupamiento se decide en la suite y el README lo describe, no lo rediseña.
+Ante un conflicto, se reporta `regla/fuente → evidencia → artefacto afectado →
+alternativas → decisión pendiente`. Se detiene solo el artefacto bloqueado;
+el autor como Tech Lead decide la excepción o el cambio normativo antes de continuar.
+Ni documentar un defecto ni un test verde lo convierten en una desviación aceptada.
+
+**EN:** Aggregate and separate suites are equivalent if they preserve cases,
+applicable variants and isolation; logical separation does not require separate
+files. Suite authoring decides grouping and the README describes, not redesigns it.
+Report conflicts as `rule/source → evidence → affected artefact → alternatives →
+pending decision`. Stop only the blocked artefact; the author as Tech Lead decides
+the exception or policy change before work resumes. Neither documenting a defect
+nor a green test makes it an accepted deviation.
 
 **ES:** El agente que hace el paso **no ejecuta los verbos de delegación** (`glot prompt`, `glot ask`): recibe el encargo ya armado, o lee las fuentes que este declara, y **realiza** el trabajo. Delegar es opcional y tiene dos vías que conviven: el autor puede enviar el encargo a su propio delegado (configurado en su entorno, fuera del repositorio y sin versionar) o el mismo agente del editor lo ejecuta. El reparto no cambia: `glot` orquesta y ejecuta comandos, el agente escribe el artefacto y el autor decide y publica. Los detalles están en [`AGENT_Template.md`](AGENT_Template.md).
 
@@ -76,9 +132,15 @@
 
 ## 🗂️ Estado del sprint / Sprint state
 
-**ES:** El sprint tiene un estado explícito —lenguaje, fase, módulo, rama, especificación y ruta del submódulo— que **no** se deduce del directorio actual. Se guarda fuera del shell (almacén de estado de `glot`, ver [`scripts/docs/CONTRACT.md`](../scripts/docs/CONTRACT.md)) para que cualquier comando posterior —ejecutar pruebas, encargar documentación, capturar evidencia— funcione **desde cualquier directorio** y para el mismo módulo.
+**ES:** El sprint tiene un contexto explícito —lenguaje, fase, módulo, rama,
+especificación y ruta del submódulo— que se comprueba antes de cada acción; no
+se deduce solo del directorio actual. En trabajo manual se declara en el encargo
+y el registro de evidencia. glot puede conservarlo fuera del shell como atajo.
 
-**EN:** A sprint has explicit state —language, phase, module, branch, specification and submodule path— which is **not** inferred from the current directory. It is stored outside the shell (`glot`'s state store, see [`scripts/docs/CONTRACT.md`](../scripts/docs/CONTRACT.md)) so that any later command —running tests, requesting documentation, capturing evidence— works **from any directory** and for the same module.
+**EN:** A sprint has explicit context —language, phase, module, branch,
+specification and submodule path— checked before every action, not inferred
+solely from the current directory. Manual work declares it in the request and
+evidence record. glot can retain it outside the shell as a shortcut.
 
 ---
 
@@ -92,6 +154,18 @@
 
 **EN:** Since v0.10.0 that evidence has a home and a shape: `glot evidence` runs the suite and the verifier and writes the **record** to `docs/evidence/{phase}/{module}/{language}.md`, with the date, the submodule commit backing it and the real output as is. The record is written **even when something is red**, because evidence is what happened and not what is wished for.
 
+**ES:** Sin glot se registra la misma evidencia en esa ruta: contexto, fecha,
+commit verificado, comandos nativos, códigos de salida y salidas reales, incluso
+si fallan. Se distingue evidencia de un árbol con cambios pendientes de la de un
+commit integrado. La validación revisa contrato y cobertura además de la ejecución;
+la evidencia no es una aprobación y el cierre lo decide el autor.
+
+**EN:** Without glot, record equivalent evidence at that path: context, date,
+verified commit, native commands, exit codes and actual output, including failures.
+Distinguish a dirty worktree run from evidence of an integrated commit.
+Validation reviews contract and coverage as well as execution; evidence is not
+approval and the author decides closure.
+
 1. **Cierre del módulo:** código + pruebas ejecutadas + README de Nivel 3 + entrada en [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) + actualización de [`ROADMAP.md`](ROADMAP.md), **en el mismo cambio**.
 2. **Cierre de fase:** solo cuando **todos** los módulos requeridos cumplen el ciclo completo. Un README no cierra un módulo, y un módulo no cierra una fase.
 3. **Nada se marca `✅` sin evidencia verificable.**
@@ -100,33 +174,58 @@
 
 ## 🤖 CI por submódulo / CI per submodule
 
-**ES:** La decisión está tomada **antes de escribir ningún workflow**: **el comando de la CI no se copia del catálogo, se le pide al catálogo**. Un workflow que repite `alr build` o `pytest -q` crea una **segunda verdad** que envejece en silencio —cambia el catálogo y el workflow no—, así que la CI llama a los mismos verbos que usan el autor y el harness: `glot test` (la suite, con el comando nativo del lenguaje) y `glot verify` (el lint idiomático). El workflow declara la **versión** de la herramienta, no la implementación del comando.
+**ES:** La CI debe usar el mismo comando nativo verificado que el autor y declarar
+su directorio de trabajo, toolchain y versiones. Si se elige glot, **el comando de la CI no se copia del catálogo, se le pide al catálogo**:
+`glot test` ejecuta la suite y `glot verify` el lint idiomático. Sin glot, el
+workflow llama al comando nativo mantenido con la configuración del módulo y
+documentado en su README. Ninguna vía permite divergencias silenciosas.
 
-**EN:** The decision is taken **before any workflow is written**: **the CI command is not copied from the catalogue, it is asked of the catalogue**. A workflow repeating `alr build` or `pytest -q` creates a **second truth** that ages in silence —the catalogue changes and the workflow does not—, so CI calls the same verbs the author and the harness use: `glot test` (the suite, with the language's native command) and `glot verify` (the idiomatic lint). The workflow declares the tool **version**, not the command's implementation.
+**EN:** CI must use the same verified native command as the author and declare
+its working directory, toolchain and versions. When using glot, ask the catalogue
+for the command rather than copying it: `glot test` runs the suite and `glot verify`
+runs idiomatic lint. Without glot, call the native command maintained with module
+configuration and documented in its README. Neither route allows silent drift.
 
 **ES:** Dónde vive cada CI:
 
-- **La CI del ciclo vive en el monorepo** (`.github/workflows/`), porque es el único sitio que tiene a la vez `glot`, su catálogo, las especificaciones, el roadmap y `docs/evidence/`. Un submódulo es un repositorio aparte: no tiene `scripts/`, así que una CI allí solo podría comprobar su lenguaje **copiando** el comando.
-- **El disparador del monorepo es el puntero del submódulo**: un push dentro del submódulo no se ve desde el monorepo, así que esa CI comprueba **cuando el módulo entra** (paso 9, `pointer`) y a mano (`workflow_dispatch`). Quien quiera la comprobación en **cada** commit del submódulo tiene que llevar allí la CI, y entonces el paso previo obligatorio es **traer `glot`** (clon superficial del monorepo, o el script con su catálogo) y llamarlo; **nunca** reescribir el comando.
+- **La CI del ciclo vive en el monorepo** (`.github/workflows/`), donde puede contrastar especificaciones, roadmap y evidencia con los submódulos.
+- **El disparador del monorepo es el puntero del submódulo**: un push dentro del submódulo no se ve desde el monorepo. Para comprobar cada commit puede haber CI nativa en el submódulo, sin dependencia obligatoria de glot. Si el autor elige usarlo allí, debe proporcionar la herramienta y sus datos versionados.
 - **La CI del tooling** (`scripts/`) también vive en el monorepo, y es la que ya existe: el análisis estático de `scripts/**`. Es **CI del repositorio**, no el verbo `verify`: desde la v1.4.0 `verify` está declarado *lint* y el **análisis estático de seguridad es un no-objetivo suyo**, lo que no impide que el repositorio tenga su propio SAST.
 
 **EN:** Where each CI lives:
 
-- **The cycle's CI lives in the monorepo** (`.github/workflows/`), because it is the only place holding `glot`, its catalogue, the specifications, the roadmap and `docs/evidence/` at once. A submodule is a repository of its own: it has no `scripts/`, so a CI there could only check its language by **copying** the command.
-- **The monorepo's trigger is the submodule pointer**: a push inside the submodule is not seen from the monorepo, so that CI checks **when the module comes in** (step 9, `pointer`) and by hand (`workflow_dispatch`). Whoever wants the check on **every** submodule commit has to move CI there, and then the mandatory previous step is **fetching `glot`** (a shallow clone of the monorepo, or the script with its catalogue) and calling it; **never** rewriting the command.
+- **The cycle's CI lives in the monorepo** (`.github/workflows/`), where it can cross-check specifications, roadmap and evidence against submodules.
+- **The monorepo's trigger is the submodule pointer**: a submodule push is not seen by the monorepo. Native submodule CI can check every commit without requiring glot. If the author chooses to use it there, provide the tool and its versioned data.
 - **The tooling CI** (`scripts/`) also lives in the monorepo, and it is the one that exists today: static analysis of `scripts/**`. It is **repository CI**, not the `verify` verb: since v1.4.0 `verify` is declared *lint* and **static security analysis is an explicit non-goal of it**, which does not stop the repository from having its own SAST.
 
-**ES:** Convivencia con el acta, en una frase: **la CI comprueba y no firma; el acta la firma el autor**. `docs/evidence/` es un artefacto versionado con la salida real de la máquina del autor y el commit del submódulo que la respalda —es lo que cierra un módulo—, mientras que la CI deja su salida en su propio registro. Por eso la CI **no escribe** en `docs/evidence/` ni confirma nada: un acta escrita desde la CI sería un acta sin autor, y `close` exige el acta con su commit. Las dos dicen lo mismo por caminos distintos; si divergen, manda el acta y lo que está mal configurado es la CI.
+**ES:** Convivencia con el acta: **la CI comprueba y no firma; el acta la firma el autor**.
+`docs/evidence/` conserva la salida real y el commit verificado; la CI deja su
+propio registro, **no escribe** el acta ni autoriza el cierre. Si divergen, se
+comparan commit, árbol de trabajo, comandos, versiones, entorno y resultados.
+La procedencia no decide cuál es correcto: se registra la causa, se corrige y
+se repite la comprobación afectada antes del cierre. Un acta verde no demuestra
+por sí sola cobertura completa.
 
 **ES:** Lo que la CI **no** hace: no instala toolchains del roadmap (eso es L9 y es del autor), no crea ni publica ramas, no fusiona, no sustituye a `close` y no es la puerta del cierre: la puerta es la evidencia del autor.
 
-**EN:** Living with the record, in one sentence: **CI checks and does not sign; the author signs the record**. `docs/evidence/` is a versioned artefact with the author's machine's real output and the submodule commit backing it —it is what closes a module—, while CI leaves its output in its own log. That is why CI **does not write** to `docs/evidence/` nor commit anything: a record written from CI would be a record without an author, and `close` demands the record with its commit. Both say the same thing along different paths; if they diverge, the record wins and the misconfigured part is the CI.
+**EN:** **CI checks and does not sign; the author signs the record**.
+`docs/evidence/` retains actual output and the verified commit; CI keeps its own
+log, does not write the record and does not authorise closure. If they diverge,
+compare commit, worktree, commands, versions, environment and results. Provenance
+does not decide which is correct: record the cause, fix it and repeat the affected
+check before closure. A green record alone does not prove complete coverage.
 
 **EN:** What CI does **not** do: it does not install roadmap toolchains (that is L9 and the author's job), it does not create or publish branches, it does not merge, it does not replace `close` and it is not the closing gate: the gate is the author's evidence.
 
-**ES:** Lo que ya existe se alinea con esta política: `ada/.github/workflows/tests.yml` **copia** hoy sus dos comandos (`alr build` y `alr -C tests run`), así que queda como **excepción declarada** —se conserva porque funciona y se alinea al catálogo (`glot test`) cuando ese submódulo cierre su siguiente módulo—, y los workflows nuevos se escriben ya con la regla.
+**ES:** La antigua **excepción declarada**, `ada/.github/workflows/tests.yml`,
+usa comandos nativos (`alr build` y `alr -C tests run`). No exige migrar a glot:
+al revisar el módulo se contrasta su equivalencia con el README y la evidencia.
+Los workflows nuevos siguen el mismo criterio de reproducibilidad.
 
-**EN:** What already exists is aligned with this policy: `ada/.github/workflows/tests.yml` **copies** its two commands today (`alr build` and `alr -C tests run`), so it stands as a **declared exception** —kept because it works and aligned with the catalogue (`glot test`) when that submodule closes its next module—, and new workflows are written with the rule already in place.
+**EN:** The former **declared exception**, `ada/.github/workflows/tests.yml`,
+uses native commands (`alr build` and `alr -C tests run`). No migration to glot
+is required: review equivalence against the README and evidence when reviewing
+the module. New workflows follow the same reproducibility criterion.
 
 ---
 
@@ -159,7 +258,7 @@
 ### Submódulo del lenguaje / Language submodule
 
 - [ ] Código y tests en la ubicación que declara la especificación, o con la desviación documentada.
-- [ ] Suite nativa ejecutada con el comando del catálogo y evidencia escrita en `docs/evidence/`.
+- [ ] Suite nativa ejecutada con el comando documentado del módulo y evidencia escrita en `docs/evidence/`; si se usa catálogo, comprobar su equivalencia.
 - [ ] Artefactos generados ignorados en `.gitignore`; el árbol queda limpio entre pasos.
 - [ ] READMEs de Nivel 1 y 2 con el módulo listado.
 - [ ] Puntero del monorepo apuntando a un commit **integrado** en el `main` del submódulo.
@@ -186,7 +285,7 @@
 - [ ] Rama `{tipo}/{fase}/{módulo}` publicada con su upstream.
 - [ ] Esqueleto y `.gitignore` del módulo puestos, sin `main` de ejemplo si el módulo es una biblioteca.
 - [ ] Suite ejecutada con salida real; sin warnings ni errores.
-- [ ] Acta de evidencia escrita con `glot evidence`, con la suite en verde (desde la v0.10.0).
+- [ ] Acta de evidencia con la suite en verde, escrita manualmente o con `glot evidence`, con contexto, commit, comandos y resultados verificables.
 - [ ] Divergencias respecto al pseudocódigo clasificadas como idiomáticas (documentadas) o como defecto (reportadas).
 - [ ] README de Nivel 3 generado desde la plantilla, bilingüe y con salidas reales.
 - [ ] Índices de Nivel 1–3 actualizados (o creados si faltaban).
@@ -194,7 +293,7 @@
 - [ ] Puntero del submódulo actualizado en el monorepo.
 - [ ] Entrada en el checklist y contador del roadmap al día.
 - [ ] `git diff --check` sin errores.
-- [ ] Sin `push` ni `commit` hechos por el agente.
+- [ ] Sin `push` ni `commit` hechos por el agente sin autorización explícita.
 
 ---
 
@@ -216,5 +315,4 @@
 | [`README_Template.md`](README_Template.md) | Estructura obligatoria del README de Nivel 3 |
 | [`AGENT_Template.md`](AGENT_Template.md) | Cómo genera documentación el agente |
 | [`../AGENTS.md`](../AGENTS.md) | Límites de actuación del agente: qué puede y qué no |
-| [`../scripts/docs/SPRINT.md`](../scripts/docs/SPRINT.md) | Los mismos pasos, con el comando de `glot` que los cubre |
 | [`AUDIT_WORKFLOW.md`](AUDIT_WORKFLOW.md) | El segundo ciclo: la auditoría del módulo cerrado y el `align` por lenguaje |

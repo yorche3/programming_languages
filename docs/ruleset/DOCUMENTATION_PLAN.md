@@ -109,8 +109,8 @@
 | Documento / Document | Propósito / Purpose | Estado / State | Responsable / Owner |
 |----------------------|---------------------|:--------------:|:-------------------:|
 | `docs/ROADMAP.md` | Progreso por fases, especificaciones y contadores `X/50` / Phase progress, specs, and `X/50` counters | 🔄 | — |
-| `docs/WORKFLOW.md` / `scripts/docs/SPRINT.md` (`Sprint de módulo.md`) | Norma del ciclo de sprint y comandos operativos por paso / Sprint cycle policy and step-by-step commands | ✅ | — |
-| `scripts/README.md` (`glot` CLI docs) | Orquestador de desarrollo, tooling del monorepo y catálogo de datos / Development tool orchestrator and data catalog | ✅ | — |
+| `docs/WORKFLOW.md` | Norma del ciclo, realizable manualmente / Tool-independent cycle policy | ✅ | — |
+| `scripts/README.md` (`glot` CLI docs, referencia / reference) | Herramienta personal del autor; documentación separada del contenido académico / Author's personal helper; documentation separate from academic content | ✅ | — |
 | `docs/AGENT_Template.md` / `AGENTS.md` | Contrato de agentes de IA, roles y calendario de adopción / AI agent contract, roles, and adoption schedule | ✅ | — |
 | `docs/ROADMAP_UPDATE_CHECKLIST.md` | Lista de verificación obligatoria para cierre de fase y módulo / Verification checklist for phase and module closure | ✅ | — |
 | `docs/README_Template.md` | Plantilla canónica de README de Nivel 3 para módulos / Canonical Level 3 module README template | ✅ | — |

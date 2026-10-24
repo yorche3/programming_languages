@@ -35,17 +35,18 @@ list, and no one is bound by it beyond every artefact having **one clear owner**
   principal; los demás son apoyo y se declaran como tales.
   **EN:** *One owner per artefact.* Every sprint artefact is signed by **one**
   principal role; the rest are support and are declared as such.
-- **El rol decide el modelo.** El perfil de modelo de un encargo se elige por el
-  **rol** y el riesgo del trabajo, no por el número del paso: razonar sobre
-  comportamiento observable exige el modelo profundo; redactar o comprobar, el
-  económico. Los perfiles viven en
-  [`scripts/data/models.tsv`](../scripts/data/models.tsv); este documento nombra
-  el perfil, no el id del modelo.
-  **EN:** *The role picks the model.* A request's model profile is chosen by the
-  **role** and the work's risk, not by the step number: reasoning about observable
-  behaviour needs the deep model; writing or checking, the cheap one. Profiles
-  live in [`scripts/data/models.tsv`](../scripts/data/models.tsv); this document
-  names the profile, not the model id.
+- **Rol, perfil y modelo son distintos.** El rol fija la responsabilidad; el
+  perfil orienta capacidad y coste según el riesgo del encargo; el modelo es una
+  elección configurable del autor. Un rol puede trabajar con distintos perfiles.
+  La tabla siguiente describe la asignación actual, no un requisito para realizar
+  el ciclo manualmente. La configuración de glot vive en `scripts/data/models.tsv`
+  y sus plantillas; no determina la autoridad de estas normas.
+  **EN:** *Role, profile and model are distinct.* The role defines responsibility;
+  the profile guides capability and cost according to request risk; the model is
+  configurable by the author. One role can use different profiles. The table below
+  describes the current allocation, not a requirement for working manually.
+  glot configuration lives in `scripts/data/models.tsv` and its templates; it
+  does not determine the authority of these policies.
 - **Los roles no se pisan.** Un rol **reporta** lo que no le toca en vez de
   arreglarlo; el artefacto de otro paso se cambia en **su** paso.
   **EN:** *Roles do not overlap.* A role **reports** what is not its job instead
@@ -66,7 +67,7 @@ list, and no one is bound by it beyond every artefact having **one clear owner**
 | **Documentation Architect** | El **sistema** documental: niveles N1–N3, plantillas, índices, navegación y enlaces | Redactar el detalle de cada módulo ni tocar código |
 | **Technical Product Manager (TPM)** | Priorizar el roadmap, el orden de la fase y los criterios de cierre y registro | Decidir arquitectura ni implementar |
 | **Tech Lead** | Decidir en divergencias y bloqueos, aprobar excepciones y dar el cierre por bueno | Ejecutar el trabajo rutinario (eso es del autor) |
-| **DevOps / Release Engineer** | Toolchain, entornos, construcción, CI y reproducibilidad | Reescribir los comandos del catálogo (se **piden** a `scripts/data/languages.tsv`) ni decidir el contrato |
+| **DevOps / Release Engineer** | Toolchain, entornos, construcción, CI y reproducibilidad | Duplicar comandos canónicos sin mantener su correspondencia ni decidir el contrato |
 | **Validator** | Comprobar y **reportar** con veredicto legible por máquina | Escribir, corregir, aplicar mitigaciones ni emitir veredicto sin comprobar |
 
 ---
@@ -83,18 +84,18 @@ marked `—`.
 
 | Encargo / Request | Paso / Step | Rol principal / Principal role | Apoyo / Support | Perfil / Profile |
 |---|:--:|---|---|:--:|
-| `scaffold` | 4a | Language-Specific SME | DevOps / Release Engineer, SDET | `balanced` |
+| `scaffold` | 4a | Language-Specific SME | DevOps / Release Engineer, SDET | `economy` |
 | `contract_stub` | 4b | Software Architect | Computer Scientist, Language-Specific SME | `balanced` |
 | `suite` | 4c | SDET | Language-Specific SME | `balanced` |
 | `build` | 4d | Language-Specific SME | DevOps / Release Engineer, Senior Software Developer | `balanced` |
-| `correct` | 4e | Senior Software Developer | Language-Specific SME, SDET | `balanced` |
+| `correct` | 4e | Senior Software Developer | Language-Specific SME, SDET | `economy` |
 | `implement` | 5 | Senior Software Developer | Language-Specific SME, Computer Scientist | `deep` |
 | `fix` | 5b | Senior Software Developer | SDET, Language-Specific SME | `deep` |
 | `refactor` | 5c | Software Architect | Senior Software Developer, Language-Specific SME | `deep` |
 | `validate` | 6 | Validator | SDET, Technical Writer | `economy` |
 | `docs-module` | 7 | Technical Writer | Language-Specific SME, Documentation Architect | `economy` |
 | `docs-language` | 8 | Documentation Architect | Technical Writer | `economy` |
-| `finish` (puntero + cierre) | 9–10 | Technical Product Manager | Documentation Architect | `economy` |
+| Puntero + cierre / Pointer + closure (autor / author) | 9–10 | Technical Product Manager | Documentation Architect | — |
 | `audit-pass` — manual, sin `glot prompt` | A | Language-Specific SME | Computer Scientist, Technical Writer, Software Architect | `balanced` |
 | `audit-align` — manual, sin `glot prompt` | B | Senior Software Developer | Language-Specific SME, SDET | `balanced` · `deep` si es estructural |
 
@@ -120,12 +121,12 @@ author) has the last word when two roles disagree.
 su rol principal, y la cabecera del encargo que arma `glot prompt` trae el estado
 del sprint. Los documentos que un agente lee —[`AGENTS.md`](../AGENTS.md),
 [`AGENT_Template.md`](AGENT_Template.md) y
-[`scripts/docs/SPRINT.md`](../scripts/docs/SPRINT.md)— apuntan aquí en vez de
+`scripts/docs/SPRINT.md`— apuntan aquí en vez de
 repetir el reparto, para que ampliar un rol sea cambiar **una** fila.
 
 **EN:** The frontmatter and body of every template under `scripts/prompts/` name
 their principal role, and the header of the request built by `glot prompt` carries
 the sprint state. The documents an agent reads —[`AGENTS.md`](../AGENTS.md),
 [`AGENT_Template.md`](AGENT_Template.md) and
-[`scripts/docs/SPRINT.md`](../scripts/docs/SPRINT.md)— point here instead of
+`scripts/docs/SPRINT.md`— point here instead of
 repeating the split, so extending a role is changing **one** row.
