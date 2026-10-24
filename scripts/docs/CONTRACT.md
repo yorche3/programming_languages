@@ -282,7 +282,8 @@
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
 | Registro / Registry | `prompts/*.prompt.md`; el `name`, el `step`, el `model` y la `description` salen de su frontmatter, así que añadir un encargo es añadir un archivo. El **modelo es la clave del perfil** que fija esfuerzo y tope de créditos en [`data/models.tsv`](../data/models.tsv) (v0.11.0) |
-| Salida de `prompt` / `prompt` output | Cabecera con el estado del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`, `module_dir`) + la plantilla sin frontmatter y con los marcadores resueltos. `root` es la raíz del monorepo, y es desde donde se leen las rutas de las fuentes |
+| Salida de `prompt` / `prompt` output | Cabecera con el estado del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `root`, `module_dir`), fuentes declaradas para lectura, política compartida y plantilla sin frontmatter, con marcadores resueltos. `root` es la raíz del monorepo |
+| Bases y agrupación / References and grouping | [`Delegation_Policy.md`](../prompts/Delegation_Policy.md), incluida una vez: `data_structures_basics` → `numbers` del mismo lenguaje, prioridad persistente y agrupación por tema/contrato/variante; no impone una suite ni archivos por validación. Ausente, vacía o ilegible: `1`, sin encargo parcial. / Included once: persistent same-language priority and grouping by topic/contract/variant, without imposing suites or files per validation. Missing, empty or unreadable: `1`, no partial request. |
 | Fuentes del encargo / Request sources | La plantilla declara en su frontmatter las fuentes del monorepo que necesita (`sources:`, rutas relativas a `root`, ordenadas y separadas por coma). `prompt` y `ask` **avisan** por stderr de cada una que falte y el encargo se imprime igual: el código no cambia, porque el aviso es para el autor. Las plantillas ya **no** nombran el monorepo en prosa: sus rutas son relativas a `root` |
 | `-n/--dry-run` | `prompt` no lo necesita (imprimir es su función); `ask -n` imprime el plan sin enviar nada |
 | Delegado / Delegate | `GLOT_DELEGATE_COP` (GitHub Copilot CLI) y `GLOT_DELEGATE_AGY` (Antigravity CLI); `GLOT_DELEGATE` sigue valiendo como **alias del primero**, que es lo ya documentado. El encargo va por **stdin** y la salida del delegado a **stdout** |
@@ -296,6 +297,20 @@
 **ES:** `ask` es una **superficie de ejecución** como la tabla de comandos: la orden sale de una variable de entorno, se anuncia por stderr y `-n` la muestra antes de lanzarla. Un delegado que falla devuelve `1`, no `4`: no es una verificación.
 
 **EN:** `ask` is an **execution surface** like the command table: the command comes from an environment variable, it is announced on stderr and `-n` shows it before running it. A failing delegate returns `1`, not `4`: it is not a verification.
+
+**ES:** La política no decide automáticamente la agrupación: el agente declara
+el mapa de unidades/variantes, casos aplicables, grupos, archivos/suites y runner,
+con referencia y motivo. Una base ausente, no homologada o igual al módulo en
+trabajo se declara; la otra solo se usa si basta. La especificación mantiene la
+autoridad del comportamiento. El mismo encargo llega por entrega manual, Copilot,
+Antigravity, delegado genérico y `validate`; no exige ejecutar esos servicios.
+
+**EN:** Policy does not automatically choose grouping: the agent states the map
+of units/variants, applicable cases, groups, files/suites and runner, with
+reference and rationale. Declare missing, unhomologated or self-referencing
+bases; use the other only if sufficient. The specification governs behaviour.
+Manual delivery, named/generic delegates and validation receive the same request;
+using those services is not required.
 
 ---
 
@@ -334,8 +349,8 @@
 
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
-| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** (`4a`, `4b`, `4c`, `4d`, `5`, `7`, `8`) o por **alias del encargo** (`scaffold`, `contract_stub`, `suite`, `fix`, `implement`, `docs-module`, `docs-language`). Nunca se escribe a mano |
-| Causa / Cause | `--cause "<texto>"` (desde la v1.5.0; `--causa` se acepta como alias) añade un **segundo párrafo** al commit (segundo `-m`) y es **obligatoria** en el paso de corrección (`4d`): es el registro del retrabajo —qué se corrigió y por qué—, lo único que explica por qué se toca algo ya confirmado |
+| Mensaje / Message | Sale de [`data/commits.tsv`](../data/commits.tsv) por **paso** o **alias**: incluye `4d build`, `4e correct`, `5b fix` y `5c refactor`. Nunca se escribe a mano |
+| Causa / Cause | `--cause "<texto>"` (`--causa` como alias) añade un **segundo párrafo** al commit y es obligatoria en `4e correct`, `5b fix` y `5c refactor`. Se toma de la opción o del estado y se limpia al confirmar esos pasos; `4d build` no consume la causa pendiente. / Required for rework; read from option or state and cleared after committing rework, not build. |
 | Marcadores / Placeholders | `{lang}`, `{phase}`, `{module}`, `{Module}`: los mismos del resto del tooling, resueltos con el estado del sprint |
 | Índice / Index | `git add -A` del **submódulo** completo. Si hay cambios fuera del módulo, se nombran por stderr antes de confirmar |
 | Rama / Branch | Si la rama activa no es la del estado del sprint, se avisa (no se bloquea) |

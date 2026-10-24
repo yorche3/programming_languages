@@ -4,6 +4,16 @@
 
 **EN:** Layers, versions and the rule that decides their order. The live version and its log are in [`VERSIONS.md`](VERSIONS.md); the cycle these layers serve is in [`SPRINT.md`](SPRINT.md) and, as monorepo policy, in [`../../docs/WORKFLOW.md`](../../docs/WORKFLOW.md).
 
+**ES:** La v2.0.2 aplica a todos los encargos la [política compartida de
+delegación](../prompts/Delegation_Policy.md): prioridad persistente
+`data_structures_basics` → `numbers`, con agrupación por tema y lenguaje y sin
+cambiar modelos. La verificación de la entrega se registra en [`VERSIONS.md`](VERSIONS.md).
+
+**EN:** v2.0.2 applies the [shared delegation policy](../prompts/Delegation_Policy.md)
+to every request: persistent `data_structures_basics` → `numbers` priority,
+with topic- and language-aware grouping and unchanged models. Release verification
+is recorded in [`VERSIONS.md`](VERSIONS.md).
+
 ---
 
 ## 🎯 Objetivo / Goal

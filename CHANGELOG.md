@@ -194,6 +194,45 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
   (Foundations, fase de texto y guía de inicialización, que además incorpora la
   fila y la estructura de `php`).
 
+### Fixed
+
+- El **runner del módulo** pasa a ser entrega del encargo `suite` (4c) cuando el lenguaje lo exige.
+  Antes el prompt decía a la vez «el runner es condición de entrada» y «no se crea ni se reescribe»,
+  y el delegado se detenía con un falso bloqueo del paso 4d: el esqueleto deja un `main` de ejemplo
+  (`null;`), la ejecución da **0 casos** y la suite quedaba sin fase roja. Ahora hay una tabla de
+  decisión explícita (convención del framework, `main` de ejemplo que se sustituye, fichero de
+  runner que se escribe, o fichero generado por la construcción que se pide al 4d) y el triaje
+  manda «0 casos» al propio 4c. El rol **SDET** declara ese runner como suyo en
+  `docs/AGENT_ROLES.md`, y `SPRINT.md`/`WORKFLOW.md` cuentan lo mismo.
+- La verificación del encargo `suite` (4c) deja de ser un «falla» genérico y pasa a ser la **fase
+  roja** con cuatro datos copiados al reporte: compila y enlaza sin warnings, **N casos
+  ejecutados** (cero casos no es rojo), **M fallos todos de aserción** —una excepción de ejecución
+  no cuenta como rojo— y la **lista de casos que pasan por coincidir con el centinela** (estado
+  vacío, `size` = 0, ausencia), que se declaran para que el paso 5 compruebe que el conjunto no
+  crece. El triaje del fallo tiene ahora tres dueños: construcción (4d, o 4b si el contrato llegó
+  sin esqueletos), defecto de los ficheros de la suite (4c) y casos ejecutados (4d).
+- El encargo `build` (4d) deja de ser un paso fijo: entra **solo** cuando el 4c no pudo alcanzar la
+  fase roja por un fallo de construcción o por cero casos ejecutados, y su éxito es la misma terna
+  de datos. Medido antes del cambio: cero commits del paso 4d en los cincuenta submódulos y los
+  enganches de pruebas ya los deja el andamiaje.
+- `glot install` **retira de la copia** lo que el clon ya no tiene en `data/`, `prompts/` y
+  `completions/`. `cp -R` no borra, así que un fichero retirado del clon se quedaba en la copia
+  para siempre y la huella no volvía a cuadrar: `doctor` decía `install_stale: yes` **justo
+  después de instalar**, anunciando como remedio el `install` que se acababa de ejecutar
+  (medido el 2026-10-17: tres ficheros de `data/` de una versión anterior en la copia del autor).
+- Los encargos de artefacto (`scaffold`, `contract_stub`, `suite`, `build`, `correct`, `fix`,
+  `refactor`) ya no recorren los cincuenta submódulos del monorepo: el reconocimiento se limita
+  al **submódulo del lenguaje**, porque en un paso de módulo `git submodule status` en la raíz
+  solo añade ruido. El encargo `suite` fija además sus **dos** referencias: el módulo base de
+  la misma fase (en `core.algorithms`, `data_structures_basics` para
+  `data_structures_advanced`) y `foundations/numbers/` solo para la **separación** de la suite
+  en una pareja `<impl>_suite` + `<impl>_tests` por implementación.
+- El encargo `suite` (paso 4c) ya no se bloquea cuando el runner existe pero **todavía no
+  recoge la suite**: es el caso del runner pre-cableado que referencia el paquete que este
+  propio paso crea. La condición de entrada pasa a ser la **presencia** del runner, la
+  ejecución con casos se traslada al acta del paso 6 y el paso `build` (4d) es quien sustituye
+  el `main` de ejemplo por el runner del framework cuando el inicializador no lo trae.
+
 ## [2.0.1] - 2026-10-17
 
 ### Fixed

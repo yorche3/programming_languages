@@ -27,6 +27,9 @@ Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
 las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo):
+fija las bases por prioridad y la agrupación por tema e idioma para este rol.
+
 ---
 
 ## Fuentes de verdad (en este orden de prioridad)
@@ -34,10 +37,10 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 1. **`{spec}`** — contrato del módulo. Su sección **«Casos de prueba / Test Cases»** es la
    **autoridad única de los casos**: qué se prueba, con qué entradas y con qué salidas. Todas
    las especificaciones del repositorio tienen esa sección.
-2. **Módulos ya homologados del mismo lenguaje** — `{lang}/core/foundations/numbers/` y
-   cualquier `{lang}/core/{phase}/*/`. Son la **autoridad del cómo**: el tipo de secuencia
-   canónico, el framework, el naming, el layout de `test/`, el runner y el `.gitignore`. La
-   suite homologada más parecida al módulo es el mejor punto de partida.
+2. **Las dos bases homologadas del mismo lenguaje**, en el orden persistente de la
+   política compartida. Orientan framework, naming, layout y runner. Elige la
+   agrupación por unidades, variantes y casos del módulo actual, no por el número
+   de archivos de una base ni por estar en la misma fase.
 3. **El contrato del módulo** — el tipo nuevo y las firmas que dejó el encargo `contract_stub`
    (paso 4b), en el archivo donde viva según el lenguaje. Es la **autoridad del tipo**: la suite
    **usa** esos nombres y esas firmas, no los declara. Si el contrato **no existe**, **no
@@ -62,12 +65,16 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 ### 1. Reconocimiento (no escribas nada todavía)
 
-- `git status --short` y `git submodule status` en la raíz del monorepo.
-- Inspecciona: la especificación, el módulo `numbers/` del mismo lenguaje, el esqueleto que
-  dejó el encargo `scaffold` (paso 4a) —directorio de pruebas, **runner que arranca** y
-  manifiesto— y el **contrato con sus esqueletos** que dejó el encargo `contract_stub` (paso
-  4b): tipo, firmas, **cuerpo vacío de cada operación** y ubicación. El runner es **condición
-  de entrada**: si falta, no lo escribas tú, detente.
+- `git status --short` y `git branch --show-current` **en el submódulo del lenguaje** (el directorio
+  donde ya estás). El monorepo y sus cincuenta submódulos **no se recorren**: `git submodule
+  status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
+- Inspecciona: la especificación, las dos bases en el orden compartido, el esqueleto que
+  dejó el encargo `scaffold` (paso 4a) —directorio de pruebas, **runner** y manifiesto— y el
+  **contrato con sus esqueletos** que dejó el encargo `contract_stub` (paso 4b): tipo, firmas,
+  **cuerpo vacío de cada operación** y ubicación.
+- Decide **quién es el runner de la suite** con la tabla del paso 4. Un `main` de ejemplo
+  (`null;`, «Hello, World!») **no** es un bloqueo ni una condición de entrada: es la pieza que
+  falta, y la escribes tú.
 - Determina y anota: framework de pruebas idiomático, dónde vive la suite, si existe un
   `run_tests` propio y si el tipo de secuencia admite nulos o cuál es su indicador de fallo.
 
@@ -78,8 +85,12 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
   no añadas los que te parezcan que faltan ni quites los que te parezcan redundantes.
 - Lee también las notas que acompañan a la tabla (caso nulo o inválido, indicador de fallo,
   aclaraciones de paradigma): son parte del contrato, no adornos.
-- Anota cuántas **funciones** expone la especificación: cada una se prueba contra **todos** los
-  casos.
+- Mapea cada caso o escenario a su **operación y contrato**, y a las variantes
+  aplicables. Solo implementaciones alternativas del mismo contrato comparten
+  todos sus casos; no cruces casos de árbol con operaciones de grafo, por ejemplo.
+- Declara `unidad/variante → casos aplicables → grupo lógico → archivo/suite →
+  runner`, con referencia y motivo. Conserva los pasos de cada escenario y permite
+  varios grupos en una suite o suites separadas según el framework.
 - **Si no hay tabla de casos, detente y avísalo.** No la sustituyas por una lista inventada:
   una suite con casos de tu cosecha valida un contrato distinto y da falsa confianza.
 
@@ -91,10 +102,10 @@ escribir y anótalas:
 
 | Decisión | Cómo la resuelves |
 |----------|-------------------|
-| **Tipo de secuencia** | El canónico del lenguaje **tal como lo use el módulo homologado**: array, lista, vector, *slice*, tabla o estructura equivalente. Si el lenguaje no tiene arrays dinámicos, entra la estructura que sí tiene |
+| **Tipos y representación** | Los del contrato actual: estructura, escalar, array, lista, vector, *slice* o tabla. Las bases orientan la forma idiomática, no sustituyen el tipo del dominio |
 | **Literales** | Sintaxis del lenguaje para cada entrada y cada salida esperada; el orden de los elementos es parte del dato |
 | **Igualdad** | Qué significa «igual» aquí: valor, orden y —si el lenguaje lo distingue— identidad de la estructura |
-| **Vacío y nulo** | Cómo se representa una secuencia vacía y cómo se representa la entrada inválida o nula: indicador de fallo, `null`/`nil`/`None`, `Option`/`Maybe`, `Result` de error o «no representable» |
+| **Vacío e inválido** | Estado vacío, ausencia o entrada inválida según cada operación y el indicador admitido por el lenguaje, la fase y el contrato |
 | **Mutabilidad** | Si el lenguaje muta en el sitio o devuelve copia: la aserción se escribe sobre lo que **promete el contrato**, no sobre lo que haga tu implementación |
 
 **Reglas de traducción:**
@@ -112,36 +123,71 @@ escribir y anótalas:
 ### 4. Escribir la suite
 
 En el directorio de pruebas que use el lenguaje (`test/`, `tests/`, `spec/`, `t/`), con el
-patrón obligatorio de más abajo. El **runner es del paso 4a**: si no existe o no arranca,
-**detente y avísalo** —no lo crees aquí—; esta suite solo añade casos sobre el que ya hay.
+patrón obligatorio de más abajo. El **runner es parte de esta entrega**: sin runner que agregue la
+suite no hay fase roja, y su ausencia **no** es motivo para detenerse.
 
-### 5. Verificación
+| Lo que hay en el esqueleto | Qué haces |
+|---|---|
+| El comando nativo **recoge por convención** (`pytest` con `test_*.py`, `cargo test` con `#[test]`, `go test`, `dotnet test`, `rspec` con `spec/`, `mix test`…) | Nada: coloca la suite donde la convención la espera |
+| Hay un **runner de ejemplo** (`null;`, `main` vacío, «Hello, World!») que no recoge nada | **Sustitúyelo** por el runner del framework, en el **mismo fichero y ruta** que compila el comando nativo, para que agregue la suite |
+| **No hay** fichero de runner y el comando nativo necesita uno | **Escríbelo**, mínimo, con la forma del módulo base (`tests.adb` con AUnit en Ada, `test/run_tests.jl` en Julia…) |
+| El fichero del runner lo **genera la construcción** (plantilla de `make`, `dune`, `cabal`) | No lo toques: pide el cambio en el paso 4d y dilo en el reporte |
 
-Ejecuta el comando nativo de pruebas y **copia la salida real** (sin editar, sin resumir).
-El build no debe producir warnings ni errores.
+Sustituir el `main` de ejemplo **no** es reescribir un artefacto ajeno: es la entrega de este paso.
+Solo se detiene si el comando nativo no compila ese fichero por una razón de construcción —falta el
+target, falta la dependencia, no está en el proyecto—: eso es del **4d**.
 
-**Desde la v1.5.0 el contrato (paso 4b) deja sus esqueletos**, así que el módulo compila **y
-enlaza** aunque el algoritmo sea del paso 5: no deberías encontrarte el enlace roto. Si el
-comando nativo falla por **símbolos sin resolver**, entonces el `4b` entregó el contrato **sin
-esqueletos** y es un **defecto del paso 4b**, no de la suite: avísalo. Como mitigación se admite
-la **compilación sin enlace** —sintaxis y chequeo de tipos—, con el comando que el lenguaje
-permita para eso (`gprbuild -c -cargs -gnatc` en Ada), y lo **declaras** en el reporte: qué se
-comprobó, con qué comando, su salida real y qué queda pendiente. La **ejecución** de la suite y
-su contra-verificación se trasladan entonces al **acta del paso 6** (`glot evidence`), cuando ya
-exista el cuerpo: aquí **no** se dan por hechas.
+### 5. Verificación: la fase roja
+
+La suite está bien cuando **falla por la razón correcta**. El criterio no es «falla»: son **cuatro
+datos** que se copian al reporte junto a la salida real del comando nativo (sin editar, sin
+resumir).
+
+1. **Compila y enlaza**: sin warnings, sin errores de compilación y sin errores de enlace.
+2. **N casos o escenarios cubiertos y K tests ejecutados**, con el mapa de cobertura por
+   operación/variante. El framework puede contar tests, filas o aserciones de forma distinta:
+   explica la correspondencia sin inventar igualdad de contadores. Ejecutar **cero tests**
+   no es fase roja.
+3. **M fallos, todos de aserción**: `Assertion_Error` y nada más. Una excepción de ejecución
+   (`Constraint_Error`, acceso nulo, desbordamiento, pila agotada) **no** es un fallo de aserción
+   y no se cuenta como rojo.
+4. **La lista de casos que ya salen en verde** con el contrato en valores centinela. Los casos
+   base —estado vacío, `size` = 0, ausencia, «falla»— **coinciden con el centinela** y pasan por
+   casualidad. No los toques ni los descartes: **decláralos** (nombre del caso y qué comparte con
+   el centinela) para que el paso 5 compruebe que ese conjunto **no crece** y que cada uno se
+   vuelve significativo cuando exista el cuerpo.
+
+**Triaje del fallo** —decide a quién pertenece lo que has visto y qué haces:
+
+| Lo que ves | De quién es | Qué haces |
+|---|---|---|
+| Compila, enlaza, ejecuta N casos y falla por aserciones | — | **Nada más**: el andamiaje está listo y el módulo pasa al **paso 5** (`implement`) |
+| Falla la **construcción**: target ausente, dependencia de pruebas sin declarar, `undefined reference`, `cannot find`, símbolos sin resolver | Del **4d** (`build`); del **4b** si el contrato llegó sin esqueletos | **Detente y avísalo** con la salida real: es el disparador del paso 4d, no un defecto de la suite |
+| No compila por un **error en tus propios ficheros** (un `with`/import, un nombre, una sintaxis, una línea cortada) | **Del 4c**, tuyo | Corrígelo aquí y repite la verificación: no se manda al 4d ni al 4b |
+| Arranca pero ejecuta **0 casos** (quedó el `main` de ejemplo) | **Del 4c**, tuyo | Escribe el runner que agrega la suite (paso 4) y repite: sin casos no hay fase roja |
+
+**Única excepción, y es del 4b**: si el comando nativo falla por **símbolos sin resolver** porque
+el contrato llegó **sin esqueletos**, la suite no se puede ejecutar todavía. Se admite entonces la
+**compilación sin enlace** —sintaxis y chequeo de tipos—, con el comando que el lenguaje permita
+para eso (`gprbuild -c -cargs -gnatc` en Ada), y se **declara** en el reporte (qué se comprobó, con
+qué comando, su salida real y qué queda pendiente): es un **defecto del paso 4b**, no de la suite.
+La fase roja y la contra-verificación se trasladan entonces al **acta del paso 6**
+(`glot evidence`), cuando exista el cuerpo. Aquí **no** se dan por hechas.
 
 ### 6. Contra-verificación (obligatoria)
 
 Rompe a propósito **una** comparación del código bajo prueba o de un ejecutor compartido y
 confirma que la suite falla señalando el test correcto. Después **revierte** el cambio y vuelve
-a verificar que todo pasa. Sin este paso no puedes declarar la tarea terminada.
+a verificar que todo pasa. Sin este paso no se declara la tarea terminada, salvo el caso del
+párrafo siguiente, donde se **traslada** en vez de omitirse.
 
-Si te encontraste el caso anterior —el contrato llegó **sin esqueletos** y la suite solo
-compila sin enlace—, la suite **todavía no se puede ejecutar**: la contra-verificación no se
-omite, se **traslada**. Se hace sobre el ejecutor compartido o sobre el código bajo prueba en
-cuanto exista el cuerpo, y queda registrada en el **acta del paso 6** (`glot evidence`). Lo que
-no vale es darla por hecha ni dar la suite por buena: lo que entregas aquí está **compilado sin
-enlace**, y así lo dices tanto en el reporte como al hablar de la cobertura.
+Con el contrato en esqueletos **todo** falla, así que romper algo más no distingue nada: la
+contra-verificación —comprobar que la suite señala **el test correcto**— solo tiene sentido cuando
+existe el cuerpo. En ese caso no se omite, se **traslada**: se hace sobre el ejecutor compartido o
+sobre el código bajo prueba en cuanto exista la implementación y el runner esté enlazado, y queda
+registrada en el **acta del paso 6** (`glot evidence`). Lo que no vale es darla por hecha ni dar la
+suite por buena: lo que entregas aquí está **compilado y ejecutado con fallos de aserción**, con la
+lista de casos que pasan por centinela declarada, y así se dice en el reporte.
 
 ### 7. Cierre
 
@@ -156,7 +202,8 @@ eso corresponde a otra delegación.
 
 - **Los casos son los de `{spec}`**, extraídos en el paso 2. Este encargo no trae ninguno
   escrito: traerlos serviría para un módulo y estorbaría en todos los demás.
-- **Cada función** que exponga la especificación se prueba contra **todos** los casos.
+- Cada caso se prueba contra su operación y las variantes del mismo contrato que
+  correspondan. El mapa de cobertura conserva todos los casos y pasos aplicables.
 - Los casos que el lenguaje no pueda representar se sustituyen por su equivalencia declarada o
   se omiten justificándolo en una línea; el resto se conserva íntegro.
 - La suite tiene que **poder fallar**: si al romper a propósito una comparación del código bajo
@@ -164,8 +211,9 @@ eso corresponde a otra delegación.
 
 ### Caso nulo
 
-- **Si el tipo admite `null`/`nil`/`None`/`()`** → añade un caso controlado que verifique el
-  indicador de fallo del lenguaje. **No** lances ni esperes una excepción.
+- **Si la especificación exige un caso nulo y el tipo lo admite** → verifica el
+  indicador de fallo del contrato. No añadas el caso por costumbre ni introduzcas
+  excepciones o envoltorios que la fase no permita.
 - **Si el tipo no admite nulos** → omite el caso y documenta en una línea por qué.
 
 ### Patrón obligatorio
@@ -173,37 +221,39 @@ eso corresponde a otra delegación.
 1. **Fixtures nombrados**: uno por cada entrada y cada salida esperada, con nombres que digan
    qué caso son. En este repositorio suelen seguir la forma `standardInput`/`standardOutput`, y
    en `snake_case` allá donde el lenguaje lo pida: **copia la forma del módulo homologado**.
-2. **Un ejecutor compartido** que recorra todos los casos y los compare, con el nombre del caso
-   en el mensaje. Evita repetir la misma aserción N veces.
-3. **Un test por cada función** de la especificación, que llame al ejecutor con la función
-   correspondiente.
+2. **Ejecución compartida cuando los casos tengan la misma forma**, con el nombre
+   del caso en el mensaje. Para escenarios de estado, conserva su secuencia de
+   operaciones y aserciones; no fuerces un helper de secuencias sobre ADT distintos.
+3. **Grupos identificables por contrato, operación o escenario**, con las variantes
+   pertinentes. Un grupo lógico no exige un archivo o una suite aparte.
 4. **Mensajes de aserción** que digan qué se esperaba y en qué caso, con el formato y el idioma
    que ya use el módulo (`"<sujeto> should <comportamiento esperado>"` en esta casa: revisa
-   `numbers/`).
+   las bases en el orden compartido).
 5. **Aislamiento**: si la operación muta su entrada *in-place*, cada caso debe operar sobre una
    copia del fixture; nunca sobre el compartido.
 
-**Alternativas por paradigma** (elige la que el lenguaje soporte y la que use `numbers/`):
+**Alternativas por paradigma** (elige según el lenguaje, las bases y el tema):
 
 | Situación | Patrón |
 |-----------|--------|
 | El lenguaje tiene referencias a función, *closures* o genéricos | Un **helper compartido** que recibe la función a probar y el nombre del caso o del sujeto |
 | No las tiene (COBOL, Forth, Tcl, Rexx…), o el idioma del repo no las usa | Un **bucle sobre una tabla de pares** (entrada, esperada) dentro de cada test, con el nombre del caso en el mensaje |
 | El framework ya es *data-driven* (`go test` con subtests, `@ParameterizedTest` de JUnit, `pytest.mark.parametrize`…) | La tabla del propio framework, con un nombre de caso por fila |
+| El caso describe operaciones sucesivas sobre un ADT | Un test de escenario con estado propio y aserciones identificables por paso, en el grupo o suite pertinente |
 
-Lo que **no** vale como patrón: repetir la misma aserción a mano una vez por caso, o un único
-test con todas las aserciones que no diga cuál falló.
+Lo que **no** vale como patrón: duplicar mecánicamente casos equivalentes sin aprovechar
+el framework, o un test agregado que no permita identificar qué caso o paso falló.
 
 ### Convenciones idiomáticas
 
 | Aspecto | Regla |
 |---------|-------|
-| Framework | El estándar del lenguaje; el mismo que use `{lang}/core/foundations/numbers/` |
+| Framework | El homologado del lenguaje según las bases en el orden compartido |
 | Tipo de secuencia | El del módulo homologado: `Vec<T>` y *slices*, `List<Integer>`, listas inmutables, tablas, `vector`, *arrays* nativos… |
 | Naming | Convención del lenguaje (`snake_case`, `camelCase`, `PascalCase`, `kebab-case`) |
 | Aserciones | Las del framework (`assertEqual`, `is`, `Assert`, `expect`, …) |
-| Dependencias | Solo las estándar del lenguaje o las ya presentes en `numbers/` |
-| Runner | El comando de la columna 4 del catálogo, que **ya dejó arrancando** el paso 4a: la suite tiene que ser recogida por él **sin configuración extra** |
+| Dependencias | Las estándar o ya autorizadas para el módulo según las bases y la guía de inicialización; una base no autoriza dependencias nuevas por sí sola |
+| Runner | El comando de la columna 3 del catálogo debe recoger todos los grupos y propagar fallos. Si el inicializador dejó un `main` de ejemplo, **lo sustituye este paso**; el 4d ajusta la configuración si la construcción lo genera |
 | Determinismo | Sin aleatoriedad, sin reloj y sin depender del orden del sistema de ficheros: las mismas entradas dan siempre el mismo veredicto |
 | Datos | Los *fixtures* se construyen en la propia suite: nada leído de ficheros externos ni de la red |
 
@@ -240,21 +290,23 @@ test con todas las aserciones que no diga cuál falló.
 - [ ] Variables resueltas y confirmadas con evidencia del repositorio.
 - [ ] El contrato del paso 4b usado tal cual: sin declarar tipos ni firmas por mi cuenta.
 - [ ] Casos **extraídos de `{spec}`**, con el número de la tabla y sin casos añadidos ni inventados.
-- [ ] Todas las funciones de la especificación × todos los casos.
-- [ ] Caso nulo incluido (si el tipo lo admite) o justificado en una línea.
+- [ ] Mapa de casos por operación/contrato y variantes aplicables, con agrupación y runner justificados.
+- [ ] Caso nulo exigido por la especificación incluido, o imposibilidad de representarlo justificada.
 - [ ] Cada adaptación de tipo y cada caso omitido, declarados con su motivo.
 - [ ] *Fixtures* nombrados, patrón de ejecución compartido y aislamiento verificado.
 - [ ] Comando nativo de pruebas ejecutado con salida real y sin warnings.
-- [ ] Contra-verificación hecha y revertida.
+- [ ] Contra-verificación hecha y revertida, o trasladada explícitamente al paso 6 por faltar implementación.
 - [ ] Sin cambios en el esqueleto, el `.gitignore`, el contrato, `src/`, la especificación, el roadmap ni los READMEs.
 
 ---
 
 ## Formato de salida
 
-- **Si todo pasa:** máximo 5 líneas — archivos creados, **casos × funciones** cubiertos, las
-  adaptaciones de tipo o casos omitidos en una línea, el comando ejecutado y el resultado.
+- **Si se alcanza la fase roja:** archivos creados; mapa breve de agrupación con
+  referencias; casos/escenarios cubiertos y tests ejecutados; adaptaciones u
+  omisiones justificadas; comando y salida real con los cuatro datos del paso 5.
+  La contra-verificación pendiente se declara, no se da por hecha.
 - **Si hay un bloqueo:** indica el archivo y la línea, la causa concreta y la mitigación
   propuesta, y **detente**. No apliques la mitigación sin autorización.
-- Prohibido: resúmenes extensos, notas explicativas, documentación, tablas de «antes y
-  después» y justificaciones de diseño.
+- Prohibido: ensayos, documentación nueva y rediseños fuera del alcance; la
+  justificación breve del agrupamiento y la evidencia sí son obligatorias.

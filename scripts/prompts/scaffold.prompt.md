@@ -28,6 +28,9 @@ Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
 las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo):
+fija las bases por prioridad y la agrupación por tema e idioma para este rol.
+
 ---
 
 ## Fuentes de verdad (en este orden de prioridad)
@@ -40,9 +43,9 @@ resuelve con un comando, dilo en el informe para que se corrija el dato.
    nativo de pruebas para `{lang}`. Respeta su leyenda:
    ✅ verificado en este repo · 🔧 estándar del ecosistema · ✍️ estructura manual.
 4. **`AGENTS.md`** — límites de actuación y flujo de cierre.
-5. **Módulos ya homologados del mismo lenguaje** — `{lang}/core/foundations/numbers/` y
-   cualquier `{lang}/core/{phase}/*/`. Definen la convención real: layout, nombres de archivo,
-   manifiesto y `.gitignore`.
+5. **Bases homologadas del mismo lenguaje**, en el orden de la política compartida.
+   Orientan layout, nombres, manifiesto y `.gitignore` según el tema; no se copian
+   las divisiones de otro módulo sin justificación.
 
 **Resolución de conflictos:** si la guía de inicialización y un módulo existente difieren,
 **gana el módulo existente**, porque es código ya verificado y ejecutado.
@@ -75,9 +78,11 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 ### 1. Reconocimiento (no escribas nada todavía)
 
-- `git status --short` y `git submodule status` en la raíz del monorepo.
+- `git status --short` y `git branch --show-current` **en el submódulo del lenguaje** (el directorio
+  donde ya estás). El monorepo y sus cincuenta submódulos **no se recorren**: `git submodule
+  status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
 - `git -C {repo} status --short` para ver exactamente qué dejó `glot new`.
-- Inspecciona: la especificación, la carpeta del módulo y el módulo `numbers/` del mismo lenguaje.
+- Inspecciona la especificación, la carpeta del módulo y las dos bases en el orden compartido.
 - Anota el layout que usa el lenguaje en este repositorio (`src`+`test`, `lib`+`t`, `source`, …)
   y los nombres de archivo que espera el runner.
 
@@ -89,7 +94,7 @@ detecta cada caso:
 | Resto / Leftover | Cómo se detecta | Qué se hace |
 |------------------|-----------------|-------------|
 | **Runner de ejemplo**: un punto de entrada `main`/`app`/`example` en lo que es una biblioteca | El inicializador generó un ejecutable y el módulo expone funciones | Quitarlo: rompe el runner de pruebas de la herramienta (casos reales: `dub test` en D, `dotnet test` en C#, `zig build test` con `src/main.zig`) |
-| **Framework sin runner**: el comando nativo de pruebas (columna 4 del catálogo) no tiene nada que ejecutar | El inicializador dejó el manifiesto pero ningún punto de entrada de pruebas | **Escribirlo aquí**: el runner es andamiaje de este paso, no de la suite. Mínimo y sin casos, pero que el comando arranque |
+| **Framework sin runner**: el comando nativo de pruebas (columna 3 del catálogo) no tiene nada que ejecutar | El inicializador dejó el manifiesto pero ningún punto de entrada de pruebas | **Escribirlo aquí** como andamiaje mínimo y sin casos; el 4c lo conectará con los grupos reales del módulo |
 | **Índice de fuentes obsoleto**: el inicializador generó el *autoloader* del lenguaje con `src/` **vacío** | El comando de pruebas falla con «clase o símbolo no encontrado» aunque el archivo exista (caso real medido el 2026-09-28: el `composer require` de `new` deja el `classmap` del `src/` vacío y PHPUnit no ve la clase nueva) | **Regenerarlo** después de crear los archivos (`composer dump-autoload`, `dotnet restore`, …) y decir el comando en la evidencia |
 | **Nombres predefinidos** que no encajan | Un archivo o manifiesto se llama como la plantilla (`MyLib.hs`, `<dir>_spec.<ext>`, `library.cabal`) y no como el módulo | Renombrar a la convención del módulo y ajustar el manifiesto (nombre, versión, descripción) para que concuerde con `{module}` / `{Module}` |
 | **Layout divergente** | El inicializador creó `bin/`+`lib/` y este repositorio usa `src/`+`test/` en ese lenguaje, o al revés | Dejar **una** disposición: la que ya usan los módulos homologados |
@@ -117,8 +122,8 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 
 - El proyecto debe compilar, resolver o instalar sin warnings ni errores.
 - Ejecuta el comando nativo de pruebas: el **runner es de este paso** y tiene que **arrancar**
-  —con cero casos, que es lo normal— porque la suite del paso 4c solo añade casos, no
-  andamiaje. Copia la salida real, sin editar y sin resumir.
+  —con cero casos, que es lo normal—; el paso 4c añadirá los grupos y los conectará
+  con el runner del módulo. Copia la salida real, sin editar y sin resumir.
 - Si el comando no arranca porque el framework no trae runner, **escríbelo aquí** (mínimo y sin
   casos) y vuelve a comprobarlo. Si aun así no arranca, **detente y dilo** con la salida real.
   No escribas la suite para «arreglarlo»: eso es el paso 4c.

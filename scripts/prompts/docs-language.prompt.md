@@ -24,6 +24,10 @@ Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
 las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo).
+Mantén el alcance de índices: no rediseñes los grupos de código ni de pruebas;
+las bases solo orientan las convenciones pertinentes a esta documentación.
+
 ---
 
 ## Fuentes de verdad

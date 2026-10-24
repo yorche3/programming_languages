@@ -25,6 +25,9 @@ Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
 las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo):
+fija las bases por prioridad y la agrupación por tema e idioma para este rol.
+
 ---
 
 ## Fuentes de verdad (en este orden de prioridad)
@@ -34,9 +37,9 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 2. **La suite del módulo** — `{lang}/core/{phase}/{module}/` en el directorio de pruebas que use
    el lenguaje (`test/`, `tests/`, `spec/`, `t/`). Es el contrato ejecutable: no la cambies para
    que pase.
-3. **Módulos ya homologados del mismo lenguaje** — `{lang}/core/foundations/numbers/` y otros
-   `{lang}/core/{phase}/*/`. Definen el estilo real: naming, manejo del caso inválido y
-   separación `src/`+`test/`.
+3. **Bases homologadas del mismo lenguaje**, en el orden de la política compartida.
+   Orientan naming, manejo del caso inválido y layout. Respeta las unidades,
+   variantes y grupos que ya usan el contrato y la suite.
 4. **`AGENTS.md`** — límites de actuación y flujo de cierre.
 
 **Resolución de conflictos:** si la especificación y un módulo ya homologado difieren en estilo,
