@@ -39,6 +39,89 @@
 | 1.7.7 | 2026-10-07 | [`versions/glot_1.7.7.sh`](../versions/glot_1.7.7.sh) | **El layout de R es el de un paquete**: la fila del catálogo apuntaba a `src/` y a `Rscript test/run_tests.R`, rutas que desaparecieron al homologar los cuatro módulos de R a `DESCRIPTION` + `NAMESPACE` + `R/` + `tests/testthat/`, así que el andamiaje pasa a `mkdir -p R tests/testthat`, el runner a `make test` (`testthat::test_local()`, que carga el paquete sin instalarlo) y el verificador a los fuentes de `R/`; la guía de inicialización lo documenta | ✅ cerrada |
 | 1.7.8 | 2026-10-08 | [`versions/glot_1.7.8.sh`](../versions/glot_1.7.8.sh) | **El estándar de Racket es `raco new library {module}`** —el layout lib/test/doc de la comunidad— con las tres adecuaciones que su plantilla no resuelve aquí: render portátil (`mv` + `sed -i` de GNU, porque su `render-template.sh` es interactivo y de BSD y dejaba los marcadores `<project>`/`<username>` en los cuatro `info.rkt`), borrado de `.github/`, `pull_request_template.md`, `render-template.sh` y `profile/`, y suites que requieren la librería **por ruta relativa** para correr sin enlazar paquetes. El runner pasa a **`raco test -x .`**: `racket test/run_tests.rkt` no existía en los dos módulos de un solo archivo y, en los tres que sí lo tienen, **salía con código 0 aunque un test fallara** (falso verde en `test`/`evidence`), mientras `raco test` sale con 1, cuenta los casos y no contamina la salida | ✅ cerrada |
 | 2.0.0 | 2026-10-12 | [`versions/glot_2.0.0.sh`](../versions/glot_2.0.0.sh) | **El esqueleto se parte en dos pasos y dos commits** (paso `4`, la carpeta del módulo, y paso `4a`, la estructura idiomática) y entra el **paso `4d build`**, con `4d correct` recorrido a `4e`; `languages.tsv` se queda con cuatro columnas (lenguaje, tipo, pruebas y verificador) y `init_sequences.tsv` con todo el esqueleto en nueve, así que se retira el vocabulario `deferred` y el camino v1 del script (`_glot_init_run`, `_glot_init_fix`, `_glot_init_normalise`, `_glot_init_flat`); los perfiles de modelo pasan a `gpt-6.1-sol` (low, 60) y `claude-sonnet-5.5` (medium, 90) | ✅ cerrada |
+| 2.0.1 | 2026-10-23 (archivo) | [`versions/glot_2.0.1.sh`](../versions/glot_2.0.1.sh) | Base previa al hotfix, archivada como copia exacta del script vivo antes de editarlo; conserva sus cambios anteriores de andamiaje y encargos / Pre-hotfix baseline, archived as an exact copy before editing | ✅ cerrada |
+| 2.0.2 | 2026-10-23 | [`glot.sh`](../glot.sh) | Política compartida de bases y agrupación, fuentes entregadas al agente, límites suite/build/correct alineados y consumo de causa corregido en `save 4e`; modelos sin cambios / Shared references and grouping, visible sources, aligned boundaries and corrected cause cleanup; unchanged models | Verificada; lista para cierre del autor / Verified; ready for author closure |
+
+---
+
+## 2.0.2 — 2026-10-23 (verificada; lista para cierre / verified; ready for closure)
+
+**ES:** Los once encargos reciben una sola copia de
+[`Delegation_Policy.md`](../prompts/Delegation_Policy.md): bases del mismo lenguaje
+en orden persistente `data_structures_basics` → `numbers`, con selección de
+patrones por tema y aspecto, nunca como moldes ni sustitutos del contrato.
+Se distingue agrupación lógica de archivos físicos: suite agregada o separada
+según framework, casos por operación/contrato y variantes aplicables, escenarios
+con sus pasos, aislamiento y runner que agrega todos los grupos. No se trasladan
+las carpetas o el runner de Ada a otros lenguajes.
+
+**EN:** All eleven requests receive shared policy once: persistent same-language
+reference priority, with topic- and aspect-aware patterns rather than templates
+or contract replacements. Logical groups are distinct from physical files:
+aggregate or split suites according to the framework, operation/contract and
+variant-specific cases, scenario steps, isolation and complete runner aggregation.
+Ada directories and runner are not imposed on other languages.
+
+**ES:** El constructor entrega también las fuentes declaradas para lectura.
+Política ausente, vacía o ilegible bloquea con `1` sin encargo parcial; sus
+marcadores se comprueban como los del cuerpo. Se conserva en la instalación y
+su huella detecta cambios. `4c` integra el runner; `4d` configura construcción y
+enlace sin reescribirlo; `4e` corrige el artefacto indicado, incluido runner o
+construcción. `save 4e` retira la causa después del commit; `save 4d` no consume
+una causa pendiente. Modelos, esfuerzos, créditos y proveedores no cambian.
+
+**EN:** The builder also delivers declared sources for reading. Missing, empty
+or unreadable policy fails with `1` without a partial request; its placeholders
+are checked alongside the body. Installation preserves it and fingerprints detect
+changes. Suite authoring integrates the runner; build configures construction and
+linking without rewriting it; correction repairs the selected artefact, including
+runner or build. Correction consumes the cause after committing; build leaves a
+pending cause intact. Models, effort, credits and providers remain unchanged.
+
+**ES:** Verificación real, con estado, repositorios y delegados simulados aislados:
+
+**EN:** Actual verification with isolated state, repositories and fake delegates:
+
+```text
+bash -n scripts/glot.sh scripts/tests/glot_test.sh scripts/versions/glot_2.0.1.sh
+# sin salida, código 0 / no output, exit 0
+
+env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.bareRepository GIT_CONFIG_VALUE_0=all ./scripts/tests/glot_test.sh
+glot tests: 1179 passed, 0 failed
+
+bash docs/tests/docs_check.sh
+docs checks: 25 passed, 0 failed
+
+git diff --check
+# sin salida, código 0 / no output, exit 0
+```
+
+**ES:** La configuración de Git solo permite al proceso de pruebas usar sus
+remotos bare temporales; no modifica la configuración del autor. El harness
+comprueba los once encargos y su entrega íntegra a delegados simulados, el
+validador, rutas desde submódulo y copia instalada, ausencia y vaciado de política,
+marcadores inválidos, agrupación declarada y limpieza de causa. La lectura
+comparativa de AUnit (Ada), descubrimiento automático (Go) y runner procedural
+(COBOL) comprobó que la política admite sus agrupaciones; no certifica sus
+implementaciones ni sustituye una evaluación futura del agente. No se ejecutaron
+delegados reales ni se alteraron submódulos o el roadmap del monorepo.
+
+**EN:** Git configuration only permits the test process to use its temporary
+bare remotes; author configuration is unchanged. The harness covers requests and
+complete delivery to fake delegates, validation, submodule and installed paths,
+missing/empty policy, invalid placeholders, stated grouping and cause cleanup.
+Read-only comparison of AUnit, automatic discovery and a procedural runner checked
+that policy allows their grouping; this neither certifies their implementations
+nor replaces future agent evaluation. No real delegates ran; submodules and the
+monorepo roadmap were untouched.
+
+**ES:** La base `2.0.1` se archivó antes de editar; el plan temporal se retiró.
+Esta entrega queda verificada para revisión y cierre del autor, sin commit ni push
+del agente. No se declara cerrado ningún módulo del monorepo.
+
+**EN:** The previous baseline was archived before editing and the temporary plan
+removed. This release is verified for author review and closure, without agent
+commit or push. No monorepo module is declared closed.
 
 ---
 

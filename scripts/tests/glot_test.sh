@@ -924,13 +924,21 @@ assert_contains 'prompt scaffold: la regla de las rutas va escrita' \
 assert_contains 'prompt scaffold: las fuentes en absoluto' "$REPO/AGENTS.md" "$out"
 assert_contains 'prompt scaffold: directorio del módulo' '/php/core/algorithms/naive_sort |' "$out"
 
-# ...y en **los diez** encargos, no solo en uno: cualquiera de ellos cita documentos del
+# ...y en los once encargos, no solo en uno: cualquiera de ellos cita documentos del
 # monorepo, y basta una plantilla que se quede atrás para volver a gastar créditos en rutas
 # que el delegado no puede resolver.
-for req in scaffold contract_stub suite correct implement fix refactor validate docs-module docs-language; do
+for req in scaffold contract_stub suite build correct implement fix refactor validate docs-module docs-language; do
     glot_run prompt "$req" php algorithms/naive_sort
+    assert_eq "prompt $req: código" '0' "$rc_last"
     assert_eq "prompt $req: ninguna ruta relativa a la raíz del monorepo" '' \
         "$(printf '%s\n' "$out" | grep -nE '(^|[^/[:alnum:]_.-])(AGENTS\.md|docs/|scripts/)' | grep -vF -- "$REPO" | head -5)"
+    assert_eq "prompt $req: política incluida una sola vez" '1' \
+        "$(printf '%s\n' "$out" | grep -c '^# Política compartida de delegación / Shared delegation policy$')"
+    assert_contains "prompt $req: bases en orden persistente" \
+        "$(printf '1. `%s/php/core/algorithms/data_structures_basics/`\n2. `%s/php/core/foundations/numbers/`' "$REPO" "$REPO")" "$out"
+    assert_contains "prompt $req: fuente del rol visible" "- $REPO/docs/AGENT_ROLES.md" "$out"
+    assert_contains "prompt $req: agrupación explícita" 'unidad/variante → casos aplicables → grupo lógico' "$out"
+    assert_contains "prompt $req: guía para uso manual" "$REPO/scripts/prompts/Delegation_Policy.md" "$out"
 done
 assert_contains 'prompt scaffold: marcadores expandidos' 'php/core/algorithms/naive_sort' "$out"
 assert_eq 'prompt scaffold: sin frontmatter de VS Code' 'no' "$(case "$out" in *'mode: agent'*) echo si ;; *) echo no ;; esac)"
@@ -938,6 +946,28 @@ assert_eq 'prompt scaffold: sin marcadores sin resolver' '' "$(printf '%s\n' "$o
 
 glot_run prompt implement php algorithms/naive_sort
 assert_contains 'prompt implement: encargo del paso 5' 'Implementación del módulo' "$out"
+
+# La política no depende del módulo ni del framework y no calcula la agrupación.
+for lang in ada go cobol; do
+    for target in algorithms/data_structures_basics foundations/numbers algorithms/data_structures_advanced; do
+        glot_run prompt suite "$lang" "$target"
+        assert_eq "política $lang $target: código" '0' "$rc_last"
+        assert_contains "política $lang $target: referencias del lenguaje" \
+            "$REPO/$lang/core/algorithms/data_structures_basics/" "$out"
+        assert_contains "política $lang $target: no homologar autorreferencia" \
+            'es el propio módulo en trabajo' "$out"
+        assert_contains "política $lang $target: suite agregada permitida" \
+            'Una suite agregada, varias suites o grupos dentro del mismo archivo' "$out"
+        assert_contains "política $lang $target: casos por contrato" \
+            'No multipliques todos los casos por todas las' "$out"
+    done
+done
+glot_run_from "$SANDBOX/php" prompt suite php algorithms/naive_sort
+assert_eq 'política desde submódulo sin bases: no inventa antecedentes' '0' "$rc_last"
+assert_contains 'política desde submódulo: rutas de su raíz' \
+    "$SANDBOX/php/core/algorithms/data_structures_basics/" "$out"
+assert_contains 'política sin bases: informa el bloqueo si la otra no basta' \
+    'si no basta, reporta el bloqueo' "$out"
 
 glot_run prompt nope
 assert_eq 'prompt con encargo desconocido: código' '1' "$rc_last"
@@ -1003,6 +1033,17 @@ glot_run_delegate 'wc -l' ask implement php algorithms/naive_sort
 assert_eq 'ask con delegado: código' '0' "$rc_last"
 assert_eq 'ask con delegado: recibe el encargo por stdin' 'si' "$([[ "$out" =~ ^[[:space:]]*[0-9]+$ && "$out" -gt 20 ]] && echo si || echo no)"
 assert_contains 'ask con delegado: lo anuncia por stderr' 'delegado / delegate' "$err"
+
+for req in scaffold contract_stub suite build correct implement fix refactor validate docs-module docs-language; do
+    glot_run prompt "$req" php algorithms/naive_sort
+    expected_request="$out"
+    glot_run_delegate 'cat' ask "$req" php algorithms/naive_sort
+    assert_eq "política $req: delegado genérico recibe encargo íntegro" "$expected_request" "$out"
+    glot_run_delegates 'cat' '' ask --delegate copilot "$req" php algorithms/naive_sort
+    assert_eq "política $req: Copilot recibe encargo íntegro" "$expected_request" "$out"
+    glot_run_delegates '' 'cat' ask --delegate antigravity "$req" php algorithms/naive_sort
+    assert_eq "política $req: Antigravity recibe encargo íntegro" "$expected_request" "$out"
+done
 
 glot_run_delegate 'false' ask implement php algorithms/naive_sort
 assert_eq 'ask con delegado que falla: código' '1' "$rc_last"
@@ -1222,7 +1263,8 @@ assert_contains 'suite: el enlace roto es defecto del 4b' 'defecto del paso 4b' 
 # casualidad: medido en `data_structures_advanced`, 2 de 17 tests salían verdes contra el contrato
 # en stubs. Se declaran, no se tocan, para que el paso 5 compruebe que el conjunto no crece.
 assert_contains 'suite: la salida es la fase roja' 'Verificación: la fase roja' "$suite_prompt"
-assert_contains 'suite: exige casos ejecutados' 'cero casos** no está en rojo' "$suite_prompt"
+assert_contains 'suite: exige tests ejecutados' 'cero tests**' "$suite_prompt"
+assert_contains 'suite: distingue casos de contadores del framework' 'N casos o escenarios cubiertos y K tests ejecutados' "$suite_prompt"
 assert_contains 'suite: separa aserción de excepción' 'Assertion_Error' "$suite_prompt"
 assert_contains 'suite: declara los verdes por centinela' 'coinciden con el centinela' "$suite_prompt"
 assert_contains 'suite: el defecto de la propia suite se corrige aquí' 'Corrígelo aquí y repite' "$suite_prompt"
@@ -1274,6 +1316,15 @@ assert_eq 'suite: ya no dice que crea el runner' 'no' \
 assert_contains 'suite: el runner es parte de la entrega' 'El **runner es parte de esta entrega**' "$suite_prompt"
 assert_contains 'suite: el runner de ejemplo se sustituye' 'lo sustituye este paso' "$suite_prompt"
 assert_contains 'suite: la construcción se pide al 4d' 'eso es del **4d**' "$suite_prompt"
+assert_contains 'suite: no cruza casos de contratos distintos' 'Solo implementaciones alternativas del mismo contrato' "$suite_prompt"
+assert_contains 'suite: admite escenarios de estado' 'Un test de escenario con estado propio' "$suite_prompt"
+assert_contains 'correct: integra runner del módulo' '| Suite y runner del módulo | `4c` |' \
+    "$(cat -- "$PROMPTS_DIR/correct.prompt.md")"
+assert_contains 'correct: corrige construcción del 4d' '| Construcción y enlace | `4d` |' \
+    "$(cat -- "$PROMPTS_DIR/correct.prompt.md")"
+glot_run help save
+assert_contains 'help save: distingue build' '4d (construcción/build)' "$out"
+assert_contains 'help save: distingue correct' '4e (corrección/correct)' "$out"
 assert_contains 'suite: cero casos es defecto del 4c' 'Escribe el runner que agrega la suite' "$suite_prompt"
 assert_contains 'build: el runner no es asunto del 4d' 'no** es asunto de este paso' "$build_prompt"
 assert_contains 'SPRINT: el 4a deja el runner arrancando' 'runner arrancando sin casos' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
@@ -1528,6 +1579,21 @@ glot_run_sandbox -n save fix --cause 'la causa' ruby algorithms/naive_sort
 assert_eq 'save con el alias fix: código' '0' "$rc_last"
 assert_contains 'save con el alias fix: el mismo mensaje' "commit -m 'fix(algorithms): fix naive_sort'" "$out"
 rm -f -- "$RB/src/z.rb"
+
+# El ordinal 4e retira la causa; 4d build no la consume.
+glot_run_sandbox set cause 'integración de los grupos del runner'
+printf 'runner\n' >"$RB/src/runner.rb"
+glot_run_sandbox save 4d ruby algorithms/naive_sort
+assert_eq 'save build: confirma sin consumir causa' '0' "$rc_last"
+glot_run_sandbox get cause
+assert_eq 'save build: conserva causa pendiente' 'integración de los grupos del runner' "$out"
+printf 'runner corregido\n' >"$RB/src/runner.rb"
+glot_run_sandbox save 4e ruby algorithms/naive_sort
+assert_eq 'save correct ordinal: confirma con causa' '0' "$rc_last"
+assert_contains 'save correct ordinal: causa registrada' 'integración de los grupos del runner' \
+    "$(git -C "$SANDBOX/ruby" log -1 --format=%B)"
+glot_run_sandbox get cause
+assert_eq 'save correct ordinal: causa consumida' '1' "$rc_last"
 
 # save -n con el árbol ya limpio: no hay plan que enseñar, y lo dice como la ejecución real
 glot_run_sandbox -n save 4c ruby algorithms/naive_sort
@@ -1833,6 +1899,8 @@ assert_contains 'validate: el registro guarda el informe' 'Sin hallazgos.' "$(ca
 assert_contains 'validate: el registro dice quién validó' 'validator=' "$(cat -- "$RECORD")"
 assert_contains 'validate: el encargo llega por stdin' '# Encargo `validate`' "$(cat -- "$SANDBOX/encargo.txt")"
 assert_contains 'validate: el encargo trae el estado del sprint' '| module | naive_sort |' "$(cat -- "$SANDBOX/encargo.txt")"
+assert_contains 'validate: recibe la política compartida' '# Política compartida de delegación' "$(cat -- "$SANDBOX/encargo.txt")"
+assert_contains 'validate: recibe agrupación por contrato' 'No multipliques todos los casos por todas las' "$(cat -- "$SANDBOX/encargo.txt")"
 
 # con hallazgos: cuatro y el registro lo dice
 VALIDATOR_VERDICT=findings glot_run_validate php algorithms/naive_sort
@@ -2525,6 +2593,10 @@ assert_eq 'install: stdout con una sola línea' '1' "$(printf '%s\n' "$out" | wc
 assert_eq 'install: la copia estable es la ruta que sale' "$INSTALL_DIR" "$out"
 assert_eq 'install: el script copiado existe' 'si' "$([[ -x "$INSTALL_DIR/glot.sh" ]] && echo si || echo no)"
 assert_eq 'install: los datos viajan con el script' 'si' "$([[ -d "$INSTALL_DIR/data" ]] && echo si || echo no)"
+assert_eq 'install: la política viaja con el script' 'si' "$([[ -s "$INSTALL_DIR/prompts/Delegation_Policy.md" ]] && echo si || echo no)"
+glot_in_home '"$HOME/.local/bin/glot" prompt suite php algorithms/naive_sort'
+assert_eq 'install: encargo con política funciona' '0' "$rc_last"
+assert_contains 'install: encargo incluye política' '# Política compartida de delegación' "$out"
 assert_eq 'install: el enlace del PATH apunta a la copia' "$INSTALL_DIR/glot.sh" "$(readlink -- "$INSTALL_HOME/.local/bin/glot")"
 assert_eq 'install: los metadatos traen la versión' "version=$LIVE_VERSION" \
     "$(sed -n 's/^version=/version=/p' "$INSTALL_DIR/install.meta")"
@@ -2588,6 +2660,12 @@ assert_contains 'doctor: la deriva de datos se informa' 'install_data: stale' "$
 glot_install install >/dev/null
 glot_install doctor
 assert_contains 'doctor: reinstalar deja los datos buenos' 'install_data: ok' "$out"
+printf '\nPolicy tweak\n' >>"$INSTALL_DIR/prompts/Delegation_Policy.md"
+glot_install doctor
+assert_contains 'doctor: política retocada detectada' 'install_data: stale' "$out"
+glot_install install >/dev/null
+glot_install doctor
+assert_contains 'doctor: reinstalar restaura política' 'install_data: ok' "$out"
 
 # v1.4.0: la deriva se mide en las **dos orillas**. Los casos de arriba tocan la copia (el
 # retoque a mano, que es el caso raro); falta la otra: que el clon del que se instaló haya
@@ -2887,6 +2965,26 @@ assert_contains 'prompt: avisa de la fuente que falta' 'fuente ausente / missing
 assert_eq 'prompt: no avisa de la que sí está' 'no' "$([[ "$err" == *'missing source: docs/core'* ]] && echo si || echo no)"
 assert_eq 'prompt: el encargo se imprime igual' 'si' \
     "$([[ "$out" == *'Cuerpo de prueba para data_structures_basics'* ]] && echo si || echo no)"
+assert_contains 'prompt: fuentes declaradas se entregan al agente' "- $SANDBOX/docs/no-existe.md" "$out"
+
+mv -- "$fuentes_glot/prompts/Delegation_Policy.md" "$fuentes_glot/policy.saved"
+for policy_state in missing empty unresolved; do
+    case "$policy_state" in
+        empty) : >"$fuentes_glot/prompts/Delegation_Policy.md" ;;
+        unresolved) printf 'Unknown {not_a_placeholder}\n' >"$fuentes_glot/prompts/Delegation_Policy.md" ;;
+    esac
+    rc_last=0
+    out="$(GLOT_ROOT="$SANDBOX" "$fuentes_glot/glot.sh" prompt fuentes-check php algorithms/data_structures_basics 2>"$WORK_DIR/stderr")" || rc_last=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+    assert_eq "política $policy_state: error explícito" '1' "$rc_last"
+    assert_eq "política $policy_state: no emite encargo incompleto" '' "$out"
+    if [[ "$policy_state" == unresolved ]]; then
+        assert_contains 'política: marcador inválido diagnosticado' 'unresolved placeholder' "$err"
+    else
+        assert_contains "política $policy_state: diagnóstico" 'delegation policy' "$err"
+    fi
+done
+mv -- "$fuentes_glot/policy.saved" "$fuentes_glot/prompts/Delegation_Policy.md"
 
 # v1.6.0: el banco local ya **no** es respaldo: una plantilla fuera de `scripts/prompts/`
 # no se lee, aunque exista en el clon.

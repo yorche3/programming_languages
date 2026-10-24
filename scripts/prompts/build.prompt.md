@@ -27,6 +27,9 @@ Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
 las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo):
+fija las bases por prioridad y la agrupación por tema e idioma para este rol.
+
 ---
 
 ## Fuentes de verdad (en este orden de prioridad)
@@ -36,10 +39,9 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
    Es el **punto de partida**: aquí se **completa**, no se rehace.
 2. **`{spec}`** — su sección **«Casos de prueba / Test Cases»** dice qué tiene que poder ejecutar
    la suite; el *cómo* lo manda el lenguaje.
-3. **Módulos ya homologados del mismo lenguaje** — `{lang}/core/foundations/numbers/` y cualquier
-   `{lang}/core/{phase}/*/`. Son la **autoridad del cómo**: el fichero de construcción real de ese
-   lenguaje, sus reglas, sus rutas de salida y el `.gitignore` que le corresponde. Copia su forma,
-   no su contenido.
+3. **Bases homologadas del mismo lenguaje**, en el orden de la política compartida.
+   Orientan el fichero de construcción, sus reglas, rutas de salida y `.gitignore`.
+   Enlaza todos los grupos reales del módulo; no copies el contenido de las bases.
 4. **`scripts/data/init_sequences.tsv`** — lo que el catálogo ya declara para `{lang}` en la fase
    `scaffold`: si el comando que crea el fichero está ahí, tu trabajo es **adecuarlo**, no crearlo
    otra vez. Si el catálogo puede dejar el fichero hecho con un comando, dilo en tu informe para
@@ -64,8 +66,8 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 - `git status --short` y `git branch --show-current` **en el submódulo del lenguaje** (el directorio
   donde ya estás). El monorepo y sus cincuenta submódulos **no se recorren**: `git submodule
   status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
-- Inspecciona: el esqueleto del módulo, el módulo `numbers/` del mismo lenguaje, la suite del paso
-  4c y el comando nativo de pruebas de `{lang}`.
+- Inspecciona el esqueleto, las dos bases en el orden compartido, los grupos y el runner
+  del paso 4c y el comando nativo de pruebas de `{lang}`.
 - Comprueba el estado real antes de tocar nada: `glot test`. Este paso **no es fijo**: se ejecuta
   cuando el **4c** no pudo alcanzar la **fase roja** por un fallo de **construcción** —target
   ausente, dependencia de pruebas sin declarar, símbolos sin resolver, el runner o la suite fuera
@@ -80,11 +82,10 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 - Escribe o adecúa **el fichero de construcción del lenguaje** (el que usa su toolchain: manifiesto,
   `Makefile`, proyecto, script de compilación) con las reglas que compilan la fuente del módulo,
   compilan la suite y **enlazan ambas**.
-- Deja el **runner** como punto de entrada. Si el inicializador del paso 4a dejó un `main` de
-  ejemplo —el «Hello, World!» o el `null` del lenguaje—, **sustitúyelo** por el runner del
-  framework de pruebas, con la forma que tenga el módulo homologado (en Ada, el `Runner` de
-  AUnit que instancia el paquete `Suite` del módulo): eso es exactamente «dejar el paso 4c
-  ejecutable». Si ya es el runner del framework, no lo reescribas.
+- Enlaza el **runner del 4c** como punto de entrada, sin reescribirlo. Si aún es un
+  `main` de ejemplo o no agrega los grupos, reporta el defecto del 4c: se corrige
+  con `correct` (4e). Si la construcción genera el runner, ajusta solo su configuración
+  para descubrir o agregar todos los grupos existentes.
 - Si la suite necesita una **dependencia de pruebas** (framework, aserción, ejecutor), declárala en el
   fichero que corresponda a ese lenguaje, con la misma forma que el módulo homologado.
 - No escribas la suite, no escribas la implementación y no cambies el contrato: si el problema está

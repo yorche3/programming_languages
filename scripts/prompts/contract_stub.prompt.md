@@ -30,14 +30,17 @@ Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
 las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo):
+fija las bases por prioridad y la agrupación por tema e idioma para este rol.
+
 ---
 
 ## Fuentes de verdad (en este orden de prioridad)
 
 1. **`{spec}`** — contrato funcional del módulo: funciones expuestas, casos de prueba y
    criterios. Manda sobre **qué** se expone.
-2. **Módulos ya homologados del mismo lenguaje** — `{lang}/core/foundations/numbers/` y
-   cualquier `{lang}/core/{phase}/*/`. Son la **autoridad del cómo**: nombre y ubicación del
+2. **Bases homologadas del mismo lenguaje**, en el orden de la política compartida.
+   Orientan el **cómo**: nombre y ubicación del
    tipo, convención de firmas, mayúsculas del identificador, si el contrato vive en un archivo
    aparte (en Ada `src/*.ads`), en una cabecera (en C `include/*.h`) o dentro del propio módulo.
 3. **`docs/AGENT_Template.md`** — reglas de la adaptación: el contrato se declara con el
@@ -83,8 +86,8 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
   donde ya estás). El monorepo y sus cincuenta submódulos **no se recorren**: `git submodule
   status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
 - `git -C {repo} status --short` para ver qué dejó `glot new` y qué ajustó `scaffold`.
-- Inspecciona: la especificación, el contrato del módulo `numbers/` del mismo lenguaje y
-  cualquier `{lang}/core/{phase}/*/` que exponga un tipo propio.
+- Inspecciona la especificación y los contratos de las dos bases en el orden compartido;
+  distingue unidades del dominio de variantes del mismo contrato.
 - Anota y di en el reporte: **dónde vive el contrato** en este lenguaje, **cómo se llama** el
   tipo nuevo, **cómo se escriben** las firmas, **cuál es** el indicador natural de fallo y
   **dónde vive el cuerpo** de las operaciones (archivo aparte, mismo archivo, etc.).

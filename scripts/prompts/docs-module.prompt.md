@@ -26,6 +26,9 @@ Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
 las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo):
+fija las bases por prioridad y la agrupación por tema e idioma para este rol.
+
 ---
 
 ## Fuentes de verdad
@@ -35,8 +38,9 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 2. **`docs/README_Template.md`** — plantilla obligatoria del README de Nivel 3.
 3. **`docs/AGENT_Template.md`** — guía de generación de documentación.
 4. **`AGENTS.md`** — límites de actuación y flujo de cierre.
-5. **Módulos ya documentados del mismo lenguaje** — `{lang}/core/foundations/numbers/README.md`
-   y otros READMEs de módulo. Definen el tono, las secciones bilingües y el nivel de detalle real.
+5. **READMEs de las bases del mismo lenguaje**, en el orden de la política compartida.
+   Orientan tono, secciones bilingües y detalle. Documenta el agrupamiento real del
+   módulo y sus adaptaciones; no lo rediseñes para copiar el README de una base.
 
 ---
 

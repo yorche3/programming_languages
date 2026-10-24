@@ -2,12 +2,12 @@
 name: correct
 step: 4e
 model: qwen/qwen3.7-plus
-description: Corrige un artefacto anterior a la implementación (esqueleto, contrato o suite) y deja constancia de la causa
+description: Corrige un artefacto anterior a la implementación (esqueleto, contrato, suite, runner o construcción) y deja constancia de la causa
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md
 mode: agent
 ---
 
-# Delegación — Corrección previa a la implementación (4a/4b/4c)
+# Delegación — Corrección previa a la implementación (4a/4b/4c/4d)
 
 ## Rol
 
@@ -27,7 +27,8 @@ Este paso solo toca artefactos **anteriores a la implementación**:
 |----------------------|:--------------------:|-------------|
 | Esqueleto o `.gitignore` | `4a` | lo justo para que compile y el runner arranque |
 | Contrato (tipo y firmas) | `4b` | el tipo, las firmas y **sus esqueletos**, y nada más |
-| Suite de pruebas | `4c` | los casos y su patrón, sin tocar el runner |
+| Suite y runner del módulo | `4c` | el patrón, la agrupación y la integración de los casos exigidos |
+| Construcción y enlace | `4d` | manifiesto, proyecto o configuración de generación del runner |
 
 **La implementación (`5`) no entra aquí.** Si el módulo ya está implementado:
 
@@ -48,6 +49,9 @@ Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
 sustituidos: las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo):
+fija las bases por prioridad y la agrupación por tema e idioma para este rol.
+
 ---
 
 ## Procedimiento
@@ -59,15 +63,15 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 - `git status --short` y `git branch --show-current` **en el submódulo del lenguaje** (el directorio
   donde ya estás). El monorepo y sus cincuenta submódulos **no se recorren**: `git submodule
   status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
-- Lee el artefacto defectuoso, `{spec}` y el módulo homologado del lenguaje (`numbers/` y
-  los demás `{lang}/core/{phase}/*/`), que es la **autoridad del cómo**.
-- Reproduce el defecto con el comando nativo (columna 4 de `scripts/data/languages.tsv`) y
+- Lee el artefacto defectuoso, `{spec}` y las dos bases en el orden compartido.
+  Conserva o corrige justificadamente el mapa de agrupación del artefacto indicado.
+- Reproduce el defecto con el comando nativo (columna 3 de `scripts/data/languages.tsv`) y
   guarda esa salida: es la prueba de que el defecto existe.
 
 ### 2. La causa, en una frase
 
 Escribe **una frase** con qué falla y **por qué**: defecto del esqueleto, del contrato o de
-la suite. Va al cuerpo del commit, así que tiene que ser concreta y comprobable, no un «se
+la suite, del runner o de la construcción. Va al cuerpo del commit, así que tiene que ser concreta y comprobable, no un «se
 corrige el módulo».
 
 ### 3. Corrección mínima
@@ -93,8 +97,8 @@ glot set cause "<la causa en una frase>"
 
 Esa clave vive **fuera del repositorio** (el almacén de estado de `glot`), así que **no crea
 ningún fichero en el módulo** ni se sube con el lenguaje: nada que limpiar después. `glot
-save 4d` la usa como cuerpo del commit y la borra. **No** confirmes nada en git: el commit
-lo hace el autor con `glot save 4d`.
+save 4e` la usa como cuerpo del commit y la borra. **No** confirmes nada en git: el commit
+lo hace el autor con `glot save 4e`.
 
 ---
 

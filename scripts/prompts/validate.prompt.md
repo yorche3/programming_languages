@@ -22,6 +22,9 @@ Este encargo lo arma `glot prompt validate`: el encabezado trae el **estado del 
 sustituidos: las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo).
+Comprueba su prioridad y la justificación del agrupamiento sin rediseñarlo ni escribir.
+
 ---
 
 ## Fuentes de verdad (en este orden de prioridad)
@@ -41,6 +44,11 @@ Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 3. **Enlaces:** los relativos del README resuelven dentro del repositorio.
 4. **Suite:** los casos de la especificación están cubiertos y la evidencia muestra que se ejecutaron. **Y que no estén aprobados a base de valores codificados**: si el código bajo prueba —o la propia suite— devuelve el resultado esperado por caso (constantes, una tabla por entrada, ramas que copian la salida), es un hallazgo **alto**: la suite pasa sin probar nada. Ese ***hardcode*** es de este paso: `verify` es un *lint* de sintaxis y formato **y no lo mira**.
 5. **Higiene:** los artefactos generados están ignorados, no hay ficheros temporales, rutas absolutas del autor ni credenciales.
+6. **Bases y agrupación:** las referencias siguen la política compartida; las unidades,
+   variantes y casos se asignan al contrato pertinente, con aislamiento y todos los
+   grupos conectados al runner. Una suite agregada no es un defecto por no estar
+   repartida en archivos; una salida con cero casos no demuestra cobertura. Distingue
+   lo comprobable en código y acta de lo que no tiene evidencia.
 
 Si algo **no lo has podido comprobar**, dilo como no comprobado. No rellenes el hueco con una suposición, y no inventes hallazgos.
 

@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v1.7.1** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v2.0.2** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -62,6 +62,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 
 | Documento | Contenido |
 |-----------|-----------|
+| [`prompts/Delegation_Policy.md`](prompts/Delegation_Policy.md) | Política compartida / Shared policy: bases por prioridad, agrupación por tema e idioma del lenguaje |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Capas L0–L9, versiones, criterios de orden y decisiones cerradas |
 | [`docs/SPRINT.md`](docs/SPRINT.md) | El ciclo de módulo: 9 pasos, comandos, evidencias y encargos de IA |
 | [`docs/CONTRACT.md`](docs/CONTRACT.md) | Contrato de todos los verbos, códigos de salida, almacén de estado y especificación de `use` |
@@ -77,11 +78,12 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v2.0.0)
+├── glot.sh                  # Versión viva / live version (v2.0.2)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
 ├── prompts/                  # Plantillas de encargo, versionadas
+│   ├── Delegation_Policy.md      # Bases y agrupación compartidas; no es un encargo
 │   ├── scaffold.prompt.md        # Paso 4a · esqueleto
 │   ├── contract_stub.prompt.md   # Paso 4b · contrato y esqueletos del módulo
 │   ├── suite.prompt.md           # Paso 4c · suite de pruebas

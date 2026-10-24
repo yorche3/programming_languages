@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# glot 1.7.0 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
+# glot 2.0.2 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
 # programa y se **carga** con `source` (capa cargable de la L8), donde `glot` es una
 # función de bash que hace el `cd` real de `use`. `install` deja la copia estable,
 # el bloque del rc y el completado; `doctor` cierra el diagnóstico del entorno.
@@ -10,8 +10,8 @@
 # Desde la v1.2.0 `ask` tiene **dos delegados con nombre** —`GLOT_DELEGATE_COP` y
 # `GLOT_DELEGATE_AGY`, elegibles con `--delegate`— y resuelve `{root}` y `{module_dir}`
 # dentro de su orden, que es del autor y nunca viaja en el repositorio.
-# Desde la v1.3.0 el **runner** de pruebas es del paso `4a` —el esqueleto lo deja
-# arrancando sin casos— y la suite (`4c`) solo añade casos: si falta, se detiene.
+# El paso `4a` deja el andamiaje arrancando sin casos; `4c` conecta los grupos y
+# el runner del módulo, y `4d` construye y enlaza sin reescribirlo.
 # Desde la v1.4.0 el **alcance de `verify`** está escrito: es *lint* idiomático (sintaxis y
 # formato) y el **análisis estático de seguridad queda fuera**; los valores codificados
 # para aprobar los casos (*hardcode*) los revisa `validate`.
@@ -150,7 +150,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="2.0.1"
+GLOT_VERSION="2.0.2"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -1620,11 +1620,14 @@ _glot_prompt_build() {
     local phase=""
     local module=""
     local body=""
+    local policy_file=""
+    local policy=""
     local root=""
     local branch=""
     local spec=""
     local sources=""
     local source=""
+    local source_list=""
 
     shift
 
@@ -1645,6 +1648,12 @@ _glot_prompt_build() {
         _glot_error "no se pudo leer la plantilla / cannot read the template: $file"
         return 1
     fi
+    policy_file="$(dirname -- "$file")/Delegation_Policy.md"
+    if [[ ! -r "$policy_file" || ! -s "$policy_file" ]] || ! policy="$(cat -- "$policy_file")"; then
+        _glot_error "política de delegación ausente o ilegible / missing or unreadable delegation policy: $policy_file"
+        return 1
+    fi
+    body="$policy"$'\n\n---\n\n'"$body"
     if ! body="$(_glot_expand_state "$lang" "$phase" "$module" "$body")"; then
         return 1
     fi
@@ -1664,6 +1673,7 @@ _glot_prompt_build() {
             source="${source%"${source##*[![:space:]]}"}"
             [[ -n "$source" ]] || continue
             [[ -e "$root/$source" ]] || _glot_warn "fuente ausente / missing source: $source"
+            source_list+="- $root/$source"$'\n'
         done
         unset IFS
     fi
@@ -1684,6 +1694,9 @@ _glot_prompt_build() {
     printf '| module_dir | %s |\n' "$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
     printf '\n**ES:** todas las rutas de este encargo son **absolutas** (`root` es la raíz del monorepo): ninguna se resuelve contra el submódulo ni contra `module_dir`.\n'
     printf '\n**EN:** every path in this request is **absolute** (`root` is the monorepo root): none resolves against the submodule or `module_dir`.\n'
+    if [[ -n "$source_list" ]]; then
+        printf '\n## Fuentes declaradas: leer antes de actuar / Declared sources: read before acting\n\n%s' "$source_list"
+    fi
     printf '\n---\n\n%s\n' "$body"
 }
 
@@ -3005,7 +3018,7 @@ _glot_cmd_save() {
     printf '%s\n' "$sha"
     # La causa ya cumplió: se retira del estado para que no se cuele en el commit siguiente.
     case "$step" in
-        4d | correct | 5b | fix | 5c | refactor)
+        4e | correct | 5b | fix | 5c | refactor)
             _glot_state_rewrite unset cause >/dev/null 2>&1 || true
             ;;
     esac
@@ -3948,7 +3961,7 @@ Verbos / Verbs:
                      Commits with the message from the repository convention, taken
                      from the commit catalogue. Monorepo steps (9 and 10) add only
                      their own paths. --cause adds the commit body and is required in
-                     rework (4d correct, 5b fix, 5c refactor), which also takes it from
+                     rework (4e correct, 5b fix, 5c refactor), which also takes it from
                      the `cause` state key; --causa is accepted as an alias. No push.
                      With the loadable layer, committing steps 7 or 8 leaves the author
                      at the language root, which is where the submodule is integrated
@@ -4185,11 +4198,15 @@ _glot_help_verb() {
             printf 'The registry carries name, step, model and description\n'
             printf 'Con encargo imprime el encargo armado: estado del sprint + plantilla expandida\n'
             printf 'With a request it prints the built request: sprint state + expanded template\n'
+            printf 'Incluye la política compartida: data_structures_basics, después numbers,\n'
+            printf 'con agrupación por tema y lenguaje; política ausente o vacía devuelve 1\n'
+            printf 'Includes shared policy: data_structures_basics, then numbers, with topic-\n'
+            printf 'and language-aware grouping; missing or empty policy returns 1\n'
             printf 'Marcadores / placeholders: lang, phase, module, Module, repo, branch, spec, module_dir\n'
             printf 'La cabecera lleva además `root`, la raíz del monorepo, y las fuentes que la\n'
-            printf 'plantilla declara (`sources:`) se avisan por stderr si no están\n'
+            printf 'plantilla declara (`sources:`) se listan para lectura y se avisan por stderr si no están\n'
             printf 'The header also carries `root`, the monorepo root, and the sources the template\n'
-            printf 'declares (`sources:`) are warned about on stderr when missing\n'
+            printf 'declares (`sources:`) are listed for reading and warned about on stderr when missing\n'
             printf 'Las rutas del encargo van **absolutas** (`root`, `spec`, `module_dir` y las citas de\n'
             printf 'la plantilla que son relativas a la raíz del monorepo): el delegado resuelve las\n'
             printf 'relativas contra su repositorio —el submódulo— y buscaba rutas que no existen\n'
@@ -4292,9 +4309,9 @@ _glot_help_verb() {
             printf 'is not written by hand. It stages the submodule and commits in it\n'
             printf '%s\n' '--cause añade el cuerpo del commit (obligatoria en el retrabajo 4e/5b/5c);'
             printf '%s\n' '--causa se acepta como alias'
-            printf '%s\n' '--cause adds the commit body (required in rework 4d/5b/5c);'
+            printf '%s\n' '--cause adds the commit body (required in rework 4e/5b/5c);'
             printf '%s\n' '--causa is accepted as an alias'
-            printf 'Pasos / steps: 4a (andamiaje/scaffold) · 4b (contrato/contract_stub) · 4c (suite) · 4d (corrección/correct) · 5 (implementación) · 5b (defecto/fix) · 5c (reelaboración/refactor) · 7 · 8\n'
+            printf 'Pasos / steps: 4 (carpeta/module directory) · 4a (andamiaje/scaffold) · 4b (contrato/contract_stub) · 4c (suite) · 4d (construcción/build) · 4e (corrección/correct) · 5 (implementación) · 5b (defecto/fix) · 5c (reelaboración/refactor) · 7 · 8\n'
             printf 'Del monorepo / monorepo steps: 9 (puntero/pointer) · 10 (cierre/close), cada uno\n'
             printf 'con sus rutas: el submódulo, o roadmap + checklist + evidencia del módulo\n'
             printf 'Each with its own paths: the submodule, or roadmap + checklist + module evidence\n'

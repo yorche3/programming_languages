@@ -20,7 +20,7 @@
 | 4 | **Esqueleto: la carpeta** | `glot new` (0.9.0; v2 desde la 2.0.0) · `glot save 4` (2.0.0) | La **carpeta del módulo**: las filas `phase=new` de [`data/init_sequences.tsv`](../data/init_sequences.tsv) la crean y, cuando el lenguaje trae una herramienta que además la genera, avanzan de antemano con ella. **`new` baja al autor al directorio del módulo** (con la capa cargable) | script |
 | 4a | **Esqueleto: la estructura idiomática** | `glot scaffold` (2.0.0) · `glot prompt scaffold` (0.9.0) · `glot save 4a` (2.0.0) | La estructura que el lenguaje espera, desde las filas `phase=scaffold`: carpetas y ficheros con su esqueleto base, renombres a la convención del lenguaje y **borrado de lo que estorba** (`.git` anidados, plantillas, ejecutables de ejemplo); con el **runner arrancando sin casos** —el runner es de este paso— y `.gitignore` verificado | script + **agente** |
 | 4b | **Contrato y esqueletos** (artefacto propio, antes de la suite) | `glot prompt contract_stub` (1.5.0) · `glot save 4b` (1.1.0) | Tipo nuevo, firmas del contrato (en Ada, `src/*.ads`) y **esqueleto de cada operación** (en Ada, `src/*.adb`), con el **indicador natural** del lenguaje: sin el cuerpo, la suite no compila **ni enlaza** | **agente** |
-| 4c | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4c` (1.1.0) | Suite unitaria derivada de la especificación, **sobre el contrato y sus esqueletos del paso 4b** (no los declara: los usa) y con el **runner del módulo**, que es parte de esta entrega cuando el lenguaje lo exige: si el inicializador dejó un `main` de ejemplo, aquí se sustituye —el runner **del andamiaje** (4a) no se toca—. Su salida es la **fase roja** (compila, enlaza, N casos ejecutados, fallos de aserción), con la lista de casos que pasan por centinela declarada. Con salida real. Desde la v1.5.0 el `4b` deja el cuerpo vacío, así que compila **y enlaza**; si el contrato llegara **sin esqueletos**, se admite la **compilación sin enlace** y la ejecución se traslada al acta del paso 6, pero eso es un **defecto del `4b`**, no del contrato | **agente** |
+| 4c | Suite de pruebas | `glot prompt suite` (0.9.0) · `glot save 4c` (1.1.0) | Suite derivada de la especificación, **sobre el contrato y sus esqueletos del paso 4b**, con agrupación por unidad/contrato/variante y el **runner del módulo**. Este paso conecta los grupos al andamiaje del 4a y sustituye su `main` de ejemplo si hace falta. Su salida es la **fase roja**: compila, enlaza y ejecuta tests con fallos de aserción; declara la correspondencia entre casos, escenarios y contadores del framework, y los casos que pasan por centinela. Si el contrato llegó **sin esqueletos**, se admite la **compilación sin enlace** y se declara el defecto del `4b` y la ejecución pendiente en el acta del paso 6 | **agente** |
 | 4d | **Construcción y enlace** (el esqueleto no deja la suite ejecutable) | `glot prompt build` (2.0.0) · `glot save 4d` (2.0.0) | El fichero de construcción del lenguaje y su enlace, justo hasta que `glot test` **compila, enlaza y falla por casos**; en los lenguajes cuya herramienta ya lo deja hecho, el paso se cierra sin cambios. No toca la suite, ni el runner del módulo, ni la implementación; entra solo si la construcción no compila la suite | **agente** |
 | 4e | **Corrección previa a la implementación** (un artefacto `4a`/`4b`/`4c`/`4d` confirmado resultó defectuoso) | `glot prompt correct` (1.6.0) · `glot save 4e` (2.0.0) | El artefacto corregido y la **causa en el cuerpo del commit** (obligatoria): el registro del retrabajo. Solo artefactos **anteriores** a la implementación | **agente** |
 | 5 | Implementación | `glot prompt implement` (0.8.0) + `glot test` (0.7.0) · `glot save 5` (0.9.0) | `feat(algorithms): add naive sort implementation`; suite en verde | autor / **agente** |
@@ -235,6 +235,37 @@ git -C {lang} push origin {rama}           # 4. la rama de trabajo, si quieres c
 **ES:** Los pasos 4a, 4b, 4c, 4d, 4e, 5, 5b, 5c, 7 y 8 se hacen con ayuda del agente porque requieren **leer y comparar** (la especificación contra el código, la plantilla contra el README, el roadmap contra el estado real). `glot` no los ejecuta: los **encarga**. Desde la v0.8.0 el encargo lo arma `glot prompt <encargo>` con el estado del sprint, y las plantillas están **versionadas** en [`scripts/prompts/`](../../scripts/prompts/).
 
 **EN:** Steps 4a, 4b, 4c, 4d, 4e, 5, 5b, 5c, 7 and 8 are done with the agent's help because they require **reading and comparing** (spec against code, template against README, roadmap against the real state). `glot` does not run them: it **requests** them. Since v0.8.0 the request is built by `glot prompt <request>` from the sprint state, and the templates are **versioned** in [`scripts/prompts/`](../../scripts/prompts/).
+
+### Bases y agrupación persistentes / Persistent references and grouping
+
+**ES:** Todos los encargos incluyen la [política compartida](../prompts/Delegation_Policy.md):
+primero `data_structures_basics`, después `numbers`, del mismo lenguaje, hasta un
+cambio explícito de política. Son referencias por aspecto y tema, no moldes ni
+dependencias obligatorias. Antes de escribir se declara el mapa breve
+`unidad/variante → casos aplicables → grupo lógico → archivo/suite → runner`.
+No exige separar archivos por validación ni trasladar las variantes de Numbers
+a cualquier módulo. `implement` y `correct` sirven con el mismo alcance como
+guía manual; no se cambian modelos, esfuerzos ni créditos.
+
+**EN:** Every request includes shared policy: same-language `data_structures_basics`,
+then `numbers`, until an explicit policy change. They are aspect- and topic-aware
+references, not templates or required dependencies. Before writing, state the
+brief unit/variant, applicable-case, group, file/suite and runner map. It does not
+require separate validation files or Numbers variants in every module.
+Implementation and correction remain equivalent manual guides; models, effort
+and credits do not change.
+
+**ES:** `4a` deja el runner arrancando sin casos; `4c` integra los grupos; `4d`
+configura construcción/enlace y solo configura el runner si lo genera la
+herramienta, sin reescribir el del 4c. `4e correct` puede corregir el runner del
+4c o la construcción del 4d cuando ese sea el artefacto declarado. Documentar
+agrupación no autoriza rediseñarla fuera del rol; validar no autoriza escribir.
+
+**EN:** Scaffolding starts the runner without cases; suite authoring integrates
+groups; build configures construction/linking and generated runners without
+rewriting the suite's runner. Correction can repair a declared runner or build
+artefact. Documenting grouping does not permit out-of-role redesign; validation
+does not permit writing.
 
 | Encargo previsto | Plantilla versionada | Paso | Modelo (v2.0.0) |
 |------------------|----------------------|:----:|-----------------|

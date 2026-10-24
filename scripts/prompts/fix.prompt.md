@@ -24,7 +24,7 @@ es **el defecto corregido y la causa por escrito**.
 |---|---|
 | Un test en rojo, un criterio de aceptación incumplido, un caso límite mal tratado, un *warning* nuevo, la complejidad prometida degradada | **`5b` `fix` (este)** |
 | El comportamiento **no** cambia: solo nombres, estructura, duplicación o claridad | `5c` `refactor` |
-| El defecto está en un artefacto **anterior** a la implementación (esqueleto, contrato o suite) | `4d` `correct` |
+| El defecto está en un artefacto **anterior** a la implementación (esqueleto, contrato, suite, runner o construcción) | `4e` `correct` |
 
 **Regla de una frase:** *¿cambia lo que el consumidor del módulo observa —valor, orden,
 indicador de fallo o complejidad prometida—?* Sí → `fix`. No → `refactor`. No mezcles las
@@ -39,15 +39,18 @@ Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
 sustituidos: las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo):
+fija las bases por prioridad y la agrupación por tema e idioma para este rol.
+
 ---
 
 ## Fuentes de verdad (en este orden)
 
 1. **`{spec}`** — el contrato: funciones, casos, orden y complejidad prometida.
 2. **La suite del módulo** — el contrato ejecutable. **No** la cambies para que pase: si
-   crees que la suite está mal, repórtalo (eso sería `correct`, paso `4d`).
-3. **Módulos homologados del mismo lenguaje** — `{lang}/core/foundations/numbers/` y los
-   demás: la autoridad del **cómo**.
+   crees que la suite está mal, repórtalo: no la corrijas desde `fix`.
+3. **Bases homologadas del mismo lenguaje**, en el orden de la política compartida;
+   conserva el agrupamiento del contrato y la suite.
 4. **`AGENTS.md`** — límites de actuación y flujo de cierre.
 
 El contrato lo manda la especificación; el estilo, el módulo homologado.

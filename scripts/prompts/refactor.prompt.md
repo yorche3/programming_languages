@@ -25,7 +25,7 @@ motivo por escrito**.
 |---|---|
 | El comportamiento **no** cambia (mismos valores, orden, indicador de fallo y complejidad): nombres, estructura, duplicación, extracción de ayudas, claridad | **`5c` `refactor` (este)** |
 | Cambia lo observable: un test en rojo, un criterio incumplido | `5b` `fix` |
-| El defecto está en un artefacto **anterior** a la implementación | `4d` `correct` |
+| El defecto está en un artefacto **anterior** a la implementación | `4e` `correct` |
 
 **Prueba de fuego:** la suite estaba **verde antes** y tiene que seguir **verde después**,
 sin tocar ni un caso. Si para «refactorizar» hay que cambiar un test, no es `refactor`: es
@@ -40,13 +40,16 @@ Este encargo lo arma `glot prompt`: el encabezado trae el **estado del sprint**
 sustituidos: las rutas de las fuentes se leen desde `root`, la raíz del monorepo.
 Si encuentras un marcador sin resolver, **detente y avísalo**: no lo inventes.
 
+Lee `scripts/prompts/Delegation_Policy.md` (incluida al armar el encargo):
+fija las bases por prioridad y la agrupación por tema e idioma para este rol.
+
 ---
 
 ## Fuentes de verdad (en este orden)
 
 1. **`{spec}`** — el contrato: es lo que **no** puede cambiar (valores, orden, complejidad).
-2. **Módulos homologados del mismo lenguaje** — `{lang}/core/foundations/numbers/` y los
-   demás: la autoridad del **cómo** idiomático.
+2. **Bases homologadas del mismo lenguaje**, en el orden de la política compartida;
+   conserva los contratos y grupos de la suite sin cambiar sus casos.
 3. **`AGENTS.md`** — límites de actuación y flujo de cierre.
 
 ---
