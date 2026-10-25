@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Algoritmos Puros / Algorithms Pure
-description: Índice de la sección de algoritmos puros — solo secuencias indexables e indicadores de fallo / Index for the pure algorithms section — only indexable sequences and failure indicators
+description: Algoritmos sobre secuencias y estructuras enlazadas con indicadores de fallo / Algorithms on sequences and linked structures with failure indicators
 nav_order: 2
 parent: Core
 grand_parent: Programming Languages Monorepo
@@ -16,9 +16,17 @@ grand_parent: Programming Languages Monorepo
 
 ## 📖 Descripción / Description
 
-**ES:** Algoritmos estructurados solo con **secuencias indexables** e indicadores de fallo compatibles con cada lenguaje. Sin excepciones, sin estructuras avanzadas. La progresión va desde los más simples a los optimizados, incluyendo estructuras de datos implementadas desde cero sobre secuencias indexables.
+**ES:** Algoritmos sobre secuencias y estructuras de datos construidas desde cero,
+con indicadores de fallo compatibles y sin excepciones. Ordenamiento y búsqueda
+usan las secuencias que pide cada contrato; listas, pilas, colas, ABB y grafos
+enseñan sus nodos, enlaces e invariantes. Preferir arrays para ordenar no impone
+esa representación ni una capacidad máxima a las estructuras enlazadas.
 
-**EN:** Algorithms structured with only **indexable sequences** and language-compatible failure indicators. No exceptions, no advanced structures. The progression goes from the simplest to the optimized, including data structures implemented from scratch over indexable sequences.
+**EN:** Algorithms on sequences and data structures built from scratch, using
+compatible failure indicators and no exceptions. Sorting and searching use the
+sequences required by their contracts; lists, stacks, queues, BSTs and graphs
+teach their nodes, links and invariants. Preferring arrays for sorting does not
+impose that representation or a maximum capacity on linked structures.
 
 ---
 

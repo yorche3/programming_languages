@@ -127,6 +127,39 @@ aspect according to module topics and variants. Declare a missing, unhomologated
 or self-referencing base; use the other if sufficient, otherwise report a blocker
 without inventing a replacement.
 
+**ES:** Una representación no define todos los ADT: preferir arrays en un
+módulo de secuencias u ordenamiento no impone arrays, índices consecutivos ni
+capacidad máxima a listas enlazadas, árboles o grafos. Solo se validan límites
+que pertenezcan al contrato actual. Un límite físico del entorno se documenta
+como tal; no se presenta como propiedad intrínseca de la estructura.
+
+**EN:** One representation does not define every ADT: preferring arrays in a
+sequence or sorting module does not impose arrays, consecutive indices or
+maximum capacity on linked lists, trees or graphs. Validate only limits belonging
+to the current contract. Document physical environment limits as such, not as
+intrinsic structure properties.
+
+**ES:** Al redactar o revisar una especificación, distingue comportamiento
+observable de intención educativa: indica qué algoritmo o representación debe
+construirse manualmente, qué operaciones de biblioteca están prohibidas y qué
+primitivas o almacenamiento sí se permiten. El SME adapta la forma sin borrar
+esa intención; el SDET prueba resultados e invariantes observables, y el
+Validator revisa también el código para comprobar restricciones que una suite
+verde no demuestra. Una mejora de complejidad no autoriza sustituir lo que se
+está aprendiendo. Al revisar documentación anterior aplica sus requisitos
+explícitos; si la intención es ambigua, solicita decisión al autor antes de
+declarar incumplimientos o extender restricciones de otro módulo.
+
+**EN:** When writing or reviewing a specification, distinguish observable
+behaviour from educational intent: state which algorithm or representation must
+be built manually, which library operations are forbidden and which primitives
+or storage are permitted. The SME adapts form without removing that intent;
+the SDET tests observable results and invariants, while the Validator also reads
+code to check constraints green tests cannot prove. Better complexity does not
+authorise replacing the learning objective. Review older documentation against
+its explicit requirements; if intent is ambiguous, request an author decision
+before declaring violations or extending another module's restrictions.
+
 - Mantener el formato bilingüe español/inglés.
 - Usar enlaces GitHub Pages donde lo exijan las guías de documentación.
 - Copiar solo salidas reales de compilación y tests.

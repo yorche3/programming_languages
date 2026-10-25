@@ -44,6 +44,18 @@ grand_parent: Core
 > **ES:** La cola de prioridad se implementa reutilizando el heap de `efficient_sort` (Fase 1). La representación del grafo es una lista de adyacencia: `adjacency_list[u] = [(v, weight), ...]`, construida desde secuencias indexables de aristas; su representación concreta es libre y se declara en el README.
 > **EN:** The priority queue reuses the heap from `efficient_sort` (Phase 1). The graph representation is an adjacency list: `adjacency_list[u] = [(v, weight), ...]`, built from indexable edge sequences; its concrete representation is free and is declared in the README.
 
+> **ES:** La indexación de los algoritmos de esta página es local a este módulo,
+> no una capacidad máxima ni una restricción de etiquetas del ADT de
+> [`data_structures_advanced`](../algorithms/07_Data_Structures_Advanced.md).
+> Al adaptar sus vértices explícitos se declara la correspondencia etiqueta ↔
+> índice, incluidos los vértices aislados; no se confunden cantidad de vértices,
+> cantidad de aristas y presupuesto físico de memoria.
+>
+> **EN:** Algorithm indexing on this page is local to this module, not a maximum
+> capacity or label restriction on the Advanced ADT. When adapting its explicit
+> vertices, declare the label ↔ index mapping, including isolated vertices;
+> distinguish vertex count, edge count and physical memory budget.
+
 ### Pseudocódigo / Pseudocode
 
 ```pseudocode
