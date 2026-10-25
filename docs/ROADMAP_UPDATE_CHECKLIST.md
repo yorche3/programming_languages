@@ -1406,3 +1406,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`v/core/algorithms/data_structures_basics/README.md` con estructura, `v.mod`, comandos y salidas reales al día, y el índice de fase `v/core/algorithms/README.md` con el árbol y los casos)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_basics` 🔄 49/50 (Ada, …, TypeScript, Vala, Zig) -> ✅ 50/50 (Ada, …, TypeScript, V, Vala, Zig)
 Observaciones / Notes: cierre del último lenguaje del módulo. Los defectos venían del andamiaje sin normalizar: el módulo quedó con `data_structures_basics.v` en la raíz y `tests/` (forma cruda de `v init --lib`), `v.mod` con `version: '0.0.1'`/`license: 'GNU'` y la evidencia en **rojo** (`v fmt -verify src` no encontraba `src/`), así que no hubo commit de cierre y el contador no lo recogía. Corregido a mano: fuente a `src/` con `module src`, import de la suite a `data_structures_basics.src`, `v.mod` a `0.1.0`/`MIT` (patrón de `numbers`, `calculator` y `naive_sort`) y README + índice al día. **Pendiente del autor**: el acta almacenada (`docs/evidence/algorithms/data_structures_basics/v.md`, commit `24c577a`) es anterior a la corrección y sigue en rojo —conviene regenerarla al confirmar el cierre— y los cambios del submódulo están sin confirmar.
+
+Fecha / Date: 2026-10-24T22:13:20-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_advanced
+Lenguaje(s) / Language(s): ada
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_advanced/ada.md`, commit `7b30147`)
+Tests y comandos / Tests and commands:
+- `alr -C tests run` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`ada/core/algorithms/data_structures_advanced/README.md` y `ada/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 📋` -> `core.algorithms.data_structures_advanced 🔄 1/50 (Ada)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
