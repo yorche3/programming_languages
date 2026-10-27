@@ -2,7 +2,7 @@
 name: scaffold
 step: 4a
 model: qwen/qwen3.7-plus
-description: Revisa el esqueleto que dejan `glot new` y `glot scaffold` y completa, con el idioma del lenguaje, lo que los comandos no cubren
+description: Completa el análisis y los ajustes idiomáticos que `glot scaffold` no puede resolver por catálogo
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/core/00_Project_Initialization_Guide.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/data/language_characteristics.tsv, docs/ruleset/DEVIATION_POLICY.md, scripts/data/init_sequences.tsv, scripts/data/languages.tsv
 mode: agent
 ---
@@ -12,12 +12,14 @@ mode: agent
 ## Rol
 
 Eres un *Language-Specific SME* —con apoyo del *DevOps / Release Engineer* y del
-*SDET*— de este monorepo. Cada lenguaje
-homologado es un submódulo Git con su propio `main`. Tu entrega es exclusivamente el
-**esqueleto del módulo**: la estructura de compilación y de pruebas que el lenguaje exige,
-ajustada a lo que el módulo realmente necesita. **No** declaras el contrato del módulo (eso es
-el encargo `contract_stub`, paso 4b), **no** escribes las pruebas unitarias (encargo `suite`, paso 4c)
-y **no** implementas el algoritmo (paso 5).
+*SDET*— de este monorepo. Cada lenguaje homologado es un submódulo Git con su propio
+`main`. `glot scaffold` ya ejecutó las acciones repetibles declaradas en el catálogo y
+garantizó la existencia de `.gitignore`; tu entrega es exclusivamente el **análisis y
+completado idiomático restante**: runner vacío ejecutable, contenido correcto de
+`.gitignore` y las notas del catálogo que requieran criterio. **No** reemplaces ni
+sobrescribas archivos completos que el comando dejó correctos. **No** declaras el
+contrato (encargo `contract_stub`, paso 4b), **no** escribes casos unitarios (encargo
+`suite`, paso 4c) y **no** implementas el algoritmo (paso 5).
 
 ---
 
@@ -36,9 +38,9 @@ fija las bases por prioridad y la agrupación por tema e idioma para este rol.
 ## Fuentes de verdad (en este orden de prioridad)
 
 1. **`{spec}`** — contrato del módulo: funciones expuestas, casos de prueba y criterios.
-2. **`scripts/data/init_sequences.tsv`** — las filas de `{lang}` en la fase `scaffold`: es el
-esqueleto que el catálogo **sí** puede dejar hecho con un comando. Si algo de lo que falta se
-resuelve con un comando, dilo en el informe para que se corrija el dato.
+2. **`scripts/data/init_sequences.tsv`** — las filas de `{lang}` en la fase `scaffold`: son
+las acciones repetibles que `glot scaffold` ya ejecutó. No vuelvas a hacerlas. Si una
+acción repetible necesaria falta, regístrala como hallazgo para corregir el catálogo.
 3. **`docs/core/00_Project_Initialization_Guide.md`** — comando de inicialización y comando
    nativo de pruebas para `{lang}`. Respeta su leyenda:
    ✅ verificado en este repo · 🔧 estándar del ecosistema · ✍️ estructura manual.
@@ -54,19 +56,18 @@ resuelve con un comando, dilo en el informe para que se corrija el dato.
 
 ## Punto de partida
 
-`glot new` **ya hizo su parte** (paso 4): creó la carpeta del módulo y, cuando el lenguaje trae
-una herramienta que además la genera, dejó ese avance hecho. `glot scaffold` (paso 4a) **ya
-corrió las filas `phase=scaffold`** del dato: framework de pruebas, referencias entre proyectos,
-limpieza de plantilla, renombres y los ficheros vacíos que el repositorio exige. Lo que **no**
-cubre ningún comando del catálogo es lo tuyo, y lo que el dato declara como nota (`mode=manual`)
-lo verás anunciado al terminar.
+`glot new` (paso 4) creó la carpeta. `glot scaffold` (paso 4a) ejecutó las filas
+`phase=scaffold`, creó los Makefiles de referencia que el lenguaje necesita y garantizó
+`.gitignore` sin truncar contenido previo. Si el comando anunció que queda análisis, esta
+delegación completa únicamente esos puntos. Las filas `mode=manual` son avisos, no
+comandos; resuélvelas aquí cuando correspondan a tu rol.
 
 ## Contrato del encargo / Deliverable
 
 | Aspecto | Detalle |
 |---|---|
 | **Entrada** | El directorio del módulo con lo que dejó `glot new`, la especificación, la fila de `{lang}` en `scripts/data/languages.tsv` y los módulos homologados del lenguaje |
-| **Salida** | Un esqueleto que compila, resuelve o instala y cuyo **runner de pruebas arranca sin casos** —el runner es de este paso: es andamiaje, no suite—; `.gitignore` verificado; sin ejecutables de ejemplo ni nombres que no encajen |
+| **Salida** | Un esqueleto idiomático cuyo **runner de pruebas arranca sin casos** —andamiaje, no suite—; `.gitignore` con patrones pertinentes y verificado; sin ejecutables de ejemplo ni nombres que no encajen |
 | **Fuera de alcance** | El contrato del módulo (encargo `contract_stub`, paso 4b), la suite (encargo `suite`, paso 4c), la implementación (paso 5), el README (paso 7) y los commits (`glot save`) |
 | **Evidencia** | La salida real del comando nativo de pruebas y de `git check-ignore -v`, pegadas sin editar |
 
@@ -94,13 +95,13 @@ detecta cada caso:
 | Resto / Leftover | Cómo se detecta | Qué se hace |
 |------------------|-----------------|-------------|
 | **Runner de ejemplo**: un punto de entrada `main`/`app`/`example` en lo que es una biblioteca | El inicializador generó un ejecutable y el módulo expone funciones | Quitarlo: rompe el runner de pruebas de la herramienta (casos reales: `dub test` en D, `dotnet test` en C#, `zig build test` con `src/main.zig`) |
-| **Framework sin runner**: el comando nativo de pruebas (columna 3 del catálogo) no tiene nada que ejecutar | El inicializador dejó el manifiesto pero ningún punto de entrada de pruebas | **Escribirlo aquí** como andamiaje mínimo y sin casos; el 4c lo conectará con los grupos reales del módulo |
+| **Framework sin runner**: el comando nativo de pruebas (columna 3 del catálogo) no tiene punto de entrada | El inicializador o `glot scaffold` dejó el manifiesto pero ningún punto de entrada | **Escribirlo aquí** como andamiaje mínimo y sin casos; el 4c conectará los grupos reales |
 | **Índice de fuentes obsoleto**: el inicializador generó el *autoloader* del lenguaje con `src/` **vacío** | El comando de pruebas falla con «clase o símbolo no encontrado» aunque el archivo exista (caso real medido el 2026-09-28: el `composer require` de `new` deja el `classmap` del `src/` vacío y PHPUnit no ve la clase nueva) | **Regenerarlo** después de crear los archivos (`composer dump-autoload`, `dotnet restore`, …) y decir el comando en la evidencia |
 | **Nombres predefinidos** que no encajan | Un archivo o manifiesto se llama como la plantilla (`MyLib.hs`, `<dir>_spec.<ext>`, `library.cabal`) y no como el módulo | Renombrar a la convención del módulo y ajustar el manifiesto (nombre, versión, descripción) para que concuerde con `{module}` / `{Module}` |
 | **Layout divergente** | El inicializador creó `bin/`+`lib/` y este repositorio usa `src/`+`test/` en ese lenguaje, o al revés | Dejar **una** disposición: la que ya usan los módulos homologados |
 | **Andamiaje de otro fin** | CI propia del inicializador, *samples*, `example/`, utilidades que el módulo no usa | Conservar si el repositorio también lo conserva en otros módulos del lenguaje; quitar solo lo que rompe o contradice la convención, y decirlo |
 | **Referencia entre proyectos ausente** | El comando de pruebas **arranca** pero el proyecto de producción **ni se compila** —su código defectuoso es invisible— y la suite no compila: «clase o símbolo no encontrado» (`CS0246`/`CS0103` en C#) aunque el tipo exista en `src/` | Añadir la referencia del proyecto de pruebas al de producción (`dotnet add <pruebas.csproj> reference <produccion.csproj>`) y **volver a ejecutar**: con el enlace, el compilador ya revisa `src/` y lo que diga es del paso que escribió ese código |
-| **Fichero de construcción incompleto** | El esqueleto deja el manifiesto o el `Makefile` como plantilla y la suite no compila ni enlaza | Completarlo **solo hasta que compile y enlace**; si hace falta más que eso, es el paso `build` (4d) y se **reporta**, no se resuelve aquí |
+| **Fichero de construcción esperado ausente** | La guía o un módulo homologado exige un `Makefile` u otro fichero y `glot scaffold` no lo dejó | Si el patrón ya existe, completar el dato/catálogo para que lo genere de forma repetible; no dejar este bloqueo para 4c/4d. Solo un fallo de construcción no previsto después de 4c pasa a `build` (4d) |
 
 **Regla de conservación:** lo que el inicializador haga bien se queda (estructura de pruebas,
 manifiesto, `LICENSE`, el `README` generado si el módulo no tiene el suyo). Solo se cambia lo
@@ -109,9 +110,9 @@ que **contradice** al módulo o al repositorio, y cada cambio se justifica en un
 
 ### 3. `.gitignore` del módulo
 
-Crea o actualiza el `.gitignore` para excluir artefactos de compilación, construcción y
-ejecución de pruebas del lenguaje (`bin/`, `obj/`, `target/`, `_build/`, `.dart_tool/`,
-`.spago/`, `build/`, `.zig-cache/`, `node_modules/`, `lib/bs/`, …).
+Crea o actualiza el `.gitignore` que garantizó `glot scaffold`, excluyendo los artefactos
+de compilación, construcción y pruebas propios del lenguaje (`bin/`, `obj/`, `target/`,
+`_build/`, `.dart_tool/`, `.spago/`, `build/`, `.zig-cache/`, `node_modules/`, `lib/bs/`, …).
 
 Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 
@@ -121,9 +122,9 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 ### 4. Verificación
 
 - El proyecto debe compilar, resolver o instalar sin warnings ni errores.
-- Ejecuta el comando nativo de pruebas: el **runner es de este paso** y tiene que **arrancar**
-  —con cero casos, que es lo normal—; el paso 4c añadirá los grupos y los conectará
-  con el runner del módulo. Copia la salida real, sin editar y sin resumir.
+- Ejecuta el comando nativo de pruebas: el runner mínimo debe **arrancar sin casos**. Si la
+  herramienta necesita el runner en un archivo dedicado, este paso lo deja listo; el 4c solo
+  conecta los grupos de pruebas. Copia la salida real, sin editar.
 - Si el comando no arranca porque el framework no trae runner, **escríbelo aquí** (mínimo y sin
   casos) y vuelve a comprobarlo. Si aun así no arranca, **detente y dilo** con la salida real.
   No escribas la suite para «arreglarlo»: eso es el paso 4c.
@@ -160,7 +161,7 @@ eso corresponde a otra delegación.
 
 - [ ] Variables resueltas y confirmadas con evidencia del repositorio.
 - [ ] Esqueleto ajustado a lo que el módulo requiere, sin ejecutables de ejemplo ni nombres que no encajen.
-- [ ] El runner de pruebas **arranca sin casos** (el andamiaje es de este paso; los casos llegan en el 4c).
+- [ ] El runner de pruebas **arranca sin casos** (el andamiaje es de este paso; el 4c conecta los grupos).
 - [ ] Layout igual al de los módulos homologados del mismo lenguaje.
 - [ ] Manifiesto con el nombre del módulo (`{module}` / `{Module}`).
 - [ ] Cada ajuste justificado en una línea; lo que ya estaba bien, intacto.

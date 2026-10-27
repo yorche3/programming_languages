@@ -123,7 +123,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ `cd test && swipl -q -f {suite}.pl -t halt` |
 | **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `spago test` |
 | **python** | ⛓️ ✅ `uv init --lib .` | `pyproject.toml`, `src/{module}/`, `conftest.py`, `tests/` | ✅ `pytest` |
-| **r** | ✅ `mkdir -p R tests/testthat` | — | ✅ `make test` |
+| **r** | ✅ `mkdir -p R tests/testthat` + `Makefile` | `Makefile` | ✅ `make test` |
 | **racket** | ⛓️ 🔧 `raco new library {module}` | `info.rkt`, `{module}.rkt` (con guiones), `tests/`, `Makefile` | ✅ `raco test -x .` |
 | **raku** | ✅ `mkdir -p lib t` | — | ✅ `prove6 -l t/` |
 | **rescript** | ⛓️ ✅ `mkdir -p src test` (después el manifiesto con `npm pkg set`) | `rescript.json`, `package.json`, `jest.config.js` | ✅ `npm test` |
@@ -432,9 +432,9 @@ mkdir -p src tests
 
 ### R — paquete (R/ + tests/testthat/)
 
-**ES:** El módulo es un paquete de R: DESCRIPTION (nombre, versión, licencia y dependencias), NAMESPACE (lo que se exporta), el código en R/ y las suites en tests/testthat/, con el prefijo test- que testthat descubre por defecto. El runner es make test, que llama a testthat::test_local() —carga el paquete con pkgload::load_all(), sin instalarlo— y el "verificador" analiza los fuentes de R/ con parse().
+**ES:** El módulo es un paquete de R: DESCRIPTION (nombre, versión, licencia y dependencias), NAMESPACE (lo que se exporta), el código en R/ y las suites en tests/testthat/, con el prefijo test- que testthat descubre por defecto. El Makefile común deja el runner `make test`, que llama a `testthat::test_local()` —carga el paquete con pkgload::load_all(), sin instalarlo—; el "verificador" analiza los fuentes de R/ con `parse()`.
 
-**EN:** The module is an R package: DESCRIPTION (name, version, license and dependencies), NAMESPACE (what is exported), the code in R/ and the suites in tests/testthat/, with the test- prefix testthat discovers by default. The runner is make test, which calls testthat::test_local() —it loads the package with pkgload::load_all(), without installing it— and the "verifier" analyses the sources under R/ with parse().
+**EN:** The module is an R package: DESCRIPTION (name, version, license and dependencies), NAMESPACE (what is exported), the code in R/ and the suites in tests/testthat/, with the test- prefix testthat discovers by default. Its shared Makefile provides `make test`, which calls `testthat::test_local()`—it loads the package with `pkgload::load_all()`, without installing it—and the verifier analyses sources under R/ with `parse()`.
 ```bash
 mkdir -p R tests/testthat
 ```
@@ -609,7 +609,7 @@ v init                        # genera v.mod (no interactivo)
 
 - **Separar fuente y pruebas.** `src/` (o `lib/`, `source/`) para el código y `test/` (o `tests/`, `spec/`, `t/`) para las suites. Ninguna suite vive junto al código de producción.
 - **Una suite por enfoque** cuando el módulo tenga variantes (`rec` / `acc` / `ite`). El nombre del archivo refleja el enfoque: `numbers_rec_test`, `numbers_ite_test`, `recursive_tests`, `iterative_tests`.
-- **Un `.gitignore` por módulo** que excluya los artefactos del lenguaje: `bin/`, `obj/`, `target/`, `_build/`, `.dart_tool/`, `.spago/`, `build/`, `.zig-cache/`, `node_modules/`, `lib/bs/`, etc.
+- **Un `.gitignore` por módulo**, creado si el inicializador no lo deja, que excluya los artefactos del lenguaje: `bin/`, `obj/`, `target/`, `_build/`, `.dart_tool/`, `.spago/`, `build/`, `.zig-cache/`, `node_modules/`, `lib/bs/`, etc.
 - **Sin `main` propio** cuando el runner de tests lo genera: declarar `main` en un target de librería rompe el runner (caso real en D con `dub test` y en C# con `dotnet test`).
 - **Cerrar el módulo** con su `README.md` generado desde [`README_Template.md`](../README_Template.md), el registro en [`ROADMAP_UPDATE_CHECKLIST.md`](../ROADMAP_UPDATE_CHECKLIST.md) y la actualización de [`ROADMAP.md`](../ROADMAP.md).
 
@@ -617,7 +617,7 @@ v init                        # genera v.mod (no interactivo)
 
 - **Separate sources and tests.** `src/` (or `lib/`, `source/`) for code and `test/` (or `tests/`, `spec/`, `t/`) for suites. No suite lives next to production code.
 - **One suite per approach** when the module has variants (`rec` / `acc` / `ite`). The file name reflects the approach: `numbers_rec_test`, `numbers_ite_test`, `recursive_tests`, `iterative_tests`.
-- **One `.gitignore` per module** excluding the language's artifacts: `bin/`, `obj/`, `target/`, `_build/`, `.dart_tool/`, `.spago/`, `build/`, `.zig-cache/`, `node_modules/`, `lib/bs/`, etc.
+- **One `.gitignore` per module**, created if the initializer does not provide one, excluding the language's artifacts: `bin/`, `obj/`, `target/`, `_build/`, `.dart_tool/`, `.spago/`, `build/`, `.zig-cache/`, `node_modules/`, `lib/bs/`, etc.
 - **No `main` of your own** when the test runner generates one: declaring `main` in a library target breaks the runner (real cases: `dub test` in D and `dotnet test` in C#).
 - **Close the module** with its `README.md` generated from [`README_Template.md`](../README_Template.md), the record in [`ROADMAP_UPDATE_CHECKLIST.md`](../ROADMAP_UPDATE_CHECKLIST.md) and the update of [`ROADMAP.md`](../ROADMAP.md).
 

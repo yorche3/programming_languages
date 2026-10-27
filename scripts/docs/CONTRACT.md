@@ -54,11 +54,11 @@
 
 ---
 
-## 🧰 Verbos de la versión viva (v1.0.0) / Verbs in the live version
+## 🧰 Verbos de la versión viva (v2.0.3) / Verbs in the live version
 
 | Verbo | Comportamiento | Código |
 |-------|----------------|:------:|
-| `version`, `--version` | `glot 1.0.0` | 0 |
+| `version`, `--version` | `glot 2.0.3` | 0 |
 | `help`, `-h`, `--help`, `help <verbo>` | Ayuda general o de un verbo | 0 |
 | `doctor` | Diagnóstico: bash, git, raíz del monorepo, directorio y fichero de estado, y número de claves | 0 / 1 |
 | `greet [nombre]` | `Hello, <nombre>!` con el nombre por argumento o por stdin | 0 / 2 |
@@ -79,7 +79,7 @@
 | `prompt [encargo] [lenguaje] [fase/módulo]` | Sin encargo, lista el registro —`nombre<TAB>paso<TAB>modelo<TAB>descripción`—; con encargo, imprime el encargo armado (estado del sprint + plantilla expandida) | 0 / 1 / 2 / 3 |
 | `ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot\|antigravity] [--model <id>] [--effort <nivel>]` | Arma el encargo y lo envía al **delegado elegido** por stdin; su salida va a stdout. El modelo sale del **rol** (perfil del encargo; para AGY, su columna del catálogo y la clave de estado `antigravity-model` —v1.7.0—; para Copilot, su columna y la clave `copilot-model` —v1.7.3, que **solo** sustituye a los modelos que ya son de OpenRouter: los modelos de los perfiles `balanced` y `deep` no se tocan—, ambas con un **alias** de `data/delegates.tsv`) y viaja por entorno (`COPILOT_MODEL`, `GLOT_DELEGATE_MODEL`, `GLOT_DELEGATE_EFFORT`, y el tier de auto si el perfil lo declara) con `GLOT_ROOT`, `GLOT_MODULE_DIR` y `GLOT_DELEGATE_SPEC`; `--model`/`GLOT_MODEL` y `--effort`/`GLOT_EFFORT` lo cambian para **una** corrida | 0 / 1 / 2 / 3 |
 | `new [lenguaje] [fase/módulo]` | Crea la **carpeta del módulo** con las filas `phase=new` del catálogo de secuencias, respetando el `cwd` de cada una: avanza con el generador cuando el lenguaje lo trae. No completa la estructura idiomática (eso es `scaffold`) ni escribe la suite | 0 / 1 / 2 / **4** |
-| `scaffold [lenguaje] [fase/módulo]` | Completa el esqueleto que deja `new`: corre en orden las filas `phase=scaffold` de `data/init_sequences.tsv` desde el directorio del módulo (framework de pruebas, referencias entre proyectos, limpieza de la plantilla, renombres a la convención y ficheros vacíos) y **anuncia** las filas `manual` sin ejecutarlas |
+| `scaffold [lenguaje] [fase/módulo]` | Completa la base repetible de `new`: corre las filas `phase=scaffold`, copia plantillas solo si falta el destino, garantiza `.gitignore` sin truncarlo y anuncia el análisis delegado declarado en el catálogo | 0 / 1 / 2 / **4** |
 | `save <paso\|alias> [lenguaje] [fase/módulo] [--cause "<texto>"]` | Confirma con el mensaje de la tabla del sprint (que vive en datos) e imprime el SHA corto; `nothing` si no hay nada. `--cause` viaja como **cuerpo del commit** y es **obligatoria** en el retrabajo (`4e` `correct`, `5b` `fix`, `5c` `refactor`): si falta, la toma de la clave de estado `cause` y, si tampoco está, devuelve `2`. `--causa` sigue admitiéndose como **alias**. Los pasos del submódulo añaden el submódulo; los del monorepo (`9`, `10`) añaden **solo las rutas del paso**. Sin push | 0 / 1 / 2 / 3 / **4** |
 | `evidence [lenguaje] [fase/módulo]` | Ejecuta la suite y el verificador y deja el acta con la salida real en `docs/evidence/`; la escribe también cuando algo está en rojo | 0 / 1 / 2 / 3 / **4** |
 | `close [lenguaje] [fase/módulo]` | Cierra el módulo: exige la evidencia en verde y los README, registra la entrada del checklist y sube el contador y la lista del roadmap; idempotente. Imprime la línea nueva | 0 / 1 / 2 / 3 / **4** |
@@ -334,7 +334,7 @@ using those services is not required.
 | Aspecto / Aspect | Detalle / Detail |
 |------------------|------------------|
 | Directorio / Directory | El del módulo, que prepara `use`. Si no existe, `new` **no lo inventa**: error `1` con la sugerencia de `use` |
-| Estructura / Structure | La completa `scaffold` (paso 4a) con las filas `phase=scaffold`: carpetas y ficheros con su esqueleto base, renombres a la convención y borrado de lo que estorba |
+| Estructura / Structure | La completa `scaffold` (paso 4a): filas `phase=scaffold`, plantillas de construcción declaradas, `.gitignore` garantizado y análisis delegado solo cuando haga falta |
 | Nido / Nesting | Los inicializadores que crean un proyecto hijo se ejecutan en el directorio del módulo y se aplanan: sin `flat` el módulo quedaría anidado dos veces |
 | Repositorios anidados / Nested repositories | `crystal` y `gleam` crean un `.git` propio; `new` lo borra antes de aplanar, porque un repositorio dentro de un submódulo no es válido |
 | Contenido previo / Existing content | Con el directorio no vacío **no se pisa nada**: aviso por stderr, imprime la ruta y devuelve `0` |

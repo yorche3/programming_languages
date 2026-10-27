@@ -40,7 +40,55 @@
 | 1.7.8 | 2026-10-08 | [`versions/glot_1.7.8.sh`](../versions/glot_1.7.8.sh) | **El estándar de Racket es `raco new library {module}`** —el layout lib/test/doc de la comunidad— con las tres adecuaciones que su plantilla no resuelve aquí: render portátil (`mv` + `sed -i` de GNU, porque su `render-template.sh` es interactivo y de BSD y dejaba los marcadores `<project>`/`<username>` en los cuatro `info.rkt`), borrado de `.github/`, `pull_request_template.md`, `render-template.sh` y `profile/`, y suites que requieren la librería **por ruta relativa** para correr sin enlazar paquetes. El runner pasa a **`raco test -x .`**: `racket test/run_tests.rkt` no existía en los dos módulos de un solo archivo y, en los tres que sí lo tienen, **salía con código 0 aunque un test fallara** (falso verde en `test`/`evidence`), mientras `raco test` sale con 1, cuenta los casos y no contamina la salida | ✅ cerrada |
 | 2.0.0 | 2026-10-12 | [`versions/glot_2.0.0.sh`](../versions/glot_2.0.0.sh) | **El esqueleto se parte en dos pasos y dos commits** (paso `4`, la carpeta del módulo, y paso `4a`, la estructura idiomática) y entra el **paso `4d build`**, con `4d correct` recorrido a `4e`; `languages.tsv` se queda con cuatro columnas (lenguaje, tipo, pruebas y verificador) y `init_sequences.tsv` con todo el esqueleto en nueve, así que se retira el vocabulario `deferred` y el camino v1 del script (`_glot_init_run`, `_glot_init_fix`, `_glot_init_normalise`, `_glot_init_flat`); los perfiles de modelo pasan a `gpt-6.1-sol` (low, 60) y `claude-sonnet-5.5` (medium, 90) | ✅ cerrada |
 | 2.0.1 | 2026-10-23 (archivo) | [`versions/glot_2.0.1.sh`](../versions/glot_2.0.1.sh) | Base previa al hotfix, archivada como copia exacta del script vivo antes de editarlo; conserva sus cambios anteriores de andamiaje y encargos / Pre-hotfix baseline, archived as an exact copy before editing | ✅ cerrada |
-| 2.0.2 | 2026-10-23 | [`glot.sh`](../glot.sh) | Política compartida de bases y agrupación, fuentes entregadas al agente, límites suite/build/correct alineados y consumo de causa corregido en `save 4e`; modelos sin cambios / Shared references and grouping, visible sources, aligned boundaries and corrected cause cleanup; unchanged models | Verificada; lista para cierre del autor / Verified; ready for author closure |
+| 2.0.2 | 2026-10-23 (archivo) | [`versions/glot_2.0.2.sh`](../versions/glot_2.0.2.sh) | Snapshot exacto previo al hotfix 2.0.3 / Exact pre-2.0.3 hotfix snapshot | ✅ cerrada |
+| 2.0.3 | 2026-10-26 | [`glot.sh`](../glot.sh) | `scaffold` automatiza `.gitignore` y Makefiles declarados, avisa si queda análisis delegado; `build` queda excepcional y conserva la suite / `scaffold` automates `.gitignore` and declared Makefiles, announces remaining delegated analysis; `build` is exceptional and preserves the suite | Verificada; lista para publicación del autor / Verified; ready for author publication |
+
+---
+
+## 2.0.3 — 2026-10-26 (verificada / verified)
+
+**ES:** Hotfix de la secuencia 4a/4c/4d: `glot scaffold` prepara los artefactos
+repetibles conocidos, garantiza `.gitignore` sin truncar contenido, copia los
+Makefiles compartidos declarados solo si faltan y muestra `glot prompt scaffold`
+cuando queda análisis idiomático. Assembly, C y COBOL reciben además una nota para
+completar el runner vacío y los patrones del ignore; Grain y R automatizan sus
+Makefiles. El delegate de suite conecta casos al runner ya preparado; `build`
+solo atiende bloqueos no previstos, conserva la suite y exige reejecutar `glot test`.
+
+**EN:** Hotfix for steps 4a/4c/4d: `glot scaffold` prepares known repeatable
+artifacts, ensures `.gitignore` without truncating contents, copies declared
+shared Makefiles only when missing, and prints `glot prompt scaffold` when
+idiomatic analysis remains. Assembly, C and COBOL also flag the empty runner and
+ignore patterns for delegate completion; Grain and R automate their Makefiles.
+The suite delegate connects cases to the prepared runner; `build` handles only
+unpredicted blockers, preserves the suite, and calls for rerunning `glot test`.
+
+**ES:** Verificación real con repositorios y estado aislados:
+
+**EN:** Actual verification with isolated repositories and state:
+
+```text
+bash -n scripts/glot.sh scripts/tests/glot_test.sh scripts/versions/glot_2.0.2.sh
+# sin salida, código 0 / no output, exit 0
+
+env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.bareRepository GIT_CONFIG_VALUE_0=all ./scripts/tests/glot_test.sh
+glot tests: 1209 passed, 0 failed
+
+bash docs/tests/docs_check.sh
+docs checks: 25 passed, 0 failed
+
+git diff --check
+# sin salida, código 0 / no output, exit 0
+```
+
+**ES:** El harness comprueba la copia de las cinco plantillas, la creación y
+conservación de `.gitignore`, el ensayo sin mutaciones y una raíz con espacios.
+No certifica los cinco toolchains nativos ni ejecuta scaffold sobre los módulos
+reales del autor.
+
+**EN:** The harness checks copying all five templates, creating and preserving
+`.gitignore`, non-mutating dry runs, and a root containing spaces. It does not
+certify all five native toolchains or run scaffold on the author's real modules.
 
 ---
 

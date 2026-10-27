@@ -314,8 +314,27 @@ sandbox_make() {
 [submodule "java"]
         path = java
         url = ../remote/java.git
+[submodule "assembly"]
+        path = assembly
+        url = ../remote/assembly.git
+[submodule "c"]
+        path = c
+        url = ../remote/c.git
+[submodule "cobol"]
+        path = cobol
+        url = ../remote/cobol.git
+[submodule "grain"]
+        path = grain
+        url = ../remote/grain.git
+[submodule "r"]
+        path = r
+        url = ../remote/r.git
 EOF
     git -C "$SANDBOX" init -q
+    mkdir -p -- "$SANDBOX/assembly/core/algorithms" "$SANDBOX/c/core/algorithms" \
+        "$SANDBOX/cobol/core/algorithms" "$SANDBOX/grain/core/algorithms" \
+        "$SANDBOX/r/core/algorithms" "$SANDBOX/scripts/data"
+    cp -R -- "$TESTS_DIR/../data/scaffold_templates" "$SANDBOX/scripts/data/"
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
@@ -1275,7 +1294,8 @@ assert_contains 'suite: el triaje manda la construcción al 4d' 'es el disparado
 # deja el andamiaje), y su éxito es la misma terna de datos.
 build_prompt="$(cat -- "$PROMPTS_DIR/build.prompt.md")"
 assert_contains 'build: el paso no es fijo' 'no es fijo' "$build_prompt"
-assert_contains 'build: lo dispara la construcción del 4c' 'no pudo alcanzar la **fase roja**' "$build_prompt"
+assert_contains 'build: lo dispara un fallo de construcción no previsto en 4c' \
+    'Este paso **no es fijo**: solo se' "$build_prompt"
 assert_contains 'build: su éxito son los cuatro datos' 'cuatro datos' "$build_prompt"
 
 # v1.5.0: el encargo del contrato se llama `contract_stub` y exige, además del contrato,
@@ -1308,14 +1328,17 @@ assert_contains 'scaffold: regenera el índice de fuentes' 'composer dump-autolo
 # comprueba las **dos mitades**: el esqueleto lo deja arrancando y la suite no lo crea.
 # Medido el 2026-09-26 en `assembly`: el manifiesto era del 4a, el runner nunca se generó y
 # `make build` se paró en el enlace (`ld: undefined reference to 'tests_failed'`).
-assert_contains 'scaffold: el runner es de este paso' 'el **runner es de este paso**' "$scaffold_prompt"
+assert_contains 'scaffold: el runner se completa en 4a' 'runner vacío ejecutable' "$scaffold_prompt"
 assert_contains 'scaffold: exige que arranque sin casos' 'arranca sin casos' "$scaffold_prompt"
 assert_contains 'scaffold: lo escribe si el framework no lo trae' 'escríbelo aquí' "$scaffold_prompt"
 assert_eq 'suite: ya no dice que crea el runner' 'no' \
     "$([[ "$suite_prompt" == *'Si el framework no incluye runner propio'* ]] && echo si || echo no)"
-assert_contains 'suite: el runner es parte de la entrega' 'El **runner es parte de esta entrega**' "$suite_prompt"
-assert_contains 'suite: el runner de ejemplo se sustituye' 'lo sustituye este paso' "$suite_prompt"
-assert_contains 'suite: la construcción se pide al 4d' 'eso es del **4d**' "$suite_prompt"
+assert_contains 'suite: conecta los grupos al runner de 4a' \
+    'grupos reales al runner existente' "$suite_prompt"
+assert_contains 'suite: no reemplaza infraestructura de pruebas' \
+    'no se crea ni reemplaza la infraestructura de pruebas' "$suite_prompt"
+assert_contains 'suite: runner ausente se reporta a 4a' \
+    'reporta el defecto del paso 4a' "$suite_prompt"
 assert_contains 'suite: no cruza casos de contratos distintos' 'Solo implementaciones alternativas del mismo contrato' "$suite_prompt"
 assert_contains 'suite: admite escenarios de estado' 'Un test de escenario con estado propio' "$suite_prompt"
 assert_contains 'correct: integra runner del módulo' '| Suite y runner del módulo | `4c` |' \
@@ -1325,10 +1348,16 @@ assert_contains 'correct: corrige construcción del 4d' '| Construcción y enlac
 glot_run help save
 assert_contains 'help save: distingue build' '4d (construcción/build)' "$out"
 assert_contains 'help save: distingue correct' '4e (corrección/correct)' "$out"
-assert_contains 'suite: cero casos es defecto del 4c' 'Escribe el runner que agrega la suite' "$suite_prompt"
-assert_contains 'build: el runner no es asunto del 4d' 'no** es asunto de este paso' "$build_prompt"
-assert_contains 'SPRINT: el 4a deja el runner arrancando' 'runner arrancando sin casos' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
-assert_contains 'SPRINT: el 4c trae el runner del módulo' 'runner del módulo' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
+assert_contains 'suite: cero casos se corrige conectando grupos al runner' \
+    'Conecta los grupos de la suite al runner existente' "$suite_prompt"
+assert_contains 'build: no sustituye un runner faltante' \
+    'reporta el defecto del paso responsable' "$build_prompt"
+assert_contains 'SPRINT: el 4a deja el runner arrancando' 'mínimo arrancando sin casos' \
+    "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
+assert_contains 'SPRINT: el 4c conecta casos al runner de 4a' \
+    'los conecta al runner mínimo del 4a' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
+assert_contains 'SPRINT: registra el diagnóstico sin enlace del contrato' \
+    'compilación sin enlace' "$(cat -- "$TESTS_DIR/../docs/SPRINT.md")"
 
 # Quien comprueba que el encargo del README no vuelva a enumerar las secciones de la
 # plantilla es `docs/tests/docs_check.sh`: allí se lee la plantilla, que es un documento.
@@ -1503,6 +1532,64 @@ assert_eq 'sandbox scaffold: código' '0' "$rc_last"
 assert_eq 'sandbox scaffold: crea src/main/java' 'si' "$([[ -d "$JB/src/main/java" ]] && echo si || echo no)"
 assert_eq 'sandbox scaffold: crea src/test/java' 'si' "$([[ -d "$JB/src/test/java" ]] && echo si || echo no)"
 assert_eq 'sandbox scaffold: no escribe la suite' '0' "$(find "$JB/src/test/java" -type f | wc -l | tr -d ' ')"
+
+# scaffold: las acciones repetibles preparan Assembly antes del paso 4c.
+AB="$SANDBOX/assembly/core/algorithms/naive_sort"
+mkdir -p -- "$AB"
+glot_run_sandbox -n scaffold assembly algorithms/naive_sort
+assert_eq 'sandbox scaffold assembly -n: código' '0' "$rc_last"
+assert_contains 'sandbox scaffold assembly -n: planifica Makefile' \
+    'scaffold_templates/assembly.Makefile' "$out"
+assert_eq 'sandbox scaffold assembly -n: no muta' '0' \
+    "$(find "$AB" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')"
+glot_run_sandbox scaffold assembly algorithms/naive_sort
+assert_eq 'sandbox scaffold assembly: código' '0' "$rc_last"
+assert_eq 'sandbox scaffold assembly: crea Makefile' 'si' "$([[ -f "$AB/Makefile" ]] && echo si || echo no)"
+assert_eq 'sandbox scaffold assembly: copia plantilla' '0' \
+    "$(cmp -s "$AB/Makefile" "$TESTS_DIR/../data/scaffold_templates/assembly.Makefile"; echo $?)"
+assert_eq 'sandbox scaffold assembly: garantiza .gitignore' 'si' \
+    "$([[ -f "$AB/.gitignore" ]] && echo si || echo no)"
+assert_contains 'sandbox scaffold assembly: avisa del delegate' \
+    'glot prompt scaffold assembly algorithms/naive_sort' "$err"
+
+# Repetir scaffold no reemplaza los artefactos declarados como preservables.
+printf 'custom-pattern\n' >"$AB/.gitignore"
+printf 'custom-makefile\n' >"$AB/Makefile"
+glot_run_sandbox scaffold assembly algorithms/naive_sort
+assert_eq 'sandbox scaffold repetido: código' '0' "$rc_last"
+assert_eq 'sandbox scaffold repetido: conserva .gitignore' 'custom-pattern' \
+    "$(cat -- "$AB/.gitignore")"
+assert_eq 'sandbox scaffold repetido: conserva Makefile' 'custom-makefile' \
+    "$(cat -- "$AB/Makefile")"
+
+# Los otros Makefiles declarados también se copian desde el catálogo sin toolchains externos.
+local_scaffold_lang=""
+for local_scaffold_lang in c cobol grain r; do
+    local_scaffold_dir="$SANDBOX/$local_scaffold_lang/core/algorithms/naive_sort"
+    mkdir -p -- "$local_scaffold_dir"
+    glot_run_sandbox scaffold "$local_scaffold_lang" algorithms/naive_sort
+    assert_eq "sandbox scaffold $local_scaffold_lang: código" '0' "$rc_last"
+    assert_eq "sandbox scaffold $local_scaffold_lang: crea Makefile" 'si' \
+        "$([[ -f "$local_scaffold_dir/Makefile" ]] && echo si || echo no)"
+    assert_eq "sandbox scaffold $local_scaffold_lang: copia plantilla" '0' \
+        "$(cmp -s "$local_scaffold_dir/Makefile" \
+            "$TESTS_DIR/../data/scaffold_templates/$local_scaffold_lang.Makefile"; echo $?)"
+    assert_eq "sandbox scaffold $local_scaffold_lang: garantiza .gitignore" 'si' \
+        "$([[ -f "$local_scaffold_dir/.gitignore" ]] && echo si || echo no)"
+done
+
+# `{root}` se expande como una ruta segura incluso cuando el monorepo contiene espacios.
+SPACED_SANDBOX="$WORK_DIR/sandbox with spaces"
+rm -rf -- "$SPACED_SANDBOX"
+cp -R -- "$SANDBOX" "$SPACED_SANDBOX"
+mkdir -p -- "$SPACED_SANDBOX/assembly/core/algorithms/naive_sort"
+local_spaced_rc=0
+out="$(GLOT_ROOT="$SPACED_SANDBOX" "$GLOT_SH" scaffold assembly algorithms/naive_sort \
+    2>"$WORK_DIR/stderr")" || local_spaced_rc=$?
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_eq 'sandbox scaffold con espacios: código' '0' "$local_spaced_rc"
+assert_eq 'sandbox scaffold con espacios: copia Makefile' 'si' \
+    "$([[ -f "$SPACED_SANDBOX/assembly/core/algorithms/naive_sort/Makefile" ]] && echo si || echo no)"
 
 # con contenido, el esqueleto ya está hecho: no se pisa nada
 glot_run_sandbox new java algorithms/naive_sort

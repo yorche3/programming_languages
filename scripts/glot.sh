@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# glot 2.0.2 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
+# glot 2.0.3 — el ciclo completo, en un archivo con dos modos: se **ejecuta** como
 # programa y se **carga** con `source` (capa cargable de la L8), donde `glot` es una
 # función de bash que hace el `cd` real de `use`. `install` deja la copia estable,
 # el bloque del rc y el completado; `doctor` cierra el diagnóstico del entorno.
@@ -150,7 +150,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="2.0.2"
+GLOT_VERSION="2.0.3"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -2671,7 +2671,7 @@ _glot_cmd_new() {
 
     if [[ "$kind" == "manual" ]]; then
         _glot_info "estructura manual creada / manual layout created: $dir"
-        _glot_info "el manifiesto y la suite son del encargo / manifest and suite belong to the request: glot prompt scaffold $lang $phase/$module"
+        _glot_info "continúa con / continue with: glot scaffold $lang $phase/$module"
     fi
 
     _glot_init_completion_report "$steps" "$module"
@@ -2683,10 +2683,10 @@ _glot_cmd_new() {
 # _glot_cmd_scaffold [lenguaje] [fase/módulo] — completa el esqueleto que `new` deja a
 # medias: asigna el framework de pruebas, enlaza proyectos entre sí, limpia los ficheros
 # de plantilla, renombra a las convenciones del lenguaje y crea los ficheros vacíos que el
-# repositorio exige. Lee las filas `phase=scaffold` de `data/init_sequences.tsv`, en orden,
-# y corre desde el directorio del módulo; las filas `mode=manual` no se ejecutan: se
-# anuncian para que las haga el autor. No escribe la suite —eso es el encargo `suite`— y no
-# confirma nada: eso es `save`.
+# repositorio exige, incluido `.gitignore` sin sobrescribir uno existente. Lee las filas
+# `phase=scaffold` de `data/init_sequences.tsv`, en orden, y corre desde el directorio del
+# módulo; las filas `mode=manual` no se ejecutan. Si quedan pasos de análisis o completado,
+# indica el encargo `scaffold`. No escribe la suite —eso es `suite`— ni confirma nada (`save`).
 # Códigos: 0 correcto (o sin filas) · 1 entorno o catálogo mal formado · 2 uso · 4 un paso falló.
 _glot_cmd_scaffold() {
     local target=""
@@ -2708,6 +2708,7 @@ _glot_cmd_scaffold() {
     local step_cmd=""
     local step_answers=""
     local step_complete=""
+    local delegate_needed=0
     local rc=0
 
     target="$(_glot_exec_target "$@")" || return $?
@@ -2739,11 +2740,15 @@ _glot_cmd_scaffold() {
         return 0
     fi
 
+    [[ -s "$dir/.gitignore" ]] || delegate_needed=1
+
     while IFS=$'\t' read -r order workdir mode command answers complete; do
         [[ -n "$order" ]] || continue
         step_dir="$dir"
-        step_dir="$dir"
         [[ "$workdir" == "phase" ]] && step_dir="$root/$lang/core/$phase"
+        if [[ "$mode" == "manual" || ( -n "$complete" && "$complete" != "-" ) ]]; then
+            delegate_needed=1
+        fi
         if [[ "$mode" == "manual" ]]; then
             step_cmd="$(_glot_expand_command "$step_dir" "$module" "$complete")" || return 1
         else
@@ -2762,6 +2767,10 @@ _glot_cmd_scaffold() {
             printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
             [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
         done <<<"$steps"
+        printf 'cd %s && touch .gitignore  # preserves existing contents\n' "$dir"
+        if ((delegate_needed)); then
+            _glot_info "para completar el análisis del paso 4a, ejecuta / to complete step 4a analysis, run: glot prompt scaffold $lang $phase/$module"
+        fi
         printf '%s\n' "$dir"
         return 0
     fi
@@ -2796,7 +2805,16 @@ _glot_cmd_scaffold() {
         fi
     done <<<"$steps"
 
+    _glot_info "scaffold: touch .gitignore"
+    touch -- "$dir/.gitignore" || {
+        _glot_error "no se pudo crear .gitignore / could not create .gitignore: $dir"
+        return 4
+    }
+
     _glot_init_completion_report "$steps" "$module"
+    if ((delegate_needed)); then
+        _glot_info "para completar el análisis del paso 4a, ejecuta / to complete step 4a analysis, run: glot prompt scaffold $lang $phase/$module"
+    fi
 
     printf '%s\n' "$dir"
     return 0
@@ -4273,18 +4291,14 @@ _glot_help_verb() {
             printf 'Desde dentro de un submódulo se puede omitir el lenguaje / the language can be omitted inside a submodule\n'
             ;;
         scaffold)
-            printf 'glot scaffold [lenguaje] [fase/módulo] — completa el esqueleto que deja new\n'
-            printf 'glot scaffold [language] [phase/module] — completes the skeleton new leaves\n'
-            printf 'Corre, en orden, las filas phase=scaffold de data/init_sequences.tsv desde el\n'
-            printf 'directorio del módulo: framework de pruebas, referencias entre proyectos,\n'
-            printf 'limpieza de la plantilla, renombres a la convención del lenguaje y ficheros\n'
-            printf 'vacíos. Las filas manual no se ejecutan: se anuncian al autor. No escribe la\n'
-            printf 'suite (eso es glot prompt suite) ni confirma nada (eso es save)\n'
-            printf 'Runs, in order, the phase=scaffold rows of data/init_sequences.tsv from the\n'
-            printf 'module directory: test framework, cross-project references, template cleanup,\n'
-            printf 'renames to the language convention and empty files. manual rows are not\n'
-            printf 'executed: they are announced to the author. It writes neither the suite\n'
-            printf '(that is glot prompt suite) nor a commit (that is save)\n'
+            printf 'glot scaffold [lenguaje] [fase/módulo] — completa la base repetible del esqueleto\n'
+            printf 'glot scaffold [language] [phase/module] — completes the repeatable scaffold base\n'
+            printf 'Corre, en orden, las filas phase=scaffold de data/init_sequences.tsv, conserva los\n'
+            printf 'archivos existentes y garantiza .gitignore. Si quedan ajustes que requieren\n'
+            printf 'análisis, indica glot prompt scaffold. No escribe la suite ni confirma cambios.\n'
+            printf 'Runs the phase=scaffold rows in order, preserves existing files and ensures\n'
+            printf '.gitignore. If analysis is still required, it prints glot prompt scaffold.\n'
+            printf 'It does not write the suite or commit changes.\n'
             ;;
         new)
             printf 'glot new [lenguaje] [fase/módulo] — inicializador y esqueleto del módulo\n'
@@ -4919,6 +4933,8 @@ _glot_expand_command() {
     local id="$2"
     local template="$3"
     local cmd="$template"
+    local root=""
+    local root_shell=""
     local effdir=""
     local prefix=""
     local suffix=""
@@ -4931,6 +4947,13 @@ _glot_expand_command() {
 
     cmd="${cmd//\{module\}/$id}"
     cmd="${cmd//\{Module\}/$(_glot_pascal "$id")}"
+    if [[ "$cmd" == *'{root}'* ]]; then
+        root="$(_glot_repo_root)" || return 1
+        printf -v root_shell '%q' "$root"
+        while [[ "$cmd" == *'{root}'* ]]; do
+            cmd="${cmd%%\{root\}*}${root_shell}${cmd#*\{root\}}"
+        done
+    fi
 
     [[ "$cmd" == *'{suite}'* ]] || {
         printf '%s\n' "$cmd"

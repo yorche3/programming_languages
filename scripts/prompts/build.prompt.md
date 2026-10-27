@@ -2,7 +2,7 @@
 name: build
 step: 4d
 model: gpt-6.1-sol
-description: Deja la suite compilando, enlazando y arrancando cuando el esqueleto del lenguaje no trae ese fichero hecho
+description: Repara un bloqueo de construcción no previsto después de la suite, sin regenerar la suite
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md, docs/core/00_Project_Initialization_Guide.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/data/language_characteristics.tsv, scripts/data/init_sequences.tsv, scripts/data/languages.tsv
 mode: agent
 ---
@@ -51,9 +51,10 @@ fija las bases por prioridad y la agrupación por tema e idioma para este rol.
 6. **`AGENTS.md`** — límites de actuación y flujo de cierre.
 
 **Resolución de conflictos:** el lenguaje manda en la forma del fichero (herramienta, convención y
-rutas); `{spec}` manda en lo que hay que poder ejecutar. Si un lenguaje **no necesita nada** porque
-su herramienta ya deja la suite compilando y enlazando, dilo y **no toques nada**: el paso se cierra
-sin cambios.
+rutas); `{spec}` manda en lo que hay que poder ejecutar. Si el comando nativo ya compila, enlaza y ejecuta los casos, dilo explícitamente como
+**«paso 4d no necesario»** y **no toques nada**. Una carencia conocida del esqueleto (por
+ejemplo, un `Makefile` que los módulos homologados ya usan) pertenece a 4a y debe quedar
+resuelta por `glot scaffold`, no aplazarse a este paso.
 
 ---
 
@@ -68,12 +69,11 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
   status` en la raíz solo añade ruido a un trabajo que es de un lenguaje y un módulo.
 - Inspecciona el esqueleto, las dos bases en el orden compartido, los grupos y el runner
   del paso 4c y el comando nativo de pruebas de `{lang}`.
-- Comprueba el estado real antes de tocar nada: `glot test`. Este paso **no es fijo**: se ejecuta
-  cuando el **4c** no pudo alcanzar la **fase roja** por un fallo de **construcción** —target
-  ausente, dependencia de pruebas sin declarar, símbolos sin resolver, el runner o la suite fuera
-  del proyecto—. El runner del módulo **no** es asunto de este paso: lo escribe el 4c. Si ya
-  compila, enlaza, ejecuta los casos y falla **por aserciones**, **detente y avísalo**: el paso se
-  cierra sin cambios.
+- Comprueba el estado real antes de tocar nada: `glot test`. Este paso **no es fijo**: solo se
+  usa cuando el **4c** encontró un fallo de construcción no previsto. Los artefactos de suite
+  que 4c ya escribió se conservan; este paso no pide repetir la delegación `suite`.
+- Si `glot test` compila y enlaza, ejecuta los casos y falla **por aserciones**, informa
+  **«paso 4d no necesario»** y cierra sin cambios.
 - Anota **qué** impide ejecutar la suite y **por qué**: fichero ausente, plantilla vacía, regla que
   no alcanza a `test/`, enlace roto, ruta de salida mal declarada.
 
@@ -82,10 +82,9 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 - Escribe o adecúa **el fichero de construcción del lenguaje** (el que usa su toolchain: manifiesto,
   `Makefile`, proyecto, script de compilación) con las reglas que compilan la fuente del módulo,
   compilan la suite y **enlazan ambas**.
-- Enlaza el **runner del 4c** como punto de entrada, sin reescribirlo. Si aún es un
-  `main` de ejemplo o no agrega los grupos, reporta el defecto del 4c: se corrige
-  con `correct` (4e). Si la construcción genera el runner, ajusta solo su configuración
-  para descubrir o agregar todos los grupos existentes.
+- Enlaza el runner preparado en 4a y conectado a los grupos por 4c, sin reescribirlo. Si
+  el runner falta o no agrega los grupos, reporta el defecto del paso responsable; no lo
+  sustituyas desde 4d. Si la construcción genera el runner, ajusta solo su configuración.
 - Si la suite necesita una **dependencia de pruebas** (framework, aserción, ejecutor), declárala en el
   fichero que corresponda a ese lenguaje, con la misma forma que el módulo homologado.
 - No escribas la suite, no escribas la implementación y no cambies el contrato: si el problema está
@@ -93,8 +92,8 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 
 ### 3. Comprobación (salida real)
 
-- Ejecuta `glot test` y enseña su **salida real** y su código con los **cuatro datos** de la fase
-  roja: compila y enlaza sin warnings; **N casos ejecutados**, con N > 0 y los de la suite; **M
+- Ejecuta `glot test` sobre la suite ya escrita y enseña su **salida real** y su código con los
+  **cuatro datos** de la fase roja: compila y enlaza sin warnings; **N casos ejecutados**, con N > 0 y los de la suite; **M
   fallos, todos de aserción** —cero excepciones de ejecución, cero errores de construcción—; y la
   lista de casos que siguen pasando por coincidir con el centinela. Un fallo de aserción es el
   resultado correcto en este punto; un error de compilación, de enlace o una excepción de ejecución
@@ -106,9 +105,8 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 ### 4. Informe
 
 - Qué ficheros creaste o adecuaste y **por qué** eran necesarios.
-- Si el catálogo (`init_sequences.tsv`, fase `scaffold`) podía haber dejado ese fichero hecho con un
-  comando, y cuál.
 - Salida real de `glot test` (y `glot verify`) y su código.
+- Si la suite ya estaba en fase roja, confirma **«paso 4d no necesario»** y que no hubo cambios.
 - Lo que **no** hiciste y por qué (si el arreglo pertenece a otro paso).
 
 ---
@@ -119,4 +117,5 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
   contrato (paso 4b).
 - **No** haces `git commit` ni `git push`: de eso se encarga el autor.
 - **No** tocas el catálogo `scripts/data/`: lo que haya que corregir ahí, se **reporta**.
-- Si el módulo ya ejecutaba la suite antes de empezar, **no cambies nada**: dilo y cierra.
+- Tras corregir construcción, vuelve a ejecutar `glot test` con los mismos archivos de suite.
+  No vuelvas a generar la suite ni reviertas sus cambios.

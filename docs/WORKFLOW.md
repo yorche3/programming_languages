@@ -37,10 +37,10 @@ documentation remains separate.
 | 2 | Asignación | Fijar `{lenguaje}`, `{fase}`, `{módulo}`, la rama y la especificación del sprint | Contexto del trabajo registrado y comprobable (ver «Estado del sprint») |
 | 3 | Rama de trabajo | Trabajar aislado, con la rama publicada y su upstream | Rama `{tipo}/{fase}/{módulo}` en minúsculas y `kebab-case`, publicada |
 | **4** | Esqueleto: la carpeta | Crear el módulo con las herramientas nativas desde la fase, respetando su directorio de trabajo (atajo: `glot new`) | Carpeta del módulo creada y **confirmada con su commit** (paso `4`) |
-| **4a** | Esqueleto: la estructura idiomática | Completar la estructura nativa, revisar los ejemplos generados y retirar solo lo ajeno al módulo, sin borrar trabajo existente (atajo: `glot scaffold`) | Estructura idiomática ejecutable sin casos del módulo, **confirmada con su commit** (paso `4a`) |
+| **4a** | Esqueleto: la estructura idiomática | Preparar los artefactos repetibles, copiar plantillas solo si faltan y garantizar `.gitignore` sin truncarlo; completar el runner mínimo cuando haga falta | Estructura idiomática ejecutable sin casos del módulo, con `.gitignore`; **confirmada con su commit** |
 | **4b** | Contrato | El tipo nuevo y sus firmas, **antes** de la suite | Contrato |
-| **4c** | Suite | La suite **con su runner** (cuando el lenguaje lo exige), que falla por falta de implementación —la fase roja—, o pasa si el módulo es solo documental | Suite |
-| **4d** | Construcción y enlace | Dejar la suite **ejecutable**: configurar compilación y enlace cuando haga falta, sin reescribir el runner del 4c; si el toolchain genera el runner, configurar su generación | Construcción correcta y suite nativa compilando y enlazando; rojo por contrato pendiente, no por infraestructura |
+| **4c** | Suite | Escribir los casos y conectarlos al runner que dejó 4a; si falla por construcción, conservar la suite y reportar el bloqueo | Suite ejecutada: fase roja por aserciones o resultado documentado |
+| **4d** | Construcción y enlace *(excepcional)* | Corregir un fallo de construcción no previsto en 4a/4c; no reescribir ni regenerar la suite | Construcción corregida y `glot test` reejecutado sobre los mismos archivos |
 | 5 | Implementación | Cumplir el contrato de la especificación | Código verificado por la suite, sin warnings |
 | **4e · 5b · 5c** | Corrección y ajuste | Corregir el artefacto previo a implementación (`correct`), reparar la implementación (`fix`) o refactorizar sin cambiar contrato ni cobertura (`refactor`); registrar siempre la causa | Corrección aplicada y verificada en el artefacto correspondiente |
 | 6 | Verificación | Tener evidencia real de que cumple | Salida real de la suite y del analizador, copiada sin editar |
@@ -67,9 +67,9 @@ documentation remains separate.
 |------|:-----:|:----------------:|:------------:|
 | 1 Reconocimiento | decide | informa | — |
 | 2–3 Asignación y rama | decide | ejecuta | — |
-| 4–4a Esqueleto | ejecuta o revisa | **ejecuta comandos nativos** | revisa/completa si se solicita |
+| 4–4a Esqueleto | ejecuta o revisa | **ejecuta comandos repetibles** | completa si el comando indica análisis pendiente |
 | 4b–4c Contrato y suite | revisa | ejecuta | **escribe** |
-| 4d Construcción y enlace | revisa | encarga | **escribe** |
+| 4d Construcción y enlace | revisa | encarga solo si 4c reporta un bloqueo no previsto | **corrige; después se reejecuta la suite existente** |
 | 5 Implementación | decide | ejecuta pruebas | **puede escribir** |
 | 6 Verificación | valida | ejecuta y captura | **comprueba** |
 | 7 README del módulo | valida | encarga | **escribe** |
@@ -79,14 +79,16 @@ documentation remains separate.
 **ES:** El autor puede realizar cualquier paso o encargarlo expresamente a un
 agente. Leer y comparar exige criterio, no obliga a usar IA ni a ejecutar un
 agente distinto por rol. El tooling ejecuta comandos y prepara encargos, pero no
-toma decisiones técnicas. En 4a, un agente puede revisar o completar el esqueleto
-nativo sin adelantar contrato ni casos. Commits y publicación corresponden al
+toma decisiones técnicas. En 4a, el tooling prepara lo repetible; si falta análisis
+idiomático, indica el encargo correspondiente. Commits y publicación corresponden al
 autor; el agente no los realiza salvo autorización explícita.
 
 **EN:** The author can perform any step or explicitly assign it to an agent.
 Reading and comparing requires judgement, not mandatory AI or a separate agent
 per role. Tooling runs commands and prepares requests, not technical decisions.
-At 4a an agent can review or complete native scaffolding without introducing
+At 4a, tooling prepares repeatable files and tells the author when
+`glot prompt scaffold` is needed for idiomatic analysis. That delegate completes
+the minimal runner and language-specific `.gitignore`; it does not introduce
 contracts or cases. Commits and publication belong to the author; agents do not
 perform them without explicit authorisation.
 
@@ -112,7 +114,9 @@ its inputs and checks; the next owner verifies what is needed before relying on 
 variantes aplicables y aislamiento; separación lógica no exige archivos separados.
 El agrupamiento se decide en la suite y el README lo describe, no lo rediseña.
 Ante un conflicto, se reporta `regla/fuente → evidencia → artefacto afectado →
-alternativas → decisión pendiente`. Se detiene solo el artefacto bloqueado;
+alternativas → decisión pendiente`. Un error de construcción no revierte la suite:
+se conserva, se corrige en 4d y se vuelve a ejecutar; no se repite la delegación 4c.
+Se detiene solo el artefacto bloqueado;
 el autor como Tech Lead decide la excepción o el cambio normativo antes de continuar.
 Ni documentar un defecto ni un test verde lo convierten en una desviación aceptada.
 

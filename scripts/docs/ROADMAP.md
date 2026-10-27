@@ -4,15 +4,19 @@
 
 **EN:** Layers, versions and the rule that decides their order. The live version and its log are in [`VERSIONS.md`](VERSIONS.md); the cycle these layers serve is in [`SPRINT.md`](SPRINT.md) and, as monorepo policy, in [`../../docs/WORKFLOW.md`](../../docs/WORKFLOW.md).
 
-**ES:** La v2.0.2 aplica a todos los encargos la [política compartida de
-delegación](../prompts/Delegation_Policy.md): prioridad persistente
-`data_structures_basics` → `numbers`, con agrupación por tema y lenguaje y sin
-cambiar modelos. La verificación de la entrega se registra en [`VERSIONS.md`](VERSIONS.md).
+**ES:** La v2.0.3 automatiza en `scaffold` los artefactos repetibles conocidos
+(incluidos Makefiles declarados y `.gitignore`) y avisa cuándo queda análisis
+idiomático para el delegate 4a. `build` queda como salvaguarda excepcional y
+preserva la suite. La política compartida de delegación de la v2.0.2 mantiene la
+prioridad `data_structures_basics` → `numbers`, con agrupación por tema y
+lenguaje y sin cambiar modelos. La verificación se registra en [`VERSIONS.md`](VERSIONS.md).
 
-**EN:** v2.0.2 applies the [shared delegation policy](../prompts/Delegation_Policy.md)
-to every request: persistent `data_structures_basics` → `numbers` priority,
-with topic- and language-aware grouping and unchanged models. Release verification
-is recorded in [`VERSIONS.md`](VERSIONS.md).
+**EN:** v2.0.3 automates known repeatable artifacts in `scaffold` (including
+declared Makefiles and `.gitignore`) and announces when idiomatic analysis remains
+for the 4a delegate. `build` is an exceptional safeguard and preserves the suite.
+The v2.0.2 shared delegation policy retains `data_structures_basics` →
+`numbers` priority, with topic- and language-aware grouping and unchanged models.
+Verification is recorded in [`VERSIONS.md`](VERSIONS.md).
 
 ---
 
