@@ -4,7 +4,7 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v2.0.2** en [`glot.sh`](glot.sh).
+Versión viva / Live version: **v2.0.3** en [`glot.sh`](glot.sh).
 
 ---
 
@@ -15,7 +15,7 @@ Versión viva / Live version: **v2.0.2** en [`glot.sh`](glot.sh).
 | Resolver catálogo y estado | Lenguaje, fase, módulo, rama y especificación del trabajo en curso |
 | Preparar el entorno | Directorio del módulo, rama de trabajo y, desde L9, la toolchain esperada |
 | Ejecutar y verificar | Comandos nativos del lenguaje desde cualquier directorio, leyendo el estado |
-| Crear el esqueleto | Inicializador del lenguaje y normalización de lo que deja (aplanar el nido, quitar el `.git` anidado), por dato y no por heurístico |
+| Crear el esqueleto | `new` inicializa; `scaffold` prepara los archivos repetibles, garantiza `.gitignore` y avisa si queda análisis idiomático delegado |
 | Preparar los encargos de IA | Arma el encargo para el agente con las plantillas versionadas de [`prompts/`](prompts/); no lo ejecuta por su cuenta |
 | Registrar la evidencia | Salidas reales, checklist de cierre, roadmap y puntero del submódulo |
 
@@ -42,7 +42,8 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh -n close php algorithms/naive_sort   # cierre: diff exacto del roadmap
 ./scripts/glot.sh validate php algorithms/naive_sort    # validador automático (opcional; usa el perfil `economy`)
 ./scripts/glot.sh -n new php algorithms/naive_sort   # esqueleto: plan sin tocar nada
-./scripts/glot.sh new php algorithms/naive_sort      # inicializador + normalización
+./scripts/glot.sh new php algorithms/naive_sort      # inicializador del lenguaje
+./scripts/glot.sh scaffold php algorithms/naive_sort # base repetible; delega solo el análisis pendiente
 ./scripts/glot.sh prompt suite                        # encargo de la suite (paso 4c)
 ./scripts/glot.sh prompt contract_stub                # encargo del contrato y sus esqueletos (paso 4b)
 ./scripts/glot.sh prompt                              # registro: nombre, paso, modelo y descripción
@@ -78,7 +79,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v2.0.2)
+├── glot.sh                  # Versión viva / live version (v2.0.3)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
@@ -99,6 +100,7 @@ scripts/
 │   ├── README.md
 │   ├── languages.tsv         # Un lenguaje por fila: init, manifiestos, pruebas, verificador e inicialización
 │   ├── init_sequences.tsv    # Secuencia de inicialización por paso: directorio, modo, comando y completado
+│   ├── scaffold_templates/   # Plantillas de Makefile que scaffold copia si falta el destino
 │   ├── commits.tsv           # Un paso de sprint por fila: alias, ámbito y mensaje de commit
 │   ├── display.tsv           # Nombre de presentación por lenguaje, en el orden de las listas del roadmap
 │   ├── models.tsv            # Perfil de modelo por fila: modelo, esfuerzo, tope de créditos y encargos

@@ -72,9 +72,9 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
   dejó el encargo `scaffold` (paso 4a) —directorio de pruebas, **runner** y manifiesto— y el
   **contrato con sus esqueletos** que dejó el encargo `contract_stub` (paso 4b): tipo, firmas,
   **cuerpo vacío de cada operación** y ubicación.
-- Decide **quién es el runner de la suite** con la tabla del paso 4. Un `main` de ejemplo
-  (`null;`, «Hello, World!») **no** es un bloqueo ni una condición de entrada: es la pieza que
-  falta, y la escribes tú.
+- Confirma que el runner mínimo del paso 4a existe y arranca sin casos. En este paso solo
+  conectas los grupos de la suite al runner ya preparado; si falta, está roto o sigue siendo
+  un ejemplo, informa el defecto del 4a y no reescribas la infraestructura.
 - Determina y anota: framework de pruebas idiomático, dónde vive la suite, si existe un
   `run_tests` propio y si el tipo de secuencia admite nulos o cuál es su indicador de fallo.
 
@@ -123,19 +123,19 @@ escribir y anótalas:
 ### 4. Escribir la suite
 
 En el directorio de pruebas que use el lenguaje (`test/`, `tests/`, `spec/`, `t/`), con el
-patrón obligatorio de más abajo. El **runner es parte de esta entrega**: sin runner que agregue la
-suite no hay fase roja, y su ausencia **no** es motivo para detenerse.
+patrón obligatorio de más abajo. El runner mínimo pertenece al paso 4a. Aquí se agregan los
+grupos reales al runner existente; no se crea ni reemplaza la infraestructura de pruebas.
 
 | Lo que hay en el esqueleto | Qué haces |
 |---|---|
 | El comando nativo **recoge por convención** (`pytest` con `test_*.py`, `cargo test` con `#[test]`, `go test`, `dotnet test`, `rspec` con `spec/`, `mix test`…) | Nada: coloca la suite donde la convención la espera |
-| Hay un **runner de ejemplo** (`null;`, `main` vacío, «Hello, World!») que no recoge nada | **Sustitúyelo** por el runner del framework, en el **mismo fichero y ruta** que compila el comando nativo, para que agregue la suite |
-| **No hay** fichero de runner y el comando nativo necesita uno | **Escríbelo**, mínimo, con la forma del módulo base (`tests.adb` con AUnit en Ada, `test/run_tests.jl` en Julia…) |
-| El fichero del runner lo **genera la construcción** (plantilla de `make`, `dune`, `cabal`) | No lo toques: pide el cambio en el paso 4d y dilo en el reporte |
+| Hay un **runner mínimo vacío** dejado en 4a | Conecta a él todos los grupos reales sin alterar su contrato de ejecución |
+| Hay un **runner de ejemplo** o no existe el runner requerido | Detente y reporta el defecto del paso 4a con archivo, comando y salida real; no escribas casos ni sustituyas infraestructura |
+| El fichero del runner lo **genera la construcción** | Reporta la dependencia de construcción; el 4d puede ajustar su generación sin pedir que se vuelva a escribir la suite |
 
-Sustituir el `main` de ejemplo **no** es reescribir un artefacto ajeno: es la entrega de este paso.
-Solo se detiene si el comando nativo no compila ese fichero por una razón de construcción —falta el
-target, falta la dependencia, no está en el proyecto—: eso es del **4d**.
+Un fallo de construcción no deshace ni invalida los archivos de suite ya escritos. Repórtalo con
+el comando, el código de salida y la salida real; se corrige en 4d y luego se vuelve a ejecutar
+`glot test` sobre esta misma suite. No se repite la delegación `suite`.
 
 ### 5. Verificación: la fase roja
 
@@ -164,7 +164,7 @@ resumir).
 | Compila, enlaza, ejecuta N casos y falla por aserciones | — | **Nada más**: el andamiaje está listo y el módulo pasa al **paso 5** (`implement`) |
 | Falla la **construcción**: target ausente, dependencia de pruebas sin declarar, `undefined reference`, `cannot find`, símbolos sin resolver | Del **4d** (`build`); del **4b** si el contrato llegó sin esqueletos | **Detente y avísalo** con la salida real: es el disparador del paso 4d, no un defecto de la suite |
 | No compila por un **error en tus propios ficheros** (un `with`/import, un nombre, una sintaxis, una línea cortada) | **Del 4c**, tuyo | Corrígelo aquí y repite la verificación: no se manda al 4d ni al 4b |
-| Arranca pero ejecuta **0 casos** (quedó el `main` de ejemplo) | **Del 4c**, tuyo | Escribe el runner que agrega la suite (paso 4) y repite: sin casos no hay fase roja |
+| Arranca pero ejecuta **0 casos** | **Del 4c**, tuyo | Conecta los grupos de la suite al runner existente y repite; si falta el runner mínimo, reporta el defecto de 4a |
 
 **Única excepción, y es del 4b**: si el comando nativo falla por **símbolos sin resolver** porque
 el contrato llegó **sin esqueletos**, la suite no se puede ejecutar todavía. Se admite entonces la
@@ -253,7 +253,7 @@ el framework, o un test agregado que no permita identificar qué caso o paso fal
 | Naming | Convención del lenguaje (`snake_case`, `camelCase`, `PascalCase`, `kebab-case`) |
 | Aserciones | Las del framework (`assertEqual`, `is`, `Assert`, `expect`, …) |
 | Dependencias | Las estándar o ya autorizadas para el módulo según las bases y la guía de inicialización; una base no autoriza dependencias nuevas por sí sola |
-| Runner | El comando de la columna 3 del catálogo debe recoger todos los grupos y propagar fallos. Si el inicializador dejó un `main` de ejemplo, **lo sustituye este paso**; el 4d ajusta la configuración si la construcción lo genera |
+| Runner | El comando de la columna 3 del catálogo debe recoger todos los grupos y propagar fallos. El 4a deja el runner mínimo; este paso lo conecta a los grupos sin crear ni sustituir infraestructura |
 | Determinismo | Sin aleatoriedad, sin reloj y sin depender del orden del sistema de ficheros: las mismas entradas dan siempre el mismo veredicto |
 | Datos | Los *fixtures* se construyen en la propia suite: nada leído de ficheros externos ni de la red |
 

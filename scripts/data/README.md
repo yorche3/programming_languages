@@ -59,6 +59,19 @@ the real module before running, and `-n` prints the result. The `nim`, `perl`, `
 and `ruby` rows rely on the file name, so a module not following it will need its row
 reviewed.
 
+**ES:** Los esqueletos de `Makefile` compartidos por `assembly`, `c`, `cobol`,
+`grain` y `r` viven en [`scaffold_templates/`](scaffold_templates/); el catálogo
+los copia solo cuando el módulo aún no tiene `Makefile`. `scaffold` también
+garantiza un `.gitignore` sin reemplazar el contenido existente. El encargo 4a
+añade o ajusta los patrones que dependen del lenguaje y verifica un artefacto con
+`git check-ignore`.
+
+**EN:** Shared `Makefile` scaffolds for `assembly`, `c`, `cobol`, `grain` and `r`
+live in [`scaffold_templates/`](scaffold_templates/); the catalogue copies one
+only when the module has no `Makefile`. `scaffold` also ensures a `.gitignore`
+without replacing existing contents. The 4a request adds or adjusts
+language-specific patterns and verifies an artifact with `git check-ignore`.
+
 **ES:** ⚠️ **Deuda conocida / Known debt (2026-10-11):** un runner puede devolver
 `0` con la suite en rojo. `guile --no-auto-compile -s {suite}_guile.scm` imprime el
 conteo de SRFI-64 pero no lo propaga al código de salida, así que `glot test` solo
