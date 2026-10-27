@@ -1417,3 +1417,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`ada/core/algorithms/data_structures_advanced/README.md` y `ada/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 📋` -> `core.algorithms.data_structures_advanced 🔄 1/50 (Ada)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-26T21:36:42-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_advanced
+Lenguaje(s) / Language(s): assembly
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_advanced/assembly.md`, commit `44398f7`)
+Tests y comandos / Tests and commands:
+- `make run` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`assembly/core/algorithms/data_structures_advanced/README.md` y `assembly/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 🔄 1/50 (Ada)` -> `core.algorithms.data_structures_advanced 🔄 2/50 (Ada, Assembly)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
