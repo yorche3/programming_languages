@@ -1428,3 +1428,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`assembly/core/algorithms/data_structures_advanced/README.md` y `assembly/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 🔄 1/50 (Ada)` -> `core.algorithms.data_structures_advanced 🔄 2/50 (Ada, Assembly)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-26T22:38:22-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_advanced
+Lenguaje(s) / Language(s): ballerina
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_advanced/ballerina.md`, commit `a7195bc`)
+Tests y comandos / Tests and commands:
+- `bal test` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`ballerina/core/algorithms/data_structures_advanced/README.md` y `ballerina/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 🔄 2/50 (Ada, Assembly)` -> `core.algorithms.data_structures_advanced 🔄 3/50 (Ada, Assembly, Ballerina)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
