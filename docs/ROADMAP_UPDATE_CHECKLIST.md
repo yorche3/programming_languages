@@ -1450,3 +1450,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`c/core/algorithms/data_structures_advanced/README.md` y `c/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 🔄 3/50 (Ada, Assembly, Ballerina)` -> `core.algorithms.data_structures_advanced 🔄 4/50 (Ada, Assembly, Ballerina, C)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-10-28T16:15:06-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_advanced
+Lenguaje(s) / Language(s): clojure
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_advanced/clojure.md`, commit `3742a93`)
+Tests y comandos / Tests and commands:
+- `clojure -T:build test` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`clojure/core/algorithms/data_structures_advanced/README.md` y `clojure/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 🔄 4/50 (Ada, Assembly, Ballerina, C)` -> `core.algorithms.data_structures_advanced 🔄 5/50 (Ada, Assembly, Ballerina, C, Clojure)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
