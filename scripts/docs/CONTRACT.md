@@ -4,6 +4,14 @@
 
 **EN:** Rules **every** verb obeys, plus the state store contract. This is what makes `glot` scriptable: a verb's output can be captured without parsing human text.
 
+**ES:** Este contrato describe v2.0.3. La ampliación acordada de `--delegate` a
+`open-router`, las restricciones de overrides y las garantías de scaffold de
+v2.1.0 están en [`V2_1_0.md`](V2_1_0.md), aún pendientes de implementación.
+
+**EN:** This contract describes v2.0.3. Agreed v2.1.0 delegate expansion,
+override restrictions and scaffold guarantees are in [`V2_1_0.md`](V2_1_0.md),
+awaiting implementation.
+
 ---
 
 ## � Frontera con la documentación / Boundary with the documentation

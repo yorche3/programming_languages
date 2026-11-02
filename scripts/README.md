@@ -65,6 +65,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 |-----------|-----------|
 | [`prompts/Delegation_Policy.md`](prompts/Delegation_Policy.md) | Política compartida / Shared policy: bases por prioridad, agrupación por tema e idioma del lenguaje |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Capas L0–L9, versiones, criterios de orden y decisiones cerradas |
+| [`docs/V2_1_0.md`](docs/V2_1_0.md) | Preparación de v2.1.0: tres rutas, BYOK, overrides y revisión de scaffold de los 50 lenguajes; pendiente de implementación / Preparation; not implemented |
 | [`docs/SPRINT.md`](docs/SPRINT.md) | El ciclo de módulo: 9 pasos, comandos, evidencias y encargos de IA |
 | [`docs/CONTRACT.md`](docs/CONTRACT.md) | Contrato de todos los verbos, códigos de salida, almacén de estado y especificación de `use` |
 | [`docs/INTERNALS.md`](docs/INTERNALS.md) | Cómo funciona el script por dentro |

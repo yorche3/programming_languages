@@ -212,6 +212,15 @@ must be the ones waiting for `pointer` (v0.12.0) and `close` (v0.10.0).
 
 ## 🤖 `models.tsv` — perfiles de modelo por encargo / per-request model profiles
 
+**ES:** Este esquema es el de v2.0.3. La separación de rutas, la asignación de
+Sonnet a `suite` y la migración a perfiles independientes del id de modelo se
+preparan en [`V2_1_0.md`](../docs/V2_1_0.md); los TSV no cambian durante esta
+preparación documental.
+
+**EN:** This is the v2.0.3 schema. Separate routes, Sonnet for `suite` and
+model-independent profiles are planned in [`V2_1_0.md`](../docs/V2_1_0.md);
+TSV files remain unchanged during documentation preparation.
+
 **ES:** Una fila por **perfil**, con el **modelo como clave**: la plantilla declara su
 modelo en el frontmatter (`model:`) y esta tabla dice qué esfuerzo y qué tope de créditos
 le tocan, más para qué encargos está pensado el perfil. El nombre del perfil (`economy`)

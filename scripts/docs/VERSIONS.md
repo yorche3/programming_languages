@@ -4,6 +4,14 @@
 
 **EN:** History of closed versions and of the live version. **Future** versions and the layer each one covers are in [`ROADMAP.md`](ROADMAP.md).
 
+**ES:** v2.1.0 está en preparación documental en [`V2_1_0.md`](V2_1_0.md).
+No tiene todavía implementación ni resultados de aceptación; no se añade como
+versión verificada a este log. Archivar v2.0.3 antes de iniciar cambios de código.
+
+**EN:** v2.1.0 is in documentation preparation in [`V2_1_0.md`](V2_1_0.md).
+It has no implementation or acceptance results yet and is not a verified log
+entry. Archive v2.0.3 before starting code changes.
+
 | Versión | Fecha | Archivo | Añade | Estado |
 |---------|-------|---------|-------|:------:|
 | 0.1.0 | 2026-09-20 | [`versions/glot_0.1.0.sh`](../versions/glot_0.1.0.sh) | Hello World en Bash (`echo "Hello World! from Bash!"`) | ✅ cerrada |
