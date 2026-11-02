@@ -4,12 +4,16 @@
 
 **EN:** Rules **every** verb obeys, plus the state store contract. This is what makes `glot` scriptable: a verb's output can be captured without parsing human text.
 
-**ES:** Este contrato describe v2.0.3. La ampliación acordada de `--delegate` a
+**ES:** Este contrato describe la línea base v2.0.3. El script de desarrollo
+se identifica como `2.1.0-dev`; su primer bloque de scaffold se detalla abajo.
+La ampliación acordada de `--delegate` a
 `open-router`, las restricciones de overrides y las garantías de scaffold de
-v2.1.0 están en [`V2_1_0.md`](V2_1_0.md), aún pendientes de implementación.
+v2.1.0 están en [`ROADMAP.md`](ROADMAP.md), aún pendientes de implementación.
 
-**EN:** This contract describes v2.0.3. Agreed v2.1.0 delegate expansion,
-override restrictions and scaffold guarantees are in [`V2_1_0.md`](V2_1_0.md),
+**EN:** This contract describes the v2.0.3 baseline. The development script
+identifies as `2.1.0-dev`; its first scaffold block is described below.
+Agreed v2.1.0 delegate expansion,
+override restrictions and scaffold guarantees are in [`ROADMAP.md`](ROADMAP.md),
 awaiting implementation.
 
 ---
@@ -352,6 +356,20 @@ using those services is not required.
 **ES:** La normalización **no adivina**: si un lenguaje no tiene operación declarada en el catálogo, no se toca nada. Lo que el inicializador deja y el módulo no usa —runners de ejemplo, nombres predefinidos— lo ajusta el encargo `scaffold`, que sí puede leer la especificación.
 
 **EN:** Normalisation **does not guess**: if a language has no declared operation in the catalogue, nothing is touched. What the initializer leaves and the module does not use —sample runners, predefined names— is adjusted by the `scaffold` request, which can read the specification.
+
+**ES:** Primer bloque de v2.1.0-dev: Ballerina renombra `main.bal` a
+`{module}.bal` con comprobación de origen/destino y sin sobreescribir; retira
+solo el ejemplo idéntico a la plantilla verificada y crea `tests/lib_test.bal`
+vacío si falta. Perl crea la fuente en `lib/` sin truncar una previa. Rust
+conserva `src/lib.rs`, que Cargo usa como punto de entrada. Los conflictos,
+archivos obligatorios ausentes y rutas no regulares fallan con `4`.
+`.gitignore` existente no se toca y una ruta symlink/directorio se rechaza.
+
+**EN:** First v2.1.0-dev block: Ballerina safely renames the source, removes
+only an exact verified sample and creates a missing empty test file. Perl
+preserves existing sources under `lib/`; Rust retains Cargo's `src/lib.rs`.
+Conflicts, missing mandatory files and invalid paths fail with `4`. Existing
+ignore files remain untouched; symlink/directory ignore paths are rejected.
 
 ### `save` — el registro / the recording
 

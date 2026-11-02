@@ -329,6 +329,15 @@ sandbox_make() {
 [submodule "r"]
         path = r
         url = ../remote/r.git
+[submodule "ballerina"]
+        path = ballerina
+        url = ../remote/ballerina.git
+[submodule "perl"]
+        path = perl
+        url = ../remote/perl.git
+[submodule "rust"]
+        path = rust
+        url = ../remote/rust.git
 EOF
     git -C "$SANDBOX" init -q
     mkdir -p -- "$SANDBOX/assembly/core/algorithms" "$SANDBOX/c/core/algorithms" \
@@ -1562,6 +1571,115 @@ assert_eq 'sandbox scaffold repetido: conserva .gitignore' 'custom-pattern' \
 assert_eq 'sandbox scaffold repetido: conserva Makefile' 'custom-makefile' \
     "$(cat -- "$AB/Makefile")"
 
+# v2.1.0: el nombre del fuente y el archivo vacío de pruebas son comandos del catálogo.
+BB="$SANDBOX/ballerina/core/algorithms/naive_sort"
+mkdir -p -- "$BB"
+cp -- "$TESTS_DIR/../data/scaffold_templates/ballerina.main.bal" "$BB/main.bal"
+printf 'gitdir: external-repository\n' >"$BB/.git"
+glot_run_sandbox -n scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold Ballerina -n: código' '0' "$rc_last"
+assert_eq 'scaffold Ballerina -n: conserva main' 'si' "$([[ -f "$BB/main.bal" ]] && echo si || echo no)"
+assert_eq 'scaffold Ballerina -n: no crea tests' 'no' "$([[ -e "$BB/tests" ]] && echo si || echo no)"
+glot_run_sandbox scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold Ballerina: código' '0' "$rc_last"
+assert_eq 'scaffold Ballerina: renombra main' 'no' "$([[ -e "$BB/main.bal" ]] && echo si || echo no)"
+assert_eq 'scaffold Ballerina: biblioteca sin ejemplo' 'si' "$([[ -f "$BB/naive_sort.bal" && ! -s "$BB/naive_sort.bal" ]] && echo si || echo no)"
+assert_eq 'scaffold Ballerina: archivo de tests vacío' 'si' "$([[ -f "$BB/tests/lib_test.bal" && ! -s "$BB/tests/lib_test.bal" ]] && echo si || echo no)"
+assert_eq 'scaffold Ballerina: conserva gitfile' 'gitdir: external-repository' "$(cat -- "$BB/.git")"
+printf 'public function custom() {}\n' >"$BB/naive_sort.bal"
+printf '// authored tests\n' >"$BB/tests/lib_test.bal"
+printf 'custom-ignore\n' >"$BB/.gitignore"
+glot_run_sandbox scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold Ballerina repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Ballerina repetido: conserva fuente' 'public function custom() {}' "$(cat -- "$BB/naive_sort.bal")"
+assert_eq 'scaffold Ballerina repetido: conserva tests' '// authored tests' "$(cat -- "$BB/tests/lib_test.bal")"
+assert_eq 'scaffold Ballerina repetido: conserva ignore' 'custom-ignore' "$(cat -- "$BB/.gitignore")"
+printf 'custom main\n' >"$BB/main.bal"
+glot_run_sandbox scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold Ballerina conflicto: código' '4' "$rc_last"
+assert_contains 'scaffold Ballerina conflicto: diagnóstico' 'ambiguous rename' "$err"
+assert_eq 'scaffold Ballerina conflicto: conserva main' 'custom main' "$(cat -- "$BB/main.bal")"
+rm -- "$BB/main.bal" "$BB/naive_sort.bal"
+glot_run_sandbox scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold Ballerina sin fuentes: código' '4' "$rc_last"
+printf 'authored main\n' >"$BB/main.bal"
+ln -s "$BB/main.bal" "$BB/naive_sort.bal"
+glot_run_sandbox scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold Ballerina destino symlink: código' '4' "$rc_last"
+rm -- "$BB/naive_sort.bal"
+glot_run_sandbox scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold Ballerina fuente propia: código' '0' "$rc_last"
+assert_eq 'scaffold Ballerina fuente propia: no borra contenido' 'authored main' "$(cat -- "$BB/naive_sort.bal")"
+rm -- "$BB/tests/lib_test.bal"
+ln -s "$BB/naive_sort.bal" "$BB/tests/lib_test.bal"
+glot_run_sandbox scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold Ballerina tests symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Ballerina tests symlink: no modifica destino' 'authored main' "$(cat -- "$BB/naive_sort.bal")"
+rm -- "$BB/tests/lib_test.bal"
+mkdir -- "$BB/tests/lib_test.bal"
+glot_run_sandbox scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold Ballerina tests directorio: código' '4' "$rc_last"
+rmdir -- "$BB/tests/lib_test.bal"
+
+BB_MISSING="$SANDBOX/ballerina/core/algorithms/data_structures_basics"
+mkdir -p -- "$BB_MISSING"
+glot_run_sandbox scaffold ballerina algorithms/data_structures_basics
+assert_eq 'scaffold Ballerina fallo inicial: código' '4' "$rc_last"
+assert_eq 'scaffold Ballerina fallo inicial: detiene creación de tests' 'no' "$([[ -e "$BB_MISSING/tests" ]] && echo si || echo no)"
+mkdir -- "$BB_MISSING/data_structures_basics.bal"
+printf 'main propio\n' >"$BB_MISSING/main.bal"
+glot_run_sandbox scaffold ballerina algorithms/data_structures_basics
+assert_eq 'scaffold Ballerina destino directorio: código' '4' "$rc_last"
+assert_eq 'scaffold Ballerina destino directorio: no mueve dentro' 'no' "$([[ -e "$BB_MISSING/data_structures_basics.bal/main.bal" ]] && echo si || echo no)"
+rmdir -- "$BB_MISSING/data_structures_basics.bal"
+rm -- "$BB_MISSING/main.bal"
+ln -s "$BB/naive_sort.bal" "$BB_MISSING/main.bal"
+glot_run_sandbox scaffold ballerina algorithms/data_structures_basics
+assert_eq 'scaffold Ballerina origen symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Ballerina origen symlink: no modifica destino' 'authored main' "$(cat -- "$BB/naive_sort.bal")"
+
+PB="$SANDBOX/perl/core/algorithms/naive_sort"
+mkdir -p -- "$PB"
+glot_run_sandbox scaffold perl algorithms/naive_sort
+assert_eq 'scaffold Perl: código' '0' "$rc_last"
+assert_contains 'scaffold Perl: fuente bajo lib' 'package NaiveSort;' "$(cat -- "$PB/lib/naive_sort.pl")"
+assert_eq 'scaffold Perl: no crea src' 'no' "$([[ -e "$PB/src" ]] && echo si || echo no)"
+printf 'authored Perl\n' >"$PB/lib/naive_sort.pl"
+glot_run_sandbox scaffold perl algorithms/naive_sort
+assert_eq 'scaffold Perl repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Perl repetido: conserva fuente' 'authored Perl' "$(cat -- "$PB/lib/naive_sort.pl")"
+rm -- "$PB/lib/naive_sort.pl"
+ln -s "$BB/naive_sort.bal" "$PB/lib/naive_sort.pl"
+glot_run_sandbox scaffold perl algorithms/naive_sort
+assert_eq 'scaffold Perl symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Perl symlink: conserva destino' 'authored main' "$(cat -- "$BB/naive_sort.bal")"
+
+RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
+mkdir -p -- "$RUSTB/src"
+printf '[package]\nname = "naive_sort"\n' >"$RUSTB/Cargo.toml"
+printf '// authored Rust\n' >"$RUSTB/src/lib.rs"
+glot_run_sandbox scaffold rust algorithms/naive_sort
+assert_eq 'scaffold Rust: código' '0' "$rc_last"
+assert_eq 'scaffold Rust: conserva entrada Cargo' '// authored Rust' "$(cat -- "$RUSTB/src/lib.rs")"
+glot_run_sandbox scaffold rust algorithms/naive_sort
+assert_eq 'scaffold Rust repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Rust: no inventa otra entrada' 'no' "$([[ -e "$RUSTB/src/naive_sort.rs" ]] && echo si || echo no)"
+rm -- "$RUSTB/src/lib.rs"
+glot_run_sandbox scaffold rust algorithms/naive_sort
+assert_eq 'scaffold Rust sin entrada: código' '4' "$rc_last"
+
+rm -- "$BB/.gitignore"
+ln -s "$BB/naive_sort.bal" "$BB/.gitignore"
+glot_run_sandbox scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold ignore symlink: código' '4' "$rc_last"
+assert_contains 'scaffold ignore symlink: diagnóstico' 'unsafe .gitignore' "$err"
+assert_eq 'scaffold ignore symlink: no modifica destino' 'authored main' "$(cat -- "$BB/naive_sort.bal")"
+rm -- "$BB/.gitignore"
+mkdir -- "$BB/.gitignore"
+glot_run_sandbox scaffold ballerina algorithms/naive_sort
+assert_eq 'scaffold ignore directorio: código' '4' "$rc_last"
+rmdir -- "$BB/.gitignore"
+
 # Los otros Makefiles declarados también se copian desde el catálogo sin toolchains externos.
 local_scaffold_lang=""
 for local_scaffold_lang in c cobol grain r; do
@@ -1590,6 +1708,15 @@ err="$(cat -- "$WORK_DIR/stderr")"
 assert_eq 'sandbox scaffold con espacios: código' '0' "$local_spaced_rc"
 assert_eq 'sandbox scaffold con espacios: copia Makefile' 'si' \
     "$([[ -f "$SPACED_SANDBOX/assembly/core/algorithms/naive_sort/Makefile" ]] && echo si || echo no)"
+rm -- "$SPACED_SANDBOX/ballerina/core/algorithms/naive_sort/naive_sort.bal"
+cp -- "$TESTS_DIR/../data/scaffold_templates/ballerina.main.bal" \
+    "$SPACED_SANDBOX/ballerina/core/algorithms/naive_sort/main.bal"
+local_spaced_rc=0
+out="$(GLOT_ROOT="$SPACED_SANDBOX" "$GLOT_SH" scaffold ballerina algorithms/naive_sort \
+    2>"$WORK_DIR/stderr")" || local_spaced_rc=$?
+assert_eq 'scaffold Ballerina con espacios: código' '0' "$local_spaced_rc"
+assert_eq 'scaffold Ballerina con espacios: retira ejemplo' 'si' \
+    "$([[ -f "$SPACED_SANDBOX/ballerina/core/algorithms/naive_sort/naive_sort.bal" && ! -s "$SPACED_SANDBOX/ballerina/core/algorithms/naive_sort/naive_sort.bal" ]] && echo si || echo no)"
 
 # con contenido, el esqueleto ya está hecho: no se pisa nada
 glot_run_sandbox new java algorithms/naive_sort

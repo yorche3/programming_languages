@@ -69,11 +69,11 @@ copilot -C "$MODULE_DIR" -p "<encargo validate>" \
 **ES:** Lo siguiente describe la versión viva v2.0.3. La configuración detallada
 de BYOK, su separación como `--delegate open-router`, el aislamiento de rutas y
 las equivalencias de esfuerzo/tokens se especifican para v2.1.0 en
-[`V2_1_0.md`](V2_1_0.md). Esa ampliación todavía no está implementada.
+[`ROADMAP.md`](ROADMAP.md). Esa ampliación todavía no está implementada.
 
 **EN:** The following describes live v2.0.3. Detailed BYOK configuration, the
 separate OpenRouter delegate route, isolation and effort/token compatibility are
-specified for v2.1.0 in [`V2_1_0.md`](V2_1_0.md), not implemented yet.
+specified for v2.1.0 in [`ROADMAP.md`](ROADMAP.md), not implemented yet.
 
 **ES:** El CLI admite un proveedor propio (`copilot help providers`): se activa con `COPILOT_PROVIDER_BASE_URL` y acepta endpoints compatibles con OpenAI, Azure y Anthropic, con la clave en `COPILOT_PROVIDER_API_KEY`, en `COPILOT_PROVIDER_BEARER_TOKEN`, o impresa en cada petición por `COPILOT_PROVIDER_API_KEY_COMMAND` (la forma en la que una clave no tiene que vivir en el repositorio ni en el entorno visible). **`glot` no gestiona credenciales**: no lee, no guarda y no pide claves. Desde la **v1.7.3** sí apunta el endpoint cuando el modelo del delegado es un id de **OpenRouter** (los de `copilot-model`, que siempre son `vendedor/modelo`), y eso es lo que hace usable el alias: `ask` y `validate` exportan `COPILOT_PROVIDER_BASE_URL=https://openrouter.ai/api/v1` **salvo que el autor apunte a otro proveedor**, mientras que los ids de Copilot (`gpt-6.1-sol`, `claude-sonnet-5.5`) no llevan `/` y siguen yendo a GitHub. La **clave** es del autor: `COPILOT_PROVIDER_API_KEY`, `COPILOT_PROVIDER_BEARER_TOKEN` o `COPILOT_PROVIDER_API_KEY_COMMAND` (que la imprime en cada petición); sin ninguna de las tres `ask` lo **avisa** por stderr, que es el canal del diagnóstico. En ese modo el CLI **no pide autenticación de GitHub**, y como `glot` exporta `COPILOT_MODEL` desde la clave de estado o el perfil, el id tiene que ser el de OpenRouter; si el modelo no es de una familia conocida, `COPILOT_PROVIDER_MODEL_ID` le da una para el *tool-calling* y los límites de tokens.
 

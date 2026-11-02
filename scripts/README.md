@@ -4,7 +4,9 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v2.0.3** en [`glot.sh`](glot.sh).
+Versión de desarrollo / Development version: **v2.1.0-dev** en [`glot.sh`](glot.sh).
+Última versión verificada / Last verified release: **v2.0.3** en
+[`versions/glot_2.0.3.sh`](versions/glot_2.0.3.sh).
 
 ---
 
@@ -65,7 +67,6 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 |-----------|-----------|
 | [`prompts/Delegation_Policy.md`](prompts/Delegation_Policy.md) | Política compartida / Shared policy: bases por prioridad, agrupación por tema e idioma del lenguaje |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Capas L0–L9, versiones, criterios de orden y decisiones cerradas |
-| [`docs/V2_1_0.md`](docs/V2_1_0.md) | Preparación de v2.1.0: tres rutas, BYOK, overrides y revisión de scaffold de los 50 lenguajes; pendiente de implementación / Preparation; not implemented |
 | [`docs/SPRINT.md`](docs/SPRINT.md) | El ciclo de módulo: 9 pasos, comandos, evidencias y encargos de IA |
 | [`docs/CONTRACT.md`](docs/CONTRACT.md) | Contrato de todos los verbos, códigos de salida, almacén de estado y especificación de `use` |
 | [`docs/INTERNALS.md`](docs/INTERNALS.md) | Cómo funciona el script por dentro |
@@ -80,7 +81,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v2.0.3)
+├── glot.sh                  # Desarrollo / development (v2.1.0-dev)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh

@@ -150,7 +150,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="2.0.3"
+GLOT_VERSION="2.1.0-dev"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -2726,6 +2726,11 @@ _glot_cmd_scaffold() {
         return 1
     fi
 
+    if [[ -L "$dir/.gitignore" || ( -e "$dir/.gitignore" && ! -f "$dir/.gitignore" ) ]]; then
+        _glot_error "ruta .gitignore no segura / unsafe .gitignore path: $dir/.gitignore"
+        return 4
+    fi
+
     seq="$(_glot_init_sequence "$lang" scaffold)" || {
         _glot_error "catálogo de inicialización mal formado / malformed initialisation catalogue: $lang"
         _glot_info 'revisa / check: scripts/data/init_sequences.tsv'
@@ -2767,7 +2772,7 @@ _glot_cmd_scaffold() {
             printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
             [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
         done <<<"$steps"
-        printf 'cd %s && touch .gitignore  # preserves existing contents\n' "$dir"
+        printf 'cd %s && { test -e .gitignore || touch .gitignore; }  # preserves existing contents\n' "$dir"
         if ((delegate_needed)); then
             _glot_info "para completar el análisis del paso 4a, ejecuta / to complete step 4a analysis, run: glot prompt scaffold $lang $phase/$module"
         fi
@@ -2805,8 +2810,8 @@ _glot_cmd_scaffold() {
         fi
     done <<<"$steps"
 
-    _glot_info "scaffold: touch .gitignore"
-    touch -- "$dir/.gitignore" || {
+    _glot_info "scaffold: garantizar .gitignore / ensure .gitignore"
+    { [[ -f "$dir/.gitignore" && ! -L "$dir/.gitignore" ]] || (set -C; : > "$dir/.gitignore"); } || {
         _glot_error "no se pudo crear .gitignore / could not create .gitignore: $dir"
         return 4
     }

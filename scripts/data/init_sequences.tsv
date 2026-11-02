@@ -7,7 +7,9 @@ assembly	new	1	phase	run	mkdir -p {module}	-	-	-
 assembly	scaffold	1	module	run	mkdir -p src test && printf 'global {module}_init\n\n.text\n' > src/{module}.asm && touch test/run_tests.asm	-	-	-
 assembly	scaffold	2	module	run	test -e Makefile || cp {root}/scripts/data/scaffold_templates/assembly.Makefile Makefile	-	-	completar el runner vacío y validar los patrones de .gitignore con el delegado scaffold
 ballerina	new	1	phase	run	bal new {module}	-	-	-
-ballerina	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	revisar tests/ generado
+ballerina	scaffold	1	module	run	if [[ -L main.bal || -L {module}.bal || ( -e main.bal && ! -f main.bal ) || ( -e {module}.bal && ! -f {module}.bal ) ]]; then printf 'scaffold: origen o destino no regular / source or target is not a regular file\n' >&2; false; elif [[ -f main.bal && ! -e {module}.bal ]]; then mv -n -- main.bal {module}.bal && test ! -e main.bal; elif [[ ! -e main.bal && -f {module}.bal ]]; then :; else printf 'scaffold: renombrado ambiguo o fuente ausente / ambiguous rename or missing source\n' >&2; false; fi	-	-	-
+ballerina	scaffold	2	module	run	test -f {root}/scripts/data/scaffold_templates/ballerina.main.bal && { cmp -s -- {module}.bal {root}/scripts/data/scaffold_templates/ballerina.main.bal; result=$?; if [[ "$result" == 0 ]]; then : > {module}.bal; elif [[ "$result" != 1 ]]; then printf 'scaffold: no se pudo comparar la plantilla / could not compare the template\n' >&2; false; fi; }	-	-	si el fuente conserva un main o contenido de ejemplo distinto de la plantilla verificada, revisar su conversión a biblioteca sin borrar código propio
+ballerina	scaffold	3	module	run	if [[ -L tests || -L tests/lib_test.bal || ( -e tests/lib_test.bal && ! -f tests/lib_test.bal ) ]]; then printf 'scaffold: ruta de pruebas no segura / unsafe test path\n' >&2; false; else mkdir -p tests && { test -e tests/lib_test.bal || touch tests/lib_test.bal; }; fi	-	-	-
 c	new	1	phase	run	mkdir -p {module}	-	-	-
 c	scaffold	1	module	run	mkdir -p include src test && printf '#ifndef {Module}_H\n#define {Module}_H\n\n#endif\n' > include/{module}.h && printf '#include "{module}.h"\n' > src/{module}.c	-	-	-
 c	scaffold	2	module	run	test -e Makefile || cp {root}/scripts/data/scaffold_templates/c.Makefile Makefile	-	-	completar el runner vacío y validar los patrones de .gitignore con el delegado scaffold
@@ -77,7 +79,7 @@ nim	scaffold	2	module	run	printf 'task test, "Run the unit tests":\n    exec "ni
 ocaml	new	1	phase	run	dune init proj {module}	-	-	-
 ocaml	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	usar el layout generado tal cual: el código en lib/ y la suite en test/
 perl	new	1	phase	run	mkdir -p {module}	-	-	-
-perl	scaffold	1	module	run	mkdir -p src test && printf 'package {Module};\n\nuse strict;\nuse warnings;\n\n1;\n' > src/{module}.pl	-	-	-
+perl	scaffold	1	module	run	if [[ -L lib || -L test || -L lib/{module}.pl || ( -e lib/{module}.pl && ! -f lib/{module}.pl ) ]]; then printf 'scaffold: ruta de Perl no segura / unsafe Perl path\n' >&2; false; else mkdir -p lib test && { test -e lib/{module}.pl || (set -C; printf 'package {Module};\n\nuse strict;\nuse warnings;\n\n1;\n' > lib/{module}.pl); }; fi	-	-	-
 php	new	1	phase	run	mkdir -p {module}	-	-	-
 php	scaffold	1	module	run	composer init -n --name={module}/{module} && composer require --dev --no-update phpunit/phpunit && mkdir -p src test && printf '<?php\n\ndeclare(strict_types=1);\n' > src/{Module}.php && touch phpunit.xml .gitignore	-	-	-
 prolog	new	1	phase	run	mkdir -p {module}	-	-	-
@@ -108,7 +110,7 @@ ruby	new	1	module	run	mkdir -p src test	-	-	-
 ruby	scaffold	1	module	run	bundle init	-	-	-
 ruby	scaffold	2	module	run	bundle install --local	-	-	Gemfile con rspec y .rspec
 rust	new	1	module	run	cargo init --lib	-	-	-
-rust	scaffold	1	module	run	mv src/lib.rs src/{module}.rs && touch .gitignore	-	-	-
+rust	scaffold	1	module	run	test -f Cargo.toml && test -f src/lib.rs	-	-	conservar el punto de entrada src/lib.rs de Cargo; revisar solo el código de ejemplo antes de declarar el contrato
 scala	new	1	phase	run	mkdir -p {module}	-	-	-
 scala	scaffold	1	module	run	mkdir -p src/main/scala src/test/scala project && printf 'object {Module}\n' > src/main/scala/{Module}.scala && touch build.sbt project/build.properties	-	-	el build.sbt declara scalatest (lo baja sbt en el build)
 scheme	new	1	phase	run	mkdir -p {module}	-	-	-
