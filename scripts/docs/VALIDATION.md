@@ -8,6 +8,137 @@
 
 ---
 
+## Configuración vigente v2.1.0-dev / Current v2.1.0-dev configuration
+
+**ES:** Esta sección reemplaza la selección de modelos y BYOK de v2.0.3
+documentada más abajo como referencia histórica. No certifica inferencia ni
+disponibilidad por cuenta; no se han usado cuotas o credenciales del autor.
+
+**EN:** This section supersedes the historical v2.0.3 model/BYOK configuration
+below. It does not certify inference or account availability; no author quota
+or credentials have been used.
+
+| Ruta / Route | Base / Default | Overrides autorizados / Allowed overrides |
+|---|---|---|
+| `antigravity` (`agy`) | Flash 3.8 para economy y contract/build | Argon solo docs; bloquea si no aparece en `agy models`. Sin Claude no-thinking verificado, deep no tiene asociación |
+| `copilot` | Flash 3.8 economy; Terra 6.1 balanced; Sonnet 5.5 deep | Argon docs; Sol 6.1/Kimi K3 contract/build; Opus 5.5 suite/implement/fix/refactor |
+| `open-router` | Qwen 3.7 Plus economy | Qwen Max/Kimi economy; Argon docs. Sin asociación balanced/deep |
+
+**ES:** Las plantillas declaran `profile:`, no un id. Las fuentes de selección
+son `--model` > entorno de la ruta > estado de la ruta > base. Los flags
+`--effort` ganan a `GLOT_EFFORT` y al perfil. Todas las fuentes pasan la misma
+autorización de [`model_options.tsv`](../data/model_options.tsv); no hay
+fallback. `GLOT_MODEL_AGY`, `GLOT_MODEL_COP` (`GLOT_MODEL` como alias nativo)
+y `GLOT_MODEL_OR` son independientes. Las preferencias persisten después de
+`finish`. `set copilot-model` guarda el id nativo resuelto: los antiguos alias
+ambiguos requieren volver a elegir ruta y ejecutar `set`; no se migran solos.
+
+**EN:** Templates declare profiles rather than model IDs. Model precedence is
+flag > route environment > route state > default; effort precedence is flag >
+environment > profile. Every source goes through the same request policy.
+Preferences survive `finish`; ambiguous old native/BYOK aliases block until
+explicitly reset. There is no automatic migration or fallback.
+
+```bash
+export GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools {reasoning_args}'
+export GLOT_DELEGATE_AGY='agy --model {model} -p "$(cat)" --add-dir {root}'
+# Solo el autor ejecuta estos verbos / Only the author runs these verbs:
+glot set copilot-model terra
+glot set open-router-model default
+glot ask --delegate copilot contract_stub ada algorithms/data_structures_basics
+glot ask --delegate open-router --model argon docs-module ada algorithms/data_structures_basics
+glot validate --delegate open-router --model qwen ada algorithms/data_structures_basics
+```
+
+**ES:** OpenRouter comparte `GLOT_DELEGATE_COP`, pero solo la ruta explícita
+configura endpoint `https://openrouter.ai/api/v1`, tipo `openai`, wire API
+`completions`, transporte `http` e identidad/wire model reales. Nunca disfraza
+Qwen como GPT/Claude. Un endpoint distinto o ajustes heredados de protocolo,
+identidad, tokens o archivo de proveedores bloquean: retirarlos del entorno de
+esa invocación, no modificar la configuración privada. Las credenciales son
+externas (`COPILOT_PROVIDER_API_KEY`, `COPILOT_PROVIDER_BEARER_TOKEN` o
+`COPILOT_PROVIDER_API_KEY_COMMAND`); glot no las guarda ni imprime.
+
+**EN:** The explicit OpenRouter route configures its endpoint, OpenAI
+completion protocol, HTTP transport and real internal/wire identity.
+Conflicting inherited provider settings block rather than silently changing
+providers. Credentials remain external and are never stored or printed.
+
+**ES:** Los adaptadores BYOK declaran límites conservadores de 131072 tokens
+de prompt y 32768 de salida, no la ventana completa del proveedor. No aumentan
+contexto ni prometen acceso a 1M mediante Copilot. Qwen Plus no tiene
+`reasoning_effort` verificado: se omite con `{reasoning_args}` y cualquier
+effort explícito bloquea. Qwen Max/Kimi/Argon admiten low/medium/high según
+metadatos públicos. AGY ajusta el sufijo del id al esfuerzo y comprueba el
+catálogo local, sin realizar inferencia. `validate` conserva `--deny-tool write`
+en el adaptador por defecto; no admite AGY porque no se ha verificado una
+denegación equivalente. Un `GLOT_VALIDATOR` personalizado es responsabilidad
+del autor. Las órdenes no se imprimen en diagnósticos ni evidencia; el registro
+identifica ruta/modelo. Dry-run muestra la orden y no debe contener secretos.
+
+**EN:** Conservative BYOK input/output limits do not enlarge context or
+guarantee 1M access through Copilot. Unsupported explicit effort blocks.
+AGY effort is encoded in a locally verified model suffix. Default validation
+remains read-only on Copilot/OpenRouter; AGY validation has no verified
+equivalent and is blocked. Custom validators remain author-owned.
+Diagnostics/evidence identify the route/model, not private commands.
+
+**ES / EN:** Los caps de 30/60/90 AI credits solo se aplican al validador nativo.
+No son límites de dinero OpenRouter ni cuotas AGY; las órdenes personalizadas
+de `ask` deciden sus caps. / Credit caps apply only to default native validation,
+not OpenRouter money, AGY quotas or author-owned `ask` commands.
+
+### Precios comprobados / Verified pricing (2026-11-02)
+
+**ES:** Comparación de tarifas públicas, no estimación de una sesión completa.
+Los precios de Copilot son USD por millón de tokens en tier default.
+Fuente: [GitHub, Models and pricing](https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing).
+El coste final depende también de caché, escritura de caché, razonamiento,
+long context y cantidad de tokens. No basta con comparar generaciones.
+
+**EN:** Public default-tier rates in USD per million tokens, not total session
+estimates. Cache, reasoning, context tiers and token counts affect actual cost;
+newer models are not automatically cheaper.
+
+| Modelo / Model | Entrada / Input | Salida / Output | Decisión / Decision |
+|---|---:|---:|---|
+| GPT-5.6 Terra | $2.00 | $12.00 | Retirado de la configuración activa / Removed from active configuration |
+| GPT-6.1 Terra | $1.00 | $5.00 | Balanced: 50% menos entrada y 58.3% menos salida / Lower input/output rates |
+| Claude Sonnet 5.5 | $2.00 | $10.00 | Deep; misma tarifa principal que 5, caché de lectura más barata / Same main rate as 5, cheaper cached input |
+| Claude Opus 5.5 | $4.00 | $20.00 | Override deep; 20% menos que Opus 5 / 20% below Opus 5 |
+| Gemini 3.8 Flash | $0.75 | $3.75 | Base economy conservada por decisión del autor / Author-selected economy default retained |
+| Gemini 4 Argon | $2.00 | $10.00 | Override docs, no sustituto barato de Flash / Not a cheaper Flash replacement |
+| Kimi K3 (Copilot) | $3.00 | $15.00 | Alternativa funcional, no escalado de ahorro / Functional alternative, not a cost-saving upgrade |
+| Claude Haiku 5.5 | $0.10 | $0.50 | Más barato en default hasta 100K; no reemplaza Flash sin nueva decisión / Cheaper, but not an authorized default replacement |
+
+**ES:** Terra 6.1 está en el catálogo oficial GA y en el selector del editor
+mostrado por el autor. `copilot help config` local todavía enumera 5.6 y no
+6.1: eso es una discrepancia editor/CLI, no evidencia de que 5.6 sea la mejor
+opción. Se usa el id 6.1 sin fallback; doctor informa la cobertura local real.
+No se ha certificado un lanzamiento/inferencia CLI con 6.1 ni actualizado
+la instalación del autor. Un estado fijado al antiguo id exige elegirlo de
+nuevo con `set copilot-model terra` o usar el override explícito.
+
+**EN:** Official GA availability and the supplied editor picker include
+Terra 6.1, while local CLI help does not yet list it. The configuration uses
+6.1 without fallback; doctor reports the actual local catalogue coverage.
+No CLI inference or author installation upgrade was performed. Old pinned
+IDs require an explicit reset or override.
+
+**ES:** OpenRouter mantiene Qwen 3.7 Plus: los
+[metadatos públicos](https://openrouter.ai/api/v1/models) indican $0.32/$1.28
+por millón de entrada/salida hasta 256K, frente a $2/$6 de Qwen 3.8 Max y
+$2/$10 de Argon. Por tanto, actualizarlo a Max solo por ser más reciente
+encarecería el default. Son rutas y tarifas distintas de Copilot; no se
+extrapolan a AGY, cuya cuota pertenece al plan del autor.
+
+**EN:** Qwen 3.7 Plus remains the OpenRouter default: its $0.32/$1.28
+input/output rates below 256K are lower than Qwen 3.8 Max ($2/$6) and
+Argon ($2/$10). A newer Max default would cost more. Copilot rates do not
+describe OpenRouter or AGY plan quotas.
+
+## Referencia histórica hasta v2.0.3 / Historical reference through v2.0.3
+
 ## 🔧 Invocación verificada / Verified invocation
 
 ```bash
@@ -65,6 +196,15 @@ copilot -C "$MODULE_DIR" -p "<encargo validate>" \
 ---
 
 ## 🧩 Proveedor propio (BYOK) y OpenRouter / Bring your own key and OpenRouter
+
+**ES:** Lo siguiente describe la versión viva v2.0.3. La configuración detallada
+de BYOK, su separación como `--delegate open-router`, el aislamiento de rutas y
+las equivalencias de esfuerzo/tokens se especifican para v2.1.0 en
+[`ROADMAP.md`](ROADMAP.md). Esa ampliación todavía no está implementada.
+
+**EN:** The following describes live v2.0.3. Detailed BYOK configuration, the
+separate OpenRouter delegate route, isolation and effort/token compatibility are
+specified for v2.1.0 in [`ROADMAP.md`](ROADMAP.md), not implemented yet.
 
 **ES:** El CLI admite un proveedor propio (`copilot help providers`): se activa con `COPILOT_PROVIDER_BASE_URL` y acepta endpoints compatibles con OpenAI, Azure y Anthropic, con la clave en `COPILOT_PROVIDER_API_KEY`, en `COPILOT_PROVIDER_BEARER_TOKEN`, o impresa en cada petición por `COPILOT_PROVIDER_API_KEY_COMMAND` (la forma en la que una clave no tiene que vivir en el repositorio ni en el entorno visible). **`glot` no gestiona credenciales**: no lee, no guarda y no pide claves. Desde la **v1.7.3** sí apunta el endpoint cuando el modelo del delegado es un id de **OpenRouter** (los de `copilot-model`, que siempre son `vendedor/modelo`), y eso es lo que hace usable el alias: `ask` y `validate` exportan `COPILOT_PROVIDER_BASE_URL=https://openrouter.ai/api/v1` **salvo que el autor apunte a otro proveedor**, mientras que los ids de Copilot (`gpt-6.1-sol`, `claude-sonnet-5.5`) no llevan `/` y siguen yendo a GitHub. La **clave** es del autor: `COPILOT_PROVIDER_API_KEY`, `COPILOT_PROVIDER_BEARER_TOKEN` o `COPILOT_PROVIDER_API_KEY_COMMAND` (que la imprime en cada petición); sin ninguna de las tres `ask` lo **avisa** por stderr, que es el canal del diagnóstico. En ese modo el CLI **no pide autenticación de GitHub**, y como `glot` exporta `COPILOT_MODEL` desde la clave de estado o el perfil, el id tiene que ser el de OpenRouter; si el modelo no es de una familia conocida, `COPILOT_PROVIDER_MODEL_ID` le da una para el *tool-calling* y los límites de tokens.
 

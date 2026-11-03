@@ -1,7 +1,7 @@
 ---
 name: correct
 step: 4e
-model: qwen/qwen3.7-plus
+profile: economy
 description: Corrige un artefacto anterior a la implementación (esqueleto, contrato, suite, runner o construcción) y deja constancia de la causa
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md
 mode: agent

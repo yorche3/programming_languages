@@ -1,5 +1,41 @@
 # 🗂️ Catálogo de datos / Data catalogue
 
+**ES:** En **v2.1.0-dev**, la configuración vigente de modelos está descrita en
+[`VALIDATION.md`](../docs/VALIDATION.md). `models.tsv` conserva siete columnas,
+pero la clave ahora es el perfil (`profile:` en la plantilla): Flash nativo
+economy, Terra 6.1 balanced (contract/build), Sonnet 5.5 deep (incluida suite).
+AGY deep es `-`, sin asociación no-thinking verificada.
+`delegates.tsv` separa `agy`, `copilot` nativo y `open-router`; no infiere ruta
+por la barra del id. Las secciones de modelos más abajo describen el historial
+hasta v2.0.3, no la política vigente.
+
+**EN:** Current model routing is documented in
+[`VALIDATION.md`](../docs/VALIDATION.md). The seven-column profile catalogue
+is now keyed by `profile:`. Delegate aliases distinguish AGY, native Copilot
+and OpenRouter explicitly. The later model sections are historical v2.0.3
+reference, not the current policy.
+
+### `model_options.tsv`: adaptadores autorizados / authorized adapters
+
+**ES:** Tabla con cabecera, separada por tabuladores. Una fila por ruta/modelo,
+sin credenciales ni precios. Se instala junto con los demás datos.
+
+**EN:** Headered TSV, one row per route/model, containing no credentials or
+prices; installed with the other runtime data.
+
+| Columna / Column | Contrato / Contract |
+|---|---|
+| `route` | `agy`, `copilot`, `open-router` |
+| `model` | Id real del catálogo de alias |
+| `requests` | Lista de encargos autorizados, separada por coma |
+| `efforts` | Niveles verificados separados por coma; `-` omite control y rechaza effort explícito |
+| `max_prompt_tokens` | Límite de entrada BYOK; `-` en rutas no BYOK |
+| `max_output_tokens` | Límite de salida BYOK; no amplía contexto |
+
+**ES / EN:** Los ids pendientes (Argon AGY) permanecen declarados y bloquean
+si el catálogo local no los ofrece; no se sustituyen. / Pending IDs remain
+declared and block when absent from the local catalogue, without substitution.
+
 **ES:** `languages.tsv` es la fuente **máquina** de los comandos e inicializadores
 por lenguaje que consume `glot`: `langs` y `test`/`verify` (v0.7.0) hoy, y `new`
 (v0.9.0). `commits.tsv` es la tabla de mensajes de commit que consume `save`
@@ -72,6 +108,19 @@ only when the module has no `Makefile`. `scaffold` also ensures a `.gitignore`
 without replacing existing contents. The 4a request adds or adjusts
 language-specific patterns and verifies an artifact with `git check-ignore`.
 
+**ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
+(`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con
+referencia declarada por dotnet), Go (`src/tests`), Haskell (`lib/test` y
+paquete Cabal con guiones) y V (`tests/`, sin mover fuentes ajenas a sus
+imports). Estas filas se prueban también con rerun, gitfile y contenido
+previo. Los renombrados de fuentes F#/V requieren actualizar referencias y
+permanecen como revisión explícita, no como borrado o aplanado automático.
+
+**EN:** Reviewed layouts preserve native directories and references.
+Regression fixtures cover reruns, gitfiles and authored contents.
+Coupled F#/V source/import changes remain explicit review tasks rather than
+automatic deletion or flattening.
+
 **ES:** ⚠️ **Deuda conocida / Known debt (2026-10-11):** un runner puede devolver
 `0` con la suite en rojo. `guile --no-auto-compile -s {suite}_guile.scm` imprime el
 conteo de SRFI-64 pero no lo propaga al código de salida, así que `glot test` solo
@@ -135,41 +184,49 @@ no declared operation is untouched: it is a data decision, not the script's.
 | Columna / Column | Contenido / Content | Ejemplo / Example |
 |:---:|---|---|
 | 1 | Lenguaje, tal como aparece en `.gitmodules` | `ada` |
-| 2 | Orden del paso, desde `1` | `1` |
-| 3 | Directorio de trabajo del paso: `module` (la carpeta del módulo que crea `use`) o `phase` (cuando el generador crea la carpeta él mismo) | `module` |
-| 4 | Modo: `run` (se ejecuta) o `expect` (se conduce con `expect`) | `run` |
-| 5 | Comando con los marcadores del tooling (`{module}`, `{Module}`) | `alr -n init --lib --in-place {module}` |
-| 6 | Requisito del paso: `-`, `expect`, `env:PERL5LIB+PATH` o `tool:uv` | `-` |
+| 2 | Fase: `new` o `scaffold` | `scaffold` |
+| 3 | Orden del paso dentro de la fase, desde `1` | `1` |
+| 4 | Directorio de trabajo: `module` o `phase` | `module` |
+| 5 | Modo: `run`, `expect` o `manual` (aviso, no ejecución) | `run` |
+| 6 | Comando con marcadores (`{module}`, `{Module}`, `{root}`) | `mkdir -p lib test` |
+| 7 | Requisito declarado del paso | `-` |
+| 8 | Respuestas de `expect`, separadas por `\|`; `-` en los otros modos | `library\|<defecto>` |
+| 9 | Análisis/completado residual; `-` si no falta nada | `revisar el runner mínimo` |
 
-**ES:** La secuencia de inicialización **no descarga bibliotecas**: crea el proyecto y deja los
-manifiestos que las **declaran** (`package.json` con jest, `composer.json` con phpunit,
-`pyproject.toml` con pytest, el proyecto de .NET con xunit…). Quien las baja es el **`build`**
-(paso 4d) o el propio `test` al resolverlas, así que en cuanto la caché del lenguaje está
-caliente se trabaja sin red. Si un paso **sí** necesita bajar algo —el generador de `clojure` o
-`racket`, el paquete de `haxe`, Quicklisp de `common-lisp`—, eso no se marca como requisito: va
-como **nota de completado**, que es el sitio del *hint* para el autor.
+**ES:** Esquema v2: cabecera y nueve columnas, con ambos pasos de los
+**50 lenguajes**. `languages.tsv` tiene cuatro columnas y no duplica el
+esqueleto. `new` ejecuta su fase; `scaffold` ejecuta la suya, garantiza
+`.gitignore` y anuncia el análisis residual. `-n` imprime comandos sin mutar;
+`GLOT_DATA_DIR` permite catálogos aislados para pruebas.
 
-**EN:** The initialisation sequence **downloads no libraries**: it creates the project and leaves
-the manifests that **declare** them (`package.json` with jest, `composer.json` with phpunit,
-`pyproject.toml` with pytest, the .NET project with xunit…). What pulls them is **`build`** (step
-4d) or `test` itself when it resolves them, so as soon as the language's cache is warm you work
-offline. If a step **does** need to pull something —the `clojure` or `racket` generator, the `haxe`
-package, Quicklisp for `common-lisp`—, it is not marked as a requirement: it goes as a
-**completion note**, which is where the *hint* for the author belongs.
-| 7 | Respuestas de `expect`, separadas por `|`; `-` en los demás modos | `library|<defecto>|<defecto>|<defecto>|<defecto>` |
-| 8 | Lo que hay que **completar a mano** después (el generador no lo crea); `-` si no falta nada | `borrar el .git que crea uv` |
+**EN:** The v2 schema has a header and nine columns, covering both phases for all
+50 languages. The four-column language catalogue does not duplicate scaffolding.
+Each verb executes its phase; scaffold ensures ignore files and reports residual
+analysis. Dry runs do not mutate; tests can inject a data directory.
 
-**ES:** Un lenguaje aparece aquí **solo** si su inicialización necesita **más de un paso**, **otro directorio de trabajo**, `expect` o un **completado posterior**; los que se resuelven con un único comando siguen en la columna 7 de `languages.tsv` y **no se duplican**. La consume `new` (v1.1.0): construye el plan con estos pasos, lo imprime con `-n` (`cd <directorio> && <comando>` por paso), lo ejecuta en orden y, al terminar —también en el plan—, imprime en **un solo bloque** lo que queda por completar (columna 8, numerado por paso), porque dentro del bucle se lo comía la salida de los comandos. Si el paso declara `phase`, **retira la carpeta vacía** que dejó `use`, porque ese generador crea la carpeta él mismo (los tres que lo hacen —`julia`, `clojure` y `racket`— fallan si ya existe). Está pensada también como **consulta humana**: es la lista que dice, lenguaje a lenguaje, qué se ejecuta y qué falta. `GLOT_DATA_DIR` redirige el directorio del dato, para pruebas y laboratorio.
+**ES:** Todo cambio conocido y repetible va en **comando**, no queda oculto
+como nota del agente. Las notas son para criterio/contenido no determinado por
+el catálogo. El harness comprueba nueve columnas, fases/modos válidos y órdenes
+contiguos. Un paso fallido detiene la secuencia; los renombrados deben preservar
+destinos existentes. La guía humana conserva las mismas adecuaciones.
 
-**EN:** A language appears here **only** when its initialisation needs **more than one step**, **another working directory**, `expect` or a later **completion**; single-command languages stay in column 7 of `languages.tsv` and are **not duplicated**. It is consumed by `new` (v1.1.0): it builds the plan from these steps, prints it with `-n` (`cd <dir> && <command>` per step), runs it in order and, when it finishes —in the plan too—, prints in **a single block** what is left to complete (column 8, numbered by step), because inside the loop the commands' own output swallowed it. When a step declares `phase`, it **removes the empty folder** left by `use`, because that generator creates the folder itself (the three that do —`julia`, `clojure` and `racket`— fail if it already exists). It is also meant as a **human reference**: the per-language list of what runs and what is missing. `GLOT_DATA_DIR` redirects the data directory, for tests and the lab.
+**EN:** Known repeatable changes belong in commands, not hidden agent notes.
+Notes describe judgment/content not determined by the catalogue. The harness
+checks the nine-column schema and per-phase order; failed steps stop execution.
+Renames preserve existing destinations and manual recipes mirror adaptations.
 
-**ES:** **Regla de completitud (v1.3.0):** todo paso necesario para que el **runner arranque** va como **comando** (columna 5), no como nota; la columna 8 queda para lo que no es un comando de shell (licencia, `description`, borrar o aplanar archivos). El harness exige **8 columnas** por fila, **órdenes contiguos** por lenguaje y que la columna 8 **nunca quede vacía** —una fila de 7 campos manda el completado a «respuestas» y lo silencia, que es el fallo medido en Ada—, y un caso comprueba que lo declarado allí **llega a stderr** al terminar `new`.
+**ES:** Primer bloque v2.1.0-dev: Ballerina crea pruebas vacías, renombra con
+guardas y elimina solo el ejemplo idéntico a
+[`ballerina.main.bal`](scaffold_templates/ballerina.main.bal). Perl escribe
+fuentes bajo `lib/` únicamente si faltan; Rust preserva `src/lib.rs`.
+Los tres se comprobaron en laboratorio offline el 2026-11-02. La revisión de los
+otros lenguajes sigue abierta en [`ROADMAP.md`](../docs/ROADMAP.md); las mediciones
+históricas no certifican automáticamente las nuevas filas.
 
-**EN:** **Completeness rule (v1.3.0):** every step needed for the **runner to start** goes as a **command** (column 5), not as a note; column 8 is for what is not a shell command (licence, `description`, deleting or flattening files). The harness requires **8 columns** per row, **contiguous orders** per language and that column 8 is **never empty** —a 7-column row sends the completion into "answers" and silences it, which is the failure measured in Ada—, and a case checks that what is declared there **reaches stderr** when `new` finishes.
-
-**ES:** Las filas están medidas ejecutando cada generador en el laboratorio el 2026-09-26 —y la de `common-lisp` **otra vez el 2026-09-29**, cuando su secuencia pasó a **`cl-project`**: es el generador de la comunidad, deja el proyecto **con** `src/` y `tests/` y **exige un *pathname*** (`#p"{module}"`)— (ver la tabla de medición de [`ROADMAP.md`](../docs/ROADMAP.md)). La regla de la columna 3 se comprobó una a una: `uv init --lib .` y `module-starter --dir=.` trabajan **en el sitio**, mientras que `cl-project`, `Pkg.generate`, `deps-new` con destino, `raco pkg new` y `alr init` **crean la carpeta** — con `alr` se resuelve con `--in-place` y se queda en `module`.
-
-**EN:** Rows were measured by running each generator in the lab on 2026-09-26 —and `common-lisp`'s **again on 2026-09-29**, when its sequence moved to **`cl-project`**: the community generator, which leaves the project **with** `src/` and `tests/` and **requires a *pathname*** (`#p"{module}"`)— (see the measurement table in [`ROADMAP.md`](../docs/ROADMAP.md)). The column 3 rule was checked one by one: `uv init --lib .` and `module-starter --dir=.` work **in place**, whereas `cl-project`, `Pkg.generate`, `deps-new` with a target, `raco pkg new` and `alr init` **create the folder** — `alr` is solved with `--in-place`, staying in `module`.
+**EN:** The first v2.1.0-dev block adds safe Ballerina adaptations, missing-only
+Perl sources under lib and preserved Rust entry points. These three were checked
+offline on 2026-11-02; remaining languages still require review and historical
+measurements do not certify changed rows.
 
 ## 📝 `commits.tsv` — la tabla de commits / the commit table
 
@@ -211,6 +268,15 @@ must be the ones waiting for `pointer` (v0.12.0) and `close` (v0.10.0).
 **EN:** The roadmap spells languages with their display name (`C#`, `C++`, `Tcl/Tk`) and **this table's line number is the position** inside its lists. `glot close` uses it for both: to write the name that goes into the list and to insert it in place, instead of inventing an order in the script. It is maintained by hand, and the harness checks drift **in both directions**: the languages must be `.gitmodules`' and the names must be, no more and no less, those of an already closed list in the roadmap.
 
 ## 🤖 `models.tsv` — perfiles de modelo por encargo / per-request model profiles
+
+**ES:** Este esquema es el de v2.0.3. La separación de rutas, la asignación de
+Sonnet a `suite` y la migración a perfiles independientes del id de modelo se
+preparan en [`ROADMAP.md`](../docs/ROADMAP.md); los TSV no cambian durante esta
+preparación documental.
+
+**EN:** This is the v2.0.3 schema. Separate routes, Sonnet for `suite` and
+model-independent profiles are planned in [`ROADMAP.md`](../docs/ROADMAP.md);
+TSV files remain unchanged during documentation preparation.
 
 **ES:** Una fila por **perfil**, con el **modelo como clave**: la plantilla declara su
 modelo en el frontmatter (`model:`) y esta tabla dice qué esfuerzo y qué tope de créditos

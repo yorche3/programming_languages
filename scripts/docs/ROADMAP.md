@@ -18,9 +18,57 @@ The v2.0.2 shared delegation policy retains `data_structures_basics` →
 `numbers` priority, with topic- and language-aware grouping and unchanged models.
 Verification is recorded in [`VERSIONS.md`](VERSIONS.md).
 
+**ES:** La siguiente entrega es **v2.1.0**, con especificación acordada en
+este roadmap: `--delegate antigravity|copilot|open-router`,
+configuración BYOK por ruta, overrides autorizados por encargo y revisión del
+scaffold de los 50 lenguajes. El primer bloque de scaffold está implementado en
+**2.1.0-dev**; rutas/perfiles y correcciones de nueve lenguajes están
+verificados. La revisión/corrección de los otros 41 scaffolds sigue pendiente.
+v2.0.3 quedó archivada como snapshot exacto antes de editar código.
+
+**EN:** The next delivery is **v2.1.0**, specified in
+this roadmap: three explicit delegate routes, route-specific BYOK
+configuration, authorized per-request overrides and a 50-language scaffold
+review. The first scaffold block is implemented in **2.1.0-dev**; routing and
+profiles and nine scaffold corrections are verified; the remaining
+41-language review/corrections are pending.
+v2.0.3 was archived before code edits.
+
 ---
 
 ## 🎯 Objetivo / Goal
+
+### Alcance acordado de v2.1.0 / Agreed v2.1.0 scope
+
+**ES:** El documento temporal de preparación fue retirado por el autor; las
+decisiones permanecen aquí. No cerrar la versión hasta comprobar:
+
+- `--delegate antigravity|copilot|open-router`, sin `--provider`; OpenRouter
+  usa Copilot CLI BYOK, no otro agente.
+- Perfiles independientes del id de modelo; Flash para economía en AGY,
+  Terra para contrato/build nativo, Sonnet para suite/implement/fix/refactor.
+  OpenRouter conserva Qwen y sus alternativas económicas.
+- Overrides por ruta y encargo: Argon solo documentación; Sol/Kimi como
+  alternativas balanced; Opus como escalado deep. Todas las fuentes de selección
+  pasan las mismas restricciones, sin fallback silencioso.
+- BYOK separa endpoint, protocolo, identidad/wire model y tokens; esfuerzo
+  equivalente comprobado, sin inventar compatibilidad. Credenciales privadas
+  externas; AI credits no son presupuestos monetarios BYOK ni cuotas AGY.
+- `ask`/`validate`, catálogos, ayuda, completado, `doctor`, instalación y
+  estado comparten la resolución; no filtrar configuración BYOK a rutas nativas.
+- Revisión de los 50 scaffolds contra catálogo, guía y bases del mismo
+  lenguaje; comprobación nativa o pendiente explícito. Acciones repetibles
+  en comandos, no notas del agente; dry-run, rerun, referencias y contenido
+  previo protegidos. No imponer `src/test` a todos los lenguajes.
+- DeepSeek y los audits siguen manuales y fuera de glot; no modificar
+  submódulos, contadores académicos ni credenciales.
+
+**EN:** The author removed the temporary preparation document; these decisions
+remain authoritative. Complete explicit routing, model-independent profiles,
+constrained overrides, verified BYOK adapters and isolated configuration across
+every CLI surface. Review all 50 scaffolds with native checks or explicit pending
+status, protect reruns and authored contents, and keep academic modules and
+manual audits outside this release.
 
 **ES:** `glot` convierte el ciclo de trabajo de un módulo —**situar, crear, ejecutar, delegar, cerrar y publicar**— en comandos reproducibles, y deja la evidencia en el repositorio.
 
@@ -102,7 +150,8 @@ Verification is recorded in [`VERSIONS.md`](VERSIONS.md).
 | 1.7.6 | fix de la 1.7.5 | 4a–8 | **El andamiaje de Perl pasa a `manual`**: `module-starter` generaba `Makefile.PL`, `lib/{module}.pm` y `t/`, que no es el layout homologado; la fila del catálogo queda con `mkdir -p lib test`, el paso único sale de `init_sequences.tsv` y la guía lo lee de la tabla maestra. Cierra la corrección de Perl que abrió la v1.7.5 (verificador `lib/` + `-Ilib`) | **No abre capa**: fix sobre la 1.7.5; la rama `fix/repo/glot-v1.7.6` ya lleva el número de la entrega que cierra | ✅ cerrada |
 | 1.7.7 | fix de la 1.7.6 | 4a–8 | **El layout de R es el de un paquete**: la fila del catálogo apuntaba a `src/{module}.R` y a `Rscript test/run_tests.R`, rutas que desaparecieron al homologar los cuatro módulos de R a `DESCRIPTION` + `NAMESPACE` + `R/` + `tests/testthat/`, así que el andamiaje pasa a `mkdir -p R tests/testthat`, el runner a `make test` (`testthat::test_local()`, que carga el paquete sin instalarlo) y el verificador a los fuentes de `R/`; la guía de inicialización lo documenta | **No abre capa**: fix sobre la 1.7.6; la rama `fix/repo/glot-v1.7.7` ya lleva el número de la entrega que cierra | ✅ cerrada |
 | 1.7.8 | fix de la 1.7.7 | 4a–8 | **El estándar de Racket es `raco new library {module}`** —el layout lib/test/doc de la comunidad— con su render portátil (`mv` + `sed -i` de GNU, porque el `render-template.sh` del template es interactivo y de BSD, y sin él los cuatro `info.rkt` conservan los marcadores `<project>`/`<username>`), el borrado de `.github/`, `pull_request_template.md`, `render-template.sh` y `profile/`, y las suites requiriendo la librería por ruta relativa para correr sin enlazar paquetes; el runner pasa a `raco test -x .`, porque `racket test/run_tests.rkt` no existía en los dos módulos de un solo archivo y, en los tres que sí lo tienen, **salía con código 0 aunque la suite fallara** (falso verde en `test`/`evidence`) | **No abre capa**: fix sobre la 1.7.7; la rama `fix/repo/glot-v1.7.8` ya lleva el número de la entrega que cierra | ✅ cerrada |
-| ⏳ | 1.8.0 | 4a | **El reparto entre `new` y `scaffold`**: `new` ejecuta **todos** los comandos —con herramienta o `mkdir` del módulo— y entra en el directorio del módulo (`cd {module}/`); `scaffold` concluye con **los archivos y configuraciones que falten**, que hoy viajan como nota del dato (en Ada el `test` y la referencia, en C# y F# las referencias y los renombrados del template, en Racket el render y los borrados) | **Abre capa**: el esqueleto deja de depender de que el agente lea la nota del paso | ⏳ abierta |
+| 2.1.0 | L4/L6.5 y andamiaje / scaffolding | 4a–8 | Tres rutas con `--delegate`, configuración BYOK y overrides por encargo; Sonnet para suite; revisión de acciones repetibles y recetas manuales de los 50 lenguajes / Three routes, BYOK, constrained overrides and scaffold review | Continúa v2.0.3 y recoge la revisión residual del plan 1.8.0 / Continues v2.0.3 and carries residual 1.8.0 review | 🔄 primer bloque scaffold; resto pendiente / first scaffold block; remainder pending |
+| ⏳ | 1.8.0 (plan histórico / historical plan) | 4a | **El reparto entre `new` y `scaffold`**: iniciado por v2.0.0/v2.0.3; la revisión residual de archivos, renombrados y notas automatizables se incorpora a v2.1.0 / Split introduced by v2.0.0/v2.0.3; residual adaptation review carried into v2.1.0 | No es una entrega futura independiente / Not a separate future release | Revisión residual en v2.1.0 / Residual review in v2.1.0 |
 | ⏳ | L9 | — | Versión esperada por lenguaje y comprobación/instalación | Segunda acepción de «manejador de versiones»; llega después del ciclo del roadmap |
 ### Deuda técnica / Technical debt
 

@@ -1,7 +1,7 @@
 ---
 name: scaffold
 step: 4a
-model: qwen/qwen3.7-plus
+profile: economy
 description: Completa el análisis y los ajustes idiomáticos que `glot scaffold` no puede resolver por catálogo
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/core/00_Project_Initialization_Guide.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/data/language_characteristics.tsv, docs/ruleset/DEVIATION_POLICY.md, scripts/data/init_sequences.tsv, scripts/data/languages.tsv
 mode: agent

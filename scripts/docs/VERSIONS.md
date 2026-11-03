@@ -4,6 +4,16 @@
 
 **EN:** History of closed versions and of the live version. **Future** versions and the layer each one covers are in [`ROADMAP.md`](ROADMAP.md).
 
+**ES:** v2.1.0 está en desarrollo según [`ROADMAP.md`](ROADMAP.md).
+El script se identifica como **2.1.0-dev**, no como una entrega cerrada.
+v2.0.3 se archivó antes de editar código; la separación de rutas/modelos está
+verificada en el harness. La revisión restante de scaffold sigue pendiente.
+
+**EN:** v2.1.0 is in development according to [`ROADMAP.md`](ROADMAP.md).
+The script identifies as **2.1.0-dev**, not a completed release.
+v2.0.3 was archived before code edits; route/model separation is verified by
+the harness. The remaining scaffold review is pending.
+
 | Versión | Fecha | Archivo | Añade | Estado |
 |---------|-------|---------|-------|:------:|
 | 0.1.0 | 2026-09-20 | [`versions/glot_0.1.0.sh`](../versions/glot_0.1.0.sh) | Hello World en Bash (`echo "Hello World! from Bash!"`) | ✅ cerrada |
@@ -41,7 +51,173 @@
 | 2.0.0 | 2026-10-12 | [`versions/glot_2.0.0.sh`](../versions/glot_2.0.0.sh) | **El esqueleto se parte en dos pasos y dos commits** (paso `4`, la carpeta del módulo, y paso `4a`, la estructura idiomática) y entra el **paso `4d build`**, con `4d correct` recorrido a `4e`; `languages.tsv` se queda con cuatro columnas (lenguaje, tipo, pruebas y verificador) y `init_sequences.tsv` con todo el esqueleto en nueve, así que se retira el vocabulario `deferred` y el camino v1 del script (`_glot_init_run`, `_glot_init_fix`, `_glot_init_normalise`, `_glot_init_flat`); los perfiles de modelo pasan a `gpt-6.1-sol` (low, 60) y `claude-sonnet-5.5` (medium, 90) | ✅ cerrada |
 | 2.0.1 | 2026-10-23 (archivo) | [`versions/glot_2.0.1.sh`](../versions/glot_2.0.1.sh) | Base previa al hotfix, archivada como copia exacta del script vivo antes de editarlo; conserva sus cambios anteriores de andamiaje y encargos / Pre-hotfix baseline, archived as an exact copy before editing | ✅ cerrada |
 | 2.0.2 | 2026-10-23 (archivo) | [`versions/glot_2.0.2.sh`](../versions/glot_2.0.2.sh) | Snapshot exacto previo al hotfix 2.0.3 / Exact pre-2.0.3 hotfix snapshot | ✅ cerrada |
-| 2.0.3 | 2026-10-26 | [`glot.sh`](../glot.sh) | `scaffold` automatiza `.gitignore` y Makefiles declarados, avisa si queda análisis delegado; `build` queda excepcional y conserva la suite / `scaffold` automates `.gitignore` and declared Makefiles, announces remaining delegated analysis; `build` is exceptional and preserves the suite | Verificada; lista para publicación del autor / Verified; ready for author publication |
+| 2.0.3 | 2026-10-26 | [`versions/glot_2.0.3.sh`](../versions/glot_2.0.3.sh) | `scaffold` automatiza `.gitignore` y Makefiles declarados, avisa si queda análisis delegado; `build` queda excepcional y conserva la suite / `scaffold` automates `.gitignore` and declared Makefiles, announces remaining delegated analysis; `build` is exceptional and preserves the suite | ✅ cerrada como línea base; snapshot exacto archivado el 2026-11-02, publicación del autor pendiente / Baseline closed; exact snapshot archived, author publication pending |
+| 2.1.0-dev | 2026-11-02 | [`glot.sh`](../glot.sh) | Primer bloque: scaffold seguro de Ballerina, layout `lib/` de Perl y punto de entrada Cargo de Rust / First block: safe Ballerina scaffold, Perl library layout and preserved Rust entry point | En desarrollo; no cerrada / In development; not closed |
+
+---
+
+## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
+
+**ES:** El perfil balanced, el alias `terra` y su adaptador pasan de
+`gpt-5.6-terra` a `gpt-6.1-terra`, que figura en el catálogo oficial y en el
+selector del editor mostrado por el autor. Tarifa default: entrada $1 y salida
+$5 por millón, frente a $2/$12 de 5.6. Sonnet/Opus 5.5 ya estaban vigentes.
+Flash se conserva por decisión previa; Qwen Plus sigue siendo más barato que
+Max en OpenRouter. Comparación y fuentes en
+[`VALIDATION.md`](VALIDATION.md).
+
+**EN:** Balanced now selects Terra 6.1 instead of 5.6 across default, alias
+and adapter. Current public pricing confirms lower input/output rates;
+the existing Claude versions and author-selected Flash remain unchanged.
+Qwen Plus remains cheaper than Max on OpenRouter.
+
+**ES / EN:** La ayuda del CLI local aún no enumera Terra 6.1; doctor informa
+la cobertura real, sin confundirla con el editor ni sustituir el modelo.
+No se ejecutó inferencia ni se actualizó la instalación del autor. /
+Local CLI help still omits 6.1; doctor reports actual coverage without
+fallback. No inference or author installation upgrade was performed.
+
+```text
+glot tests: 1316 passed, 0 failed
+docs checks: 25 passed, 0 failed
+```
+
+## 2.1.0-dev — 2026-11-02 (layouts nativos / native layouts)
+
+**ES:** Segundo bloque de scaffold: C++ usa `tests/`; Crystal conserva
+`src/spec`; F# conserva proyectos anidados y declara su `ProjectReference`
+con `dotnet add reference`; Go usa `src/tests`; Haskell genera nombre Cabal
+con guiones, `hs-source-dirs: lib` y el módulo exportado, y crea su declaración
+solo si falta; V conserva `tests/`, gitfile y fuente generado sin mover código
+cuyos imports aún apuntan a la raíz. Se corrigió también la tabla manual de
+Perl para que declare `lib/`, no `src/`.
+
+**EN:** The next scaffold block corrects C++, Crystal, F#, Go, Haskell and V
+layouts without flattening native projects, deleting Git metadata or moving
+authored sources independently of their references. The manual Perl table
+now matches its library layout.
+
+**ES:** Comprobaciones nativas en laboratorio temporal aislado: generadores
+Crystal, F#, Haskell y V, aplicación de las filas reales de scaffold,
+inicialización Go y `ghc -fno-code lib/NaiveSort.hs`. F# se generó con
+`--no-restore` y se comprobó su referencia con `dotnet sln list`; no se
+certifica la suite xUnit ni se descargaron paquetes. Se conserva la distinción
+entre comprobar un layout y homologar código/tests académicos.
+
+**EN:** Isolated native checks covered generators, actual scaffold rows,
+Go initialization and a no-code Haskell compilation. F# used no-restore
+templates and solution/reference inspection, not xUnit certification.
+No academic code or module completion counters changed.
+
+```text
+crystal scaffold: passed
+fsharp scaffold: passed
+haskell scaffold: passed
+v scaffold: passed
+glot tests: 1316 passed, 0 failed
+docs checks: 25 passed, 0 failed
+```
+
+**ES / EN:** No cierra v2.1.0: nueve lenguajes tienen correcciones verificadas
+en estos bloques; queda la revisión/corrección de los otros 41, incluidos
+renombrados acoplados a referencias y artefactos de configuración faltantes.
+/ v2.1.0 remains open pending the other 41 languages and their coupled
+reference/configuration corrections.
+
+## 2.1.0-dev — 2026-11-02 (rutas y perfiles / routes and profiles)
+
+**ES:** Tres rutas explícitas, perfiles independientes del modelo, Sonnet para
+suite e implementación, Terra 5.6 para contrato/build, Flash conservado en AGY
+y como base nativa. OpenRouter conserva Qwen y sustituye su alternativa Flash
+por Argon. Overrides autorizados por ruta/encargo y esfuerzos verificados;
+Qwen Plus omite effort y rechaza su selección explícita. AGY deep no tiene
+modelo no-thinking verificado y Argon pendiente permanece declarado.
+
+**EN:** Explicit AGY/native Copilot/OpenRouter routes, profile metadata and
+request-restricted adapters. Defaults and overrides match the agreed model
+split; unavailable AGY bindings block instead of silently falling back.
+
+**ES / EN:** `ask` y `validate` comparten resolutor, preferencias independientes
+y aislamiento del entorno. El validador por defecto conserva solo lectura;
+AI credits no se aplican a BYOK. Ayuda, completado bash/zsh, instalación,
+catálogos y doctor acompañan el cambio. / Shared resolution, independent
+preferences, provider isolation and read-only default validation are wired
+through CLI surfaces.
+
+Validación ejecutada / Executed validation:
+
+```text
+bash -n scripts/glot.sh scripts/completions/glot.bash scripts/tests/glot_test.sh
+zsh -n scripts/completions/glot.zsh
+env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.bareRepository GIT_CONFIG_VALUE_0=all ./scripts/tests/glot_test.sh
+glot tests: 1282 passed, 0 failed
+bash docs/tests/docs_check.sh
+docs checks: 25 passed, 0 failed
+git diff --check
+```
+
+**ES:** También se ejecutó el completado zsh con funciones de presentación de
+prueba: validate ofrece lenguaje, ask cuenta correctamente los valores de
+opción y OpenRouter ofrece sus cuatro alias. No se ejecutó inferencia, no se
+consultaron credenciales ni se modificaron submódulos. **No cierra la versión**:
+la revisión y corrección restante de los 47 scaffolds sigue pendiente.
+
+**EN:** Zsh completion was also exercised with presentation stubs. No paid
+inference, credential access or submodule changes occurred. **The release
+remains open** pending the remaining 47-language scaffold review/corrections.
+
+## 2.1.0-dev — 2026-11-02 (primer bloque / first block)
+
+**ES:** Commit documental de preparación: `2469c90`. Antes de editar código
+se archivó v2.0.3 y se comprobó su igualdad con la fuente de ese commit.
+Se implementó el primer bloque de scaffold:
+
+- Ballerina: renombrado protegido, retirada solo del ejemplo idéntico a la
+  plantilla verificada y archivo vacío `tests/lib_test.bal`.
+- Perl: fuente bajo `lib/`, coherente con el verificador, sin truncar contenido.
+- Rust: conservación de `src/lib.rs`, el punto de entrada predeterminado de Cargo.
+- Protección de `.gitignore` frente a symlinks/directorios y creación sin
+  truncamiento; no se modifica una instancia regular existente en el paso final.
+
+**EN:** Preparation documentation was committed as `2469c90`; v2.0.3 was
+archived and equality checked before code edits. The first scaffold block adds
+safe Ballerina adaptations, missing-only Perl sources under lib, preserved Rust
+crate entry points and protected ignore-file creation.
+
+**ES:** Verificación real del bloque:
+
+```text
+bash -n scripts/glot.sh scripts/tests/glot_test.sh scripts/versions/glot_2.0.3.sh
+# sin salida, código 0 / no output, exit 0
+
+env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.bareRepository GIT_CONFIG_VALUE_0=all ./scripts/tests/glot_test.sh
+glot tests: 1255 passed, 0 failed
+
+bash docs/tests/docs_check.sh
+docs checks: 25 passed, 0 failed
+
+git diff --check
+# sin salida, código 0 / no output, exit 0
+```
+
+**ES:** Se verificaron también los tres scaffolds en un laboratorio temporal
+aislado y offline: Ballerina 2201.13.4 compila el fuente vacío y anuncia
+`No tests found`; Cargo 1.98.1 ejecuta el test de su plantilla sin romper la
+entrada de biblioteca; Perl devuelve `syntax OK` al comprobar la fuente creada.
+El laboratorio se retiró y no se tocaron submódulos. El harness prueba
+reruns, dry-run, contenido propio, renombrados conflictivos, fuentes ausentes,
+symlinks, directorios y rutas con espacios.
+
+**EN:** Isolated offline native checks passed for all three scaffolds; the
+temporary lab was removed and no submodules changed. Harness cases cover reruns,
+dry runs, authored contents, rename conflicts, missing sources, invalid paths and
+spaces. Native template/empty tests do not certify academic contract coverage.
+
+**ES:** **No cierra v2.1.0:** rutas/modelos/overrides y los otros 47 lenguajes
+siguen pendientes según [`ROADMAP.md`](ROADMAP.md).
+
+**EN:** **This does not close v2.1.0:** routes/models/overrides and the remaining
+47 languages are still pending.
 
 ---
 

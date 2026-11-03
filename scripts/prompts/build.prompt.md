@@ -1,7 +1,7 @@
 ---
 name: build
 step: 4d
-model: gpt-6.1-sol
+profile: balanced
 description: Repara un bloqueo de construcción no previsto después de la suite, sin regenerar la suite
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md, docs/core/00_Project_Initialization_Guide.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/data/language_characteristics.tsv, scripts/data/init_sequences.tsv, scripts/data/languages.tsv
 mode: agent

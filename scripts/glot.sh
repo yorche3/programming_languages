@@ -150,7 +150,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="2.0.3"
+GLOT_VERSION="2.1.0-dev"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -190,6 +190,153 @@ _glot_repo_root() {
 
     [[ -n "$root" ]] || return 1
     printf '%s\n' "$root"
+}
+
+_glot_model_options_list() {
+    local file=""
+    file="$(_glot_models_file)" || return 1
+    file="${file%/*}/model_options.tsv"
+    if [[ ! -r "$file" ]]; then _glot_error 'falta model_options.tsv / missing model_options.tsv'; return 1; fi
+    if ! awk -F'\t' '
+        NR==1 {if ($0!="route\tmodel\trequests\tefforts\tmax_prompt_tokens\tmax_output_tokens") bad=1; next}
+        {
+            if (NF!=6 || $1 !~ /^(agy|copilot|open-router)$/ || $2=="" || seen[$1 FS $2]++) bad=1
+            n=split($3, a, ",")
+            for (i=1;i<=n;i++)
+                if (a[i] !~ /^(scaffold|correct|validate|docs-module|docs-language|contract_stub|build|suite|implement|fix|refactor)$/) bad=1
+            n=split($4, a, ",")
+            for (i=1;i<=n;i++) if (a[i] !~ /^(low|medium|high|-)$/) bad=1
+            if ($1=="open-router") {
+                if ($5 !~ /^[1-9][0-9]*$/ || $6 !~ /^[1-9][0-9]*$/) bad=1
+            } else if ($5!="-" || $6!="-") bad=1
+        }
+        END {exit bad || NR<2}
+    ' "$file"; then
+        _glot_error 'adaptadores de modelo inválidos / invalid model adapters: model_options.tsv'
+        return 1
+    fi
+    tail -n +2 -- "$file"
+}
+
+_glot_model_resolve() {
+    local route="$1" name="$2" override="${3:-}" effort_override="${4:-}"
+    local template="" profile="" pname="" native="" logical_effort="" credits="" tier="" requests="" agy=""
+    local key="" selected="" state="" rc=0 file="" row="" allowed="" levels="" prompt_limit="" output_limit=""
+    local options_route="" model="" native_catalog="" v=""
+
+    template="$(_glot_prompt_file "$name")" || return 1
+    profile="$(_glot_prompt_profile "$template")" || return $?
+    IFS=$'\t' read -r pname native logical_effort credits tier requests agy <<<"$profile"
+    case "$route" in
+        agy)
+            options_route=agy; key=antigravity-model
+            selected="${override:-${GLOT_MODEL_AGY:-}}"; model="$agy"
+            ;;
+        cop)
+            options_route=copilot; key=copilot-model
+            selected="${override:-${GLOT_MODEL_COP:-${GLOT_MODEL:-}}}"; model="$native"
+            ;;
+        open-router)
+            options_route=open-router; key=open-router-model
+            selected="${override:-${GLOT_MODEL_OR:-}}"
+            if [[ "$pname" == economy ]]; then model=qwen/qwen3.7-plus; else model="-"; fi
+            ;;
+        *) _glot_error "ruta desconocida / unknown route: $route"; return 2 ;;
+    esac
+    if [[ -z "$selected" ]]; then
+        state="$(_glot_state_get "$key")" || rc=$?
+        if ((rc != 0 && rc != 1)); then
+            _glot_error "estado de modelo ilegible / unreadable model state: $key"
+            return 3
+        fi
+        selected="$state"
+        if [[ "$route" == cop && "$selected" == @(default|gemini|kimi|qwen) ]]; then
+            _glot_error 'alias Copilot heredado ambiguo / ambiguous legacy Copilot alias'
+            _glot_info 'elige ruta y vuelve a ejecutar set copilot-model o set open-router-model / choose the route and set its model again'
+            return 2
+        fi
+    fi
+    if [[ -n "$selected" ]]; then
+        model="$(_glot_delegate_model "$options_route" "$selected")" || {
+            _glot_error "modelo desconocido en la ruta / unknown route model: $options_route $selected"
+            if [[ "$route" == cop && "$selected" == @(qwen|gemini|kimi|default) ]]; then
+                _glot_info 'los alias BYOK antiguos ahora se eligen con --delegate open-router y open-router-model / select legacy BYOK aliases explicitly on open-router'
+            fi
+            return 2
+        }
+    fi
+    if [[ "$model" == "-" || -z "$model" ]]; then
+        _glot_error "sin asociación de modelo / no model binding: $options_route $name"
+        return 1
+    fi
+    file="$(_glot_model_options_list)" || return $?
+    row="$(awk -F'\t' -v r="$options_route" -v m="$model" '$1==r && $2==m {print; exit}' <<<"$file")"
+    if [[ -z "$row" ]]; then _glot_error "modelo sin adaptador / model without adapter: $model"; return 1; fi
+    IFS=$'\t' read -r v model allowed levels prompt_limit output_limit <<<"$row"
+    if [[ ",$allowed," != *",$name,"* ]]; then
+        _glot_error "override fuera de categoría / override outside category: $options_route $model $name"
+        return 2
+    fi
+    logical_effort="${effort_override:-${GLOT_EFFORT:-$logical_effort}}"
+    if [[ "$levels" == "-" ]]; then
+        if [[ -n "$effort_override" || -n "${GLOT_EFFORT:-}" ]]; then
+            _glot_error "el modelo no admite effort / model does not support effort: $model"
+            return 2
+        fi
+        logical_effort="-"
+        _glot_info "sin control effort verificado / no verified effort control: $model"
+    elif [[ ",$levels," != *",$logical_effort,"* ]]; then
+        _glot_error "esfuerzo incompatible / incompatible effort: $model $logical_effort"
+        return 2
+    fi
+    export GLOT_DELEGATE_REASONING_ARGS=""
+    if [[ "$logical_effort" != "-" ]]; then
+        if [[ "$route" == agy ]]; then
+            model="${model%-low}-$logical_effort"
+            GLOT_DELEGATE_REASONING_ARGS="--effort $logical_effort"
+        else
+            GLOT_DELEGATE_REASONING_ARGS="--reasoning-effort $logical_effort"
+        fi
+    fi
+    if [[ "$route" == agy ]]; then
+        native_catalog="$(agy models)" || {
+            _glot_error 'no se pudo consultar el catálogo AGY / could not query AGY catalogue'; return 1;
+        }
+        if ! awk '{print $1}' <<<"$native_catalog" | grep -qxF -- "$model"; then
+            _glot_error "modelo AGY pendiente de disponibilidad / AGY model awaiting availability: $model"
+            return 1
+        fi
+    fi
+    if [[ "$route" == open-router ]]; then
+        if [[ -n "${COPILOT_PROVIDER_BASE_URL:-}" && "$COPILOT_PROVIDER_BASE_URL" != https://openrouter.ai/api/v1 ]]; then
+            _glot_error 'endpoint BYOK incompatible con open-router / BYOK endpoint conflicts with open-router'
+            return 2
+        fi
+        if [[ -n "${COPILOT_PROVIDER_TYPE:-}${COPILOT_PROVIDER_WIRE_API:-}${COPILOT_PROVIDER_TRANSPORT:-}${COPILOT_PROVIDER_MODEL_ID:-}${COPILOT_PROVIDER_WIRE_MODEL:-}${COPILOT_PROVIDER_MAX_PROMPT_TOKENS:-}${COPILOT_PROVIDER_MAX_OUTPUT_TOKENS:-}${COPILOT_PROVIDERS_CONFIG:-}" ]]; then
+            _glot_error 'configuración BYOK heredada incompatible / conflicting inherited BYOK settings'
+            return 2
+        fi
+        export COPILOT_PROVIDER_BASE_URL=https://openrouter.ai/api/v1
+        export COPILOT_PROVIDER_TYPE=openai COPILOT_PROVIDER_WIRE_API=completions COPILOT_PROVIDER_TRANSPORT=http
+        export COPILOT_PROVIDER_MODEL_ID="$model" COPILOT_PROVIDER_WIRE_MODEL="$model"
+        export COPILOT_PROVIDER_MAX_PROMPT_TOKENS="$prompt_limit" COPILOT_PROVIDER_MAX_OUTPUT_TOKENS="$output_limit"
+        if [[ -z "${COPILOT_PROVIDER_API_KEY:-}" && -z "${COPILOT_PROVIDER_BEARER_TOKEN:-}" && -z "${COPILOT_PROVIDER_API_KEY_COMMAND:-}" && $_glot_dry_run == 0 ]]; then
+            _glot_error 'OpenRouter sin credenciales externas / OpenRouter requires external credentials'
+            return 1
+        fi
+        credits="-"
+    else
+        while IFS= read -r v; do unset "$v"; done < <(compgen -A variable COPILOT_PROVIDER_)
+        unset COPILOT_PROVIDERS_CONFIG COPILOT_AUTO_TIER
+        if [[ "$route" == agy ]]; then
+            unset COPILOT_MODEL COPILOT_AUTO_TIER
+            credits="-"
+        fi
+    fi
+    if [[ "$route" != agy ]]; then export COPILOT_MODEL="$model"; fi
+    export GLOT_DELEGATE_MODEL="$model" GLOT_DELEGATE_EFFORT="$logical_effort"
+    export GLOT_DELEGATE_PROFILE="$pname" GLOT_DELEGATE_CREDITS="$credits" GLOT_DELEGATE_ROUTE="$route"
+    return 0
 }
 
 # --- almacén de estado (L1) --------------------------------------------------
@@ -608,6 +755,7 @@ _glot_cmd_doctor() {
             # manda cuando no hay nada fijado.
             printf 'antigravity_model_state: %s\n' "$(_glot_state_get antigravity-model 2>/dev/null || printf '(del perfil / from the profile)')"
             printf 'copilot_model_state: %s\n' "$(_glot_state_get copilot-model 2>/dev/null || printf '(del perfil / from the profile)')"
+            printf 'open_router_model_state: %s\n' "$(_glot_state_get open-router-model 2>/dev/null || printf '(del perfil / from the profile)')"
         else
             printf 'models_file: (no encontrado / not found)\n'
             status=1
@@ -619,10 +767,18 @@ _glot_cmd_doctor() {
         # OpenRouter, que no están en el catálogo del CLI, así que no se comprueban.
         if delegates="$(_glot_delegates_file)"; then
             printf 'delegates_file: %s\n' "$delegates"
-            printf 'delegate_aliases: %s alias / aliases (%s de AGY, %s de Copilot)\n' \
+            printf 'delegate_aliases: %s alias / aliases (%s de AGY, %s de Copilot, %s de OpenRouter)\n' \
                 "$(_glot_delegates_list | wc -l | tr -d ' ')" \
                 "$(_glot_delegates_list agy | wc -l | tr -d ' ')" \
-                "$(_glot_delegates_list copilot | wc -l | tr -d ' ')"
+                "$(_glot_delegates_list copilot | wc -l | tr -d ' ')" \
+                "$(_glot_delegates_list open-router | wc -l | tr -d ' ')"
+            local adapters=""
+            if adapters="$(_glot_model_options_list)"; then
+                printf 'model_options: %s adapters\n' "$(printf '%s\n' "$adapters" | wc -l | tr -d ' ')"
+            else
+                printf 'model_options: invalid\n'
+                status=1
+            fi
             if command -v agy >/dev/null 2>&1; then
                 local agy_catalog=""
                 local agy_ids=""
@@ -648,20 +804,20 @@ _glot_cmd_doctor() {
         fi
 
         if [[ -n "${GLOT_DELEGATE_COP:-}" ]]; then
-            printf 'delegate_cop: %s\n' "$GLOT_DELEGATE_COP"
+            printf 'delegate_cop: (configurado / configured)\n'
         elif [[ -n "${GLOT_DELEGATE:-}" ]]; then
-            printf 'delegate_cop: %s\n' "$GLOT_DELEGATE"
+            printf 'delegate_cop: (configurado / configured)\n'
             _glot_info 'GLOT_DELEGATE es el alias antiguo / is the old alias: GLOT_DELEGATE_COP'
         else
             printf 'delegate_cop: (sin configurar / not configured)\n'
         fi
         if [[ -n "${GLOT_DELEGATE_AGY:-}" ]]; then
-            printf 'delegate_agy: %s\n' "$GLOT_DELEGATE_AGY"
+            printf 'delegate_agy: (configurado / configured)\n'
         else
             printf 'delegate_agy: (sin configurar / not configured)\n'
         fi
         if [[ -n "${GLOT_VALIDATOR:-}" ]]; then
-            printf 'validator: %s\n' "$GLOT_VALIDATOR"
+            printf 'validator: (configurado / configured)\n'
         else
             printf 'validator: (sin configurar; Copilot CLI por defecto / not configured; Copilot CLI by default)\n'
         fi
@@ -945,9 +1101,15 @@ _glot_cmd_set() {
             fi
             ;;
         copilot-model)
-            if ! _glot_delegate_model copilot "$value" >/dev/null 2>&1; then
+            if ! value="$(_glot_delegate_model copilot "$value")"; then
                 _glot_error "alias de modelo desconocido para Copilot / unknown Copilot model alias: $value"
                 _glot_info "valen / valid: $(_glot_delegate_aliases copilot | tr '\n' ' ')"
+                return 2
+            fi
+            ;;
+        open-router-model)
+            if ! _glot_delegate_model open-router "$value" >/dev/null; then
+                _glot_error "alias OpenRouter desconocido / unknown OpenRouter alias: $value"
                 return 2
             fi
             ;;
@@ -1126,6 +1288,7 @@ _glot_cmd_models() {
 _glot_cmd_delegates() {
     local want="${1:-}"
     local data=""
+    if [[ "$want" == antigravity ]]; then want=agy; fi
 
     if [[ $# -gt 1 ]]; then
         _glot_error 'uso / usage: glot delegates [delegado]'
@@ -1134,7 +1297,7 @@ _glot_cmd_delegates() {
     fi
     if [[ -n "$want" ]] && ! _glot_delegate_table_known "$want"; then
         _glot_error "delegado desconocido / unknown delegate: $want"
-        _glot_info 'valen / valid: agy, copilot'
+        _glot_info 'valen / valid: antigravity (agy), copilot, open-router'
         return 2
     fi
 
@@ -1529,7 +1692,7 @@ _glot_prompts_list() {
         [[ -e "$file" ]] || continue
         name="$(_glot_prompt_field "$file" name)" || name="$(basename -- "$file" .prompt.md)"
         step="$(_glot_prompt_field "$file" step)" || step="-"
-        model="$(_glot_prompt_field "$file" model)" || model="-"
+        model="$(_glot_prompt_field "$file" profile)" || model="-"
         desc="$(_glot_prompt_field "$file" description)" || desc="-"
         printf '%s\t%s\t%s\t%s\n' "$name" "$step" "$model" "$desc"
     done
@@ -1728,6 +1891,7 @@ _glot_delegate_effective() {
     case "$kind" in
         copilot | cop) printf 'cop\n' ;;
         antigravity | agy) printf 'agy\n' ;;
+        open-router) printf 'open-router\n' ;;
         "")
             [[ -n "$cop" ]] && count=$((count + 1))
             [[ -n "$agy" ]] && count=$((count + 1))
@@ -1783,6 +1947,14 @@ _glot_delegate_command() {
             fi
             printf '%s\n' "$cop"
             ;;
+        open-router)
+            if [[ -z "$cop" ]]; then
+                _glot_error 'OpenRouter necesita GLOT_DELEGATE_COP / OpenRouter requires GLOT_DELEGATE_COP'
+                _glot_delegates_hint cop >&2
+                return 1
+            fi
+            printf '%s\n' "$cop"
+            ;;
         antigravity | agy)
             if [[ -z "$agy" ]]; then
                 _glot_error 'el delegado de Antigravity no está configurado / the Antigravity delegate is not set'
@@ -1794,7 +1966,7 @@ _glot_delegate_command() {
             ;;
         *)
             _glot_error "delegado desconocido / unknown delegate: $kind"
-            _glot_info 'valen / valid: copilot, antigravity'
+            _glot_info 'valen / valid: copilot, antigravity, open-router'
             return 2
             ;;
     esac
@@ -1849,6 +2021,7 @@ _glot_delegate_expand() {
     order="${order//\{spec\}/${GLOT_DELEGATE_SPEC:-}}"
     order="${order//\{model\}/${GLOT_DELEGATE_MODEL:-}}"
     order="${order//\{effort\}/${GLOT_DELEGATE_EFFORT:-}}"
+    order="${order//\{reasoning_args\}/${GLOT_DELEGATE_REASONING_ARGS:-}}"
 
     # Los `${VAR}` del shell son legítimos en la orden —es la forma de citar las rutas por
     # variable—, así que se apartan antes de buscar marcadores de glot sin resolver.
@@ -1870,7 +2043,7 @@ _glot_delegate_expand() {
 # el perfil lo declara), y con él `GLOT_ROOT` y `GLOT_MODULE_DIR`: es lo único que un
 # delegado cualquiera puede leer sin que haya que inyectarle flags, que romperían un
 # `GLOT_DELEGATE_COP='wc -l'`.
-_glot_cmd_ask() {
+_glot_cmd_ask() (
     local delegate_kind=""
     local delegate_eff=""
     local name=""
@@ -1957,77 +2130,23 @@ _glot_cmd_ask() {
     delegate_order="$(_glot_delegate_command "$delegate_kind" "$name")" || return $?
     delegate_eff="$(_glot_delegate_effective "$delegate_kind")" || return 2
 
-    template="$(_glot_prompt_file "$name")" || return 1
-    profile="$(_glot_prompt_profile "$template")" || return $?
-    IFS=$'\t' read -r pname pmodel effort credits tier requests pagy_model <<<"$profile"
-
-    # El modelo efectivo, por delegado. Precedencia: `--model`, después el entorno del
-    # delegado (`GLOT_MODEL_<DELEGADO>` y, como alias, `GLOT_MODEL`) y después la **clave de
-    # estado** del delegado (`antigravity-model` para AGY, `copilot-model` para Copilot), que
-    # guarda un **alias** de `data/delegates.tsv`; el perfil es el último recurso. El alias se
-    # resuelve aquí; si el valor guardado no fuera un alias conocido se pasa tal cual, para que un
-    # id pegado a mano siga valiendo. Para Copilot el del perfil es la columna 2 y para AGY la 7.
-    state_model=""
-    env_model=""
-    base_model=""
-    state_key=""
-    cat_name=""
-    if [[ "$delegate_eff" == "agy" ]]; then
-        cat_name="agy"
-        state_key="antigravity-model"
-        base_model="$pagy_model"
-        env_model="${GLOT_MODEL_AGY:-}"
-    else
-        cat_name="copilot"
-        state_key="copilot-model"
-        base_model="$pmodel"
-        env_model="${GLOT_MODEL_COP:-${GLOT_MODEL:-}}"
-    fi
-    state_model="$(_glot_state_get "$state_key" 2>/dev/null || true)"
-    if [[ -n "$state_model" ]]; then
-        state_model="$(_glot_delegate_model "$cat_name" "$state_model" 2>/dev/null || printf '%s' "$state_model")"
-    fi
-    # El alias de Copilot solo sustituye a los modelos que **ya son de OpenRouter** —los perfiles de
-    # andamiaje, corrección y documentación—: los ids de Copilot (`gpt-5.6-terra`, `claude-sonnet-5`)
-    # no llevan `/` y **no se tocan**, porque una asignación de documentación no debe cambiar el
-    # modelo de un contrato, de una suite ni de una implementación. `--model`, `GLOT_MODEL_COP` y
-    # `GLOT_MODEL` sí pueden con todo: son la puerta explícita. El alias de AGY no se acota: su
-    # columna es siempre de AGY.
-    if [[ "$delegate_eff" == "cop" && -n "$state_model" && "$base_model" != */* ]]; then
-        state_model=""
-    fi
-    model="${model_opt:-${env_model:-${state_model:-$base_model}}}"
-
-    # Copilot y AGY exigen un modelo: su id no tiene valor por defecto y la orden lo lleva
-    # siempre, así que sin modelo no se delega.
-    if [[ -z "$model" ]]; then
-        _glot_error "el perfil no declara modelo para $delegate_eff / the profile declares no model for $delegate_eff"
-        _glot_info 'mira el catálogo / check the catalogue: scripts/data/models.tsv'
-        return 1
-    fi
-    if [[ -n "$effort_opt" ]]; then effort="$effort_opt"; fi
-    if [[ -n "${GLOT_EFFORT:-}" ]]; then effort="$GLOT_EFFORT"; fi
-
-    export GLOT_DELEGATE_MODEL="$model"
-    export GLOT_DELEGATE_EFFORT="$effort"
-    env_prefix=""
-    if [[ -n "$model" ]]; then
-        export COPILOT_MODEL="$model"
-        env_prefix="COPILOT_MODEL=$model"
-        # Un modelo de OpenRouter (`vendedor/modelo`) activa el proveedor propio del CLI; es lo
-        # que hace usable el alias sin tocar los ids de siempre, que no llevan `/`.
-        _glot_delegate_provider "$delegate_eff" "$model"
-    fi
-    if [[ "$tier" != "-" ]]; then
-        export COPILOT_AUTO_TIER="$tier"
-        env_prefix+=" COPILOT_AUTO_TIER=$tier"
-    fi
+    _glot_model_resolve "$delegate_eff" "$name" "$model_opt" "$effort_opt" || return $?
+    model="$GLOT_DELEGATE_MODEL"
+    effort="$GLOT_DELEGATE_EFFORT"
+    pname="$GLOT_DELEGATE_PROFILE"
+    credits="$GLOT_DELEGATE_CREDITS"
+    env_prefix="route=$delegate_eff model=$model effort=$effort"
+    if [[ "$delegate_eff" != "agy" ]]; then env_prefix+=" COPILOT_MODEL=$model"; fi
 
     # Las rutas que la orden puede citar: `GLOT_ROOT` y `GLOT_MODULE_DIR`, las del
     # **encargo**. La llamada va **sin** capturar la salida, porque dentro de un `$( )`
     # el `export` se perdería.
     _glot_delegate_env "${rest[@]:1}"
     delegate_order="$(_glot_delegate_expand "$delegate_order")" || return $?
+    if [[ "$effort" == "-" && "$delegate_order" == *--reasoning-effort* ]]; then
+        _glot_error 'la orden fuerza un esfuerzo no soportado / command forces unsupported reasoning effort; use {reasoning_args}'
+        return 2
+    fi
 
     if ((_glot_dry_run)); then
         printf '%s <encargo de %s> | %s\n' "$env_prefix" "$name" "$delegate_order"
@@ -2037,12 +2156,8 @@ _glot_cmd_ask() {
     # El perfil se anuncia con **su** modelo para el delegado elegido (la columna 2 es la de Copilot
     # y la 7 la de AGY) y con el modelo efectivo solo cuando no coincide: así una asignación o un
     # `--model` se ven de un vistazo.
-    profile_model="$pmodel"
-    model_note=""
-    if [[ "$delegate_eff" == "agy" ]]; then profile_model="$pagy_model"; fi
-    if [[ "$model" != "$profile_model" ]]; then model_note=" → $model"; fi
-    _glot_info "perfil / profile: $pname ($delegate_eff $profile_model$model_note, esfuerzo / effort $effort, $credits créditos / credits)"
-    _glot_info "delegado / delegate: $delegate_order"
+    _glot_info "perfil / profile: $pname ($delegate_eff $model, esfuerzo / effort $effort, cap $credits)"
+    _glot_info "delegado / delegate: $delegate_eff"
     printf '%s\n' "$request" | eval "$delegate_order" || rc=$?
 
     if ((rc != 0)); then
@@ -2051,7 +2166,7 @@ _glot_cmd_ask() {
     fi
 
     return 0
-}
+)
 
 # --- perfiles de modelo por encargo (L6.5) -----------------------------------
 
@@ -2170,42 +2285,15 @@ _glot_delegate_model() {
     return 1
 }
 
-# _glot_delegate_provider <delegado> <modelo> — apunta el **proveedor propio** del CLI cuando
-# el modelo del delegado es un id de **OpenRouter**: sus ids son siempre `vendedor/modelo`, así
-# que la barra los distingue de los que ofrece Copilot (`gpt-5.6-terra`, `claude-sonnet-5`), que
-# siguen yendo a GitHub. Activa BYOK con `COPILOT_PROVIDER_BASE_URL`, que es lo que hace usable
-# el alias; la **clave** no la toca glot —la pone el autor en su entorno, con
-# `COPILOT_PROVIDER_API_KEY` o `COPILOT_PROVIDER_API_KEY_COMMAND`—, y si el autor ya apunta a
-# otro proveedor ese valor manda: glot no lo pisa. Sin clave avisa por stderr, que es el canal
-# del diagnóstico, en vez de dejar que el CLI falle sin decir por qué.
-_glot_delegate_provider() {
-    local delegate="$1"
-    local model="$2"
-
-    [[ "$delegate" == "cop" ]] || return 0
-    [[ "$model" == */* ]] || return 0
-
-    export COPILOT_PROVIDER_BASE_URL="${COPILOT_PROVIDER_BASE_URL:-https://openrouter.ai/api/v1}"
-
-    if [[ -z "${COPILOT_PROVIDER_API_KEY:-}" && -z "${COPILOT_PROVIDER_BEARER_TOKEN:-}" && -z "${COPILOT_PROVIDER_API_KEY_COMMAND:-}" ]]; then
-        _glot_warn 'modelo de OpenRouter sin clave: define COPILOT_PROVIDER_API_KEY / OpenRouter model without a key: set COPILOT_PROVIDER_API_KEY'
-    fi
-
-    return 0
-}
-
-# _glot_profile_line <modelo|perfil> — fila del catálogo. El **modelo es la clave**: la
-# plantilla declara el modelo en su frontmatter y el catálogo dice qué esfuerzo y qué
-# tope de créditos le tocan, así que no hay un `profile:` que pueda derivar del modelo.
-# El nombre del perfil (`economy`) es la etiqueta legible de esa fila.
+# _glot_profile_line <perfil> — fila del catálogo independiente del id de modelo.
 _glot_profile_line() {
     local want="$1"
 
-    _glot_models_list | awk -F'\t' -v want="$want" '$1 == want || $2 == want { print; exit }'
+    _glot_models_list | awk -F'\t' -v want="$want" '$1 == want { print; exit }'
 }
 
 # _glot_prompt_profile <archivo> — fila del perfil que declara el frontmatter de la
-# plantilla (`model:`), resuelta contra el catálogo. Un modelo que no esté en el catálogo
+# plantilla (`profile:`), resuelta contra el catálogo. Un perfil que no esté en el catálogo
 # es un **dato que falta** (`1`), como un marcador sin resolver: nunca se inventa un
 # esfuerzo ni un tope de créditos.
 _glot_prompt_profile() {
@@ -2213,9 +2301,9 @@ _glot_prompt_profile() {
     local model=""
     local row=""
 
-    if ! model="$(_glot_prompt_field "$file" model)"; then
-        _glot_error "la plantilla no declara modelo / the template declares no model: $(basename -- "$file")"
-        _glot_info 'añade `model: <id de Copilot>` al frontmatter / add `model: <Copilot id>` to the frontmatter'
+    if ! model="$(_glot_prompt_field "$file" profile)"; then
+        _glot_error "la plantilla no declara perfil / the template declares no profile: $(basename -- "$file")"
+        _glot_info 'añade `profile: <perfil>` / add `profile: <profile>`'
         _glot_info 'mira el catálogo / check the catalogue: scripts/data/models.tsv'
         return 1
     fi
@@ -2726,6 +2814,11 @@ _glot_cmd_scaffold() {
         return 1
     fi
 
+    if [[ -L "$dir/.gitignore" || ( -e "$dir/.gitignore" && ! -f "$dir/.gitignore" ) ]]; then
+        _glot_error "ruta .gitignore no segura / unsafe .gitignore path: $dir/.gitignore"
+        return 4
+    fi
+
     seq="$(_glot_init_sequence "$lang" scaffold)" || {
         _glot_error "catálogo de inicialización mal formado / malformed initialisation catalogue: $lang"
         _glot_info 'revisa / check: scripts/data/init_sequences.tsv'
@@ -2767,7 +2860,7 @@ _glot_cmd_scaffold() {
             printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
             [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
         done <<<"$steps"
-        printf 'cd %s && touch .gitignore  # preserves existing contents\n' "$dir"
+        printf 'cd %s && { test -e .gitignore || touch .gitignore; }  # preserves existing contents\n' "$dir"
         if ((delegate_needed)); then
             _glot_info "para completar el análisis del paso 4a, ejecuta / to complete step 4a analysis, run: glot prompt scaffold $lang $phase/$module"
         fi
@@ -2805,8 +2898,8 @@ _glot_cmd_scaffold() {
         fi
     done <<<"$steps"
 
-    _glot_info "scaffold: touch .gitignore"
-    touch -- "$dir/.gitignore" || {
+    _glot_info "scaffold: garantizar .gitignore / ensure .gitignore"
+    { [[ -f "$dir/.gitignore" && ! -L "$dir/.gitignore" ]] || (set -C; : > "$dir/.gitignore"); } || {
         _glot_error "no se pudo crear .gitignore / could not create .gitignore: $dir"
         return 4
     }
@@ -3661,7 +3754,7 @@ _glot_validate_file() {
 # El validador es **opcional**: sin él, el verbo avisa y devuelve `1`.
 # Códigos: 0 sin hallazgos · 1 sin validador o entorno · 2 uso · 3 no se pudo ejecutar o
 # no se pudo leer el veredicto · 4 con hallazgos.
-_glot_cmd_validate() {
+_glot_cmd_validate() (
     local target=""
     local lang=""
     local phase=""
@@ -3693,7 +3786,30 @@ _glot_cmd_validate() {
     local commit=""
     local dirty="no"
 
-    target="$(_glot_exec_target "$@")" || return $?
+    local route=cop model_override="" effort_override="" arg=""
+    local -a args=()
+    while (($#)); do
+        case "$1" in
+            --delegate|--model|--effort)
+                if (($# < 2)); then _glot_error "falta valor / missing value: $1"; return 2; fi
+                arg="$1"
+                case "$arg" in
+                    --delegate) route="$(_glot_delegate_effective "$2")" || return 2 ;;
+                    --model) model_override="$2" ;;
+                    --effort) effort_override="$2" ;;
+                esac
+                shift 2 ;;
+            --delegate=*) route="$(_glot_delegate_effective "${1#*=}")" || return 2; shift ;;
+            --model=*) model_override="${1#*=}"; shift ;;
+            --effort=*) effort_override="${1#*=}"; shift ;;
+            *) args+=("$1"); shift ;;
+        esac
+    done
+    if [[ "$route" == agy ]]; then
+        _glot_error 'validate exige Copilot nativo u OpenRouter para garantizar solo lectura / validate requires Copilot or OpenRouter for read-only enforcement'
+        return 2
+    fi
+    target="$(_glot_exec_target "${args[@]}")" || return $?
     IFS=$'\t' read -r lang phase module <<<"$target"
 
     root="$(_glot_repo_root)" || {
@@ -3714,34 +3830,11 @@ _glot_cmd_validate() {
 
     # El perfil sale del `model:` de la plantilla y del catálogo: aquí no hay literales de
     # modelo, esfuerzo ni créditos que se puedan quedar viejos por su cuenta.
-    template="$(_glot_prompt_file validate)" || return 1
-    profile="$(_glot_prompt_profile "$template")" || return $?
-    IFS=$'\t' read -r pname pmodel effort credits tier requests pagy_model <<<"$profile"
-
-    # El validador usa el delegado de Copilot: el modelo sale del perfil, y `GLOT_MODEL` (o
-    # su alias `GLOT_MODEL_COP`), la clave de estado `copilot-model` (un alias de
-    # `data/delegates.tsv`, v1.7.3) y `GLOT_EFFORT` lo pueden cambiar para una sola corrida.
-    if [[ -n "${GLOT_MODEL_COP:-${GLOT_MODEL:-}}" ]]; then
-        pmodel="${GLOT_MODEL_COP:-${GLOT_MODEL:-}}"
-    else
-        cop_state="$(_glot_state_get copilot-model 2>/dev/null || true)"
-        # El alias solo sustituye a los modelos que ya son de OpenRouter: a un validador con id de
-        # Copilot no se le cambia el modelo por una asignación de documentación.
-        if [[ -n "$cop_state" && "$pmodel" == */* ]]; then
-            pmodel="$(_glot_delegate_model copilot "$cop_state" 2>/dev/null || printf '%s' "$cop_state")"
-        fi
-    fi
-    if [[ -n "${GLOT_EFFORT:-}" ]]; then
-        effort="$GLOT_EFFORT"
-    fi
-
-    export COPILOT_MODEL="$pmodel"
-    # El modelo del validador puede ser un id de OpenRouter (alias `copilot-model`): entonces el
-    # proveedor propio se apunta igual que en `ask`.
-    _glot_delegate_provider cop "$pmodel"
-    if [[ "$tier" != "-" ]]; then
-        export COPILOT_AUTO_TIER="$tier"
-    fi
+    _glot_model_resolve "$route" validate "$model_override" "$effort_override" || return $?
+    pmodel="$GLOT_DELEGATE_MODEL"
+    effort="$GLOT_DELEGATE_EFFORT"
+    credits="$GLOT_DELEGATE_CREDITS"
+    tier="-"
 
     # El validador lee fuera del submódulo, así que necesita la raíz y el módulo por variable:
     # los marca `_glot_delegate_env` (el mismo entorno que el delegado de `ask`) y el modelo y
@@ -3762,7 +3855,8 @@ _glot_cmd_validate() {
             _glot_info 'el validador es opcional; mira / the validator is optional; see: glot help validate'
             return 1
         fi
-        cmd="copilot -C \"$dir\" -p \"\$(cat)\" -s --output-format json --model $pmodel --reasoning-effort $effort --max-ai-credits $credits"
+        cmd="copilot -C \"$dir\" -p \"\$(cat)\" -s --output-format json --model $pmodel $GLOT_DELEGATE_REASONING_ARGS"
+        if [[ "$credits" != "-" ]]; then cmd+=" --max-ai-credits $credits"; fi
         if [[ "$tier" != "-" ]]; then
             cmd+=" --auto-tier $tier"
         fi
@@ -3779,7 +3873,11 @@ _glot_cmd_validate() {
         return 0
     fi
 
-    _glot_info "validate: $cmd"
+    if [[ "$effort" == "-" && "$cmd" == *--reasoning-effort* ]]; then
+        _glot_error 'orden de validador con effort incompatible / incompatible validator effort command'
+        return 2
+    fi
+    _glot_info "validate: route=$route model=$pmodel effort=$effort"
     response="$(printf '%s\n' "$request" | eval "$cmd")" || rc=$?
 
     if ((rc != 0)); then
@@ -3837,7 +3935,7 @@ _glot_cmd_validate() {
         printf 'commit=%s\n' "${commit:--}"
         printf 'dirty=%s\n' "$dirty"
         printf 'date=%s\n' "$stamp"
-        printf 'validator=%s\n' "${cmd//$'\n'/ }"
+        printf 'validator=%s:%s\n' "$route" "$pmodel"
         printf 'verdict=%s\n' "$verdict"
         printf 'findings=%s\n' "${findings:-0}"
         printf '%s\n\n' '-->'
@@ -3851,7 +3949,7 @@ _glot_cmd_validate() {
     printf '%s\n' "$response"
     _glot_info "registro escrito / record written: $rel_record"
     return "$status"
-}
+)
 
 _glot_usage() {
     cat <<'EOF'
@@ -3926,7 +4024,7 @@ Verbos / Verbs:
                      armado con el estado del sprint. No muta nada
                      With no request it lists the registry; with one it prints the
                      request built from the sprint state. It mutates nothing
-  ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot|antigravity] [--model <id>] [--effort <nivel>]
+  ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot|antigravity|open-router] [--model <id>] [--effort <nivel>]
                      Arma el encargo y lo envía al delegado por stdin: --delegate elige
                      entre GLOT_DELEGATE_COP (Copilot) y GLOT_DELEGATE_AGY (Antigravity), y
                      sin él, con uno solo configurado, se
@@ -3941,6 +4039,10 @@ Verbos / Verbs:
                      request profile; for AGY, the `antigravity-model`
                      key with an alias from `data/delegates.tsv`) and
                      `--model`/`GLOT_MODEL` and `--effort`/`GLOT_EFFORT` change it for one run
+                     OpenRouter es una ruta explícita; overrides autorizados por encargo.
+                     OpenRouter is explicit; every override is request-authorized.
+                     validate admite las mismas opciones en copilot y open-router.
+                     validate accepts the same options on copilot and open-router.
   use <lenguaje> <fase>/<módulo> [tipo]
                      Sitúa el trabajo: valida y, con el árbol limpio, activa o crea
                      la rama {tipo}/{fase}/{módulo} desde main y la publica con
@@ -4059,11 +4161,11 @@ _glot_help_verb() {
         set)
             printf 'glot set <clave> <valor> — guarda una clave en el estado (claves [A-Za-z0-9_.-])\n'
             printf 'glot set <key> <value> — stores a state key (keys [A-Za-z0-9_.-])\n'
-            printf 'Claves reservadas / reserved keys: lang, phase, module, branch, spec, repo, target, cause, antigravity-model, copilot-model\n'
+            printf 'Claves reservadas / reserved keys: lang, phase, module, branch, spec, repo, target, cause, antigravity-model, copilot-model, open-router-model\n'
             printf '`glot finish` las limpia al cerrar el sprint, salvo las de modelo / `glot finish` clears them when the sprint closes, except the model keys\n'
             printf 'Las de modelo toman un alias de `data/delegates.tsv` (o un id de esa tabla):\n'
             printf 'The model keys take an alias from `data/delegates.tsv` (or an id in that table):\n'
-            printf '  antigravity-model: gemini | sonnet · copilot-model: default | gemini | qwen | kimi\n'
+            printf 'Alias por ruta / route aliases: glot delegates antigravity|copilot|open-router\n'
             printf 'Los ids de `copilot-model` son de OpenRouter y apuntan su proveedor propio\n'
             printf 'The `copilot-model` ids come from OpenRouter and point its custom provider\n'
             ;;
@@ -4106,14 +4208,9 @@ _glot_help_verb() {
             printf 'glot delegates [delegado] — catálogo de alias de modelo por delegado (data/delegates.tsv)\n'
             printf 'glot delegates [delegate] — per-delegate model alias catalogue (data/delegates.tsv)\n'
             printf 'Columnas / columns: delegado<TAB>alias<TAB>modelo\n'
-            printf 'Sin argumento publica el catálogo entero; con `agy` o `copilot`, solo sus filas\n'
-            printf 'With no argument it prints the whole catalogue; with `agy` or `copilot`, only its rows\n'
-            printf 'El orden de cada delegado es de más barato a más caro: es el del autocompletado y el\n'
-            printf 'del escalado cuando se agotan límites / each delegate is ordered cheapest to most\n'
-            printf 'expensive: that is the order of the completion and of the limit fallback\n'
-            printf 'Las filas de `copilot` son ids de OpenRouter: `ask` y `validate` apuntan entonces su\n'
-            printf 'proveedor propio (la clave la pone el autor) / the `copilot` rows are OpenRouter ids:\n'
-            printf '`ask` and `validate` then point its custom provider (the key belongs to the author)\n'
+            printf 'Rutas independientes / independent routes: antigravity (agy), copilot, open-router\n'
+            printf 'OpenRouter usa Copilot BYOK; copilot es nativo / OpenRouter uses Copilot BYOK; copilot is native\n'
+            printf 'Sin fallback automático; overrides limitados por encargo / no automatic fallback; request-restricted overrides\n'
             ;;
         progress)
             printf 'glot progress [fase] — estado del roadmap, que es la fuente de verdad\n'
@@ -4234,7 +4331,7 @@ _glot_help_verb() {
             printf 'No muta nada y no necesita -n / it mutates nothing and does not need -n\n'
             ;;
         ask)
-            printf 'glot ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot|antigravity]\n'
+            printf 'glot ask <encargo> [lenguaje] [fase/módulo] [--delegate copilot|antigravity|open-router] [--model <alias|id>] [--effort <nivel>]\n'
             printf '  — envía el encargo al delegado / pipes the request to the delegate\n'
             printf 'Las órdenes viven en el entorno del autor, no en el repositorio: GLOT_DELEGATE_COP\n'
             printf '(Copilot) y GLOT_DELEGATE_AGY (Antigravity);\n'
@@ -4252,7 +4349,7 @@ _glot_help_verb() {
             printf 'Sin delegado, o con dos configurados sin --delegate, devuelve 1 y 2\n'
             printf 'With no delegate, or two set without --delegate, it returns 1 and 2\n'
             printf 'El modelo sale del perfil o de la clave del delegado (`antigravity-model`,\n'
-            printf '`copilot-model`), viaja como COPILOT_MODEL (y COPILOT_AUTO_TIER si el perfil lo\n'
+            printf '`copilot-model`, `open-router-model`), viaja como COPILOT_MODEL (y COPILOT_AUTO_TIER si el perfil lo\n'
             printf 'declara) junto con GLOT_ROOT, GLOT_MODULE_DIR, GLOT_DELEGATE_MODEL y\n'
             printf 'GLOT_DELEGATE_EFFORT: entorno, no flags. `--model`/`GLOT_MODEL` y `--effort`/`GLOT_EFFORT`\n'
             printf 'lo cambian para una corrida; `glot set antigravity-model|copilot-model <alias>` lo\n'
@@ -4261,8 +4358,11 @@ _glot_help_verb() {
             printf 'GLOT_ROOT, GLOT_MODULE_DIR, GLOT_DELEGATE_MODEL and GLOT_DELEGATE_EFFORT:\n'
             printf 'environment, not flags. `--model`/`GLOT_MODEL` and `--effort`/`GLOT_EFFORT` change it\n'
             printf 'for one run; `glot set antigravity-model|copilot-model <alias>` sets it per sprint\n'
-            printf 'Un id de OpenRouter en Copilot (`vendedor/modelo`) apunta el proveedor propio del CLI\n'
-            printf 'An OpenRouter id on Copilot (`vendor/model`) points the CLI custom provider\n'
+            printf 'BYOK solo con --delegate open-router; effort incompatible bloquea / BYOK only with --delegate open-router; incompatible effort blocks\n'
+            printf 'Entorno por ruta / route environment: GLOT_MODEL_AGY, GLOT_MODEL_COP (GLOT_MODEL), GLOT_MODEL_OR\n'
+            printf 'Precedencia / precedence: flag > entorno/environment > estado/state > perfil/profile\n'
+            printf 'Marcador opcional de flags / optional flag placeholder: {reasoning_args}\n'
+            printf 'AI credits solo en validate nativo; caps personalizados son del autor / AI credits only in native validate; custom caps are author-owned\n'
             ;;
         use)
             printf 'glot use <lenguaje> <fase>/<módulo> [tipo] — sitúa el trabajo del sprint\n'
@@ -5635,7 +5735,7 @@ _glot_delegates_hint() {
     if [[ -z "$only" ]]; then
         printf 'delegados: estas dos líneas van en tu rc / delegates: these two lines go in your rc\n'
     fi
-    [[ "$only" == "agy" ]] || printf "export GLOT_DELEGATE_COP='copilot -C {module_dir} -p \"\$(cat)\" --add-dir {root} --allow-all-tools --reasoning-effort {effort}'\n"
+    [[ "$only" == "agy" ]] || printf "export GLOT_DELEGATE_COP='copilot -C {module_dir} -p \"\$(cat)\" --add-dir {root} --allow-all-tools {reasoning_args}'\n"
     [[ "$only" == "cop" ]] || printf "export GLOT_DELEGATE_AGY='agy --model {model} -p \"\$(cat)\" --add-dir {root}'\n"
 }
 

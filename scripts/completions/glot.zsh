@@ -12,6 +12,7 @@ _glot_zsh() {
     local -a verbs fases modulos lenguajes encargos pasos
     local i=""
     local positional=0
+    local route=copilot
 
     verbs=(
         'version:versión instalada'
@@ -78,7 +79,7 @@ _glot_zsh() {
                 _describe 'módulo' modulos
             fi
             ;;
-        test | verify | evidence | close | validate | finish | scaffold)
+        test | verify | evidence | close | finish | scaffold)
             if ((CURRENT == 3)); then
                 lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
                 _describe 'lenguaje' lenguajes
@@ -88,7 +89,7 @@ _glot_zsh() {
             fi
             ;;
         delegates)
-            _values 'delegado' agy copilot
+            _values 'delegado' agy copilot open-router
             ;;
         prompt)
             if ((CURRENT == 3)); then
@@ -102,26 +103,43 @@ _glot_zsh() {
                 _describe 'módulo' modulos
             fi
             ;;
-        ask)
+        ask | validate)
             # `ask` añade el delegado (v1.4.2): la opción y sus dos valores se completan, y el
             # posicional se cuenta **saltando** el valor de `--delegate`.
             if [[ "${words[CURRENT]}" == --delegate=* ]]; then
-                compadd -- --delegate=copilot --delegate=antigravity
+                compadd -- --delegate=copilot --delegate=antigravity --delegate=open-router
                 return 0
             fi
             if [[ "${words[CURRENT - 1]}" == "--delegate" ]]; then
-                compadd -- copilot antigravity
+                compadd -- copilot antigravity open-router
                 return 0
             fi
-            for ((i = 2; i < CURRENT; i++)); do
-                if [[ "${words[i]}" != -* && "${words[i - 1]}" != "--delegate" ]]; then
+            if [[ "${words[CURRENT - 1]}" == "--effort" ]]; then
+                compadd -- low medium high
+                return 0
+            fi
+            if [[ "${words[CURRENT - 1]}" == "--model" ]]; then
+                for ((i = 3; i < CURRENT; i++)); do
+                    case "${words[i]}" in
+                        --delegate=*) route="${words[i]#*=}" ;;
+                        --delegate) route="${words[i + 1]}" ;;
+                    esac
+                done
+                [[ "$route" == cop ]] && route=copilot
+                encargos=(${(f)"$("$glot" delegates "$route" 2>/dev/null | cut -f2)"})
+                compadd -- "${encargos[@]}"
+                return 0
+            fi
+            for ((i = 3; i < CURRENT; i++)); do
+                if [[ "${words[i]}" != -* && "${words[i - 1]}" != "--delegate" && "${words[i - 1]}" != "--model" && "${words[i - 1]}" != "--effort" ]]; then
                     positional=$((positional + 1))
                 fi
             done
+            [[ "${words[2]}" == validate ]] && positional=$((positional + 1))
             case "$positional" in
                 0)
                     encargos=(${(f)"$("$glot" prompt 2>/dev/null | cut -f1)"})
-                    encargos+=(--delegate)
+                    encargos+=(--delegate --model --effort)
                     _describe 'encargo' encargos
                     ;;
                 1)
@@ -138,7 +156,7 @@ _glot_zsh() {
             _values 'shell' bash zsh
             ;;
         get | unset)
-            _values 'clave' lang phase module branch spec repo target cause antigravity-model copilot-model
+            _values 'clave' lang phase module branch spec repo target cause antigravity-model copilot-model open-router-model
             ;;
         set)
             if [[ "${words[CURRENT - 1]}" == "antigravity-model" ]]; then
@@ -149,8 +167,11 @@ _glot_zsh() {
             elif [[ "${words[CURRENT - 1]}" == "copilot-model" ]]; then
                 ids=(${(f)"$("$glot" delegates copilot 2>/dev/null | cut -f2)"})
                 _describe 'alias de Copilot' ids
+            elif [[ "${words[CURRENT - 1]}" == "open-router-model" ]]; then
+                ids=(${(f)"$("$glot" delegates open-router 2>/dev/null | cut -f2)"})
+                _describe 'alias de OpenRouter' ids
             else
-                _values 'clave' lang phase module branch spec repo target cause antigravity-model copilot-model
+                _values 'clave' lang phase module branch spec repo target cause antigravity-model copilot-model open-router-model
             fi
             ;;
     esac

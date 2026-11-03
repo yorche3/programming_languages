@@ -4,6 +4,18 @@
 
 **EN:** Rules **every** verb obeys, plus the state store contract. This is what makes `glot` scriptable: a verb's output can be captured without parsing human text.
 
+**ES:** Este contrato describe la línea base v2.0.3. El script de desarrollo
+se identifica como `2.1.0-dev`; su primer bloque de scaffold se detalla abajo.
+La ampliación acordada de `--delegate` a
+`open-router`, las restricciones de overrides y las garantías de scaffold de
+v2.1.0 están en [`ROADMAP.md`](ROADMAP.md), aún pendientes de implementación.
+
+**EN:** This contract describes the v2.0.3 baseline. The development script
+identifies as `2.1.0-dev`; its first scaffold block is described below.
+Agreed v2.1.0 delegate expansion,
+override restrictions and scaffold guarantees are in [`ROADMAP.md`](ROADMAP.md),
+awaiting implementation.
+
 ---
 
 ## � Frontera con la documentación / Boundary with the documentation
@@ -120,11 +132,17 @@
 | `repo` | Nombre del submódulo en la raíz del monorepo (`php`) | `use` (v0.5.0) |
 | `target` | Dónde está el trabajo del cierre: `submodule` o `monorepo` | `use` y `finish` (v1.6.0) |
 | `cause` | Causa del retrabajo, mientras el paso la necesite | el encargo, y `save` la retira al confirmar (v1.6.0) |
-| `antigravity-model` | Modelo del delegado de **AGY** en este sprint, como **alias** de `data/delegates.tsv` (`gemini`, `sonnet`) o id de esa tabla; gana a la columna del perfil y pierde con `--model` y `GLOT_MODEL_AGY` | el autor, con `glot set antigravity-model <alias>` (v1.7.0) |
-| `copilot-model` | Modelo del delegado de **Copilot** en este sprint, como **alias** de `data/delegates.tsv` (`default`, `gemini`, `qwen`, `kimi`) o id de esa tabla; son ids de **OpenRouter**, así que **solo** sustituye al modelo del perfil cuando ese ya lleva `/` (andamiaje, corrección y documentación): los modelos de `balanced` y `deep` no se tocan, y `ask` y `validate` apuntan entonces el proveedor propio (la clave es del autor). Pierde con `--model` y `GLOT_MODEL_COP`/`GLOT_MODEL` | el autor, con `glot set copilot-model <alias>` (v1.7.3) |
+| `antigravity-model` | Alias o id AGY; `gemini` y `argon`. Gana al perfil; pierde con `--model` y `GLOT_MODEL_AGY`. Autorización por encargo y disponibilidad local | el autor, con `glot set antigravity-model <alias>` |
+| `copilot-model` | Id **nativo** resuelto por `set`; gana al perfil y pierde con `--model` y `GLOT_MODEL_COP`/`GLOT_MODEL`. Los alias BYOK antiguos ambiguos bloquean hasta una elección explícita | el autor, con `glot set copilot-model <alias>` |
+| `open-router-model` | Alias o id BYOK independiente. Gana al default economy y pierde con `--model` y `GLOT_MODEL_OR`. Fuera de categoría bloquea; no cambia la ruta nativa | el autor, con `glot set open-router-model <alias>` |
 **ES:** Hasta la v0.4.0 el almacén solo guardaba y devolvía texto: no interpretaba ninguna clave. Desde la v0.5.0 las escribe `use`.
 
 **EN:** Up to v0.4.0 the store only saved and returned text: it interpreted no key. Since v0.5.0, `use` writes them.
+
+**ES / EN:** En v2.1.0-dev, las tres claves de modelo sobreviven a `finish`;
+selección, esfuerzo, aislamiento BYOK y límites están en
+[`VALIDATION.md`](VALIDATION.md). / All three model preferences survive
+`finish`; the current routing/adapter contract is in the validation guide.
 
 **ES:** Desde la **v1.6.2**, `glot finish` **retira** al cerrar las claves del sprint (`lang`, `phase`, `module`, `branch`, `spec`, `repo`, `target` y `cause`): un sprint cerrado no se sigue por inercia, así que el siguiente empieza por `glot use`, que vuelve a asignarlas y valida. Las **claves de modelo** del delegado (`antigravity-model` y `copilot-model`) **no se tocan** —son preferencia del delegado, y sus límites son por horas o por semana, no por sprint— y `unset` sigue borrando cualquier clave a mano.
 
@@ -344,6 +362,20 @@ using those services is not required.
 **ES:** La normalización **no adivina**: si un lenguaje no tiene operación declarada en el catálogo, no se toca nada. Lo que el inicializador deja y el módulo no usa —runners de ejemplo, nombres predefinidos— lo ajusta el encargo `scaffold`, que sí puede leer la especificación.
 
 **EN:** Normalisation **does not guess**: if a language has no declared operation in the catalogue, nothing is touched. What the initializer leaves and the module does not use —sample runners, predefined names— is adjusted by the `scaffold` request, which can read the specification.
+
+**ES:** Primer bloque de v2.1.0-dev: Ballerina renombra `main.bal` a
+`{module}.bal` con comprobación de origen/destino y sin sobreescribir; retira
+solo el ejemplo idéntico a la plantilla verificada y crea `tests/lib_test.bal`
+vacío si falta. Perl crea la fuente en `lib/` sin truncar una previa. Rust
+conserva `src/lib.rs`, que Cargo usa como punto de entrada. Los conflictos,
+archivos obligatorios ausentes y rutas no regulares fallan con `4`.
+`.gitignore` existente no se toca y una ruta symlink/directorio se rechaza.
+
+**EN:** First v2.1.0-dev block: Ballerina safely renames the source, removes
+only an exact verified sample and creates a missing empty test file. Perl
+preserves existing sources under `lib/`; Rust retains Cargo's `src/lib.rs`.
+Conflicts, missing mandatory files and invalid paths fail with `4`. Existing
+ignore files remain untouched; symlink/directory ignore paths are rejected.
 
 ### `save` — el registro / the recording
 

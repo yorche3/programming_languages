@@ -90,7 +90,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 |---|---|---|---|
 | **ada** | ⛓️ ✅ `alr init --lib --in-place {module}` | `alire.toml`, `{module}.gpr`, `config/`, `tests/` | ✅ `alr -C tests run` |
 | **assembly** | ✍️ `mkdir -p src test` + `Makefile` | `Makefile` | ✅ `make run` |
-| **ballerina** | 🔧 `bal new {module}` | `Ballerina.toml`, `{module}.bal`, `tests/` | ✅ `bal test` |
+| **ballerina** | ⛓️ 🔧 `bal new {module}` → adecuaciones de biblioteca / library adaptations | `Ballerina.toml`, `{module}.bal`, `tests/lib_test.bal` | ✅ `bal test` |
 | **c** | ✍️ `mkdir -p include src test` + `Makefile` | `include/{module}.h`, `Makefile` | ✅ `make test` |
 | **clojure** | ⛓️ 🔧 `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib` | `deps.edn`, `build.clj`, `src/{module}/` | ✅ `clojure -T:build test` |
 | **cobol** | ✍️ `mkdir -p src/copybooks src/lib test` | `Makefile`, `run_tests` | ✅ `make test` |
@@ -152,11 +152,16 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | Lenguaje / Language | Secuencia de inicialización / Initialisation sequence | Completado posterior a mano / Later completion by hand |
 |---|---|---|
 | **ada** | `alr init --lib --in-place {module}` → `alr init --bin tests` → `alr with {module} --use=..` → `alr with aunit` (los dos últimos, dentro de `tests/`) | Licencia GPL-3.0-or-later en `alire.toml` y `tests/alire.toml`, y `description` del subproyecto de pruebas |
+| **ballerina** | `bal new {module}` → renombrado protegido `main.bal` a `{module}.bal` → retirar solo el ejemplo verificado → crear `tests/lib_test.bal` vacío si falta | El generador no crea `tests/`; revisar únicamente contenido de ejemplo desconocido y patrones de `.gitignore` |
 | **clojure** | `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib :name {module} :target-dir {module}` | Sustituir el test de plantilla |
 | **common-lisp** | `ros -e '(ql:quickload :cl-project)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'` | Homologar el andamiaje con guion y no subrayado, sistema de pruebas con fiveam y `run-tests.lisp` |
+| **cpp** | `mkdir -p src include tests` → `touch MODULE.bazel BUILD .bazelversion .gitignore` | Declarar targets y dependencias Bazel; conservar `tests/` de las bases homologadas |
+| **crystal** | `crystal init lib {module}` → comprobar `shard.yml` y `spec/` | Conservar `src/`, `spec/spec_helper.cr` y `spec/`; no añadir `test/` ni borrar el gitfile |
 | **csharp** | `dotnet new sln` → `dotnet new classlib` → `dotnet new xunit` → `dotnet sln add` → `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj` | Borrar `Class1.cs` y `UnitTest1.cs` y añadir `.gitignore` |
-| **fsharp** | Igual que C# con `-lang F#` | Aplanar a `src/{Module}.fsproj`, `<ProjectReference>`, borrar `Library.fs` y `Tests.fs`, `.gitignore` |
+| **fsharp** | Igual que C# con `-lang F#`, incluido `dotnet add test/{Module}.Tests/{Module}.Tests.fsproj reference src/{Module}/{Module}.fsproj` | Conservar los proyectos anidados y su referencia; cualquier renombrado de `Library.fs`/`Tests.fs` actualiza sus `Compile Include` y conserva contenido propio |
 | **groovy** | `gradle init --type groovy-library --dsl groovy --use-defaults` | Borrar `Library.groovy` y `LibraryTest.groovy` |
+| **go** | `go mod init example.com/{module}` → `mkdir -p src tests` | El paquete externo de `tests/` importa `example.com/{module}/src`, sin imponer `test/` |
+| **haskell** | `cabal init --lib -n --source-dir=lib --package-name={module-kebab} --expose-module={Module}` → crear `lib/{Module}.hs` solo si falta | `{module-kebab}` sustituye subrayados por guiones; declarar `module {Module} where`, conservar `hs-source-dirs: lib` y completar test-suite/runner |
 | **haxe** | `mkdir -p src test` → `haxelib install utest` | `build.hxml` y `RunTests.hx` son contenido del sprint |
 | **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` | Completar `test/` y su runner; añadir `uuid`, `[compat]`, `[extras]` y `[targets]` |
 | **kotlin** | `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | Borrar `Library.kt` y `LibraryTest.kt` |
@@ -166,7 +171,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **racket** | `raco new library {module}` → render portátil (`mv` + `sed -i`, con el código renombrado a `{module}.rkt` con guiones) → `rm -rf .github pull_request_template.md render-template.sh profile` | Las suites requieren la librería por ruta relativa (`"../../{module}-lib/{module}.rkt"`, con guiones) y el runner es `raco test -x .`, sin enlazar paquetes |
 | **rescript** | `mkdir -p src test` → `npm init -y` → `npm pkg set` | El manifiesto y sus devDependencies se declaran con `npm pkg set`; los baja `npm install` |
 | **ruby** | `mkdir -p src test` → `bundle init` → `bundle install` | `rspec` en el `Gemfile` y `.rspec` |
-| **v** | `v init --lib` (lo conduce `expect`) | Quitar el `.git` anidado, llevar `tests/` a `test/` y fijar `version: '0.1.0'` en `v.mod` |
+| **v** | `v init --lib` (no interactivo) → `mkdir -p src tests` | Conservar `tests/`, fuentes y gitfile; fijar `version: '0.1.0'` en `v.mod`. No renombrar carpetas sin actualizar imports |
 | **vala** | `meson init --language vala --type library --name {module}` | Completar `src/` y `test/` y decidir el build con meson |
 
 > **ES:** Si el generador crea un `main` o un `app` de ejemplo (caso de `dub init` en D, `zig init`; `cargo init --lib` genera solo la librería), bórralo cuando el módulo sea una biblioteca: un `main` propio rompe el runner de tests generado por la herramienta. Ese borrado es parte del completado posterior.
@@ -191,7 +196,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | `forth` | `mkdir -p src test` · `touch src/{module}.forth` | `: {module}-init` |
 | `grain` | `mkdir -p src tests` · `touch src/{module}.gr` | `module {Module}` |
 | `java` | `mkdir -p src/main/java src/test/java` · `touch src/main/java/{Module}.java` | `public class {Module} { }` |
-| `perl` | `mkdir -p src test` · `touch src/{module}.pl` | `package {Module};` + `use strict;` + `use warnings;` + `1;` |
+| `perl` | `mkdir -p lib test` · `touch lib/{module}.pl` | `package {Module};` + `use strict;` + `use warnings;` + `1;` |
 | `php` | `mkdir -p src test` · `touch src/{Module}.php` | `<?php` + `declare(strict_types=1);` + `namespace {Module};` |
 | `prolog` | `mkdir -p src test` · `touch src/{module}.pl` | `:- module({module}, []).` |
 | `scala` | `mkdir -p src/main/scala src/test/scala project` · `touch src/main/scala/{Module}.scala` | `object {Module}` |
@@ -217,6 +222,83 @@ mkdir -p src test
 ├── src/                     # un archivo .asm por enfoque
 └── test/                    # suites + run_tests.asm + test_macros.inc + test_utils.asm
 ```
+
+### Ballerina — biblioteca en la raíz y tests/
+
+**ES:** `bal new {module}` se ejecuta desde la carpeta de la fase y genera
+`main.bal`, **no** `{module}.bal` ni `tests/` (verificado con 2201.13.4).
+Desde la raíz del paquete, las adecuaciones repetibles son las siguientes;
+detenerse si una falla. `{root}` es la raíz del clon, `{module}` el id canónico
+con subrayados. La plantilla de comparación vive en
+`scripts/data/scaffold_templates/ballerina.main.bal`; no se utiliza un marcador
+`{module_idiomatic}` sin resolución.
+
+**EN:** Run the generator from the phase directory. It produces `main.bal`,
+not the library source or tests directory. From the package root, apply the
+following adaptations and stop on failure. Resolve clone-root and canonical
+module placeholders before execution.
+
+```bash
+if [[ -L main.bal || -L {module}.bal ||
+      ( -e main.bal && ! -f main.bal ) ||
+      ( -e {module}.bal && ! -f {module}.bal ) ]]; then
+  printf 'scaffold: origen o destino no regular / source or target is not a regular file\n' >&2
+  false
+elif [[ -f main.bal && ! -e {module}.bal ]]; then
+  mv -n -- main.bal {module}.bal && test ! -e main.bal
+elif [[ ! -e main.bal && -f {module}.bal ]]; then
+  :
+else
+  printf 'scaffold: renombrado ambiguo o fuente ausente / ambiguous rename or missing source\n' >&2
+  false
+fi
+```
+
+**ES:** Renombrar no elimina un `main`. Solo se vacía el fuente cuando coincide
+exactamente con el ejemplo de la herramienta verificado; un fuente distinto se
+conserva para revisión, nunca se reemplaza por un supuesto esqueleto.
+
+**EN:** Renaming does not remove a main function. Empty only an exact verified
+generator sample; preserve other content for review.
+
+```bash
+test -f {root}/scripts/data/scaffold_templates/ballerina.main.bal && {
+  cmp -s -- {module}.bal {root}/scripts/data/scaffold_templates/ballerina.main.bal
+  result=$?
+  if [[ "$result" == 0 ]]; then
+      : > {module}.bal
+  elif [[ "$result" != 1 ]]; then
+      printf 'scaffold: no se pudo comparar la plantilla / could not compare the template\n' >&2
+      false
+  fi
+}
+```
+
+```bash
+if [[ -L tests || -L tests/lib_test.bal ||
+      ( -e tests/lib_test.bal && ! -f tests/lib_test.bal ) ]]; then
+  printf 'scaffold: ruta de pruebas no segura / unsafe test path\n' >&2
+  false
+else
+  mkdir -p tests && { test -e tests/lib_test.bal || touch tests/lib_test.bal; }
+fi
+```
+
+```text
+{module}/
+├── Ballerina.toml
+├── {module}.bal             # vacío tras retirar el ejemplo conocido
+├── .gitignore
+└── tests/lib_test.bal       # vacío; los casos pertenecen a suite
+```
+
+**ES:** Conservar `.gitignore` si ya existe; rechazar symlinks/directorios en esa
+ruta. La comprobación nativa del andamiaje es `bal test --offline`: **No tests
+found** es esperado antes de escribir la suite, no demuestra cobertura.
+
+**EN:** Preserve an existing ignore file and reject symlink/directory ignore
+paths. Native scaffold verification reports no tests, as expected before suite
+creation; this is not coverage evidence.
 
 ### C — Makefile + include/ + src/ + test/
 ```bash
@@ -371,18 +453,33 @@ dune init proj {module}
 └── test/dune                # declara el ejecutable de tests
 ```
 
-### Perl — src/ + test/
+### Perl — lib/ + test/
 
-**ES:** Herramienta (R1): module-starter --module={module} --dir=. (necesita Module::Starter y su PERL5LIB). El generador usa el layout de distribución (lib/, t/, xt/, Makefile.PL, MANIFEST), así que el runner pasa a prove -l t/ y el módulo se actualizará al retomarlo (R6); lo de abajo es la estructura homologada actual.
+**ES:** Andamiaje manual: la fuente va en `lib/` y las suites en `test/`, como
+los módulos homologados y el verificador del catálogo. `module-starter` no forma
+parte de esta secuencia. Crear la fuente solo si falta; no truncar una previa.
+El comando canónico de pruebas sigue siendo `prove --ext=.pl test/`.
 
-**EN:** Tool (R1): module-starter --module={module} --dir=. (needs Module::Starter and its PERL5LIB). The generator uses the distribution layout (lib/, t/, xt/, Makefile.PL, MANIFEST), so the runner moves to prove -l t/ and the module will be updated when retaken (R6); what follows is the current homologated structure.
+**EN:** Manual scaffolding uses `lib/` and `test/`, matching verified modules
+and the catalogue verifier. Module::Starter is not part of this sequence.
+Create only a missing source; retain the canonical test command.
+
 ```bash
-mkdir -p src test
+if [[ -L lib || -L test || -L lib/{module}.pl ||
+      ( -e lib/{module}.pl && ! -f lib/{module}.pl ) ]]; then
+  printf 'scaffold: ruta de Perl no segura / unsafe Perl path\n' >&2
+  false
+else
+  mkdir -p lib test && {
+      test -e lib/{module}.pl ||
+          (set -C; printf 'package {Module};\n\nuse strict;\nuse warnings;\n\n1;\n' > lib/{module}.pl)
+  }
+fi
 ```
 
 ```text
 {module}/
-├── src/{module}.pl
+├── lib/{module}.pl
 └── test/                    # una suite .pl por enfoque (Test2::Bundle::More)
 ```
 
@@ -508,6 +605,27 @@ bundle install --local        # resuelve con las gemas instaladas; sin red
 └── test/                    # una suite _tests.rb por enfoque
 ```
 
+### Rust — conservar el punto de entrada de Cargo
+
+**ES:** `cargo init --lib` genera `Cargo.toml` y `src/lib.rs`. Ese es el punto de
+entrada predeterminado; no renombrarlo a `src/{module}.rs` sin una decisión y
+configuración explícita. El scaffold comprueba ambos archivos y los conserva:
+
+**EN:** Cargo's library initializer generates its default entry point.
+Scaffolding checks and preserves it; do not rename it without explicit crate
+configuration.
+
+```bash
+test -f Cargo.toml && test -f src/lib.rs
+```
+
+**ES:** Los ejemplos de funciones/tests que genere Cargo se revisan en el paso
+4a; no representan la suite del contrato. Verificado con `cargo test --offline`
+en un paquete temporal, sin tocar módulos homologados.
+
+**EN:** Review Cargo-generated function/test examples in step 4a; they are not
+the contract suite. Verified offline in a temporary package, not actual modules.
+
 ### Scala — layout sbt estándar
 ```bash
 mkdir -p src/main/scala src/test/scala project
@@ -582,19 +700,19 @@ mkdir -p src test
 
 ### V — módulo V
 
-**ES:** Herramienta (R1): v init --lib, **no interactivo** (no pregunta). Crea {module}.v en la raíz, tests/, .editorconfig, .gitattributes, un .git anidado que hay que quitar y v.mod con version: '0.0.0', que se sube a '0.1.0'; el módulo se actualizará al retomarlo (R6) y lo de abajo es la estructura homologada actual.
+**ES:** Herramienta (R1): `v init --lib`, **no interactivo**. Crea `{module}.v` en la raíz, `tests/`, `.editorconfig`, `.gitattributes`, `.git` y `v.mod`. Conservar `tests/` y el gitfile; crear `src/` sin mover fuentes desconocidas. El traslado de código a `src/` requiere cambiar los imports a `{module}.src`; no se puede hacer renombrando carpetas solamente.
 
-**EN:** Tool (R1): v init --lib, **non-interactive** (it asks nothing). It creates {module}.v at the root, tests/, .editorconfig, .gitattributes, a nested .git that must be removed and v.mod with version: '0.0.0', which is raised to '0.1.0'; the module will be updated when retaken (R6) and what follows is the current homologated structure.
+**EN:** `v init --lib` is non-interactive and creates a root source, `tests/`, configuration files and Git metadata. Preserve the test directory and gitfile; moving code into `src/` also requires updating imports to `{module}.src`, not just renaming folders.
 ```bash
-mkdir -p src test
-v init                        # genera v.mod (no interactivo)
+v init --lib                  # genera v.mod (no interactivo)
+mkdir -p src tests
 ```
 
 ```text
 {module}/
 ├── v.mod
 ├── src/{module}.v
-└── test/                    # archivos _test.v con funciones test_*
+└── tests/                   # archivos _test.v con funciones test_*
 ```
 
 ### Manifiestos que mkdir no crea / Manifests mkdir does not create

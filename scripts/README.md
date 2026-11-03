@@ -4,7 +4,12 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión viva / Live version: **v2.0.3** en [`glot.sh`](glot.sh).
+Versión de desarrollo / Development version: **v2.1.0-dev** en [`glot.sh`](glot.sh).
+Última versión verificada / Last verified release: **v2.0.3** en
+[`versions/glot_2.0.3.sh`](versions/glot_2.0.3.sh).
+
+Configuración vigente de las tres rutas y BYOK / Current three-route and BYOK
+configuration: [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
 ---
 
@@ -34,7 +39,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh langs
 ./scripts/glot.sh modules
 ./scripts/glot.sh models                         # perfiles: modelo, esfuerzo, créditos y el de AGY
-./scripts/glot.sh delegates                      # alias de modelo por delegado (agy, copilot)
+./scripts/glot.sh delegates                      # rutas: agy, copilot, open-router
 ./scripts/glot.sh progress
 ./scripts/glot.sh test php algorithms/naive_sort    # suite del módulo / module suite
 ./scripts/glot.sh verify php algorithms/naive_sort  # sintaxis/lint del lenguaje
@@ -46,7 +51,7 @@ cd "$REPO"                              # ruta de tu clon / path to your clone
 ./scripts/glot.sh scaffold php algorithms/naive_sort # base repetible; delega solo el análisis pendiente
 ./scripts/glot.sh prompt suite                        # encargo de la suite (paso 4c)
 ./scripts/glot.sh prompt contract_stub                # encargo del contrato y sus esqueletos (paso 4b)
-./scripts/glot.sh prompt                              # registro: nombre, paso, modelo y descripción
+./scripts/glot.sh prompt                              # registro: nombre, paso, perfil y descripción
 ./scripts/glot.sh status                              # submódulos, ramas y punteros (solo lectura)
 ./scripts/glot.sh -n pointer php algorithms/naive_sort  # puntero del submódulo: plan sin tocar nada
 ./scripts/glot.sh -n finish php algorithms/naive_sort   # cierre del monorepo: puntero + registro (y al final limpia el estado del sprint)
@@ -79,7 +84,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Versión viva / live version (v2.0.3)
+├── glot.sh                  # Desarrollo / development (v2.1.0-dev)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh
