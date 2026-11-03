@@ -16,18 +16,27 @@
 
 | Familia práctica / Practical family | Etiquetas del TSV / TSV labels | Nº | Variante |
 |---|---|:--:|:--:|
-| F1 OO con null | `oo-null` (13) + `oo-option` (3) − dyn-null de `ruby` − `rexx` a F2 | 13 | V1 |
-| F2 Scripting dinámico | `dyn-null` (8, incluye Common Lisp mutable) − `php` a F1 + `rexx` | 8 | V1 |
+| F1 OO con null | `oo-null` (13) + `oo-option` (3) | 16 | V1 |
+| F2 Scripting dinámico | `dyn-null` (8, incluye Common Lisp mutable) | 8 | V1 |
 | F3 Sistemas C-lineage | `sys-pointer` (4) + `sys-sentinel` (1, d) | 5 | V1 |
 | F4 Sistemas modernos | `sys-option` (4) + `sys-tuple` (1, go) + `multi` (2: cpp, rust) | 7 | V1 (clase V3) |
 | F5 Funcional ML/Haskell | `func-option` (9) − los 3 Lisp funcionales | 6 | V2 |
 | F6 Lisp / Scheme / Racket | los 3 Lisp de `func-option`; Common Lisp mutable está en F2 | 3 | V2 |
 | F7 BEAM funcional | `func-result` (4) | 4 | V2 |
-| F8 Multi-paradigma OO | clase **V3** (5: rust, scala, swift, cpp, nim), repartidos en F1/F3/F4 | 4 | V1 |
+| F8 Multi-paradigma OO | clase **V3** (5: rust, scala, swift, cpp, nim), ya contados en F1/F3/F4 | 0 propios | V1 |
 | F9 Lógico | `logic` (1, prolog) | 1 | V4 |
+| **Total / Total** | **16 + 8 + 5 + 7 + 6 + 3 + 4 + 1** | **50** | — |
+
+**ES:** Cada etiqueta `family` de `canonical_names.tsv` pertenece a **una sola** familia práctica. Si un lenguaje debe cambiar de familia, se cambia su etiqueta en el TSV; este documento no reparte lenguajes a mano. F8 no añade miembros: es la clase V3 de lenguajes ya contados en F1/F3/F4.
+
+**EN:** Every `family` label in `canonical_names.tsv` belongs to **exactly one** practical family. If a language must move, change its label in the TSV; this document does not redistribute languages by hand. F8 adds no members: it is the V3 class of languages already counted in F1/F3/F4.
+
+**ES:** Estas familias agrupan por **decisión de implementación**. La tabla «Indicador de fallo por familia» de `PSEUDOCODE_CONVENTION.md` agrupa por **mecanismo de fallo** y puede situar un mismo lenguaje en otro grupo: `ada` está en F1 por su forma OO y en «Sistemas con punteros» por usar `NULL`/`-1`. No son taxonomías rivales; cada una responde a un eje distinto.
+
+**EN:** These families group by **implementation decision**. The “Failure indicator per family” table in `PSEUDOCODE_CONVENTION.md` groups by **failure mechanism** and may place the same language elsewhere: `ada` is in F1 for its OO shape and in “Systems with pointers” for using `NULL`/`-1`. They are not rival taxonomies; each answers a different axis.
 
 ```pseudocode
--- F1 — OO con null (12; ada/ballerina desde `oo-null`, swift desde `oo-option`)
+-- F1 — OO con null (16: `oo-null` 13 + `oo-option` 3)
 init(value)   = new Node(value)          -- new T(v) | T(v) | T.new(v)
 get_value()   = return this.value        -- propiedad o getX()
 set_next(n)   = this.next = n; return this
@@ -45,6 +54,18 @@ is_empty(c)   = not c                            -- empty? | is_empty
 size(c)       = len(c)                           -- len | length | size
 delete(c, v)  = ...                              -- remove si choca [D, JS, TS, ruby, tcl]
 -- ausencia: nil | undef | {} · memoria: GC · el contrato lo sostiene la suite
+```
+
+```pseudocode
+-- F2 · subgrupo Common Lisp (V1 mutable, nombres kebab-case, defstruct o CLOS)
+(make-node :value v)             -- constructor, no new ni init()
+(node-value n)                   -- accessor; no get_value
+(setf (node-next n) x)           -- muta el slot; no hay with_next
+(linked-list-is-empty l)         -- predicado del modulo; size con (linked-list-size l)
+(linked-list-delete l v)         -- el prefijo de tipo evita el choque con cl:delete
+-- ausencia: nil · fallo: centinela 0/-1 documentado (DEVIATION_POLICY C2)
+-- eleccion V1 declarada: la base homologada usa defstruct + setf (C4)
+-- insert_tail/enqueue: O(1) con puntero a la cola, no se reconstruye la cadena
 ```
 
 ```pseudocode
@@ -94,7 +115,7 @@ is_empty(node)     = node == absent
 ```
 
 ```pseudocode
--- F8 — Multi-paradigma OO (4; clase V3: rust, scala, swift, cpp, nim)
+-- F8 — Multi-paradigma OO (0 propios; clase V3 de 5: rust, scala, swift, cpp, nim, ya contados en F1/F3/F4)
 -- El módulo implementa V1 (una sola variante); V3 es la CLASE, no una asignación.
 -- scala: class + Option · raku: Nil + tipos opcionales · ballerina: null + tipos dependientes
 -- swift: mutating dentro de #expect · cpp/rust: punteros y ownership (ver F3/F4)

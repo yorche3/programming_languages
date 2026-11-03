@@ -101,7 +101,7 @@
 | 2 | Pruebas en verde | ✅ obligatorio |
 | 3 | Sin `unsafe`/`unwrap` que rompa el contrato | ✅ obligatorio |
 | 4 | Constructor **NO** idiomático (ej. `init()` como método) | ⚠️ típico |
-| 5 | Indicador de fallo **NO** idiomático (ej. `-1` en lenguaje con `Option`) | ⚠️ típico |
+| 5 | Indicador de fallo **NO** idiomático: `-1` donde el contrato pide un opcional, el tipo no lo representa o colisiona con un resultado válido (`DEVIATION_POLICY` C2). Un centinela `-1` documentado en un lenguaje **sin** tipo de ausencia no baja el nivel | ⚠️ típico |
 | 6 | Varios nombres traducidos literalmente (`get_value`, `set_next`) | ⚠️ típico |
 | 7 | Desviaciones **documentadas** en README | ⚠️ obligatorio |
 | 8 | Existe una nota de "migración pendiente" o similar | ⚠️ recomendado |

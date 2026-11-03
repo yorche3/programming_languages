@@ -202,6 +202,7 @@ not cure a breach of the required bound.
 - Zig: no tiene `private` de campos. Los campos son públicos; la convención se documenta.
 - Scheme: `define-record-type` sin setter deja los campos visibles por el accessor. La encapsulación es por no exponer setters.
 - Lua: las tablas son transparentes; la encapsulación se hace con metatables o por convención.
+- Common Lisp: los campos de `defstruct` se alcanzan por sus accesores y el tipo queda visible si se exporta el símbolo; la encapsulación se hace no exportando, o con `defclass` y `:reader`/`:accessor` cuando el contrato la pide.
 
 **Ejemplos NO legítimos:**
 
