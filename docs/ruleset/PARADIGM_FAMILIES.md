@@ -167,35 +167,35 @@ node_with_next(node(V, _), N, node(V, present(N))).
 ## 📊 Vista general / Overview
 
 ```text
-F1 — OO con null (V1)                      12 lenguajes
+F1 — OO con null (V1)                      16 lenguajes
 F2 — Scripting dinámico con null (V1)       8 lenguajes
 F3 — Sistemas C-lineage con sentinel (V1)   5 lenguajes
 F4 — Sistemas modernos con option (V1; V3 es clase)   7 lenguajes
 F5 — Funcional ML/Haskell con option (V2)   6 lenguajes
 F6 — Lisp / Scheme / Racket (V2)            3 lenguajes
 F7 — BEAM funcional con result (V2)         4 lenguajes
-F8 — Multi-paradigma OO (clase V3 → V1)      4 lenguajes
+F8 — Multi-paradigma OO (clase V3 → V1)      0 propios
 F9 — Lógico (V4)                            1 lenguaje
                                             ─────────
                                             50 lenguajes
                                             👥 Las 9 familias / The 9 families
 ```
-F1 — OO con null (V1) — 12 lenguajes
+F1 — OO con null (V1) — 16 lenguajes
 
-Miembros / Members: csharp, crystal, dart, groovy, haxe, java, javascript, kotlin, ruby, swift, typescript, vala.
+Miembros / Members: ada, ballerina, crystal, csharp, dart, groovy, haxe, java, javascript, kotlin, raku, rexx, scala, swift, typescript, vala.
 
 Perfil / Profile:
 Eje	Valor dominante
 Variante	V1 (mutable)
 Mutabilidad	mutable
-Fallo	null / nil (excepciones en Java, C#)
-Memoria	gc (excepto swift con arc)
+Fallo	null / nil (ada con sentinel `-1` y `Boolean`; excepciones en Java, C#)
+Memoria	gc (ada con memoria manual; swift con arc)
 Construcción	new T() (keyword)
-Naming	camelCase (excepto ruby con snake_case)
+Naming	camelCase, kebab-case en raku/scala
 
-ES: Familia dominante en el monorepo (12 de 50). Son lenguajes con OO clásico, mutación in-place, null como ausencia y GC. La forma del módulo es idéntica entre ellos: constructor, getters/setters, métodos mutantes, null como indicador de fallo.
+ES: Familia dominante en el monorepo (16 de 50). Son lenguajes con OO clásico, mutación in-place, null como ausencia y GC. La forma del módulo es idéntica entre ellos: constructor, getters/setters, métodos mutantes, null como indicador de fallo.
 
-EN: The dominant family (12 of 50). Languages with classic OO, in-place mutation, null as absence and GC. The module shape is identical among them: constructor, getters/setters, mutating methods, null as failure indicator.
+EN: The dominant family (16 of 50). Languages with classic OO, in-place mutation, null as absence and GC. The module shape is identical among them: constructor, getters/setters, mutating methods, null as failure indicator.
 
 ES: Dentro de la familia hay subgrupos por convención de nombres y keyword de construcción:
 
@@ -205,13 +205,17 @@ ES: Dentro de la familia hay subgrupos por convención de nombres y keyword de c
 
     camelCase + new keyword + null safety: dart, kotlin, swift.
 
-    snake_case + T.new method: ruby, crystal.
+    snake_case + T.new method: crystal (ruby pertenece a F2).
 
     camelCase + new keyword + ARC: swift.
 
+    kebab-case + T.new / init(): raku, scala.
+
+    Paquete y procedimientos: ada (`Make`/`Init`, sin GC); ballerina (`init()`, GC); rexx (`::class`).
+
 ES: Deviations comunes a la familia (ver DEVIATION_POLICY.md para el formato):
 
-    C1: delete → remove en C#/Java/Kotlin, pero se mantiene delete en ruby/crystal/dart.
+    C1: delete → remove en C#/Java/Kotlin, pero se mantiene delete en crystal/dart.
 
     C2: uso de null como indicador de fallo (idiomático, no es desviación).
 
@@ -219,7 +223,7 @@ ES: Deviations comunes a la familia (ver DEVIATION_POLICY.md para el formato):
 
 EN: Family-wide deviations (see DEVIATION_POLICY.md for the format):
 
-    C1: delete → remove in C#/Java/Kotlin, kept as delete in ruby/crystal/dart.
+    C1: delete → remove in C#/Java/Kotlin, kept as delete in crystal/dart.
 
     C2: null as failure indicator (idiomatic, not a deviation).
 
@@ -243,7 +247,7 @@ EN: Shared lessons:
 
 F2 — Scripting dinámico con null (V1) — 8 lenguajes
 
-Miembros / Members: common-lisp, lua, perl, php, python, r, rexx, tcl-tk.
+Miembros / Members: common-lisp, lua, perl, php, python, r, ruby, tcl-tk.
 
 **ES:** Common Lisp conserva su notación Lisp: `(make-node :value v)`,
 `(node-value n)` y `(setf (node-next n) x)`. Se agrupa aquí por su contrato
@@ -260,7 +264,7 @@ Mutabilidad	mutable
 Fallo	null / nil / undef / {}
 Memoria	gc
 Construcción	T.new(...) (method) o literal
-Naming	snake_case (excepto tcl-tk con espacio)
+Naming	snake_case, kebab-case en common-lisp (tcl-tk con espacio)
 
 ES: Lenguajes sin tipado verificado en compilación, GC, y ausencia representada con nil/undef/None/{}. La forma del módulo es la más libre de todas las familias: no hay contratos verificables por el compilador, solo por convención.
 
@@ -268,27 +272,27 @@ EN: Languages without compile-time type checking, GC, and absence represented wi
 
 ES: Subgrupos:
 
-    nil nativo: lua, ruby (ya en F1), tcl-tk ({}).
+    nil nativo: lua, ruby, common-lisp (nil y `'()` son el mismo objeto).
 
     undef nativo: perl.
 
     None / nil / null: php (null), python (None), r (NULL/NA).
 
-    Con OO nativo: php, python, lua (con metatables).
+    Con OO nativo: php, python, lua (con metatables), common-lisp (CLOS y `defstruct`).
 
-    Sin OO nativo: perl (con package/bless), tcl-tk (con TclOO), rexx (con ::class).
+    Sin OO nativo: perl (con package/bless), tcl-tk (con TclOO).
 
 EN: Subgroups:
 
-    Native nil: lua, tcl-tk ({}).
+    Native nil: lua, ruby, common-lisp (nil and `'()` are the same object).
 
     Native undef: perl.
 
     None / nil / null: php, python, r.
 
-    Native OO: php, python, lua (metatables).
+    Native OO: php, python, lua (metatables), common-lisp (CLOS and `defstruct`).
 
-    No native OO: perl (package/bless), tcl-tk (TclOO), rexx (::class).
+    No native OO: perl (package/bless), tcl-tk (TclOO).
 
 ES: Deviations comunes:
 
@@ -296,7 +300,7 @@ ES: Deviations comunes:
 
     C1: nombres traducidos (get_value en vez de value) son aceptables por falta de convención fuerte.
 
-    C6: la encapsulación es solo por convención (no hay private real en Perl/Lua/Tcl).
+    C6: la encapsulación es solo por convención (no hay private real en Perl/Lua/Tcl) y en Common Lisp los campos de `defstruct` quedan visibles por sus accesores; se encapsula no exportando el símbolo o con `defclass` y `:reader`/`:accessor`.
 
 EN: Common deviations:
 
@@ -324,28 +328,28 @@ EN: Shared lessons:
 
 F3 — Sistemas C-lineage con sentinel (V1) — 5 lenguajes
 
-Miembros / Members: ada, assembly, c, cobol, forth.
+Miembros / Members: assembly, c, cobol, d, forth.
 
 Perfil / Profile:
 Eje	Valor dominante
 Variante	V1 (mutable)
 Mutabilidad	mutable
 Fallo	sentinel (NULL, 0, -1)
-Memoria	manual
+Memoria	manual (d con GC)
 Construcción	función init/make/literal
 Naming	snake_case / PascalCase
 
-ES: Lenguajes de sistemas "clásicos" con memoria manual (malloc/free), sin tipos opcionales, y sin GC. La ausencia se representa con NULL (nullptr), 0, o un sentinel documentado.
+ES: Lenguajes de sistemas "clásicos" con memoria manual (malloc/free) —salvo d, que recolecta— y sin tipo opcional al estilo ML. La ausencia se representa con NULL (nullptr), 0, o un sentinel documentado.
 
-EN: "Classic" systems languages with manual memory (malloc/free), no optional types, and no GC. Absence is represented with NULL (nullptr), 0, or a documented sentinel.
+EN: "Classic" systems languages with manual memory (malloc/free) —except d, which is collected— and no ML-style optional type. Absence is represented with NULL (nullptr), 0, or a documented sentinel.
 
 ES: Subgrupos:
 
     C y Assembly: NULL o 0 como ausencia, malloc/free manual.
 
-    Ada: tipos controlados, null de access types, tasks.
-
     COBOL: espacios / NULL como ausencia, formato fijo.
+
+    D: sentinel documentado con GC y compilación nativa.
 
     Forth: stack-based, todo es un número, 0 como sentinel.
 
@@ -353,9 +357,9 @@ EN: Subgroups:
 
     C and Assembly: NULL or 0 as absence, manual malloc/free.
 
-    Ada: controlled types, null of access types, tasks.
-
     COBOL: spaces / NULL as absence, fixed format.
+
+    D: documented sentinel with GC and native compilation.
 
     Forth: stack-based, everything is a number, 0 as sentinel.
 
@@ -393,16 +397,16 @@ EN: Shared lessons:
 
 F4 — Sistemas modernos con option (V1; V3 es clase) — 7 lenguajes
 
-Miembros / Members: d, go, julia, nim, rust, v, zig.
+Miembros / Members: cpp, go, julia, nim, rust, v, zig.
 
 Perfil / Profile:
 Eje	Valor dominante
 Variante	V1 (una sola; V3 es la clase, no una asignación)
 Mutabilidad	mutable o mixta
-Fallo	Option/?T/(T, bool)/Result
+Fallo	Option/?T/(T, bool)/Result/puntero nulo (cpp)
 Memoria	gc / raii / manual (variado)
 Construcción	new factory / literal
-Naming	snake_case (excepto d con camelCase)
+Naming	snake_case (cpp con camelCase parcial)
 
 ES: Lenguajes de sistemas modernos, con tipos opcionales y verificación en compilación. A diferencia de F3, no usan sentinel: usan Option, ?T, Result o (T, bool). Cada uno gestiona memoria a su manera.
 
@@ -410,9 +414,9 @@ EN: Modern systems languages with optional types and compile-time verification. 
 
 ES: Subgrupos por memoria:
 
-    GC: d, go, julia, nim.
+    GC: go, julia, nim.
 
-    RAII/ownership: rust, v.
+    RAII/ownership: cpp, rust, v.
 
     Manual explícito: zig.
 
@@ -424,6 +428,16 @@ ES: Subgrupos por fallo:
 
     (T, bool): go.
 
+    Puntero nulo: cpp.
+
+EN: Subgroups by memory:
+
+    GC: go, julia, nim.
+
+    RAII/ownership: cpp, rust, v.
+
+    Explicit manual: zig.
+
 EN: Subgroups by failure:
 
     Option/?T: julia, nim, rust, v, zig.
@@ -432,9 +446,11 @@ EN: Subgroups by failure:
 
     (T, bool): go.
 
+    Null pointer: cpp.
+
 ES: Deviations comunes:
 
-    C2: en rust/zig/v, Option es idiomático. En d, el sentinel -1 es aceptado pero no óptimo.
+    C2: en rust/zig/v/julia/nim, Option es idiomático. En cpp, el puntero nulo es el mecanismo del lenguaje y se declara.
 
     C5: insertTail es O(1) con punteros/referencias; **excepción medida**: en ownership (rust) es O(n) porque el nodo no se puede reubicar sin mover la cadena. Se declara.
 
@@ -442,7 +458,7 @@ ES: Deviations comunes:
 
 EN: Common deviations:
 
-    C2: in rust/zig/v, Option is idiomatic. In d, the -1 sentinel is accepted but not optimal.
+    C2: in rust/zig/v/julia/nim, Option is idiomatic. In cpp, the null pointer is the language mechanism and is declared.
 
     C5: insertTail is O(1) with pointers/references; **measured exception**: under ownership (rust) it is O(n) because the node cannot be relocated without moving the chain. It is declared.
 
@@ -686,18 +702,18 @@ EN: Shared lessons:
 
     Typed failure {:ok, _} / {:error, _} is the way to communicate fallible operations.
 
-F8 — Multi-paradigma OO (clase V3 → V1) — 4 lenguajes
+F8 — Multi-paradigma OO (clase V3 → V1) — 0 propios (clase de 5)
 
-Miembros / Members: ballerina, cpp, raku, scala.
+Miembros / Members (clase, ya contados en F1/F3/F4): cpp, nim, rust, scala, swift.
 
 Perfil / Profile:
 Eje	Valor dominante
 Variante	V1 (la clase V3 se resolvió a V1; sin alternativas)
 Mutabilidad	mixta
-Fallo	mixto (option/null/sentinel)
-Memoria	raii (cpp), gc (raku, scala, ballerina)
-Construcción	new keyword / apply / T.new
-Naming	camelCase / kebab-case
+Fallo	option (scala, nim), option/result (rust), null (cpp)
+Memoria	raii (cpp, rust), arc (swift), gc (scala, nim)
+Construcción	new keyword / T.new / T()
+Naming	camelCase / snake_case
 
 ES: Lenguajes multi-paradigma que permiten tanto V1 como V2 según el módulo. La elección se documenta en el README del lenguaje por módulo. No comparten un modelo único; su rasgo común es que no encajan en ninguna otra familia.
 
@@ -705,23 +721,27 @@ EN: Multi-paradigm languages that allow both V1 and V2 depending on the module. 
 
 ES: Perfiles individuales:
 
-    cpp: RAII, plantillas, multi-paradigma histórico. El módulo elige V1 por pedagogía.
+    cpp: RAII, plantillas, multi-paradigma histórico. El módulo elige V1 por pedagogía. (Contado en F4 por la etiqueta `multi`.)
 
-    scala: JVM, funcional + OO, con Option/Either. Implementa V1 (V3 es su clase). (Se implementó en V1; no se explora la alternativa.)
+    rust: ownership y préstamos, con `Option`/`Result`. Implementa V1 (V3 es su clase). (Contado en F4.)
 
-    raku: graduales, multi-paradigma, con Nil y tipos opcionales. Implementa V1 (V3 es su clase).
+    scala: JVM, funcional + OO, con Option/Either. Implementa V1 (V3 es su clase). (Contado en F1 por `oo-option`.)
 
-    ballerina: orientado a red, con null y tipos dependientes. Implementa V1 (V3 es su clase).
+    swift: ARC y protocolos, con Optional. Implementa V1 (V3 es su clase). (Contado en F1.)
+
+    nim: multi-paradigma con Option y GC. Implementa V1 (V3 es su clase). (Contado en F4 por `sys-option`.)
 
 EN: Individual profiles:
 
-    cpp: RAII, templates, historic multi-paradigm. The module chooses V1 for pedagogy.
+    cpp: RAII, templates, historic multi-paradigm. The module chooses V1 for pedagogy. (Counted in F4 through the `multi` label.)
 
-    scala: JVM, functional + OO, with Option/Either. It implements V1 (V3 is its class). (Implemented in V1; the alternative is not explored.)
+    rust: ownership and borrowing, with `Option`/`Result`. It implements V1 (V3 is its class). (Counted in F4.)
 
-    raku: gradual, multi-paradigm, with Nil and optional types. It implements V1 (V3 is its class).
+    scala: JVM, functional + OO, with Option/Either. It implements V1 (V3 is its class). (Counted in F1 through `oo-option`.)
 
-    ballerina: network-oriented, with null and dependent types. It implements V1 (V3 is its class).
+    swift: ARC and protocols, with Optional. It implements V1 (V3 is its class). (Counted in F1.)
+
+    nim: multi-paradigm with Option and GC. It implements V1 (V3 is its class). (Counted in F4 through `sys-option`.)
 
 ES: Deviations comunes:
 
@@ -842,9 +862,9 @@ ES: Si encuentras un bug en elixir, revisa erlang, gleam, grain (misma familia F
 EN: If you find a bug in elixir, check erlang, gleam, grain (same family F7). They likely share the bug.
 3. Organizar el trabajo de auditoría por familia
 
-ES: La auditoría se puede hacer por familia: cerrar F1 completa (12 lenguajes), luego F2 (8), etc. Es más eficiente que hacerla por lenguaje aislado.
+ES: La auditoría se puede hacer por familia: cerrar F1 completa (16 lenguajes), luego F2 (8), etc. Es más eficiente que hacerla por lenguaje aislado.
 
-EN: The audit can be done by family: close F1 completely (12 languages), then F2 (8), etc. It is more efficient than doing it per isolated language.
+EN: The audit can be done by family: close F1 completely (16 languages), then F2 (8), etc. It is more efficient than doing it per isolated language.
 📋 Criterios de aceptación del propio documento
 
     □
@@ -880,4 +900,4 @@ EN: The audit can be done by family: close F1 completely (12 languages), then F2
 
     data/canonical_names.tsv — La tabla de traducción.
 
-Última actualización / Last update: 2026-10-12
+*Última actualización / Last update: 2026-11-02*

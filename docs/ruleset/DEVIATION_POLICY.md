@@ -431,4 +431,4 @@ EN: If the language README says there are 3 deviations and idiomaticity_state.ts
 
     data/idiomaticity_state.tsv — El estado actual por (lenguaje, módulo).
 
-Última actualización / Last update: 2026-10-12
+Última actualización / Last update: 2026-11-02

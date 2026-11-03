@@ -304,7 +304,8 @@ Desviaciones permitidas / Allowed deviations:
 
 Desviaciones NO permitidas / Not allowed deviations:
 
-    Usar -1 como sentinel en un lenguaje con Option/Maybe.
+    Usar -1 como sentinel cuando el contrato no lo exige, cuando el tipo no lo
+    representa o cuando colisiona con un resultado válido.
 
     Usar null en un lenguaje que no lo tiene.
 
@@ -315,6 +316,10 @@ Desviaciones NO permitidas / Not allowed deviations:
     Cambiar la complejidad sin documentarla.
 
     Silenciar warnings con #[allow], @Suppress o equivalentes sin justificación en el README.
+
+**ES:** Un centinela `-1` que el contrato exige, que el tipo representa y que no colisiona con un resultado válido **no** entra en esta lista: se tramita como C2 en [`DEVIATION_POLICY.md`](DEVIATION_POLICY.md) y se declara en el README del lenguaje o del módulo.
+
+**EN:** A `-1` sentinel that the contract requires, that the type represents and that does not collide with a valid result is **not** in this list: it is handled as C2 in [`DEVIATION_POLICY.md`](DEVIATION_POLICY.md) and declared in the language or module README.
 
 🔗 Referencias / References
 
@@ -339,8 +344,8 @@ Desviaciones NO permitidas / Not allowed deviations:
 | # | Caso / Case | Lenguajes medidos / Measured languages | Regla derivada / Derived rule |
 |:--:|---|---|---|
 | 1 | Ausencia de enlace sin `null` en el lenguaje | clojure, common-lisp, elixir, elm, erlang, fsharp, gleam, grain, haskell, ocaml, purescript, racket, rescript, scheme | Se usa el átomo o tipo suma nativo (`None`, `Nothing`, `nil`, `'()`, `#f`); `null` solo para enlaces y nodos |
-| 2 | `-1` donde el lenguaje ya tiene `Option`/`Maybe` | regla de familia (csharp, kotlin, dart, swift, scala, fsharp, rust, zig tienen tipo de ausencia) | Desviación **no permitida**; el indicador natural del lenguaje se declara en el README del módulo |
-| 3 | Sentinel nativo del lenguaje | ada (`Failure_Value = -1`), assembly (`FAILURE = -1`), cobol, forth (`0`) | Sentinel documentado en el README; sin tipo de ausencia, la regla 2 no aplica |
+| 2 | `-1` donde el contrato no lo exige, el tipo no lo representa o colisiona con un resultado válido | regla de familia (csharp, kotlin, dart, swift, scala, fsharp, rust, zig tienen tipo de ausencia) | Desviación **no permitida**; el indicador natural del lenguaje se declara en el README del módulo. Un `-1` representable y exigido por el contrato se tramita como C2 |
+| 3 | Sentinel nativo del lenguaje | ada (`Failure_Value = -1`), assembly (`FAILURE = -1`), cobol, forth (`0`) | Sentinel documentado en el README; si el contrato lo exige, el tipo lo representa y no colisiona con un resultado válido, la regla 2 no aplica |
 | 4 | Constructor que no puede fallar de forma idiomática | rexx (`init` devolvía `.Nil`), swift (`fatalError` dentro de `init`) | Nivel `workaround`: se registra la desviación, no se silencia |
 | 5 | Memoria manual y punteros | zig (`destroy`, `?*Node`, `std.testing.allocator`), v (`@[heap]`, `?&Node`), c, cpp, cobol (`ALLOCATE` / `BASED`), assembly (allocator propio sobre `brk`, sin libc) | `deinit` / `free` / `ALLOCATE` son desviación permitida; la suite comprueba ausencia de fugas |
 | 6 | Puntero crudo donde existía alternativa con propiedad | rust (`*mut Node` en vez de `Option<Box<Node>>`) | Nivel `workaround`; `Rc<RefCell>` se evaluó y se rechazó por coste pedagógico |
@@ -359,5 +364,5 @@ Desviaciones NO permitidas / Not allowed deviations:
 
 ---
 
-Última actualización / Last update: 2026-10-12
+Última actualización / Last update: 2026-11-02
 ---

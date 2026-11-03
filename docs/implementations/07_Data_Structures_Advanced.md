@@ -101,6 +101,8 @@ de la base no decide la mutabilidad. `nil` es lista vacía y ausencia: el
 contrato de `neighbors` debe distinguir un vértice existente sin vecinos
 de un vértice inexistente mediante un indicador no ambiguo permitido por
 la fase, no imponer inmutabilidad ni elegir un retorno silenciosamente.
+Aquí se resuelve con **dos valores**: `(values lista 0|-1)`, donde `0` es
+éxito —lista vacía si el vértice está aislado— y `-1` el vértice inexistente.
 
 **EN:** Common Lisp uses **V1 / F2**, running SBCL through Roswell.
 `defstruct` links support direct `setf`, except `:read-only` slots.
@@ -108,6 +110,23 @@ A1 (CLOS/structure inclusion) or A2 (embedded value) is declared separately
 from mutation policy. Since `nil` means both an empty list and absence,
 the neighbors contract must explicitly distinguish empty success from a
 missing vertex with an unambiguous phase-compatible indicator.
+Here it is resolved with **two values**: `(values list 0|-1)`, where `0` is
+success —empty list for an isolated vertex— and `-1` the missing vertex.
+
+**ES:** **Código de resultado del módulo:** `0` = éxito o «sí», `-1` = fallo o
+«no», en todas las operaciones y también en las preguntas (`contains`,
+`has_edge`, `is_empty`): una misma pregunta se compara siempre igual, sin
+una bandera aparte que invierta el significado del `0`. Los lenguajes con
+booleano nativo (`Boolean`, `bool`, `true/false`, `T/nil`) usan ese booleano;
+COBOL y Assembly, que no lo tienen, usan el par `0`/`-1` y reservan `NULL` o
+`ABSENT` para la ausencia de enlace.
+
+**EN:** **Module result code:** `0` = success or “yes”, `-1` = failure or
+“no”, for every operation and for questions too (`contains`, `has_edge`,
+`is_empty`): the same question always compares the same way, with no
+separate flag that flips what `0` means. Languages with a native boolean
+(`Boolean`, `bool`, `true/false`, `T/nil`) use it; COBOL and Assembly, which
+lack one, use the `0`/`-1` pair and keep `NULL` or `ABSENT` for an absent link.
 
 ---
 

@@ -101,7 +101,7 @@
 | 2 | Pruebas en verde | ✅ obligatorio |
 | 3 | Sin `unsafe`/`unwrap` que rompa el contrato | ✅ obligatorio |
 | 4 | Constructor **NO** idiomático (ej. `init()` como método) | ⚠️ típico |
-| 5 | Indicador de fallo **NO** idiomático: `-1` donde el contrato pide un opcional, el tipo no lo representa o colisiona con un resultado válido (`DEVIATION_POLICY` C2). Un centinela `-1` documentado en un lenguaje **sin** tipo de ausencia no baja el nivel | ⚠️ típico |
+| 5 | Indicador de fallo **NO** idiomático: `-1` cuando el contrato no lo exige, el tipo no lo representa o colisiona con un resultado válido. Un centinela `-1` exigido por el contrato, representable y documentado en el README **no** baja el nivel (`DEVIATION_POLICY` C2), tenga o no el lenguaje un tipo de ausencia | ⚠️ típico |
 | 6 | Varios nombres traducidos literalmente (`get_value`, `set_next`) | ⚠️ típico |
 | 7 | Desviaciones **documentadas** en README | ⚠️ obligatorio |
 | 8 | Existe una nota de "migración pendiente" o similar | ⚠️ recomendado |
@@ -110,7 +110,7 @@
 
 **EN:** The boundary with `mostly-idiomatic` is: the deviation affects **structure (constructor or failure)**, not just the name.
 
-**Ejemplos esperados / Expected examples:** El estado actual (octubre 2026) de varios lenguajes que revisamos — D con `init()`, Kotlin con `get_value`, Dart con `bool?` en `delete`, Go con `-1` en `Pop`, Vala con `get_value()`, Haxe con `init()`, ReScript con `Js.Nullable`, Rust con `*mut Node`.
+**Ejemplos esperados / Expected examples:** El estado actual (octubre 2026) de varios lenguajes que revisamos — D con `init()`, Kotlin con `get_value`, Dart con `bool?` en `delete`, Vala con `get_value()`, Haxe con `init()`, ReScript con `Js.Nullable`, Rust con `*mut Node`. Go **no** figura aquí por `-1` en `Pop`: cuando el contrato lo exige y queda documentado, es C2 y no baja el nivel.
 
 ---
 
@@ -220,9 +220,9 @@ text
 >
 > **EN:** **Technical** scope: the scale measures how idiomatic an implementation is and records the deviation when it is not. It defines **2 principal axes** —idiomatic target and module fidelity— and **9 detail axes** feeding them. Signed by **Software Architect** (support: *SDET*). Editorial tracking (changelog, closure records) is out of scope; see [`AGENT_ROLES.md`](../AGENT_ROLES.md).
 
-**ES:** El resultado se escribe en `docs/ruleset/data/idiomaticity_state.tsv` (**ya creado**, con la auditoría del módulo `data_structures_basics`). La columna `module_fidelity` es el eje principal 2; el eje principal 1 (`idiomatic_target`) es `pendiente` en los 50 y se documenta arriba. Los 50 lenguajes se agrupan en las cuatro variantes de [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 35 · V2 14 · V4 1 = 50, con V3 como clase transversal— y el nivel se evalúa por (lenguaje, módulo), no por lenguaje. Los casos ya medidos que alimentan esta escala están en la sección *Casos medidos en la homologación* de ese mismo documento.
+**ES:** El resultado se escribe en `docs/ruleset/data/idiomaticity_state.tsv` (**ya creado**, con la auditoría del módulo `data_structures_basics`). La columna `module_fidelity` es el eje principal 2; el eje principal 1 (`idiomatic_target`) es `pendiente` en los 50 y se documenta arriba. Los 50 lenguajes se agrupan en las cuatro variantes de [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) — V1 36 · V2 13 · V4 1 = 50, con V3 como clase transversal— y el nivel se evalúa por (lenguaje, módulo), no por lenguaje. Los casos ya medidos que alimentan esta escala están en la sección *Casos medidos en la homologación* de ese mismo documento.
 
-**EN:** The result is written to `docs/ruleset/data/idiomaticity_state.tsv` (**already created**, with the `data_structures_basics` audit). The `module_fidelity` column is principal axis 2; principal axis 1 (`idiomatic_target`) is `pendiente` for all 50 and is documented above. The 50 languages are grouped into the four variants of [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 35 · V2 14 · V4 1 = 50, with V3 as a cross-cutting class— and the level is evaluated per (language, module), not per language. The cases already measured that feed this scale are in the *Cases measured during homologation* section of that same document.
+**EN:** The result is written to `docs/ruleset/data/idiomaticity_state.tsv` (**already created**, with the `data_structures_basics` audit). The `module_fidelity` column is principal axis 2; principal axis 1 (`idiomatic_target`) is `pendiente` for all 50 and is documented above. The 50 languages are grouped into the four variants of [`PSEUDOCODE_CONVENTION.md`](PSEUDOCODE_CONVENTION.md) —V1 36 · V2 13 · V4 1 = 50, with V3 as a cross-cutting class— and the level is evaluated per (language, module), not per language. The cases already measured that feed this scale are in the *Cases measured during homologation* section of that same document.
 
 | `language` | `module` | `idiomatic_target` | `module_fidelity` | `blocking_axis` | `notes` | `commit` | `last_updated` |
 |-----------|----------|:------------------:|:-----------------:|:---------------:|---------|----------|----------------|
@@ -336,4 +336,4 @@ text
 
 ---
 
-*Última actualización / Last update: 2026-10-12*
+*Última actualización / Last update: 2026-11-02*
