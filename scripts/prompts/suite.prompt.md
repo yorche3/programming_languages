@@ -1,7 +1,7 @@
 ---
 name: suite
 step: 4c
-model: gpt-6.1-sol
+profile: deep
 description: Escribe la suite de pruebas unitarias del módulo desde su especificación, sobre el contrato ya declarado
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/ruleset/PSEUDOCODE_CONVENTION.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/data/canonical_names.tsv, docs/ruleset/data/language_characteristics.tsv, scripts/data/languages.tsv
 mode: agent

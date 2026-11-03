@@ -12,10 +12,11 @@ _glot_complete() {
     local cmd="${COMP_WORDS[1]}"
     local glot="${GLOT_CMD:-glot}"
     local words=""
-    local keys="lang phase module branch spec repo target cause antigravity-model copilot-model"
+    local keys="lang phase module branch spec repo target cause antigravity-model copilot-model open-router-model"
     local verbs="version help doctor greet langs modules models delegates progress completion use new scaffold save test verify evidence close validate prompt ask status pointer finish clean install uninstall set get unset list path"
     local i=""
     local positional=0
+    local route=copilot
 
     if ((COMP_CWORD == 1)); then
         COMPREPLY=($(compgen -W "$verbs -q --quiet -n --dry-run -h --help --version" -- "$cur"))
@@ -36,7 +37,7 @@ _glot_complete() {
         modules | progress)
             words="$("$glot" modules 2>/dev/null | cut -f2 | LC_ALL=C sort -u)"
             ;;
-        test | verify | evidence | close | validate | finish | scaffold)
+        test | verify | evidence | close | finish | scaffold)
             if ((COMP_CWORD == 2)); then
                 words="$("$glot" langs 2>/dev/null | cut -f1)"
             else
@@ -44,7 +45,7 @@ _glot_complete() {
             fi
             ;;
         delegates)
-            words="agy copilot"
+            words="agy copilot open-router"
             ;;
         save)
             if ((COMP_CWORD == 2)); then
@@ -64,26 +65,43 @@ _glot_complete() {
                 words="$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"
             fi
             ;;
-        ask)
+        ask | validate)
             # `ask` añade el delegado (v1.4.2): la opción y sus dos valores se completan, y el
             # posicional se cuenta **saltando** el valor de `--delegate`, para que el encargo
             # siga completándose aunque la opción vaya delante.
             if [[ "$cur" == --delegate=* ]]; then
-                COMPREPLY=($(compgen -W "--delegate=copilot --delegate=antigravity" -- "$cur"))
+                COMPREPLY=($(compgen -W "--delegate=copilot --delegate=antigravity --delegate=open-router" -- "$cur"))
                 return 0
             fi
             if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "--delegate" ]]; then
-                COMPREPLY=($(compgen -W "copilot antigravity" -- "$cur"))
+                COMPREPLY=($(compgen -W "copilot antigravity open-router" -- "$cur"))
+                return 0
+            fi
+            if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "--effort" ]]; then
+                COMPREPLY=($(compgen -W "low medium high" -- "$cur"))
+                return 0
+            fi
+            if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "--model" ]]; then
+                for ((i = 2; i < COMP_CWORD; i++)); do
+                    case "${COMP_WORDS[i]}" in
+                        --delegate=*) route="${COMP_WORDS[i]#*=}" ;;
+                        --delegate) route="${COMP_WORDS[i + 1]}" ;;
+                    esac
+                done
+                [[ "$route" == cop ]] && route=copilot
+                words="$("$glot" delegates "$route" 2>/dev/null | cut -f2)"
+                COMPREPLY=($(compgen -W "$words" -- "$cur"))
                 return 0
             fi
             for ((i = 2; i < COMP_CWORD; i++)); do
-                if [[ "${COMP_WORDS[i]}" != -* && "${COMP_WORDS[i - 1]}" != "--delegate" ]]; then
+                if [[ "${COMP_WORDS[i]}" != -* && "${COMP_WORDS[i - 1]}" != "--delegate" && "${COMP_WORDS[i - 1]}" != "--model" && "${COMP_WORDS[i - 1]}" != "--effort" ]]; then
                     positional=$((positional + 1))
                 fi
             done
+            [[ "$cmd" == validate ]] && positional=$((positional + 1))
             case "$positional" in
-                0) words="$("$glot" prompt 2>/dev/null | cut -f1 | grep -v -e '^$') --delegate" ;;
-                1) words="$("$glot" langs 2>/dev/null | cut -f1)" ;;
+                0) words="$("$glot" prompt 2>/dev/null | cut -f1 | grep -v -e '^$') --delegate --model --effort" ;;
+                1) words="$("$glot" langs 2>/dev/null | cut -f1) --delegate --model --effort" ;;
                 *) words="$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')" ;;
             esac
             ;;
@@ -99,6 +117,8 @@ _glot_complete() {
                 words="$("$glot" delegates agy 2>/dev/null | cut -f2)"
             elif [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "copilot-model" ]]; then
                 words="$("$glot" delegates copilot 2>/dev/null | cut -f2)"
+            elif [[ "${COMP_WORDS[COMP_CWORD - 1]}" == "open-router-model" ]]; then
+                words="$("$glot" delegates open-router 2>/dev/null | cut -f2)"
             fi
             ;;
         get | unset)

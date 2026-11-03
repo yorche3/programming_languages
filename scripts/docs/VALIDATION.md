@@ -8,6 +8,88 @@
 
 ---
 
+## Configuración vigente v2.1.0-dev / Current v2.1.0-dev configuration
+
+**ES:** Esta sección reemplaza la selección de modelos y BYOK de v2.0.3
+documentada más abajo como referencia histórica. No certifica inferencia ni
+disponibilidad por cuenta; no se han usado cuotas o credenciales del autor.
+
+**EN:** This section supersedes the historical v2.0.3 model/BYOK configuration
+below. It does not certify inference or account availability; no author quota
+or credentials have been used.
+
+| Ruta / Route | Base / Default | Overrides autorizados / Allowed overrides |
+|---|---|---|
+| `antigravity` (`agy`) | Flash 3.8 para economy y contract/build | Argon solo docs; bloquea si no aparece en `agy models`. Sin Claude no-thinking verificado, deep no tiene asociación |
+| `copilot` | Flash 3.8 economy; Terra 5.6 balanced; Sonnet 5.5 deep | Argon docs; Sol 6.1/Kimi K3 contract/build; Opus 5.5 suite/implement/fix/refactor |
+| `open-router` | Qwen 3.7 Plus economy | Qwen Max/Kimi economy; Argon docs. Sin asociación balanced/deep |
+
+**ES:** Las plantillas declaran `profile:`, no un id. Las fuentes de selección
+son `--model` > entorno de la ruta > estado de la ruta > base. Los flags
+`--effort` ganan a `GLOT_EFFORT` y al perfil. Todas las fuentes pasan la misma
+autorización de [`model_options.tsv`](../data/model_options.tsv); no hay
+fallback. `GLOT_MODEL_AGY`, `GLOT_MODEL_COP` (`GLOT_MODEL` como alias nativo)
+y `GLOT_MODEL_OR` son independientes. Las preferencias persisten después de
+`finish`. `set copilot-model` guarda el id nativo resuelto: los antiguos alias
+ambiguos requieren volver a elegir ruta y ejecutar `set`; no se migran solos.
+
+**EN:** Templates declare profiles rather than model IDs. Model precedence is
+flag > route environment > route state > default; effort precedence is flag >
+environment > profile. Every source goes through the same request policy.
+Preferences survive `finish`; ambiguous old native/BYOK aliases block until
+explicitly reset. There is no automatic migration or fallback.
+
+```bash
+export GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools {reasoning_args}'
+export GLOT_DELEGATE_AGY='agy --model {model} -p "$(cat)" --add-dir {root}'
+# Solo el autor ejecuta estos verbos / Only the author runs these verbs:
+glot set copilot-model terra
+glot set open-router-model default
+glot ask --delegate copilot contract_stub ada algorithms/data_structures_basics
+glot ask --delegate open-router --model argon docs-module ada algorithms/data_structures_basics
+glot validate --delegate open-router --model qwen ada algorithms/data_structures_basics
+```
+
+**ES:** OpenRouter comparte `GLOT_DELEGATE_COP`, pero solo la ruta explícita
+configura endpoint `https://openrouter.ai/api/v1`, tipo `openai`, wire API
+`completions`, transporte `http` e identidad/wire model reales. Nunca disfraza
+Qwen como GPT/Claude. Un endpoint distinto o ajustes heredados de protocolo,
+identidad, tokens o archivo de proveedores bloquean: retirarlos del entorno de
+esa invocación, no modificar la configuración privada. Las credenciales son
+externas (`COPILOT_PROVIDER_API_KEY`, `COPILOT_PROVIDER_BEARER_TOKEN` o
+`COPILOT_PROVIDER_API_KEY_COMMAND`); glot no las guarda ni imprime.
+
+**EN:** The explicit OpenRouter route configures its endpoint, OpenAI
+completion protocol, HTTP transport and real internal/wire identity.
+Conflicting inherited provider settings block rather than silently changing
+providers. Credentials remain external and are never stored or printed.
+
+**ES:** Los adaptadores BYOK declaran límites conservadores de 131072 tokens
+de prompt y 32768 de salida, no la ventana completa del proveedor. No aumentan
+contexto ni prometen acceso a 1M mediante Copilot. Qwen Plus no tiene
+`reasoning_effort` verificado: se omite con `{reasoning_args}` y cualquier
+effort explícito bloquea. Qwen Max/Kimi/Argon admiten low/medium/high según
+metadatos públicos. AGY ajusta el sufijo del id al esfuerzo y comprueba el
+catálogo local, sin realizar inferencia. `validate` conserva `--deny-tool write`
+en el adaptador por defecto; no admite AGY porque no se ha verificado una
+denegación equivalente. Un `GLOT_VALIDATOR` personalizado es responsabilidad
+del autor. Las órdenes no se imprimen en diagnósticos ni evidencia; el registro
+identifica ruta/modelo. Dry-run muestra la orden y no debe contener secretos.
+
+**EN:** Conservative BYOK input/output limits do not enlarge context or
+guarantee 1M access through Copilot. Unsupported explicit effort blocks.
+AGY effort is encoded in a locally verified model suffix. Default validation
+remains read-only on Copilot/OpenRouter; AGY validation has no verified
+equivalent and is blocked. Custom validators remain author-owned.
+Diagnostics/evidence identify the route/model, not private commands.
+
+**ES / EN:** Los caps de 30/60/90 AI credits solo se aplican al validador nativo.
+No son límites de dinero OpenRouter ni cuotas AGY; las órdenes personalizadas
+de `ask` deciden sus caps. / Credit caps apply only to default native validation,
+not OpenRouter money, AGY quotas or author-owned `ask` commands.
+
+## Referencia histórica hasta v2.0.3 / Historical reference through v2.0.3
+
 ## 🔧 Invocación verificada / Verified invocation
 
 ```bash

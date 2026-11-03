@@ -271,19 +271,28 @@ regenerating the suite; after repair, rerun `glot test`. `4e correct` can repair
 the runner or build artefact when that is the declared target. Documenting
 grouping does not permit out-of-role redesign; validation does not permit writing.
 
-| Encargo previsto | Plantilla versionada | Paso | Modelo (v2.0.0) |
+| Encargo previsto | Plantilla versionada | Paso | Perfil (v2.1.0-dev) |
 |------------------|----------------------|:----:|-----------------|
-| `scaffold` | [`scaffold.prompt.md`](../../scripts/prompts/scaffold.prompt.md) | 4a | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
-| `contract_stub` | [`contract_stub.prompt.md`](../../scripts/prompts/contract_stub.prompt.md) | 4b | `gpt-6.1-sol` |
-| `suite` | [`suite.prompt.md`](../../scripts/prompts/suite.prompt.md) | 4c | `gpt-6.1-sol` |
-| `build` | [`build.prompt.md`](../../scripts/prompts/build.prompt.md) | 4d | `gpt-6.1-sol` |
-| `correct` | [`correct.prompt.md`](../../scripts/prompts/correct.prompt.md) | 4e | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
-| `implement` | [`implement.prompt.md`](../../scripts/prompts/implement.prompt.md) | 5 | `claude-sonnet-5.5` |
-| `fix` | [`fix.prompt.md`](../../scripts/prompts/fix.prompt.md) | 5b | `claude-sonnet-5.5` |
-| `refactor` | [`refactor.prompt.md`](../../scripts/prompts/refactor.prompt.md) | 5c | `claude-sonnet-5.5` |
-| `validate` | [`validate.prompt.md`](../../scripts/prompts/validate.prompt.md) | 6 | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
-| `docs-module` | [`docs-module.prompt.md`](../../scripts/prompts/docs-module.prompt.md) | 7 | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
-| `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 | `qwen/qwen3.7-plus` (OpenRouter, `low`) |
+| `scaffold` | [`scaffold.prompt.md`](../../scripts/prompts/scaffold.prompt.md) | 4a | `economy` |
+| `contract_stub` | [`contract_stub.prompt.md`](../../scripts/prompts/contract_stub.prompt.md) | 4b | `balanced` |
+| `suite` | [`suite.prompt.md`](../../scripts/prompts/suite.prompt.md) | 4c | `deep` |
+| `build` | [`build.prompt.md`](../../scripts/prompts/build.prompt.md) | 4d | `balanced` |
+| `correct` | [`correct.prompt.md`](../../scripts/prompts/correct.prompt.md) | 4e | `economy` |
+| `implement` | [`implement.prompt.md`](../../scripts/prompts/implement.prompt.md) | 5 | `deep` |
+| `fix` | [`fix.prompt.md`](../../scripts/prompts/fix.prompt.md) | 5b | `deep` |
+| `refactor` | [`refactor.prompt.md`](../../scripts/prompts/refactor.prompt.md) | 5c | `deep` |
+| `validate` | [`validate.prompt.md`](../../scripts/prompts/validate.prompt.md) | 6 | `economy` |
+| `docs-module` | [`docs-module.prompt.md`](../../scripts/prompts/docs-module.prompt.md) | 7 | `economy` |
+| `docs-language` | [`docs-language.prompt.md`](../../scripts/prompts/docs-language.prompt.md) | 8 | `economy` |
+
+**ES:** Los ids y overrides de las tres rutas están en
+[`VALIDATION.md`](VALIDATION.md). `profile:` es metadato propio de glot,
+no un selector de modelo del editor. Los párrafos siguientes conservan el
+historial de la selección hasta v2.0.3, reemplazado por esta configuración.
+
+**EN:** Current route IDs/overrides are documented in the validation guide.
+`profile:` is glot metadata, not an editor model selector. The following
+paragraphs preserve the superseded model-selection history through v2.0.3.
 
 **ES:** Desde la v0.11.0 cada plantilla **declara su modelo** en el frontmatter (`model:`, con el id real que ofrece Copilot) y el catálogo [`data/models.tsv`](../../scripts/data/models.tsv) fija el esfuerzo, el tope de créditos y el tier de auto de ese modelo. El **modelo es la clave del perfil**: no hay una clave `profile:` que pueda derivar. Las plantillas siguen siendo **genéricas**: el modelo es política de coste, no dato de un módulo. Desde la **v1.6.0** el catálogo añade la **séptima columna** con el modelo del **delegado de AGY** —sus ids no son los de Copilot—, así que el modelo se elige **por rol** y viaja también con `--delegate antigravity`; `--model`/`GLOT_MODEL` (`_COP`/`_AGY`) y `--effort`/`GLOT_EFFORT` lo cambian **para una corrida** sin tocar el dato (los perfiles: `economy` → `gemini-3.8-flash-low`, `balanced` → `gemini-3.8-flash-low`, `deep` → `claude-sonnet-5-5-low`). Desde la v1.0.0 declaran además sus **fuentes** (`sources:`, rutas relativas a la raíz del monorepo, que la cabecera del encargo trae como `root`) y `glot prompt` **avisa** por stderr de las que falten: el encargo dice qué documentos necesita como dato comprobable, en vez de nombrar el monorepo en prosa.
 

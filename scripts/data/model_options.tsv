@@ -1,0 +1,14 @@
+route	model	requests	efforts	max_prompt_tokens	max_output_tokens
+agy	gemini-3.8-flash-low	scaffold,correct,validate,docs-module,docs-language,contract_stub,build	low,medium,high	-	-
+agy	gemini-4-argon-low	docs-module,docs-language	low,medium,high	-	-
+copilot	gemini-3.8-flash	scaffold,correct,validate,docs-module,docs-language	low,medium,high	-	-
+copilot	gemini-4-argon	docs-module,docs-language	low,medium,high	-	-
+copilot	gpt-5.6-terra	contract_stub,build	low,medium,high	-	-
+copilot	gpt-6.1-sol	contract_stub,build	low,medium,high	-	-
+copilot	kimi-k3	contract_stub,build	low,medium,high	-	-
+copilot	claude-sonnet-5.5	suite,implement,fix,refactor	low,medium,high	-	-
+copilot	claude-opus-5.5	suite,implement,fix,refactor	low,medium,high	-	-
+open-router	qwen/qwen3.7-plus	scaffold,correct,validate,docs-module,docs-language	-	131072	32768
+open-router	google/gemini-4-argon	docs-module,docs-language	low,medium,high	131072	32768
+open-router	qwen/qwen3.8-max-0902	scaffold,correct,validate,docs-module,docs-language	low,medium,high	131072	32768
+open-router	moonshotai/kimi-k3	scaffold,correct,validate,docs-module,docs-language	low,medium,high	131072	32768

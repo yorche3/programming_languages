@@ -1,5 +1,41 @@
 # 🗂️ Catálogo de datos / Data catalogue
 
+**ES:** En **v2.1.0-dev**, la configuración vigente de modelos está descrita en
+[`VALIDATION.md`](../docs/VALIDATION.md). `models.tsv` conserva siete columnas,
+pero la clave ahora es el perfil (`profile:` en la plantilla): Flash nativo
+economy, Terra 5.6 balanced (contract/build), Sonnet 5.5 deep (incluida suite).
+AGY deep es `-`, sin asociación no-thinking verificada.
+`delegates.tsv` separa `agy`, `copilot` nativo y `open-router`; no infiere ruta
+por la barra del id. Las secciones de modelos más abajo describen el historial
+hasta v2.0.3, no la política vigente.
+
+**EN:** Current model routing is documented in
+[`VALIDATION.md`](../docs/VALIDATION.md). The seven-column profile catalogue
+is now keyed by `profile:`. Delegate aliases distinguish AGY, native Copilot
+and OpenRouter explicitly. The later model sections are historical v2.0.3
+reference, not the current policy.
+
+### `model_options.tsv`: adaptadores autorizados / authorized adapters
+
+**ES:** Tabla con cabecera, separada por tabuladores. Una fila por ruta/modelo,
+sin credenciales ni precios. Se instala junto con los demás datos.
+
+**EN:** Headered TSV, one row per route/model, containing no credentials or
+prices; installed with the other runtime data.
+
+| Columna / Column | Contrato / Contract |
+|---|---|
+| `route` | `agy`, `copilot`, `open-router` |
+| `model` | Id real del catálogo de alias |
+| `requests` | Lista de encargos autorizados, separada por coma |
+| `efforts` | Niveles verificados separados por coma; `-` omite control y rechaza effort explícito |
+| `max_prompt_tokens` | Límite de entrada BYOK; `-` en rutas no BYOK |
+| `max_output_tokens` | Límite de salida BYOK; no amplía contexto |
+
+**ES / EN:** Los ids pendientes (Argon AGY) permanecen declarados y bloquean
+si el catálogo local no los ofrece; no se sustituyen. / Pending IDs remain
+declared and block when absent from the local catalogue, without substitution.
+
 **ES:** `languages.tsv` es la fuente **máquina** de los comandos e inicializadores
 por lenguaje que consume `glot`: `langs` y `test`/`verify` (v0.7.0) hoy, y `new`
 (v0.9.0). `commits.tsv` es la tabla de mensajes de commit que consume `save`

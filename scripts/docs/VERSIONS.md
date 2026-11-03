@@ -6,13 +6,13 @@
 
 **ES:** v2.1.0 está en desarrollo según [`ROADMAP.md`](ROADMAP.md).
 El script se identifica como **2.1.0-dev**, no como una entrega cerrada.
-v2.0.3 se archivó antes de editar código; la separación de rutas/modelos y la
-revisión restante de scaffold siguen pendientes.
+v2.0.3 se archivó antes de editar código; la separación de rutas/modelos está
+verificada en el harness. La revisión restante de scaffold sigue pendiente.
 
 **EN:** v2.1.0 is in development according to [`ROADMAP.md`](ROADMAP.md).
 The script identifies as **2.1.0-dev**, not a completed release.
-v2.0.3 was archived before code edits; route/model separation and the remaining
-scaffold review are pending.
+v2.0.3 was archived before code edits; route/model separation is verified by
+the harness. The remaining scaffold review is pending.
 
 | Versión | Fecha | Archivo | Añade | Estado |
 |---------|-------|---------|-------|:------:|
@@ -55,6 +55,48 @@ scaffold review are pending.
 | 2.1.0-dev | 2026-11-02 | [`glot.sh`](../glot.sh) | Primer bloque: scaffold seguro de Ballerina, layout `lib/` de Perl y punto de entrada Cargo de Rust / First block: safe Ballerina scaffold, Perl library layout and preserved Rust entry point | En desarrollo; no cerrada / In development; not closed |
 
 ---
+
+## 2.1.0-dev — 2026-11-02 (rutas y perfiles / routes and profiles)
+
+**ES:** Tres rutas explícitas, perfiles independientes del modelo, Sonnet para
+suite e implementación, Terra 5.6 para contrato/build, Flash conservado en AGY
+y como base nativa. OpenRouter conserva Qwen y sustituye su alternativa Flash
+por Argon. Overrides autorizados por ruta/encargo y esfuerzos verificados;
+Qwen Plus omite effort y rechaza su selección explícita. AGY deep no tiene
+modelo no-thinking verificado y Argon pendiente permanece declarado.
+
+**EN:** Explicit AGY/native Copilot/OpenRouter routes, profile metadata and
+request-restricted adapters. Defaults and overrides match the agreed model
+split; unavailable AGY bindings block instead of silently falling back.
+
+**ES / EN:** `ask` y `validate` comparten resolutor, preferencias independientes
+y aislamiento del entorno. El validador por defecto conserva solo lectura;
+AI credits no se aplican a BYOK. Ayuda, completado bash/zsh, instalación,
+catálogos y doctor acompañan el cambio. / Shared resolution, independent
+preferences, provider isolation and read-only default validation are wired
+through CLI surfaces.
+
+Validación ejecutada / Executed validation:
+
+```text
+bash -n scripts/glot.sh scripts/completions/glot.bash scripts/tests/glot_test.sh
+zsh -n scripts/completions/glot.zsh
+env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.bareRepository GIT_CONFIG_VALUE_0=all ./scripts/tests/glot_test.sh
+glot tests: 1282 passed, 0 failed
+bash docs/tests/docs_check.sh
+docs checks: 25 passed, 0 failed
+git diff --check
+```
+
+**ES:** También se ejecutó el completado zsh con funciones de presentación de
+prueba: validate ofrece lenguaje, ask cuenta correctamente los valores de
+opción y OpenRouter ofrece sus cuatro alias. No se ejecutó inferencia, no se
+consultaron credenciales ni se modificaron submódulos. **No cierra la versión**:
+la revisión y corrección restante de los 47 scaffolds sigue pendiente.
+
+**EN:** Zsh completion was also exercised with presentation stubs. No paid
+inference, credential access or submodule changes occurred. **The release
+remains open** pending the remaining 47-language scaffold review/corrections.
 
 ## 2.1.0-dev — 2026-11-02 (primer bloque / first block)
 

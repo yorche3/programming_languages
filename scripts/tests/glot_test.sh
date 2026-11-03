@@ -665,8 +665,8 @@ assert_eq 'models: código' '0' "$rc_last"
 assert_eq 'models: el catálogo tal cual' \
     "$(awk 'NF && $1 !~ /^#/' "$TESTS_DIR/../data/models.tsv")" "$out"
 assert_eq 'models: siete columnas por línea' '' "$(printf '%s\n' "$out" | awk -F'\t' 'NF!=7')"
-assert_eq 'models: ningún perfil sin modelo de AGY' '' \
-    "$(printf '%s\n' "$out" | awk -F'\t' '$7=="" || $7=="-"')"
+assert_eq 'models: deep AGY sin modelo disponible no inventa uno' '-' \
+    "$(printf '%s\n' "$out" | awk -F'\t' '$1=="deep" {print $7}')"
 assert_eq 'models: ningún encargo en dos perfiles' '0' \
     "$(printf '%s\n' "$out" | cut -f6 | tr ',' '\n' | sed 's/^ *//' | grep -v '^$' | LC_ALL=C sort | uniq -d | wc -l | tr -d ' ')"
 
@@ -689,8 +689,9 @@ assert_eq 'delegates: tres columnas por línea' '' "$(printf '%s\n' "$out" | awk
 assert_eq 'delegates: ningún alias repetido dentro de un delegado' '0' \
     "$(printf '%s\n' "$out" | awk -F'\t' '{print $1"/"$2}' | LC_ALL=C sort | uniq -d | wc -l | tr -d ' ')"
 # v1.7.2 retiró aider y la v1.7.3 añade las filas de Copilot (los modelos de OpenRouter)
-assert_eq 'delegates: los dos delegados del catálogo' 'agy
-copilot' \
+assert_eq 'delegates: las tres rutas del catálogo' 'agy
+copilot
+open-router' \
     "$(printf '%s\n' "$out" | cut -f1 | LC_ALL=C sort -u)"
 
 glot_run delegates agy
@@ -702,11 +703,11 @@ assert_eq 'delegates agy: la primera columna, el delegado' 'agy' "$(printf '%s\n
 # que distingue el modelo que viaja al proveedor propio del que viaja a GitHub
 glot_run delegates copilot
 assert_eq 'delegates copilot: código' '0' "$rc_last"
-assert_eq 'delegates copilot: sus cuatro filas' '4' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+assert_eq 'delegates copilot: sus ocho filas' '8' "$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
 assert_eq 'delegates copilot: la primera columna, el delegado' 'copilot' "$(printf '%s\n' "$out" | cut -f1 | LC_ALL=C sort -u)"
-assert_eq 'delegates copilot: todos sus modelos son ids de OpenRouter' '4' \
+assert_eq 'delegates copilot: no mezcla modelos de OpenRouter' '0' \
     "$(printf '%s\n' "$out" | awk -F'\t' '$3 ~ /\//' | wc -l | tr -d ' ')"
-assert_eq 'delegates copilot: el alias `default` es el modelo de la documentación' 'qwen/qwen3.7-plus' \
+assert_eq 'delegates copilot: el alias `default` es el modelo de la documentación' 'gemini-3.8-flash' \
     "$(printf '%s\n' "$out" | awk -F'\t' '$2=="default" {print $3}')"
 
 glot_run delegates nope
@@ -935,7 +936,7 @@ assert_contains 'prompt: scaffold en el paso 4' "$(printf 'scaffold\t4')" "$out"
 assert_contains 'prompt: contract_stub en el paso 4b' "$(printf 'contract_stub\t4b')" "$out"
 assert_contains 'prompt: suite después del contrato' "$(printf 'suite\t4c')" "$out"
 assert_contains 'prompt: docs-language en el paso 8' "$(printf 'docs-language\t8')" "$out"
-assert_contains 'prompt: el modelo sale del catálogo' "$(printf 'validate\t6\tqwen/qwen3.7-plus')" "$out"
+assert_contains 'prompt: el perfil sale de la plantilla' "$(printf 'validate\t6\teconomy')" "$out"
 
 # el encargo lleva la cabecera con el estado del sprint y la plantilla expandida
 glot_run prompt scaffold php algorithms/naive_sort
@@ -1047,7 +1048,7 @@ assert_contains 'ask --delegate aider: lista los válidos' 'copilot, antigravity
 # la ayuda de `ask` trae las tres líneas, que es donde se buscan
 glot_run help ask
 assert_contains 'help ask: trae la línea de Copilot' "export GLOT_DELEGATE_COP='copilot" "$out"
-assert_contains 'help ask: la línea de Copilot lleva el esfuerzo del perfil' '--reasoning-effort {effort}' "$out"
+assert_contains 'help ask: la línea de Copilot lleva el adaptador de esfuerzo' '{reasoning_args}' "$out"
 assert_contains 'help ask: trae la línea de Antigravity' "export GLOT_DELEGATE_AGY='agy" "$out"
 assert_eq 'help ask: ya no trae la línea de aider (v1.7.2)' 'no' \
     "$([[ "$out" == *GLOT_DELEGATE_AIDER* ]] && echo si || echo no)"
@@ -1070,7 +1071,11 @@ for req in scaffold contract_stub suite build correct implement fix refactor val
     glot_run_delegates 'cat' '' ask --delegate copilot "$req" php algorithms/naive_sort
     assert_eq "política $req: Copilot recibe encargo íntegro" "$expected_request" "$out"
     glot_run_delegates '' 'cat' ask --delegate antigravity "$req" php algorithms/naive_sort
-    assert_eq "política $req: Antigravity recibe encargo íntegro" "$expected_request" "$out"
+    case "$req" in
+        suite|implement|fix|refactor)
+            assert_eq "política $req: AGY sin binding bloquea" '1' "$rc_last" ;;
+        *) assert_eq "política $req: Antigravity recibe encargo íntegro" "$expected_request" "$out" ;;
+    esac
 done
 
 glot_run_delegate 'false' ask implement php algorithms/naive_sort
@@ -1088,19 +1093,19 @@ assert_contains 'ask -n: imprime el plan sin enviar' 'cat >/dev/null' "$out"
 # entera (su modelo sale del perfil).
 AGY_LINE='agy --model {model} -p "$(cat)" --add-dir {root}'
 STATE_MODEL="$WORK_DIR/state-model"
-GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set antigravity-model sonnet >/dev/null 2>&1
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set antigravity-model gemini >/dev/null 2>&1
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_AGY="$AGY_LINE" \
-    "$GLOT_SH" ask -n --delegate antigravity implement php algorithms/naive_sort 2>/dev/null || true)"
-assert_contains 'set antigravity-model: el alias llega resuelto a la orden de AGY' 'agy --model claude-sonnet-5-5-low' "$out"
-out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_AGY="$AGY_LINE" GLOT_MODEL_AGY=gemini-3.7-flash-high \
-    "$GLOT_SH" ask -n --delegate antigravity implement php algorithms/naive_sort 2>/dev/null || true)"
-assert_contains 'set antigravity-model: el entorno del delegado gana al estado' 'agy --model gemini-3.7-flash-high' "$out"
+    "$GLOT_SH" ask -n --delegate antigravity docs-module php algorithms/naive_sort 2>/dev/null || true)"
+assert_contains 'set antigravity-model: el alias llega resuelto a la orden de AGY' 'agy --model gemini-3.8-flash-low' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_AGY="$AGY_LINE" GLOT_MODEL_AGY=argon \
+    "$GLOT_SH" ask -n --delegate antigravity implement php algorithms/naive_sort 2>"$WORK_DIR/stderr" || true)"
+assert_contains 'AGY: entorno no elude categoría' 'outside category' "$(cat -- "$WORK_DIR/stderr")"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_AGY="$AGY_LINE" \
     GLOT_DELEGATE_COP='copilot -C {module_dir} -p "$(cat)" --add-dir {root}' \
     "$GLOT_SH" ask -n --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
 assert_contains 'set antigravity-model: el de Copilot sigue saliendo del perfil' 'COPILOT_MODEL=claude-sonnet-5' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" doctor 2>/dev/null || true)"
-assert_contains 'set antigravity-model: doctor informa del alias fijado' 'antigravity_model_state: sonnet' "$out"
+assert_contains 'set antigravity-model: doctor informa del alias fijado' 'antigravity_model_state: gemini' "$out"
 
 # v1.7.3: el delegado de Copilot tiene su propia clave, `copilot-model`, y sus alias son ids de
 # **OpenRouter**: es la vía de los encargos que no son de contrato, suite ni implementación
@@ -1110,35 +1115,37 @@ COP_LINE='printf "P=%s|M=%s\n" "${COPILOT_PROVIDER_BASE_URL:-vacio}" "$COPILOT_M
 GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model default >/dev/null 2>&1
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
     "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
-assert_eq 'copilot-model: el alias `default` resuelve al modelo de OpenRouter' 'P=https://openrouter.ai/api/v1|M=qwen/qwen3.7-plus' "$out"
+assert_eq 'copilot-model: default es Flash nativo' 'P=vacio|M=gemini-3.8-flash' "$out"
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" unset copilot-model >/dev/null 2>&1
 # el alias no toca lo que ya estaba: terra (contrato y suite) ni sonnet (implementación)
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
     "$GLOT_SH" ask --delegate copilot contract_stub php algorithms/naive_sort 2>/dev/null || true)"
-assert_eq 'copilot-model: no cambia el modelo del contrato (balanced)' 'P=vacio|M=gpt-6.1-sol' "$out"
+assert_eq 'copilot-model: contrato usa Terra disponible' 'P=vacio|M=gpt-5.6-terra' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
     "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
 assert_eq 'copilot-model: no cambia el modelo de la implementación (deep)' 'P=vacio|M=claude-sonnet-5.5' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test COPILOT_PROVIDER_BASE_URL=https://otro.example/v1 \
     "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
-assert_eq 'copilot-model: el endpoint del autor manda sobre el de OpenRouter' 'P=https://otro.example/v1|M=qwen/qwen3.7-plus' "$out"
+assert_eq 'copilot-model: ruta nativa no hereda endpoint externo' 'P=vacio|M=gemini-3.8-flash' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
     env -u COPILOT_PROVIDER_API_KEY -u COPILOT_PROVIDER_BASE_URL \
     "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>"$WORK_DIR/stderr" || true)"
-assert_eq 'copilot-model: sin clave sigue delegando' 'P=https://openrouter.ai/api/v1|M=qwen/qwen3.7-plus' "$out"
+assert_eq 'copilot-model: ruta nativa sin clave BYOK' 'P=vacio|M=gemini-3.8-flash' "$out"
 err="$(cat -- "$WORK_DIR/stderr")"
-assert_contains 'copilot-model: sin clave lo avisa por stderr' 'COPILOT_PROVIDER_API_KEY' "$err"
+assert_contains 'copilot-model: anuncia ruta nativa' 'cop gemini-3.8-flash' "$err"
 GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model kimi >/dev/null 2>&1
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
-    "$GLOT_SH" -n ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
-assert_contains 'copilot-model: el alias llega resuelto a COPILOT_MODEL' 'COPILOT_MODEL=moonshotai/kimi-k3' "$out"
+    "$GLOT_SH" -n ask --delegate copilot contract_stub php algorithms/naive_sort 2>/dev/null || true)"
+assert_contains 'copilot-model: Kimi nativo para balanced' 'COPILOT_MODEL=kimi-k3' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" doctor 2>/dev/null || true)"
-assert_contains 'copilot-model: doctor informa del alias fijado' 'copilot_model_state: kimi' "$out"
+assert_contains 'copilot-model: doctor informa del id nativo fijado' 'copilot_model_state: kimi-k3' "$out"
 # el esfuerzo del perfil viaja en la orden publicada, que es lo que lo hace efectivo: `low` en los
 # encargos de OpenRouter y en el contrato, `high` en la implementación
 COP_PUB='copilot -C {module_dir} -p "$(cat)" --add-dir {root} --allow-all-tools --reasoning-effort {effort}'
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_PUB" \
-    "$GLOT_SH" -n ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
-assert_contains 'el esfuerzo de OpenRouter llega a la orden' '--reasoning-effort low' "$out"
+    "$GLOT_SH" -n ask --delegate copilot contract_stub php algorithms/naive_sort 2>/dev/null || true)"
+assert_contains 'el esfuerzo balanced llega a la orden' '--reasoning-effort low' "$out"
+GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" unset copilot-model >/dev/null 2>&1
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_PUB" \
     "$GLOT_SH" -n ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
 assert_contains 'el esfuerzo de la implementación llega a la orden' '--reasoning-effort medium' "$out"
@@ -1146,7 +1153,7 @@ assert_contains 'el esfuerzo de la implementación llega a la orden' '--reasonin
 GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" unset copilot-model >/dev/null 2>&1
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
     "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>/dev/null || true)"
-assert_eq 'copilot-model sin fijar: manda el modelo del perfil' 'P=https://openrouter.ai/api/v1|M=qwen/qwen3.7-plus' "$out"
+assert_eq 'copilot-model sin fijar: manda el modelo del perfil' 'P=vacio|M=gemini-3.8-flash' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" \
     "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
 assert_eq 'un perfil de Copilot no toca el proveedor' 'P=vacio|M=claude-sonnet-5.5' "$out"
@@ -1155,7 +1162,63 @@ GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model
 assert_eq 'set copilot-model con alias inválido: código' '2' "$rc_bad"
 GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" set copilot-model nope 2>"$WORK_DIR/stderr" >/dev/null || true
 err="$(cat -- "$WORK_DIR/stderr")"
-assert_contains 'set copilot-model con alias inválido: lista los válidos' 'default gemini qwen kimi' "$err"
+assert_contains 'set copilot-model con alias inválido: lista los válidos' 'default gemini argon terra sol kimi sonnet opus' "$err"
+
+# v2.1.0: rutas explícitas, políticas compartidas y aislamiento sin inferencia.
+route_run() {
+    rc_last=0
+    out="$(env -u GLOT_MODEL -u GLOT_MODEL_COP -u GLOT_MODEL_OR -u GLOT_EFFORT \
+        -u COPILOT_PROVIDER_BASE_URL -u COPILOT_PROVIDERS_CONFIG \
+        GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$WORK_DIR/route-state" \
+        GLOT_DELEGATE_COP='cat >/dev/null; printf "%s|%s|%s|%s|%s|%s\n" "$GLOT_DELEGATE_ROUTE" "$COPILOT_MODEL" "${COPILOT_PROVIDER_BASE_URL:-native}" "${COPILOT_PROVIDER_MAX_PROMPT_TOKENS:--}" "${COPILOT_PROVIDER_MAX_OUTPUT_TOKENS:--}" "$GLOT_DELEGATE_EFFORT"' \
+        COPILOT_PROVIDER_API_KEY=glot-test-placeholder \
+        "$GLOT_SH" "$@" 2>"$WORK_DIR/stderr")" || rc_last=$?
+    err="$(cat -- "$WORK_DIR/stderr")"
+}
+route_run ask --delegate open-router docs-module php algorithms/naive_sort
+assert_eq 'OR: modelo/endpoint/límites/esfuerzo exactos' \
+    'open-router|qwen/qwen3.7-plus|https://openrouter.ai/api/v1|131072|32768|-' "$out"
+assert_eq 'OR: default sin esfuerzo artificial' '0' "$rc_last"
+route_run ask --delegate open-router --effort low docs-module php algorithms/naive_sort
+assert_eq 'OR Plus: effort explícito bloquea' '2' "$rc_last"
+assert_contains 'OR Plus: effort tiene diagnóstico' 'does not support effort' "$err"
+route_run ask --delegate open-router --model argon --effort high docs-module php algorithms/naive_sort
+assert_eq 'OR Argon: identidad real, no familia fingida' \
+    'open-router|google/gemini-4-argon|https://openrouter.ai/api/v1|131072|32768|high' "$out"
+route_run ask --delegate open-router --model argon scaffold php algorithms/naive_sort
+assert_eq 'OR Argon: solo documentación' '2' "$rc_last"
+route_run ask --delegate open-router implement php algorithms/naive_sort
+assert_eq 'OR: sin default deep no inventa modelo' '1' "$rc_last"
+route_run ask --delegate copilot --model argon docs-module php algorithms/naive_sort
+assert_eq 'Copilot Argon: no activa BYOK por identidad' 'cop|gemini-4-argon|native|-|-|low' "$out"
+route_run ask --delegate copilot --model sol contract_stub php algorithms/naive_sort
+assert_eq 'Sol: balanced nativo' 'cop|gpt-6.1-sol|native|-|-|low' "$out"
+route_run ask --delegate copilot --model opus suite php algorithms/naive_sort
+assert_eq 'Opus: suite deep nativa' 'cop|claude-opus-5.5|native|-|-|medium' "$out"
+route_run ask --delegate copilot --model terra docs-module php algorithms/naive_sort
+assert_eq 'Terra: no se cuela en docs' '2' "$rc_last"
+route_run ask --delegate copilot --model qwen/qwen3.7-plus docs-module php algorithms/naive_sort
+assert_eq 'Copilot: id BYOK no cambia ruta implícitamente' '2' "$rc_last"
+route_run ask --delegate copilot --effort invented implement php algorithms/naive_sort
+assert_eq 'Copilot: effort desconocido bloquea' '2' "$rc_last"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$WORK_DIR/no-route-state" GLOT_DELEGATE_COP="$COP_LINE" \
+    COPILOT_PROVIDER_BASE_URL=https://unrelated.example/v1 \
+    "$GLOT_SH" -n ask --delegate open-router docs-module php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || true
+assert_contains 'OR: endpoint heredado distinto bloquea' 'endpoint conflicts' "$(cat -- "$WORK_DIR/stderr")"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$WORK_DIR/no-route-state" GLOT_DELEGATE_COP="$COP_LINE" \
+    COPILOT_PROVIDER_BASE_URL=https://unrelated.example/v1 COPILOT_PROVIDER_WIRE_MODEL=foreign \
+    "$GLOT_SH" ask --delegate copilot docs-module php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || true
+assert_eq 'Copilot: limpia proveedor aunque heredado' 'P=vacio|M=gemini-3.8-flash' "$out"
+out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$WORK_DIR/no-route-state" GLOT_DELEGATE_COP=cat \
+    GLOT_EFFORT=high "$GLOT_SH" -n ask --delegate copilot --effort low implement php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || true
+assert_contains 'effort: flag gana a entorno' 'effort=low' "$out"
+printf 'copilot-model=default\n' >"$WORK_DIR/route-state"
+route_run ask --delegate copilot docs-module php algorithms/naive_sort
+assert_eq 'estado legacy: alias ambiguo bloquea' '2' "$rc_last"
+assert_contains 'estado legacy: explica migración' 'ambiguous legacy' "$err"
+route_run ask --delegate copilot --model gemini docs-module php algorithms/naive_sort
+assert_eq 'estado legacy: override explícito resuelve sin mutar' '0' "$rc_last"
+rm -- "$WORK_DIR/route-state"
 
 # v1.7.2: `aider-model` deja de ser clave reservada, así que ya no se valida contra el
 # catálogo: `set` la guarda como cualquier clave del autor.
@@ -1176,7 +1239,7 @@ glot_run doctor
 assert_contains 'doctor: carpeta de plantillas' 'prompts: ' "$out"
 assert_contains 'doctor: registro de encargos' 'prompts_ok: 11 encargos / requests' "$out"
 assert_contains 'doctor: catálogo de delegados' 'delegates_file: ' "$out"
-assert_contains 'doctor: alias por delegado' 'delegate_aliases: 6 alias / aliases (2 de AGY, 4 de Copilot)' "$out"
+assert_contains 'doctor: alias por delegado' 'delegate_aliases: 14 alias / aliases (2 de AGY, 8 de Copilot, 4 de OpenRouter)' "$out"
 assert_contains 'doctor: delegado COP sin configurar' 'delegate_cop: (sin configurar / not configured)' "$out"
 assert_contains 'doctor: delegado AGY sin configurar' 'delegate_agy: (sin configurar / not configured)' "$out"
 assert_eq 'doctor: ya no informa de un delegado aider (v1.7.2)' 'no' \
@@ -1398,7 +1461,7 @@ assert_eq 'completion bash: un candidato por línea' '26' "$(printf '%s\n' "$sav
 # `model` fuera del completado.
 keys_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot get ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
 assert_eq 'completion bash: las diez claves reservadas' \
-    'antigravity-model branch cause copilot-model lang module phase repo spec target' \
+    'antigravity-model branch cause copilot-model lang module open-router-model phase repo spec target' \
     "$(printf '%s\n' "$keys_comp" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
 assert_contains 'completion zsh: la misma lista de claves' \
     'lang phase module branch spec repo target cause antigravity-model copilot-model' "$(cat -- "$TESTS_DIR/../completions/glot.zsh")"
@@ -1411,7 +1474,7 @@ assert_contains 'help set: la misma lista de claves' \
 # salen de `langs`.
 set_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
 assert_eq 'completion bash: `set` completa las claves' \
-    'lang phase module branch spec repo target cause antigravity-model copilot-model' \
+    'lang phase module branch spec repo target cause antigravity-model copilot-model open-router-model' \
     "$(printf '%s\n' "$set_comp" | tr '\n' ' ' | sed 's/ $//')"
 set_agy_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot set antigravity-model ""); COMP_CWORD=3; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
 glot_run delegates agy
@@ -1423,7 +1486,7 @@ glot_run delegates copilot
 assert_eq 'completion bash: `set copilot-model` completa los alias de Copilot del catálogo' \
     "$(printf '%s\n' "$out" | cut -f2)" "$set_cop_comp"
 delegates_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot delegates ""); COMP_CWORD=2; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
-assert_eq 'completion bash: los dos delegados del catálogo' 'agy copilot' \
+assert_eq 'completion bash: las tres rutas del catálogo' 'agy copilot open-router' \
     "$(printf '%s\n' "$delegates_comp" | tr '\n' ' ' | sed 's/ $//')"
 verb_comp="$(GLOT_CMD="$GLOT_SH" bash -c 'source <('"$GLOT_SH"' completion bash); COMP_WORDS=(glot mod); COMP_CWORD=1; _glot_complete; printf "%s\n" "${COMPREPLY[@]}"')"
 assert_eq 'completion bash: los dos verbos del catálogo' 'modules
@@ -2180,7 +2243,7 @@ assert_contains 'validate por defecto: modo solo lectura' '--deny-tool write' "$
 # comprobar la especificación ni el acta y las dejó como dos notas en vez de revisarlas.
 assert_contains 'validate por defecto: la raíz del monorepo' "--add-dir $SANDBOX" "$copilot_args"
 assert_contains 'validate por defecto: tope de créditos' '--max-ai-credits 30' "$copilot_args"
-assert_contains 'validate por defecto: el modelo del perfil' '--model qwen/qwen3.7-plus' "$copilot_args"
+assert_contains 'validate por defecto: el modelo del perfil' '--model gemini-3.8-flash' "$copilot_args"
 assert_contains 'validate por defecto: el esfuerzo del perfil' '--reasoning-effort low' "$copilot_args"
 
 # errores de objetivo y de argumentos
@@ -2201,13 +2264,24 @@ err="$(cat -- "$WORK_DIR/stderr")"
 assert_eq 'validate con marcadores: código' '0' "$rc_last"
 assert_contains 'validate con marcadores: el módulo resuelto' "-C $SANDBOX/php/core/algorithms/naive_sort" "$out"
 assert_contains 'validate con marcadores: la raíz resuelta' "--add-dir $SANDBOX" "$out"
-assert_contains 'validate con marcadores: el modelo del perfil' '--model qwen/qwen3.7-plus' "$out"
+assert_contains 'validate con marcadores: el modelo del perfil' '--model gemini-3.8-flash' "$out"
 
 out="$(GLOT_ROOT="$SANDBOX" GLOT_VALIDATOR="$SANDBOX/stub/validador --model {inexistente}" \
     "$GLOT_SH" -n validate php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
 err="$(cat -- "$WORK_DIR/stderr")"
 assert_eq 'validate con marcador desconocido: código' '1' "$rc_last"
 assert_contains 'validate con marcador desconocido: lo dice' 'marcador sin resolver' "$err"
+
+route_run validate --delegate antigravity php algorithms/naive_sort
+assert_eq 'validate: AGY sin permiso readonly equivalente bloquea' '2' "$rc_last"
+route_run -n validate --delegate open-router --model qwen php algorithms/naive_sort
+assert_eq 'validate OR: resolutor compartido' '0' "$rc_last"
+assert_contains 'validate OR: modelo autorizado en orden' '--model qwen/qwen3.8-max-0902' "$out"
+assert_contains 'validate OR: denegación write conservada' '--deny-tool write' "$out"
+assert_eq 'validate OR: no usa AI credits como presupuesto BYOK' 'no' \
+    "$([[ "$out" == *--max-ai-credits* ]] && echo yes || echo no)"
+route_run -n validate --delegate open-router --model argon php algorithms/naive_sort
+assert_eq 'validate: Argon respeta la misma categoría docs que ask' '2' "$rc_last"
 
 # doctor informa del validador configurado y del CLI disponible
 glot_run doctor
@@ -2236,12 +2310,12 @@ missing_model=""
 unknown_model=""
 for prompt_file in "$PROMPTS_DIR"/*.prompt.md; do
     prompt_name="$(sed -n 's/^name: \(.*\)$/\1/p' "$prompt_file")"
-    prompt_model="$(sed -n 's/^model: \(.*\)$/\1/p' "$prompt_file")"
+    prompt_model="$(sed -n 's/^profile: \(.*\)$/\1/p' "$prompt_file")"
     if [[ -z "$prompt_model" ]]; then
         missing_model+="$prompt_name "
         continue
     fi
-    cut -f2 -- "$MODELS_TSV" | grep -qxF -- "$prompt_model" || unknown_model+="$prompt_name "
+    cut -f1 -- "$MODELS_TSV" | grep -qxF -- "$prompt_model" || unknown_model+="$prompt_name "
 done
 assert_eq 'modelos: toda plantilla declara su modelo' '' "$missing_model"
 assert_eq 'modelos: el modelo declarado está en el catálogo' '' "$unknown_model"
@@ -2251,7 +2325,7 @@ assert_eq 'modelos: el modelo declarado está en el catálogo' '' "$unknown_mode
 models_drift=""
 while IFS=$'\t' read -r profile model effort credits tier requests pagy_model; do
     declared="$(for prompt_file in "$PROMPTS_DIR"/*.prompt.md; do
-        if [[ "$(sed -n 's/^model: \(.*\)$/\1/p' "$prompt_file")" == "$model" ]]; then
+        if [[ "$(sed -n 's/^profile: \(.*\)$/\1/p' "$prompt_file")" == "$profile" ]]; then
             sed -n 's/^name: \(.*\)$/\1/p' "$prompt_file"
         fi
     done | sort | tr '\n' ' ')"
@@ -2269,7 +2343,7 @@ assert_contains 'ask: anuncia el perfil' 'profile: deep' "$err"
 
 glot_run_delegate 'cat >/dev/null' -n ask validate php algorithms/naive_sort
 assert_eq 'ask -n: código' '0' "$rc_last"
-assert_contains 'ask -n: el modelo en el plan' 'COPILOT_MODEL=qwen/qwen3.7-plus' "$out"
+assert_contains 'ask -n: el modelo en el plan' 'COPILOT_MODEL=gemini-3.8-flash' "$out"
 
 # sin modelo en la plantilla y con un modelo que el catálogo no conoce: los dos son un
 # dato que falta (1), y en ningún caso se inventan esfuerzo ni créditos
@@ -2279,22 +2353,29 @@ cp -- "$GLOT_SH" "$fake_glot/glot.sh"
 cp -R -- "$TESTS_DIR/../data" "$fake_glot/data"
 cp -R -- "$PROMPTS_DIR/." "$fake_glot/prompts/"
 
-sed -i '/^model: /d' "$fake_glot/prompts/suite.prompt.md"
+sed -i '/^profile: /d' "$fake_glot/prompts/suite.prompt.md"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_DELEGATE='cat >/dev/null' "$fake_glot/glot.sh" ask suite php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
 assert_eq 'plantilla sin modelo: código' '1' "$rc_last"
-assert_contains 'plantilla sin modelo: lo dice' 'no declara modelo' "$(cat -- "$WORK_DIR/stderr")"
+assert_contains 'plantilla sin modelo: lo dice' 'no declara perfil' "$(cat -- "$WORK_DIR/stderr")"
 
-sed -i '/^step: /a model: modelo-que-no-existe' "$fake_glot/prompts/suite.prompt.md"
+sed -i '/^step: /a profile: modelo-que-no-existe' "$fake_glot/prompts/suite.prompt.md"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_DELEGATE='cat >/dev/null' "$fake_glot/glot.sh" ask suite php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
 assert_eq 'modelo fuera del catálogo: código' '1' "$rc_last"
 assert_contains 'modelo fuera del catálogo: lo dice' 'sin perfil en el catálogo' "$(cat -- "$WORK_DIR/stderr")"
+
+sed -i 's/^profile: .*/profile: deep/' "$fake_glot/prompts/suite.prompt.md"
+printf 'malformed\n' >>"$fake_glot/data/model_options.tsv"
+rc_last=0
+out="$(GLOT_ROOT="$SANDBOX" GLOT_DELEGATE=cat "$fake_glot/glot.sh" -n ask suite php algorithms/naive_sort 2>"$WORK_DIR/stderr")" || rc_last=$?
+assert_eq 'adaptador malformado: no se delega' '1' "$rc_last"
+assert_contains 'adaptador malformado: diagnóstico explícito' 'invalid model adapters' "$(cat -- "$WORK_DIR/stderr")"
 
 # doctor informa de la cobertura del catálogo y del envejecimiento contra el CLI
 glot_run doctor
 assert_contains 'doctor: catálogo de modelos' 'models_file: ' "$out"
 assert_contains 'doctor: cobertura de perfiles' 'model_profiles: 11 de / of 11' "$out"
 if command -v copilot >/dev/null 2>&1; then
-    assert_contains 'doctor: los modelos siguen en el CLI' 'model_available: 2 de / of 2' "$out"
+    assert_contains 'doctor: los modelos siguen en el CLI' 'model_available: 3 de / of 3' "$out"
     cli_models="$(copilot help config 2>/dev/null || true)"
     available=0
     while IFS=$'\t' read -r _ model _rest; do
@@ -2302,7 +2383,7 @@ if command -v copilot >/dev/null 2>&1; then
         [[ "$model" == */* ]] && continue
         [[ "$cli_models" == *"\"$model\""* ]] && available=$((available + 1))
     done <"$MODELS_TSV"
-    assert_eq 'modelos: los de Copilot están en la lista del CLI instalado' '2' "$available"
+    assert_eq 'modelos: los de Copilot están en la lista del CLI instalado' '3' "$available"
 fi
 
 # --- casos de la especificación v0.12.0 (L7, higiene y punteros) --------------
@@ -2519,7 +2600,7 @@ assert_eq 'finish: el sprint se ha ido' '1' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get lang >/dev/null 2>&1; echo $?)"
 assert_eq 'finish: el modelo de AGY se queda' 'gemini' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get antigravity-model)"
-assert_eq 'finish: el modelo de Copilot se queda' 'default' \
+assert_eq 'finish: el modelo de Copilot se queda' 'gemini-3.8-flash' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$FINISH_STATE" "$GLOT_SH" get copilot-model)"
 glot_run_finish save 4a
 assert_eq 'finish sin estado: hay que asignarlo otra vez' '1' "$rc_last"
@@ -2685,7 +2766,7 @@ assert_contains 'cargado: un use fallido no deja la shell rota' 'vivo' "$out"
 # delegado se quedan.
 STATE_CLEAR="$WORK_DIR/state-clear"
 for kv in lang=php phase=algorithms module=naive_sort branch=feat/algorithms/x \
-    spec=spec.md target=monorepo cause=fix antigravity-model=sonnet copilot-model=default zap=1; do
+    spec=spec.md target=monorepo cause=fix antigravity-model=gemini copilot-model=default open-router-model=default zap=1; do
     GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" set "${kv%%=*}" "${kv#*=}" >/dev/null 2>&1
 done
 assert_eq 'estado del sprint: el almacén de prueba está montado' 'php' \
@@ -2695,9 +2776,9 @@ glot_loaded "source \"\$1\"; GLOT_STATE_FILE='$STATE_CLEAR'; _glot_sprint_clear"
 assert_eq 'finish: la limpieza no falla' '0' "$rc_last"
 assert_eq 'finish: el sprint se ha ido' 'si' \
     "$(grep -qE '^(lang|phase|module|branch|spec|repo|target|cause)=' "$STATE_CLEAR" && echo no || echo si)"
-assert_eq 'finish: el modelo de AGY se queda' 'sonnet' \
+assert_eq 'finish: el modelo de AGY se queda' 'gemini' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get antigravity-model)"
-assert_eq 'finish: el modelo de Copilot se queda' 'default' \
+assert_eq 'finish: el modelo de Copilot se queda' 'gemini-3.8-flash' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get copilot-model)"
 assert_eq 'finish: las claves del autor se quedan' '1' \
     "$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_CLEAR" "$GLOT_SH" get zap)"
@@ -3165,7 +3246,7 @@ cat >"$fuentes_glot/prompts/fuentes-check.prompt.md" <<'EOF'
 ---
 name: fuentes-check
 step: 4b
-model: gpt-5.6-terra
+profile: balanced
 description: prueba del aviso de fuentes
 sources: docs/core, docs/no-existe.md
 mode: agent
@@ -3248,7 +3329,7 @@ glot_run_delegates 'cat >/dev/null' '' ask --delegate antigravity implement php 
 assert_eq '--delegate antigravity sin AGY: código' '1' "$rc_last"
 assert_contains '--delegate antigravity sin AGY: nombra la variable' 'GLOT_DELEGATE_AGY' "$err"
 
-glot_run_delegates 'cat >/dev/null' 'echo ALIAS; cat >/dev/null' ask --delegate antigravity implement php algorithms/naive_sort
+glot_run_delegates 'cat >/dev/null' 'echo ALIAS; cat >/dev/null' ask --delegate antigravity docs-module php algorithms/naive_sort
 assert_eq '--delegate antigravity elige el suyo' 'ALIAS' "$out"
 
 glot_run_delegates 'cat >/dev/null' '' ask --delegate gemini implement php algorithms/naive_sort
@@ -3266,8 +3347,8 @@ assert_eq 'GLOT_DELEGATE es el alias de COP' 'ALIAS' "$out"
 
 # Y `doctor` informa de los dos
 out="$(env -u GLOT_DELEGATE -u GLOT_DELEGATE_AIDER GLOT_DELEGATE_COP='cat' GLOT_DELEGATE_AGY='cat' "$GLOT_SH" doctor 2>/dev/null)" || true
-assert_contains 'doctor: delegado COP configurado' 'delegate_cop: cat' "$out"
-assert_contains 'doctor: delegado AGY configurado' 'delegate_agy: cat' "$out"
+assert_contains 'doctor: delegado COP configurado' 'delegate_cop: (configurado / configured)' "$out"
+assert_contains 'doctor: delegado AGY configurado' 'delegate_agy: (configurado / configured)' "$out"
 out="$(env -u GLOT_DELEGATE -u GLOT_DELEGATE_COP -u GLOT_DELEGATE_AGY GLOT_DELEGATE_AIDER='cat' "$GLOT_SH" doctor 2>/dev/null)" || true
 assert_eq 'doctor: GLOT_DELEGATE_AIDER se ignora (v1.7.2)' 'no' \
     "$([[ "$out" == *delegate_aider* ]] && echo si || echo no)"
@@ -3359,7 +3440,7 @@ assert_contains 'completado ask: sigue ofreciendo los encargos' 'scaffold' "$out
 assert_contains 'completado ask: ofrece la opción del delegado' '--delegate' "$out"
 
 completion_probe ask --delegate ""
-assert_eq 'completado --delegate: los dos valores, ni uno más' 'antigravity copilot' \
+assert_eq 'completado --delegate: las tres rutas' 'antigravity copilot open-router' \
     "$(printf '%s\n' "$out" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
 
 completion_probe ask --delegate=c
@@ -3368,7 +3449,7 @@ assert_eq 'completado --delegate=c: filtra por la letra' 'no' \
     "$([[ "$out" == *--delegate=antigravity* ]] && echo si || echo no)"
 
 completion_probe ask --delegate=
-assert_eq 'completado --delegate=: los dos valores' '--delegate=antigravity --delegate=copilot' \
+assert_eq 'completado --delegate=: las tres rutas' '--delegate=antigravity --delegate=copilot --delegate=open-router' \
     "$(printf '%s\n' "$out" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
 
 completion_probe ask --delegate copilot ""
@@ -3393,7 +3474,7 @@ ZSH_COMP_AGY='delegates agy 2>/dev/null | cut -f2'
 ZSH_COMP_COP='delegates copilot 2>/dev/null | cut -f2'
 assert_contains 'completado zsh: los dos valores del delegado' 'compadd -- copilot antigravity' "$ZSH_COMP"
 assert_contains 'completado zsh: la forma --delegate=' 'compadd -- --delegate=copilot --delegate=antigravity' "$ZSH_COMP"
-assert_contains 'completado zsh: ask tiene su propia rama' '        ask)' "$ZSH_COMP"
+assert_contains 'completado zsh: ask y validate comparten las opciones' '        ask | validate)' "$ZSH_COMP"
 assert_contains 'completado zsh: `set` tiene su rama' '        set)' "$ZSH_COMP"
 assert_contains 'completado zsh: los alias de AGY tras `antigravity-model`' "$ZSH_COMP_AGY" "$ZSH_COMP"
 assert_contains 'completado zsh: los alias de Copilot tras `copilot-model`' "$ZSH_COMP_COP" "$ZSH_COMP"

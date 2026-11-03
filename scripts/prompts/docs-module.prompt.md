@@ -1,7 +1,7 @@
 ---
 name: docs-module
 step: 7
-model: qwen/qwen3.7-plus
+profile: economy
 description: Verifica el módulo terminado y genera su README de Nivel 3
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md, docs/README_Template.md
 mode: agent

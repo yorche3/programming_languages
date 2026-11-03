@@ -1,7 +1,7 @@
 ---
 name: refactor
 step: 5c
-model: claude-sonnet-5.5
+profile: deep
 description: Reelabora la implementación sin cambiar su comportamiento observable y justifica el motivo
 sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md
 mode: agent
