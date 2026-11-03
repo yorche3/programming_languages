@@ -56,6 +56,32 @@ the harness. The remaining scaffold review is pending.
 
 ---
 
+## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
+
+**ES:** El perfil balanced, el alias `terra` y su adaptador pasan de
+`gpt-5.6-terra` a `gpt-6.1-terra`, que figura en el catálogo oficial y en el
+selector del editor mostrado por el autor. Tarifa default: entrada $1 y salida
+$5 por millón, frente a $2/$12 de 5.6. Sonnet/Opus 5.5 ya estaban vigentes.
+Flash se conserva por decisión previa; Qwen Plus sigue siendo más barato que
+Max en OpenRouter. Comparación y fuentes en
+[`VALIDATION.md`](VALIDATION.md).
+
+**EN:** Balanced now selects Terra 6.1 instead of 5.6 across default, alias
+and adapter. Current public pricing confirms lower input/output rates;
+the existing Claude versions and author-selected Flash remain unchanged.
+Qwen Plus remains cheaper than Max on OpenRouter.
+
+**ES / EN:** La ayuda del CLI local aún no enumera Terra 6.1; doctor informa
+la cobertura real, sin confundirla con el editor ni sustituir el modelo.
+No se ejecutó inferencia ni se actualizó la instalación del autor. /
+Local CLI help still omits 6.1; doctor reports actual coverage without
+fallback. No inference or author installation upgrade was performed.
+
+```text
+glot tests: 1316 passed, 0 failed
+docs checks: 25 passed, 0 failed
+```
+
 ## 2.1.0-dev — 2026-11-02 (layouts nativos / native layouts)
 
 **ES:** Segundo bloque de scaffold: C++ usa `tests/`; Crystal conserva

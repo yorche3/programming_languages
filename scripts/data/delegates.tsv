@@ -3,7 +3,7 @@ agy	argon	gemini-4-argon-low
 copilot	default	gemini-3.8-flash
 copilot	gemini	gemini-3.8-flash
 copilot	argon	gemini-4-argon
-copilot	terra	gpt-5.6-terra
+copilot	terra	gpt-6.1-terra
 copilot	sol	gpt-6.1-sol
 copilot	kimi	kimi-k3
 copilot	sonnet	claude-sonnet-5.5

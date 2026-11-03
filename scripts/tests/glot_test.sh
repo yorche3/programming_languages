@@ -1138,7 +1138,7 @@ GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" "$GLOT_SH" unset copilot-mod
 # el alias no toca lo que ya estaba: terra (contrato y suite) ni sonnet (implementación)
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
     "$GLOT_SH" ask --delegate copilot contract_stub php algorithms/naive_sort 2>/dev/null || true)"
-assert_eq 'copilot-model: contrato usa Terra disponible' 'P=vacio|M=gpt-5.6-terra' "$out"
+assert_eq 'copilot-model: contrato usa Terra 6.1 vigente' 'P=vacio|M=gpt-6.1-terra' "$out"
 out="$(GLOT_ROOT="$SANDBOX" GLOT_STATE_FILE="$STATE_MODEL" GLOT_DELEGATE_COP="$COP_LINE" COPILOT_PROVIDER_API_KEY=sk-or-test \
     "$GLOT_SH" ask --delegate copilot implement php algorithms/naive_sort 2>/dev/null || true)"
 assert_eq 'copilot-model: no cambia el modelo de la implementación (deep)' 'P=vacio|M=claude-sonnet-5.5' "$out"
@@ -1211,6 +1211,8 @@ route_run ask --delegate copilot --model argon docs-module php algorithms/naive_
 assert_eq 'Copilot Argon: no activa BYOK por identidad' 'cop|gemini-4-argon|native|-|-|low' "$out"
 route_run ask --delegate copilot --model sol contract_stub php algorithms/naive_sort
 assert_eq 'Sol: balanced nativo' 'cop|gpt-6.1-sol|native|-|-|low' "$out"
+route_run ask --delegate copilot --model terra contract_stub php algorithms/naive_sort
+assert_eq 'Terra: alias selecciona 6.1 y nunca 5.6' 'cop|gpt-6.1-terra|native|-|-|low' "$out"
 route_run ask --delegate copilot --model opus suite php algorithms/naive_sort
 assert_eq 'Opus: suite deep nativa' 'cop|claude-opus-5.5|native|-|-|medium' "$out"
 route_run ask --delegate copilot --model terra docs-module php algorithms/naive_sort
@@ -2441,7 +2443,6 @@ glot_run doctor
 assert_contains 'doctor: catálogo de modelos' 'models_file: ' "$out"
 assert_contains 'doctor: cobertura de perfiles' 'model_profiles: 11 de / of 11' "$out"
 if command -v copilot >/dev/null 2>&1; then
-    assert_contains 'doctor: los modelos siguen en el CLI' 'model_available: 3 de / of 3' "$out"
     cli_models="$(copilot help config 2>/dev/null || true)"
     available=0
     while IFS=$'\t' read -r _ model _rest; do
@@ -2449,7 +2450,8 @@ if command -v copilot >/dev/null 2>&1; then
         [[ "$model" == */* ]] && continue
         [[ "$cli_models" == *"\"$model\""* ]] && available=$((available + 1))
     done <"$MODELS_TSV"
-    assert_eq 'modelos: los de Copilot están en la lista del CLI instalado' '3' "$available"
+    assert_contains 'doctor: informa disponibilidad real sin confundir IDE y CLI' \
+        "model_available: $available de / of 3" "$out"
 fi
 
 # --- casos de la especificación v0.12.0 (L7, higiene y punteros) --------------

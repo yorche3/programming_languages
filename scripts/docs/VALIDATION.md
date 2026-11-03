@@ -21,7 +21,7 @@ or credentials have been used.
 | Ruta / Route | Base / Default | Overrides autorizados / Allowed overrides |
 |---|---|---|
 | `antigravity` (`agy`) | Flash 3.8 para economy y contract/build | Argon solo docs; bloquea si no aparece en `agy models`. Sin Claude no-thinking verificado, deep no tiene asociación |
-| `copilot` | Flash 3.8 economy; Terra 5.6 balanced; Sonnet 5.5 deep | Argon docs; Sol 6.1/Kimi K3 contract/build; Opus 5.5 suite/implement/fix/refactor |
+| `copilot` | Flash 3.8 economy; Terra 6.1 balanced; Sonnet 5.5 deep | Argon docs; Sol 6.1/Kimi K3 contract/build; Opus 5.5 suite/implement/fix/refactor |
 | `open-router` | Qwen 3.7 Plus economy | Qwen Max/Kimi economy; Argon docs. Sin asociación balanced/deep |
 
 **ES:** Las plantillas declaran `profile:`, no un id. Las fuentes de selección
@@ -87,6 +87,55 @@ Diagnostics/evidence identify the route/model, not private commands.
 No son límites de dinero OpenRouter ni cuotas AGY; las órdenes personalizadas
 de `ask` deciden sus caps. / Credit caps apply only to default native validation,
 not OpenRouter money, AGY quotas or author-owned `ask` commands.
+
+### Precios comprobados / Verified pricing (2026-11-02)
+
+**ES:** Comparación de tarifas públicas, no estimación de una sesión completa.
+Los precios de Copilot son USD por millón de tokens en tier default.
+Fuente: [GitHub, Models and pricing](https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing).
+El coste final depende también de caché, escritura de caché, razonamiento,
+long context y cantidad de tokens. No basta con comparar generaciones.
+
+**EN:** Public default-tier rates in USD per million tokens, not total session
+estimates. Cache, reasoning, context tiers and token counts affect actual cost;
+newer models are not automatically cheaper.
+
+| Modelo / Model | Entrada / Input | Salida / Output | Decisión / Decision |
+|---|---:|---:|---|
+| GPT-5.6 Terra | $2.00 | $12.00 | Retirado de la configuración activa / Removed from active configuration |
+| GPT-6.1 Terra | $1.00 | $5.00 | Balanced: 50% menos entrada y 58.3% menos salida / Lower input/output rates |
+| Claude Sonnet 5.5 | $2.00 | $10.00 | Deep; misma tarifa principal que 5, caché de lectura más barata / Same main rate as 5, cheaper cached input |
+| Claude Opus 5.5 | $4.00 | $20.00 | Override deep; 20% menos que Opus 5 / 20% below Opus 5 |
+| Gemini 3.8 Flash | $0.75 | $3.75 | Base economy conservada por decisión del autor / Author-selected economy default retained |
+| Gemini 4 Argon | $2.00 | $10.00 | Override docs, no sustituto barato de Flash / Not a cheaper Flash replacement |
+| Kimi K3 (Copilot) | $3.00 | $15.00 | Alternativa funcional, no escalado de ahorro / Functional alternative, not a cost-saving upgrade |
+| Claude Haiku 5.5 | $0.10 | $0.50 | Más barato en default hasta 100K; no reemplaza Flash sin nueva decisión / Cheaper, but not an authorized default replacement |
+
+**ES:** Terra 6.1 está en el catálogo oficial GA y en el selector del editor
+mostrado por el autor. `copilot help config` local todavía enumera 5.6 y no
+6.1: eso es una discrepancia editor/CLI, no evidencia de que 5.6 sea la mejor
+opción. Se usa el id 6.1 sin fallback; doctor informa la cobertura local real.
+No se ha certificado un lanzamiento/inferencia CLI con 6.1 ni actualizado
+la instalación del autor. Un estado fijado al antiguo id exige elegirlo de
+nuevo con `set copilot-model terra` o usar el override explícito.
+
+**EN:** Official GA availability and the supplied editor picker include
+Terra 6.1, while local CLI help does not yet list it. The configuration uses
+6.1 without fallback; doctor reports the actual local catalogue coverage.
+No CLI inference or author installation upgrade was performed. Old pinned
+IDs require an explicit reset or override.
+
+**ES:** OpenRouter mantiene Qwen 3.7 Plus: los
+[metadatos públicos](https://openrouter.ai/api/v1/models) indican $0.32/$1.28
+por millón de entrada/salida hasta 256K, frente a $2/$6 de Qwen 3.8 Max y
+$2/$10 de Argon. Por tanto, actualizarlo a Max solo por ser más reciente
+encarecería el default. Son rutas y tarifas distintas de Copilot; no se
+extrapolan a AGY, cuya cuota pertenece al plan del autor.
+
+**EN:** Qwen 3.7 Plus remains the OpenRouter default: its $0.32/$1.28
+input/output rates below 256K are lower than Qwen 3.8 Max ($2/$6) and
+Argon ($2/$10). A newer Max default would cost more. Copilot rates do not
+describe OpenRouter or AGY plan quotas.
 
 ## Referencia histórica hasta v2.0.3 / Historical reference through v2.0.3
 

@@ -3,7 +3,7 @@ agy	gemini-3.8-flash-low	scaffold,correct,validate,docs-module,docs-language,con
 agy	gemini-4-argon-low	docs-module,docs-language	low,medium,high	-	-
 copilot	gemini-3.8-flash	scaffold,correct,validate,docs-module,docs-language	low,medium,high	-	-
 copilot	gemini-4-argon	docs-module,docs-language	low,medium,high	-	-
-copilot	gpt-5.6-terra	contract_stub,build	low,medium,high	-	-
+copilot	gpt-6.1-terra	contract_stub,build	low,medium,high	-	-
 copilot	gpt-6.1-sol	contract_stub,build	low,medium,high	-	-
 copilot	kimi-k3	contract_stub,build	low,medium,high	-	-
 copilot	claude-sonnet-5.5	suite,implement,fix,refactor	low,medium,high	-	-

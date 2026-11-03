@@ -3,7 +3,7 @@
 **ES:** En **v2.1.0-dev**, la configuración vigente de modelos está descrita en
 [`VALIDATION.md`](../docs/VALIDATION.md). `models.tsv` conserva siete columnas,
 pero la clave ahora es el perfil (`profile:` en la plantilla): Flash nativo
-economy, Terra 5.6 balanced (contract/build), Sonnet 5.5 deep (incluida suite).
+economy, Terra 6.1 balanced (contract/build), Sonnet 5.5 deep (incluida suite).
 AGY deep es `-`, sin asociación no-thinking verificada.
 `delegates.tsv` separa `agy`, `copilot` nativo y `open-router`; no infiere ruta
 por la barra del id. Las secciones de modelos más abajo describen el historial
