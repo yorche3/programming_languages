@@ -21,9 +21,9 @@ cobol	scaffold	2	module	run	test -e Makefile || cp {root}/scripts/data/scaffold_
 common-lisp	new	1	phase	run	ros -e '(ql:quickload :cl-project :silent t)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'	-	-	descarga cl-project con Quicklisp la primera vez; queda en ~/.roswell
 common-lisp	scaffold	1	module	run	mv src/main.lisp src/{module}.lisp && mv tests/main.lisp tests/{module}-test.lisp && touch run-tests.lisp	-	-	homologar el .asd (defsystem/test-op y uiop:symbol-call), el paquete con guion y el sistema de pruebas sobre fiveam
 cpp	new	1	phase	run	mkdir -p {module}	-	-	-
-cpp	scaffold	1	module	run	mkdir -p src include test && touch MODULE.bazel BUILD .bazelversion .gitignore	-	-	-
+cpp	scaffold	1	module	run	mkdir -p src include tests && touch MODULE.bazel BUILD .bazelversion .gitignore	-	-	-
 crystal	new	1	phase	run	crystal init lib {module}	-	-	-
-crystal	scaffold	1	module	run	rm -rf .git && touch .gitignore && mkdir -p test	-	-	revisar spec/ frente a test/
+crystal	scaffold	1	module	run	test -d spec && test -f shard.yml	-	-	conservar el layout nativo src/ y spec/, incluyendo spec_helper.cr y contenido propio
 csharp	new	1	module	run	dotnet new sln -n {Module}	-	-	-
 csharp	new	2	module	run	dotnet new classlib -n {Module} -o src/{Module}	-	-	-
 csharp	new	3	module	run	dotnet new xunit --no-restore -n {Module}.Tests -o test/{Module}.Tests	-	-	-
@@ -47,18 +47,19 @@ fsharp	new	1	module	run	dotnet new sln -n {Module}	-	-	-
 fsharp	new	2	module	run	dotnet new classlib -lang F# -n {Module} -o src/{Module}	-	-	-
 fsharp	new	3	module	run	dotnet new xunit --no-restore -lang F# -n {Module}.Tests -o test/{Module}.Tests	-	-	-
 fsharp	new	4	module	run	dotnet sln add src/{Module}/{Module}.fsproj test/{Module}.Tests/{Module}.Tests.fsproj	-	-	-
-fsharp	scaffold	1	module	run	mv src/{Module}/{Module}.fsproj src/{Module}.fsproj && rm -f src/{Module}/Library.fs test/{Module}.Tests/Tests.fs && rmdir src/{Module} 2>/dev/null; touch .gitignore	-	-	ajustar el ProjectReference del proyecto de pruebas a ..\src\{Module}.fsproj
+fsharp	new	5	module	run	dotnet add test/{Module}.Tests/{Module}.Tests.fsproj reference src/{Module}/{Module}.fsproj	-	-	-
+fsharp	scaffold	1	module	run	test -f src/{Module}/{Module}.fsproj && test -f test/{Module}.Tests/{Module}.Tests.fsproj	-	-	conservar los proyectos anidados y su ProjectReference; cambiar Library.fs/Tests.fs solo junto con sus Compile Include, sin borrar contenido propio
 gleam	new	1	phase	run	gleam new {module}	-	-	-
 gleam	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	-
 go	new	1	module	run	go mod init example.com/{module}	-	-	-
-go	scaffold	1	module	run	mkdir -p test && touch .gitignore	-	-	la suite va junto al paquete: {module}_test.go
+go	scaffold	1	module	run	mkdir -p src tests	-	-	la suite externa en tests/ importa example.com/{module}/src; conservar la declaración de paquete de src/
 grain	new	1	phase	run	mkdir -p {module}	-	-	-
 grain	scaffold	1	module	run	mkdir -p src tests && printf 'module {Module}\n' > src/{module}.gr	-	-	-
 grain	scaffold	2	module	run	test -e Makefile || cp {root}/scripts/data/scaffold_templates/grain.Makefile Makefile	-	-	completar el runner vacío y validar los patrones de .gitignore con el delegado scaffold
 groovy	new	1	module	run	gradle init --type groovy-library --dsl groovy --project-name {module} --package {module} --use-defaults	-	-	-
 groovy	scaffold	1	module	run	find lib -name 'Library*.groovy' -delete	-	-	-
-haskell	new	1	module	run	cabal init --lib -n	-	-	-
-haskell	scaffold	1	module	run	mkdir -p src test && touch .gitignore	-	-	revisar {module}.cabal generado: declarar el test-suite (lo baja cabal)
+haskell	new	1	module	run	cabal init --lib -n --source-dir=lib --package-name="$(printf '%s' {module} | tr '_' '-')" --expose-module={Module}	-	-	-
+haskell	scaffold	1	module	run	if [[ -L lib || -L test || -L lib/{Module}.hs || ( -e lib/{Module}.hs && ! -f lib/{Module}.hs ) ]]; then printf 'scaffold: ruta de Haskell no segura / unsafe Haskell path\n' >&2; false; else mkdir -p lib test && { test -e lib/{Module}.hs || (set -C; printf 'module {Module} where\n' > lib/{Module}.hs); }; fi	-	-	conservar lib/ y hs-source-dirs del proyecto Cabal; declarar el test-suite y su runner sin imponer src/
 haxe	new	1	phase	run	mkdir -p {module}	-	-	-
 haxe	scaffold	1	module	run	mkdir -p src test	-	-	-
 haxe	scaffold	2	module	run	haxelib install utest	-	-	instala utest la primera vez (queda en la ruta de haxelib); build.hxml y RunTests.hx son contenido del sprint
@@ -122,8 +123,8 @@ tcl-tk	scaffold	1	module	run	mkdir -p src test && touch src/{module}.tcl src/pkg
 typescript	new	1	module	run	npm init -y	-	-	-
 typescript	scaffold	1	module	run	mkdir -p src test && touch tsconfig.json jest.config.cjs .gitignore && npm pkg set private=true 'scripts.test=jest --runInBand --passWithNoTests' 'scripts.build=tsc --noEmit' 'devDependencies.jest=^29.7.0' 'devDependencies.ts-jest=^29.2.5' 'devDependencies.@types/jest=^29.5.14' 'devDependencies.typescript=^5.8.3'	-	-	-
 v	new	1	module	run	v init --lib	-	-	-
-v	scaffold	1	module	run	rm -rf .git	-	-	-
-v	scaffold	2	module	run	mv tests test	-	-	-
+v	scaffold	1	module	run	test -f v.mod	-	-	conservar el gitfile y el código generado; no borrar repositorios ni muestras desconocidas
+v	scaffold	2	module	run	mkdir -p src tests	-	-	conservar tests/ nativo; mover fuentes solo junto con imports y referencias
 v	scaffold	3	module	run	sed -i "s/version: '0.0.0'/version: '0.1.0'/" v.mod	-	-	`v init --lib` no pregunta y deja la versión por defecto
 vala	new	1	module	run	meson init --language vala --type library --name {module}	-	-	-
 vala	scaffold	1	module	run	mkdir -p src test	-	-	decidir el build con meson

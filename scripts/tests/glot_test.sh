@@ -338,6 +338,24 @@ sandbox_make() {
 [submodule "rust"]
         path = rust
         url = ../remote/rust.git
+[submodule "cpp"]
+        path = cpp
+        url = ../remote/cpp.git
+[submodule "crystal"]
+        path = crystal
+        url = ../remote/crystal.git
+[submodule "fsharp"]
+        path = fsharp
+        url = ../remote/fsharp.git
+[submodule "go"]
+        path = go
+        url = ../remote/go.git
+[submodule "haskell"]
+        path = haskell
+        url = ../remote/haskell.git
+[submodule "v"]
+        path = v
+        url = ../remote/v.git
 EOF
     git -C "$SANDBOX" init -q
     mkdir -p -- "$SANDBOX/assembly/core/algorithms" "$SANDBOX/c/core/algorithms" \
@@ -1730,6 +1748,54 @@ assert_eq 'scaffold Rust: no inventa otra entrada' 'no' "$([[ -e "$RUSTB/src/nai
 rm -- "$RUSTB/src/lib.rs"
 glot_run_sandbox scaffold rust algorithms/naive_sort
 assert_eq 'scaffold Rust sin entrada: código' '4' "$rc_last"
+
+for layout_lang in cpp crystal fsharp go haskell v; do
+    layout_dir="$SANDBOX/$layout_lang/core/algorithms/naive_sort"
+    mkdir -p "$layout_dir"
+    printf 'gitdir: preserved\n' >"$layout_dir/.git"
+    printf 'authored ignore\n' >"$layout_dir/.gitignore"
+    case "$layout_lang" in
+        crystal)
+            mkdir -p "$layout_dir/spec" "$layout_dir/src"
+            printf 'name: naive_sort\n' >"$layout_dir/shard.yml"
+            printf 'authored Crystal\n' >"$layout_dir/src/naive_sort.cr" ;;
+        fsharp)
+            mkdir -p "$layout_dir/src/NaiveSort" "$layout_dir/test/NaiveSort.Tests"
+            printf '<Project><Compile Include="Library.fs"/></Project>\n' >"$layout_dir/src/NaiveSort/NaiveSort.fsproj"
+            printf '<Project><ProjectReference Include="../../src/NaiveSort/NaiveSort.fsproj"/></Project>\n' >"$layout_dir/test/NaiveSort.Tests/NaiveSort.Tests.fsproj"
+            printf 'authored FSharp\n' >"$layout_dir/src/NaiveSort/Library.fs" ;;
+        haskell)
+            mkdir -p "$layout_dir/lib"
+            printf 'module NaiveSort where\n' >"$layout_dir/lib/NaiveSort.hs" ;;
+        v)
+            mkdir -p "$layout_dir/tests"
+            printf "Module {\nversion: '0.0.0'\n}\n" >"$layout_dir/v.mod"
+            printf 'authored test\n' >"$layout_dir/tests/square_test.v"
+            printf 'authored V\n' >"$layout_dir/naive_sort.v" ;;
+    esac
+    glot_run_sandbox scaffold "$layout_lang" algorithms/naive_sort
+    assert_eq "scaffold $layout_lang: código" '0' "$rc_last"
+    glot_run_sandbox scaffold "$layout_lang" algorithms/naive_sort
+    assert_eq "scaffold $layout_lang: rerun" '0' "$rc_last"
+    assert_eq "scaffold $layout_lang: conserva gitfile" 'gitdir: preserved' "$(cat "$layout_dir/.git")"
+    assert_eq "scaffold $layout_lang: conserva ignore" 'authored ignore' "$(cat "$layout_dir/.gitignore")"
+    case "$layout_lang" in
+        cpp|go|v)
+            assert_eq "scaffold $layout_lang: tests no test" 'yes' "$([[ -d "$layout_dir/tests" && ! -e "$layout_dir/test" ]] && echo yes || echo no)" ;;
+        crystal)
+            assert_eq 'Crystal: no inventa test/' 'no' "$([[ -e "$layout_dir/test" ]] && echo yes || echo no)"
+            assert_eq 'Crystal: conserva fuente' 'authored Crystal' "$(cat "$layout_dir/src/naive_sort.cr")" ;;
+        fsharp)
+            assert_eq 'FSharp: no aplana proyecto' 'no' "$([[ -e "$layout_dir/src/NaiveSort.fsproj" ]] && echo yes || echo no)"
+            assert_eq 'FSharp: conserva fuente' 'authored FSharp' "$(cat "$layout_dir/src/NaiveSort/Library.fs")" ;;
+        haskell)
+            assert_eq 'Haskell: no impone src/' 'no' "$([[ -e "$layout_dir/src" ]] && echo yes || echo no)"
+            assert_eq 'Haskell: conserva declaración' 'module NaiveSort where' "$(cat "$layout_dir/lib/NaiveSort.hs")" ;;
+    esac
+done
+assert_contains 'FSharp new: referencia declarada con herramienta' \
+    'dotnet add test/{Module}.Tests/{Module}.Tests.fsproj reference src/{Module}/{Module}.fsproj' \
+    "$(awk -F'\t' '$1=="fsharp" && $2=="new" && $3==5 {print $6}' "$TESTS_DIR/../data/init_sequences.tsv")"
 
 rm -- "$BB/.gitignore"
 ln -s "$BB/naive_sort.bal" "$BB/.gitignore"

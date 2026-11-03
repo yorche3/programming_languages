@@ -155,9 +155,13 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **ballerina** | `bal new {module}` → renombrado protegido `main.bal` a `{module}.bal` → retirar solo el ejemplo verificado → crear `tests/lib_test.bal` vacío si falta | El generador no crea `tests/`; revisar únicamente contenido de ejemplo desconocido y patrones de `.gitignore` |
 | **clojure** | `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib :name {module} :target-dir {module}` | Sustituir el test de plantilla |
 | **common-lisp** | `ros -e '(ql:quickload :cl-project)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'` | Homologar el andamiaje con guion y no subrayado, sistema de pruebas con fiveam y `run-tests.lisp` |
+| **cpp** | `mkdir -p src include tests` → `touch MODULE.bazel BUILD .bazelversion .gitignore` | Declarar targets y dependencias Bazel; conservar `tests/` de las bases homologadas |
+| **crystal** | `crystal init lib {module}` → comprobar `shard.yml` y `spec/` | Conservar `src/`, `spec/spec_helper.cr` y `spec/`; no añadir `test/` ni borrar el gitfile |
 | **csharp** | `dotnet new sln` → `dotnet new classlib` → `dotnet new xunit` → `dotnet sln add` → `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj` | Borrar `Class1.cs` y `UnitTest1.cs` y añadir `.gitignore` |
-| **fsharp** | Igual que C# con `-lang F#` | Aplanar a `src/{Module}.fsproj`, `<ProjectReference>`, borrar `Library.fs` y `Tests.fs`, `.gitignore` |
+| **fsharp** | Igual que C# con `-lang F#`, incluido `dotnet add test/{Module}.Tests/{Module}.Tests.fsproj reference src/{Module}/{Module}.fsproj` | Conservar los proyectos anidados y su referencia; cualquier renombrado de `Library.fs`/`Tests.fs` actualiza sus `Compile Include` y conserva contenido propio |
 | **groovy** | `gradle init --type groovy-library --dsl groovy --use-defaults` | Borrar `Library.groovy` y `LibraryTest.groovy` |
+| **go** | `go mod init example.com/{module}` → `mkdir -p src tests` | El paquete externo de `tests/` importa `example.com/{module}/src`, sin imponer `test/` |
+| **haskell** | `cabal init --lib -n --source-dir=lib --package-name={module-kebab} --expose-module={Module}` → crear `lib/{Module}.hs` solo si falta | `{module-kebab}` sustituye subrayados por guiones; declarar `module {Module} where`, conservar `hs-source-dirs: lib` y completar test-suite/runner |
 | **haxe** | `mkdir -p src test` → `haxelib install utest` | `build.hxml` y `RunTests.hx` son contenido del sprint |
 | **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` | Completar `test/` y su runner; añadir `uuid`, `[compat]`, `[extras]` y `[targets]` |
 | **kotlin** | `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | Borrar `Library.kt` y `LibraryTest.kt` |
@@ -167,7 +171,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **racket** | `raco new library {module}` → render portátil (`mv` + `sed -i`, con el código renombrado a `{module}.rkt` con guiones) → `rm -rf .github pull_request_template.md render-template.sh profile` | Las suites requieren la librería por ruta relativa (`"../../{module}-lib/{module}.rkt"`, con guiones) y el runner es `raco test -x .`, sin enlazar paquetes |
 | **rescript** | `mkdir -p src test` → `npm init -y` → `npm pkg set` | El manifiesto y sus devDependencies se declaran con `npm pkg set`; los baja `npm install` |
 | **ruby** | `mkdir -p src test` → `bundle init` → `bundle install` | `rspec` en el `Gemfile` y `.rspec` |
-| **v** | `v init --lib` (lo conduce `expect`) | Quitar el `.git` anidado, llevar `tests/` a `test/` y fijar `version: '0.1.0'` en `v.mod` |
+| **v** | `v init --lib` (no interactivo) → `mkdir -p src tests` | Conservar `tests/`, fuentes y gitfile; fijar `version: '0.1.0'` en `v.mod`. No renombrar carpetas sin actualizar imports |
 | **vala** | `meson init --language vala --type library --name {module}` | Completar `src/` y `test/` y decidir el build con meson |
 
 > **ES:** Si el generador crea un `main` o un `app` de ejemplo (caso de `dub init` en D, `zig init`; `cargo init --lib` genera solo la librería), bórralo cuando el módulo sea una biblioteca: un `main` propio rompe el runner de tests generado por la herramienta. Ese borrado es parte del completado posterior.
@@ -192,7 +196,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | `forth` | `mkdir -p src test` · `touch src/{module}.forth` | `: {module}-init` |
 | `grain` | `mkdir -p src tests` · `touch src/{module}.gr` | `module {Module}` |
 | `java` | `mkdir -p src/main/java src/test/java` · `touch src/main/java/{Module}.java` | `public class {Module} { }` |
-| `perl` | `mkdir -p src test` · `touch src/{module}.pl` | `package {Module};` + `use strict;` + `use warnings;` + `1;` |
+| `perl` | `mkdir -p lib test` · `touch lib/{module}.pl` | `package {Module};` + `use strict;` + `use warnings;` + `1;` |
 | `php` | `mkdir -p src test` · `touch src/{Module}.php` | `<?php` + `declare(strict_types=1);` + `namespace {Module};` |
 | `prolog` | `mkdir -p src test` · `touch src/{module}.pl` | `:- module({module}, []).` |
 | `scala` | `mkdir -p src/main/scala src/test/scala project` · `touch src/main/scala/{Module}.scala` | `object {Module}` |
@@ -696,19 +700,19 @@ mkdir -p src test
 
 ### V — módulo V
 
-**ES:** Herramienta (R1): v init --lib, **no interactivo** (no pregunta). Crea {module}.v en la raíz, tests/, .editorconfig, .gitattributes, un .git anidado que hay que quitar y v.mod con version: '0.0.0', que se sube a '0.1.0'; el módulo se actualizará al retomarlo (R6) y lo de abajo es la estructura homologada actual.
+**ES:** Herramienta (R1): `v init --lib`, **no interactivo**. Crea `{module}.v` en la raíz, `tests/`, `.editorconfig`, `.gitattributes`, `.git` y `v.mod`. Conservar `tests/` y el gitfile; crear `src/` sin mover fuentes desconocidas. El traslado de código a `src/` requiere cambiar los imports a `{module}.src`; no se puede hacer renombrando carpetas solamente.
 
-**EN:** Tool (R1): v init --lib, **non-interactive** (it asks nothing). It creates {module}.v at the root, tests/, .editorconfig, .gitattributes, a nested .git that must be removed and v.mod with version: '0.0.0', which is raised to '0.1.0'; the module will be updated when retaken (R6) and what follows is the current homologated structure.
+**EN:** `v init --lib` is non-interactive and creates a root source, `tests/`, configuration files and Git metadata. Preserve the test directory and gitfile; moving code into `src/` also requires updating imports to `{module}.src`, not just renaming folders.
 ```bash
-mkdir -p src test
-v init                        # genera v.mod (no interactivo)
+v init --lib                  # genera v.mod (no interactivo)
+mkdir -p src tests
 ```
 
 ```text
 {module}/
 ├── v.mod
 ├── src/{module}.v
-└── test/                    # archivos _test.v con funciones test_*
+└── tests/                   # archivos _test.v con funciones test_*
 ```
 
 ### Manifiestos que mkdir no crea / Manifests mkdir does not create

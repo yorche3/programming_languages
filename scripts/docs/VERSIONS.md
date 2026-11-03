@@ -56,6 +56,48 @@ the harness. The remaining scaffold review is pending.
 
 ---
 
+## 2.1.0-dev — 2026-11-02 (layouts nativos / native layouts)
+
+**ES:** Segundo bloque de scaffold: C++ usa `tests/`; Crystal conserva
+`src/spec`; F# conserva proyectos anidados y declara su `ProjectReference`
+con `dotnet add reference`; Go usa `src/tests`; Haskell genera nombre Cabal
+con guiones, `hs-source-dirs: lib` y el módulo exportado, y crea su declaración
+solo si falta; V conserva `tests/`, gitfile y fuente generado sin mover código
+cuyos imports aún apuntan a la raíz. Se corrigió también la tabla manual de
+Perl para que declare `lib/`, no `src/`.
+
+**EN:** The next scaffold block corrects C++, Crystal, F#, Go, Haskell and V
+layouts without flattening native projects, deleting Git metadata or moving
+authored sources independently of their references. The manual Perl table
+now matches its library layout.
+
+**ES:** Comprobaciones nativas en laboratorio temporal aislado: generadores
+Crystal, F#, Haskell y V, aplicación de las filas reales de scaffold,
+inicialización Go y `ghc -fno-code lib/NaiveSort.hs`. F# se generó con
+`--no-restore` y se comprobó su referencia con `dotnet sln list`; no se
+certifica la suite xUnit ni se descargaron paquetes. Se conserva la distinción
+entre comprobar un layout y homologar código/tests académicos.
+
+**EN:** Isolated native checks covered generators, actual scaffold rows,
+Go initialization and a no-code Haskell compilation. F# used no-restore
+templates and solution/reference inspection, not xUnit certification.
+No academic code or module completion counters changed.
+
+```text
+crystal scaffold: passed
+fsharp scaffold: passed
+haskell scaffold: passed
+v scaffold: passed
+glot tests: 1316 passed, 0 failed
+docs checks: 25 passed, 0 failed
+```
+
+**ES / EN:** No cierra v2.1.0: nueve lenguajes tienen correcciones verificadas
+en estos bloques; queda la revisión/corrección de los otros 41, incluidos
+renombrados acoplados a referencias y artefactos de configuración faltantes.
+/ v2.1.0 remains open pending the other 41 languages and their coupled
+reference/configuration corrections.
+
 ## 2.1.0-dev — 2026-11-02 (rutas y perfiles / routes and profiles)
 
 **ES:** Tres rutas explícitas, perfiles independientes del modelo, Sonnet para

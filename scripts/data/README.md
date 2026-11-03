@@ -108,6 +108,19 @@ only when the module has no `Makefile`. `scaffold` also ensures a `.gitignore`
 without replacing existing contents. The 4a request adds or adjusts
 language-specific patterns and verifies an artifact with `git check-ignore`.
 
+**ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
+(`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con
+referencia declarada por dotnet), Go (`src/tests`), Haskell (`lib/test` y
+paquete Cabal con guiones) y V (`tests/`, sin mover fuentes ajenas a sus
+imports). Estas filas se prueban también con rerun, gitfile y contenido
+previo. Los renombrados de fuentes F#/V requieren actualizar referencias y
+permanecen como revisión explícita, no como borrado o aplanado automático.
+
+**EN:** Reviewed layouts preserve native directories and references.
+Regression fixtures cover reruns, gitfiles and authored contents.
+Coupled F#/V source/import changes remain explicit review tasks rather than
+automatic deletion or flattening.
+
 **ES:** ⚠️ **Deuda conocida / Known debt (2026-10-11):** un runner puede devolver
 `0` con la suite en rojo. `guile --no-auto-compile -s {suite}_guile.scm` imprime el
 conteo de SRFI-64 pero no lo propaga al código de salida, así que `glot test` solo
