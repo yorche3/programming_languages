@@ -85,13 +85,29 @@ persistent records adapt links, not delegate the algorithm to a collection.
 | **F3** C-lineage | No hay tipo base: el valor es el primer campo del nodo hijo | Registro y punteros | Puntero nulo | A2 |
 | **F4** Sistemas modernos | Registro con el valor y enlaces en el mismo tipo, u opción nativa | El registro, si el tipo lo permite | Ausencia tipada del lenguaje | A2 (o A1 si hay clases) |
 | **F5** Funcional ML/Haskell | Tipo base con solo el valor y subtipos por registro o tipo algebraico; a menudo el valor es un campo compartido | Nada | Opción nativa, solo en el enlace | A1 por subtipado, A2 por campo |
-| **F6** Lisp | Clase base (CLOS) o registro; el valor es un campo | Solo con celdas mutables explícitas | Lista vacía, falso o nulo | A1 en CLOS; A2 en registro |
+| **F6** Lisp funcional (Clojure, Scheme, Racket) | Registro; el valor es un campo | En la variante V2 elegida, devuelve un registro nuevo | Lista vacía, falso o nulo | A2 en registro |
 | **F7** BEAM | Registro con el valor y los enlaces juntos | Nada | Valor ausente del dominio | A2 |
 | **F8** Multi-paradigma | Depende del tipo: clase base o registro | Según el tipo | Según el tipo | A1 o A2, declarada en el README |
 | **F9** Lógico | El valor es el primer argumento del término | Nada | Fallo de unificación | A2 + A3 |
 
 **ES:** Ninguna familia cambia **qué** se guarda: un valor y, en el hijo, sus enlaces. Lo que cambia es si el valor se hereda de un tipo base o se declara dentro del hijo. En las familias sin herencia, la forma A2 **no es una emulación**: es la forma natural de escribir el mismo contrato.
 **EN:** No family changes **what** is stored: a value and, in the child, its links. What changes is whether the value is inherited from a base type or declared inside the child. In families without inheritance, form A2 is **not an emulation**: it is the natural way to write the same contract.
+
+**ES:** Common Lisp usa **V1 / F2** en este monorepo, con SBCL vía Roswell:
+los enlaces de `defstruct` se mutan directamente con `setf` (salvo slots
+`:read-only`), sin celdas adicionales. Puede usar A1 con CLOS o inclusión de
+estructuras, o A2 con el valor embebido, según declare el README. La forma
+de la base no decide la mutabilidad. `nil` es lista vacía y ausencia: el
+contrato de `neighbors` debe distinguir un vértice existente sin vecinos
+de un vértice inexistente mediante un indicador no ambiguo permitido por
+la fase, no imponer inmutabilidad ni elegir un retorno silenciosamente.
+
+**EN:** Common Lisp uses **V1 / F2**, running SBCL through Roswell.
+`defstruct` links support direct `setf`, except `:read-only` slots.
+A1 (CLOS/structure inclusion) or A2 (embedded value) is declared separately
+from mutation policy. Since `nil` means both an empty list and absence,
+the neighbors contract must explicitly distinguish empty success from a
+missing vertex with an unambiguous phase-compatible indicator.
 
 ---
 

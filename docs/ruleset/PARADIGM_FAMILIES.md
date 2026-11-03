@@ -17,11 +17,11 @@
 | Familia práctica / Practical family | Etiquetas del TSV / TSV labels | Nº | Variante |
 |---|---|:--:|:--:|
 | F1 OO con null | `oo-null` (13) + `oo-option` (3) − dyn-null de `ruby` − `rexx` a F2 | 13 | V1 |
-| F2 Scripting dinámico | `dyn-null` (7) − `php` a F1 + `rexx` | 7 | V1 |
+| F2 Scripting dinámico | `dyn-null` (8, incluye Common Lisp mutable) − `php` a F1 + `rexx` | 8 | V1 |
 | F3 Sistemas C-lineage | `sys-pointer` (4) + `sys-sentinel` (1, d) | 5 | V1 |
 | F4 Sistemas modernos | `sys-option` (4) + `sys-tuple` (1, go) + `multi` (2: cpp, rust) | 7 | V1 (clase V3) |
-| F5 Funcional ML/Haskell | `func-option` (10) − los 4 Lisp | 6 | V2 |
-| F6 Lisp / Scheme / Racket | los 4 Lisp de `func-option` | 4 | V2 |
+| F5 Funcional ML/Haskell | `func-option` (9) − los 3 Lisp funcionales | 6 | V2 |
+| F6 Lisp / Scheme / Racket | los 3 Lisp de `func-option`; Common Lisp mutable está en F2 | 3 | V2 |
 | F7 BEAM funcional | `func-result` (4) | 4 | V2 |
 | F8 Multi-paradigma OO | clase **V3** (5: rust, scala, swift, cpp, nim), repartidos en F1/F3/F4 | 4 | V1 |
 | F9 Lógico | `logic` (1, prolog) | 1 | V4 |
@@ -38,7 +38,7 @@ delete(v)     = ...                      -- remove si `delete` choca (d, js, ts,
 ```
 
 ```pseudocode
--- F2 — Scripting dinámico con null (7)
+-- F2 — Scripting dinámico con null (8, incluye Common Lisp V1)
 init(value)   = { value: value, next: absent }   -- mapa/objeto/lista
 set_next(n,x) = n.next = x; return n
 is_empty(c)   = not c                            -- empty? | is_empty
@@ -75,7 +75,7 @@ is_empty(node)     = node == absent                 -- null? | isEmpty
 ```
 
 ```pseudocode
--- F6 — Lisp / Scheme / Racket (4: clojure, common-lisp, racket, scheme)
+-- F6 — Lisp / Scheme / Racket (3: clojure, racket, scheme)
 (make-node value)                  ; make-node | ->Node | make-instance
 (node-value n)                     ; accessor por convención
 (node-with-next n x)               ; NO muta: término nuevo
@@ -147,11 +147,11 @@ node_with_next(node(V, _), N, node(V, present(N))).
 
 ```text
 F1 — OO con null (V1)                      12 lenguajes
-F2 — Scripting dinámico con null (V1)       7 lenguajes
+F2 — Scripting dinámico con null (V1)       8 lenguajes
 F3 — Sistemas C-lineage con sentinel (V1)   5 lenguajes
 F4 — Sistemas modernos con option (V1; V3 es clase)   7 lenguajes
 F5 — Funcional ML/Haskell con option (V2)   6 lenguajes
-F6 — Lisp / Scheme / Racket (V2)            4 lenguajes
+F6 — Lisp / Scheme / Racket (V2)            3 lenguajes
 F7 — BEAM funcional con result (V2)         4 lenguajes
 F8 — Multi-paradigma OO (clase V3 → V1)      4 lenguajes
 F9 — Lógico (V4)                            1 lenguaje
@@ -220,9 +220,17 @@ EN: Shared lessons:
 
     Encapsulation uses private (Java/C#) or # (JS/TS).
 
-F2 — Scripting dinámico con null (V1) — 7 lenguajes
+F2 — Scripting dinámico con null (V1) — 8 lenguajes
 
-Miembros / Members: lua, perl, php, python, r, rexx, tcl-tk.
+Miembros / Members: common-lisp, lua, perl, php, python, r, rexx, tcl-tk.
+
+**ES:** Common Lisp conserva su notación Lisp: `(make-node :value v)`,
+`(node-value n)` y `(setf (node-next n) x)`. Se agrupa aquí por su contrato
+mutable con `nil` y GC, no por sintaxis ni por falta de CLOS.
+
+**EN:** Common Lisp keeps its Lisp notation and native CLOS/structure
+capabilities; this grouping reflects mutable state, `nil` and GC,
+not syntax or the absence of an object system.
 
 Perfil / Profile:
 Eje	Valor dominante
@@ -508,9 +516,20 @@ EN: Shared lessons:
 
     insert_tail/enqueue in O(n) is inevitable. All languages in the family document it the same way.
 
-F6 — Lisp / Scheme / Racket (V2) — 4 lenguajes
+F6 — Lisp / Scheme / Racket (V2) — 3 lenguajes
 
-Miembros / Members: clojure, common-lisp, racket, scheme.
+Miembros / Members: clojure, racket, scheme.
+
+**ES:** Common Lisp no pertenece a esta familia de implementación V2:
+en el monorepo usa registros mutables (`defstruct` + `setf`), ausencia
+`nil` y GC, por lo que se agrupa en F2 / `dyn-null`. Su genealogía Lisp
+no obliga a usar persistencia. SBCL vía Roswell admite mutación de slots
+sin celdas auxiliares; con tail/rear, inserción al final y enqueue son O(1).
+
+**EN:** Common Lisp's chosen implementation is V1 with mutable records,
+`nil` and GC, so it belongs to F2 / `dyn-null`, not this V2 family.
+Lisp ancestry does not require persistence. SBCL through Roswell supports
+slot mutation directly and O(1) insertion/enqueue with tail/rear.
 
 Perfil / Profile:
 Eje	Valor dominante
@@ -529,8 +548,6 @@ ES: Subgrupos:
 
     Scheme/Lisp mínimos: scheme, racket.
 
-    Lisp común: common-lisp.
-
     Lisp sobre JVM: clojure.
 
     Lisp funcional puro: racket.
@@ -538,8 +555,6 @@ ES: Subgrupos:
 EN: Subgroups:
 
     Minimal Scheme/Lisp: scheme, racket.
-
-    Common Lisp: common-lisp.
 
     Lisp on JVM: clojure.
 
@@ -549,7 +564,7 @@ ES: Deviations comunes:
 
     C1: nombres con make- (Scheme) o ->Node (Clojure).
 
-    C2: #f (Scheme/Racket) o nil (Clojure) o nil (Common Lisp) como ausencia.
+    C2: #f (Scheme/Racket) o nil (Clojure) como ausencia.
 
     C4: inmutable, insert_tail/enqueue O(n).
 
@@ -559,7 +574,7 @@ EN: Common deviations:
 
     C1: names with make- (Scheme) or ->Node (Clojure).
 
-    C2: #f (Scheme/Racket) or nil (Clojure) or nil (Common Lisp) as absence.
+    C2: #f (Scheme/Racket) or nil (Clojure) as absence.
 
     C4: immutable, insert_tail/enqueue O(n).
 
@@ -567,7 +582,7 @@ EN: Common deviations:
 
 ES: Lecciones compartidas:
 
-    El módulo se escribe con define-record-type (Scheme/Racket) o defrecord (Clojure) o defstruct (Common Lisp).
+    El módulo se escribe con define-record-type (Scheme/Racket) o defrecord (Clojure).
 
     Los tests se escriben con (check-equal? ...) o (is ...) o (assert ...).
 
@@ -575,7 +590,7 @@ ES: Lecciones compartidas:
 
 EN: Shared lessons:
 
-    The module is written with define-record-type (Scheme/Racket) or defrecord (Clojure) or defstruct (Common Lisp).
+    The module is written with define-record-type (Scheme/Racket) or defrecord (Clojure).
 
     Tests are written with (check-equal? ...) or (is ...) or (assert ...).
 
@@ -806,9 +821,9 @@ ES: Si encuentras un bug en elixir, revisa erlang, gleam, grain (misma familia F
 EN: If you find a bug in elixir, check erlang, gleam, grain (same family F7). They likely share the bug.
 3. Organizar el trabajo de auditoría por familia
 
-ES: La auditoría se puede hacer por familia: cerrar F1 completa (12 lenguajes), luego F2 (7), etc. Es más eficiente que hacerla por lenguaje aislado.
+ES: La auditoría se puede hacer por familia: cerrar F1 completa (12 lenguajes), luego F2 (8), etc. Es más eficiente que hacerla por lenguaje aislado.
 
-EN: The audit can be done by family: close F1 completely (12 languages), then F2 (7), etc. It is more efficient than doing it per isolated language.
+EN: The audit can be done by family: close F1 completely (12 languages), then F2 (8), etc. It is more efficient than doing it per isolated language.
 📋 Criterios de aceptación del propio documento
 
     □
