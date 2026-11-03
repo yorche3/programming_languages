@@ -47,13 +47,42 @@
 
 | Valor | Significado | Ejemplos |
 |-------|-------------|----------|
-| `mutable` | Los valores mutan in-place por defecto | C#, Java, Kotlin, Dart, Go, D, JS, Lua, Perl, PHP, Python, Ruby, Tcl, Groovy, Haxe |
-| `inmutable` | Los valores no mutan; se crean nuevos | Haskell, Elm, Scheme, Racket, Clojure, Common Lisp, Erlang, Elixir, Gleam, Grain, ReScript, F#, OCaml, PureScript |
+| `mutable` | Los valores mutan in-place por defecto | C#, Java, Kotlin, Dart, Go, D, JS, Lua, Perl, PHP, Python, Ruby, Tcl, Groovy, Haxe, Common Lisp (`defstruct` + `setf`) |
+| `inmutable` | Los valores no mutan; se crean nuevos | Haskell, Elm, Scheme, Racket, Clojure, Erlang, Elixir, Gleam, Grain, ReScript, F#, OCaml, PureScript |
 | `mixta` | El programador elige por declaración | Scala, Swift, C++, Rust, Nim, Vala, Ballerina |
 
 **ES:** Este es el eje **más determinante** del módulo. Cambia el pseudocódigo entero (V1 vs V2).
 
 **EN:** This is the **most determining** axis of the module. It changes the entire pseudocode (V1 vs V2).
+
+**ES:** No confundir capacidad del lenguaje con estilo elegido: Common Lisp
+permite código funcional, pero sus registros `defstruct` son mutables salvo
+slots `:read-only`. Aquí se elige V1, como en la base homologada
+`data_structures_basics`. Roswell ejecuta SBCL; ASDF y Quicklisp gestionan
+sistemas/dependencias, no cambian la mutabilidad.
+
+**EN:** Language capability and chosen style are distinct. Common Lisp
+supports functional code, but `defstruct` slots are mutable unless
+`:read-only`. This repository chooses V1, matching its homologated base.
+Roswell launches SBCL; ASDF/Quicklisp do not alter mutation semantics.
+
+**ES / EN:** Comprobación local del 2026-11-02 / Local check:
+
+```lisp
+(format t "implementation: ~A ~A~%"
+        (lisp-implementation-type) (lisp-implementation-version))
+(defstruct mutability-probe value)
+(let ((node (make-mutability-probe :value 1)))
+  (setf (mutability-probe-value node) 2)
+  (format t "defstruct mutation: ~A~%" (mutability-probe-value node)))
+```
+
+Salida real con `ros run --eval` / Actual output with `ros run --eval`:
+
+```text
+implementation: SBCL 2.6.5.roswell
+defstruct mutation: 2
+```
 
 ---
 
@@ -266,13 +295,13 @@
 
 `raku`, `scala`, `swift`.
 
-### Familia `func-option` (10)
+### Familia `func-option` (9)
 
 **ES:** Funcional inmutable con `Maybe`/`Option`. Todo devuelve copia, `with_*` en vez de `set_*`.
 
 **EN:** Immutable functional with `Maybe`/`Option`. Everything returns a copy, `with_*` instead of `set_*`.
 
-`clojure`, `common-lisp`, `elm`, `fsharp`, `haskell`, `ocaml`, `purescript`, `racket`, `rescript`, `scheme`.
+`clojure`, `elm`, `fsharp`, `haskell`, `ocaml`, `purescript`, `racket`, `rescript`, `scheme`.
 
 ### Familia `func-result` (4)
 
@@ -314,13 +343,13 @@
 
 `d`.
 
-### Familia `dyn-null` (7)
+### Familia `dyn-null` (8)
 
 **ES:** Lenguajes dinámicos con `nil`/`undef`/`{}`. Sin verificación de tipos, sin contratos formales.
 
 **EN:** Dynamic languages with `nil`/`undef`/`{}`. No type checking, no formal contracts.
 
-`lua`, `perl`, `php`, `python`, `r`, `ruby`, `tcl-tk`.
+`common-lisp`, `lua`, `perl`, `php`, `python`, `r`, `ruby`, `tcl-tk`.
 
 ### Familia `logic` (1)
 

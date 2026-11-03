@@ -46,7 +46,7 @@ type Node
         this.next = n
         return this
 ```
-Aplica a / Applies to: ada, assembly, ballerina, c, cobol, cpp, crystal, csharp, d, dart, forth, go, groovy, haxe, java, javascript, julia, kotlin, lua, nim, perl, php, python, r, raku, rexx, ruby, rust, scala, swift, tcl-tk, typescript, v, vala, zig.
+Aplica a / Applies to: ada, assembly, ballerina, c, cobol, common-lisp, cpp, crystal, csharp, d, dart, forth, go, groovy, haxe, java, javascript, julia, kotlin, lua, nim, perl, php, python, r, raku, rexx, ruby, rust, scala, swift, tcl-tk, typescript, v, vala, zig.
 V2 — Inmutable / Funcional
 
 ES: Para lenguajes donde los valores no se mutan: cada operación devuelve un valor nuevo. La ausencia se representa con Option/Maybe o el tipo suma del lenguaje. La operación "set" se reemplaza por with_* (copia modificada).
@@ -63,7 +63,7 @@ type Node
     get_next(node)  = return node.next
     with_next(node, n) = return Node(node.value, present(n))
 
-Aplica a / Applies to: clojure, common-lisp, elixir, elm, erlang, fsharp, gleam, grain, haskell, ocaml, purescript, racket, rescript, scheme.
+Aplica a / Applies to: clojure, elixir, elm, erlang, fsharp, gleam, grain, haskell, ocaml, purescript, racket, rescript, scheme.
 V3 — Mixto / Multi-paradigma
 
 ES: Para lenguajes que permiten ambos estilos y donde el módulo elige una variante concreta (normalmente V1 si el objetivo es pedagogía imperativa, V2 si es demostrar el paradigma funcional del lenguaje). La decisión se documenta en el README del lenguaje.
@@ -92,18 +92,31 @@ Aplica a / Applies to: prolog.
 >
 > **EN:** **Technical** scope: this document defines how the pseudocode is written and how it translates to each language so the implementation is idiomatic. Signed by **Software Architect** (support: *Language-Specific SME*). Process, pedagogy, or visual-content documents are out of scope (see [`AGENT_ROLES.md`](../AGENT_ROLES.md)).
 
-**ES:** Verificado contra los 50 submódulos (`.gitmodules`): **cada lenguaje implementa una sola variante**, sin explorar alternativas. El reparto por variante implementada es **35 V1 + 14 V2 + 1 V4 = 50**. V3 es una **clase transversal** (lenguajes multi-paradigma: rust, scala, swift, cpp, nim), que en este monorepo resuelven a **V1** y lo documentan en el README del lenguaje.
+**ES:** Verificado contra los 50 submódulos (`.gitmodules`): **cada lenguaje implementa una sola variante**, sin explorar alternativas. El reparto por variante implementada es **36 V1 + 13 V2 + 1 V4 = 50**. V3 es una **clase transversal** (lenguajes multi-paradigma: rust, scala, swift, cpp, nim), que en este monorepo resuelven a **V1** y lo documentan en el README del lenguaje.
 
-**EN:** Verified against the 50 submodules (`.gitmodules`): **each language implements a single variant**, with no alternatives explored. The distribution by implemented variant is **35 V1 + 14 V2 + 1 V4 = 50**. V3 is a **cross-cutting class** (multi-paradigm languages: rust, scala, swift, cpp, nim), which in this monorepo resolve to **V1** and document it in the language README.
+**EN:** Verified against the 50 submodules (`.gitmodules`): **each language implements a single variant**, with no alternatives explored. The distribution by implemented variant is **36 V1 + 13 V2 + 1 V4 = 50**. V3 is a **cross-cutting class** (multi-paradigm languages: rust, scala, swift, cpp, nim), which in this monorepo resolve to **V1** and document it in the language README.
 
 | Variante / Variant | Nº | Lenguajes / Languages |
 |---|:--:|---|
-| V1 Mutable / Imperativo / OO | 35 | ada, assembly, ballerina, c, cobol, cpp, crystal, csharp, d, dart, forth, go, groovy, haxe, java, javascript, julia, kotlin, lua, nim, perl, php, python, r, raku, rexx, ruby, rust, scala, swift, tcl-tk, typescript, v, vala, zig |
-| V2 Inmutable / Funcional | 14 | clojure, common-lisp, elixir, elm, erlang, fsharp, gleam, grain, haskell, ocaml, purescript, racket, rescript, scheme |
+| V1 Mutable / Imperativo / OO | 36 | ada, assembly, ballerina, c, cobol, common-lisp, cpp, crystal, csharp, d, dart, forth, go, groovy, haxe, java, javascript, julia, kotlin, lua, nim, perl, php, python, r, raku, rexx, ruby, rust, scala, swift, tcl-tk, typescript, v, vala, zig |
+| V2 Inmutable / Funcional | 13 | clojure, elixir, elm, erlang, fsharp, gleam, grain, haskell, ocaml, purescript, racket, rescript, scheme |
 | V3 Mixto (clase transversal) | 5 | rust, scala, swift, cpp, nim — cada uno implementa **V1** |
 | V4 Lógico / Declarativo | 1 | prolog |
 
 ### 🧩 Indicador de fallo: qué queda fuera / Failure indicator: what stays out
+
+**ES:** Common Lisp usa **V1** en este monorepo: los slots de `defstruct`
+son mutables con `setf` salvo declaración `:read-only`. Roswell es el
+gestor/lanzador; el runtime comprobado es SBCL, no otro dialecto Lisp.
+La base homologada `data_structures_basics` conserva identidad y muta enlaces.
+No exige celdas auxiliares ni reconstrucción persistente; con tail/rear,
+`insert_tail` y `enqueue` son O(1). `nil` como ausencia no implica V2.
+
+**EN:** Common Lisp uses **V1** here: `defstruct` slots support `setf` unless
+declared `:read-only`. Roswell launches the verified SBCL runtime.
+The homologated base mutates links while preserving identity; extra cells
+or persistent reconstruction are not required. Tail/rear enable O(1)
+insertion/enqueue. Using `nil` for absence does not imply immutability.
 
 **ES:** Esta tabla es **de familia, no de lenguaje**: la decisión concreta vive en el README del lenguaje, que es donde se declara el indicador natural. Un lenguaje aparece **una sola vez**.
 
@@ -146,7 +159,7 @@ ballerina	new / init	self.value	self.next = n	() (nil)	self.isEmpty()	self.size(
 c	node_new(v)	node->value	node->next = n	NULL	list_is_empty(l)	list_size(l)	list_delete(l, v)
 clojure	(->Node v nil) / make-node	(:value node)	(assoc node :next n)	nil	(empty? l)	(count l)	(remove ...)
 cobol	INITIALIZE / MOVE	NODE-VALUE	MOVE n TO NODE-NEXT	NULL / espacios	IF COUNT = 0	NODE-COUNT	DELETE-NODE
-common-lisp	(make-node :value v)	(node-value n)	(setf (node-next n) x)	nil	(node-empty-p l)	(node-size l)	(node-delete l v)
+common-lisp	(make-node :value v)	(node-value n)	(setf (node-next n) x)	nil	(linked-list-is-empty l)	(linked-list-size l)	(linked-list-delete l v)
 cpp	Node(v) / new Node(v)	node.value / node->value	node.next = n	nullptr / NULL	list.empty()	list.size()	list.delete(v)
 crystal	Node.new(v)	node.value	node.next = n	nil	list.empty?	list.size	list.delete(v)
 csharp	new Node(v)	node.Value	node.Next = n	null / int?	list.IsEmpty	list.Size / list.Count	list.Delete(v) / Remove
@@ -234,13 +247,13 @@ EN: Pseudocode declares absent for "no value" and, in fallible operations, the l
 Familia / Family	Miembros / Members	Indicador de fallo / Failure indicator
 OO con null	csharp, dart, groovy, haxe, java, javascript, kotlin, php, typescript, vala	null / nil (nativo)
 OO con Option	scala, swift	Option / Optional
-Funcional con Option	elm, fsharp, gleam, grain, haskell, ocaml, purescript, rescript, scheme, racket, clojure, common-lisp	Maybe / Option / nil (Lisp)
+Funcional con Option	elm, fsharp, gleam, grain, haskell, ocaml, purescript, rescript, scheme, racket, clojure	Maybe / Option / nil (Lisp)
 Funcional con Result	elixir, erlang	{:ok, _} / {:error, _} / undefined
 Sistemas con punteros	ada, c, cobol, cpp, forth	NULL / null / 0
 Sistemas con Option	rust, zig, v	Option<T> / ?T
 Sistemas con tupla	go	(T, bool)
 Sistemas con sentinel	d, assembly	-1 / null documentado
-Dinámicos con null	lua, perl, python, r, raku, ruby, tcl-tk	nil / undef / None / NULL / {}
+Dinámicos con null	common-lisp, lua, perl, python, r, raku, ruby, tcl-tk	nil / undef / None / NULL / {}
 Lógico	prolog	fallo de unificación
 Multi-paradigma	ballerina, crystal, julia, nim, rexx	el que declare el README del lenguaje
 📐 Complejidad declarada / Declared complexity
@@ -331,7 +344,7 @@ Desviaciones NO permitidas / Not allowed deviations:
 | 4 | Constructor que no puede fallar de forma idiomática | rexx (`init` devolvía `.Nil`), swift (`fatalError` dentro de `init`) | Nivel `workaround`: se registra la desviación, no se silencia |
 | 5 | Memoria manual y punteros | zig (`destroy`, `?*Node`, `std.testing.allocator`), v (`@[heap]`, `?&Node`), c, cpp, cobol (`ALLOCATE` / `BASED`), assembly (allocator propio sobre `brk`, sin libc) | `deinit` / `free` / `ALLOCATE` son desviación permitida; la suite comprueba ausencia de fugas |
 | 6 | Puntero crudo donde existía alternativa con propiedad | rust (`*mut Node` en vez de `Option<Box<Node>>`) | Nivel `workaround`; `Rc<RefCell>` se evaluó y se rechazó por coste pedagógico |
-| 7 | Complejidad real de `insert_tail` / `enqueue` | clojure, elm, erlang, fsharp, gleam, grain, haskell, ocaml, purescript, rescript, scheme, racket, common-lisp, elixir, rust, prolog | O(n) en V2/V4 por reconstrucción o ausencia de cola mutable; se declara en el README |
+| 7 | Complejidad real de `insert_tail` / `enqueue` | clojure, elm, erlang, fsharp, gleam, grain, haskell, ocaml, purescript, rescript, scheme, racket, elixir, rust, prolog | O(n) en V2/V4 por reconstrucción o ausencia de cola mutable; se declara en el README |
 | 8 | Conflicto de palabra reservada o de BCL en `delete` / `next` / `init` | d (`delete` keyword), javascript y typescript (`delete`), perl (`next`), ruby (`delete` de `Array`), tcl-tk (`delete` de lista), csharp (`LinkedList` / `Queue` / `Stack`) | El nombre canónico se ajusta al idioma (`remove`, `unlink`) y se registra en la tabla por lenguaje |
 | 9 | Predicado vacío y tamaño idiomáticos | go (`IsEmpty` exportado), rust (`is_empty`, `len`), haskell (`length`, `null`), ruby (`empty?`), scheme (`null?`), v (`is_empty`) | El README del lenguaje fija el nombre y la tabla canónica lo refleja |
 | 10 | Runner de tests sin mensaje de aserción | vala (`GLib.Test` → `Test.message` + `assert_not_reached`), zig (ayudas `check_*` que imprimen el contrato antes de fallar), v (`assert cond, 'msg'`), lenguajes con `assert`/`expect` sin parámetro de mensaje | La suite imprime el mensaje del contrato antes de fallar; el andamiaje con mensaje se conserva |

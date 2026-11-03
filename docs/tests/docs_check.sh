@@ -130,5 +130,27 @@ for rec in $files; do
 done
 assert_eq 'auditorías: los registros traen los cuatro estados' '' "$missing_states"
 
+# --- mutabilidad ↔ nombres canónicos / mutability ↔ canonical names ----------
+RULESET="$REPO/docs/ruleset"
+characteristics="$RULESET/data/language_characteristics.tsv"
+canonical="$RULESET/data/canonical_names.tsv"
+assert_eq 'Common Lisp: mutabilidad y variante' "$(printf 'mutable\tV1')" \
+    "$(awk -F'\t' '$1=="common-lisp" {print $8 "\t" $15}' "$characteristics")"
+assert_eq 'Common Lisp: familia, setter y ausencia sin copia obligatoria' \
+    "$(printf 'V1\tdyn-null\t(setf (node-next n) x)\t-\tnil')" \
+    "$(awk -F'\t' '$1=="common-lisp" {print $2 "\t" $3 "\t" $6 "\t" $7 "\t" $8}' "$canonical")"
+assert_eq 'ruleset: variantes coherentes entre tablas' '' \
+    "$(awk -F'\t' 'NR==FNR {if (FNR>1) variant[$1]=$15; next}
+        FNR>1 && variant[$1]!=$2 {print $1}' "$characteristics" "$canonical")"
+variant_counts="$(awk -F'\t' 'NR>1 {count[$15]++}
+    END {printf "%d V1 + %d V2 + %d V4 = %d", count["V1"], count["V2"], count["V4"], NR-1}' "$characteristics")"
+assert_eq 'ruleset: distribución de los 50 lenguajes' '36 V1 + 13 V2 + 1 V4 = 50' "$variant_counts"
+assert_contains 'pseudocódigo: conteos derivados del catálogo' "$variant_counts" \
+    "$(cat "$RULESET/PSEUDOCODE_CONVENTION.md")"
+assert_eq 'Common Lisp: no listado como V2 en pseudocódigo' '' \
+    "$(awk '/^\| V2 / && /common-lisp/ {print}' "$RULESET/PSEUDOCODE_CONVENTION.md")"
+assert_contains 'guía avanzada: Common Lisp mutable no exige celdas' \
+    'Common Lisp usa **V1 / F2**' "$(cat "$REPO/docs/implementations/07_Data_Structures_Advanced.md")"
+
 printf '\ndocs checks: %s passed, %s failed\n' "$passed" "$failed"
 [[ "$failed" -eq 0 ]]
