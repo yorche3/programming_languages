@@ -1483,3 +1483,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`common-lisp/core/algorithms/data_structures_advanced/README.md` y `common-lisp/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 🔄 6/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL)` -> `core.algorithms.data_structures_advanced 🔄 7/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-11-06T22:18:17-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_advanced
+Lenguaje(s) / Language(s): cpp
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_advanced/cpp.md`, commit `92fc573`)
+Tests y comandos / Tests and commands:
+- `bazelisk test //...` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`cpp/core/algorithms/data_structures_advanced/README.md` y `cpp/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 🔄 7/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp)` -> `core.algorithms.data_structures_advanced 🔄 8/50 (Ada, Assembly, Ballerina, C, Clojure, COBOL, Common Lisp, C++)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
