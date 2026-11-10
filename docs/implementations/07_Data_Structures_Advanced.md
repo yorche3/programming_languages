@@ -115,18 +115,22 @@ success —empty list for an isolated vertex— and `-1` the missing vertex.
 
 **ES:** **Código de resultado del módulo:** `0` = éxito o «sí», `-1` = fallo o
 «no», en todas las operaciones y también en las preguntas (`contains`,
-`has_edge`, `is_empty`): una misma pregunta se compara siempre igual, sin
-una bandera aparte que invierta el significado del `0`. Los lenguajes con
-booleano nativo (`Boolean`, `bool`, `true/false`, `T/nil`) usan ese booleano;
-COBOL y Assembly, que no lo tienen, usan el par `0`/`-1` y reservan `NULL` o
-`ABSENT` para la ausencia de enlace.
+`has_edge`, `is_empty`): una misma pregunta se compara siempre igual. Se usa el
+booleano nativo solo cuando su valor falso **no** coincide con el átomo de
+ausencia (`Boolean`, `bool`, `true`/`false`); donde el lenguaje usa la ausencia
+como falso —Common Lisp, con `nil` como lista vacía y enlace ausente— se usa el
+par `0`/`-1`, igual que en COBOL y Assembly, y el átomo de ausencia queda solo
+para el enlace. Así una respuesta negativa nunca se confunde con un enlace
+inexistente ni con una lista vacía.
 
 **EN:** **Module result code:** `0` = success or “yes”, `-1` = failure or
 “no”, for every operation and for questions too (`contains`, `has_edge`,
-`is_empty`): the same question always compares the same way, with no
-separate flag that flips what `0` means. Languages with a native boolean
-(`Boolean`, `bool`, `true/false`, `T/nil`) use it; COBOL and Assembly, which
-lack one, use the `0`/`-1` pair and keep `NULL` or `ABSENT` for an absent link.
+`is_empty`): the same question always compares the same way. The native boolean
+is used only when its false value is **not** the absence atom (`Boolean`,
+`bool`, `true`/`false`); where the language uses absence as false —Common Lisp,
+with `nil` as both the empty list and an absent link— the `0`/`-1` pair is used,
+as in COBOL and Assembly, and the absence atom is kept for links only. A
+negative answer is thus never confused with a missing link or an empty list.
 
 ---
 

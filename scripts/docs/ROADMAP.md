@@ -70,6 +70,50 @@ every CLI surface. Review all 50 scaffolds with native checks or explicit pendin
 status, protect reruns and authored contents, and keep academic modules and
 manual audits outside this release.
 
+### Fix pendiente: Git anidado del generador / Pending fix: generator-created nested Git
+
+**ES:** Reportado el 2026-11-08 en Crystal. Al inicializar un módulo,
+`crystal init lib` puede crear un `.git/` dentro de su carpeta. Desde allí,
+`glot` detecta esa carpeta como raíz y busca otro estado: `get lang` pierde
+la clave y `scaffold` informa que faltan datos del sprint aunque el estado
+del monorepo esté completo. El autor tuvo que retirar la carpeta manualmente;
+ni `scaffold` ni su delegado resolvieron el caso. La corrección queda pendiente
+para el siguiente fix del bloque de scaffold de v2.1.0.
+
+**EN:** Reported on 2026-11-08 for Crystal. A generated module-local `.git/`
+shadows the enclosing submodule/monorepo, selecting a different state file.
+The author had to remove it manually; neither scaffold nor its delegate
+handled it. This remains pending for the next v2.1.0 scaffold fix.
+
+Criterios de aceptación / Acceptance criteria:
+
+- Resolver el monorepo y su estado desde dentro del módulo **antes** de
+  ejecutar scaffold, incluso si existe el Git anidado. No requerir otro
+  `use`, un `GLOT_ROOT` manual ni crear un segundo estado.
+  / Resolve the enclosing monorepo and existing state before scaffold,
+  without another `use`, manual root override or duplicate state.
+- `glot scaffold` retira automáticamente el `.git/` generado dentro del
+  módulo; es una operación de tooling, no una tarea del delegate ni del autor.
+  Donde el inicializador admita una opción nativa comprobada, evitar crearlo
+  en `new`, pero también resolver módulos ya generados.
+  / Scaffold removes generator-created module-local Git itself; use a verified
+  native opt-out during initialization where available, and handle existing modules.
+- Limitar la retirada al directorio `.git/` del módulo reconocido; preservar
+  el gitfile del submódulo, el Git del lenguaje/monorepo y todo el contenido
+  fuente. No borrar Git con commits, remotos o trabajo propio no identificado
+  como artefacto del generador: detenerse con diagnóstico explícito.
+  / Scope cleanup to verified generated metadata; preserve submodule gitfiles,
+  enclosing repositories and sources, and explicitly block ambiguous authored Git.
+- Revisar los 50 inicializadores y las retiradas actuales de `.git`, no solo
+  Crystal; reemplazar eliminaciones incondicionales por la misma protección.
+  / Review all initializers and existing unconditional Git cleanup consistently.
+- Añadir regresiones para invocación desde raíz, submódulo y módulo con Git
+  anidado: mismo `path`/sprint, limpieza real, rerun idempotente, dry-run sin
+  cambios y preservación/bloqueo de Git ajeno. Validar Crystal y los demás
+  generadores afectados; no considerar el fix cerrado solo por documentarlo.
+  / Test state identity, actual cleanup, reruns, non-mutating dry-run and
+  authored Git protection across Crystal and other affected generators.
+
 **ES:** `glot` convierte el ciclo de trabajo de un módulo —**situar, crear, ejecutar, delegar, cerrar y publicar**— en comandos reproducibles, y deja la evidencia en el repositorio.
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository.
