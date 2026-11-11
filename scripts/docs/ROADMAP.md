@@ -114,6 +114,48 @@ Criterios de aceptación / Acceptance criteria:
   / Test state identity, actual cleanup, reruns, non-mutating dry-run and
   authored Git protection across Crystal and other affected generators.
 
+### Fix pendiente: scaffold incompleto y aviso ausente / Pending fix: incomplete scaffold and missing handoff
+
+**ES:** Reportado el 2026-11-09 en D. `glot scaffold` imprimió
+`rm -f source/app.d && rm -rf .git && touch .gitignore`, anunció garantizar
+`.gitignore` y terminó sin indicar el trabajo pendiente del delegate scaffold.
+El listado aportado mostró solo `dub.sdl` y `source/`; al ser `ls` sin `-a`,
+no demuestra ausencia de `.gitignore`. El catálogo actual de D no declara
+creación adicional de estructura/archivos ni completado delegado (nota `-`).
+Revisar el alcance faltante contra la guía y las bases homologadas, sin asumir
+que imprimir una orden prueba que existen todos los artefactos requeridos.
+
+**EN:** Reported on 2026-11-09 for D. Scaffold printed cleanup and ignore-file
+commands but gave no pending delegate handoff. Plain `ls` cannot establish
+whether `.gitignore` exists. D's current catalog declares neither additional
+layout/file creation nor a delegate completion note. Verify required artifacts
+against the guide and homologated bases rather than treating printed commands
+as evidence of a complete scaffold.
+
+Criterios de aceptación / Acceptance criteria:
+
+- Revisar D y los demás lenguajes: ejecutar desde `glot scaffold` todos los
+  `mkdir`, `touch`, configuraciones y runners repetibles que correspondan a
+  su layout idiomático. No imponer carpetas genéricas ni delegar comandos
+  deterministas; preservar contenido propio y evitar borrados incondicionales.
+  / Execute all required deterministic setup in tooling, preserving native
+  layouts and authored content instead of delegating shell operations.
+- Comprobar los artefactos reales, incluidos archivos ocultos y contenido
+  mínimo requerido; un archivo vacío no sustituye una configuración funcional.
+  Si falla un paso o falta un resultado exigido, informar el error explícitamente.
+  / Check actual artifacts, hidden files and required contents, with explicit
+  failures for missing outputs rather than success-shaped completion.
+- Si queda análisis o adecuación idiomática para el delegate scaffold,
+  anunciarlo al terminar, con el encargo y lo pendiente; mantener coherentes
+  catálogo, guía y salida. No presentar esa situación como scaffold completo.
+  / Explicitly identify remaining delegate work and its request, consistently
+  across catalog, guide and terminal output.
+- Añadir regresiones de D y casos equivalentes: artefactos esperados,
+  `.gitignore`, aviso de completado cuando corresponda, errores visibles,
+  rerun sin pérdida de contenido y dry-run sin modificaciones.
+  / Test required artifacts, hidden files, handoff messages, visible failures,
+  non-destructive reruns and non-mutating dry-run.
+
 **ES:** `glot` convierte el ciclo de trabajo de un módulo —**situar, crear, ejecutar, delegar, cerrar y publicar**— en comandos reproducibles, y deja la evidencia en el repositorio.
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository.
