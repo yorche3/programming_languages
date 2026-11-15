@@ -1630,3 +1630,14 @@ Tests y comandos / Tests and commands:
 README(s) verificado(s) / README(s) verified: yes (`grain/core/algorithms/data_structures_advanced/README.md` y `grain/core/algorithms/README.md`)
 Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 🔄 19/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go)` -> `core.algorithms.data_structures_advanced 🔄 20/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain)`
 Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
+
+Fecha / Date: 2026-11-14T20:58:58-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.data_structures_advanced
+Lenguaje(s) / Language(s): groovy
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/data_structures_advanced/groovy.md`, commit `0b233a0`)
+Tests y comandos / Tests and commands:
+- `./gradlew test` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`groovy/core/algorithms/data_structures_advanced/README.md` y `groovy/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.data_structures_advanced 🔄 20/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain)` -> `core.algorithms.data_structures_advanced 🔄 21/50 (Ada, Assembly, Ballerina, C, C#, Clojure, COBOL, Common Lisp, C++, Crystal, D, Dart, Elixir, Elm, Erlang, Forth, F#, Gleam, Go, Grain, Groovy)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
