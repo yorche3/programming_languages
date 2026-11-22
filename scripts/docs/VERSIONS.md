@@ -313,6 +313,14 @@ pendiente de protección.
 **EN:** Ballerina warns that `bal test` can succeed without cases; runner
 protection remains pending.
 
+**ES:** Groovy conserva archivos propios y retira solo la pareja de ejemplos
+Gradle 9.6.1 verificada si no hay más archivos en `lib/src`. Se advierte que
+Gradle todavía puede devolver éxito sin casos.
+
+**EN:** Groovy preserves authored files and removes only the verified Gradle
+9.6.1 sample pair when `lib/src` has no other files. Gradle can still succeed
+without cases and this is flagged.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

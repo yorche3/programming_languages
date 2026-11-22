@@ -384,6 +384,9 @@ sandbox_make() {
 [submodule "haskell"]
         path = haskell
         url = ../remote/haskell.git
+[submodule "groovy"]
+        path = groovy
+        url = ../remote/groovy.git
 [submodule "v"]
         path = v
         url = ../remote/v.git
@@ -2296,6 +2299,50 @@ ln -s "$CB/include/data_structures_basics.h" "$CB/src/data_structures_basics.c"
 glot_run_sandbox scaffold c algorithms/data_structures_basics
 assert_eq 'scaffold C symlink: bloquea' '4' "$rc_last"
 assert_eq 'scaffold C symlink: conserva destino' 'author header' "$(cat "$CB/include/data_structures_basics.h")"
+
+# Groovy: retirar solo la pareja exacta sin tocar contenido propio.
+GR="$SANDBOX/groovy/core/algorithms/naive_sort"
+mkdir -p "$GR/lib/src/main/groovy/naive_sort" "$GR/lib/src/test/groovy/naive_sort"
+mkdir -p "$GR/lib/other"
+printf 'author library\n' >"$GR/lib/other/LibraryNotes.groovy"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/groovy.Library.groovy" >"$GR/lib/src/main/groovy/naive_sort/Library.groovy"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/groovy.LibraryTest.groovy" >"$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy"
+glot_run_sandbox -n scaffold groovy algorithms/naive_sort
+assert_eq 'scaffold Groovy dry-run: código' '0' "$rc_last"
+assert_eq 'scaffold Groovy dry-run: conserva muestra' 'si' "$([[ -f "$GR/lib/src/main/groovy/naive_sort/Library.groovy" ]] && echo si || echo no)"
+glot_run_sandbox scaffold groovy algorithms/naive_sort
+assert_eq 'scaffold Groovy: código' '0' "$rc_last"
+assert_eq 'scaffold Groovy: retira fuente de muestra' 'no' "$([[ -e "$GR/lib/src/main/groovy/naive_sort/Library.groovy" ]] && echo si || echo no)"
+assert_eq 'scaffold Groovy: retira test de muestra' 'no' "$([[ -e "$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy" ]] && echo si || echo no)"
+assert_eq 'scaffold Groovy: conserva Library fuera del source root' 'author library' "$(cat -- "$GR/lib/other/LibraryNotes.groovy")"
+glot_run_sandbox scaffold groovy algorithms/naive_sort
+assert_eq 'scaffold Groovy repetido: código' '0' "$rc_last"
+assert_contains 'scaffold Groovy: anuncia revisión' 'revisar muestras Groovy' "$err"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/groovy.Library.groovy" >"$GR/lib/src/main/groovy/naive_sort/Library.groovy"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/groovy.LibraryTest.groovy" >"$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy"
+printf 'author helper\n' >"$GR/lib/src/main/groovy/naive_sort/LibraryHelper.groovy"
+glot_run_sandbox scaffold groovy algorithms/naive_sort
+assert_eq 'scaffold Groovy con helper: código' '0' "$rc_last"
+assert_eq 'scaffold Groovy con helper: conserva helper' 'author helper' "$(cat -- "$GR/lib/src/main/groovy/naive_sort/LibraryHelper.groovy")"
+assert_eq 'scaffold Groovy con helper: conserva muestras' 'si' "$([[ -f "$GR/lib/src/main/groovy/naive_sort/Library.groovy" && -f "$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy" ]] && echo si || echo no)"
+rm -- "$GR/lib/src/main/groovy/naive_sort/LibraryHelper.groovy"
+printf 'authored test\n' >"$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy"
+glot_run_sandbox scaffold groovy algorithms/naive_sort
+assert_eq 'scaffold Groovy test propio: código' '0' "$rc_last"
+assert_eq 'scaffold Groovy test propio: conserva test' 'authored test' "$(cat -- "$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy")"
+assert_eq 'scaffold Groovy test propio: conserva fuente' 'si' "$([[ -f "$GR/lib/src/main/groovy/naive_sort/Library.groovy" ]] && echo si || echo no)"
+rm -- "$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy"
+ln -s "$GR/lib/src/main/groovy/naive_sort/Library.groovy" "$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy"
+glot_run_sandbox scaffold groovy algorithms/naive_sort
+assert_eq 'scaffold Groovy enlace: rechaza' '4' "$rc_last"
+assert_eq 'scaffold Groovy enlace: conserva destino' 'si' "$([[ -f "$GR/lib/src/main/groovy/naive_sort/Library.groovy" ]] && echo si || echo no)"
+rm -- "$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/groovy.LibraryTest.groovy" >"$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy"
+mv -- "$SANDBOX/scripts/data/scaffold_templates/groovy.LibraryTest.groovy" "$SANDBOX/scripts/data/scaffold_templates/groovy.LibraryTest.saved"
+glot_run_sandbox scaffold groovy algorithms/naive_sort
+assert_eq 'scaffold Groovy plantilla ausente: rechaza' '4' "$rc_last"
+assert_eq 'scaffold Groovy plantilla ausente: conserva pareja' 'si' "$([[ -f "$GR/lib/src/main/groovy/naive_sort/Library.groovy" && -f "$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy" ]] && echo si || echo no)"
+mv -- "$SANDBOX/scripts/data/scaffold_templates/groovy.LibraryTest.saved" "$SANDBOX/scripts/data/scaffold_templates/groovy.LibraryTest.groovy"
 
 # v2.1.0: el nombre del fuente y el archivo vacío de pruebas son comandos del catálogo.
 BB="$SANDBOX/ballerina/core/algorithms/naive_sort"

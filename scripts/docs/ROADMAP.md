@@ -323,6 +323,20 @@ prototype Ballerina parser distinguished empty and passing reports; it is not
 integrated, and report isolation and lifecycle still need verification along
 with the remaining scenarios.
 
+**ES — Groovy (2026-11-22):** el borrado previo buscaba `Library*.groovy`
+en todo `lib` y podía eliminar archivos propios. El scaffold en desarrollo
+retira solo la pareja exacta generada por Gradle 9.6.1 cuando no hay otros
+archivos o enlaces en `lib/src`, y conserva las demás variantes para revisión.
+En un proyecto aislado, `./gradlew test --offline` informó `NO-SOURCE` y
+devolvió éxito; queda pendiente rechazar ejecuciones sin casos de forma fiable.
+
+**EN — Groovy (2026-11-22):** the previous deletion searched all of `lib` for
+`Library*.groovy` and could remove authored files. The development scaffold
+removes only the exact Gradle 9.6.1 sample pair when no other files or links
+exist in `lib/src`, preserving other variants for review. In an isolated
+project, `./gradlew test --offline` reported `NO-SOURCE` and succeeded;
+reliably rejecting runs without cases remains pending.
+
 **ES — Scala (2026-11-22):** el scaffold sobrescribía la fuente en cada
 ejecución y dejaba `build.sbt` y `build.properties` vacíos. Ahora crea
 fuente, build, versión sbt e ignore solo si faltan; rechaza enlaces y pide

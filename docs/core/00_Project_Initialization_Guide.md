@@ -159,7 +159,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **csharp** | `dotnet new sln` → `dotnet new classlib` → `dotnet new xunit` → `dotnet sln add` → `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj` | Borrar `Class1.cs` y `UnitTest1.cs` y añadir `.gitignore` |
 | **d** | `dub init {module} --format=sdl` → retirar solo el ejemplo verificado → crear `source/{module}.d` y `test/` → configurar `unittest` solo en el manifiesto generado reconocido | En otros manifiestos comprobar que `dub test` incluye `test/`; revisar cualquier `source/app.d` diferente del ejemplo y conservar contenido propio |
 | **fsharp** | Igual que C# con `-lang F#`, incluido `dotnet add test/{Module}.Tests/{Module}.Tests.fsproj reference src/{Module}/{Module}.fsproj` | Conservar los proyectos anidados y su referencia; cualquier renombrado de `Library.fs`/`Tests.fs` actualiza sus `Compile Include` y conserva contenido propio |
-| **groovy** | `gradle init --type groovy-library --dsl groovy --use-defaults` | Borrar `Library.groovy` y `LibraryTest.groovy` |
+| **groovy** | `gradle init --type groovy-library --dsl groovy --project-name {module} --package {module} --use-defaults` → retirar solo la pareja de muestras verificada, si no hay otros archivos en `lib/src` | Conservar muestras distintas o con otros archivos y revisar; Gradle puede devolver éxito sin casos |
 | **go** | `go mod init example.com/{module}` → `mkdir -p src tests` | El paquete externo de `tests/` importa `example.com/{module}/src`, sin imponer `test/` |
 | **haskell** | `cabal init --lib -n --source-dir=lib --package-name={module-kebab} --expose-module={Module}` → crear `lib/{Module}.hs` solo si falta | `{module-kebab}` sustituye subrayados por guiones; declarar `module {Module} where`, conservar `hs-source-dirs: lib` y completar test-suite/runner |
 | **haxe** | `mkdir -p src test` → `haxelib install utest` | `build.hxml` y `RunTests.hx` son contenido del sprint |
@@ -423,6 +423,49 @@ false; the suite connects its groups and passes it the framework's result, for
 example `TestStatus.finish(Testing.printSummary())`. Authored files are
 preserved; only the recognized previous empty runner is upgraded. The
 framework is adapted to the domain during completion.
+
+### Groovy — Gradle + lib/src/
+
+**ES:** Desde la raíz del paquete, retirar únicamente las muestras exactas de
+Gradle 9.6.1 si son los únicos archivos o enlaces en `lib/src`. Si alguna
+difiere, falta, o hay otros archivos, conservar ambas para revisión. El comando
+de pruebas puede salir con éxito y `test NO-SOURCE`: no valida una suite.
+
+**EN:** From the package root, remove only the exact Gradle 9.6.1 samples when
+they are the only files or links in `lib/src`. Preserve both for review if
+either differs or is missing, or other files exist. The test command can
+succeed with `test NO-SOURCE`; that does not validate a suite.
+
+```bash
+src=lib/src/main/groovy/{module}/Library.groovy
+tst=lib/src/test/groovy/{module}/LibraryTest.groovy
+unsafe=0
+for path in lib lib/src lib/src/main lib/src/main/groovy \
+  lib/src/main/groovy/{module} lib/src/test lib/src/test/groovy \
+  lib/src/test/groovy/{module}; do
+  if [[ -L "$path" || ( -e "$path" && ! -d "$path" ) ]]; then unsafe=1; fi
+done
+if [[ "$unsafe" == 1 || ! -d lib/src || -L "$src" || -L "$tst" ||
+      ( -e "$src" && ! -f "$src" ) || ( -e "$tst" && ! -f "$tst" ) ]]; then
+  printf 'scaffold: ruta Groovy no segura o fuentes ausentes / unsafe Groovy path or missing sources\n' >&2
+  false
+elif [[ -f "$src" && -f "$tst" ]]; then
+  source_sample="$(sed 's/@MODULE@/{module}/g' {root}/scripts/data/scaffold_templates/groovy.Library.groovy)" &&
+  test -n "$source_sample" &&
+  test_sample="$(sed 's/@MODULE@/{module}/g' {root}/scripts/data/scaffold_templates/groovy.LibraryTest.groovy)" &&
+  test -n "$test_sample" && {
+    cmp -s "$src" <(printf '%s\n' "$source_sample"); a=$?
+    cmp -s "$tst" <(printf '%s\n' "$test_sample"); b=$?
+    if [[ "$a" -gt 1 || "$b" -gt 1 ]]; then
+      printf 'scaffold: no se pudo comparar la muestra Groovy / could not compare Groovy sample\n' >&2
+      false
+    elif [[ "$a" == 0 && "$b" == 0 ]]; then
+      extra="$(find lib/src \( -type f -o -type l \) ! -path "$src" ! -path "$tst" -print -quit)" &&
+        { [[ -n "$extra" ]] || rm -- "$tst" "$src"; }
+    fi
+  }
+fi
+```
 
 ### Haxe — build.hxml + src/ + test/
 ```bash

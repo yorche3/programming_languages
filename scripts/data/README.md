@@ -199,6 +199,14 @@ que `bal test` puede devolver éxito sin ejecutar casos.
 **EN:** Ballerina uses `tests/lib_test.bal` as in the homologated base and warns
 that `bal test` can succeed without executing cases.
 
+**ES:** Groovy retira solo la pareja exacta de ejemplos Gradle 9.6.1 cuando
+no hay otros archivos o enlaces en `lib/src`. Rechaza rutas inseguras y
+conserva el resto; Gradle aún puede informar éxito sin casos.
+
+**EN:** Groovy removes only the exact Gradle 9.6.1 sample pair when there are
+no other files or links in `lib/src`. It rejects unsafe paths and preserves
+other content; Gradle can still report success without cases.
+
 **ES:** El runner mínimo de PureScript puede devolver éxito sin ejecutar casos;
 completar y verificar la suite sigue siendo necesario.
 
