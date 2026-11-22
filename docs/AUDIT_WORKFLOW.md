@@ -100,6 +100,20 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 | 6 | Commit | `fix({fase}): align {modulo} with the audit` + la causa en el cuerpo | Commit del submódulo |
 | 7 | Integración y puntero | Merge en el `main` del submódulo; en el monorepo `glot pointer` + `glot save 9` | Gitlink actualizado en la rama `audit/...` |
 
+**ES:** El `align` deja **un commit por paso** en la rama del submódulo —código
+(`fix({fase}): align {modulo} with the audit`), documentación del módulo
+(`docs({fase}): …`) cuando cambien estructura o complejidad, y acta
+(`chore({fase}): …`)— y **no empuja**: el push lo decide el autor. Si el paso
+exige cambiar la suite, entonces no es un `align`, como dice el párrafo
+siguiente.
+
+**EN:** An `align` leaves **one commit per step** on the submodule branch —code
+(`fix({fase}): align {modulo} with the audit`), module documentation
+(`docs({fase}): …`) when structure or complexity changes, and the evidence
+record (`chore({fase}): …`)— and **does not push**: the author decides the
+push. If the step requires changing the suite, it is not an `align`, as the next
+paragraph states.
+
 **ES:** Lo que un `align` **nunca** toca: la especificación del módulo, el pseudocódigo, el contrato de errores de la fase, la suite de pruebas y el andamiaje del lenguaje. Si un hallazgo exige cambiar algo de eso, **no es un `align`**: es rehacer el módulo, y eso se lleva con el ciclo de [`WORKFLOW.md`](WORKFLOW.md) desde una rama del submódulo —ahí sí aplican `4e correct`, `5b fix` y `5c refactor`, con su causa obligatoria—.
 
 **EN:** What an `align` **never** touches: the module specification, the pseudocode, the phase's error contract, the test suite and the language's scaffolding. If a finding requires changing any of that, it is **not an `align`**: it is redoing the module, and that runs with the [`WORKFLOW.md`](WORKFLOW.md) cycle from a submodule branch —where `4e correct`, `5b fix` and `5c refactor` do apply, with their mandatory cause—.
