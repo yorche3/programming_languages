@@ -154,6 +154,13 @@ revisión pendiente del runner y la selección de varias suites.
 **EN:** Rexx preserves the source and rejects symbolic paths; it reports the
 pending runner review and multiple-suite selection.
 
+**ES:** Scheme crea un módulo Guile y excluye logs SRFI-64 si falta el ignore;
+preserva archivos existentes, rechaza enlaces y avisa de la revisión del runner.
+
+**EN:** Scheme creates a Guile module and excludes SRFI-64 logs when the ignore
+file is missing; existing files are preserved, symlinks rejected and runner
+review announced.
+
 **ES:** Forth crea una fuente vacía, un framework y un runner que anuncia que
 no hay tests; conserva archivos existentes. La suite conecta los grupos y el
 framework devuelve código no cero ante aserciones fallidas.

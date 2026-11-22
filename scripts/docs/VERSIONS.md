@@ -216,6 +216,14 @@ la propagación de fallos de las suites ooRexxUnit existentes.
 pending runner review. Multiple-suite selection and failure propagation for
 existing ooRexxUnit suites remain open.
 
+**ES:** Scheme crea una fuente Guile cargable sin sobrescribir archivos y
+excluye logs SRFI-64 cuando falta el ignore. La selección de varias suites y
+la propagación de fallos del runner siguen pendientes.
+
+**EN:** Scheme creates a loadable Guile source without overwriting files and
+excludes SRFI-64 logs when the ignore file is absent. Multiple-suite selection
+and runner failure propagation remain pending.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

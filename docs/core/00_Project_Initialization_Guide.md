@@ -201,7 +201,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | `php` | `mkdir -p src test` · `touch src/{Module}.php` | `<?php` + `declare(strict_types=1);` + `namespace {Module};` |
 | `prolog` | `mkdir -p src test` · crear `src/{module}.pl` si falta | Fuente inicialmente vacía, consultada como en las bases homologadas |
 | `scala` | `mkdir -p src/main/scala src/test/scala project` · `touch src/main/scala/{Module}.scala` | `object {Module}` |
-| `scheme` | `mkdir -p src test` · `touch src/{module}.scm` | `(define-library ({module}) (export) (import (scheme base)))` |
+| `scheme` | `mkdir -p src test` · crear `src/{module}.scm` si falta | `(define-module ({module}))` (Guile) |
 
 **ES:** En los lenguajes con herramienta, la secuencia manual equivalente es su comando de la **tabla maestra** seguido de lo que lista la sección **Secuencias de varios pasos**.
 
@@ -775,14 +775,34 @@ mkdir -p src/main/scala src/test/scala project
 ```
 
 ### Scheme — src/ + test/
+
+**ES:** Crear la fuente Guile y el `.gitignore` solo si faltan, conservando
+archivos existentes y rechazando enlaces simbólicos en esas rutas. El runner
+actual aún no selecciona varias suites ni garantiza código no cero ante fallos
+de SRFI-64; requiere revisión.
+
+**EN:** Create the Guile source and `.gitignore` only when absent, preserving
+existing files and rejecting symlinks at these paths. The current runner does
+not yet select multiple suites or guarantee nonzero status on SRFI-64 failures.
+
 ```bash
-mkdir -p src test
+if [[ -L src || -L test || -L src/{module}.scm || -L .gitignore ||
+      ( -e src/{module}.scm && ! -f src/{module}.scm ) ||
+      ( -e .gitignore && ! -f .gitignore ) ]]; then
+  printf 'scaffold: ruta de Scheme no segura / unsafe Scheme path\n' >&2
+  false
+else
+  mkdir -p src test &&
+    { test -e src/{module}.scm || (set -C; printf '(define-module ({module}))\n' > src/{module}.scm); } &&
+    { test -e .gitignore || (set -C; printf '*.log\n' > .gitignore); }
+fi
 ```
 
 ```text
 {module}/
 ├── src/{module}.scm
-└── test/                    # suites por enfoque (+ variantes _guile.scm)
+├── test/                    # suites por enfoque (+ variantes _guile.scm)
+└── .gitignore               # logs de SRFI-64
 ```
 
 ### Swift — Swift Package Manager

@@ -262,6 +262,22 @@ In that test, exiting with the combined failure and error count returned 1.
 Running every suite and propagating failures without modifying or hiding
 existing suites still needs a solution.
 
+**ES — Scheme (2026-11-22):** el scaffold crea un módulo Guile cargable,
+preserva los archivos existentes y excluye logs SRFI-64 si falta el ignore.
+`glot test` rechaza como ambiguas las tres suites Guile de `numbers`; en
+una prueba aislada SRFI-64 devolvió 0 tras una aserción fallida. Una prueba
+de concepto con `test-runner-simple` consultó los contadores de una suite
+homologada y detectó una aserción fallida, pero aún falta integrar y verificar
+la ejecución completa, los errores y las salidas anticipadas.
+
+**EN — Scheme (2026-11-22):** scaffold creates a loadable Guile module,
+preserves existing files and excludes SRFI-64 logs when the ignore file is
+missing. `glot test` rejects the three `numbers` Guile suites as ambiguous;
+an isolated failing SRFI-64 assertion returned 0. A `test-runner-simple`
+proof of concept checked a homologated suite's counters and detected a failing
+assertion, but complete execution, errors and early exits still need integration
+and verification.
+
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su
 delegate, con archivos sobrantes. El catálogo anterior solo declaraba

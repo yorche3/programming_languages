@@ -2407,6 +2407,48 @@ glot_run_sandbox -n scaffold rexx algorithms/naive_sort
 assert_eq 'scaffold Rexx dry-run: código' '0' "$rc_last"
 assert_eq 'scaffold Rexx dry-run: no crea archivos' '0' "$(find "$RX_DRY" -mindepth 1 | wc -l | tr -d ' ')"
 
+# Scheme: módulo Guile seguro y aviso del runner pendiente.
+SC="$SANDBOX/scheme/core/algorithms/data_structures_basics"
+mkdir -p -- "$SC"
+glot_run_sandbox scaffold scheme algorithms/data_structures_basics
+assert_eq 'scaffold Scheme: código' '0' "$rc_last"
+assert_eq 'scaffold Scheme: módulo Guile' '(define-module (data_structures_basics))' "$(cat -- "$SC/src/data_structures_basics.scm")"
+assert_eq 'scaffold Scheme: ignora logs' '1' "$(git -C "$SC" check-ignore test/suite.log | wc -l | tr -d ' ')"
+assert_contains 'scaffold Scheme: avisa del runner pendiente' 'runner SRFI-64' "$err"
+if command -v guile >/dev/null 2>&1; then
+    scheme_rc=0
+    scheme_out="$(cd "$SC" && guile --no-auto-compile -c '(load "src/data_structures_basics.scm") (use-modules (data_structures_basics))' 2>&1)" || scheme_rc=$?
+    assert_eq 'scaffold Scheme: módulo cargable' '0' "$scheme_rc"
+    assert_eq 'scaffold Scheme: carga sin diagnósticos' '' "$scheme_out"
+fi
+printf 'author Scheme\n' >"$SC/src/data_structures_basics.scm"
+printf 'author ignore\n' >"$SC/.gitignore"
+glot_run_sandbox scaffold scheme algorithms/data_structures_basics
+assert_eq 'scaffold Scheme repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Scheme repetido: conserva fuente' 'author Scheme' "$(cat -- "$SC/src/data_structures_basics.scm")"
+assert_eq 'scaffold Scheme repetido: conserva ignore' 'author ignore' "$(cat -- "$SC/.gitignore")"
+rm -- "$SC/src/data_structures_basics.scm"
+ln -s "$SC/.gitignore" "$SC/src/data_structures_basics.scm"
+glot_run_sandbox scaffold scheme algorithms/data_structures_basics
+assert_eq 'scaffold Scheme symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Scheme symlink: conserva destino' 'author ignore' "$(cat -- "$SC/.gitignore")"
+rm -- "$SC/src/data_structures_basics.scm"
+mkdir -- "$SC/src/data_structures_basics.scm"
+glot_run_sandbox scaffold scheme algorithms/data_structures_basics
+assert_eq 'scaffold Scheme destino directorio: código' '4' "$rc_last"
+rmdir -- "$SC/src/data_structures_basics.scm"
+rm -- "$SC/.gitignore"
+printf 'author suite\n' >"$SC/test/suite_guile.scm"
+ln -s "$SC/test/suite_guile.scm" "$SC/.gitignore"
+glot_run_sandbox scaffold scheme algorithms/data_structures_basics
+assert_eq 'scaffold Scheme ignore symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Scheme ignore symlink: conserva destino' 'author suite' "$(cat -- "$SC/test/suite_guile.scm")"
+SC_DRY="$SANDBOX/scheme/core/algorithms/naive_sort"
+mkdir -p -- "$SC_DRY"
+glot_run_sandbox -n scaffold scheme algorithms/naive_sort
+assert_eq 'scaffold Scheme dry-run: código' '0' "$rc_last"
+assert_eq 'scaffold Scheme dry-run: no crea archivos' '0' "$(find "$SC_DRY" -mindepth 1 | wc -l | tr -d ' ')"
+
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"
 printf '[package]\nname = "naive_sort"\n' >"$RUSTB/Cargo.toml"
