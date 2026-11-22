@@ -169,77 +169,48 @@ step with no push.
 
 ### 🟡 Advertencias / Warnings
 
-**ES:** La detección del vecino repetido, que la especificación vigente exige
-escrita a mano, se delega en una operación de pertenencia de la biblioteca
-(`contains`, `includes`, `indexOf`, `member`, `List.mem`, `elem`, `include?`…).
-La inserción ya es manual y ordenada y el resultado observable coincide con el
-contrato; la desviación es de **fidelidad al módulo**, no de salida.
+**ES:** Ninguna abierta: los quince hallazgos de la primera pasada están
+cerrados con `align` y **integrados** en el `main` de su submódulo (lote 1 el
+2026-11-22, lotes 2–4 en el mismo día). La tabla quedó vacía tras integrar los
+nueve que esperaban en rama.
 
-**EN:** Duplicate-neighbour detection, which the current specification requires
-hand-written, is delegated to a library membership operation (`contains`,
-`includes`, `indexOf`, `member`, `List.mem`, `elem`, `include?`…). Insertion is
-already manual and sorted and the observable result matches the contract; the
-deviation is in **module fidelity**, not in output.
-
-| Lenguaje / Language | Evidencia / Evidence | Severidad / Severity |
-|---|---|---|
-| `elm` | `DataStructuresAdvanced.elm:300,324` — `List.member` | 🟡 — align listo en rama `ab490ec`, pendiente de integración / align ready on branch, pending integration |
-| `erlang` | `data_structures_advanced.erl:167,187` — `lists:member` | 🟡 — align listo en rama `deb8ebd`, pendiente de integración / align ready on branch, pending integration |
-| `fsharp` | `DataStructuresAdvanced.fs:141,156` — `List.contains` | 🟡 — align listo en rama `9af47f3`, pendiente de integración / align ready on branch, pending integration |
-| `gleam` | `data_structures_advanced.gleam:227,248` — `list.contains` | 🟡 — align listo en rama `8ddfb1d`, pendiente de integración / align ready on branch, pending integration |
-| `haskell` | `DataStructuresAdvanced.hs:139,154` — `` v `elem` neighbours `` | 🟡 — align listo en rama `0a9d36a`, pendiente de integración / align ready on branch, pending integration |
-| `ocaml` | `graph.ml:134,144` — `List.mem v u_vertex.neighbors` | 🟡 — align listo en rama `15b1ea2`, pendiente de integración / align ready on branch, pending integration |
-| `prolog` | `data_structures_advanced.pl:124,149` — `member(To, Neighbors)` | 🟡 — align listo en rama `6986ae5`, pendiente de integración / align ready on branch, pending integration |
-| `rust` | `graph.rs:78` — `u_vertex.neighbors().contains(&v)` | 🟡 — align listo en rama `481b3ca`, pendiente de integración / align ready on branch, pending integration |
-| `javascript` | `Graph.js:57,75` — `neighbors.includes(v)`; `Graph.js:87` — `[...].sort((a, b) => a - b)` | 🟠 — align listo en rama `ecc8828`, pendiente de integración / align ready on branch, pending integration |
-
-**ES:** `javascript` lleva además una **ordenación de biblioteca** en el camino
-de salida de `getNeighbors`, que es una decisión de diseño delegada y por eso se
-registra 🟠 (estructural). Los otros catorce son 🟡: el paso delegado es idéntico
-en coste asintótico y en resultado.
-
-**EN:** `javascript` also carries a **library sort** in `getNeighbors`' output
-path, a delegated design decision, hence 🟠 (structural). The other fourteen are
-🟡: the delegated step is identical in asymptotic cost and result.
-
-**ES:** Los nueve restantes ya tienen su `align` **commiteado en la rama**
-`align/algorithms/data-structures-advanced` de su submódulo, con la suite en
-verde; la integración en el `main` se hará cuando el pase pueda cerrarse, así que
-siguen contando como 🟡 hasta entonces.
-
-**EN:** The remaining nine already have their `align` **committed on the**
-`align/algorithms/data-structures-advanced` **branch** of their submodule, with
-the suite green; the merge into `main` waits until the pass can close, so they
-still count as 🟡 until then.
+**EN:** None open: the fifteen findings from the first sweep are closed with an
+`align` and **merged** into their submodule's `main` (batch 1 on 2026-11-22,
+batches 2–4 the same day). The table emptied once the nine that waited on a
+branch were integrated.
 
 ### 🔵 Aceptados por el autor / Accepted by the author
 
-- — Ninguno: no hay desviaciones aceptadas por escrito todavía; las 15
-  advertencias de arriba esperan a la puerta de contrato y su ruta (`align` o
-  `correct`+`fix`) / None: no deviations accepted in writing yet; the 15
-  warnings above wait for the contract gate and its route (`align` or
-  `correct`+`fix`).
+- — Ninguno: los quince hallazgos se cerraron con `align` y no hubo desviaciones
+  aceptadas por escrito / None: the fifteen findings closed with an `align` and
+  no deviation needed to be accepted in writing.
 
 ### 🟢 Homologados / Homologated
 
-- **41 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`,
-  `common-lisp`, `cpp`, `crystal`, `csharp`, `d`, `dart`, `elixir`, `forth`, `go`,
-  `grain`, `groovy`, `haxe`, `java`, `julia`, `kotlin`, `lua`, `nim`, `perl`,
-  `php`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`,
-  `ruby`, `scala`, `scheme`, `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
+- **50 lenguajes / languages**: `ada`, `assembly`, `ballerina`, `c`,
+  `clojure`, `cobol`, `common-lisp`, `cpp`, `crystal`, `csharp`, `d`, `dart`,
+  `elixir`, `elm`, `erlang`, `forth`, `fsharp`, `gleam`, `go`, `grain`,
+  `groovy`, `haskell`, `haxe`, `java`, `javascript`, `julia`, `kotlin`, `lua`,
+  `nim`, `ocaml`, `perl`, `php`, `prolog`, `purescript`, `python`, `r`,
+  `racket`, `raku`, `rescript`, `rexx`, `ruby`, `rust`, `scala`, `scheme`,
+  `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
 
 **ES:** 🟢 significa que el barrido léxico no encontró ninguna búsqueda ni
 ordenación de biblioteca en el camino de adyacencia, la suite nativa está en
 verde y el README N3 existe. `lua`, `r` y `v` registran recorridos manuales con
 `ipairs`/`for … in`; `scala`, `swift`, `typescript`, `vala`, `zig`, `tcl-tk`,
 `scheme` y `raku` tienen la búsqueda y la inserción escritas a mano, como
-declaran sus cabeceras.
+declaran sus cabeceras. Los nueve alineados en este pase (`elm`, `erlang`,
+`fsharp`, `gleam`, `haskell`, `javascript`, `ocaml`, `prolog`, `rust`) pasaron de
+pertenencia de biblioteca a recorrido propio.
 
 **EN:** 🟢 means the lexical scan found no library search or sort in the
 adjacency path, the native suite is green and the N3 README exists. `lua`, `r`
 and `v` show manual walks with `ipairs`/`for … in`; `scala`, `swift`,
 `typescript`, `vala`, `zig`, `tcl-tk`, `scheme` and `raku` have search and
-insertion written by hand, as their headers declare.
+insertion written by hand, as their headers declare. The nine aligned in this
+pass (`elm`, `erlang`, `fsharp`, `gleam`, `haskell`, `javascript`, `ocaml`,
+`prolog`, `rust`) moved from library membership to their own traversal.
 
 ## Deuda por lenguaje / Debt per language
 
@@ -259,31 +230,27 @@ bound and output do not change — the deviation belongs to the **module layer**
 |---|---|---|
 | `csharp` | `List.Contains` en `HasEdge` | ✅ cerrado en `00de948`: `HasNeighbor` recorre la lista / closed: `HasNeighbor` scans the list |
 | `crystal` | `includes?` en `has_edge` | ✅ cerrado en `e3913de`: `has_neighbor` recorre el array / closed: `has_neighbor` scans the array |
-| `elm` | `List.member` en alta y consulta | `align` — recursión propia sobre la lista / own recursion |
-| `erlang` | `lists:member` en alta y consulta | `align` — recursión propia / own recursion |
-| `fsharp` | `List.contains` en alta y consulta | `align` — recursión propia / own recursion |
-| `gleam` | `list.contains` en alta y consulta | `align` — recursión propia / own recursion |
+| `elm` | `List.member` en alta y consulta | ✅ cerrado en `86ddb5d`: `hasNeighbor` recorre la lista / scans the list / closed: `hasNeighbor` recorre la lista / scans the list |
+| `erlang` | `lists:member` en alta y consulta | ✅ cerrado en `abe0b68`: `has_neighbor/2` recorre la lista / scans the list / closed: `has_neighbor/2` recorre la lista / scans the list |
+| `fsharp` | `List.contains` en alta y consulta | ✅ cerrado en `c757c8d`: `hasNeighbor` recorre la lista / scans the list / closed: `hasNeighbor` recorre la lista / scans the list |
+| `gleam` | `list.contains` en alta y consulta | ✅ cerrado en `16e9ef7`: `has_neighbor` recorre la lista / scans the list / closed: `has_neighbor` recorre la lista / scans the list |
 | `groovy` | `contains` en alta y consulta | ✅ cerrado en `b400ed7`: `hasNeighbor` recorre la lista / closed: `hasNeighbor` scans the list |
-| `haskell` | `` `elem` `` en alta y consulta | `align` — función propia sobre la lista / own list function |
+| `haskell` | `` `elem` `` en alta y consulta | ✅ cerrado en `32c98b4`: `hasNeighbor` recorre la lista / scans the list / closed: `hasNeighbor` recorre la lista / scans the list |
 | `haxe` | `indexOf` en alta y consulta | ✅ cerrado en `cfa2ee9`: `hasNeighbor` recorre el array / closed: `hasNeighbor` scans the array |
 | `java` | `contains` en alta y consulta | ✅ cerrado en `715ef35`: `hasNeighbor` recorre la adyacencia / closed: `hasNeighbor` scans the adjacency |
-| `javascript` | `includes` en alta y consulta; `sort` en la salida | `align` — bucle propio e inserción ordenada manual / own loop and manual sorted insertion |
-| `ocaml` | `List.mem` en alta y consulta | `align` — recursión propia / own recursion |
-| `prolog` | `member/2` en alta y consulta | `align` — recorrido propio / own traversal, si el contrato lo permite |
+| `javascript` | `includes` en alta y consulta; `sort` en la salida | ✅ cerrado en `094242f`: `hasNeighbor` + `insertNeighbor`; sin `includes` ni `sort` / no `includes` or `sort` / closed: `hasNeighbor` + `insertNeighbor`; sin `includes` ni `sort` / no `includes` or `sort` |
+| `ocaml` | `List.mem` en alta y consulta | ✅ cerrado en `2fdf193`: `has_neighbor` recorre la lista / scans the list / closed: `has_neighbor` recorre la lista / scans the list |
+| `prolog` | `member/2` en alta y consulta | ✅ cerrado en `ca5c8dd`: `has_neighbor/2` propio sustituye a `member/2` / own predicate replaces `member/2` / closed: `has_neighbor/2` propio sustituye a `member/2` / own predicate replaces `member/2` |
 | `ruby` | `include?` en alta y consulta | ✅ cerrado en `351a260`: `has_neighbor?` recorre el array / closed: `has_neighbor?` scans the array |
-| `rust` | `slice::contains` en `has_edge` | `align` — recorrido propio / own traversal |
+| `rust` | `slice::contains` en `has_edge` | ✅ cerrado en `7f30d98`: `GraphNode::has_neighbor` recorre el array / scans the array / closed: `GraphNode::has_neighbor` recorre el array / scans the array |
 
-**ES:** Los quince hallazgos son de la **capa del módulo** y anteriores a la
-propuesta de contrato: si el autor integra el cambio propuesto (orden de
-inserción, sin ordenar), la mitad de ellos cambia de criterio y la corrección
-ya no es un `align` sino `correct` + `fix` sobre el contrato nuevo. Por eso el
-plan los deja **abiertos** hasta que el contrato se resuelva.
+**ES:** Los quince hallazgos eran de la **capa del módulo** y la puerta de
+contrato los resolvió sin tocar la especificación: orden creciente mantenido y
+quince `align` integrados. El bloqueo se retiró al cerrar el pase.
 
-**EN:** The fifteen findings belong to the **module layer** and predate the
-contract proposal: if the author integrates the proposed change (insertion order,
-no sorting), half of them change criteria and the fix is no longer an `align` but
-`correct` + `fix` against the new contract. That is why the plan leaves them
-**open** until the contract is resolved.
+**EN:** The fifteen findings sat in the **module layer** and the contract gate
+settled them without touching the specification: ascending order kept and fifteen
+`align` merged. The gate was lifted when the pass closed.
 
 ## Plan de cierre / Closure plan
 
@@ -321,6 +288,14 @@ autor). Detalle en el plan de trabajo de la sección siguiente.
    the pass closes when all 50 are 🟢 or have a written accepted deviation in
    `ruleset/idioms/{lang}.md`; the author decides.
 
+**ES:** **Cerrado el 2026-11-22** con autorización del autor: 50 🟢, 0 🟡, 0 🔵 y
+0 🔴; los quince `align` están en el `main` de su submódulo y el contador del
+sprint (`50/50`) no se toca.
+
+**EN:** **Closed on 2026-11-22** with the author's authorisation: 50 🟢, 0 🟡,
+0 🔵 and 0 🔴; the fifteen `align` sit on their submodule's `main` and the sprint
+counter (`50/50`) is untouched.
+
 ## Plan de trabajo del `align` / Align work plan
 
 **ES:** Los quince lenguajes se agrupan por familia para revisarlos en lotes
@@ -337,6 +312,16 @@ checklist — rather than simultaneous.
 | 2 | `haskell`, `elm`, `ocaml`, `fsharp`, `gleam`, `rust` | F4/F5: sistemas y ML, con opción nativa y listas inmutables |
 | 3 | `erlang`, `prolog` | F7/F9: BEAM y lógico |
 | 4 | `javascript` | F2 con `sort` de biblioteca en la salida |
+
+**ES:** Los cuatro lotes están cerrados e integrados el 2026-11-22: lote 1 en
+`715ef35`, `00de948`, `b400ed7`, `cfa2ee9`, `e3913de` y `351a260`; lote 2 en
+`32c98b4`, `86ddb5d`, `2fdf193`, `c757c8d`, `16e9ef7` y `7f30d98`; lote 3 en
+`abe0b68` y `ca5c8dd`; lote 4 en `094242f`.
+
+**EN:** All four batches are closed and merged on 2026-11-22: batch 1 at
+`715ef35`, `00de948`, `b400ed7`, `cfa2ee9`, `e3913de` and `351a260`; batch 2 at
+`32c98b4`, `86ddb5d`, `2fdf193`, `c757c8d`, `16e9ef7` and `7f30d98`; batch 3 at
+`abe0b68` and `ca5c8dd`; batch 4 at `094242f`.
 
 **ES:** Lista de comprobación idéntica en cada lenguaje (es la que decide si el
 `align` está terminado):
@@ -377,16 +362,16 @@ submodule pointer commit on the monorepo's `audit/...` branch.
 | 2026-11-22 | Documentación / Documentation | `test -f {lang}/core/algorithms/data_structures_advanced/README.md` | 50/50 presentes / 50/50 present |
 | 2026-11-22 | Estado del árbol / Worktree state | `git -C {lang} status --short` | 50/50 sin cambios locales / 50/50 with no local changes |
 | 2026-11-22 | `align` de `java` / `java` align | `mvn test` + `glot evidence java algorithms/data_structures_advanced` | Rama `align/algorithms/data-structures-advanced`: `c65e7f8` (código), `7eed001` (README), merge `715ef35`; 23 tests, 0 fallos; verificador `-` (no declarado) / branch, code commit, README commit, merge; 23 tests, 0 failures; verifier `-` (not declared) |
-
 | 2026-11-22 | `align` de `csharp` / `csharp` align | `dotnet test` + `glot evidence csharp algorithms/data_structures_advanced` | Rama `align/algorithms/data-structures-advanced`: un commit de código y merge `00de948`; suite en verde; README sin cambios / one code commit and merge; suite green; README unchanged |
-**ES:** El pase **no cierra** con este barrido: quedan 15 hallazgos por resolver
 | 2026-11-22 | `align` de `groovy` / `groovy` align | `./gradlew test` + `glot evidence groovy algorithms/data_structures_advanced` | Rama `align/algorithms/data-structures-advanced`: un commit de código y merge `b400ed7`; suite en verde; README sin cambios / one code commit and merge; suite green; README unchanged |
-o aceptar, y la propuesta de contrato del autor puede cambiar su criterio.
 | 2026-11-22 | `align` de `haxe` / `haxe` align | `haxe build.hxml` + `glot evidence haxe …` | Rama `align/…`: un commit de código y merge `cfa2ee9`; suite en verde / one code commit and merge; suite green |
 | 2026-11-22 | `align` de `crystal` / `crystal` align | `crystal spec` + `glot evidence crystal …` | Rama `align/…`: un commit de código y merge `e3913de`; 23 ejemplos, 0 fallos / one code commit and merge; 23 examples, 0 failures |
 | 2026-11-22 | `align` de `ruby` / `ruby` align | `bundle exec rspec` + `glot evidence ruby …` | Rama `align/…`: un commit de código y merge `351a260`; 23 ejemplos, 0 fallos / one code commit and merge; 23 examples, 0 failures |
-**EN:** The pass **does not close** with this sweep: 15 findings remain to be
 | 2026-11-22 | `align` lote 2 (rama) / batch 2 (branch) | `glot test` de `haskell`, `elm`, `ocaml`, `fsharp`, `gleam`, `rust` | Ramas `align/…`, un commit de código cada una: `0a9d36a`, `ab490ec`, `15b1ea2`, `9af47f3`, `8ddfb1d`, `481b3ca`; 89 ejemplos, 0 fallos y el resto en verde / one code commit each; suites green |
 | 2026-11-22 | `align` lote 3 (rama) / batch 3 (branch) | `glot test` de `erlang` y `prolog` | Ramas `align/…`: `deb8ebd` (24 tests) y `6986ae5` (24 casos), en verde / branches; green |
 | 2026-11-22 | `align` lote 4 (rama) / batch 4 (branch) | `glot test javascript` | Rama `align/…`: `ecc8828` (código) y `258d4cb` (README); 23 pruebas en verde, cota de `getNeighbors` de `O(V + d log d)` a `O(V + d)` / 23 tests green, bound improved |
-fixed or accepted, and the author's contract proposal may change their criteria.
+| 2026-11-22 | Integración lote 2 / batch 2 merge | merge `--no-ff` en el `main` de cada submódulo / into each submodule's `main` | `haskell` `32c98b4`, `elm` `86ddb5d`, `ocaml` `2fdf193`, `fsharp` `c757c8d`, `gleam` `16e9ef7`, `rust` `7f30d98` |
+| 2026-11-22 | Integración lote 3 / batch 3 merge | merge `--no-ff` en el `main` de cada submódulo | `erlang` `abe0b68`, `prolog` `ca5c8dd` |
+| 2026-11-22 | Integración lote 4 / batch 4 merge | merge `--no-ff` en el `main` del submódulo | `javascript` `094242f` |
+| 2026-11-22 | Suites sobre el `main` integrado / Suites on integrated `main` | `glot test {lang} algorithms/data_structures_advanced` para los nueve / for the nine | **9/9 en verde**: `haskell` 1/1 suite, `elm` 23, `ocaml` dune runtest, `fsharp` 24, `gleam` 24, `rust` 23, `erlang` 24, `prolog` 24/24, `javascript` 23 / **9/9 green** |
+| 2026-11-22 | Evidencia y cierre / Evidence and closure | `glot evidence {lang} algorithms/data_structures_advanced` (9 actas, todas `green`) y actualización de `idiomaticity_state.tsv` + índice / 9 records, all `green`, plus state and index update | 50 🟢 · 0 🟡 · 0 🔵 · 0 🔴; pase cerrado con autorización del autor / pass closed with the author's authorisation |
