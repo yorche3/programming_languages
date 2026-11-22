@@ -252,6 +252,18 @@ working Cabal file now includes the declaration. This generalizes to future
 modules with production or test helpers because build systems differ in how
 they assign source files to targets.
 
+**ES — Investigación (2026-11-22):** con Cabal 3.16.1.0, `cabal init
+--lib --tests` genera el test-suite y `test/Main.hs`, pero deja
+`other-modules` sin declarar. Incluso con `--main-is=RunTests.hs` conservó
+`Main.hs` en la prueba aislada. Por tanto, añadir `--tests` no resuelve la
+sincronización de helpers ni reproduce por sí solo el runner homologado.
+
+**EN — Investigation (2026-11-22):** Cabal 3.16.1.0 `init --lib --tests`
+generates a test suite and `test/Main.hs`, but leaves `other-modules`
+undeclared. Even `--main-is=RunTests.hs` retained `Main.hs` in the isolated
+test. Adding `--tests` alone therefore does not synchronize helpers or
+reproduce the homologated runner.
+
 Criterios para la siguiente versión / Next-version acceptance criteria:
 
 - Revisar los lenguajes y generadores donde los archivos de un target deben
