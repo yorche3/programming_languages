@@ -179,6 +179,17 @@ lists its production source but not its suite in `test/`. The development
 scaffold configures `test/` for the recognized generated manifest and checks
 a failing test; existing D modules and other manifests still need review.
 
+**ES — Hallazgo Forth (2026-11-22):** al ejecutar una aserción fallida con
+`test.forth` de la base `data_structures_basics`, el reporte indicó un fallo
+pero Gforth devolvió código 0. El scaffold en desarrollo incorpora un
+`test-report` que devuelve 1 ante fallos; los frameworks ya existentes
+requieren revisión por separado.
+
+**EN — Forth finding (2026-11-22):** a failing assertion using the homologated
+base's `test.forth` was reported but Gforth exited 0. The development
+scaffold's `test-report` exits 1 on failures; existing frameworks need a
+separate review.
+
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su
 delegate, con archivos sobrantes. El catálogo anterior solo declaraba

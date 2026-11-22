@@ -116,6 +116,16 @@ an intentionally failing test in an isolated lab; normal builds exclude it.
 Authored manifests are preserved for review. The homologated D base also
 needs its test inclusion reviewed.
 
+**ES:** Forth crea una fuente vacía, un framework y un runner que anuncia la
+ausencia de tests, sin sobrescribir archivos propios. Gforth 0.7.3 ejecutó el
+runner y devolvió 1 ante una aserción fallida. El framework de la base
+homologada todavía necesita revisar su código de salida.
+
+**EN:** Forth creates an empty source, a framework and a runner announcing no
+tests without overwriting authored files. Gforth 0.7.3 ran the runner and
+returned 1 on a failed assertion. The homologated base's framework still
+needs its exit status reviewed.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

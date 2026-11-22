@@ -134,6 +134,14 @@ Only the verified `app.d` sample is removed, and `test/` is configured in the
 recognized generated manifest. Other content is preserved; the manifest and
 any unfamiliar sample are explicitly handed off for review.
 
+**ES:** Forth crea una fuente vacía, un framework y un runner que anuncia que
+no hay tests; conserva archivos existentes. La suite conecta los grupos y el
+framework devuelve código no cero ante aserciones fallidas.
+
+**EN:** Forth creates an empty source, a framework and a runner announcing
+that there are no tests, preserving existing files. The suite connects its
+groups, and the framework returns a nonzero code for failed assertions.
+
 **ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
 (`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con
 referencia declarada por dotnet), Go (`src/tests`), Haskell (`lib/test` y

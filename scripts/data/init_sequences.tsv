@@ -47,7 +47,7 @@ elm	scaffold	1	module	run	touch .gitignore && mkdir -p tests	-	-	-
 erlang	new	1	phase	run	rebar3 new lib {module}	-	-	-
 erlang	scaffold	1	module	run	touch .gitignore && mkdir -p test	-	-	-
 forth	new	1	phase	run	mkdir -p {module}	-	-	-
-forth	scaffold	1	module	run	mkdir -p src test && printf ': {module}-init\n' > src/{module}.forth && touch test/run-tests.forth	-	-	-
+forth	scaffold	1	module	run	if [[ -L src || -L test || -L src/{module}.forth || -L test/run-tests.forth || -L test/test.forth || ( -e src/{module}.forth && ! -f src/{module}.forth ) || ( -e test/run-tests.forth && ! -f test/run-tests.forth ) || ( -e test/test.forth && ! -f test/test.forth ) ]]; then printf 'scaffold: ruta Forth no segura / unsafe Forth path\n' >&2; false; else mkdir -p src test && { test -e src/{module}.forth || (set -C; : > src/{module}.forth); } && { test -e test/test.forth || (set -C; cat {root}/scripts/data/scaffold_templates/forth.test.forth > test/test.forth); } && { test -e test/run-tests.forth || (set -C; printf 'include ../src/{module}.forth\ninclude test.forth\ninit-tests\n.( Scaffold: no tests configured ) cr\ntest-report\nbye\n' > test/run-tests.forth); }; fi	-	-	la suite debe conectar sus grupos al runner; verificar el framework y .gitignore existentes
 fsharp	new	1	module	run	dotnet new sln -n {Module}	-	-	-
 fsharp	new	2	module	run	dotnet new classlib -lang F# -n {Module} -o src/{Module}	-	-	-
 fsharp	new	3	module	run	dotnet new xunit --no-restore -lang F# -n {Module}.Tests -o test/{Module}.Tests	-	-	-

@@ -194,7 +194,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | `assembly` | `mkdir -p src test` · crear `src/{module}.asm` si falta | `section .text`; el contrato declara sus símbolos en el paso 4b |
 | `c` | `mkdir -p include src test` · crear `include/{module}.h` y `src/{module}.c` si faltan | `#ifndef {Module}_H` + `#define {Module}_H` en la cabecera; `#include "{module}.h"` en la fuente |
 | `cobol` | `mkdir -p src/copybooks src/lib test` · `touch src/lib/{module}.cbl` | `IDENTIFICATION DIVISION.` + `PROGRAM-ID. {Module}.` |
-| `forth` | `mkdir -p src test` · `touch src/{module}.forth` | `: {module}-init` |
+| `forth` | `mkdir -p src test` · crear `src/{module}.forth` y `test/run-tests.forth` si faltan | Fuente inicialmente vacía; el runner la carga y anuncia que no hay pruebas |
 | `grain` | `mkdir -p src tests` · `touch src/{module}.gr` | `module {Module}` |
 | `java` | `mkdir -p src/main/java src/test/java` · `touch src/main/java/{Module}.java` | `public class {Module} { }` |
 | `perl` | `mkdir -p lib test` · `touch lib/{module}.pl` | `package {Module};` + `use strict;` + `use warnings;` + `1;` |
@@ -371,6 +371,16 @@ mkdir -p src test
 ├── src/{module}.forth
 └── test/                    # test.forth (runner casero) + suites + run-tests.forth
 ```
+
+**ES:** El scaffold crea una fuente vacía, el framework `test.forth` y un
+runner que anuncia que no hay tests y termina. `test-report` devuelve código
+no cero ante fallos. Se conservan los archivos existentes; la suite conecta
+sus grupos antes del reporte.
+
+**EN:** Scaffold creates an empty source, the `test.forth` framework and a
+runner that announces that there are no tests and exits. `test-report`
+returns a nonzero exit code for failures. Existing files are preserved; the
+suite connects its groups before the report.
 
 ### Grain — Makefile + src/ + tests/
 ```bash

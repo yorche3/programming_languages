@@ -348,6 +348,9 @@ sandbox_make() {
 [submodule "d"]
         path = d
         url = ../remote/d.git
+[submodule "forth"]
+        path = forth
+        url = ../remote/forth.git
 [submodule "purescript"]
         path = purescript
         url = ../remote/purescript.git
@@ -1755,6 +1758,52 @@ ln -s "$DB/source/app.d" "$DB/source/naive_sort.d"
 glot_run_sandbox scaffold d algorithms/naive_sort
 assert_eq 'scaffold D symlink: bloquea' '4' "$rc_last"
 assert_eq 'scaffold D symlink: conserva destino' 'author code' "$(cat "$DB/source/app.d")"
+
+# Forth carga la fuente sin inventar palabras y deja un runner vacío ejecutable.
+FB="$SANDBOX/forth/core/algorithms/naive_sort"
+mkdir -p "$FB"
+glot_run_sandbox -n scaffold forth algorithms/naive_sort
+assert_eq 'scaffold Forth -n: código' '0' "$rc_last"
+assert_eq 'scaffold Forth -n: no crea fuentes' 'no' "$([[ -e "$FB/src" || -e "$FB/test" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold forth algorithms/naive_sort
+assert_eq 'scaffold Forth: código' '0' "$rc_last"
+assert_eq 'scaffold Forth: crea fuente vacía' 'yes' "$([[ -f "$FB/src/naive_sort.forth" && ! -s "$FB/src/naive_sort.forth" ]] && echo yes || echo no)"
+assert_eq 'scaffold Forth: crea runner' 'yes' "$([[ -f "$FB/test/run-tests.forth" ]] && echo yes || echo no)"
+assert_eq 'scaffold Forth: crea framework' 'yes' "$([[ -f "$FB/test/test.forth" ]] && echo yes || echo no)"
+assert_contains 'scaffold Forth: anuncia trabajo pendiente' 'glot prompt scaffold forth algorithms/naive_sort' "$err"
+if command -v gforth >/dev/null 2>&1; then
+    forth_rc=0
+    forth_out="$(cd "$FB/test" && gforth run-tests.forth 2>&1)" || forth_rc=$?
+    assert_eq 'scaffold Forth: runner arranca' '0' "$forth_rc"
+    assert_contains 'scaffold Forth: anuncia ausencia de tests' 'Scaffold: no tests configured' "$forth_out"
+    printf 'glot-undefined-word\n' >"$FB/src/naive_sort.forth"
+    forth_rc=0
+    forth_out="$(cd "$FB/test" && gforth run-tests.forth 2>&1)" || forth_rc=$?
+    assert_eq 'scaffold Forth: propaga error de la fuente' 'yes' "$([[ "$forth_rc" != 0 ]] && echo yes || echo no)"
+    assert_contains 'scaffold Forth: carga la fuente' 'glot-undefined-word' "$forth_out"
+    : >"$FB/src/naive_sort.forth"
+    printf 'include ../src/naive_sort.forth\ninclude test.forth\ninit-tests\n0 0 assert-equals\n1 2 assert-equals\ntest-report\nbye\n' >"$FB/test/run-tests.forth"
+    forth_rc=0
+    forth_out="$(cd "$FB/test" && gforth run-tests.forth 2>&1)" || forth_rc=$?
+    assert_eq 'scaffold Forth: propaga aserción fallida' '1' "$forth_rc"
+    assert_contains 'scaffold Forth: informa aserción fallida' '[FAIL]' "$forth_out"
+    assert_contains 'scaffold Forth: cuenta todas las aserciones' 'tests runned 2' "$forth_out"
+fi
+printf 'author source\n' >"$FB/src/naive_sort.forth"
+printf 'author runner\n' >"$FB/test/run-tests.forth"
+printf 'author framework\n' >"$FB/test/test.forth"
+printf 'author ignore\n' >"$FB/.gitignore"
+glot_run_sandbox scaffold forth algorithms/naive_sort
+assert_eq 'scaffold Forth repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Forth repetido: conserva fuente' 'author source' "$(cat "$FB/src/naive_sort.forth")"
+assert_eq 'scaffold Forth repetido: conserva runner' 'author runner' "$(cat "$FB/test/run-tests.forth")"
+assert_eq 'scaffold Forth repetido: conserva framework' 'author framework' "$(cat "$FB/test/test.forth")"
+assert_eq 'scaffold Forth repetido: conserva ignore' 'author ignore' "$(cat "$FB/.gitignore")"
+rm -- "$FB/test/run-tests.forth"
+ln -s "$FB/src/naive_sort.forth" "$FB/test/run-tests.forth"
+glot_run_sandbox scaffold forth algorithms/naive_sort
+assert_eq 'scaffold Forth symlink: bloquea' '4' "$rc_last"
+assert_eq 'scaffold Forth symlink: conserva destino' 'author source' "$(cat "$FB/src/naive_sort.forth")"
 
 PSB="$SANDBOX/purescript/core/algorithms/naive_sort"
 mkdir -p "$PSB/src"
