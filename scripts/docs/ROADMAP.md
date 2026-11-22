@@ -167,6 +167,18 @@ Criterios de aceptación / Acceptance criteria:
   / Test required artifacts, hidden files, handoff messages, visible failures,
   non-destructive reruns and non-mutating dry-run.
 
+**ES — Hallazgo D (2026-11-22):** `dub describe --build=unittest
+--data=source-files --data-list --skip-registry=all` en la base homologada
+`data_structures_basics` lista solo `source/data_structures_basics.d`, no su
+suite en `test/`. El scaffold en desarrollo configura `test/` para el
+manifiesto generado reconocido y comprueba un test fallido; los módulos D
+existentes y los manifiestos distintos aún requieren revisión y corrección.
+
+**EN — D finding (2026-11-22):** `dub describe` for the homologated base
+lists its production source but not its suite in `test/`. The development
+scaffold configures `test/` for the recognized generated manifest and checks
+a failing test; existing D modules and other manifests still need review.
+
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su
 delegate, con archivos sobrantes. El catálogo anterior solo declaraba

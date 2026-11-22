@@ -1700,18 +1700,61 @@ assert_contains 'scaffold dentro de Git anidado: diagnóstico de Git' 'pre-exist
 DB="$SANDBOX/d/core/algorithms/naive_sort"
 mkdir -p "$DB/source"
 cp "$TESTS_DIR/../data/scaffold_templates/d.app.d" "$DB/source/app.d"
+printf 'name "naive_sort"\ndescription "A minimal D application."\nauthors "test"\nlicense "proprietary"\n' >"$DB/dub.sdl"
 glot_run_sandbox -n scaffold d algorithms/naive_sort
 assert_eq 'scaffold D -n: código' '0' "$rc_last"
 assert_eq 'scaffold D -n: conserva ejemplo' 'yes' "$([[ -f "$DB/source/app.d" ]] && echo yes || echo no)"
+assert_eq 'scaffold D -n: no crea fuente ni tests' 'no' "$([[ -e "$DB/source/naive_sort.d" || -e "$DB/test" ]] && echo yes || echo no)"
 glot_run_sandbox scaffold d algorithms/naive_sort
 assert_eq 'scaffold D: código' '0' "$rc_last"
 assert_eq 'scaffold D: retira ejemplo verificado' 'no' "$([[ -e "$DB/source/app.d" ]] && echo yes || echo no)"
 assert_eq 'scaffold D: crea .gitignore' 'yes' "$([[ -f "$DB/.gitignore" ]] && echo yes || echo no)"
+assert_eq 'scaffold D: crea fuente idiomática' 'module naive_sort;' "$(cat "$DB/source/naive_sort.d")"
+assert_eq 'scaffold D: crea test' 'yes' "$([[ -d "$DB/test" ]] && echo yes || echo no)"
+assert_contains 'scaffold D: configura los tests' 'sourcePaths "source" "test"' "$(cat "$DB/dub.sdl")"
+assert_eq 'scaffold D: excluye artefactos' '4' \
+    "$(git -C "$DB" check-ignore .dub/build/file.o libnaive_sort.a naive_sort-test-library file.o | wc -l | tr -d ' ')"
 assert_contains 'scaffold D: anuncia análisis' 'glot prompt scaffold d algorithms/naive_sort' "$err"
-printf 'author code\n' >"$DB/source/app.d"
+d_manifest="$(cat "$DB/dub.sdl")"
 glot_run_sandbox scaffold d algorithms/naive_sort
+assert_eq 'scaffold D: rerun sin duplicar configuraciones' "$d_manifest" "$(cat "$DB/dub.sdl")"
+if command -v dub >/dev/null 2>&1 && command -v dmd >/dev/null 2>&1; then
+    d_rc=0
+    d_out="$(cd "$DB" && dub test --skip-registry=all 2>&1)" || d_rc=$?
+    assert_eq 'scaffold D: runner arranca sin casos' '0' "$d_rc"
+    printf 'module naive_sort_test;\nunittest { assert(0); }\n' >"$DB/test/naive_sort_test.d"
+    d_rc=0
+    d_out="$(cd "$DB" && dub test --skip-registry=all 2>&1)" || d_rc=$?
+    assert_eq 'scaffold D: propaga un caso fallido' 'yes' "$([[ "$d_rc" != 0 ]] && echo yes || echo no)"
+    assert_contains 'scaffold D: ejecuta el test fallido' 'naive_sort_test.d' "$d_out"
+    d_rc=0
+    d_out="$(cd "$DB" && dub build --skip-registry=all 2>&1)" || d_rc=$?
+    assert_eq 'scaffold D: build normal no incluye tests' '0' "$d_rc"
+    d_out="$(cd "$DB" && dub describe --data=source-files --data-list --skip-registry=all)"
+    assert_eq 'scaffold D: build normal no compila test/' 'no' "$([[ "$d_out" == *naive_sort_test.d* ]] && echo yes || echo no)"
+
+    (cd "$SANDBOX/d/core/algorithms" && dub init data_structures_basics --format=sdl --non-interactive --skip-registry=all >/dev/null)
+    glot_run_sandbox scaffold d algorithms/data_structures_basics
+    assert_eq 'scaffold D: acepta salida real de dub init' '0' "$rc_last"
+    assert_contains 'scaffold D: configura manifiesto nativo' 'sourcePaths "source" "test"' \
+        "$(cat "$SANDBOX/d/core/algorithms/data_structures_basics/dub.sdl")"
+fi
+printf 'author code\n' >"$DB/source/app.d"
+printf 'author module\n' >"$DB/source/naive_sort.d"
+printf 'author ignore\n' >"$DB/.gitignore"
+printf 'author manifest\n' >"$DB/dub.sdl"
+glot_run_sandbox scaffold d algorithms/naive_sort
+assert_eq 'scaffold D repetido: código' '0' "$rc_last"
 assert_eq 'scaffold D repetido: conserva código propio' 'author code' "$(cat "$DB/source/app.d")"
+assert_eq 'scaffold D repetido: conserva módulo' 'author module' "$(cat "$DB/source/naive_sort.d")"
+assert_eq 'scaffold D repetido: conserva ignore' 'author ignore' "$(cat "$DB/.gitignore")"
+assert_eq 'scaffold D repetido: conserva manifiesto' 'author manifest' "$(cat "$DB/dub.sdl")"
 assert_contains 'scaffold D repetido: anuncia análisis' 'glot prompt scaffold d algorithms/naive_sort' "$err"
+rm -- "$DB/source/naive_sort.d"
+ln -s "$DB/source/app.d" "$DB/source/naive_sort.d"
+glot_run_sandbox scaffold d algorithms/naive_sort
+assert_eq 'scaffold D symlink: bloquea' '4' "$rc_last"
+assert_eq 'scaffold D symlink: conserva destino' 'author code' "$(cat "$DB/source/app.d")"
 
 PSB="$SANDBOX/purescript/core/algorithms/naive_sort"
 mkdir -p "$PSB/src"

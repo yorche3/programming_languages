@@ -104,6 +104,18 @@ ejecutó el runner sin casos y devolvió fallo al introducir un caso fallido.
 creates a missing `.gitignore`. In an isolated lab, Criterion 2.4.1 ran the
 empty runner and returned failure for an intentionally failing test.
 
+**ES:** D crea `source/{module}.d` y `test/`, y configura la inclusión de
+`test/` en el manifiesto generado reconocido. DUB 1.41.0 ejecutó el runner
+vacío y detectó un test fallido en un laboratorio aislado; el build normal
+no incluye ese test. Los manifiestos propios se conservan para revisión.
+La base homologada D también necesita revisar su inclusión de tests.
+
+**EN:** D creates `source/{module}.d` and `test/`, configuring `test/` in the
+recognized generated manifest. DUB 1.41.0 ran the empty runner and detected
+an intentionally failing test in an isolated lab; normal builds exclude it.
+Authored manifests are preserved for review. The homologated D base also
+needs its test inclusion reviewed.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

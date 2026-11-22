@@ -157,6 +157,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **cpp** | `mkdir -p src include tests` → `touch MODULE.bazel BUILD .bazelversion .gitignore` | Declarar targets y dependencias Bazel; conservar `tests/` de las bases homologadas |
 | **crystal** | `crystal init lib {module}` → comprobar `shard.yml` y `spec/` | Conservar `src/`, `spec/spec_helper.cr` y `spec/`; no añadir `test/` ni borrar el gitfile |
 | **csharp** | `dotnet new sln` → `dotnet new classlib` → `dotnet new xunit` → `dotnet sln add` → `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj` | Borrar `Class1.cs` y `UnitTest1.cs` y añadir `.gitignore` |
+| **d** | `dub init {module} --format=sdl` → retirar solo el ejemplo verificado → crear `source/{module}.d` y `test/` → configurar `unittest` solo en el manifiesto generado reconocido | En otros manifiestos comprobar que `dub test` incluye `test/`; revisar cualquier `source/app.d` diferente del ejemplo y conservar contenido propio |
 | **fsharp** | Igual que C# con `-lang F#`, incluido `dotnet add test/{Module}.Tests/{Module}.Tests.fsproj reference src/{Module}/{Module}.fsproj` | Conservar los proyectos anidados y su referencia; cualquier renombrado de `Library.fs`/`Tests.fs` actualiza sus `Compile Include` y conserva contenido propio |
 | **groovy** | `gradle init --type groovy-library --dsl groovy --use-defaults` | Borrar `Library.groovy` y `LibraryTest.groovy` |
 | **go** | `go mod init example.com/{module}` → `mkdir -p src tests` | El paquete externo de `tests/` importa `example.com/{module}/src`, sin imponer `test/` |
@@ -174,9 +175,9 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **v** | `v init --lib` (no interactivo) → `mkdir -p src tests` | Conservar `tests/`, fuentes y gitfile; fijar `version: '0.1.0'` en `v.mod`. No renombrar carpetas sin actualizar imports |
 | **vala** | `meson init --language vala --type library --name {module}` | Completar `src/` y `test/` y decidir el build con meson |
 
-> **ES:** Si el generador crea un `main` o un `app` de ejemplo (caso de `dub init` en D, `zig init`; `cargo init --lib` genera solo la librería), bórralo cuando el módulo sea una biblioteca: un `main` propio rompe el runner de tests generado por la herramienta. Ese borrado es parte del completado posterior.
+> **ES:** Si el generador crea un `main` o un `app` de ejemplo (`dub init` en D, `zig init`; `cargo init --lib` genera solo la librería), debe retirarse cuando el módulo sea una biblioteca: un `main` propio rompe el runner de tests. En D solo se retira automáticamente la muestra verificada; el contenido diferente se conserva para revisión.
 >
-> **EN:** If the generator creates an example main or app (e.g. `dub init` in D, `zig init`; `cargo init --lib` generates only the library), delete it when the module is a library: a main of your own breaks the tool's generated test runner. That deletion is part of the later completion.
+> **EN:** If the generator creates an example main or app (`dub init` in D, `zig init`; `cargo init --lib` generates only the library), remove it for a library: a main of your own breaks the test runner. For D only the verified sample is removed automatically; different content is preserved for review.
 
 ## 🔨 Generación manual (lib) / Manual generation (lib)
 

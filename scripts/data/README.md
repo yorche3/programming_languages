@@ -124,6 +124,16 @@ sin casos; la suite añade las pruebas, sin crear otro `main`.
 missing `.gitignore` for `bin/` and `obj/`. Criterion supplies the runner
 even without cases; the suite adds tests without creating another `main`.
 
+**ES:** D crea `source/{module}.d` y `test/`, y un `.gitignore` si falta.
+Solo retira el `app.d` idéntico a la muestra verificada y configura `test/`
+en el manifiesto generado reconocido. Los demás contenidos se conservan;
+se anuncia la revisión del manifiesto y del ejemplo desconocido.
+
+**EN:** D creates `source/{module}.d`, `test/`, and a missing `.gitignore`.
+Only the verified `app.d` sample is removed, and `test/` is configured in the
+recognized generated manifest. Other content is preserved; the manifest and
+any unfamiliar sample are explicitly handed off for review.
+
 **ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
 (`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con
 referencia declarada por dotnet), Go (`src/tests`), Haskell (`lib/test` y
