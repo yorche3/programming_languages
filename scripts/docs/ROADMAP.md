@@ -321,6 +321,12 @@ desarrollo sustituye solo la muestra exacta y conserva las variantes propias.
 Queda pendiente un runner que detecte ausencia de casos en ambos frameworks
 sin ocultar fallos. El informe xUnit se generó solo con `--parallel` y no
 incluyó Swift Testing, por lo que no se adoptó como solución general.
+La opción interna `--event-stream-output-path` registró eventos de Swift
+Testing, pero no creó archivo en una ejecución solo XCTest. Con un test
+omitido por framework, `swift test` devolvió éxito: XCTest contó un test
+ejecutado y omitido, y Swift Testing informó un test aprobado en el resumen
+aunque sus eventos indicaban `testSkipped`. No basta con contar tests del
+resumen; también hay que distinguir omitidos y ejecuciones incompletas.
 
 **EN — Swift (2026-11-22):** SwiftPM 6.3.3 generated an `example` test
 without assertions; `swift test` reported it as a passing case. Removing only
@@ -330,6 +336,12 @@ sample and preserves authored variants. A runner detecting missing cases across
 both frameworks without hiding failures remains pending. The xUnit report was
 generated only with `--parallel` and omitted Swift Testing, so it was not
 adopted as a general solution.
+The internal `--event-stream-output-path` option recorded Swift Testing events
+but created no file in an XCTest-only run. With one skipped test per
+framework, `swift test` returned success: XCTest counted one executed and
+skipped test, and the Swift Testing summary reported one passing test even
+though its events showed `testSkipped`. Summary counts alone are insufficient;
+skips and incomplete runs must also be distinguished.
 
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
 si faltan, preserva archivos existentes y avisa de su revisión. El selector
