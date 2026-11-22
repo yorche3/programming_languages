@@ -1889,6 +1889,54 @@ glot_run_sandbox scaffold grain algorithms/data_structures_basics
 assert_eq 'scaffold Grain symlink: bloquea' '4' "$rc_last"
 assert_eq 'scaffold Grain symlink: conserva destino' 'author source' "$(cat "$GRB/src/data_structures_basics.gr")"
 
+# R prepara un paquete con testthat y conserva configuraciones existentes.
+RSC="$SANDBOX/r/core/algorithms/data_structures_basics"
+mkdir -p "$RSC"
+glot_run_sandbox -n scaffold r algorithms/data_structures_basics
+assert_eq 'scaffold R -n: código' '0' "$rc_last"
+assert_eq 'scaffold R -n: no crea archivos' 'no' "$([[ -e "$RSC/DESCRIPTION" || -e "$RSC/R" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold r algorithms/data_structures_basics
+assert_eq 'scaffold R: código' '0' "$rc_last"
+assert_contains 'scaffold R: nombre idiomático' 'Package: dataStructuresBasics' "$(cat "$RSC/DESCRIPTION")"
+assert_contains 'scaffold R: runner apunta al paquete' 'test_check("dataStructuresBasics")' "$(cat "$RSC/tests/testthat.R")"
+assert_eq 'scaffold R: crea fuente y test vacío' 'yes' \
+    "$([[ -f "$RSC/R/data_structures_basics.R" && -f "$RSC/tests/testthat/test-scaffold.R" ]] && echo yes || echo no)"
+assert_eq 'scaffold R: excluye artefactos' '2' \
+    "$(git -C "$RSC" check-ignore .Rhistory package.Rcheck/test | wc -l | tr -d ' ')"
+assert_contains 'scaffold R: anuncia revisión' 'glot prompt scaffold r algorithms/data_structures_basics' "$err"
+if command -v Rscript >/dev/null 2>&1 && command -v make >/dev/null 2>&1 && Rscript -e 'quit(status = if (requireNamespace("testthat", quietly = TRUE)) 0 else 1)' >/dev/null 2>&1; then
+    r_rc=0
+    r_out="$(make -s -C "$RSC" test 2>&1)" || r_rc=$?
+    assert_eq 'scaffold R: testthat arranca sin casos' '0' "$r_rc"
+    assert_contains 'scaffold R: informa cero casos' 'PASS 0' "$r_out"
+    printf 'test_that("glot failure", { expect_equal(1, 2) })\n' >"$RSC/tests/testthat/test-failure.R"
+    r_rc=0
+    r_out="$(make -s -C "$RSC" test 2>&1)" || r_rc=$?
+    assert_eq 'scaffold R: propaga aserción fallida' 'yes' "$([[ "$r_rc" != 0 ]] && echo yes || echo no)"
+    assert_contains 'scaffold R: informa test fallido' 'glot failure' "$r_out"
+fi
+printf 'author source\n' >"$RSC/R/data_structures_basics.R"
+printf 'author description\n' >"$RSC/DESCRIPTION"
+printf 'author namespace\n' >"$RSC/NAMESPACE"
+printf 'author runner\n' >"$RSC/tests/testthat.R"
+printf 'author test\n' >"$RSC/tests/testthat/test-scaffold.R"
+printf 'author makefile\n' >"$RSC/Makefile"
+printf 'author ignore\n' >"$RSC/.gitignore"
+glot_run_sandbox scaffold r algorithms/data_structures_basics
+assert_eq 'scaffold R repetido: código' '0' "$rc_last"
+assert_eq 'scaffold R repetido: conserva fuente' 'author source' "$(cat "$RSC/R/data_structures_basics.R")"
+assert_eq 'scaffold R repetido: conserva DESCRIPTION' 'author description' "$(cat "$RSC/DESCRIPTION")"
+assert_eq 'scaffold R repetido: conserva NAMESPACE' 'author namespace' "$(cat "$RSC/NAMESPACE")"
+assert_eq 'scaffold R repetido: conserva runner' 'author runner' "$(cat "$RSC/tests/testthat.R")"
+assert_eq 'scaffold R repetido: conserva test' 'author test' "$(cat "$RSC/tests/testthat/test-scaffold.R")"
+assert_eq 'scaffold R repetido: conserva Makefile' 'author makefile' "$(cat "$RSC/Makefile")"
+assert_eq 'scaffold R repetido: conserva ignore' 'author ignore' "$(cat "$RSC/.gitignore")"
+rm -- "$RSC/NAMESPACE"
+ln -s "$RSC/DESCRIPTION" "$RSC/NAMESPACE"
+glot_run_sandbox scaffold r algorithms/data_structures_basics
+assert_eq 'scaffold R symlink: bloquea' '4' "$rc_last"
+assert_eq 'scaffold R symlink: conserva destino' 'author description' "$(cat "$RSC/DESCRIPTION")"
+
 PSB="$SANDBOX/purescript/core/algorithms/naive_sort"
 mkdir -p "$PSB/src"
 printf 'author code\n' >"$PSB/src/Main.purs"

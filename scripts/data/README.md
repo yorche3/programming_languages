@@ -159,6 +159,14 @@ los archivos existentes se conservan.
 `.gitignore`. Framework and failure propagation remain completion work;
 existing files are preserved.
 
+**ES:** R crea, si faltan, los metadatos iniciales, fuente, NAMESPACE,
+runner, test vacío, Makefile y `.gitignore`. Conserva contenido propio;
+el completado revisa metadatos y exports antes de la suite.
+
+**EN:** R creates missing initial metadata, source, NAMESPACE, runner, empty
+test file, Makefile and `.gitignore`. Authored contents are preserved;
+completion reviews metadata and exports before the suite.
+
 **ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
 (`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con
 referencia declarada por dotnet), Go (`src/tests`), Haskell (`lib/test` y

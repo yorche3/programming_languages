@@ -583,6 +583,16 @@ mkdir -p src tests
 **ES:** El módulo es un paquete de R: DESCRIPTION (nombre, versión, licencia y dependencias), NAMESPACE (lo que se exporta), el código en R/ y las suites en tests/testthat/, con el prefijo test- que testthat descubre por defecto. El Makefile común deja el runner `make test`, que llama a `testthat::test_local()` —carga el paquete con pkgload::load_all(), sin instalarlo—; el "verificador" analiza los fuentes de R/ con `parse()`.
 
 **EN:** The module is an R package: DESCRIPTION (name, version, license and dependencies), NAMESPACE (what is exported), the code in R/ and the suites in tests/testthat/, with the test- prefix testthat discovers by default. Its shared Makefile provides `make test`, which calls `testthat::test_local()`—it loads the package with `pkgload::load_all()`, without installing it—and the verifier analyses sources under R/ with `parse()`.
+
+**ES:** Si faltan, el scaffold crea metadatos iniciales, fuente y NAMESPACE
+vacíos, `tests/testthat.R` y un `test-scaffold.R` sin casos para que
+`test_local()` arranque. No sustituye archivos existentes: el completado
+revisa los metadatos y los exports, y la suite añade sus propios tests.
+
+**EN:** When missing, scaffold creates initial metadata, an empty source and
+NAMESPACE, `tests/testthat.R` and a case-free `test-scaffold.R` so
+`test_local()` can start. Existing files are preserved: completion reviews
+metadata and exports, and the suite adds its own tests.
 ```bash
 mkdir -p R tests/testthat
 ```

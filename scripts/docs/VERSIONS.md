@@ -146,6 +146,14 @@ without overwriting files. Grain 0.7.2 compiled the runner and rejected an
 invalid source. The framework remains pending: a negative test of the
 homologated base reported failure but returned exit code 0.
 
+**ES:** R prepara un paquete mínimo con `testthat` sin reemplazar archivos
+existentes. En un laboratorio aislado, testthat 3.2.1 arrancó con cero casos
+y devolvió fallo al introducir una aserción fallida.
+
+**EN:** R prepares a minimal package with `testthat` without replacing
+existing files. In an isolated lab, testthat 3.2.1 ran with zero cases and
+returned failure for an intentionally failing assertion.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de
