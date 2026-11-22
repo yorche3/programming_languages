@@ -18,7 +18,7 @@ in the roadmap at `50/50`.
 - **Convención / Convention:** [`README.md`](README.md)
 - **Escala / Scale:** [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md)
 - **Severidad / Severity:** [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md)
-- **Estado / Status:** **pase ejecutado (primer barrido)**; contrato resuelto el 2026-11-22 (se mantiene el orden creciente); 12 hallazgos 🟡/🟠 con `align` planificado, 3 alineados (`java`, `csharp`, `groovy`) y 38 lenguajes 🟢 / **pass run (first sweep)**; contract settled on 2026-11-22 (ascending order stays); 12 🟡/🟠 findings with a planned `align`, 3 aligned (`java`, `csharp`, `groovy`) and 38 languages 🟢
+- **Estado / Status:** **pase ejecutado (primer barrido)**; contrato resuelto el 2026-11-22 (se mantiene el orden creciente); 9 hallazgos 🟡/🟠 con `align` planificado, 6 alineados y 41 lenguajes 🟢 (lote 1 cerrado: `java`, `csharp`, `groovy`, `haxe`, `crystal`, `ruby`) / **pass run (first sweep)**; contract settled on 2026-11-22 (ascending order stays); 9 🟡/🟠 findings with a planned `align`, 6 aligned and 41 languages 🟢 (batch 1 closed)
 - **Última verificación / Last verification:** 2026-11-22
 
 ---
@@ -183,16 +183,13 @@ deviation is in **module fidelity**, not in output.
 
 | Lenguaje / Language | Evidencia / Evidence | Severidad / Severity |
 |---|---|---|
-| `crystal` | `data_structures_advanced.cr:170` — `neighbors.includes?(v)` | 🟡 |
 | `elm` | `DataStructuresAdvanced.elm:300,324` — `List.member` | 🟡 |
 | `erlang` | `data_structures_advanced.erl:167,187` — `lists:member` | 🟡 |
 | `fsharp` | `DataStructuresAdvanced.fs:141,156` — `List.contains` | 🟡 |
 | `gleam` | `data_structures_advanced.gleam:227,248` — `list.contains` | 🟡 |
 | `haskell` | `DataStructuresAdvanced.hs:139,154` — `` v `elem` neighbours `` | 🟡 |
-| `haxe` | `Graph.hx:55,63` — `neighbors.indexOf(v)` | 🟡 |
 | `ocaml` | `graph.ml:134,144` — `List.mem v u_vertex.neighbors` | 🟡 |
 | `prolog` | `data_structures_advanced.pl:124,149` — `member(To, Neighbors)` | 🟡 |
-| `ruby` | `graph.rb:25,36` — `neighbors.include?(v)` | 🟡 |
 | `rust` | `graph.rs:78` — `u_vertex.neighbors().contains(&v)` | 🟡 |
 | `javascript` | `Graph.js:57,75` — `neighbors.includes(v)`; `Graph.js:87` — `[...].sort((a, b) => a - b)` | 🟠 |
 
@@ -215,11 +212,11 @@ path, a delegated design decision, hence 🟠 (structural). The other fourteen a
 
 ### 🟢 Homologados / Homologated
 
-- **38 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`,
-  `common-lisp`, `cpp`, `csharp`, `d`, `dart`, `elixir`, `forth`, `go`, `grain`,
-  `groovy`, `java`, `julia`, `kotlin`, `lua`, `nim`, `perl`, `php`, `purescript`,
-  `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `scala`, `scheme`,
-  `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
+- **41 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`,
+  `common-lisp`, `cpp`, `crystal`, `csharp`, `d`, `dart`, `elixir`, `forth`, `go`,
+  `grain`, `groovy`, `haxe`, `java`, `julia`, `kotlin`, `lua`, `nim`, `perl`,
+  `php`, `purescript`, `python`, `r`, `racket`, `raku`, `rescript`, `rexx`,
+  `ruby`, `scala`, `scheme`, `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
 
 **ES:** 🟢 significa que el barrido léxico no encontró ninguna búsqueda ni
 ordenación de biblioteca en el camino de adyacencia, la suite nativa está en
@@ -251,19 +248,19 @@ bound and output do not change — the deviation belongs to the **module layer**
 | Lenguaje / Language | Hallazgo / Finding | Ruta / Route |
 |---|---|---|
 | `csharp` | `List.Contains` en `HasEdge` | ✅ cerrado en `00de948`: `HasNeighbor` recorre la lista / closed: `HasNeighbor` scans the list |
-| `crystal` | `includes?` en `has_edge` | `align` — recorrido manual / manual walk |
+| `crystal` | `includes?` en `has_edge` | ✅ cerrado en `e3913de`: `has_neighbor` recorre el array / closed: `has_neighbor` scans the array |
 | `elm` | `List.member` en alta y consulta | `align` — recursión propia sobre la lista / own recursion |
 | `erlang` | `lists:member` en alta y consulta | `align` — recursión propia / own recursion |
 | `fsharp` | `List.contains` en alta y consulta | `align` — recursión propia / own recursion |
 | `gleam` | `list.contains` en alta y consulta | `align` — recursión propia / own recursion |
 | `groovy` | `contains` en alta y consulta | ✅ cerrado en `b400ed7`: `hasNeighbor` recorre la lista / closed: `hasNeighbor` scans the list |
 | `haskell` | `` `elem` `` en alta y consulta | `align` — función propia sobre la lista / own list function |
-| `haxe` | `indexOf` en alta y consulta | `align` — bucle propio / own loop |
+| `haxe` | `indexOf` en alta y consulta | ✅ cerrado en `cfa2ee9`: `hasNeighbor` recorre el array / closed: `hasNeighbor` scans the array |
 | `java` | `contains` en alta y consulta | ✅ cerrado en `715ef35`: `hasNeighbor` recorre la adyacencia / closed: `hasNeighbor` scans the adjacency |
 | `javascript` | `includes` en alta y consulta; `sort` en la salida | `align` — bucle propio e inserción ordenada manual / own loop and manual sorted insertion |
 | `ocaml` | `List.mem` en alta y consulta | `align` — recursión propia / own recursion |
 | `prolog` | `member/2` en alta y consulta | `align` — recorrido propio / own traversal, si el contrato lo permite |
-| `ruby` | `include?` en alta y consulta | `align` — bucle propio / own loop |
+| `ruby` | `include?` en alta y consulta | ✅ cerrado en `351a260`: `has_neighbor?` recorre el array / closed: `has_neighbor?` scans the array |
 | `rust` | `slice::contains` en `has_edge` | `align` — recorrido propio / own traversal |
 
 **ES:** Los quince hallazgos son de la **capa del módulo** y anteriores a la
@@ -375,5 +372,8 @@ submodule pointer commit on the monorepo's `audit/...` branch.
 **ES:** El pase **no cierra** con este barrido: quedan 15 hallazgos por resolver
 | 2026-11-22 | `align` de `groovy` / `groovy` align | `./gradlew test` + `glot evidence groovy algorithms/data_structures_advanced` | Rama `align/algorithms/data-structures-advanced`: un commit de código y merge `b400ed7`; suite en verde; README sin cambios / one code commit and merge; suite green; README unchanged |
 o aceptar, y la propuesta de contrato del autor puede cambiar su criterio.
+| 2026-11-22 | `align` de `haxe` / `haxe` align | `haxe build.hxml` + `glot evidence haxe …` | Rama `align/…`: un commit de código y merge `cfa2ee9`; suite en verde / one code commit and merge; suite green |
+| 2026-11-22 | `align` de `crystal` / `crystal` align | `crystal spec` + `glot evidence crystal …` | Rama `align/…`: un commit de código y merge `e3913de`; 23 ejemplos, 0 fallos / one code commit and merge; 23 examples, 0 failures |
+| 2026-11-22 | `align` de `ruby` / `ruby` align | `bundle exec rspec` + `glot evidence ruby …` | Rama `align/…`: un commit de código y merge `351a260`; 23 ejemplos, 0 fallos / one code commit and merge; 23 examples, 0 failures |
 **EN:** The pass **does not close** with this sweep: 15 findings remain to be
 fixed or accepted, and the author's contract proposal may change their criteria.
