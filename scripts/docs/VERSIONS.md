@@ -146,6 +146,16 @@ without overwriting files. Grain 0.7.2 compiled the runner and rejected an
 invalid source. The framework remains pending: a negative test of the
 homologated base reported failure but returned exit code 0.
 
+**ES:** Grain incorpora `TestStatus.finish` y actualiza solo el runner vacío
+anterior reconocido. Con el framework de la base, una prueba verde devolvió
+0 y una fallida devolvió 1. La suite debe conectar el resultado; los módulos
+existentes y la adaptación del framework siguen pendientes.
+
+**EN:** Grain now provides `TestStatus.finish` and upgrades only the
+recognized previous empty runner. With the base framework, a passing test
+returned 0 and a failing one returned 1. The suite must connect the result;
+existing modules and framework adaptation remain pending.
+
 **ES:** R prepara un paquete mínimo con `testthat` sin reemplazar archivos
 existentes. En un laboratorio aislado, testthat 3.2.1 arrancó con cero casos
 y devolvió fallo al introducir una aserción fallida.

@@ -151,13 +151,15 @@ The Makefile links the runner before helpers and checks that it exists even
 when the executable is already present. The suite connects groups and
 propagates failures.
 
-**ES:** Grain crea una fuente y un runner mínimos, Makefile y `.gitignore`
-si faltan. El framework y la propagación de fallos quedan para el completado;
-los archivos existentes se conservan.
+**ES:** Grain crea fuente, runner y `test_status.gr`, Makefile y `.gitignore`
+si faltan. La suite conecta los grupos y pasa el resultado del framework a
+`TestStatus.finish`; el framework se adapta al dominio. Se preserva el
+contenido propio y solo se actualiza el runner vacío anterior reconocido.
 
-**EN:** Grain creates a missing minimal source, runner, Makefile and
-`.gitignore`. Framework and failure propagation remain completion work;
-existing files are preserved.
+**EN:** Grain creates a missing source, runner, `test_status.gr`, Makefile and
+`.gitignore`. The suite connects groups and passes the framework result to
+`TestStatus.finish`; the framework is adapted to the domain. Authored content
+is preserved and only the recognized previous empty runner is upgraded.
 
 **ES:** R crea, si faltan, los metadatos iniciales, fuente, NAMESPACE,
 runner, test vacío, Makefile y `.gitignore`. Conserva contenido propio;

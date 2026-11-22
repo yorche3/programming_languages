@@ -194,13 +194,16 @@ separate review.
 **ES — Hallazgo Grain (2026-11-22):** una prueba aislada con el framework
 de `data_structures_basics` reportó un caso fallido pero `grain run` devolvió
 0: `printSummary` devuelve una bandera que el runner no comprueba. El
-scaffold prepara el runner vacío, pero el framework y la propagación de fallos
-deben resolverse antes de considerar completo el andamiaje.
+scaffold incorpora `TestStatus.finish` para convertir la bandera en código de
+salida y actualiza el runner vacío anterior reconocido; el framework aún debe
+adaptarse al dominio. Los módulos existentes requieren revisión por separado.
 
 **EN — Grain finding (2026-11-22):** an isolated failing case using the
 homologated framework was reported but `grain run` exited 0: the runner
-ignores the flag returned by `printSummary`. Scaffold prepares the empty
-runner, but framework and failure propagation remain completion work.
+ignores the flag returned by `printSummary`. Scaffold now provides
+`TestStatus.finish` to translate that flag into an exit status and upgrades
+the recognized previous empty runner. Framework adaptation and review of
+existing modules remain open.
 
 **ES — Prolog (2026-11-22):** las bases usan `consult/1` y no declaran un
 módulo con exportaciones vacías; el scaffold en desarrollo preserva fuentes

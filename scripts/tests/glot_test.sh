@@ -1863,6 +1863,8 @@ glot_run_sandbox scaffold grain algorithms/data_structures_basics
 assert_eq 'scaffold Grain: código' '0' "$rc_last"
 assert_eq 'scaffold Grain: crea fuente y runner' 'yes' \
     "$([[ -f "$GRB/src/data_structures_basics.gr" && -f "$GRB/tests/run_tests.gr" ]] && echo yes || echo no)"
+assert_eq 'scaffold Grain: crea control de estado' 'yes' "$([[ -f "$GRB/tests/test_status.gr" ]] && echo yes || echo no)"
+assert_contains 'scaffold Grain: usa control de estado' 'TestStatus.finish(true)' "$(cat "$GRB/tests/run_tests.gr")"
 assert_eq 'scaffold Grain: excluye artefactos' '3' \
     "$(git -C "$GRB" check-ignore target/module.gro tests/run_tests.wasm src/module.gro | wc -l | tr -d ' ')"
 assert_contains 'scaffold Grain: anuncia trabajo pendiente' 'glot prompt scaffold grain algorithms/data_structures_basics' "$err"
@@ -1871,6 +1873,18 @@ if command -v grain >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
     grain_out="$(make -s -C "$GRB" test 2>&1)" || grain_rc=$?
     assert_eq 'scaffold Grain: runner arranca' '0' "$grain_rc"
     assert_contains 'scaffold Grain: informa ausencia de tests' 'Scaffold: no tests configured' "$grain_out"
+    printf 'module Testing\nprovide let printSummary = () => {\n  print("1 passed, 0 failed")\n  1 == 1\n}\n' >"$GRB/tests/testing.gr"
+    printf 'module RunTests\nfrom "./testing.gr" include Testing\nfrom "./test_status.gr" include TestStatus\nTestStatus.finish(Testing.printSummary())\n' >"$GRB/tests/run_tests.gr"
+    grain_rc=0
+    grain_out="$(make -s -C "$GRB" test 2>&1)" || grain_rc=$?
+    assert_eq 'scaffold Grain: acepta suite en verde' '0' "$grain_rc"
+    assert_contains 'scaffold Grain: ejecuta suite en verde' '1 passed, 0 failed' "$grain_out"
+    printf 'module Testing\nprovide let printSummary = () => {\n  print("0 passed, 1 failed")\n  1 == 2\n}\n' >"$GRB/tests/testing.gr"
+    grain_rc=0
+    grain_out="$(make -s -C "$GRB" test 2>&1)" || grain_rc=$?
+    assert_eq 'scaffold Grain: propaga aserción fallida' 'yes' "$([[ "$grain_rc" != 0 ]] && echo yes || echo no)"
+    assert_contains 'scaffold Grain: ejecuta suite fallida' '0 passed, 1 failed' "$grain_out"
+    printf 'module RunTests\nfrom "../src/data_structures_basics.gr" include DataStructuresBasics\nfrom "./test_status.gr" include TestStatus\nTestStatus.finish(true)\n' >"$GRB/tests/run_tests.gr"
     printf 'module DataStructuresBasics\nthis is invalid Grain\n' >"$GRB/src/data_structures_basics.gr"
     grain_rc=0
     grain_out="$(make -s -C "$GRB" test 2>&1)" || grain_rc=$?
@@ -1878,12 +1892,14 @@ if command -v grain >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
 fi
 printf 'author source\n' >"$GRB/src/data_structures_basics.gr"
 printf 'author runner\n' >"$GRB/tests/run_tests.gr"
+printf 'author status\n' >"$GRB/tests/test_status.gr"
 printf 'author makefile\n' >"$GRB/Makefile"
 printf 'author ignore\n' >"$GRB/.gitignore"
 glot_run_sandbox scaffold grain algorithms/data_structures_basics
 assert_eq 'scaffold Grain repetido: código' '0' "$rc_last"
 assert_eq 'scaffold Grain repetido: conserva fuente' 'author source' "$(cat "$GRB/src/data_structures_basics.gr")"
 assert_eq 'scaffold Grain repetido: conserva runner' 'author runner' "$(cat "$GRB/tests/run_tests.gr")"
+assert_eq 'scaffold Grain repetido: conserva control de estado' 'author status' "$(cat "$GRB/tests/test_status.gr")"
 assert_eq 'scaffold Grain repetido: conserva Makefile' 'author makefile' "$(cat "$GRB/Makefile")"
 assert_eq 'scaffold Grain repetido: conserva ignore' 'author ignore' "$(cat "$GRB/.gitignore")"
 rm -- "$GRB/tests/run_tests.gr"
@@ -1891,6 +1907,24 @@ ln -s "$GRB/src/data_structures_basics.gr" "$GRB/tests/run_tests.gr"
 glot_run_sandbox scaffold grain algorithms/data_structures_basics
 assert_eq 'scaffold Grain symlink: bloquea' '4' "$rc_last"
 assert_eq 'scaffold Grain symlink: conserva destino' 'author source' "$(cat "$GRB/src/data_structures_basics.gr")"
+GR_OLD="$SANDBOX/grain/core/algorithms/naive_sort"
+mkdir -p "$GR_OLD/tests"
+printf 'module RunTests\n\nfrom "../src/naive_sort.gr" include NaiveSort\n\nprint("Scaffold: no tests configured")\n' >"$GR_OLD/tests/run_tests.gr"
+printf 'author status\n' >"$GR_OLD/tests/test_status.gr"
+glot_run_sandbox scaffold grain algorithms/naive_sort
+assert_eq 'scaffold Grain anterior con helper propio: bloquea' '4' "$rc_last"
+assert_contains 'scaffold Grain anterior con helper propio: diagnóstico' 'custom or unreadable Grain status helper' "$err"
+assert_eq 'scaffold Grain anterior con helper propio: conserva runner' 'yes' \
+    "$(grep -q 'TestStatus.finish' "$GR_OLD/tests/run_tests.gr" && echo no || echo yes)"
+rm -- "$GR_OLD/tests/test_status.gr"
+glot_run_sandbox -n scaffold grain algorithms/naive_sort
+assert_eq 'scaffold Grain anterior -n: código' '0' "$rc_last"
+assert_eq 'scaffold Grain anterior -n: no crea helper' 'no' "$([[ -e "$GR_OLD/tests/test_status.gr" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold grain algorithms/naive_sort
+assert_eq 'scaffold Grain anterior: código' '0' "$rc_last"
+assert_contains 'scaffold Grain anterior: actualiza solo runner conocido' 'TestStatus.finish(true)' "$(cat "$GR_OLD/tests/run_tests.gr")"
+glot_run_sandbox scaffold grain algorithms/naive_sort
+assert_eq 'scaffold Grain anterior: rerun sin cambios' '0' "$rc_last"
 
 # R prepara un paquete con testthat y conserva configuraciones existentes.
 RSC="$SANDBOX/r/core/algorithms/data_structures_basics"

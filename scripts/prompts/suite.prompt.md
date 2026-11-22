@@ -133,6 +133,11 @@ grupos reales al runner existente; no se crea ni reemplaza la infraestructura de
 | Hay un **runner de ejemplo** o no existe el runner requerido | Detente y reporta el defecto del paso 4a con archivo, comando y salida real; no escribas casos ni sustituyas infraestructura |
 | El fichero del runner lo **genera la construcción** | Reporta la dependencia de construcción; el 4d puede ajustar su generación sin pedir que se vuelva a escribir la suite |
 
+En Grain, cuando el scaffold proporciona `TestStatus.finish`, conecta los
+grupos y pasa a esa función el resultado booleano del framework, por ejemplo
+`TestStatus.finish(Testing.printSummary())`. No ignores el resultado: una
+suite con fallos debe devolver código no cero.
+
 Un fallo de construcción no deshace ni invalida los archivos de suite ya escritos. Repórtalo con
 el comando, el código de salida y la salida real; se corrige en 4d y luego se vuelve a ejecutar
 `glot test` sobre esta misma suite. No se repite la delegación `suite`.

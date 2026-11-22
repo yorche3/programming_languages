@@ -404,15 +404,19 @@ mkdir -p src tests
 └── tests/                   # suites + run_tests.gr + testing.gr
 ```
 
-**ES:** El scaffold crea una fuente mínima y un runner que la importa, además
-de `Makefile` y `.gitignore` si faltan. Se conservan los archivos existentes.
-El framework y la propagación de fallos requieren revisión en el completado:
-la base homologada devuelve una bandera que su runner no comprueba.
+**ES:** El scaffold crea una fuente mínima, un runner y `test_status.gr`, además
+de `Makefile` y `.gitignore` si faltan. El helper `TestStatus.finish` devuelve
+código 1 ante un resultado falso; la suite debe conectar los grupos y pasarle
+el resultado del framework, por ejemplo `TestStatus.finish(Testing.printSummary())`.
+Se conservan los archivos propios y se actualiza solo el runner vacío anterior
+reconocido. El framework se adapta al dominio en el completado.
 
-**EN:** Scaffold creates a minimal source and a runner importing it, plus a
-missing `Makefile` and `.gitignore`. Existing files are preserved. Framework
-and failure propagation require completion review: the homologated base
-returns a flag its runner does not check.
+**EN:** Scaffold creates a minimal source, runner and `test_status.gr`, plus a
+missing `Makefile` and `.gitignore`. `TestStatus.finish` exits with code 1 on
+false; the suite connects its groups and passes it the framework's result, for
+example `TestStatus.finish(Testing.printSummary())`. Authored files are
+preserved; only the recognized previous empty runner is upgraded. The
+framework is adapted to the domain during completion.
 
 ### Haxe — build.hxml + src/ + test/
 ```bash
