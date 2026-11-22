@@ -190,6 +190,17 @@ base's `test.forth` was reported but Gforth exited 0. The development
 scaffold's `test-report` exits 1 on failures; existing frameworks need a
 separate review.
 
+**ES — Hallazgo Grain (2026-11-22):** una prueba aislada con el framework
+de `data_structures_basics` reportó un caso fallido pero `grain run` devolvió
+0: `printSummary` devuelve una bandera que el runner no comprueba. El
+scaffold prepara el runner vacío, pero el framework y la propagación de fallos
+deben resolverse antes de considerar completo el andamiaje.
+
+**EN — Grain finding (2026-11-22):** an isolated failing case using the
+homologated framework was reported but `grain run` exited 0: the runner
+ignores the flag returned by `printSummary`. Scaffold prepares the empty
+runner, but framework and failure propagation remain completion work.
+
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su
 delegate, con archivos sobrantes. El catálogo anterior solo declaraba

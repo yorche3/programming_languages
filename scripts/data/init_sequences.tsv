@@ -60,8 +60,9 @@ gleam	scaffold	1	module	run	touch .gitignore	-	-	-
 go	new	1	module	run	go mod init example.com/{module}	-	-	-
 go	scaffold	1	module	run	mkdir -p src tests	-	-	la suite externa en tests/ importa example.com/{module}/src; conservar la declaración de paquete de src/
 grain	new	1	phase	run	mkdir -p {module}	-	-	-
-grain	scaffold	1	module	run	mkdir -p src tests && printf 'module {Module}\n' > src/{module}.gr	-	-	-
-grain	scaffold	2	module	run	test -e Makefile || cp {root}/scripts/data/scaffold_templates/grain.Makefile Makefile	-	-	completar el runner vacío y validar los patrones de .gitignore con el delegado scaffold
+grain	scaffold	1	module	run	if [[ -L src || -L tests || -L src/{module}.gr || -L tests/run_tests.gr || ( -e src/{module}.gr && ! -f src/{module}.gr ) || ( -e tests/run_tests.gr && ! -f tests/run_tests.gr ) ]]; then printf 'scaffold: ruta Grain no segura / unsafe Grain path\n' >&2; false; else mkdir -p src tests && { test -e src/{module}.gr || (set -C; printf 'module {Module}\n' > src/{module}.gr); } && { test -e tests/run_tests.gr || (set -C; printf 'module RunTests\n\nfrom "../src/{module}.gr" include {Module}\n\nprint("Scaffold: no tests configured")\n' > tests/run_tests.gr); }; fi	-	-	revisar el framework de pruebas; la suite debe conectar sus grupos y propagar los fallos
+grain	scaffold	2	module	run	if [[ -L Makefile || ( -e Makefile && ! -f Makefile ) ]]; then printf 'scaffold: Makefile no seguro / unsafe Makefile\n' >&2; false; else test -e Makefile || (set -C; cat {root}/scripts/data/scaffold_templates/grain.Makefile > Makefile); fi	-	-	-
+grain	scaffold	3	module	run	test -e .gitignore || (set -C; cat {root}/scripts/data/scaffold_templates/grain.gitignore > .gitignore)	-	-	-
 groovy	new	1	module	run	gradle init --type groovy-library --dsl groovy --project-name {module} --package {module} --use-defaults	-	-	-
 groovy	scaffold	1	module	run	find lib -name 'Library*.groovy' -delete	-	-	-
 haskell	new	1	module	run	cabal init --lib -n --source-dir=lib --package-name="$(printf '%s' {module} | tr '_' '-')" --expose-module={Module}	-	-	-

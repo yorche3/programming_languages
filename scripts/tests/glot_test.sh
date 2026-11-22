@@ -1850,6 +1850,45 @@ glot_run_sandbox scaffold cobol algorithms/data_structures_basics
 assert_eq 'scaffold COBOL symlink: bloquea' '4' "$rc_last"
 assert_eq 'scaffold COBOL symlink: conserva destino' 'author source' "$(cat "$COB/src/lib/data_structures_basics.cbl")"
 
+# Grain preserva contenido y compila el runner con la fuente real.
+GRB="$SANDBOX/grain/core/algorithms/data_structures_basics"
+mkdir -p "$GRB"
+glot_run_sandbox -n scaffold grain algorithms/data_structures_basics
+assert_eq 'scaffold Grain -n: código' '0' "$rc_last"
+assert_eq 'scaffold Grain -n: no crea fuentes' 'no' "$([[ -e "$GRB/src" || -e "$GRB/tests" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold grain algorithms/data_structures_basics
+assert_eq 'scaffold Grain: código' '0' "$rc_last"
+assert_eq 'scaffold Grain: crea fuente y runner' 'yes' \
+    "$([[ -f "$GRB/src/data_structures_basics.gr" && -f "$GRB/tests/run_tests.gr" ]] && echo yes || echo no)"
+assert_eq 'scaffold Grain: excluye artefactos' '3' \
+    "$(git -C "$GRB" check-ignore target/module.gro tests/run_tests.wasm src/module.gro | wc -l | tr -d ' ')"
+assert_contains 'scaffold Grain: anuncia trabajo pendiente' 'glot prompt scaffold grain algorithms/data_structures_basics' "$err"
+if command -v grain >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
+    grain_rc=0
+    grain_out="$(make -s -C "$GRB" test 2>&1)" || grain_rc=$?
+    assert_eq 'scaffold Grain: runner arranca' '0' "$grain_rc"
+    assert_contains 'scaffold Grain: informa ausencia de tests' 'Scaffold: no tests configured' "$grain_out"
+    printf 'module DataStructuresBasics\nthis is invalid Grain\n' >"$GRB/src/data_structures_basics.gr"
+    grain_rc=0
+    grain_out="$(make -s -C "$GRB" test 2>&1)" || grain_rc=$?
+    assert_eq 'scaffold Grain: detecta fuente inválida' 'yes' "$([[ "$grain_rc" != 0 ]] && echo yes || echo no)"
+fi
+printf 'author source\n' >"$GRB/src/data_structures_basics.gr"
+printf 'author runner\n' >"$GRB/tests/run_tests.gr"
+printf 'author makefile\n' >"$GRB/Makefile"
+printf 'author ignore\n' >"$GRB/.gitignore"
+glot_run_sandbox scaffold grain algorithms/data_structures_basics
+assert_eq 'scaffold Grain repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Grain repetido: conserva fuente' 'author source' "$(cat "$GRB/src/data_structures_basics.gr")"
+assert_eq 'scaffold Grain repetido: conserva runner' 'author runner' "$(cat "$GRB/tests/run_tests.gr")"
+assert_eq 'scaffold Grain repetido: conserva Makefile' 'author makefile' "$(cat "$GRB/Makefile")"
+assert_eq 'scaffold Grain repetido: conserva ignore' 'author ignore' "$(cat "$GRB/.gitignore")"
+rm -- "$GRB/tests/run_tests.gr"
+ln -s "$GRB/src/data_structures_basics.gr" "$GRB/tests/run_tests.gr"
+glot_run_sandbox scaffold grain algorithms/data_structures_basics
+assert_eq 'scaffold Grain symlink: bloquea' '4' "$rc_last"
+assert_eq 'scaffold Grain symlink: conserva destino' 'author source' "$(cat "$GRB/src/data_structures_basics.gr")"
+
 PSB="$SANDBOX/purescript/core/algorithms/naive_sort"
 mkdir -p "$PSB/src"
 printf 'author code\n' >"$PSB/src/Main.purs"

@@ -195,7 +195,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | `c` | `mkdir -p include src test` · crear `include/{module}.h` y `src/{module}.c` si faltan | `#ifndef {Module}_H` + `#define {Module}_H` en la cabecera; `#include "{module}.h"` en la fuente |
 | `cobol` | `mkdir -p src/copybooks src/lib test` · crear `src/lib/{module}.cbl` y `test/RUN-TESTS.cbl` si faltan | Programa mínimo con `PROGRAM-ID. {Module}.` y `GOBACK.` |
 | `forth` | `mkdir -p src test` · crear `src/{module}.forth` y `test/run-tests.forth` si faltan | Fuente inicialmente vacía; el runner la carga y anuncia que no hay pruebas |
-| `grain` | `mkdir -p src tests` · `touch src/{module}.gr` | `module {Module}` |
+| `grain` | `mkdir -p src tests` · crear `src/{module}.gr` y `tests/run_tests.gr` si faltan | `module {Module}`; el runner importa la fuente y anuncia que no hay tests |
 | `java` | `mkdir -p src/main/java src/test/java` · `touch src/main/java/{Module}.java` | `public class {Module} { }` |
 | `perl` | `mkdir -p lib test` · `touch lib/{module}.pl` | `package {Module};` + `use strict;` + `use warnings;` + `1;` |
 | `php` | `mkdir -p src test` · `touch src/{Module}.php` | `<?php` + `declare(strict_types=1);` + `namespace {Module};` |
@@ -403,6 +403,16 @@ mkdir -p src tests
 ├── src/{module}.gr
 └── tests/                   # suites + run_tests.gr + testing.gr
 ```
+
+**ES:** El scaffold crea una fuente mínima y un runner que la importa, además
+de `Makefile` y `.gitignore` si faltan. Se conservan los archivos existentes.
+El framework y la propagación de fallos requieren revisión en el completado:
+la base homologada devuelve una bandera que su runner no comprueba.
+
+**EN:** Scaffold creates a minimal source and a runner importing it, plus a
+missing `Makefile` and `.gitignore`. Existing files are preserved. Framework
+and failure propagation require completion review: the homologated base
+returns a flag its runner does not check.
 
 ### Haxe — build.hxml + src/ + test/
 ```bash

@@ -151,6 +151,14 @@ The Makefile links the runner before helpers and checks that it exists even
 when the executable is already present. The suite connects groups and
 propagates failures.
 
+**ES:** Grain crea una fuente y un runner mínimos, Makefile y `.gitignore`
+si faltan. El framework y la propagación de fallos quedan para el completado;
+los archivos existentes se conservan.
+
+**EN:** Grain creates a missing minimal source, runner, Makefile and
+`.gitignore`. Framework and failure propagation remain completion work;
+existing files are preserved.
+
 **ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
 (`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con
 referencia declarada por dotnet), Go (`src/tests`), Haskell (`lib/test` y

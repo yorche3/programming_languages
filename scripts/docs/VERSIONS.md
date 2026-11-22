@@ -136,6 +136,16 @@ without overwriting existing files. With GnuCOBOL 3.2.0, tests verified the
 entry point with helpers, failure propagation and a missing runner even when
 an earlier executable exists.
 
+**ES:** Grain crea fuente y runner mínimos, Makefile y `.gitignore` sin
+sobrescribir archivos. Grain 0.7.2 compiló el runner e informó el fallo de una
+fuente inválida. El framework sigue pendiente: una prueba negativa de la base
+homologada reportó el fallo pero devolvió código 0.
+
+**EN:** Grain creates a minimal source, runner, Makefile and `.gitignore`
+without overwriting files. Grain 0.7.2 compiled the runner and rejected an
+invalid source. The framework remains pending: a negative test of the
+homologated base reported failure but returned exit code 0.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de
