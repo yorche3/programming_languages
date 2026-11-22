@@ -26,9 +26,9 @@ This module declares a **`Node` base carrying the value** and two derived nodes:
 
 ## 🧭 Cómo leer este módulo / How to read this module
 
-> **ES:** Esta página fija **qué** se exige. Para el **cómo** y el **porqué** de cada familia de lenguajes (base con valor por herencia o embebida, mutabilidad de enlaces y registro de vértices), la guía del módulo: [`implementations/07_Data_Structures_Advanced.md`](../../implementations/07_Data_Structures_Advanced.md).
+> **ES:** Esta página fija **qué** se exige. Para el **cómo** y el **porqué** de cada familia de lenguajes (base con valor por herencia o embebida, mutabilidad de enlaces y registro de vértices), la guía del módulo: [`implementations/07_Data_Structures_Advanced.md`](../../implementations/07_Data_Structures_Advanced.md). Para **qué** se verificó en los 50 lenguajes, su registro de auditoría: [`07_Audited_Data_Structures_Advanced.md`](../../audits/07_Audited_Data_Structures_Advanced.md).
 >
-> **EN:** This page fixes **what** is required. For the **how** and the **why** of each language family (value base through inheritance or embedding, link mutability and vertex registration), see the module guide: [`implementations/07_Data_Structures_Advanced.md`](../../implementations/07_Data_Structures_Advanced.md).
+> **EN:** This page fixes **what** is required. For the **how** and the **why** of each language family (value base through inheritance or embedding, link mutability and vertex registration), see the module guide: [`implementations/07_Data_Structures_Advanced.md`](../../implementations/07_Data_Structures_Advanced.md). For **what** was verified across the 50 languages, its audit record: [`07_Audited_Data_Structures_Advanced.md`](../../audits/07_Audited_Data_Structures_Advanced.md).
 
 ## 📖 Concepto: múltiples referencias / Concept: multiple links
 
