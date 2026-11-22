@@ -256,7 +256,12 @@ aResult~errorCount > 0)` devolvió 1. Falta un mecanismo que ejecute todas las
 suites y propague fallos sin modificar ni ocultar las suites existentes.
 En una prueba adicional, `.Package~new` ejecutó el cuerpo principal de la
 suite al cargarla; descubrir clases y ejecutarlas otra vez duplicaría los
-tests y sus posibles efectos.
+tests y sus posibles efectos. Un prototipo con `CALL` y una subclase instalada
+mediante `ooRexxUnit.default.TestResult.Class` capturó los resultados sin
+repetir las suites homologadas de `numbers` y `data_structures_basics`;
+detectó una aserción fallida, una suite vacía y `exit 7`. Sigue pendiente
+validar las suites que proporcionen su propio resultado o cambien esa
+configuración antes de adoptar el runner: no deben generar un falso verde.
 
 **EN — Rexx (2026-11-22):** scaffold preserves sources and rejects symbolic
 paths, but the runner remains pending. `glot test` rejects the two `numbers`
@@ -266,7 +271,12 @@ Running every suite and propagating failures without modifying or hiding
 existing suites still needs a solution.
 An additional check showed that `.Package~new` executes the suite's main body
 on load, so discovering and executing its classes afterward would run tests
-and their potential side effects twice.
+and their potential side effects twice. A prototype using `CALL` and a
+subclass registered as `ooRexxUnit.default.TestResult.Class` captured results
+without repeating the homologated `numbers` and `data_structures_basics`
+suites; it detected an assertion failure, an empty suite and `exit 7`.
+Suites supplying their own result or changing that configuration still need
+validation before adopting the runner: they must not produce false success.
 
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
 si faltan, preserva archivos existentes y avisa de su revisión. El selector
