@@ -206,6 +206,20 @@ the PascalCase module and a minimal runner, removes/replaces only exact
 matching samples, and preserves other content. The `test-unit` manifest and
 other generator versions remain to be checked.
 
+**ES — Investigación (2026-11-22):** `spago install --offline --test-deps
+test-unit` añadió la dependencia al manifiesto y actualizó el lockfile en un
+proyecto aislado. Con PureScript 0.15.16, Spago 1.0.4 y `test-unit` 17.0.0,
+una compilación limpia con `spago test --offline --strict` terminó con código
+0, pero informó 15 warnings de la dependencia y 0 de los fuentes del proyecto.
+La regla del encargo exige ausencia de warnings: queda por resolver cómo
+conciliarla con esta dependencia antes de automatizar su incorporación.
+
+**EN — Investigation (2026-11-22):** offline `spago install --test-deps
+test-unit` updated the manifest and lockfile in an isolated project. With
+PureScript 0.15.16, Spago 1.0.4 and `test-unit` 17.0.0, a clean strict test
+exited 0 but reported 15 dependency warnings and 0 project warnings. The
+warning-free gate still needs resolution before automating this dependency.
+
 - Para el fix, verificar la salida real de `spago init` y el layout homologado;
   automatizar los cambios mecánicos de nombres, imports, runner y manifiesto
   que correspondan, manteniendo consistentes archivos y declaraciones.
