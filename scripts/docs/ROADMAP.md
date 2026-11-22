@@ -303,6 +303,11 @@ cero casos en ambos escenarios y un caso aprobado en una prueba positiva;
 un fallo de aserción devolvió código no cero. Queda por investigar cómo usar
 esos resultados sin alterar el alcance, el caché o los archivos propios,
 incluidos proyectos multipaquete, ejecuciones incompletas e informes ausentes.
+En un paquete con dos módulos, uno sin casos y otro con un caso aprobado,
+el informe agregó ambos resultados y el comando tuvo éxito. Un parser
+prototipo escrito en Ballerina distinguió los informes vacío y aprobado;
+no está integrado y aún hay que verificar aislamiento y ciclo de vida de
+los informes, además de los escenarios pendientes.
 
 **EN — Ballerina (2026-11-22):** in an isolated project, `new` and `scaffold`
 produced the empty library and `tests/lib_test.bal` used by the homologated
@@ -312,6 +317,11 @@ in both scenarios and one passing case in a positive test; an assertion failure
 returned nonzero. Safe use of these results without changing scope, cache or
 authored files, including multi-package projects, incomplete executions and
 missing reports, remains to be investigated.
+In a two-module package with no cases in one module and a passing case in the
+other, the report aggregated both results and the command succeeded. A
+prototype Ballerina parser distinguished empty and passing reports; it is not
+integrated, and report isolation and lifecycle still need verification along
+with the remaining scenarios.
 
 **ES — Scala (2026-11-22):** el scaffold sobrescribía la fuente en cada
 ejecución y dejaba `build.sbt` y `build.properties` vacíos. Ahora crea
