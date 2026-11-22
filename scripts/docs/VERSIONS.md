@@ -275,6 +275,14 @@ Verificadas las dos bases homologadas en copias aisladas.
 it rejects empty and entirely ignored runs. Both homologated bases were verified
 in isolated copies.
 
+**ES:** Swift conserva suites y manifiestos existentes, protege rutas y
+sustituye solo el ejemplo SwiftPM 6.3.3 comprobado por un archivo sin casos.
+El runner aún informa éxito con cero tests y sigue pendiente de corrección.
+
+**EN:** Swift preserves existing suites and manifests, protects paths and
+replaces only the verified SwiftPM 6.3.3 example with a case-free file. The
+runner still reports success with zero tests and remains pending.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

@@ -351,6 +351,9 @@ sandbox_make() {
 [submodule "scala"]
         path = scala
         url = ../remote/scala.git
+[submodule "swift"]
+        path = swift
+        url = ../remote/swift.git
 [submodule "tcl-tk"]
         path = tcl-tk
         url = ../remote/tcl-tk.git
@@ -2672,6 +2675,49 @@ glot_run_sandbox scaffold tcl-tk algorithms/naive_sort
 assert_eq 'scaffold Tcl previo: código' '0' "$rc_last"
 assert_eq 'scaffold Tcl previo: conserva índice vacío' 'yes' "$([[ ! -s "$TC_DRY/src/pkgIndex.tcl" ]] && echo yes || echo no)"
 assert_contains 'scaffold Tcl previo: anuncia revisión' 'revisar archivos previos' "$err"
+
+# Swift: retirar solo la muestra comprobada y conservar suites propias.
+SW="$SANDBOX/swift/core/algorithms/data_structures_basics"
+mkdir -p -- "$SW/Tests/data_structures_basicsTests"
+printf 'author manifest\n' >"$SW/Package.swift"
+sed 's/@MODULE@/data_structures_basics/g' "$DATA_DIR/scaffold_templates/swift.Test.swift" \
+    >"$SW/Tests/data_structures_basicsTests/data_structures_basicsTests.swift"
+glot_run_sandbox -n scaffold swift algorithms/data_structures_basics
+assert_eq 'scaffold Swift dry-run: código' '0' "$rc_last"
+assert_contains 'scaffold Swift dry-run: conserva muestra' '@Test func example()' "$(cat -- "$SW/Tests/data_structures_basicsTests/data_structures_basicsTests.swift")"
+glot_run_sandbox scaffold swift algorithms/data_structures_basics
+assert_eq 'scaffold Swift: código' '0' "$rc_last"
+assert_eq 'scaffold Swift: reemplaza muestra' "$(printf 'import Testing\n@testable import data_structures_basics')" "$(cat -- "$SW/Tests/data_structures_basicsTests/data_structures_basicsTests.swift")"
+assert_eq 'scaffold Swift: conserva manifiesto' 'author manifest' "$(cat -- "$SW/Package.swift")"
+assert_eq 'scaffold Swift: ignora compilados' '1' "$(git -C "$SW" check-ignore .build/artifact | wc -l | tr -d ' ')"
+assert_contains 'scaffold Swift: avisa runner' 'runner Swift' "$err"
+printf 'author test\n' >"$SW/Tests/data_structures_basicsTests/data_structures_basicsTests.swift"
+printf 'author ignore\n' >"$SW/.gitignore"
+glot_run_sandbox scaffold swift algorithms/data_structures_basics
+assert_eq 'scaffold Swift repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Swift repetido: conserva suite' 'author test' "$(cat -- "$SW/Tests/data_structures_basicsTests/data_structures_basicsTests.swift")"
+assert_eq 'scaffold Swift repetido: conserva ignore' 'author ignore' "$(cat -- "$SW/.gitignore")"
+printf 'author target\n' >"$SW/target-file"
+rm -- "$SW/Tests/data_structures_basicsTests/data_structures_basicsTests.swift"
+ln -s "$SW/target-file" "$SW/Tests/data_structures_basicsTests/data_structures_basicsTests.swift"
+glot_run_sandbox scaffold swift algorithms/data_structures_basics
+assert_eq 'scaffold Swift symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Swift symlink: conserva destino' 'author target' "$(cat -- "$SW/target-file")"
+SW_EMPTY="$SANDBOX/swift/core/algorithms/naive_sort"
+mkdir -p -- "$SW_EMPTY"
+glot_run_sandbox scaffold swift algorithms/naive_sort
+assert_eq 'scaffold Swift sin manifiesto: falla' '4' "$rc_last"
+assert_contains 'scaffold Swift sin manifiesto: diagnóstico' 'missing manifest' "$err"
+assert_eq 'scaffold Swift sin manifiesto: no escribe' '0' "$(find "$SW_EMPTY" -mindepth 1 | wc -l | tr -d ' ')"
+SW_MISSING="$SANDBOX/swift/core/algorithms/searching"
+mkdir -p -- "$SW_MISSING/Tests/searchingTests"
+printf 'author manifest\n' >"$SW_MISSING/Package.swift"
+sed 's/@MODULE@/searching/g' "$DATA_DIR/scaffold_templates/swift.Test.swift" >"$SW_MISSING/Tests/searchingTests/searchingTests.swift"
+mv -- "$SANDBOX/scripts/data/scaffold_templates/swift.Test.swift" "$SANDBOX/scripts/data/scaffold_templates/swift.Test.saved"
+glot_run_sandbox scaffold swift algorithms/searching
+assert_eq 'scaffold Swift plantilla ausente: falla' '4' "$rc_last"
+assert_contains 'scaffold Swift plantilla ausente: conserva muestra' '@Test func example()' "$(cat -- "$SW_MISSING/Tests/searchingTests/searchingTests.swift")"
+mv -- "$SANDBOX/scripts/data/scaffold_templates/swift.Test.saved" "$SANDBOX/scripts/data/scaffold_templates/swift.Test.swift"
 
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"

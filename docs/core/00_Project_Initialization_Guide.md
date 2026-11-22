@@ -850,15 +850,55 @@ fi
 ```
 
 ### Swift — Swift Package Manager
+
+**ES:** El generador deja un test `example` sin aserciones. El scaffold
+sustituye esa muestra únicamente si coincide exactamente con la plantilla
+verificada de SwiftPM 6.3.3; conserva cualquier variante propia y pide
+revisarla. Conserva el manifiesto y el ignore existentes, rechaza enlaces en
+las rutas usadas por el scaffold y
+requiere un `Package.swift` regular. Hay que revisar fuentes y nombres.
+`swift test` puede devolver éxito con cero casos; no es una suite validada.
+
+**EN:** The generator leaves an assertion-free `example` test. Scaffold
+replaces it only if it exactly matches the verified SwiftPM 6.3.3 template;
+it preserves and requests review of any other version. It preserves the
+manifest and ignore file, rejects symlinks in scaffold paths and requires a regular
+`Package.swift`. Source and names need review. `swift test` can succeed with
+zero cases; that is not a validated suite.
+
 ```bash
-mkdir -p Sources/{Module} Tests/{Module}Tests
+if [[ -L Package.swift || ! -f Package.swift || -L Sources || -L Tests ||
+      -L Tests/{module}Tests || -L Tests/{module}Tests/{module}Tests.swift ||
+      -L .gitignore ||
+      ( -e Tests/{module}Tests && ! -d Tests/{module}Tests ) ||
+      ( -e Tests/{module}Tests/{module}Tests.swift && ! -f Tests/{module}Tests/{module}Tests.swift ) ||
+      ( -e .gitignore && ! -f .gitignore ) ]]; then
+  printf 'scaffold: ruta Swift no segura o manifiesto ausente / unsafe Swift path or missing manifest\n' >&2
+  false
+else
+  mkdir -p Tests &&
+    { test -e .gitignore || (set -C; printf '.DS_Store\n/.build\n/Packages\nxcuserdata/\nDerivedData/\n.swiftpm/configuration/registries.json\n.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata\n.netrc\n' > .gitignore); }
+fi &&
+if [[ -f Tests/{module}Tests/{module}Tests.swift ]]; then
+  sample="$(sed 's/@MODULE@/{module}/g' {root}/scripts/data/scaffold_templates/swift.Test.swift)" &&
+    test -n "$sample" && {
+      cmp -s Tests/{module}Tests/{module}Tests.swift <(printf '%s\n' "$sample")
+      result=$?
+      if [[ "$result" == 0 ]]; then
+        printf 'import Testing\n@testable import {module}\n' > Tests/{module}Tests/{module}Tests.swift
+      elif [[ "$result" != 1 ]]; then
+        printf 'scaffold: no se pudo comparar la muestra Swift / could not compare Swift sample\n' >&2
+        false
+      fi
+    }
+fi
 ```
 
 ```text
 {module}/
 ├── Package.swift
-├── Sources/{Module}/        # código público
-└── Tests/{Module}Tests/     # suites XCTest
+├── Sources/{module}/        # código público generado
+└── Tests/{module}Tests/     # suites XCTest o Swift Testing
 ```
 
 ### Tcl — src/ + test/

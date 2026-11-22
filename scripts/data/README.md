@@ -177,6 +177,14 @@ revisión.
 version and ignore file based on the two homologated references. Symbolic paths
 are rejected; existing files and contract-specific source need review.
 
+**ES:** Swift rechaza enlaces en las rutas del scaffold y sustituye solo la muestra
+de SwiftPM 6.3.3 verificada en `scaffold_templates/swift.Test.swift`; preserva
+otras suites y manifiestos. El runner todavía puede aceptar cero casos.
+
+**EN:** Swift rejects symlinks in scaffold paths and replaces only the verified SwiftPM
+6.3.3 test sample in `scaffold_templates/swift.Test.swift`; other suites and
+manifests are preserved. The runner may still accept zero cases.
+
 **ES:** Tcl crea una fuente de paquete, su índice y el ignore si faltan,
 preservando archivos previos y rechazando enlaces. Los archivos previos
 necesitan revisión.

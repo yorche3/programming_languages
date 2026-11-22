@@ -316,16 +316,20 @@ as was single execution.
 **ES — Swift (2026-11-22):** SwiftPM 6.3.3 generó una prueba `example`
 sin aserciones; `swift test` la informó como un caso aprobado. Al retirar
 solo ese ejemplo en un laboratorio aislado, `swift test` devolvió éxito
-con cero tests tanto para XCTest como para Swift Testing. Quedan pendientes
-la retirada segura de la muestra reconocida y un runner que detecte ausencia
-de casos en ambos frameworks sin ocultar fallos.
+con cero tests tanto para XCTest como para Swift Testing. El scaffold en
+desarrollo sustituye solo la muestra exacta y conserva las variantes propias.
+Queda pendiente un runner que detecte ausencia de casos en ambos frameworks
+sin ocultar fallos. El informe xUnit se generó solo con `--parallel` y no
+incluyó Swift Testing, por lo que no se adoptó como solución general.
 
 **EN — Swift (2026-11-22):** SwiftPM 6.3.3 generated an `example` test
 without assertions; `swift test` reported it as a passing case. Removing only
 that example in an isolated lab made `swift test` succeed with zero tests in
-both XCTest and Swift Testing. Safe removal of the recognized sample and a
-runner detecting missing cases across both frameworks without hiding failures
-remain pending.
+both XCTest and Swift Testing. The development scaffold replaces only the exact
+sample and preserves authored variants. A runner detecting missing cases across
+both frameworks without hiding failures remains pending. The xUnit report was
+generated only with `--parallel` and omitted Swift Testing, so it was not
+adopted as a general solution.
 
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
 si faltan, preserva archivos existentes y avisa de su revisión. El selector
