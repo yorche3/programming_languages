@@ -183,15 +183,15 @@ deviation is in **module fidelity**, not in output.
 
 | Lenguaje / Language | Evidencia / Evidence | Severidad / Severity |
 |---|---|---|
-| `elm` | `DataStructuresAdvanced.elm:300,324` — `List.member` | 🟡 |
-| `erlang` | `data_structures_advanced.erl:167,187` — `lists:member` | 🟡 |
-| `fsharp` | `DataStructuresAdvanced.fs:141,156` — `List.contains` | 🟡 |
-| `gleam` | `data_structures_advanced.gleam:227,248` — `list.contains` | 🟡 |
-| `haskell` | `DataStructuresAdvanced.hs:139,154` — `` v `elem` neighbours `` | 🟡 |
-| `ocaml` | `graph.ml:134,144` — `List.mem v u_vertex.neighbors` | 🟡 |
-| `prolog` | `data_structures_advanced.pl:124,149` — `member(To, Neighbors)` | 🟡 |
-| `rust` | `graph.rs:78` — `u_vertex.neighbors().contains(&v)` | 🟡 |
-| `javascript` | `Graph.js:57,75` — `neighbors.includes(v)`; `Graph.js:87` — `[...].sort((a, b) => a - b)` | 🟠 |
+| `elm` | `DataStructuresAdvanced.elm:300,324` — `List.member` | 🟡 — align listo en rama `ab490ec`, pendiente de integración / align ready on branch, pending integration |
+| `erlang` | `data_structures_advanced.erl:167,187` — `lists:member` | 🟡 — align listo en rama `deb8ebd`, pendiente de integración / align ready on branch, pending integration |
+| `fsharp` | `DataStructuresAdvanced.fs:141,156` — `List.contains` | 🟡 — align listo en rama `9af47f3`, pendiente de integración / align ready on branch, pending integration |
+| `gleam` | `data_structures_advanced.gleam:227,248` — `list.contains` | 🟡 — align listo en rama `8ddfb1d`, pendiente de integración / align ready on branch, pending integration |
+| `haskell` | `DataStructuresAdvanced.hs:139,154` — `` v `elem` neighbours `` | 🟡 — align listo en rama `0a9d36a`, pendiente de integración / align ready on branch, pending integration |
+| `ocaml` | `graph.ml:134,144` — `List.mem v u_vertex.neighbors` | 🟡 — align listo en rama `15b1ea2`, pendiente de integración / align ready on branch, pending integration |
+| `prolog` | `data_structures_advanced.pl:124,149` — `member(To, Neighbors)` | 🟡 — align listo en rama `6986ae5`, pendiente de integración / align ready on branch, pending integration |
+| `rust` | `graph.rs:78` — `u_vertex.neighbors().contains(&v)` | 🟡 — align listo en rama `481b3ca`, pendiente de integración / align ready on branch, pending integration |
+| `javascript` | `Graph.js:57,75` — `neighbors.includes(v)`; `Graph.js:87` — `[...].sort((a, b) => a - b)` | 🟠 — align listo en rama `ecc8828`, pendiente de integración / align ready on branch, pending integration |
 
 **ES:** `javascript` lleva además una **ordenación de biblioteca** en el camino
 de salida de `getNeighbors`, que es una decisión de diseño delegada y por eso se
@@ -201,6 +201,16 @@ en coste asintótico y en resultado.
 **EN:** `javascript` also carries a **library sort** in `getNeighbors`' output
 path, a delegated design decision, hence 🟠 (structural). The other fourteen are
 🟡: the delegated step is identical in asymptotic cost and result.
+
+**ES:** Los nueve restantes ya tienen su `align` **commiteado en la rama**
+`align/algorithms/data-structures-advanced` de su submódulo, con la suite en
+verde; la integración en el `main` se hará cuando el pase pueda cerrarse, así que
+siguen contando como 🟡 hasta entonces.
+
+**EN:** The remaining nine already have their `align` **committed on the**
+`align/algorithms/data-structures-advanced` **branch** of their submodule, with
+the suite green; the merge into `main` waits until the pass can close, so they
+still count as 🟡 until then.
 
 ### 🔵 Aceptados por el autor / Accepted by the author
 
@@ -376,4 +386,7 @@ o aceptar, y la propuesta de contrato del autor puede cambiar su criterio.
 | 2026-11-22 | `align` de `crystal` / `crystal` align | `crystal spec` + `glot evidence crystal …` | Rama `align/…`: un commit de código y merge `e3913de`; 23 ejemplos, 0 fallos / one code commit and merge; 23 examples, 0 failures |
 | 2026-11-22 | `align` de `ruby` / `ruby` align | `bundle exec rspec` + `glot evidence ruby …` | Rama `align/…`: un commit de código y merge `351a260`; 23 ejemplos, 0 fallos / one code commit and merge; 23 examples, 0 failures |
 **EN:** The pass **does not close** with this sweep: 15 findings remain to be
+| 2026-11-22 | `align` lote 2 (rama) / batch 2 (branch) | `glot test` de `haskell`, `elm`, `ocaml`, `fsharp`, `gleam`, `rust` | Ramas `align/…`, un commit de código cada una: `0a9d36a`, `ab490ec`, `15b1ea2`, `9af47f3`, `8ddfb1d`, `481b3ca`; 89 ejemplos, 0 fallos y el resto en verde / one code commit each; suites green |
+| 2026-11-22 | `align` lote 3 (rama) / batch 3 (branch) | `glot test` de `erlang` y `prolog` | Ramas `align/…`: `deb8ebd` (24 tests) y `6986ae5` (24 casos), en verde / branches; green |
+| 2026-11-22 | `align` lote 4 (rama) / batch 4 (branch) | `glot test javascript` | Rama `align/…`: `ecc8828` (código) y `258d4cb` (README); 23 pruebas en verde, cota de `getNeighbors` de `O(V + d log d)` a `O(V + d)` / 23 tests green, bound improved |
 fixed or accepted, and the author's contract proposal may change their criteria.
