@@ -308,7 +308,7 @@ cobol	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adja
 common-lisp	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	25d20c9	2026-11-22
 cpp	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	43854f0	2026-11-22
 crystal	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (includes? on neighbours in has_edge); insertion manual and sorted	f777d71	2026-11-22
-csharp	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (List.Contains on neighbours in hasEdge); insertion manual and sorted	a691525	2026-11-22
+csharp	data_structures_advanced	algorithms	idiomatic	-	0	Aligned 2026-11-22: hand-written adjacency lookup (HasNeighbor) plus manual sorted insertion; no Contains or sort	00de948	2026-11-22
 d	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	940813d	2026-11-22
 dart	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	3018d0d	2026-11-22
 elixir	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	1b05391	2026-11-22

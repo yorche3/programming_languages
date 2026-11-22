@@ -18,7 +18,7 @@ in the roadmap at `50/50`.
 - **Convención / Convention:** [`README.md`](README.md)
 - **Escala / Scale:** [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md)
 - **Severidad / Severity:** [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md)
-- **Estado / Status:** **pase ejecutado (primer barrido)**; contrato resuelto el 2026-11-22 (se mantiene el orden creciente); 14 hallazgos 🟡/🟠 con `align` planificado, 1 alineado (`java`) y 35 lenguajes 🟢 / **pass run (first sweep)**; contract settled on 2026-11-22 (ascending order stays); 14 🟡/🟠 findings with a planned `align`, 1 aligned (`java`) and 35 languages 🟢
+- **Estado / Status:** **pase ejecutado (primer barrido)**; contrato resuelto el 2026-11-22 (se mantiene el orden creciente); 13 hallazgos 🟡/🟠 con `align` planificado, 2 alineados (`java`, `csharp`) y 37 lenguajes 🟢 / **pass run (first sweep)**; contract settled on 2026-11-22 (ascending order stays); 13 🟡/🟠 findings with a planned `align`, 2 aligned (`java`, `csharp`) and 37 languages 🟢
 - **Última verificación / Last verification:** 2026-11-22
 
 ---
@@ -183,7 +183,6 @@ deviation is in **module fidelity**, not in output.
 
 | Lenguaje / Language | Evidencia / Evidence | Severidad / Severity |
 |---|---|---|
-| `csharp` | `Graph.cs:53` — `source.Neighbors.Contains(v)` | 🟡 |
 | `crystal` | `data_structures_advanced.cr:170` — `neighbors.includes?(v)` | 🟡 |
 | `elm` | `DataStructuresAdvanced.elm:300,324` — `List.member` | 🟡 |
 | `erlang` | `data_structures_advanced.erl:167,187` — `lists:member` | 🟡 |
@@ -217,11 +216,11 @@ path, a delegated design decision, hence 🟠 (structural). The other fourteen a
 
 ### 🟢 Homologados / Homologated
 
-- **36 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`,
-  `common-lisp`, `cpp`, `d`, `dart`, `elixir`, `forth`, `go`, `grain`, `java`,
-  `julia`, `kotlin`, `lua`, `nim`, `perl`, `php`, `purescript`, `python`, `r`,
-  `racket`, `raku`, `rescript`, `rexx`, `scala`, `scheme`, `swift`, `tcl-tk`,
-  `typescript`, `v`, `vala`, `zig`
+- **37 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`,
+  `common-lisp`, `cpp`, `csharp`, `d`, `dart`, `elixir`, `forth`, `go`, `grain`,
+  `java`, `julia`, `kotlin`, `lua`, `nim`, `perl`, `php`, `purescript`, `python`,
+  `r`, `racket`, `raku`, `rescript`, `rexx`, `scala`, `scheme`, `swift`,
+  `tcl-tk`, `typescript`, `v`, `vala`, `zig`
 
 **ES:** 🟢 significa que el barrido léxico no encontró ninguna búsqueda ni
 ordenación de biblioteca en el camino de adyacencia, la suite nativa está en
@@ -252,7 +251,7 @@ bound and output do not change — the deviation belongs to the **module layer**
 
 | Lenguaje / Language | Hallazgo / Finding | Ruta / Route |
 |---|---|---|
-| `csharp` | `List.Contains` en `hasEdge` | `align` — recorrido manual de `Neighbors` / manual walk |
+| `csharp` | `List.Contains` en `HasEdge` | ✅ cerrado en `00de948`: `HasNeighbor` recorre la lista / closed: `HasNeighbor` scans the list |
 | `crystal` | `includes?` en `has_edge` | `align` — recorrido manual / manual walk |
 | `elm` | `List.member` en alta y consulta | `align` — recursión propia sobre la lista / own recursion |
 | `erlang` | `lists:member` en alta y consulta | `align` — recursión propia / own recursion |
@@ -373,6 +372,7 @@ submodule pointer commit on the monorepo's `audit/...` branch.
 | 2026-11-22 | Estado del árbol / Worktree state | `git -C {lang} status --short` | 50/50 sin cambios locales / 50/50 with no local changes |
 | 2026-11-22 | `align` de `java` / `java` align | `mvn test` + `glot evidence java algorithms/data_structures_advanced` | Rama `align/algorithms/data-structures-advanced`: `c65e7f8` (código), `7eed001` (README), merge `715ef35`; 23 tests, 0 fallos; verificador `-` (no declarado) / branch, code commit, README commit, merge; 23 tests, 0 failures; verifier `-` (not declared) |
 
+| 2026-11-22 | `align` de `csharp` / `csharp` align | `dotnet test` + `glot evidence csharp algorithms/data_structures_advanced` | Rama `align/algorithms/data-structures-advanced`: un commit de código y merge `00de948`; suite en verde; README sin cambios / one code commit and merge; suite green; README unchanged |
 **ES:** El pase **no cierra** con este barrido: quedan 15 hallazgos por resolver
 o aceptar, y la propuesta de contrato del autor puede cambiar su criterio.
 **EN:** The pass **does not close** with this sweep: 15 findings remain to be
