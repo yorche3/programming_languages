@@ -116,6 +116,14 @@ archivos existentes se conservan; el paso de suite conecta los grupos al runner.
 there are no tests, plus an ignore file when absent. Existing content is preserved;
 the suite step connects its groups to the runner.
 
+**ES:** C preserva cabecera, fuente y Makefile existentes; si falta
+`.gitignore`, incluye `bin/` y `obj/`. Criterion aporta el runner incluso
+sin casos; la suite añade las pruebas, sin crear otro `main`.
+
+**EN:** C preserves existing headers, sources and Makefiles, and creates a
+missing `.gitignore` for `bin/` and `obj/`. Criterion supplies the runner
+even without cases; the suite adds tests without creating another `main`.
+
 **ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
 (`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con
 referencia declarada por dotnet), Go (`src/tests`), Haskell (`lib/test` y

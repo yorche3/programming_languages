@@ -96,6 +96,14 @@ source and ignore patterns, preserving existing contents. Verified in an
 isolated directory with `make run`, NASM and `ld`; the suite must connect its
 groups and propagate failures.
 
+**ES:** C conserva archivos y Makefile existentes, rechaza rutas simbólicas
+y crea `.gitignore` cuando falta. En un laboratorio aislado, Criterion 2.4.1
+ejecutó el runner sin casos y devolvió fallo al introducir un caso fallido.
+
+**EN:** C preserves existing files and Makefiles, rejects symlinked paths and
+creates a missing `.gitignore`. In an isolated lab, Criterion 2.4.1 ran the
+empty runner and returned failure for an intentionally failing test.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

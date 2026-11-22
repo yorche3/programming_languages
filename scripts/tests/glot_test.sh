@@ -1820,6 +1820,45 @@ glot_run_sandbox scaffold assembly algorithms/data_structures_basics
 assert_eq 'assembly Makefile symlink: bloquea' '4' "$rc_last"
 assert_eq 'assembly Makefile symlink: conserva destino' 'section .text' "$(cat "$AB_SAFE/src/data_structures_basics.asm")"
 
+# C preserva los archivos del autor y usa el runner propio de Criterion.
+CB="$SANDBOX/c/core/algorithms/data_structures_basics"
+mkdir -p "$CB"
+glot_run_sandbox -n scaffold c algorithms/data_structures_basics
+assert_eq 'scaffold C -n: código' '0' "$rc_last"
+assert_eq 'scaffold C -n: no crea fuentes' 'no' "$([[ -e "$CB/src" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold c algorithms/data_structures_basics
+assert_eq 'scaffold C: código' '0' "$rc_last"
+assert_eq 'scaffold C: crea cabecera y fuente' 'yes' \
+    "$([[ -f "$CB/include/data_structures_basics.h" && -f "$CB/src/data_structures_basics.c" ]] && echo yes || echo no)"
+assert_eq 'scaffold C: excluye objetos y ejecutables' '2' \
+    "$(git -C "$CB" check-ignore obj/example.o bin/run_tests | wc -l | tr -d ' ')"
+if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists criterion && command -v cc >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
+    c_rc=0
+    c_out="$(make -s -C "$CB" test 2>&1)" || c_rc=$?
+    assert_eq 'scaffold C: Criterion arranca sin casos' '0' "$c_rc"
+    assert_contains 'scaffold C: informa cero casos' 'Tested: 0' "$c_out"
+    printf '#include <criterion/criterion.h>\nTest(scaffold, failure) { cr_assert(0); }\n' >"$CB/test/scaffold_test.c"
+    c_rc=0
+    c_out="$(make -s -C "$CB" test 2>&1)" || c_rc=$?
+    assert_eq 'scaffold C: propaga un caso fallido' 'yes' "$([[ "$c_rc" != 0 ]] && echo yes || echo no)"
+    assert_contains 'scaffold C: ejecuta el caso fallido' 'Failing: 1' "$c_out"
+fi
+printf 'author header\n' >"$CB/include/data_structures_basics.h"
+printf 'author source\n' >"$CB/src/data_structures_basics.c"
+printf 'author makefile\n' >"$CB/Makefile"
+printf 'author ignore\n' >"$CB/.gitignore"
+glot_run_sandbox scaffold c algorithms/data_structures_basics
+assert_eq 'scaffold C repetido: código' '0' "$rc_last"
+assert_eq 'scaffold C repetido: conserva cabecera' 'author header' "$(cat "$CB/include/data_structures_basics.h")"
+assert_eq 'scaffold C repetido: conserva fuente' 'author source' "$(cat "$CB/src/data_structures_basics.c")"
+assert_eq 'scaffold C repetido: conserva Makefile' 'author makefile' "$(cat "$CB/Makefile")"
+assert_eq 'scaffold C repetido: conserva ignore' 'author ignore' "$(cat "$CB/.gitignore")"
+rm -- "$CB/src/data_structures_basics.c"
+ln -s "$CB/include/data_structures_basics.h" "$CB/src/data_structures_basics.c"
+glot_run_sandbox scaffold c algorithms/data_structures_basics
+assert_eq 'scaffold C symlink: bloquea' '4' "$rc_last"
+assert_eq 'scaffold C symlink: conserva destino' 'author header' "$(cat "$CB/include/data_structures_basics.h")"
+
 # v2.1.0: el nombre del fuente y el archivo vacío de pruebas son comandos del catálogo.
 BB="$SANDBOX/ballerina/core/algorithms/naive_sort"
 mkdir -p -- "$BB"

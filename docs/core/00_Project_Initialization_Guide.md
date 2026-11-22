@@ -191,7 +191,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | Lenguaje / Language | Comandos / Commands | Declaración idiomática / Idiomatic declaration |
 |---|---|---|
 | `assembly` | `mkdir -p src test` · crear `src/{module}.asm` si falta | `section .text`; el contrato declara sus símbolos en el paso 4b |
-| `c` | `mkdir -p include src test` · `touch include/{module}.h src/{module}.c` | `#ifndef {MODULE}_H` + `#define {MODULE}_H` en la cabecera; `#include "{module}.h"` en la fuente |
+| `c` | `mkdir -p include src test` · crear `include/{module}.h` y `src/{module}.c` si faltan | `#ifndef {Module}_H` + `#define {Module}_H` en la cabecera; `#include "{module}.h"` en la fuente |
 | `cobol` | `mkdir -p src/copybooks src/lib test` · `touch src/lib/{module}.cbl` | `IDENTIFICATION DIVISION.` + `PROGRAM-ID. {Module}.` |
 | `forth` | `mkdir -p src test` · `touch src/{module}.forth` | `: {module}-init` |
 | `grain` | `mkdir -p src tests` · `touch src/{module}.gr` | `module {Module}` |
@@ -232,6 +232,16 @@ uno existente se conserva y debe verificarse.
 configured; the suite must connect its groups and propagate failures. A missing
 `.gitignore` is created with patterns for `obj/` and the runner executable;
 an existing one is preserved and must be checked.
+
+### C — Criterion + Makefile
+
+**ES:** Criterion aporta el runner de `make test`: sin casos arranca y comunica
+que ejecutó cero. El scaffold conserva fuentes y manifiestos existentes; si
+falta `.gitignore`, lo crea con `bin/` y `obj/`.
+
+**EN:** Criterion supplies the `make test` runner: without test cases it starts
+and reports zero tests. Scaffold preserves existing sources and build files and
+creates a missing `.gitignore` for `bin/` and `obj/`.
 
 ### Ballerina — biblioteca en la raíz y tests/
 
