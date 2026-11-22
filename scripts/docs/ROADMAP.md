@@ -269,7 +269,9 @@ en la configuración sin generar falsos verdes. Un segundo prototipo envolvió
 los métodos de ejecución de `TestSuite` y `TestCase`: detectó ese fallo con
 resultado explícito y rechazó una suite vacía. Todavía necesita garantizar
 que los overrides de `execute` no esquiven la instrumentación y que sus
-errores no se pierdan al retornar de `CALL`; no está integrado.
+errores no se pierdan al retornar de `CALL`; no está integrado. Además, una
+prueba con `exit 0` dentro de un método de test devolvió éxito: ooRexxUnit
+interpretó esa salida como retorno del método, incluso con los wrappers.
 
 **EN — Rexx (2026-11-22):** scaffold preserves sources and rejects symbolic
 paths, but the runner remains pending. `glot test` rejects the two `numbers`
@@ -289,7 +291,9 @@ Explicit results and configuration changes must also be detected without false
 success. A second prototype wrapped `TestSuite` and `TestCase` execution:
 it caught the explicit-result failure and rejected an empty suite. It still
 needs to ensure `execute` overrides cannot evade instrumentation and that
-errors are not lost on return from `CALL`; it is not integrated.
+errors are not lost on return from `CALL`; it is not integrated. A further
+test with `exit 0` inside a test method returned success: ooRexxUnit treated
+that exit as a method return even with the wrappers.
 
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
 si faltan, preserva archivos existentes y avisa de su revisión. El selector
