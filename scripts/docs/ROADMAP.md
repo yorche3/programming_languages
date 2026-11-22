@@ -21,17 +21,18 @@ Verification is recorded in [`VERSIONS.md`](VERSIONS.md).
 **ES:** La siguiente entrega es **v2.1.0**, con especificación acordada en
 este roadmap: `--delegate antigravity|copilot|open-router`,
 configuración BYOK por ruta, overrides autorizados por encargo y revisión del
-scaffold de los 50 lenguajes. El primer bloque de scaffold está implementado en
-**2.1.0-dev**; rutas/perfiles y correcciones de nueve lenguajes están
-verificados. La revisión/corrección de los otros 41 scaffolds sigue pendiente.
+scaffold de los 50 lenguajes. En **2.1.0-dev** están verificados las rutas,
+los perfiles y el primer bloque de nueve lenguajes; después se añadieron los
+avances registrados en [`VERSIONS.md`](VERSIONS.md), algunos aún parciales.
+La revisión completa de los demás scaffolds sigue pendiente.
 v2.0.3 quedó archivada como snapshot exacto antes de editar código.
 
 **EN:** The next delivery is **v2.1.0**, specified in
 this roadmap: three explicit delegate routes, route-specific BYOK
 configuration, authorized per-request overrides and a 50-language scaffold
-review. The first scaffold block is implemented in **2.1.0-dev**; routing and
-profiles and nine scaffold corrections are verified; the remaining
-41-language review/corrections are pending.
+review. Routing, profiles and the first nine scaffold corrections are verified
+in **2.1.0-dev**; later progress, some still partial, is recorded in
+[`VERSIONS.md`](VERSIONS.md). The full review of the remaining scaffolds is pending.
 v2.0.3 was archived before code edits.
 
 ---
