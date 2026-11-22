@@ -1,3 +1,9 @@
+---
+layout: default
+title: Auditoría 06 — Data Structures Basics
+nav_exclude: true
+---
+
 # Auditoría de Módulo: 06_Data_Structures_Basics
 # Module Audit: 06_Data_Structures_Basics
 

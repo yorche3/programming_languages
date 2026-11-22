@@ -1,3 +1,9 @@
+---
+layout: default
+title: Convenciones de Elm / Elm idioms
+nav_exclude: true
+---
+
 # 🗣️ Elm — Convenciones e Idioms / Idioms and Conventions
 
 > **ES:** Este documento es la referencia de convenciones del lenguaje `elm` en el monorepo. Es la fuente de verdad para: cómo se traduce el pseudocódigo canónico, qué desviaciones existen y por qué, y cómo se ejecuta el ciclo del sprint. Complementa [`PSEUDOCODE_CONVENTION.md`](../PSEUDOCODE_CONVENTION.md) (el contrato) y `data/language_characteristics.tsv` (los ejes clasificados).

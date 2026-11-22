@@ -1,4 +1,7 @@
 ---
+layout: default
+title: Encargo de auditoría / Audit request
+nav_exclude: true
 name: audit
 step: A
 model: gpt-6.1-sol

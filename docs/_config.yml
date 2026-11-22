@@ -7,10 +7,6 @@ remote_theme: just-the-docs/just-the-docs
 url: "https://yorche3.github.io"
 baseurl: "/programming_languages"
 
-# Navegación / Navigation
-nav_order: 1
-has_children: false
-
 # Búsqueda integrada del tema / Theme built-in search
 search_enabled: true
 
@@ -20,11 +16,13 @@ gh_edit_link: true
 gh_edit_link_text: "Editar esta página en GitHub / Edit this page on GitHub"
 gh_edit_repository: "https://github.com/yorche3/programming_languages"
 gh_edit_branch: "main"
+gh_edit_source: docs
 gh_edit_view_mode: "tree"
 
 plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
+  - jekyll-relative-links
 
 exclude:
   - Gemfile

@@ -4,7 +4,6 @@ title: Abstracción y Persistencia / Abstraction & Persistence
 description: Índice de la sección de abstracción y persistencia — modelado, regex, parsing, BD, ETL integrado / Index for the abstraction and persistence section — modeling, regex, parsing, DB, integrated ETL
 nav_order: 5
 parent: Core
-grand_parent: Programming Languages Monorepo
 ---
 
 # Abstracción y Persistencia / Abstraction & Persistence

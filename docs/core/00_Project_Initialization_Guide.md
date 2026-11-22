@@ -4,7 +4,6 @@ title: 00 — Project Initialization Guide
 description: Comandos de inicialización por lenguaje para crear el esqueleto de un módulo / Per-language initialization commands to scaffold a module
 nav_order: 0
 parent: Core
-grand_parent: Programming Languages Monorepo
 ---
 
 # 🧰 00 — Guía de inicialización de proyectos / Project Initialization Guide

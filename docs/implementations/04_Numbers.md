@@ -1,3 +1,9 @@
+---
+layout: default
+title: Guía 04 — Numbers
+nav_exclude: true
+---
+
 # 04 — Numbers: cómo se implementa en cada familia
 # 04 — Numbers: how it is implemented in each family
 

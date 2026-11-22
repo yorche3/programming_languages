@@ -1,3 +1,9 @@
+---
+layout: default
+title: Auditoría 02 — Hello User
+nav_exclude: true
+---
+
 # Auditoría de Módulo: 02_Hello_User
 # Module Audit: 02_Hello_User
 

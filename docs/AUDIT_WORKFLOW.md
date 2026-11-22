@@ -1,3 +1,9 @@
+---
+layout: default
+title: Ciclo de auditoría / Audit cycle
+nav_exclude: true
+---
+
 # 🧪 Ciclo de auditoría y `align` / Audit and `align` cycle
 
 **ES:** Este documento es la **norma** del segundo ciclo del monorepo: el que lleva un módulo **ya cerrado a `50/50`** a un estado homogéneo en los 50 lenguajes antes de arrancar el **módulo siguiente**. El primer ciclo —el sprint— vive en [`WORKFLOW.md`](WORKFLOW.md) y no se toca: lo de aquí es una **capa nueva** —la de la idiomaticidad—, con su propio registro, su propio estado y su propio cierre. La convención de los registros, los estados y los criterios vive en [`audits/README.md`](audits/README.md); la escala con la que se clasifica cada implementación, en [`ruleset/IDIOMATICITY_LEVELS.md`](ruleset/IDIOMATICITY_LEVELS.md).
@@ -92,7 +98,21 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 | 4 | Acta | `glot evidence {lang} {fase}/{modulo}` | `docs/evidence/{fase}/{modulo}/{lang}.md` regenerada |
 | 5 | README del módulo | [`README_Template.md`](README_Template.md), si el `align` cambió estructura o complejidad | README de Nivel 3 al día |
 | 6 | Commit | `fix({fase}): align {modulo} with the audit` + la causa en el cuerpo | Commit del submódulo |
-| 7 | Integración y puntero | Merge en el `main` del submódulo; en el monorepo `glot pointer` + `glot save 9` | Gitlink actualizado en la rama `audit/...` |
+| 7 | Integración y puntero | Merge en el `main` del submódulo; en el monorepo, `git add {lang}` + `chore(repo): point {modulo} {lang} align` | Gitlink actualizado en la rama `audit/...` |
+
+**ES:** El `align` deja **un commit por paso** en la rama del submódulo —código
+(`fix({fase}): align {modulo} with the audit`), documentación del módulo
+(`docs({fase}): …`) cuando cambien estructura o complejidad, y acta
+(`chore({fase}): …`)— y **no empuja**: el push lo decide el autor. Si el paso
+exige cambiar la suite, entonces no es un `align`, como dice el párrafo
+siguiente.
+
+**EN:** An `align` leaves **one commit per step** on the submodule branch —code
+(`fix({fase}): align {modulo} with the audit`), module documentation
+(`docs({fase}): …`) when structure or complexity changes, and the evidence
+record (`chore({fase}): …`)— and **does not push**: the author decides the
+push. If the step requires changing the suite, it is not an `align`, as the next
+paragraph states.
 
 **ES:** Lo que un `align` **nunca** toca: la especificación del módulo, el pseudocódigo, el contrato de errores de la fase, la suite de pruebas y el andamiaje del lenguaje. Si un hallazgo exige cambiar algo de eso, **no es un `align`**: es rehacer el módulo, y eso se lleva con el ciclo de [`WORKFLOW.md`](WORKFLOW.md) desde una rama del submódulo —ahí sí aplican `4e correct`, `5b fix` y `5c refactor`, con su causa obligatoria—.
 

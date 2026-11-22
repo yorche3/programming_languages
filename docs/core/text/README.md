@@ -4,7 +4,7 @@ title: Procesamiento Contiguo / Contiguous Processing
 description: Índice de procesamiento de strings y archivos contiguos / Index for contiguous string and file processing
 nav_order: 3
 parent: Core
-grand_parent: Programming Languages Monorepo
+has_children: true
 ---
 
 # Procesamiento Contiguo / Contiguous Processing

@@ -1,3 +1,9 @@
+---
+layout: default
+title: Guía 07 — Data Structures Advanced
+nav_exclude: true
+---
+
 # 07 — Data Structures Advanced: cómo se implementa en cada familia
 # 07 — Data Structures Advanced: how it is implemented in each family
 
@@ -338,3 +344,4 @@ without invalidating the declared upper bound.
 | Qué se exige / What is required | [`07_Data_Structures_Advanced.md`](../core/algorithms/07_Data_Structures_Advanced.md) |
 | Las familias en general / Families in general | [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md) |
 | Qué obliga tu lenguaje / What your language mandates | [`idioms/{lang}.md`](../ruleset/idioms/) |
+| Qué se verificó en los 50 / What was verified across the 50 | [`07_Audited_Data_Structures_Advanced.md`](../audits/07_Audited_Data_Structures_Advanced.md) |

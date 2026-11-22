@@ -4,7 +4,7 @@ title: 01 — Hello World
 description: Primera especificación / First specification — Hello World en cualquier lenguaje
 nav_order: 1
 parent: Fundamentos / Foundations
-grand_parent: 🧱 Core
+grand_parent: Core
 ---
 
 # 🚀 01 — Hello World

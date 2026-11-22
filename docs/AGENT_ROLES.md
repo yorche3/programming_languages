@@ -1,3 +1,9 @@
+---
+layout: default
+title: Roles de los agentes / Agent roles
+nav_exclude: true
+---
+
 # 🎭 Roles de los agentes / Agent roles
 
 **ES:** Este monorepo se lleva a cabo **bajo un conjunto de roles de ingeniería

@@ -1,3 +1,9 @@
+---
+layout: default
+title: Convenciones por lenguaje / Per-language conventions
+nav_exclude: true
+---
+
 # 🗣️ Convenciones por lenguaje / Per-language conventions
 
 **ES:** Esta carpeta guarda **una ficha por lenguaje** con sus convenciones idiomáticas y las **desviaciones aceptadas** de sus módulos. Es la **fuente de verdad de una desviación**: lo que no esté declarado aquí con su plantilla no está aceptado, por mucho que el código lo haga.

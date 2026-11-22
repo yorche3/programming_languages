@@ -1,3 +1,9 @@
+---
+layout: default
+title: Auditoría 01 — Hello World
+nav_exclude: true
+---
+
 # Auditoría de Módulo: 01_Hello_World
 # Module Audit: 01_Hello_World
 

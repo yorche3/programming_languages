@@ -1,3 +1,9 @@
+---
+layout: default
+title: Plantilla de README / README template
+nav_exclude: true
+---
+
 # 🧾 Plantilla de README de módulo (Nivel 3) / Module README template (Level 3)
 
 **ES:** Plantilla **única** del README de módulo-lenguaje, que vive en `{lenguaje}/core/{fase}/{modulo}/README.md`. Todas las secciones de abajo son **obligatorias** salvo las marcadas como _(si aplica)_: cuando un módulo no tenga nada que decir en una sección, la sección se escribe igualmente con `No aplica / Not applicable` y una línea de por qué. Un README al que le falte una sección es un incumplimiento que el encargo `docs-module` y `glot validate` pueden comprobar. También es la base del README de fase (Nivel 2), reducido a _Archivos y estructura_, _Cómo se ejecuta_ y _Notas de la fase_.

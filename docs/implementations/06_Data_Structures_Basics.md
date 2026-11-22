@@ -1,3 +1,9 @@
+---
+layout: default
+title: Guía 06 — Data Structures Basics
+nav_exclude: true
+---
+
 # 06 — Data Structures Basics: cómo se implementa en cada familia
 # 06 — Data Structures Basics: how it is implemented in each family
 

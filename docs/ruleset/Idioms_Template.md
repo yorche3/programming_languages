@@ -1,3 +1,9 @@
+---
+layout: default
+title: Plantilla de convenciones / Idioms template
+nav_exclude: true
+---
+
 # 🗣️ {Language Name} — Convenciones e Idioms / Idioms and Conventions
 
 > **ES:** Este documento es la referencia de convenciones del lenguaje `{lang}` en el monorepo. Es la fuente de verdad para: cómo se traduce el pseudocódigo canónico, qué desviaciones existen y por qué, y cómo se ejecuta el ciclo del sprint. Complementa `docs/ruleset/PSEUDOCODE_CONVENTION.md` (el contrato) y `data/language_characteristics.tsv` (los 11 ejes clasificados).

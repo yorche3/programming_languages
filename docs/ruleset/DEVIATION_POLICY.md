@@ -1,3 +1,9 @@
+---
+layout: default
+title: Política de desviaciones / Deviation policy
+nav_exclude: true
+---
+
 # ⚠️ Política de Desviaciones / Deviation Policy
 
 > **ES:** Este documento define **qué cuenta como desviación**, **cuándo está permitida**, **dónde se documenta** y **cómo se valida**. Es el complemento operativo del `PSEUDOCODE_CONVENTION.md`: allí se fijó el contrato canónico, aquí se define cómo registrar la distancia entre ese contrato y la implementación real. Sin este documento, la auditoría sería una opinión; con él, es un procedimiento.

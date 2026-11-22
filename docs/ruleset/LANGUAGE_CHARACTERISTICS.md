@@ -1,3 +1,9 @@
+---
+layout: default
+title: Características de lenguajes / Language characteristics
+nav_exclude: true
+---
+
 # 🧬 Características del Lenguaje / Language Characteristics
 
 > **ES:** Este documento define los **11 ejes** con los que se clasifica cada uno de los 50 lenguajes del monorepo. Cada eje afecta directamente a cómo se implementa un módulo, cómo se traduce el pseudocódigo, y qué desviaciones son aceptables. La clasificación completa vive en `data/language_characteristics.tsv`.
