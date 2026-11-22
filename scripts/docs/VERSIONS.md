@@ -56,6 +56,24 @@ the harness. The remaining scaffold review is pending.
 
 ---
 
+## 2.1.0-dev — 2026-11-22 (fix de scaffold en curso / scaffold fix in progress)
+
+**ES:** Se inicia el fix sin cerrar la versión. `new` inspecciona el `.git/`
+recién generado en un módulo inicialmente vacío y solo lo retira si es seguro;
+el estado se resuelve desde Git anidado y se eliminan del catálogo los borrados
+incondicionales de `.git`. Un Git preexistente se preserva y bloquea la
+operación: la limpieza automática segura de esos casos sigue pendiente.
+En D se retira únicamente el ejemplo nativo verificado; D y PureScript anuncian
+el análisis pendiente. Siguen abiertas la revisión de los scaffolds, los helpers
+de build y las demás condiciones del [`ROADMAP.md`](ROADMAP.md).
+
+**EN:** The fix has started; the release remains open. `new` checks and removes
+freshly generated Git only when safe, nested Git resolves the superproject
+state, and unconditional catalog cleanup is removed. Pre-existing Git is
+protected and blocks the operation pending a safe automatic solution. D removes
+only the verified native sample; D and PureScript announce pending analysis.
+The remaining scaffold review, build helpers and roadmap conditions are open.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

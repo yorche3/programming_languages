@@ -354,14 +354,18 @@ using those services is not required.
 | Directorio / Directory | El del módulo, que prepara `use`. Si no existe, `new` **no lo inventa**: error `1` con la sugerencia de `use` |
 | Estructura / Structure | La completa `scaffold` (paso 4a): filas `phase=scaffold`, plantillas de construcción declaradas, `.gitignore` garantizado y análisis delegado solo cuando haga falta |
 | Nido / Nesting | Los inicializadores que crean un proyecto hijo se ejecutan en el directorio del módulo y se aplanan: sin `flat` el módulo quedaría anidado dos veces |
-| Repositorios anidados / Nested repositories | `crystal` y `gleam` crean un `.git` propio; `new` lo borra antes de aplanar, porque un repositorio dentro de un submódulo no es válido |
-| Contenido previo / Existing content | Con el directorio no vacío **no se pisa nada**: aviso por stderr, imprime la ruta y devuelve `0` |
+| Repositorios anidados / Nested repositories | `new` inspecciona el `.git/` recién generado en el módulo inicialmente vacío y solo lo retira si pasa las comprobaciones; metadatos desconocidos fallan con `4`. Un `.git/` preexistente se conserva y bloquea `new` y `scaffold` con `4` |
+| Contenido previo / Existing content | Con el directorio no vacío **no se pisa nada**: aviso por stderr, imprime la ruta y devuelve `0`; salvo Git anidado preexistente, que se bloquea |
 | Alcance / Scope | **No** escribe la suite (encargo `suite`), **no** implementa, **no** añade al índice y **no** confirma nada |
 | `-n/--dry-run` | Imprime `cd <dir> && <comando>`, la normalización ya expandida y la ruta; no toca el disco |
 
-**ES:** La normalización **no adivina**: si un lenguaje no tiene operación declarada en el catálogo, no se toca nada. Lo que el inicializador deja y el módulo no usa —runners de ejemplo, nombres predefinidos— lo ajusta el encargo `scaffold`, que sí puede leer la especificación.
+**ES:** La normalización **no adivina**: salvo la inspección común de Git
+recién generado, los cambios mecánicos se declaran en el catálogo. Si queda
+análisis idiomático, se anuncia para el encargo `scaffold`.
 
-**EN:** Normalisation **does not guess**: if a language has no declared operation in the catalogue, nothing is touched. What the initializer leaves and the module does not use —sample runners, predefined names— is adjusted by the `scaffold` request, which can read the specification.
+**EN:** Apart from common inspection of newly generated Git, mechanical
+changes are declared in the catalog; remaining idiomatic analysis is
+announced for the `scaffold` request.
 
 **ES:** Primer bloque de v2.1.0-dev: Ballerina renombra `main.bal` a
 `{module}.bal` con comprobación de origen/destino y sin sobreescribir; retira

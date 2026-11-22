@@ -8,6 +8,18 @@ Versión de desarrollo / Development version: **v2.1.0-dev** en [`glot.sh`](glot
 Última versión verificada / Last verified release: **v2.0.3** en
 [`versions/glot_2.0.3.sh`](versions/glot_2.0.3.sh).
 
+**ES:** En desarrollo, `new` retira el `.git/` creado durante la inicialización
+de un módulo vacío solo si sus metadatos pasan las comprobaciones de seguridad.
+Un Git anidado preexistente se conserva y bloquea `new`/`scaffold` con un
+diagnóstico: revísalo antes de decidir qué hacer. Desde el Git anidado, glot
+detecta el superproyecto del submódulo para consultar el mismo estado.
+
+**EN:** In development, `new` removes a module-local `.git/` created during
+initialization of an empty module only after safety checks. Pre-existing
+nested Git is preserved and blocks `new`/`scaffold` with a diagnostic; inspect
+it before deciding what to do. State lookup still resolves the submodule's
+superproject from inside nested Git.
+
 Configuración vigente de las tres rutas y BYOK / Current three-route and BYOK
 configuration: [`docs/VALIDATION.md`](docs/VALIDATION.md).
 

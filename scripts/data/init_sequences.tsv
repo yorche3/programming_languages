@@ -14,7 +14,7 @@ c	new	1	phase	run	mkdir -p {module}	-	-	-
 c	scaffold	1	module	run	mkdir -p include src test && printf '#ifndef {Module}_H\n#define {Module}_H\n\n#endif\n' > include/{module}.h && printf '#include "{module}.h"\n' > src/{module}.c	-	-	-
 c	scaffold	2	module	run	test -e Makefile || cp {root}/scripts/data/scaffold_templates/c.Makefile Makefile	-	-	completar el runner vacío y validar los patrones de .gitignore con el delegado scaffold
 clojure	new	1	phase	run	clojure -Sdeps '{:deps {io.github.seancorfield/deps-new {:git/tag "v0.9.0" :git/sha "da2f764f71da871224ae639656d52ccedfb0020c"}}}' -Tnew create :template lib :name {module} :target-dir {module}	-	-	descarga deps-new la primera vez (queda en ~/.gitlibs); sustituir el test de plantilla que falla a propósito
-clojure	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	sustituir el test de plantilla que falla a propósito
+clojure	scaffold	1	module	run	touch .gitignore	-	-	sustituir el test de plantilla que falla a propósito
 cobol	new	1	phase	run	mkdir -p {module}	-	-	-
 cobol	scaffold	1	module	run	mkdir -p src/copybooks src/lib test && printf '       IDENTIFICATION DIVISION.\n       PROGRAM-ID. {Module}.\n' > src/lib/{module}.cbl	-	-	-
 cobol	scaffold	2	module	run	test -e Makefile || cp {root}/scripts/data/scaffold_templates/cobol.Makefile Makefile	-	-	completar el runner vacío y validar los patrones de .gitignore con el delegado scaffold
@@ -32,15 +32,15 @@ csharp	new	5	module	run	dotnet add test/{Module}.Tests/{Module}.Tests.csproj ref
 csharp	scaffold	1	module	run	rm -f src/{Module}/Class1.cs test/{Module}.Tests/UnitTest1.cs	-	-	-
 csharp	scaffold	2	module	run	touch .gitignore	-	-	-
 d	new	1	phase	run	dub init {module} --format=sdl	-	-	-
-d	scaffold	1	module	run	rm -f source/app.d && rm -rf .git && touch .gitignore	-	-	-
+d	scaffold	1	module	run	if [[ -L source/app.d || ( -e source/app.d && ! -f source/app.d ) ]]; then printf 'scaffold: fuente D no segura / unsafe D source\n' >&2; false; elif [[ -f source/app.d ]]; then test -f {root}/scripts/data/scaffold_templates/d.app.d && { cmp -s source/app.d {root}/scripts/data/scaffold_templates/d.app.d; result=$?; if [[ "$result" == 0 ]]; then rm -- source/app.d; elif [[ "$result" != 1 ]]; then printf 'scaffold: no se pudo comparar la plantilla D / could not compare D template\n' >&2; false; fi; }; fi	-	-	revisar source/app.d si difiere del ejemplo verificado, el runner y el manifiesto de biblioteca sin borrar contenido propio
 dart	new	1	phase	run	dart create --no-pub -t package {module}	-	-	-
-dart	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	revisar example/ y lib/{module}.dart
+dart	scaffold	1	module	run	touch .gitignore	-	-	revisar example/ y lib/{module}.dart
 elixir	new	1	phase	run	mix new {module} --module {Module}	-	-	-
-elixir	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	-
+elixir	scaffold	1	module	run	touch .gitignore	-	-	-
 elm	new	1	module	run	printf 'y\n' | elm init	-	-	-
-elm	scaffold	1	module	run	rm -rf .git && touch .gitignore && mkdir -p tests	-	-	-
+elm	scaffold	1	module	run	touch .gitignore && mkdir -p tests	-	-	-
 erlang	new	1	phase	run	rebar3 new lib {module}	-	-	-
-erlang	scaffold	1	module	run	rm -rf .git && touch .gitignore && mkdir -p test	-	-	-
+erlang	scaffold	1	module	run	touch .gitignore && mkdir -p test	-	-	-
 forth	new	1	phase	run	mkdir -p {module}	-	-	-
 forth	scaffold	1	module	run	mkdir -p src test && printf ': {module}-init\n' > src/{module}.forth && touch test/run-tests.forth	-	-	-
 fsharp	new	1	module	run	dotnet new sln -n {Module}	-	-	-
@@ -50,7 +50,7 @@ fsharp	new	4	module	run	dotnet sln add src/{Module}/{Module}.fsproj test/{Module
 fsharp	new	5	module	run	dotnet add test/{Module}.Tests/{Module}.Tests.fsproj reference src/{Module}/{Module}.fsproj	-	-	-
 fsharp	scaffold	1	module	run	test -f src/{Module}/{Module}.fsproj && test -f test/{Module}.Tests/{Module}.Tests.fsproj	-	-	conservar los proyectos anidados y su ProjectReference; cambiar Library.fs/Tests.fs solo junto con sus Compile Include, sin borrar contenido propio
 gleam	new	1	phase	run	gleam new {module}	-	-	-
-gleam	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	-
+gleam	scaffold	1	module	run	touch .gitignore	-	-	-
 go	new	1	module	run	go mod init example.com/{module}	-	-	-
 go	scaffold	1	module	run	mkdir -p src tests	-	-	la suite externa en tests/ importa example.com/{module}/src; conservar la declaración de paquete de src/
 grain	new	1	phase	run	mkdir -p {module}	-	-	-
@@ -78,7 +78,7 @@ nim	new	1	module	run	nimble init -y	-	-	-
 nim	scaffold	1	module	run	rm -rf src/{module}	-	-	-
 nim	scaffold	2	module	run	printf 'task test, "Run the unit tests":\n    exec "nim c -r tests/{module}_tests.nim"\n' >> {module}.nimble	-	-	la task apunta a la suite que escribe el paso 4c
 ocaml	new	1	phase	run	dune init proj {module}	-	-	-
-ocaml	scaffold	1	module	run	rm -rf .git && touch .gitignore	-	-	usar el layout generado tal cual: el código en lib/ y la suite en test/
+ocaml	scaffold	1	module	run	touch .gitignore	-	-	usar el layout generado tal cual: el código en lib/ y la suite en test/
 perl	new	1	phase	run	mkdir -p {module}	-	-	-
 perl	scaffold	1	module	run	if [[ -L lib || -L test || -L lib/{module}.pl || ( -e lib/{module}.pl && ! -f lib/{module}.pl ) ]]; then printf 'scaffold: ruta de Perl no segura / unsafe Perl path\n' >&2; false; else mkdir -p lib test && { test -e lib/{module}.pl || (set -C; printf 'package {Module};\n\nuse strict;\nuse warnings;\n\n1;\n' > lib/{module}.pl); }; fi	-	-	-
 php	new	1	phase	run	mkdir -p {module}	-	-	-
@@ -86,9 +86,9 @@ php	scaffold	1	module	run	composer init -n --name={module}/{module} && composer 
 prolog	new	1	phase	run	mkdir -p {module}	-	-	-
 prolog	scaffold	1	module	run	mkdir -p src test && printf ':- module({module}, []).\n' > src/{module}.pl	-	-	-
 purescript	new	1	module	run	spago init	-	-	-
-purescript	scaffold	1	module	run	mkdir -p src test && touch .gitignore	-	-	-
+purescript	scaffold	1	module	run	mkdir -p src test && touch .gitignore	-	-	revisar nombres de módulos y runner, spago.yaml, .gitignore y ejemplos generados sin sobrescribir contenido propio
 python	new	1	module	run	uv init --lib .	tool:uv	-	-
-python	scaffold	1	module	run	rm -rf .git	-	-	-
+python	scaffold	1	module	run	test -d .	-	-	-
 python	scaffold	2	module	run	touch conftest.py && mkdir -p tests	-	-	-
 python	scaffold	3	module	run	uv add --dev pytest --no-sync	-	-	añadir la config de pytest y pasar el runner a uv run pytest
 r	new	1	phase	run	mkdir -p {module}	-	-	-

@@ -344,6 +344,12 @@ sandbox_make() {
 [submodule "crystal"]
         path = crystal
         url = ../remote/crystal.git
+[submodule "d"]
+        path = d
+        url = ../remote/d.git
+[submodule "purescript"]
+        path = purescript
+        url = ../remote/purescript.git
 [submodule "fsharp"]
         path = fsharp
         url = ../remote/fsharp.git
@@ -1624,6 +1630,95 @@ assert_eq 'sandbox scaffold: código' '0' "$rc_last"
 assert_eq 'sandbox scaffold: crea src/main/java' 'si' "$([[ -d "$JB/src/main/java" ]] && echo si || echo no)"
 assert_eq 'sandbox scaffold: crea src/test/java' 'si' "$([[ -d "$JB/src/test/java" ]] && echo si || echo no)"
 assert_eq 'sandbox scaffold: no escribe la suite' '0' "$(find "$JB/src/test/java" -type f | wc -l | tr -d ' ')"
+
+# Crystal crea Git en `new`: no debe quedar tras el inicializador.
+if command -v crystal >/dev/null 2>&1; then
+    CRYSTAL_NEW="$SANDBOX/crystal/core/algorithms/data_structures_basics"
+    mkdir -p -- "$CRYSTAL_NEW"
+    glot_run_sandbox -n new crystal algorithms/data_structures_basics
+    assert_contains 'new Crystal -n: informa limpieza segura' 'remove generated Git if safe' "$out"
+    assert_eq 'new Crystal -n: no genera archivos' '' "$(ls -A "$CRYSTAL_NEW")"
+    glot_run_sandbox new crystal algorithms/data_structures_basics
+    assert_eq 'new Crystal real: código' '0' "$rc_last"
+    assert_eq 'new Crystal real: elimina solo Git generado' 'no' "$([[ -e "$CRYSTAL_NEW/.git" ]] && echo yes || echo no)"
+    assert_eq 'new Crystal real: preserva fuentes y manifiesto' 'yes' \
+        "$([[ -f "$CRYSTAL_NEW/shard.yml" && -d "$CRYSTAL_NEW/src" && -d "$CRYSTAL_NEW/spec" ]] && echo yes || echo no)"
+    glot_run_sandbox scaffold crystal algorithms/data_structures_basics
+    assert_eq 'scaffold tras new Crystal real: código' '0' "$rc_last"
+fi
+
+# No se borra un Git creado por el generador que ya contiene datos no triviales.
+GIT_SEQ_DIR="$WORK_DIR/git-sequence-data"
+mkdir -p "$GIT_SEQ_DIR"
+cp -R "$DATA_DIR/." "$GIT_SEQ_DIR/"
+awk -F'\t' 'BEGIN {OFS="\t"} NR == 1 || !($1 == "java" && $2 == "new")' \
+    "$DATA_DIR/init_sequences.tsv" >"$GIT_SEQ_DIR/init_sequences.tsv"
+printf 'java\tnew\t1\tmodule\trun\tgit init -q && git config user.name authored\t-\t-\t-\n' \
+    >>"$GIT_SEQ_DIR/init_sequences.tsv"
+GIT_NEW="$SANDBOX/java/core/algorithms/data_structures_basics"
+mkdir -p "$GIT_NEW"
+rc_last=0
+out="$(GLOT_ROOT="$SANDBOX" GLOT_DATA_DIR="$GIT_SEQ_DIR" "$GLOT_SH" new java algorithms/data_structures_basics 2>"$WORK_DIR/stderr")" || rc_last=$?
+err="$(cat -- "$WORK_DIR/stderr")"
+assert_eq 'new con Git personalizado: falla' '4' "$rc_last"
+assert_contains 'new con Git personalizado: diagnóstico' 'unrecognized Git configuration' "$err"
+assert_eq 'new con Git personalizado: conserva Git' 'yes' "$([[ -d "$GIT_NEW/.git" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold java algorithms/data_structures_basics
+assert_eq 'scaffold con Git preexistente: falla sin borrarlo' '4' "$rc_last"
+assert_contains 'scaffold con Git preexistente: diagnóstico' 'pre-existing nested Git' "$err"
+assert_eq 'scaffold con Git preexistente: conserva Git' 'yes' "$([[ -d "$GIT_NEW/.git" ]] && echo yes || echo no)"
+
+# Un repositorio anidado no debe ocultar el estado del superproyecto de un submódulo.
+NESTED_ROOT="$WORK_DIR/nested-root"
+NESTED_MODULE="$NESTED_ROOT/crystal/core/algorithms/naive_sort"
+mkdir -p "$NESTED_MODULE" "$NESTED_ROOT/docs/core/algorithms"
+printf '# 05 — Naive Sort\n' >"$NESTED_ROOT/docs/core/algorithms/05_Naive_Sort.md"
+git -C "$NESTED_ROOT" init -q
+git -C "$NESTED_ROOT/crystal" init -q
+printf '[submodule "crystal"]\n\tpath = crystal\n\turl = ../crystal.git\n' >"$NESTED_ROOT/.gitmodules"
+git -C "$NESTED_ROOT" add .gitmodules
+git -C "$NESTED_ROOT" update-index --add --cacheinfo "160000,$(git -C "$REPO" rev-parse HEAD),crystal"
+git -C "$NESTED_MODULE" init -q
+NESTED_STATE="$WORK_DIR/nested-state"
+mkdir -p "$NESTED_STATE"
+(cd "$NESTED_ROOT" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" set lang crystal >/dev/null)
+(cd "$NESTED_ROOT" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" set phase algorithms >/dev/null)
+(cd "$NESTED_ROOT" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" set module naive_sort >/dev/null)
+root_state="$(cd "$NESTED_ROOT" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" path)"
+module_state="$(cd "$NESTED_MODULE" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" path)"
+assert_eq 'Git anidado: estado coincide con monorepo' "$root_state" "$module_state"
+assert_eq 'Git anidado: lee sprint del monorepo' 'crystal' \
+    "$(cd "$NESTED_MODULE" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" get lang)"
+rc_last=0
+out="$(cd "$NESTED_MODULE" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" scaffold 2>"$WORK_DIR/stderr")" || rc_last=$?
+err="$(cat "$WORK_DIR/stderr")"
+assert_eq 'scaffold dentro de Git anidado: bloquea Git, no pierde sprint' '4' "$rc_last"
+assert_contains 'scaffold dentro de Git anidado: diagnóstico de Git' 'pre-existing nested Git' "$err"
+
+# D elimina únicamente el ejemplo nativo conocido y anuncia lo que falta.
+DB="$SANDBOX/d/core/algorithms/naive_sort"
+mkdir -p "$DB/source"
+cp "$TESTS_DIR/../data/scaffold_templates/d.app.d" "$DB/source/app.d"
+glot_run_sandbox -n scaffold d algorithms/naive_sort
+assert_eq 'scaffold D -n: código' '0' "$rc_last"
+assert_eq 'scaffold D -n: conserva ejemplo' 'yes' "$([[ -f "$DB/source/app.d" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold d algorithms/naive_sort
+assert_eq 'scaffold D: código' '0' "$rc_last"
+assert_eq 'scaffold D: retira ejemplo verificado' 'no' "$([[ -e "$DB/source/app.d" ]] && echo yes || echo no)"
+assert_eq 'scaffold D: crea .gitignore' 'yes' "$([[ -f "$DB/.gitignore" ]] && echo yes || echo no)"
+assert_contains 'scaffold D: anuncia análisis' 'glot prompt scaffold d algorithms/naive_sort' "$err"
+printf 'author code\n' >"$DB/source/app.d"
+glot_run_sandbox scaffold d algorithms/naive_sort
+assert_eq 'scaffold D repetido: conserva código propio' 'author code' "$(cat "$DB/source/app.d")"
+assert_contains 'scaffold D repetido: anuncia análisis' 'glot prompt scaffold d algorithms/naive_sort' "$err"
+
+PSB="$SANDBOX/purescript/core/algorithms/naive_sort"
+mkdir -p "$PSB/src"
+printf 'author code\n' >"$PSB/src/Main.purs"
+glot_run_sandbox scaffold purescript algorithms/naive_sort
+assert_eq 'scaffold PureScript: código' '0' "$rc_last"
+assert_eq 'scaffold PureScript: conserva fuente' 'author code' "$(cat "$PSB/src/Main.purs")"
+assert_contains 'scaffold PureScript: anuncia análisis' 'glot prompt scaffold purescript algorithms/naive_sort' "$err"
 
 # scaffold: las acciones repetibles preparan Assembly antes del paso 4c.
 AB="$SANDBOX/assembly/core/algorithms/naive_sort"

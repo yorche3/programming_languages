@@ -85,6 +85,17 @@ shadows the enclosing submodule/monorepo, selecting a different state file.
 The author had to remove it manually; neither scaffold nor its delegate
 handled it. This remains pending for the next v2.1.0 scaffold fix.
 
+**ES:** Avance del fix: `new` inspecciona y retira el Git recién generado
+cuando es seguro; desde Git anidado se resuelve el estado del superproyecto.
+Se eliminaron las retiradas incondicionales del catálogo. Un Git preexistente
+queda protegido y bloquea la operación: su limpieza automática segura sigue
+pendiente. También sigue pendiente revisar los demás inicializadores.
+
+**EN:** Fix in progress: `new` checks and removes freshly generated Git when
+safe; nested Git resolves the superproject's state. Unconditional catalog
+removals were removed. Pre-existing Git is protected and blocks the operation;
+safe automatic cleanup and the remaining initializer review are still pending.
+
 Criterios de aceptación / Acceptance criteria:
 
 - Resolver el monorepo y su estado desde dentro del módulo **antes** de
@@ -155,6 +166,78 @@ Criterios de aceptación / Acceptance criteria:
   rerun sin pérdida de contenido y dry-run sin modificaciones.
   / Test required artifacts, hidden files, handoff messages, visible failures,
   non-destructive reruns and non-mutating dry-run.
+
+**ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
+generación/actualización incompletos tanto en `glot scaffold` como en su
+delegate, con archivos sobrantes. El catálogo actual solo declara
+`mkdir -p src test && touch .gitignore`, sin nota de completado. En el módulo
+activo existen `src/Main.purs`, el módulo avanzado y el runner con su suite;
+`src/Main.purs` también existe en la base homologada, por lo que su presencia
+por sí sola no prueba que deba borrarse. Identificar con el autor y las
+convenciones vigentes qué restos y renombres concretos corresponden antes de
+eliminarlos; no sobrescribir el trabajo activo.
+
+**EN — PureScript, reported 2026-11-17:** the author reports incomplete
+renaming and file creation/updates in both scaffold and its delegate, with
+leftover files. The catalog currently only creates directories and ensures
+`.gitignore`, without a handoff note. The homologated base also contains
+`src/Main.purs`, so its presence alone does not justify deletion. Identify
+the actual unwanted files and renames before removing anything.
+
+- Para el fix, verificar la salida real de `spago init` y el layout homologado;
+  automatizar los cambios mecánicos de nombres, imports, runner y manifiesto
+  que correspondan, manteniendo consistentes archivos y declaraciones.
+  Anunciar cualquier adecuación restante para el delegate y comprobar que su
+  encargo la identifica sin invadir contrato, suite o implementación.
+  / Check native Spago output and the homologated layout; automate applicable
+  naming and wiring, and explicitly hand off any remaining scaffold work.
+- Añadir regresiones de PureScript con la plantilla real o una reproducción
+  fiel: comprobar nombres, manifiesto, runner y restos, así como reruns que
+  preserven código, tests y configuración del autor.
+  / Test naming, manifest, runner and leftovers against the native template,
+  including reruns that preserve authored work.
+
+### Fix pendiente: helpers declarados en los builds / Pending fix: helpers declared in build targets
+
+**ES:** Reportado el 2026-11-14 tras un bloqueo de validación en Haskell:
+GHC advirtió `-Wmissing-home-modules` porque el módulo de pruebas
+`DataStructuresAdvancedSpec`, importado por `RunTests.hs`, no estaba
+declarado en `other-modules` del test-suite Cabal. El patrón correcto está
+en la base `data_structures_basics`; el archivo de trabajo adjunto ya muestra
+la declaración explícita. El problema no es exclusivo de Haskell: los módulos
+futuros pueden separar helpers de producción o de tests, y cada lenguaje
+resuelve de forma distinta qué archivos pertenecen a cada target.
+
+**EN:** Reported on 2026-11-14 after a Haskell validation block: GHC emitted
+`-Wmissing-home-modules` because the test module imported by `RunTests.hs`
+was missing from the Cabal test-suite's `other-modules`. The homologated
+`data_structures_basics` package has the required pattern; the attached
+working Cabal file now includes the declaration. This generalizes to future
+modules with production or test helpers because build systems differ in how
+they assign source files to targets.
+
+Criterios para la siguiente versión / Next-version acceptance criteria:
+
+- Revisar los lenguajes y generadores donde los archivos de un target deben
+  declararse explícitamente: módulos de producción, módulos de test y helpers
+  importados. Mantener sincronizados imports, source roots y manifiestos
+  (`other-modules` en Cabal, u otros mecanismos nativos equivalentes); no
+  asumir que encontrar el archivo basta para compilarlo.
+  / Audit languages whose build targets require explicit source/module
+  declarations; keep imports, source roots and native manifests synchronized.
+- Aplicar la regla en el paso que crea o incorpora el helper (scaffold,
+  contrato/esqueletos o suite, según el flujo); no depender de que el autor
+  descubra una advertencia después ni de pedir al delegate que haga cambios
+  mecánicos que conoce el tooling.
+  / Apply the rule at the workflow step that introduces the helper, rather
+  than leaving deterministic manifest edits to the author or delegate.
+- Agregar pruebas representativas con al menos un helper importado por un
+  test y uno por código de producción en los lenguajes aplicables. Ejecutar
+  build/test con las advertencias del proyecto habilitadas y exigir cero
+  diagnósticos de módulos locales omitidos; comprobar también reruns y que no
+  se borren helpers propios.
+  / Add representative production/test helper cases, validate with project
+  warnings enabled, and cover reruns and preservation of authored helpers.
 
 **ES:** `glot` convierte el ciclo de trabajo de un módulo —**situar, crear, ejecutar, delegar, cerrar y publicar**— en comandos reproducibles, y deja la evidencia en el repositorio.
 

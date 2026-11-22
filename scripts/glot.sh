@@ -177,16 +177,27 @@ GLOT_SCRIPT_DIR="$(_glot_script_dir)"
 # _glot_repo_root — raíz del monorepo: GLOT_ROOT > superproyecto > raíz git.
 _glot_repo_root() {
     local root=""
+    local current=""
+    local parent=""
+    local super=""
 
     if [[ -n "${GLOT_ROOT:-}" ]]; then
         printf '%s\n' "$GLOT_ROOT"
         return 0
     fi
 
-    root="$(git rev-parse --show-superproject-working-tree 2>/dev/null || true)"
-    if [[ -z "$root" ]]; then
-        root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-    fi
+    root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+    current="$root"
+    while [[ -n "$current" ]]; do
+        super="$(git -C "$current" rev-parse --show-superproject-working-tree 2>/dev/null || true)"
+        if [[ -n "$super" ]]; then
+            printf '%s\n' "$super"
+            return 0
+        fi
+        parent="$(git -C "$current/.." rev-parse --show-toplevel 2>/dev/null || true)"
+        [[ -n "$parent" && "$parent" != "$current" ]] || break
+        current="$parent"
+    done
 
     [[ -n "$root" ]] || return 1
     printf '%s\n' "$root"
@@ -2598,6 +2609,49 @@ _glot_cmd_pointer() {
 
 # --- creación y registro (L5) ------------------------------------------------
 
+# Solo se retira el Git nacido en el directorio vacío que `new` acaba de generar.
+_glot_new_remove_generated_git() {
+    local dir="$1" gitdir="$1/.git" path="" key="" keys="" entries="" objects="" remotes=""
+    [[ -e "$gitdir" || -L "$gitdir" ]] || return 0
+    if [[ -L "$dir" || "$(cd -- "$dir" && pwd -P)" != "$dir" || -L "$gitdir" || ! -d "$gitdir" ]]; then
+        _glot_error "Git generado no es directorio seguro / generated Git is not a safe directory: $gitdir"
+        return 1
+    fi
+    if [[ ! -d "$gitdir/objects" || ! -d "$gitdir/refs" ]] ||
+        ! entries="$(find "$gitdir" ! -type d ! -type f -print -quit)" ||
+        ! objects="$(find "$gitdir/objects" "$gitdir/refs" -type f -print -quit)" ||
+        ! remotes="$(git -C "$dir" remote)" ||
+        ! keys="$(git -C "$dir" config --local --name-only --list)"; then
+        _glot_error "no se pudo inspeccionar Git generado / could not inspect generated Git: $gitdir"
+        return 1
+    fi
+    if [[ -e "$gitdir/index" || -e "$gitdir/packed-refs" || -n "$entries" || -n "$objects" || -n "$remotes" ]] ||
+        ! git -C "$dir" symbolic-ref -q HEAD >/dev/null ||
+        [[ "$(git -C "$dir" rev-parse --is-inside-work-tree)" != true ]] ||
+        [[ "$(git -C "$dir" rev-parse --show-toplevel)" != "$dir" ]]; then
+        _glot_error "Git generado contiene datos propios; no se elimina / generated Git contains authored data; not removed: $gitdir"
+        return 1
+    fi
+    while IFS= read -r key; do
+        case "$key" in
+            core.repositoryformatversion|core.filemode|core.bare|core.logallrefupdates) ;;
+            *) _glot_error "configuración Git no reconocida / unrecognized Git configuration: $key"; return 1 ;;
+        esac
+    done <<<"$keys"
+    entries="$(find "$gitdir" -type f -print)" || {
+        _glot_error "no se pudo inspeccionar Git generado / could not inspect generated Git: $gitdir"
+        return 1
+    }
+    while IFS= read -r path; do
+        case "${path#"$gitdir"/}" in
+            HEAD|config|description|info/exclude|hooks/*.sample) ;;
+            *) _glot_error "metadato Git no reconocido / unrecognized Git metadata: $path"; return 1 ;;
+        esac
+    done <<<"$entries"
+    _glot_info "new: retirar Git generado / remove generated Git: $gitdir"
+    rm -rf -- "$gitdir"
+}
+
 # _glot_cmd_new [lenguaje] [fase/módulo] — la carpeta del módulo y, si el lenguaje trae
 # herramienta que además la genera, el avance de antemano con ella (v2). Ejecuta las filas
 # `phase=new` de `data/init_sequences.tsv` respetando su `cwd`: lo mínimo es crear la
@@ -2707,6 +2761,7 @@ _glot_cmd_new() {
             printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
             [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
         done <<<"$steps"
+        printf '# retirar Git generado en %s/.git si es seguro / remove generated Git if safe\n' "$dir"
         [[ "$kind" == "manual" ]] && printf '# el manifiesto y la suite son del encargo / manifest and suite belong to the request\n'
         _glot_init_completion_report "$steps" "$module"
         printf '%s\n' "$dir"
@@ -2715,6 +2770,10 @@ _glot_cmd_new() {
 
     # El directorio del módulo lo deja vacío `use`. Con contenido, el esqueleto ya
     # está hecho: no se pisa nada (misma política que `use` con un módulo existente).
+    if [[ -d "$dir/.git" || -L "$dir/.git" ]]; then
+        _glot_error "Git anidado preexistente: no se elimina sin verificar su origen / pre-existing nested Git: not removed without provenance: $dir/.git"
+        return 4
+    fi
     if [[ -n "$(ls -A -- "$dir" 2>/dev/null)" ]]; then
         _glot_warn "el módulo ya tiene contenido, no se genera esqueleto / module already has content, no scaffolding: $dir"
         printf '%s\n' "$dir"
@@ -2756,6 +2815,8 @@ _glot_cmd_new() {
             return 4
         fi
     done <<<"$steps"
+
+    _glot_new_remove_generated_git "$dir" || return 4
 
     if [[ "$kind" == "manual" ]]; then
         _glot_info "estructura manual creada / manual layout created: $dir"
@@ -2812,6 +2873,11 @@ _glot_cmd_scaffold() {
         _glot_error "el módulo no existe / module not found: $dir"
         _glot_info "prepáralo primero / prepare it first: glot new $lang $phase/$module"
         return 1
+    fi
+
+    if [[ -d "$dir/.git" || -L "$dir/.git" ]]; then
+        _glot_error "Git anidado preexistente: no se elimina sin verificar su origen / pre-existing nested Git: not removed without provenance: $dir/.git"
+        return 4
     fi
 
     if [[ -L "$dir/.gitignore" || ( -e "$dir/.gitignore" && ! -f "$dir/.gitignore" ) ]]; then
