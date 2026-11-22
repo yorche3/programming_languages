@@ -250,6 +250,12 @@ Se verificaron `numbers` y `data_structures_basics`.
 for failures and empty or incomplete runs. Verified against `numbers` and
 `data_structures_basics`.
 
+**ES:** `new` y `scaffold` bloquean también un `.git` anidado en formato
+gitfile, sin modificarlo. La limpieza segura de Git preexistente sigue pendiente.
+
+**EN:** `new` and `scaffold` also block a nested `.git` gitfile without
+modifying it. Safe cleanup of pre-existing Git remains pending.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

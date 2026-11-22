@@ -1687,6 +1687,24 @@ assert_eq 'scaffold con Git preexistente: falla sin borrarlo' '4' "$rc_last"
 assert_contains 'scaffold con Git preexistente: diagnóstico' 'pre-existing nested Git' "$err"
 assert_eq 'scaffold con Git preexistente: conserva Git' 'yes' "$([[ -d "$GIT_NEW/.git" ]] && echo yes || echo no)"
 
+# Un gitfile de worktree o submódulo anidado también debe bloquear la escritura.
+GIT_FILE_MODULE="$SANDBOX/java/core/algorithms/searching"
+mkdir -p -- "$GIT_FILE_MODULE"
+printf 'gitdir: ../authored-git\n' >"$GIT_FILE_MODULE/.git"
+glot_run_sandbox -n new java algorithms/searching
+assert_eq 'new gitfile dry-run: código' '0' "$rc_last"
+assert_eq 'new gitfile dry-run: conserva contenido' 'gitdir: ../authored-git' "$(cat -- "$GIT_FILE_MODULE/.git")"
+glot_run_sandbox new java algorithms/searching
+assert_eq 'new con gitfile preexistente: falla' '4' "$rc_last"
+assert_contains 'new con gitfile preexistente: diagnóstico' 'pre-existing nested Git' "$err"
+glot_run_sandbox scaffold java algorithms/searching
+assert_eq 'scaffold con gitfile preexistente: falla' '4' "$rc_last"
+assert_contains 'scaffold con gitfile preexistente: diagnóstico' 'pre-existing nested Git' "$err"
+glot_run_sandbox -n scaffold java algorithms/searching
+assert_eq 'scaffold gitfile dry-run: bloquea' '4' "$rc_last"
+assert_eq 'gitfile preexistente: conserva contenido' 'gitdir: ../authored-git' "$(cat -- "$GIT_FILE_MODULE/.git")"
+assert_eq 'gitfile preexistente: no crea scaffold' 'no' "$([[ -e "$GIT_FILE_MODULE/.gitignore" ]] && echo yes || echo no)"
+
 # Un repositorio anidado no debe ocultar el estado del superproyecto de un submódulo.
 NESTED_ROOT="$WORK_DIR/nested-root"
 NESTED_MODULE="$NESTED_ROOT/crystal/core/algorithms/naive_sort"

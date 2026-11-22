@@ -89,13 +89,15 @@ handled it. This remains pending for the next v2.1.0 scaffold fix.
 **ES:** Avance del fix: `new` inspecciona y retira el Git recién generado
 cuando es seguro; desde Git anidado se resuelve el estado del superproyecto.
 Se eliminaron las retiradas incondicionales del catálogo. Un Git preexistente
-queda protegido y bloquea la operación: su limpieza automática segura sigue
-pendiente. También sigue pendiente revisar los demás inicializadores.
+queda protegido y bloquea la operación, tanto si `.git` es directorio como
+gitfile o enlace: su limpieza automática segura sigue pendiente. También sigue
+pendiente revisar los demás inicializadores.
 
 **EN:** Fix in progress: `new` checks and removes freshly generated Git when
 safe; nested Git resolves the superproject's state. Unconditional catalog
-removals were removed. Pre-existing Git is protected and blocks the operation;
-safe automatic cleanup and the remaining initializer review are still pending.
+removals were removed. Pre-existing Git blocks the operation whether `.git` is
+a directory, gitfile or symlink; safe automatic cleanup and the remaining
+initializer review are still pending.
 
 Criterios de aceptación / Acceptance criteria:
 

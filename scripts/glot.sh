@@ -2770,7 +2770,7 @@ _glot_cmd_new() {
 
     # El directorio del módulo lo deja vacío `use`. Con contenido, el esqueleto ya
     # está hecho: no se pisa nada (misma política que `use` con un módulo existente).
-    if [[ -d "$dir/.git" || -L "$dir/.git" ]]; then
+    if [[ -e "$dir/.git" || -L "$dir/.git" ]]; then
         _glot_error "Git anidado preexistente: no se elimina sin verificar su origen / pre-existing nested Git: not removed without provenance: $dir/.git"
         return 4
     fi
@@ -2875,7 +2875,7 @@ _glot_cmd_scaffold() {
         return 1
     fi
 
-    if [[ -d "$dir/.git" || -L "$dir/.git" ]]; then
+    if [[ -e "$dir/.git" || -L "$dir/.git" ]]; then
         _glot_error "Git anidado preexistente: no se elimina sin verificar su origen / pre-existing nested Git: not removed without provenance: $dir/.git"
         return 4
     fi
