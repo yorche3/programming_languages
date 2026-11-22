@@ -193,7 +193,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 |---|---|---|
 | `assembly` | `mkdir -p src test` · crear `src/{module}.asm` si falta | `section .text`; el contrato declara sus símbolos en el paso 4b |
 | `c` | `mkdir -p include src test` · crear `include/{module}.h` y `src/{module}.c` si faltan | `#ifndef {Module}_H` + `#define {Module}_H` en la cabecera; `#include "{module}.h"` en la fuente |
-| `cobol` | `mkdir -p src/copybooks src/lib test` · `touch src/lib/{module}.cbl` | `IDENTIFICATION DIVISION.` + `PROGRAM-ID. {Module}.` |
+| `cobol` | `mkdir -p src/copybooks src/lib test` · crear `src/lib/{module}.cbl` y `test/RUN-TESTS.cbl` si faltan | Programa mínimo con `PROGRAM-ID. {Module}.` y `GOBACK.` |
 | `forth` | `mkdir -p src test` · crear `src/{module}.forth` y `test/run-tests.forth` si faltan | Fuente inicialmente vacía; el runner la carga y anuncia que no hay pruebas |
 | `grain` | `mkdir -p src tests` · `touch src/{module}.gr` | `module {Module}` |
 | `java` | `mkdir -p src/main/java src/test/java` · `touch src/main/java/{Module}.java` | `public class {Module} { }` |
@@ -342,11 +342,21 @@ mkdir -p src/copybooks src/lib test
 ```text
 {module}/
 ├── Makefile
-├── run_tests                # script de ejecución
+├── run_tests                # ejecutable generado por el Makefile
 ├── src/copybooks/           # copybooks
 ├── src/lib/                 # programa principal
 └── test/                    # ASSERTS.cpy + suites + RUN-TESTS.cbl
 ```
+
+**ES:** El scaffold crea una fuente y un runner mínimos compilables. El
+Makefile enlaza primero `RUN-TESTS.cbl` y exige su presencia incluso si ya
+existe el ejecutable. La suite conecta los grupos y propaga sus fallos;
+`.gitignore` excluye el ejecutable y los artefactos generados si faltaba.
+
+**EN:** Scaffold creates a minimal compilable source and runner. The Makefile
+links `RUN-TESTS.cbl` first and requires it even when the executable already
+exists. The suite connects its groups and propagates failures; a missing
+`.gitignore` is created to exclude the executable and build artifacts.
 
 ### Common Lisp — ASDF + src/ + tests/
 

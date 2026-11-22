@@ -1805,6 +1805,51 @@ glot_run_sandbox scaffold forth algorithms/naive_sort
 assert_eq 'scaffold Forth symlink: bloquea' '4' "$rc_last"
 assert_eq 'scaffold Forth symlink: conserva destino' 'author source' "$(cat "$FB/src/naive_sort.forth")"
 
+# COBOL deja un runner enlazable y preserva los archivos existentes.
+COB="$SANDBOX/cobol/core/algorithms/data_structures_basics"
+mkdir -p "$COB"
+glot_run_sandbox -n scaffold cobol algorithms/data_structures_basics
+assert_eq 'scaffold COBOL -n: código' '0' "$rc_last"
+assert_eq 'scaffold COBOL -n: no crea fuentes' 'no' "$([[ -e "$COB/src" || -e "$COB/test" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold cobol algorithms/data_structures_basics
+assert_eq 'scaffold COBOL: código' '0' "$rc_last"
+assert_eq 'scaffold COBOL: crea estructura y runner' 'yes' \
+    "$([[ -d "$COB/src/copybooks" && -f "$COB/src/lib/data_structures_basics.cbl" && -f "$COB/test/RUN-TESTS.cbl" ]] && echo yes || echo no)"
+assert_eq 'scaffold COBOL: excluye artefactos' '3' \
+    "$(git -C "$COB" check-ignore run_tests test.o build/object | wc -l | tr -d ' ')"
+assert_contains 'scaffold COBOL: anuncia trabajo pendiente' 'glot prompt scaffold cobol algorithms/data_structures_basics' "$err"
+if command -v cobc >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
+    printf 'identification division.\nprogram-id. AAA-TEST.\nprocedure division.\n display "wrong entry".\n goback.\nend program AAA-TEST.\n' >"$COB/test/AAA-TEST.cbl"
+    cob_rc=0
+    cob_out="$(make -s -C "$COB" test 2>&1)" || cob_rc=$?
+    assert_eq 'scaffold COBOL: runner arranca con helpers' '0' "$cob_rc"
+    assert_contains 'scaffold COBOL: runner es punto de entrada' 'Scaffold: no tests configured' "$cob_out"
+    printf 'identification division.\nprogram-id. RUN-TESTS.\nprocedure division.\n move 1 to return-code\n goback.\nend program RUN-TESTS.\n' >"$COB/test/RUN-TESTS.cbl"
+    cob_rc=0
+    cob_out="$(make -s -B -C "$COB" test 2>&1)" || cob_rc=$?
+    assert_eq 'scaffold COBOL: propaga fallo del runner' 'yes' "$([[ "$cob_rc" != 0 ]] && echo yes || echo no)"
+    rm -- "$COB/test/RUN-TESTS.cbl"
+    cob_rc=0
+    cob_out="$(make -s -C "$COB" test 2>&1)" || cob_rc=$?
+    assert_eq 'scaffold COBOL: falla si falta runner aun con ejecutable' 'yes' "$([[ "$cob_rc" != 0 ]] && echo yes || echo no)"
+    assert_contains 'scaffold COBOL: diagnostica runner ausente' 'Test runner is missing' "$cob_out"
+fi
+printf 'author source\n' >"$COB/src/lib/data_structures_basics.cbl"
+printf 'author runner\n' >"$COB/test/RUN-TESTS.cbl"
+printf 'author makefile\n' >"$COB/Makefile"
+printf 'author ignore\n' >"$COB/.gitignore"
+glot_run_sandbox scaffold cobol algorithms/data_structures_basics
+assert_eq 'scaffold COBOL repetido: código' '0' "$rc_last"
+assert_eq 'scaffold COBOL repetido: conserva fuente' 'author source' "$(cat "$COB/src/lib/data_structures_basics.cbl")"
+assert_eq 'scaffold COBOL repetido: conserva runner' 'author runner' "$(cat "$COB/test/RUN-TESTS.cbl")"
+assert_eq 'scaffold COBOL repetido: conserva Makefile' 'author makefile' "$(cat "$COB/Makefile")"
+assert_eq 'scaffold COBOL repetido: conserva ignore' 'author ignore' "$(cat "$COB/.gitignore")"
+rm -- "$COB/Makefile"
+ln -s "$COB/src/lib/data_structures_basics.cbl" "$COB/Makefile"
+glot_run_sandbox scaffold cobol algorithms/data_structures_basics
+assert_eq 'scaffold COBOL symlink: bloquea' '4' "$rc_last"
+assert_eq 'scaffold COBOL symlink: conserva destino' 'author source' "$(cat "$COB/src/lib/data_structures_basics.cbl")"
+
 PSB="$SANDBOX/purescript/core/algorithms/naive_sort"
 mkdir -p "$PSB/src"
 printf 'author code\n' >"$PSB/src/Main.purs"

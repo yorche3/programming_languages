@@ -126,6 +126,16 @@ tests without overwriting authored files. Gforth 0.7.3 ran the runner and
 returned 1 on a failed assertion. The homologated base's framework still
 needs its exit status reviewed.
 
+**ES:** COBOL crea una fuente y un runner mínimos, Makefile y `.gitignore`
+sin sobrescribir los existentes. Con GnuCOBOL 3.2.0 se verificaron el punto de
+entrada con helpers, la propagación de un fallo y la ausencia del runner aunque
+exista un ejecutable anterior.
+
+**EN:** COBOL creates a minimal source and runner, Makefile and `.gitignore`
+without overwriting existing files. With GnuCOBOL 3.2.0, tests verified the
+entry point with helpers, failure propagation and a missing runner even when
+an earlier executable exists.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

@@ -142,6 +142,15 @@ framework devuelve código no cero ante aserciones fallidas.
 that there are no tests, preserving existing files. The suite connects its
 groups, and the framework returns a nonzero code for failed assertions.
 
+**ES:** COBOL crea fuente, runner, Makefile y `.gitignore` cuando faltan. El
+Makefile enlaza el runner antes de los helpers y comprueba su presencia incluso
+si ya existe el ejecutable. La suite conecta los grupos y propaga fallos.
+
+**EN:** COBOL creates a missing source, runner, Makefile and `.gitignore`.
+The Makefile links the runner before helpers and checks that it exists even
+when the executable is already present. The suite connects groups and
+propagates failures.
+
 **ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
 (`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con
 referencia declarada por dotnet), Go (`src/tests`), Haskell (`lib/test` y
