@@ -138,6 +138,12 @@ Only the verified `app.d` sample is removed, and `test/` is configured in the
 recognized generated manifest. Other content is preserved; the manifest and
 any unfamiliar sample are explicitly handed off for review.
 
+**ES:** Raku crea la fuente y `.gitignore` si faltan, preserva archivos
+propios y rechaza enlaces simbólicos en las rutas del scaffold.
+
+**EN:** Raku creates a missing source and `.gitignore`, preserves authored
+files and rejects symlinks at scaffold paths.
+
 **ES:** Forth crea una fuente vacía, un framework y un runner que anuncia que
 no hay tests; conserva archivos existentes. La suite conecta los grupos y el
 framework devuelve código no cero ante aserciones fallidas.

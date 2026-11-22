@@ -2309,6 +2309,54 @@ if command -v perl >/dev/null 2>&1 && perl -MApp::Prove::State -MTAP::Harness::E
     assert_eq 'test Perl: rechaza directorio de pruebas ausente' '4' "$rc_last"
 fi
 
+# Raku: conservar fuentes existentes y proteger las rutas del scaffold.
+RK="$SANDBOX/raku/core/algorithms/data_structures_basics"
+mkdir -p -- "$RK"
+glot_run_sandbox scaffold raku algorithms/data_structures_basics
+assert_eq 'scaffold Raku: código' '0' "$rc_last"
+assert_eq 'scaffold Raku: fuente idiomática' 'unit module DataStructuresBasics;' "$(cat -- "$RK/lib/DataStructuresBasics.rakumod")"
+assert_contains 'scaffold Raku: excluye precompilación' '.precomp/' "$(cat -- "$RK/.gitignore")"
+assert_eq 'scaffold Raku: ignora precompilación' '1' "$(git -C "$RK" check-ignore lib/.precomp/artifact | wc -l | tr -d ' ')"
+if command -v raku >/dev/null 2>&1 && command -v prove6 >/dev/null 2>&1; then
+    raku_rc=0
+    raku_out="$(cd "$RK" && raku -c lib/DataStructuresBasics.rakumod 2>&1)" || raku_rc=$?
+    assert_eq 'scaffold Raku: fuente compilable' '0' "$raku_rc"
+    printf 'use Test;\nuse DataStructuresBasics;\nok True, "module loads";\ndone-testing;\n' >"$RK/t/module.rakutest"
+    glot_run_sandbox test raku algorithms/data_structures_basics
+    assert_eq 'scaffold Raku: runner descubre suite' '0' "$rc_last"
+    assert_contains 'scaffold Raku: ejecuta suite' 'module.rakutest' "$out"
+    printf 'use Test;\nok False, "failure";\ndone-testing;\n' >"$RK/t/module.rakutest"
+    glot_run_sandbox test raku algorithms/data_structures_basics
+    assert_eq 'scaffold Raku: propaga fallo' '4' "$rc_last"
+fi
+printf 'author Raku\n' >"$RK/lib/DataStructuresBasics.rakumod"
+printf 'author ignore\n' >"$RK/.gitignore"
+glot_run_sandbox scaffold raku algorithms/data_structures_basics
+assert_eq 'scaffold Raku repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Raku repetido: conserva fuente' 'author Raku' "$(cat -- "$RK/lib/DataStructuresBasics.rakumod")"
+assert_eq 'scaffold Raku repetido: conserva ignore' 'author ignore' "$(cat -- "$RK/.gitignore")"
+rm -- "$RK/lib/DataStructuresBasics.rakumod"
+ln -s "$RK/.gitignore" "$RK/lib/DataStructuresBasics.rakumod"
+glot_run_sandbox scaffold raku algorithms/data_structures_basics
+assert_eq 'scaffold Raku symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Raku symlink: conserva destino' 'author ignore' "$(cat -- "$RK/.gitignore")"
+rm -- "$RK/lib/DataStructuresBasics.rakumod"
+mkdir -- "$RK/lib/DataStructuresBasics.rakumod"
+glot_run_sandbox scaffold raku algorithms/data_structures_basics
+assert_eq 'scaffold Raku destino directorio: código' '4' "$rc_last"
+rmdir -- "$RK/lib/DataStructuresBasics.rakumod"
+rm -- "$RK/.gitignore"
+printf 'author suite\n' >"$RK/t/module.rakutest"
+ln -s "$RK/t/module.rakutest" "$RK/.gitignore"
+glot_run_sandbox scaffold raku algorithms/data_structures_basics
+assert_eq 'scaffold Raku ignore symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Raku ignore symlink: conserva destino' 'author suite' "$(cat -- "$RK/t/module.rakutest")"
+RK_DRY="$SANDBOX/raku/core/algorithms/naive_sort"
+mkdir -p -- "$RK_DRY"
+glot_run_sandbox -n scaffold raku algorithms/naive_sort
+assert_eq 'scaffold Raku dry-run: código' '0' "$rc_last"
+assert_eq 'scaffold Raku dry-run: no crea archivos' '0' "$(find "$RK_DRY" -mindepth 1 | wc -l | tr -d ' ')"
+
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"
 printf '[package]\nname = "naive_sort"\n' >"$RUSTB/Cargo.toml"

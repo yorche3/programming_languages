@@ -114,7 +114,7 @@ racket	new	4	module	run	rm -rf .github pull_request_template.md render-template.
 racket	new	5	module	run	sed -i "s|^\( *\){module})$|\1\"../../{module}-lib/$(printf '%s' {module} | tr '_' '-').rkt\")|" {module}-test/tests/{module}.rkt	-	-	el test de plantilla requiere la colección por nombre: con la ruta relativa corre sin enlazar paquetes
 racket	scaffold	1	module	run	touch .gitignore	-	-	las suites requieren la librería por ruta relativa y el runner es raco test -x .
 raku	new	1	phase	run	mkdir -p {module}	-	-	-
-raku	scaffold	1	module	run	mkdir -p lib t && printf 'unit module {Module};\n' > lib/{Module}.rakumod	-	-	-
+raku	scaffold	1	module	run	if [[ -L lib || -L t || -L lib/{Module}.rakumod || -L .gitignore || ( -e lib/{Module}.rakumod && ! -f lib/{Module}.rakumod ) || ( -e .gitignore && ! -f .gitignore ) ]]; then printf 'scaffold: ruta de Raku no segura / unsafe Raku path\n' >&2; false; else mkdir -p lib t && { test -e lib/{Module}.rakumod || (set -C; printf 'unit module {Module};\n' > lib/{Module}.rakumod); } && { test -e .gitignore || (set -C; printf '.precomp/\nlib/.precomp/\n' > .gitignore); }; fi	-	-	-
 rescript	new	1	phase	run	mkdir -p {module}	-	-	-
 rescript	scaffold	1	module	run	mkdir -p src test	-	-	-
 rescript	scaffold	2	module	run	npm init -y && npm pkg set 'scripts.test=rescript && jest' 'devDependencies.rescript=^11.1.4' 'devDependencies.@rescript/core=^1.6.1' 'devDependencies.@glennsl/rescript-jest=^0.11.0' 'devDependencies.jest=^30.2.0'	-	-	el package.json va antes de instalar: sin manifiesto, npm install falla

@@ -190,6 +190,16 @@ scaffold vacío necesita su suite antes de validar.
 rejects runs without suites or non-skipped cases. An empty scaffold needs its
 suite before validation.
 
+**ES:** Raku preserva la fuente y el ignore existentes, protege rutas
+simbólicas y crea patrones de precompilación si falta el ignore. Verificado
+con el compilador, una suite de prueba y `numbers`. La salida exitosa de
+`prove6` sin casos sigue pendiente de corrección.
+
+**EN:** Raku preserves existing source and ignore files, protects symbolic
+paths and creates missing precompilation ignore patterns. Verified with the
+compiler, a test suite and `numbers`. `prove6` succeeding with no cases remains
+to be addressed.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

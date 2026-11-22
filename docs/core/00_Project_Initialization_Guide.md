@@ -659,14 +659,32 @@ rm -rf .github pull_request_template.md render-template.sh profile
 ```
 
 ### Raku — lib/ + t/
+
+**ES:** Crear la fuente y el `.gitignore` solo si faltan; conservar contenido
+existente y rechazar enlaces simbólicos en estas rutas. El runner `prove6`
+descubre las suites en `t/`.
+
+**EN:** Create the source and `.gitignore` only when absent; preserve existing
+content and reject symlinks at these paths. `prove6` discovers suites in `t/`.
+
 ```bash
-mkdir -p lib t
+if [[ -L lib || -L t || -L lib/{Module}.rakumod || -L .gitignore ||
+      ( -e lib/{Module}.rakumod && ! -f lib/{Module}.rakumod ) ||
+      ( -e .gitignore && ! -f .gitignore ) ]]; then
+  printf 'scaffold: ruta de Raku no segura / unsafe Raku path\n' >&2
+  false
+else
+  mkdir -p lib t &&
+    { test -e lib/{Module}.rakumod || (set -C; printf 'unit module {Module};\n' > lib/{Module}.rakumod); } &&
+    { test -e .gitignore || (set -C; printf '.precomp/\nlib/.precomp/\n' > .gitignore); }
+fi
 ```
 
 ```text
 {module}/
 ├── lib/{Module}.rakumod
-└── t/                       # suites .rakutest por enfoque
+├── t/                       # suites .rakutest por enfoque
+└── .gitignore               # precompilación de Raku
 ```
 
 ### Rexx — src/ + test/

@@ -232,6 +232,18 @@ uses prove's file selection and TAP harness but fails when there are no suites
 or all cases are skipped. Verified with the `numbers` and
 `data_structures_basics` bases; an empty scaffold needs a suite before validation.
 
+**ES — Raku (2026-11-22):** el scaffold preserva la fuente y el `.gitignore`
+existentes, rechaza rutas simbólicas y crea patrones de precompilación cuando
+falta el ignore. En `numbers`, `prove6` ejecutó tres suites. En un directorio
+vacío devolvió código 0 con `Result: NOTESTS`; queda pendiente evitar que
+`glot test` presente una ejecución sin casos como validada.
+
+**EN — Raku (2026-11-22):** scaffold preserves existing source and ignore files,
+rejects symbolic paths and creates precompilation patterns when the ignore file
+is missing. In `numbers`, `prove6` ran three suites. For an empty directory it
+returned exit code 0 with `Result: NOTESTS`; preventing `glot test` from
+presenting a run without cases as validated remains pending.
+
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su
 delegate, con archivos sobrantes. El catálogo anterior solo declaraba
