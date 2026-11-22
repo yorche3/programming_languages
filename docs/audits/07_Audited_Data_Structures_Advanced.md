@@ -18,7 +18,7 @@ in the roadmap at `50/50`.
 - **Convención / Convention:** [`README.md`](README.md)
 - **Escala / Scale:** [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md)
 - **Severidad / Severity:** [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md)
-- **Estado / Status:** **pase ejecutado (primer barrido)**; contrato resuelto el 2026-11-22 (se mantiene el orden creciente); 13 hallazgos 🟡/🟠 con `align` planificado, 2 alineados (`java`, `csharp`) y 37 lenguajes 🟢 / **pass run (first sweep)**; contract settled on 2026-11-22 (ascending order stays); 13 🟡/🟠 findings with a planned `align`, 2 aligned (`java`, `csharp`) and 37 languages 🟢
+- **Estado / Status:** **pase ejecutado (primer barrido)**; contrato resuelto el 2026-11-22 (se mantiene el orden creciente); 12 hallazgos 🟡/🟠 con `align` planificado, 3 alineados (`java`, `csharp`, `groovy`) y 38 lenguajes 🟢 / **pass run (first sweep)**; contract settled on 2026-11-22 (ascending order stays); 12 🟡/🟠 findings with a planned `align`, 3 aligned (`java`, `csharp`, `groovy`) and 38 languages 🟢
 - **Última verificación / Last verification:** 2026-11-22
 
 ---
@@ -188,7 +188,6 @@ deviation is in **module fidelity**, not in output.
 | `erlang` | `data_structures_advanced.erl:167,187` — `lists:member` | 🟡 |
 | `fsharp` | `DataStructuresAdvanced.fs:141,156` — `List.contains` | 🟡 |
 | `gleam` | `data_structures_advanced.gleam:227,248` — `list.contains` | 🟡 |
-| `groovy` | `Graph.groovy:43,60` — `neighbors.contains(v)` | 🟡 |
 | `haskell` | `DataStructuresAdvanced.hs:139,154` — `` v `elem` neighbours `` | 🟡 |
 | `haxe` | `Graph.hx:55,63` — `neighbors.indexOf(v)` | 🟡 |
 | `ocaml` | `graph.ml:134,144` — `List.mem v u_vertex.neighbors` | 🟡 |
@@ -216,11 +215,11 @@ path, a delegated design decision, hence 🟠 (structural). The other fourteen a
 
 ### 🟢 Homologados / Homologated
 
-- **37 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`,
+- **38 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`,
   `common-lisp`, `cpp`, `csharp`, `d`, `dart`, `elixir`, `forth`, `go`, `grain`,
-  `java`, `julia`, `kotlin`, `lua`, `nim`, `perl`, `php`, `purescript`, `python`,
-  `r`, `racket`, `raku`, `rescript`, `rexx`, `scala`, `scheme`, `swift`,
-  `tcl-tk`, `typescript`, `v`, `vala`, `zig`
+  `groovy`, `java`, `julia`, `kotlin`, `lua`, `nim`, `perl`, `php`, `purescript`,
+  `python`, `r`, `racket`, `raku`, `rescript`, `rexx`, `scala`, `scheme`,
+  `swift`, `tcl-tk`, `typescript`, `v`, `vala`, `zig`
 
 **ES:** 🟢 significa que el barrido léxico no encontró ninguna búsqueda ni
 ordenación de biblioteca en el camino de adyacencia, la suite nativa está en
@@ -257,7 +256,7 @@ bound and output do not change — the deviation belongs to the **module layer**
 | `erlang` | `lists:member` en alta y consulta | `align` — recursión propia / own recursion |
 | `fsharp` | `List.contains` en alta y consulta | `align` — recursión propia / own recursion |
 | `gleam` | `list.contains` en alta y consulta | `align` — recursión propia / own recursion |
-| `groovy` | `contains` en alta y consulta | `align` — bucle propio / own loop |
+| `groovy` | `contains` en alta y consulta | ✅ cerrado en `b400ed7`: `hasNeighbor` recorre la lista / closed: `hasNeighbor` scans the list |
 | `haskell` | `` `elem` `` en alta y consulta | `align` — función propia sobre la lista / own list function |
 | `haxe` | `indexOf` en alta y consulta | `align` — bucle propio / own loop |
 | `java` | `contains` en alta y consulta | ✅ cerrado en `715ef35`: `hasNeighbor` recorre la adyacencia / closed: `hasNeighbor` scans the adjacency |
@@ -374,6 +373,7 @@ submodule pointer commit on the monorepo's `audit/...` branch.
 
 | 2026-11-22 | `align` de `csharp` / `csharp` align | `dotnet test` + `glot evidence csharp algorithms/data_structures_advanced` | Rama `align/algorithms/data-structures-advanced`: un commit de código y merge `00de948`; suite en verde; README sin cambios / one code commit and merge; suite green; README unchanged |
 **ES:** El pase **no cierra** con este barrido: quedan 15 hallazgos por resolver
+| 2026-11-22 | `align` de `groovy` / `groovy` align | `./gradlew test` + `glot evidence groovy algorithms/data_structures_advanced` | Rama `align/algorithms/data-structures-advanced`: un commit de código y merge `b400ed7`; suite en verde; README sin cambios / one code commit and merge; suite green; README unchanged |
 o aceptar, y la propuesta de contrato del autor puede cambiar su criterio.
 **EN:** The pass **does not close** with this sweep: 15 findings remain to be
 fixed or accepted, and the author's contract proposal may change their criteria.

@@ -319,7 +319,7 @@ fsharp	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membersh
 gleam	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (list.contains in add and lookup); insertion manual and sorted	3de9104	2026-11-22
 go	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	7125769	2026-11-22
 grain	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	5d25233	2026-11-22
-groovy	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (contains in add and lookup); insertion manual and sorted	a4885da	2026-11-22
+groovy	data_structures_advanced	algorithms	idiomatic	-	0	Aligned 2026-11-22: hand-written adjacency lookup (hasNeighbor) plus manual sorted insertion; no contains or sort	b400ed7	2026-11-22
 haskell	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (elem on neighbours in add and lookup); insertion manual and sorted	25d756a	2026-11-22
 haxe	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (indexOf in add and lookup); insertion manual and sorted	e4b30ac	2026-11-22
 java	data_structures_advanced	algorithms	idiomatic	-	0	Aligned 2026-11-22: hand-written adjacency lookup (hasNeighbor) plus manual sorted insertion; no contains, indexOf or sort	715ef35	2026-11-22
