@@ -145,6 +145,9 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 - En Groovy y Kotlin, Gradle puede devolver éxito con `test NO-SOURCE`: eso no
   valida una suite. Conserva cualquier muestra que el catálogo no haya retirado
   y revisa su contenido junto con el código existente.
+- En Nim, el scaffold actual puede borrar `src/{module}/` y duplicar la task
+  `test`; no lo ejecutes sobre contenido propio. Nimble puede devolver código 0
+  incluso tras informar un fallo; revisa la salida, no solo el código de salida.
 - Si el comando no arranca porque el framework no trae runner, **escríbelo aquí** (mínimo y sin
   casos) y vuelve a comprobarlo. Si aun así no arranca, **detente y dilo** con la salida real.
   No escribas la suite para «arreglarlo»: eso es el paso 4c.
