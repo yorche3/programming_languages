@@ -263,7 +263,11 @@ detectó una aserción fallida, una suite vacía y `exit 7`. No es una solución
 una suite sintética ejecutó un test aprobado con el resultado predeterminado
 y otro fallido con `.TestResult~new` explícito; el prototipo devolvió 0. Es
 necesario detectar también resultados proporcionados explícitamente y cambios
-en la configuración sin generar falsos verdes.
+en la configuración sin generar falsos verdes. Un segundo prototipo envolvió
+los métodos de ejecución de `TestSuite` y `TestCase`: detectó ese fallo con
+resultado explícito y rechazó una suite vacía. Todavía necesita garantizar
+que los overrides de `execute` no esquiven la instrumentación y que sus
+errores no se pierdan al retornar de `CALL`; no está integrado.
 
 **EN — Rexx (2026-11-22):** scaffold preserves sources and rejects symbolic
 paths, but the runner remains pending. `glot test` rejects the two `numbers`
@@ -280,7 +284,10 @@ suites; it detected an assertion failure, an empty suite and `exit 7`. It is not
 a solution: a synthetic suite ran a passing test with the default result and
 a failing one with an explicit `.TestResult~new`; the prototype returned 0.
 Explicit results and configuration changes must also be detected without false
-success.
+success. A second prototype wrapped `TestSuite` and `TestCase` execution:
+it caught the explicit-result failure and rejected an empty suite. It still
+needs to ensure `execute` overrides cannot evade instrumentation and that
+errors are not lost on return from `CALL`; it is not integrated.
 
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
 si faltan, preserva archivos existentes y avisa de su revisión. El selector
