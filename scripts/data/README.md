@@ -193,6 +193,12 @@ otras suites y manifiestos. El runner todavía puede aceptar cero casos.
 6.3.3 test sample in `scaffold_templates/swift.Test.swift`; other suites and
 manifests are preserved. The runner may still accept zero cases.
 
+**ES:** Ballerina usa `tests/lib_test.bal` como la base homologada y advierte
+que `bal test` puede devolver éxito sin ejecutar casos.
+
+**EN:** Ballerina uses `tests/lib_test.bal` as in the homologated base and warns
+that `bal test` can succeed without executing cases.
+
 **ES:** El runner mínimo de PureScript puede devolver éxito sin ejecutar casos;
 completar y verificar la suite sigue siendo necesario.
 

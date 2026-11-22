@@ -295,6 +295,24 @@ errors are not lost on return from `CALL`; it is not integrated. A further
 test with `exit 0` inside a test method returned success: ooRexxUnit treated
 that exit as a method return even with the wrappers.
 
+**ES — Ballerina (2026-11-22):** en un proyecto aislado, `new` y `scaffold`
+produjeron la biblioteca vacía y `tests/lib_test.bal` de la base homologada.
+Con Ballerina 2201.13.4, `bal test --offline --test-report` devolvió éxito
+sin casos y también con un test deshabilitado. Los informes JSON registraron
+cero casos en ambos escenarios y un caso aprobado en una prueba positiva;
+un fallo de aserción devolvió código no cero. Queda por investigar cómo usar
+esos resultados sin alterar el alcance, el caché o los archivos propios,
+incluidos proyectos multipaquete, ejecuciones incompletas e informes ausentes.
+
+**EN — Ballerina (2026-11-22):** in an isolated project, `new` and `scaffold`
+produced the empty library and `tests/lib_test.bal` used by the homologated
+base. With Ballerina 2201.13.4, `bal test --offline --test-report` succeeded
+with no cases and also with a disabled test. JSON reports recorded zero cases
+in both scenarios and one passing case in a positive test; an assertion failure
+returned nonzero. Safe use of these results without changing scope, cache or
+authored files, including multi-package projects, incomplete executions and
+missing reports, remains to be investigated.
+
 **ES — Scala (2026-11-22):** el scaffold sobrescribía la fuente en cada
 ejecución y dejaba `build.sbt` y `build.properties` vacíos. Ahora crea
 fuente, build, versión sbt e ignore solo si faltan; rechaza enlaces y pide

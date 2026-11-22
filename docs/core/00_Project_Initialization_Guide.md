@@ -259,6 +259,12 @@ not the library source or tests directory. From the package root, apply the
 following adaptations and stop on failure. Resolve clone-root and canonical
 module placeholders before execution.
 
+**ES:** `bal test` puede devolver éxito sin casos, incluso con todos los tests
+deshabilitados. Ese resultado no valida una suite.
+
+**EN:** `bal test` can succeed with no cases, including when all tests are
+disabled. That result does not validate a suite.
+
 ```bash
 if [[ -L main.bal || -L {module}.bal ||
       ( -e main.bal && ! -f main.bal ) ||
