@@ -162,6 +162,14 @@ preserva archivos existentes y rechaza enlaces.
 **EN:** Scheme creates a Guile module and excludes SRFI-64 logs when the ignore
 file is missing; existing files are preserved and symlinks rejected.
 
+**ES:** Tcl crea una fuente de paquete, su índice y el ignore si faltan,
+preservando archivos previos y rechazando enlaces. El runner y los archivos
+previos necesitan revisión.
+
+**EN:** Tcl creates a missing package source, index and ignore file, preserving
+existing files and rejecting symlinks. The runner and pre-existing files need
+review.
+
 **ES:** Forth crea una fuente vacía, un framework y un runner que anuncia que
 no hay tests; conserva archivos existentes. La suite conecta los grupos y el
 framework devuelve código no cero ante aserciones fallidas.

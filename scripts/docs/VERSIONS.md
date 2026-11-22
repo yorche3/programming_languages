@@ -232,6 +232,16 @@ anticipadas y fallos; se verificaron las tres suites de `numbers`.
 It rejects empty runs, incomplete groups, early exits and failures; verified
 with all three `numbers` suites.
 
+**ES:** Tcl crea una fuente de paquete y su índice funcionales si faltan,
+conserva archivos existentes y anuncia la revisión pendiente del runner y
+de scaffolds anteriores. Rexx cargó el cuerpo de la suite al crear un
+`.Package`, por lo que volver a ejecutar sus clases duplicaría las pruebas.
+
+**EN:** Tcl creates a working package source and index if missing, preserves
+existing files and announces pending runner and old-scaffold review. Rexx
+executed the suite body when creating a `.Package`, so running its classes
+again would duplicate tests.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

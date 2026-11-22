@@ -254,6 +254,9 @@ de `numbers` como ambiguas; una prueba aislada de ooRexxUnit informó una
 aserción fallida y devolvió 0. En esa prueba, `exit (aResult~failureCount +
 aResult~errorCount > 0)` devolvió 1. Falta un mecanismo que ejecute todas las
 suites y propague fallos sin modificar ni ocultar las suites existentes.
+En una prueba adicional, `.Package~new` ejecutó el cuerpo principal de la
+suite al cargarla; descubrir clases y ejecutarlas otra vez duplicaría los
+tests y sus posibles efectos.
 
 **EN — Rexx (2026-11-22):** scaffold preserves sources and rejects symbolic
 paths, but the runner remains pending. `glot test` rejects the two `numbers`
@@ -261,6 +264,21 @@ suites as ambiguous; an isolated ooRexxUnit assertion failure returned 0.
 In that test, exiting with the combined failure and error count returned 1.
 Running every suite and propagating failures without modifying or hiding
 existing suites still needs a solution.
+An additional check showed that `.Package~new` executes the suite's main body
+on load, so discovering and executing its classes afterward would run tests
+and their potential side effects twice.
+
+**ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
+si faltan, preserva archivos existentes y avisa de su revisión. `glot test`
+rechaza las dos suites de `numbers` como ambiguas; Tcltest 2.5.11 informó una
+aserción fallida y devolvió 0 en una prueba aislada. El runner y los archivos
+vacíos de scaffolds anteriores requieren tratamiento.
+
+**EN — Tcl (2026-11-22):** scaffold creates a loadable package and index when
+missing, preserves existing files and announces their review. `glot test`
+rejects the two `numbers` suites as ambiguous; Tcltest 2.5.11 reported a failing
+assertion but returned 0 in an isolated test. The runner and empty files from
+older scaffolds still require attention.
 
 **ES — Scheme (2026-11-22):** el scaffold crea un módulo Guile cargable,
 preserva los archivos existentes y excluye logs SRFI-64 si falta el ignore.

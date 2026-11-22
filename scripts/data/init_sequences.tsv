@@ -132,7 +132,7 @@ scheme	scaffold	1	module	run	if [[ -L src || -L test || -L src/{module}.scm || -
 swift	new	1	module	run	swift package init --type library	-	-	-
 swift	scaffold	1	module	run	touch .gitignore && mkdir -p Tests	-	-	revisar Sources/{Module}/ y el nombre del fichero
 tcl-tk	new	1	phase	run	mkdir -p {module}	-	-	-
-tcl-tk	scaffold	1	module	run	mkdir -p src test && touch src/{module}.tcl src/pkgIndex.tcl	-	-	-
+tcl-tk	scaffold	1	module	run	if [[ -L src || -L test || -L src/{module}.tcl || -L src/pkgIndex.tcl || -L .gitignore || ( -e src/{module}.tcl && ! -f src/{module}.tcl ) || ( -e src/pkgIndex.tcl && ! -f src/pkgIndex.tcl ) || ( -e .gitignore && ! -f .gitignore ) ]]; then printf 'scaffold: ruta de Tcl no segura / unsafe Tcl path\n' >&2; false; else mkdir -p src test && { test -e src/{module}.tcl || (set -C; printf 'namespace eval {Module} {}\n\npackage provide {module} 1.0\n' > src/{module}.tcl); } && { test -e src/pkgIndex.tcl || (set -C; printf '%s\n' 'package ifneeded {module} 1.0 [list source [file join $dir {module}.tcl]]' > src/pkgIndex.tcl); } && { test -e .gitignore || (set -C; printf '*.log\n' > .gitignore); }; fi	-	-	revisar archivos previos y runner Tcltest; el selector actual no admite varias suites
 typescript	new	1	module	run	npm init -y	-	-	-
 typescript	scaffold	1	module	run	mkdir -p src test && touch tsconfig.json jest.config.cjs .gitignore && npm pkg set private=true 'scripts.test=jest --runInBand --passWithNoTests' 'scripts.build=tsc --noEmit' 'devDependencies.jest=^29.7.0' 'devDependencies.ts-jest=^29.2.5' 'devDependencies.@types/jest=^29.5.14' 'devDependencies.typescript=^5.8.3'	-	-	-
 v	new	1	module	run	v init --lib	-	-	-

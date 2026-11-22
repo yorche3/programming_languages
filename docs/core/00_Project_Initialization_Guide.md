@@ -823,15 +823,37 @@ mkdir -p Sources/{Module} Tests/{Module}Tests
 ```
 
 ### Tcl — src/ + test/
+
+**ES:** Crear la fuente, el índice de paquete y el ignore solo si faltan;
+conservar archivos existentes y rechazar enlaces simbólicos en estas rutas.
+El runner actual no admite varias suites; revisar también archivos previos
+que estén vacíos.
+
+**EN:** Create the source, package index and ignore file only when missing;
+preserve existing files and reject symlinks at these paths. The current runner
+does not handle multiple suites; also review any pre-existing empty files.
+
 ```bash
-mkdir -p src test
+if [[ -L src || -L test || -L src/{module}.tcl || -L src/pkgIndex.tcl ||
+      -L .gitignore || ( -e src/{module}.tcl && ! -f src/{module}.tcl ) ||
+      ( -e src/pkgIndex.tcl && ! -f src/pkgIndex.tcl ) ||
+      ( -e .gitignore && ! -f .gitignore ) ]]; then
+  printf 'scaffold: ruta de Tcl no segura / unsafe Tcl path\n' >&2
+  false
+else
+  mkdir -p src test &&
+    { test -e src/{module}.tcl || (set -C; printf 'namespace eval {Module} {}\n\npackage provide {module} 1.0\n' > src/{module}.tcl); } &&
+    { test -e src/pkgIndex.tcl || (set -C; printf '%s\n' 'package ifneeded {module} 1.0 [list source [file join $dir {module}.tcl]]' > src/pkgIndex.tcl); } &&
+    { test -e .gitignore || (set -C; printf '*.log\n' > .gitignore); }
+fi
 ```
 
 ```text
 {module}/
 ├── src/{module}.tcl         # namespace + package provide
 ├── src/pkgIndex.tcl         # permite package require
-└── test/                    # suites .test con Tcltest
+├── test/                    # suites .test con Tcltest
+└── .gitignore               # logs de tests
 ```
 
 **ES:** Las suites cargan el paquete con TCLLIBPATH, no con una ruta relativa:

@@ -339,6 +339,18 @@ sandbox_make() {
 [submodule "prolog"]
         path = prolog
         url = ../remote/prolog.git
+[submodule "raku"]
+        path = raku
+        url = ../remote/raku.git
+[submodule "rexx"]
+        path = rexx
+        url = ../remote/rexx.git
+[submodule "scheme"]
+        path = scheme
+        url = ../remote/scheme.git
+[submodule "tcl-tk"]
+        path = tcl-tk
+        url = ../remote/tcl-tk.git
 [submodule "rust"]
         path = rust
         url = ../remote/rust.git
@@ -2486,6 +2498,57 @@ mkdir -p -- "$SC_DRY"
 glot_run_sandbox -n scaffold scheme algorithms/naive_sort
 assert_eq 'scaffold Scheme dry-run: código' '0' "$rc_last"
 assert_eq 'scaffold Scheme dry-run: no crea archivos' '0' "$(find "$SC_DRY" -mindepth 1 | wc -l | tr -d ' ')"
+
+# Tcl: paquete cargable y conservación de archivos existentes.
+TC="$SANDBOX/tcl-tk/core/algorithms/data_structures_basics"
+mkdir -p -- "$TC"
+glot_run_sandbox scaffold tcl-tk algorithms/data_structures_basics
+assert_eq 'scaffold Tcl: código' '0' "$rc_last"
+assert_contains 'scaffold Tcl: declara paquete' 'package provide data_structures_basics 1.0' "$(cat -- "$TC/src/data_structures_basics.tcl")"
+assert_contains 'scaffold Tcl: índice nativo' 'package ifneeded data_structures_basics 1.0' "$(cat -- "$TC/src/pkgIndex.tcl")"
+assert_eq 'scaffold Tcl: ignora logs' '1' "$(git -C "$TC" check-ignore test/suite.log | wc -l | tr -d ' ')"
+assert_contains 'scaffold Tcl: anuncia revisión' 'runner Tcltest' "$err"
+if command -v tclsh9.0 >/dev/null 2>&1; then
+    tcl_rc=0
+    tcl_out="$(cd "$TC" && printf 'lappend auto_path [file normalize src]\nputs [package require data_structures_basics 1.0]\nputs [namespace exists ::DataStructuresBasics]\n' | tclsh9.0 2>&1)" || tcl_rc=$?
+    assert_eq 'scaffold Tcl: paquete cargable' '0' "$tcl_rc"
+    assert_eq 'scaffold Tcl: versión y namespace' "$(printf '1.0\n1')" "$tcl_out"
+fi
+printf 'author source\n' >"$TC/src/data_structures_basics.tcl"
+printf 'author index\n' >"$TC/src/pkgIndex.tcl"
+printf 'author ignore\n' >"$TC/.gitignore"
+glot_run_sandbox scaffold tcl-tk algorithms/data_structures_basics
+assert_eq 'scaffold Tcl repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Tcl repetido: conserva fuente' 'author source' "$(cat -- "$TC/src/data_structures_basics.tcl")"
+assert_eq 'scaffold Tcl repetido: conserva índice' 'author index' "$(cat -- "$TC/src/pkgIndex.tcl")"
+assert_eq 'scaffold Tcl repetido: conserva ignore' 'author ignore' "$(cat -- "$TC/.gitignore")"
+rm -- "$TC/src/pkgIndex.tcl"
+ln -s "$TC/src/data_structures_basics.tcl" "$TC/src/pkgIndex.tcl"
+glot_run_sandbox scaffold tcl-tk algorithms/data_structures_basics
+assert_eq 'scaffold Tcl symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Tcl symlink: conserva destino' 'author source' "$(cat -- "$TC/src/data_structures_basics.tcl")"
+rm -- "$TC/src/pkgIndex.tcl"
+mkdir -- "$TC/src/pkgIndex.tcl"
+glot_run_sandbox scaffold tcl-tk algorithms/data_structures_basics
+assert_eq 'scaffold Tcl destino directorio: código' '4' "$rc_last"
+rmdir -- "$TC/src/pkgIndex.tcl"
+rm -- "$TC/.gitignore"
+ln -s "$TC/src/data_structures_basics.tcl" "$TC/.gitignore"
+glot_run_sandbox scaffold tcl-tk algorithms/data_structures_basics
+assert_eq 'scaffold Tcl ignore symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Tcl ignore symlink: conserva destino' 'author source' "$(cat -- "$TC/src/data_structures_basics.tcl")"
+TC_DRY="$SANDBOX/tcl-tk/core/algorithms/naive_sort"
+mkdir -p -- "$TC_DRY"
+glot_run_sandbox -n scaffold tcl-tk algorithms/naive_sort
+assert_eq 'scaffold Tcl dry-run: código' '0' "$rc_last"
+assert_eq 'scaffold Tcl dry-run: no crea archivos' '0' "$(find "$TC_DRY" -mindepth 1 | wc -l | tr -d ' ')"
+mkdir -p -- "$TC_DRY/src" "$TC_DRY/test"
+: >"$TC_DRY/src/naive_sort.tcl"
+: >"$TC_DRY/src/pkgIndex.tcl"
+glot_run_sandbox scaffold tcl-tk algorithms/naive_sort
+assert_eq 'scaffold Tcl previo: código' '0' "$rc_last"
+assert_eq 'scaffold Tcl previo: conserva índice vacío' 'yes' "$([[ ! -s "$TC_DRY/src/pkgIndex.tcl" ]] && echo yes || echo no)"
+assert_contains 'scaffold Tcl previo: anuncia revisión' 'revisar archivos previos' "$err"
 
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"
