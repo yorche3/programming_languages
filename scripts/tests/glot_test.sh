@@ -336,6 +336,9 @@ sandbox_make() {
 [submodule "perl"]
         path = perl
         url = ../remote/perl.git
+[submodule "prolog"]
+        path = prolog
+        url = ../remote/prolog.git
 [submodule "rust"]
         path = rust
         url = ../remote/rust.git
@@ -1936,6 +1939,35 @@ ln -s "$RSC/DESCRIPTION" "$RSC/NAMESPACE"
 glot_run_sandbox scaffold r algorithms/data_structures_basics
 assert_eq 'scaffold R symlink: bloquea' '4' "$rc_last"
 assert_eq 'scaffold R symlink: conserva destino' 'author description' "$(cat "$RSC/DESCRIPTION")"
+
+# Prolog no impone un módulo exportador que contradiga las bases de consult/1.
+PRB="$SANDBOX/prolog/core/algorithms/data_structures_basics"
+mkdir -p "$PRB"
+glot_run_sandbox -n scaffold prolog algorithms/data_structures_basics
+assert_eq 'scaffold Prolog -n: código' '0' "$rc_last"
+assert_eq 'scaffold Prolog -n: no crea fuentes' 'no' "$([[ -e "$PRB/src" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold prolog algorithms/data_structures_basics
+assert_eq 'scaffold Prolog: código' '0' "$rc_last"
+assert_eq 'scaffold Prolog: fuente vacía' 'yes' "$([[ -f "$PRB/src/data_structures_basics.pl" && ! -s "$PRB/src/data_structures_basics.pl" ]] && echo yes || echo no)"
+assert_eq 'scaffold Prolog: excluye QLF' '1' "$(git -C "$PRB" check-ignore src/module.qlf | wc -l | tr -d ' ')"
+assert_contains 'scaffold Prolog: anuncia runner pendiente' 'glot prompt scaffold prolog algorithms/data_structures_basics' "$err"
+if command -v swipl >/dev/null 2>&1; then
+    prolog_rc=0
+    prolog_out="$(cd "$PRB/test" && swipl -q -g "consult('../src/data_structures_basics.pl'),halt" -t halt 2>&1)" || prolog_rc=$?
+    assert_eq 'scaffold Prolog: fuente consultable' '0' "$prolog_rc"
+    assert_eq 'scaffold Prolog: consulta sin errores' '' "$prolog_out"
+fi
+printf 'author source\n' >"$PRB/src/data_structures_basics.pl"
+printf 'author ignore\n' >"$PRB/.gitignore"
+glot_run_sandbox scaffold prolog algorithms/data_structures_basics
+assert_eq 'scaffold Prolog repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Prolog repetido: conserva fuente' 'author source' "$(cat "$PRB/src/data_structures_basics.pl")"
+assert_eq 'scaffold Prolog repetido: conserva ignore' 'author ignore' "$(cat "$PRB/.gitignore")"
+rm -- "$PRB/src/data_structures_basics.pl"
+ln -s "$PRB/.gitignore" "$PRB/src/data_structures_basics.pl"
+glot_run_sandbox scaffold prolog algorithms/data_structures_basics
+assert_eq 'scaffold Prolog symlink: bloquea' '4' "$rc_last"
+assert_eq 'scaffold Prolog symlink: conserva destino' 'author ignore' "$(cat "$PRB/.gitignore")"
 
 PSB="$SANDBOX/purescript/core/algorithms/naive_sort"
 mkdir -p "$PSB/src"

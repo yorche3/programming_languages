@@ -167,6 +167,14 @@ el completado revisa metadatos y exports antes de la suite.
 test file, Makefile and `.gitignore`. Authored contents are preserved;
 completion reviews metadata and exports before the suite.
 
+**ES:** Prolog crea una fuente vacía compatible con `consult/1` y un
+`.gitignore` si faltan, preservando el contenido existente. El runner PlUnit
+y la selección de varias suites aún requieren completado.
+
+**EN:** Prolog creates an empty source compatible with `consult/1` and a
+missing `.gitignore`, preserving existing content. The PlUnit runner and
+multiple-suite selection still require completion.
+
 **ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
 (`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con
 referencia declarada por dotnet), Go (`src/tests`), Haskell (`lib/test` y

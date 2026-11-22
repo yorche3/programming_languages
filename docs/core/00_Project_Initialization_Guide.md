@@ -199,7 +199,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | `java` | `mkdir -p src/main/java src/test/java` · `touch src/main/java/{Module}.java` | `public class {Module} { }` |
 | `perl` | `mkdir -p lib test` · `touch lib/{module}.pl` | `package {Module};` + `use strict;` + `use warnings;` + `1;` |
 | `php` | `mkdir -p src test` · `touch src/{Module}.php` | `<?php` + `declare(strict_types=1);` + `namespace {Module};` |
-| `prolog` | `mkdir -p src test` · `touch src/{module}.pl` | `:- module({module}, []).` |
+| `prolog` | `mkdir -p src test` · crear `src/{module}.pl` si falta | Fuente inicialmente vacía, consultada como en las bases homologadas |
 | `scala` | `mkdir -p src/main/scala src/test/scala project` · `touch src/main/scala/{Module}.scala` | `object {Module}` |
 | `scheme` | `mkdir -p src test` · `touch src/{module}.scm` | `(define-library ({module}) (export) (import (scheme base)))` |
 
@@ -560,6 +560,14 @@ mkdir -p src test
 ├── src/{module}.pl          # base de conocimiento
 └── test/                    # suites plunit por enfoque
 ```
+
+**ES:** El scaffold conserva la fuente existente o crea una vacía, sin imponer
+un módulo que oculte predicados a `consult/1`. El runner PlUnit y la selección
+de varias suites siguen pendientes; `glot scaffold` anuncia el completado.
+
+**EN:** Scaffold preserves an existing source or creates an empty one, without
+imposing a module that hides predicates from `consult/1`. The PlUnit runner and
+multiple-suite selection remain pending; `glot scaffold` announces completion.
 
 ### Python — src-layout (PEP 621)
 

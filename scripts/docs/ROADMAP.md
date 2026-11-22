@@ -201,6 +201,18 @@ homologated framework was reported but `grain run` exited 0: the runner
 ignores the flag returned by `printSummary`. Scaffold prepares the empty
 runner, but framework and failure propagation remain completion work.
 
+**ES — Prolog (2026-11-22):** las bases usan `consult/1` y no declaran un
+módulo con exportaciones vacías; el scaffold en desarrollo preserva fuentes
+o crea una vacía. El comando actual elige una sola coincidencia de `{suite}`;
+queda pendiente un runner que cubra todas las suites sin romper los módulos
+existentes y distinga el andamiaje vacío de una suite sin casos ejecutados.
+
+**EN — Prolog (2026-11-22):** the bases use `consult/1` without an empty-export
+module declaration; the development scaffold preserves or creates an empty
+source. The current command selects one `{suite}` match; a runner covering all
+suites without breaking existing modules and distinguishing an empty scaffold
+from a suite with no executed cases remains pending.
+
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su
 delegate, con archivos sobrantes. El catálogo anterior solo declaraba

@@ -154,6 +154,14 @@ y devolvió fallo al introducir una aserción fallida.
 existing files. In an isolated lab, testthat 3.2.1 ran with zero cases and
 returned failure for an intentionally failing assertion.
 
+**ES:** Prolog preserva fuentes y crea, si falta, una fuente vacía compatible
+con `consult/1` y patrones para QLF. SWI-Prolog 10.0.2 la consultó sin errores;
+el runner y la selección de varias suites siguen pendientes.
+
+**EN:** Prolog preserves existing sources and creates a missing empty source
+compatible with `consult/1` plus QLF ignore patterns. SWI-Prolog 10.0.2
+consulted it without errors; runner and multiple-suite selection remain pending.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de
