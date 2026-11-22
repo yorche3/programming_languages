@@ -387,6 +387,9 @@ sandbox_make() {
 [submodule "groovy"]
         path = groovy
         url = ../remote/groovy.git
+[submodule "kotlin"]
+        path = kotlin
+        url = ../remote/kotlin.git
 [submodule "v"]
         path = v
         url = ../remote/v.git
@@ -396,6 +399,7 @@ EOF
         "$SANDBOX/cobol/core/algorithms" "$SANDBOX/grain/core/algorithms" \
         "$SANDBOX/r/core/algorithms" "$SANDBOX/scripts/data"
     cp -R -- "$TESTS_DIR/../data/scaffold_templates" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/gradle_scaffold.sh" "$SANDBOX/scripts/data/"
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
@@ -2343,6 +2347,52 @@ glot_run_sandbox scaffold groovy algorithms/naive_sort
 assert_eq 'scaffold Groovy plantilla ausente: rechaza' '4' "$rc_last"
 assert_eq 'scaffold Groovy plantilla ausente: conserva pareja' 'si' "$([[ -f "$GR/lib/src/main/groovy/naive_sort/Library.groovy" && -f "$GR/lib/src/test/groovy/naive_sort/LibraryTest.groovy" ]] && echo si || echo no)"
 mv -- "$SANDBOX/scripts/data/scaffold_templates/groovy.LibraryTest.saved" "$SANDBOX/scripts/data/scaffold_templates/groovy.LibraryTest.groovy"
+
+# Kotlin: el mismo mecanismo protege la pareja y los archivos propios.
+KT="$SANDBOX/kotlin/core/algorithms/naive_sort"
+mkdir -p "$KT/lib/src/main/kotlin/naive_sort" "$KT/lib/src/test/kotlin/naive_sort" "$KT/notes"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/kotlin.Library.kt" >"$KT/lib/src/main/kotlin/naive_sort/Library.kt"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/kotlin.LibraryTest.kt" >"$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt"
+printf 'author library\n' >"$KT/notes/LibraryNotes.kt"
+glot_run_sandbox -n scaffold kotlin algorithms/naive_sort
+assert_eq 'scaffold Kotlin dry-run: código' '0' "$rc_last"
+assert_eq 'scaffold Kotlin dry-run: conserva muestra' 'si' "$([[ -f "$KT/lib/src/main/kotlin/naive_sort/Library.kt" ]] && echo si || echo no)"
+glot_run_sandbox scaffold kotlin algorithms/naive_sort
+assert_eq 'scaffold Kotlin: código' '0' "$rc_last"
+assert_eq 'scaffold Kotlin: retira pareja exacta' 'no' "$([[ -e "$KT/lib/src/main/kotlin/naive_sort/Library.kt" || -e "$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt" ]] && echo si || echo no)"
+assert_eq 'scaffold Kotlin: conserva Library fuera del source root' 'author library' "$(cat -- "$KT/notes/LibraryNotes.kt")"
+assert_contains 'scaffold Kotlin: anuncia revisión' 'revisar muestras Kotlin' "$err"
+glot_run_sandbox scaffold kotlin algorithms/naive_sort
+assert_eq 'scaffold Kotlin repetido: código' '0' "$rc_last"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/kotlin.Library.kt" >"$KT/lib/src/main/kotlin/naive_sort/Library.kt"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/kotlin.LibraryTest.kt" >"$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt"
+printf 'author helper\n' >"$KT/lib/src/main/kotlin/naive_sort/LibraryHelper.kt"
+glot_run_sandbox scaffold kotlin algorithms/naive_sort
+assert_eq 'scaffold Kotlin con helper: código' '0' "$rc_last"
+assert_eq 'scaffold Kotlin con helper: conserva pareja' 'si' "$([[ -f "$KT/lib/src/main/kotlin/naive_sort/Library.kt" && -f "$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt" ]] && echo si || echo no)"
+assert_eq 'scaffold Kotlin con helper: conserva helper' 'author helper' "$(cat -- "$KT/lib/src/main/kotlin/naive_sort/LibraryHelper.kt")"
+rm -- "$KT/lib/src/main/kotlin/naive_sort/LibraryHelper.kt"
+printf 'author test\n' >"$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt"
+glot_run_sandbox scaffold kotlin algorithms/naive_sort
+assert_eq 'scaffold Kotlin test propio: código' '0' "$rc_last"
+assert_eq 'scaffold Kotlin test propio: conserva pareja' 'si' "$([[ -f "$KT/lib/src/main/kotlin/naive_sort/Library.kt" && "$(cat -- "$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt")" == 'author test' ]] && echo si || echo no)"
+rm -- "$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt"
+ln -s "$KT/lib/src/main/kotlin/naive_sort/Library.kt" "$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt"
+glot_run_sandbox scaffold kotlin algorithms/naive_sort
+assert_eq 'scaffold Kotlin enlace: rechaza' '4' "$rc_last"
+assert_eq 'scaffold Kotlin enlace: conserva destino' 'si' "$([[ -f "$KT/lib/src/main/kotlin/naive_sort/Library.kt" ]] && echo si || echo no)"
+rm -- "$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/kotlin.LibraryTest.kt" >"$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt"
+mv -- "$SANDBOX/scripts/data/scaffold_templates/kotlin.LibraryTest.kt" "$SANDBOX/scripts/data/scaffold_templates/kotlin.LibraryTest.saved"
+glot_run_sandbox scaffold kotlin algorithms/naive_sort
+assert_eq 'scaffold Kotlin plantilla ausente: rechaza' '4' "$rc_last"
+assert_eq 'scaffold Kotlin plantilla ausente: conserva pareja' 'si' "$([[ -f "$KT/lib/src/main/kotlin/naive_sort/Library.kt" && -f "$KT/lib/src/test/kotlin/naive_sort/LibraryTest.kt" ]] && echo si || echo no)"
+mv -- "$SANDBOX/scripts/data/scaffold_templates/kotlin.LibraryTest.saved" "$SANDBOX/scripts/data/scaffold_templates/kotlin.LibraryTest.kt"
+mv -- "$KT/lib/src" "$KT/lib/src.saved"
+glot_run_sandbox scaffold kotlin algorithms/naive_sort
+assert_eq 'scaffold Kotlin layout distinto: rechaza' '4' "$rc_last"
+assert_eq 'scaffold Kotlin layout distinto: conserva pareja' 'si' "$([[ -f "$KT/lib/src.saved/main/kotlin/naive_sort/Library.kt" && -f "$KT/lib/src.saved/test/kotlin/naive_sort/LibraryTest.kt" ]] && echo si || echo no)"
+mv -- "$KT/lib/src.saved" "$KT/lib/src"
 
 # v2.1.0: el nombre del fuente y el archivo vacío de pruebas son comandos del catálogo.
 BB="$SANDBOX/ballerina/core/algorithms/naive_sort"

@@ -142,9 +142,9 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
   el target y prepara su runner vacío como indica el catálogo; eso no valida casos.
 - En Ballerina, `bal test` puede devolver éxito sin casos o con todos los tests
   deshabilitados; verifica la salida y no lo presentes como una suite validada.
-- En Groovy, Gradle puede devolver éxito con `test NO-SOURCE`: eso no valida
-  una suite. Conserva cualquier muestra que el catálogo no haya retirado y
-  revisa su contenido junto con el código existente.
+- En Groovy y Kotlin, Gradle puede devolver éxito con `test NO-SOURCE`: eso no
+  valida una suite. Conserva cualquier muestra que el catálogo no haya retirado
+  y revisa su contenido junto con el código existente.
 - Si el comando no arranca porque el framework no trae runner, **escríbelo aquí** (mínimo y sin
   casos) y vuelve a comprobarlo. Si aun así no arranca, **detente y dilo** con la salida real.
   No escribas la suite para «arreglarlo»: eso es el paso 4c.

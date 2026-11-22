@@ -164,7 +164,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **haskell** | `cabal init --lib -n --source-dir=lib --package-name={module-kebab} --expose-module={Module}` → crear `lib/{Module}.hs` solo si falta | `{module-kebab}` sustituye subrayados por guiones; declarar `module {Module} where`, conservar `hs-source-dirs: lib` y completar test-suite/runner |
 | **haxe** | `mkdir -p src test` → `haxelib install utest` | `build.hxml` y `RunTests.hx` son contenido del sprint |
 | **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` | Completar `test/` y su runner; añadir `uuid`, `[compat]`, `[extras]` y `[targets]` |
-| **kotlin** | `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | Borrar `Library.kt` y `LibraryTest.kt` |
+| **kotlin** | `gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project` → retirar solo la pareja de muestras verificada, si no hay otros archivos en `lib/src` | Conservar muestras distintas o con otros archivos y revisar; Gradle puede devolver éxito sin casos |
 | **nim** | `nimble init -y` → `rm -rf src/{module}` → la task `test` apuntando a `tests/{module}_tests.nim` | Borrar la muestra anidada `src/{module}/` y dejar la task `test` apuntando a `tests/{module}_tests.nim` |
 | **ocaml** | `dune init proj {module}` | El código va en `lib/` y la suite en `test/`: se usa el layout generado tal cual |
 | **python** | `uv init --lib .` | Borrar el `.git` que crea `uv`, añadir `conftest.py` y `tests/` con configuración de pytest, y declarar pytest (`uv add --dev pytest --no-sync`) |
@@ -437,35 +437,12 @@ either differs or is missing, or other files exist. The test command can
 succeed with `test NO-SOURCE`; that does not validate a suite.
 
 ```bash
-src=lib/src/main/groovy/{module}/Library.groovy
-tst=lib/src/test/groovy/{module}/LibraryTest.groovy
-unsafe=0
-for path in lib lib/src lib/src/main lib/src/main/groovy \
-  lib/src/main/groovy/{module} lib/src/test lib/src/test/groovy \
-  lib/src/test/groovy/{module}; do
-  if [[ -L "$path" || ( -e "$path" && ! -d "$path" ) ]]; then unsafe=1; fi
-done
-if [[ "$unsafe" == 1 || ! -d lib/src || -L "$src" || -L "$tst" ||
-      ( -e "$src" && ! -f "$src" ) || ( -e "$tst" && ! -f "$tst" ) ]]; then
-  printf 'scaffold: ruta Groovy no segura o fuentes ausentes / unsafe Groovy path or missing sources\n' >&2
-  false
-elif [[ -f "$src" && -f "$tst" ]]; then
-  source_sample="$(sed 's/@MODULE@/{module}/g' {root}/scripts/data/scaffold_templates/groovy.Library.groovy)" &&
-  test -n "$source_sample" &&
-  test_sample="$(sed 's/@MODULE@/{module}/g' {root}/scripts/data/scaffold_templates/groovy.LibraryTest.groovy)" &&
-  test -n "$test_sample" && {
-    cmp -s "$src" <(printf '%s\n' "$source_sample"); a=$?
-    cmp -s "$tst" <(printf '%s\n' "$test_sample"); b=$?
-    if [[ "$a" -gt 1 || "$b" -gt 1 ]]; then
-      printf 'scaffold: no se pudo comparar la muestra Groovy / could not compare Groovy sample\n' >&2
-      false
-    elif [[ "$a" == 0 && "$b" == 0 ]]; then
-      extra="$(find lib/src \( -type f -o -type l \) ! -path "$src" ! -path "$tst" -print -quit)" &&
-        { [[ -n "$extra" ]] || rm -- "$tst" "$src"; }
-    fi
-  }
-fi
+bash "{root}/scripts/data/gradle_scaffold.sh" groovy {module}
 ```
+
+**ES / EN:** El helper compartido comprueba las rutas y compara las plantillas
+antes de borrar. / The shared helper checks paths and compares templates before
+deleting.
 
 ### Haxe — build.hxml + src/ + test/
 ```bash
@@ -527,18 +504,30 @@ mkdir -p src test
 ```
 
 ### Kotlin — layout Gradle estándar
+
+**ES:** Gradle 9.6.1 generó `lib/src` incluso con `--no-split-project`.
+Desde la raíz, el helper retira solo la pareja exacta sin otros archivos o
+enlaces en `lib/src`; conserva las demás variantes. Un layout distinto requiere
+revisión. `gradle test` puede devolver éxito con `NO-SOURCE`, sin validar casos.
+
+**EN:** Gradle 9.6.1 generated `lib/src` even with `--no-split-project`. From
+the package root, the helper removes only the exact sample pair with no other
+files or links in `lib/src`; it preserves other variants. A different layout
+needs review. `gradle test` can succeed with `NO-SOURCE`, without validating cases.
+
 ```bash
-mkdir -p src/main/kotlin src/test/kotlin
+bash "{root}/scripts/data/gradle_scaffold.sh" kotlin {module}
 ```
 
 ```text
 {module}/
-├── build.gradle.kts
 ├── settings.gradle.kts
 ├── gradle/wrapper/
-└── src/
-    ├── main/kotlin/         # archivo del módulo
-    └── test/kotlin/         # suites Kotest por enfoque
+└── lib/
+    ├── build.gradle.kts
+    └── src/
+        ├── main/kotlin/     # archivo del módulo
+        └── test/kotlin/     # suites Kotest por enfoque
 ```
 
 ### Ocaml — Dune

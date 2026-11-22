@@ -321,6 +321,12 @@ Gradle todavía puede devolver éxito sin casos.
 9.6.1 sample pair when `lib/src` has no other files. Gradle can still succeed
 without cases and this is flagged.
 
+**ES:** Kotlin comparte la protección de muestras de Gradle con Groovy;
+conserva archivos propios y advierte del éxito sin casos.
+
+**EN:** Kotlin shares Groovy's Gradle sample protection, preserves authored
+files and warns about success without cases.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

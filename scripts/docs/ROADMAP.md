@@ -337,6 +337,22 @@ exist in `lib/src`, preserving other variants for review. In an isolated
 project, `./gradlew test --offline` reported `NO-SOURCE` and succeeded;
 reliably rejecting runs without cases remains pending.
 
+**ES — Kotlin (2026-11-22):** el borrado previo recorría todo el módulo
+buscando `Library*.kt`, por lo que también podía eliminar archivos propios.
+Gradle 9.6.1 generó `lib/src` incluso con `--no-split-project`, como las dos
+bases homologadas. El helper compartido con Groovy conserva archivos propios
+y retira solo la pareja exacta sin otros archivos en `lib/src`. En el
+laboratorio, `gradle test --offline` informó `NO-SOURCE` y devolvió éxito;
+la protección del runner y otros layouts permanecen pendientes.
+
+**EN — Kotlin (2026-11-22):** the previous deletion searched the entire module
+for `Library*.kt` and could also remove authored files. Gradle 9.6.1 generated
+`lib/src` even with `--no-split-project`, matching both homologated bases.
+The helper shared with Groovy preserves authored files and removes only the
+exact pair when `lib/src` has no other files. In the lab, `gradle test
+--offline` reported `NO-SOURCE` and succeeded; runner protection and other
+layouts remain pending.
+
 **ES — Scala (2026-11-22):** el scaffold sobrescribía la fuente en cada
 ejecución y dejaba `build.sbt` y `build.properties` vacíos. Ahora crea
 fuente, build, versión sbt e ignore solo si faltan; rechaza enlaces y pide
