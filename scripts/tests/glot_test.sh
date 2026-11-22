@@ -896,7 +896,7 @@ glot_run -n test csharp algorithms/naive_sort
 assert_contains 'test -n: {Modulo} en PascalCase' 'dotnet test NaiveSort.slnx' "$out"
 
 glot_run -n test prolog algorithms/naive_sort
-assert_contains 'test -n: {suite} del sufijo del patrón' 'naive_sort_tests.pl' "$out"
+assert_contains 'test -n: Prolog recoge suites' "expand_file_name('*_tests.pl'" "$out"
 assert_contains 'test -n: respeta el cd del comando' '&& cd test && ' "$out"
 
 glot_run -n test scheme algorithms/naive_sort
@@ -1984,12 +1984,51 @@ glot_run_sandbox scaffold prolog algorithms/data_structures_basics
 assert_eq 'scaffold Prolog: código' '0' "$rc_last"
 assert_eq 'scaffold Prolog: fuente vacía' 'yes' "$([[ -f "$PRB/src/data_structures_basics.pl" && ! -s "$PRB/src/data_structures_basics.pl" ]] && echo yes || echo no)"
 assert_eq 'scaffold Prolog: excluye QLF' '1' "$(git -C "$PRB" check-ignore src/module.qlf | wc -l | tr -d ' ')"
-assert_contains 'scaffold Prolog: anuncia runner pendiente' 'glot prompt scaffold prolog algorithms/data_structures_basics' "$err"
+assert_contains 'scaffold Prolog: anuncia revisión' 'glot prompt scaffold prolog algorithms/data_structures_basics' "$err"
 if command -v swipl >/dev/null 2>&1; then
-    prolog_rc=0
-    prolog_out="$(cd "$PRB/test" && swipl -q -g "consult('../src/data_structures_basics.pl'),halt" -t halt 2>&1)" || prolog_rc=$?
-    assert_eq 'scaffold Prolog: fuente consultable' '0' "$prolog_rc"
-    assert_eq 'scaffold Prolog: consulta sin errores' '' "$prolog_out"
+    glot_run_sandbox test prolog algorithms/data_structures_basics
+    assert_eq 'scaffold Prolog: runner arranca sin casos' '0' "$rc_last"
+    assert_contains 'scaffold Prolog: informa ausencia de tests' 'Scaffold: no tests configured' "$out"
+    printf 'this is not valid prolog.\n' >"$PRB/src/data_structures_basics.pl"
+    glot_run_sandbox test prolog algorithms/data_structures_basics
+    assert_eq 'scaffold Prolog: detecta fuente inválida sin suite' '4' "$rc_last"
+    : >"$PRB/src/data_structures_basics.pl"
+    printf ':- begin_tests(alpha).\ntest(first) :- assertion(1 = 1).\n:- end_tests(alpha).\n' >"$PRB/test/alpha_test.pl"
+    printf ':- begin_tests(beta).\ntest(second) :- assertion(2 = 2).\n:- end_tests(beta).\n' >"$PRB/test/beta_tests.pl"
+    glot_run_sandbox test prolog algorithms/data_structures_basics
+    assert_eq 'scaffold Prolog: ejecuta varias suites' '0' "$rc_last"
+    assert_contains 'scaffold Prolog: incluye primera suite' 'alpha:first' "$err"
+    assert_contains 'scaffold Prolog: incluye segunda suite' 'beta:second' "$err"
+    printf ':- begin_tests(beta).\ntest(second) :- assertion(1 = 2).\n:- end_tests(beta).\n' >"$PRB/test/beta_tests.pl"
+    glot_run_sandbox test prolog algorithms/data_structures_basics
+    assert_eq 'scaffold Prolog: propaga fallo de segunda suite' '4' "$rc_last"
+    assert_contains 'scaffold Prolog: identifica test fallido' 'beta:second' "$err"
+    printf ':- begin_tests(beta).\nthis is not valid prolog.\n:- end_tests(beta).\n' >"$PRB/test/beta_tests.pl"
+    glot_run_sandbox test prolog algorithms/data_structures_basics
+    assert_eq 'scaffold Prolog: propaga error de sintaxis' '4' "$rc_last"
+    assert_contains 'scaffold Prolog: informa error sintáctico' 'Syntax error' "$err"
+    rm -- "$PRB/test/alpha_test.pl" "$PRB/test/beta_tests.pl"
+    printf '%% empty suite\n' >"$PRB/test/empty_tests.pl"
+    glot_run_sandbox test prolog algorithms/data_structures_basics
+    assert_eq 'scaffold Prolog: rechaza suite sin casos' '4' "$rc_last"
+    assert_contains 'scaffold Prolog: diagnostica suite sin casos' 'No Prolog test cases executed' "$err"
+    printf ':- begin_tests(blocked).\ntest(skipped, [blocked("not ready")]) :- fail.\n:- end_tests(blocked).\n' >"$PRB/test/empty_tests.pl"
+    glot_run_sandbox test prolog algorithms/data_structures_basics
+    assert_eq 'scaffold Prolog: rechaza suite completamente bloqueada' '4' "$rc_last"
+    assert_contains 'scaffold Prolog: informa casos bloqueados' '1 blocked' "$out"
+    rm -- "$PRB/test/empty_tests.pl"
+    printf '%% helper without suite\n' >"$PRB/test/helper.pl"
+    glot_run_sandbox test prolog algorithms/data_structures_basics
+    assert_eq 'scaffold Prolog: rechaza nombres no reconocidos' '4' "$rc_last"
+    assert_contains 'scaffold Prolog: diagnostica nombres no reconocidos' 'No recognized Prolog test files' "$err"
+
+    PR_CALC="$SANDBOX/prolog/core/foundations/unit_test/calculator"
+    mkdir -p "$PR_CALC/src" "$PR_CALC/test"
+    printf 'calculate(1).\n' >"$PR_CALC/src/calculator.pl"
+    printf ':- consult("../src/calculator.pl").\n:- begin_tests(calculator).\ntest(check) :- calculate(1).\n:- end_tests(calculator).\n' >"$PR_CALC/test/calculator_test.pl"
+    glot_run_sandbox test prolog foundations/unit_test
+    assert_eq 'test Prolog: calculator usa fuente de la suite' '0' "$rc_last"
+    assert_contains 'test Prolog: ejecuta calculator' 'calculator:check' "$err"
 fi
 printf 'author source\n' >"$PRB/src/data_structures_basics.pl"
 printf 'author ignore\n' >"$PRB/.gitignore"

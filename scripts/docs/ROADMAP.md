@@ -206,16 +206,16 @@ the recognized previous empty runner. Framework adaptation and review of
 existing modules remain open.
 
 **ES — Prolog (2026-11-22):** las bases usan `consult/1` y no declaran un
-módulo con exportaciones vacías; el scaffold en desarrollo preserva fuentes
-o crea una vacía. El comando actual elige una sola coincidencia de `{suite}`;
-queda pendiente un runner que cubra todas las suites sin romper los módulos
-existentes y distinga el andamiaje vacío de una suite sin casos ejecutados.
+módulo con exportaciones vacías; el scaffold preserva fuentes o crea una vacía.
+El comando en desarrollo recoge todas las suites `*_test.pl` y `*_tests.pl`,
+informa scaffold vacío y rechaza suites sin casos ejecutados. Validado con las
+tres suites de `numbers` y con `calculator`, cuyo nombre difiere del id.
 
 **EN — Prolog (2026-11-22):** the bases use `consult/1` without an empty-export
-module declaration; the development scaffold preserves or creates an empty
-source. The current command selects one `{suite}` match; a runner covering all
-suites without breaking existing modules and distinguishing an empty scaffold
-from a suite with no executed cases remains pending.
+module declaration; scaffold preserves or creates an empty source. The
+development command collects all `*_test.pl` and `*_tests.pl` suites, reports
+an empty scaffold and rejects suites with no executed cases. Verified against
+all three `numbers` suites and `calculator`, whose name differs from its id.
 
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su

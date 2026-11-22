@@ -119,7 +119,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **ocaml** | ⛓️ ✅ `dune init proj {module}` (crea la carpeta del módulo) | `dune-project`, `lib/dune`, `test/dune` | ✅ `dune runtest` |
 | **perl** | ✍️ `mkdir -p lib test` | — | ✅ `prove --ext=.pl test/` |
 | **php** | ✍️ `mkdir -p src test` + `composer init -n` + `composer require --dev --no-update phpunit/phpunit` | `composer.json`, `phpunit.xml`, `.gitignore` | ✅ `composer test` |
-| **prolog** | ✍️ `mkdir -p src test` | — | ✅ `cd test && swipl -q -f {suite}.pl -t halt` |
+| **prolog** | ✍️ `mkdir -p src test` | — | ✅ SWI-Prolog + PlUnit (comando abajo / command below) |
 | **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `spago test` |
 | **python** | ⛓️ ✅ `uv init --lib .` | `pyproject.toml`, `src/{module}/`, `conftest.py`, `tests/` | ✅ `pytest` |
 | **r** | ✅ `mkdir -p R tests/testthat` + `Makefile` | `Makefile` | ✅ `make test` |
@@ -566,12 +566,21 @@ mkdir -p src test
 ```
 
 **ES:** El scaffold conserva la fuente existente o crea una vacía, sin imponer
-un módulo que oculte predicados a `consult/1`. El runner PlUnit y la selección
-de varias suites siguen pendientes; `glot scaffold` anuncia el completado.
+un módulo que oculte predicados a `consult/1`. El comando recoge todas las
+suites `*_test.pl` y `*_tests.pl`; sin archivos anuncia el scaffold vacío.
+Con archivos de prueba exige casos ejecutados y propaga fallos o errores.
+Informa también los casos bloqueados, que no cuentan como ejecutados.
 
 **EN:** Scaffold preserves an existing source or creates an empty one, without
-imposing a module that hides predicates from `consult/1`. The PlUnit runner and
-multiple-suite selection remain pending; `glot scaffold` announces completion.
+imposing a module that hides predicates from `consult/1`. The command discovers
+all `*_test.pl` and `*_tests.pl` suites; with no files it announces the empty
+scaffold. With test files it requires executed cases and propagates failures
+or errors. Blocked cases are also reported and do not count as executed.
+
+```bash
+cd test
+swipl -q --on-error=status -g "use_module(library(plunit)), expand_file_name('*_test.pl', A), expand_file_name('*_tests.pl', B), append(A, B, Fs), (Fs = [] -> (expand_file_name('*.pl', Other), (Other = [] -> (consult('../src/{module}.pl'), writeln('Scaffold: no tests configured')); (format(user_error, 'No recognized Prolog test files~n', []), fail))); (maplist(consult, Fs), run_tests(all, [summary(S)]), get_dict(passed, S, P), get_dict(failed, S, F), get_dict(timeout, S, T), get_dict(blocked, S, BCount), format('Prolog tests: ~d passed, ~d failed, ~d timed out, ~d blocked~n', [P, F, T, BCount]), (P > 0, F =:= 0, T =:= 0 -> true; (P =:= 0, F =:= 0, T =:= 0 -> (format(user_error, 'No Prolog test cases executed~n', []), fail); fail)))), halt" -t 'halt(1)'
+```
 
 ### Python — src-layout (PEP 621)
 

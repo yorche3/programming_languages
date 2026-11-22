@@ -85,7 +85,8 @@ de verdad** en el módulo correspondiente; la cobertura se informa en `doctor` c
 5 pueden llevar marcadores (`{module}`, `{Module}`, `{suite}`): `glot` los resuelve
 contra el módulo real antes de ejecutar, y `-n` imprime el resultado. El régimen de
 `nim`, `perl`, `php` y `ruby` se apoya en el nombre del archivo, así que un módulo
-que no lo siga necesitará revisar su fila.
+que no lo siga necesitará revisar su fila. Prolog recoge todas las suites
+`*_test.pl` y `*_tests.pl` con PlUnit.
 
 **EN:** **Column 5 is maintained by hand** and only with verifiers **actually run**
 in the corresponding module; coverage is reported by `doctor` as
@@ -93,7 +94,7 @@ in the corresponding module; coverage is reported by `doctor` as
 carry placeholders (`{module}`, `{Module}`, `{suite}`): `glot` resolves them against
 the real module before running, and `-n` prints the result. The `nim`, `perl`, `php`
 and `ruby` rows rely on the file name, so a module not following it will need its row
-reviewed.
+reviewed. Prolog collects all `*_test.pl` and `*_tests.pl` suites with PlUnit.
 
 **ES:** Los esqueletos de `Makefile` compartidos por `assembly`, `c`, `cobol`,
 `grain` y `r` viven en [`scaffold_templates/`](scaffold_templates/); el catálogo
@@ -170,12 +171,14 @@ test file, Makefile and `.gitignore`. Authored contents are preserved;
 completion reviews metadata and exports before the suite.
 
 **ES:** Prolog crea una fuente vacía compatible con `consult/1` y un
-`.gitignore` si faltan, preservando el contenido existente. El runner PlUnit
-y la selección de varias suites aún requieren completado.
+`.gitignore` si faltan, preservando el contenido existente. El comando PlUnit
+ejecuta todas las suites reconocidas, distingue el scaffold vacío y falla si
+hay suites pero no se ejecuta ningún caso.
 
 **EN:** Prolog creates an empty source compatible with `consult/1` and a
-missing `.gitignore`, preserving existing content. The PlUnit runner and
-multiple-suite selection still require completion.
+missing `.gitignore`, preserving existing content. The PlUnit command runs
+all recognized suites, distinguishes an empty scaffold and fails if suites
+exist but no cases are executed.
 
 **ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
 (`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con

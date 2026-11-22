@@ -172,6 +172,16 @@ el runner y la selección de varias suites siguen pendientes.
 compatible with `consult/1` plus QLF ignore patterns. SWI-Prolog 10.0.2
 consulted it without errors; runner and multiple-suite selection remain pending.
 
+**ES:** El comando Prolog ahora ejecuta todas las suites `*_test.pl` y
+`*_tests.pl`, informa scaffold vacío y falla cuando no se ejecuta ningún caso,
+una aserción falla o hay errores. Se verificaron 15 casos de las tres suites
+de `numbers` y los cinco de `calculator` con SWI-Prolog 10.0.2.
+
+**EN:** The Prolog command now runs all `*_test.pl` and `*_tests.pl` suites,
+reports an empty scaffold and fails when no case runs, an assertion fails, or
+errors occur. SWI-Prolog 10.0.2 verified all 15 cases from the three `numbers`
+suites and all five `calculator` cases.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de
