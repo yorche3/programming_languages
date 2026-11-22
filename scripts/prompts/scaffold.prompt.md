@@ -135,6 +135,9 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
   con la muestra reconocida, revísalo sin eliminar código propio.
 - En PureScript, el runner mínimo puede devolver éxito sin ejecutar casos;
   no lo presentes como una suite validada.
+- En Rexx, el selector actual no admite varias suites y ooRexxUnit puede
+  informar fallos aunque el proceso termine con código 0. No tomes ese código
+  como prueba de éxito; reporta el bloqueo y la salida real sin ocultar fallos.
 - Si el comando no arranca porque el framework no trae runner, **escríbelo aquí** (mínimo y sin
   casos) y vuelve a comprobarlo. Si aun así no arranca, **detente y dilo** con la salida real.
   No escribas la suite para «arreglarlo»: eso es el paso 4c.

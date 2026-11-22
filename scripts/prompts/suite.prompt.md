@@ -144,6 +144,11 @@ el comando, el código de salida y la salida real; se corrige en 4d y luego se v
 
 ### 5. Verificación: la fase roja
 
+En Rexx, `glot test` puede rechazar varias suites como ambiguas y una suite
+ooRexxUnit puede informar fallos con código 0. No infieras éxito ni cobertura
+por el código de salida: conserva la salida y reporta el bloqueo si el comando
+no permite verificar todos los grupos. No elimines suites para superar el selector.
+
 La suite está bien cuando **falla por la razón correcta**. El criterio no es «falla»: son **cuatro
 datos** que se copian al reporte junto a la salida real del comando nativo (sin editar, sin
 resumir).
