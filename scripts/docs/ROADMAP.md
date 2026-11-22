@@ -220,15 +220,17 @@ all three `numbers` suites and `calculator`, whose name differs from its id.
 **ES — Hallazgo Perl (2026-11-22):** en un laboratorio aislado,
 `prove --ext=.pl` devolvió código 0 y `Result: NOTESTS` tanto con el
 directorio de pruebas vacío como con una suite que solo declara
-`plan skip_all`. `glot test` puede anunciar «en verde» sin ejecutar casos.
-Queda pendiente distinguir el scaffold vacío de una suite sin casos y
-evitar presentar esta última como validada, sin alterar suites existentes.
+`plan skip_all`. El comando en desarrollo usa la selección de archivos de
+prove y su harness TAP, pero falla si no hay suites o si todos los casos se
+omiten. Verificado con las bases `numbers` y `data_structures_basics`; el
+scaffold vacío requiere una suite antes de validar.
 
 **EN — Perl finding (2026-11-22):** in an isolated laboratory, `prove
 --ext=.pl` returned exit code 0 and `Result: NOTESTS` both for an empty test
-directory and for a suite with only `plan skip_all`. `glot test` can report
-green without running cases. Distinguishing an empty scaffold from a suite
-with no executed cases, without changing existing suites, remains pending.
+directory and for a suite with only `plan skip_all`. The development command
+uses prove's file selection and TAP harness but fails when there are no suites
+or all cases are skipped. Verified with the `numbers` and
+`data_structures_basics` bases; an empty scaffold needs a suite before validation.
 
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su

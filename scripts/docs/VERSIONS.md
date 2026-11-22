@@ -182,6 +182,14 @@ reports an empty scaffold and fails when no case runs, an assertion fails, or
 errors occur. SWI-Prolog 10.0.2 verified all 15 cases from the three `numbers`
 suites and all five `calculator` cases.
 
+**ES:** En Perl, el comando de pruebas conserva la selección de prove y su
+harness TAP, pero rechaza la ausencia de suites o de casos no omitidos. Un
+scaffold vacío necesita su suite antes de validar.
+
+**EN:** Perl test execution retains prove's selection and TAP harness but
+rejects runs without suites or non-skipped cases. An empty scaffold needs its
+suite before validation.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

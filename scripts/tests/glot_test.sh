@@ -2271,6 +2271,44 @@ glot_run_sandbox scaffold perl algorithms/naive_sort
 assert_eq 'scaffold Perl symlink: código' '4' "$rc_last"
 assert_eq 'scaffold Perl symlink: conserva destino' 'authored main' "$(cat -- "$BB/naive_sort.bal")"
 
+# Perl: prove selecciona suites TAP pero no considera NOTESTS un error.
+PT="$SANDBOX/perl/core/algorithms/data_structures_basics"
+mkdir -p -- "$PT"
+glot_run_sandbox scaffold perl algorithms/data_structures_basics
+assert_eq 'scaffold Perl runner: código' '0' "$rc_last"
+if command -v perl >/dev/null 2>&1 && perl -MApp::Prove::State -MTAP::Harness::Env -e 1; then
+    glot_run_sandbox test perl algorithms/data_structures_basics
+    assert_eq 'test Perl: scaffold sin suites falla' '4' "$rc_last"
+    assert_contains 'test Perl: explica ausencia de suites' 'No Perl test files configured' "$err"
+    printf 'print "1..1\\nok 1 - first\\n";\n' >"$PT/test/first.pl"
+    printf 'print "1..1\\nok 1 - second\\n";\n' >"$PT/test/second.pl"
+    glot_run_sandbox test perl algorithms/data_structures_basics
+    assert_eq 'test Perl: ejecuta dos suites' '0' "$rc_last"
+    assert_contains 'test Perl: primera suite' 'first.pl' "$out"
+    assert_contains 'test Perl: segunda suite' 'second.pl' "$out"
+    printf 'print "1..1\\nnot ok 1 - second\\n";\n' >"$PT/test/second.pl"
+    glot_run_sandbox test perl algorithms/data_structures_basics
+    assert_eq 'test Perl: propaga fallo' '4' "$rc_last"
+    printf 'print "not TAP\\n";\n' >"$PT/test/second.pl"
+    glot_run_sandbox test perl algorithms/data_structures_basics
+    assert_eq 'test Perl: rechaza TAP inválido' '4' "$rc_last"
+    rm -- "$PT/test/first.pl"
+    printf 'print "1..0 # SKIP not ready\\n";\n' >"$PT/test/second.pl"
+    glot_run_sandbox test perl algorithms/data_structures_basics
+    assert_eq 'test Perl: rechaza suite skip_all' '4' "$rc_last"
+    assert_contains 'test Perl: explica suite skip_all' 'No Perl test cases executed' "$err"
+    printf 'print "1..2\\nok 1 # SKIP one\\nok 2 # SKIP two\\n";\n' >"$PT/test/second.pl"
+    glot_run_sandbox test perl algorithms/data_structures_basics
+    assert_eq 'test Perl: rechaza todos los casos omitidos' '4' "$rc_last"
+    printf 'print "1..2\\nok 1 # SKIP one\\nok 2 - executed\\n";\n' >"$PT/test/second.pl"
+    glot_run_sandbox test perl algorithms/data_structures_basics
+    assert_eq 'test Perl: acepta omisiones con casos ejecutados' '0' "$rc_last"
+    rm -- "$PT/test/second.pl"
+    rmdir -- "$PT/test"
+    glot_run_sandbox test perl algorithms/data_structures_basics
+    assert_eq 'test Perl: rechaza directorio de pruebas ausente' '4' "$rc_last"
+fi
+
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"
 printf '[package]\nname = "naive_sort"\n' >"$RUSTB/Cargo.toml"

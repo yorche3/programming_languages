@@ -86,7 +86,8 @@ de verdad** en el módulo correspondiente; la cobertura se informa en `doctor` c
 contra el módulo real antes de ejecutar, y `-n` imprime el resultado. El régimen de
 `nim`, `perl`, `php` y `ruby` se apoya en el nombre del archivo, así que un módulo
 que no lo siga necesitará revisar su fila. Prolog recoge todas las suites
-`*_test.pl` y `*_tests.pl` con PlUnit.
+`*_test.pl` y `*_tests.pl` con PlUnit. Perl usa la selección de archivos y el
+harness TAP de prove, pero rechaza las ejecuciones sin casos o con todos omitidos.
 
 **EN:** **Column 5 is maintained by hand** and only with verifiers **actually run**
 in the corresponding module; coverage is reported by `doctor` as
@@ -95,6 +96,8 @@ carry placeholders (`{module}`, `{Module}`, `{suite}`): `glot` resolves them aga
 the real module before running, and `-n` prints the result. The `nim`, `perl`, `php`
 and `ruby` rows rely on the file name, so a module not following it will need its row
 reviewed. Prolog collects all `*_test.pl` and `*_tests.pl` suites with PlUnit.
+Perl uses prove's file discovery and TAP harness, rejecting empty or entirely
+skipped runs instead of reporting them as successful.
 
 **ES:** Los esqueletos de `Makefile` compartidos por `assembly`, `c`, `cobol`,
 `grain` y `r` viven en [`scaffold_templates/`](scaffold_templates/); el catálogo

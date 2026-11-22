@@ -117,7 +117,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **lua** | 🔧 `luarocks init` | `{module}.rockspec`, `.busted` | ✅ `busted` |
 | **nim** | ⛓️ ✅ `nimble init` (tipo library; `nimble init -y`) | `{module}.nimble`, `src/{module}.nim`, `test/config.nims` | ✅ `nimble test` |
 | **ocaml** | ⛓️ ✅ `dune init proj {module}` (crea la carpeta del módulo) | `dune-project`, `lib/dune`, `test/dune` | ✅ `dune runtest` |
-| **perl** | ✍️ `mkdir -p lib test` | — | ✅ `prove --ext=.pl test/` |
+| **perl** | ✍️ `mkdir -p lib test` | — | ✅ TAP::Harness (comando abajo / command below) |
 | **php** | ✍️ `mkdir -p src test` + `composer init -n` + `composer require --dev --no-update phpunit/phpunit` | `composer.json`, `phpunit.xml`, `.gitignore` | ✅ `composer test` |
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ SWI-Prolog + PlUnit (comando abajo / command below) |
 | **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `spago test` |
@@ -513,11 +513,19 @@ dune init proj {module}
 **ES:** Andamiaje manual: la fuente va en `lib/` y las suites en `test/`, como
 los módulos homologados y el verificador del catálogo. `module-starter` no forma
 parte de esta secuencia. Crear la fuente solo si falta; no truncar una previa.
-El comando canónico de pruebas sigue siendo `prove --ext=.pl test/`.
+El comando usa la selección de archivos y el harness de `prove --ext=.pl
+test/`, pero falla explícitamente si no hay archivos o si todos los casos se
+omiten. Un scaffold vacío necesita su suite antes de poder validar.
 
 **EN:** Manual scaffolding uses `lib/` and `test/`, matching verified modules
 and the catalogue verifier. Module::Starter is not part of this sequence.
-Create only a missing source; retain the canonical test command.
+Create only a missing source. The command uses prove's file selection and TAP
+harness, but fails explicitly when no files or no non-skipped cases are run.
+An empty scaffold needs its suite before validation.
+
+```bash
+perl -MApp::Prove::State -MTAP::Harness::Env -e 'my $s = App::Prove::State->new({extensions => [".pl"]}); my @tests = $s->get_tests(0, "test/"); @tests or die "No Perl test files configured in test/\n"; my $result = TAP::Harness::Env->create({})->runtests(@tests); exit 1 if $result->has_errors; die "No Perl test cases executed\n" unless $result->total > $result->skipped;'
+```
 
 ```bash
 if [[ -L lib || -L test || -L lib/{module}.pl ||
