@@ -299,3 +299,53 @@ typescript	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without l
 v	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	b4f8869	2026-10-17
 vala	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	ea8fb14	2026-10-17
 zig	naive_sort	algorithms	idiomatic	-	0	Clean: three algorithms without library sort or selection, bubble early exit, 7 cases on a fresh fixture, source/test split	9cd126d	2026-10-17
+ada	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	1d1cfa1	2026-11-22
+assembly	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	9a97192	2026-11-22
+ballerina	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	a605e04	2026-11-22
+c	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	a44ea67	2026-11-22
+clojure	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	5bd89bf	2026-11-22
+cobol	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	318457b	2026-11-22
+common-lisp	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	25d20c9	2026-11-22
+cpp	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	43854f0	2026-11-22
+crystal	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (includes? on neighbours in has_edge); insertion manual and sorted	f777d71	2026-11-22
+csharp	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (List.Contains on neighbours in hasEdge); insertion manual and sorted	a691525	2026-11-22
+d	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	940813d	2026-11-22
+dart	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	3018d0d	2026-11-22
+elixir	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	1b05391	2026-11-22
+elm	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (List.member in add and lookup); insertion manual and sorted	449b7e5	2026-11-22
+erlang	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (lists:member in add and lookup); insertion manual and sorted	dd04beb	2026-11-22
+forth	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	e121c72	2026-11-22
+fsharp	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (List.contains in add and lookup); insertion manual and sorted	082a8bc	2026-11-22
+gleam	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (list.contains in add and lookup); insertion manual and sorted	3de9104	2026-11-22
+go	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	7125769	2026-11-22
+grain	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	5d25233	2026-11-22
+groovy	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (contains in add and lookup); insertion manual and sorted	a4885da	2026-11-22
+haskell	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (elem on neighbours in add and lookup); insertion manual and sorted	25d756a	2026-11-22
+haxe	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (indexOf in add and lookup); insertion manual and sorted	e4b30ac	2026-11-22
+java	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (contains in add and lookup); insertion manual and sorted	36ef2c9	2026-11-22
+javascript	data_structures_advanced	algorithms	transitional	complexity	0	Library sort in getNeighbors output path plus includes in add and lookup	271fd70	2026-11-22
+julia	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	0013f8a	2026-11-22
+kotlin	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	71599a3	2026-11-22
+lua	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	aa272ac	2026-11-22
+nim	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	34995e2	2026-11-22
+ocaml	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (List.mem in add and lookup); insertion manual and sorted	0b40cfb	2026-11-22
+perl	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	acd789f	2026-11-22
+php	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	c84e596	2026-11-22
+prolog	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (member/2 in add and lookup); insertion manual and sorted	4e55501	2026-11-22
+purescript	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	4d78e91	2026-11-22
+python	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	9f52e43	2026-11-22
+r	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	4be3fab	2026-11-22
+racket	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	21e874f	2026-11-22
+raku	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	1a90a2f	2026-11-22
+rescript	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	36ea40e	2026-11-22
+rexx	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	878bd94	2026-11-22
+ruby	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (include? in add and lookup); insertion manual and sorted	ef8a0cf	2026-11-22
+rust	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (slice::contains in has_edge); insertion manual and sorted	dc6c94e	2026-11-22
+scala	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	4bafc58	2026-11-22
+scheme	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	caf9c26	2026-11-22
+swift	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	5020033	2026-11-22
+tcl-tk	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	1e24c1c	2026-11-22
+typescript	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	3e6bcc2	2026-11-22
+v	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	98aa5f2	2026-11-22
+vala	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	5453962	2026-11-22
+zig	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	74c2845	2026-11-22
