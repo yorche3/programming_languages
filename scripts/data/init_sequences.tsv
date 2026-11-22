@@ -128,7 +128,7 @@ rust	scaffold	1	module	run	test -f Cargo.toml && test -f src/lib.rs	-	-	conserva
 scala	new	1	phase	run	mkdir -p {module}	-	-	-
 scala	scaffold	1	module	run	mkdir -p src/main/scala src/test/scala project && printf 'object {Module}\n' > src/main/scala/{Module}.scala && touch build.sbt project/build.properties	-	-	el build.sbt declara scalatest (lo baja sbt en el build)
 scheme	new	1	phase	run	mkdir -p {module}	-	-	-
-scheme	scaffold	1	module	run	if [[ -L src || -L test || -L src/{module}.scm || -L .gitignore || ( -e src/{module}.scm && ! -f src/{module}.scm ) || ( -e .gitignore && ! -f .gitignore ) ]]; then printf 'scaffold: ruta de Scheme no segura / unsafe Scheme path\n' >&2; false; else mkdir -p src test && { test -e src/{module}.scm || (set -C; printf '(define-module ({module}))\n' > src/{module}.scm); } && { test -e .gitignore || (set -C; printf '*.log\n' > .gitignore); }; fi	-	-	revisar runner SRFI-64 y selección de varias suites Guile
+scheme	scaffold	1	module	run	if [[ -L src || -L test || -L src/{module}.scm || -L .gitignore || ( -e src/{module}.scm && ! -f src/{module}.scm ) || ( -e .gitignore && ! -f .gitignore ) ]]; then printf 'scaffold: ruta de Scheme no segura / unsafe Scheme path\n' >&2; false; else mkdir -p src test && { test -e src/{module}.scm || (set -C; printf '(define-module ({module}))\n' > src/{module}.scm); } && { test -e .gitignore || (set -C; printf '*.log\n' > .gitignore); }; fi	-	-	-
 swift	new	1	module	run	swift package init --type library	-	-	-
 swift	scaffold	1	module	run	touch .gitignore && mkdir -p Tests	-	-	revisar Sources/{Module}/ y el nombre del fichero
 tcl-tk	new	1	phase	run	mkdir -p {module}	-	-	-

@@ -900,7 +900,7 @@ assert_contains 'test -n: Prolog recoge suites' "expand_file_name('*_tests.pl'" 
 assert_contains 'test -n: respeta el cd del comando' '&& cd test && ' "$out"
 
 glot_run -n test scheme algorithms/naive_sort
-assert_contains 'test -n: sufijo fijo tras {suite}' 'naive_sort_tests_guile.scm' "$out"
+assert_contains 'test -n: recoge suites Guile' './*_guile.scm' "$out"
 
 glot_run -n test vala algorithms/naive_sort
 assert_contains 'test -n: {suite} dentro de una ruta' 'test/naive_sort_tests.vala' "$out"
@@ -2407,19 +2407,57 @@ glot_run_sandbox -n scaffold rexx algorithms/naive_sort
 assert_eq 'scaffold Rexx dry-run: código' '0' "$rc_last"
 assert_eq 'scaffold Rexx dry-run: no crea archivos' '0' "$(find "$RX_DRY" -mindepth 1 | wc -l | tr -d ' ')"
 
-# Scheme: módulo Guile seguro y aviso del runner pendiente.
+# Scheme: módulo Guile seguro y comprobación del runner.
 SC="$SANDBOX/scheme/core/algorithms/data_structures_basics"
 mkdir -p -- "$SC"
 glot_run_sandbox scaffold scheme algorithms/data_structures_basics
 assert_eq 'scaffold Scheme: código' '0' "$rc_last"
 assert_eq 'scaffold Scheme: módulo Guile' '(define-module (data_structures_basics))' "$(cat -- "$SC/src/data_structures_basics.scm")"
 assert_eq 'scaffold Scheme: ignora logs' '1' "$(git -C "$SC" check-ignore test/suite.log | wc -l | tr -d ' ')"
-assert_contains 'scaffold Scheme: avisa del runner pendiente' 'runner SRFI-64' "$err"
 if command -v guile >/dev/null 2>&1; then
     scheme_rc=0
     scheme_out="$(cd "$SC" && guile --no-auto-compile -c '(load "src/data_structures_basics.scm") (use-modules (data_structures_basics))' 2>&1)" || scheme_rc=$?
     assert_eq 'scaffold Scheme: módulo cargable' '0' "$scheme_rc"
     assert_eq 'scaffold Scheme: carga sin diagnósticos' '' "$scheme_out"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: rechaza scaffold sin suites' '4' "$rc_last"
+    assert_contains 'test Scheme: explica ausencia de suites' 'No Scheme test files configured' "$err"
+    printf '(use-modules (srfi srfi-64))\n(test-begin "first")\n(test-equal 1 1)\n(test-end "first")\n' >"$SC/test/first_guile.scm"
+    printf '(use-modules (srfi srfi-64))\n(test-begin "second")\n(test-equal 2 2)\n(test-end "second")\n' >"$SC/test/second_guile.scm"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: ejecuta varias suites' '0' "$rc_last"
+    assert_contains 'test Scheme: incluye primera suite' 'Starting test first' "$out"
+    assert_contains 'test Scheme: incluye segunda suite' 'Starting test second' "$out"
+    printf '(use-modules (srfi srfi-64))\n(test-begin "first")\n(test-equal 1 2)\n(test-end "first")\n' >"$SC/test/first_guile.scm"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: propaga aserción fallida' '4' "$rc_last"
+    assert_contains 'test Scheme: ejecuta segunda tras fallo' 'Starting test second' "$out"
+    printf '(exit 0)\n' >"$SC/test/first_guile.scm"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: rechaza salida anticipada' '4' "$rc_last"
+    assert_contains 'test Scheme: explica salida anticipada' 'Scheme suite exited before validation' "$err"
+    printf '(use-modules (srfi srfi-64))\n(test-begin "bad" 2)\n(test-equal 1 1)\n(test-end "bad")\n' >"$SC/test/first_guile.scm"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: rechaza plan incorrecto' '4' "$rc_last"
+    printf '(use-modules (srfi srfi-64))\n(test-begin "empty")\n(test-end "empty")\n' >"$SC/test/first_guile.scm"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: rechaza suite vacía' '4' "$rc_last"
+    assert_contains 'test Scheme: explica ausencia de casos' 'No Scheme test cases executed' "$err"
+    printf '(use-modules (srfi srfi-64))\n(test-begin "skipped")\n(test-skip 1)\n(test-equal 1 1)\n(test-end "skipped")\n' >"$SC/test/first_guile.scm"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: rechaza suite totalmente omitida' '4' "$rc_last"
+    printf '(use-modules (srfi srfi-64))\n(test-begin "unclosed")\n(test-equal 1 1)\n' >"$SC/test/first_guile.scm"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: rechaza grupo sin cerrar' '4' "$rc_last"
+    printf '(use-modules (srfi srfi-64))\n(test-begin "xfail")\n(test-expect-fail 1)\n(test-equal 1 2)\n(test-end "xfail")\n' >"$SC/test/first_guile.scm"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: admite fallo esperado' '0' "$rc_last"
+    printf '(use-modules (srfi srfi-64))\n(test-begin "xpass")\n(test-expect-fail 1)\n(test-equal 1 1)\n(test-end "xpass")\n' >"$SC/test/first_guile.scm"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: rechaza éxito inesperado' '4' "$rc_last"
+    printf '(\n' >"$SC/test/first_guile.scm"
+    glot_run_sandbox test scheme algorithms/data_structures_basics
+    assert_eq 'test Scheme: propaga error de sintaxis' '4' "$rc_last"
 fi
 printf 'author Scheme\n' >"$SC/src/data_structures_basics.scm"
 printf 'author ignore\n' >"$SC/.gitignore"

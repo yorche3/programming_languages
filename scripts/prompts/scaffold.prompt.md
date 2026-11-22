@@ -67,7 +67,7 @@ comandos; resuélvelas aquí cuando correspondan a tu rol.
 | Aspecto | Detalle |
 |---|---|
 | **Entrada** | El directorio del módulo con lo que dejó `glot new`, la especificación, la fila de `{lang}` en `scripts/data/languages.tsv` y los módulos homologados del lenguaje |
-| **Salida** | Un esqueleto idiomático cuyo **runner de pruebas arranca sin casos** —andamiaje, no suite—; en Perl y Raku, el comando informa y rechaza explícitamente la ausencia de suites. `.gitignore` con patrones pertinentes y verificado; sin ejecutables de ejemplo ni nombres que no encajen |
+| **Salida** | Un esqueleto idiomático cuyo **runner de pruebas arranca sin casos** —andamiaje, no suite—; en Perl, Raku y Scheme, el comando informa y rechaza explícitamente la ausencia de suites. `.gitignore` con patrones pertinentes y verificado; sin ejecutables de ejemplo ni nombres que no encajen |
 | **Fuera de alcance** | El contrato del módulo (encargo `contract_stub`, paso 4b), la suite (encargo `suite`, paso 4c), la implementación (paso 5), el README (paso 7) y los commits (`glot save`) |
 | **Evidencia** | La salida real del comando nativo de pruebas y de `git check-ignore -v`, pegadas sin editar |
 
@@ -124,10 +124,11 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 - El proyecto debe compilar, resolver o instalar sin warnings ni errores.
 - Ejecuta el comando nativo de pruebas: el runner mínimo debe **arrancar sin casos**. Si la
   herramienta necesita el runner en un archivo dedicado, este paso lo deja listo; el 4c solo
-  conecta los grupos de pruebas. En Perl y Raku, verifica que el comando informa
-  `No Perl test files configured` o `No Raku test files configured`, respectivamente,
-  y devuelve fallo cuando el directorio de pruebas está vacío: es la protección
-  esperada, no un bloqueo ni una suite validada. Copia la salida real, sin editar.
+  conecta los grupos de pruebas. En Perl, Raku y Scheme, verifica que el comando
+  informa `No Perl test files configured`, `No Raku test files configured` o
+  `No Scheme test files configured`, respectivamente, y devuelve fallo cuando el
+  directorio de pruebas está vacío: es la protección esperada, no un bloqueo ni
+  una suite validada. Copia la salida real, sin editar.
 - Si el comando no arranca porque el framework no trae runner, **escríbelo aquí** (mínimo y sin
   casos) y vuelve a comprobarlo. Si aun así no arranca, **detente y dilo** con la salida real.
   No escribas la suite para «arreglarlo»: eso es el paso 4c.

@@ -90,6 +90,7 @@ que no lo siga necesitará revisar su fila. Prolog recoge todas las suites
 harness TAP de prove, pero rechaza las ejecuciones sin casos o con todos omitidos.
 Raku usa el descubrimiento y harness de prove6 con la misma protección; suma
 los resultados individuales porque TAP 0.3.15 no agrega correctamente `skipped`.
+Scheme ejecuta cada suite `*_guile.scm` y comprueba su runner SRFI-64.
 
 **EN:** **Column 5 is maintained by hand** and only with verifiers **actually run**
 in the corresponding module; coverage is reported by `doctor` as
@@ -102,6 +103,7 @@ Perl uses prove's file discovery and TAP harness, rejecting empty or entirely
 skipped runs instead of reporting them as successful.
 Raku uses prove6's discovery and harness with the same protection; it sums
 per-file results because TAP 0.3.15 does not aggregate `skipped` correctly.
+Scheme runs every `*_guile.scm` suite and checks its SRFI-64 runner.
 
 **ES:** Los esqueletos de `Makefile` compartidos por `assembly`, `c`, `cobol`,
 `grain` y `r` viven en [`scaffold_templates/`](scaffold_templates/); el catálogo
@@ -155,11 +157,10 @@ revisión pendiente del runner y la selección de varias suites.
 pending runner review and multiple-suite selection.
 
 **ES:** Scheme crea un módulo Guile y excluye logs SRFI-64 si falta el ignore;
-preserva archivos existentes, rechaza enlaces y avisa de la revisión del runner.
+preserva archivos existentes y rechaza enlaces.
 
 **EN:** Scheme creates a Guile module and excludes SRFI-64 logs when the ignore
-file is missing; existing files are preserved, symlinks rejected and runner
-review announced.
+file is missing; existing files are preserved and symlinks rejected.
 
 **ES:** Forth crea una fuente vacía, un framework y un runner que anuncia que
 no hay tests; conserva archivos existentes. La suite conecta los grupos y el

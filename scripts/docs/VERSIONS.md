@@ -218,11 +218,19 @@ existing ooRexxUnit suites remain open.
 
 **ES:** Scheme crea una fuente Guile cargable sin sobrescribir archivos y
 excluye logs SRFI-64 cuando falta el ignore. La selección de varias suites y
-la propagación de fallos del runner siguen pendientes.
+la propagación de fallos se abordan en el cambio siguiente.
 
 **EN:** Scheme creates a loadable Guile source without overwriting files and
 excludes SRFI-64 logs when the ignore file is absent. Multiple-suite selection
-and runner failure propagation remain pending.
+and runner failure propagation are addressed in the following change.
+
+**ES:** El comando Scheme ejecuta todas las suites Guile y consulta sus
+resultados SRFI-64. Rechaza ausencia de casos, grupos incompletos, salidas
+anticipadas y fallos; se verificaron las tres suites de `numbers`.
+
+**EN:** Scheme's command runs every Guile suite and checks SRFI-64 results.
+It rejects empty runs, incomplete groups, early exits and failures; verified
+with all three `numbers` suites.
 
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 

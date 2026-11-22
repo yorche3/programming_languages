@@ -41,7 +41,7 @@ rexx	manual	rexx test/{suite}.rexx	-
 ruby	manual	bundle exec rspec	ruby -c src/{module}.rb
 rust	tool	cargo test	cargo fmt --check
 scala	manual	sbt -batch -no-colors test	-
-scheme	manual	cd test && guile --no-auto-compile -s {suite}_guile.scm	-
+scheme	manual	cd test && { found=0; failed=0; for suite in ./*_guile.scm; do [ -f "$suite" ] || continue; found=1; guile --no-auto-compile -c '(use-modules (srfi srfi-64)) (define runner (test-runner-simple)) (define bad-group #f) (define old-count (test-runner-on-bad-count runner)) (define old-name (test-runner-on-bad-end-name runner)) (test-runner-on-bad-count! runner (lambda args (set! bad-group #t) (apply old-count args))) (test-runner-on-bad-end-name! runner (lambda args (set! bad-group #t) (apply old-name args))) (test-runner-current runner) (catch (quote quit) (lambda () (load (canonicalize-path (cadr (command-line))))) (lambda (key . args) (error "Scheme suite exited before validation" args))) (when (or bad-group (not (null? (test-runner-group-stack runner)))) (error "Scheme test group mismatch")) (when (= 0 (+ (test-runner-pass-count runner) (test-runner-fail-count runner) (test-runner-xfail-count runner) (test-runner-xpass-count runner))) (error "No Scheme test cases executed")) (exit (= 0 (test-runner-fail-count runner) (test-runner-xpass-count runner)))' "$suite" || failed=1; done; if [ "$found" -eq 0 ]; then printf 'No Scheme test files configured in test/\n' >&2; false; else [ "$failed" -eq 0 ]; fi; }	-
 swift	tool	swift test	-
 tcl-tk	manual	cd test && TCLLIBPATH="$(cd ../src && pwd)" tclsh9.0 {suite}.test	-
 typescript	tool	npm test	-

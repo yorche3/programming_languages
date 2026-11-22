@@ -130,7 +130,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **ruby** | ⛓️ ✅ `mkdir -p src test` (después `bundle init` y `bundle install`) | `Gemfile`, `.rspec` | ✅ `bundle exec rspec` |
 | **rust** | ✅ `cargo init --lib` | `Cargo.toml` | ✅ `cargo test` |
 | **scala** | ✍️ `mkdir -p src/main/scala src/test/scala project` + `build.sbt` (el runner instalado, sbt 2.0.8, ya no trae `sbt new`) | `build.sbt`, `project/build.properties` | ✅ `sbt -batch -no-colors test` |
-| **scheme** | ✍️ `mkdir -p src test` | — | ✅ `cd test && guile --no-auto-compile -s {suite}_guile.scm` |
+| **scheme** | ✍️ `mkdir -p src test` | — | ✅ Guile + SRFI-64 (comando abajo / command below) |
 | **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Module}/` | ✅ `swift test` |
 | **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ `cd test && TCLLIBPATH="$(cd ../src && pwd)" tclsh9.0 {suite}.test` |
 | **typescript** | ✅ `npm init -y` | `package.json`, `tsconfig.json`, `jest.config.cjs` | ✅ `npm test` |
@@ -777,13 +777,18 @@ mkdir -p src/main/scala src/test/scala project
 ### Scheme — src/ + test/
 
 **ES:** Crear la fuente Guile y el `.gitignore` solo si faltan, conservando
-archivos existentes y rechazando enlaces simbólicos en esas rutas. El runner
-actual aún no selecciona varias suites ni garantiza código no cero ante fallos
-de SRFI-64; requiere revisión.
+archivos existentes y rechazando enlaces simbólicos en esas rutas. El comando
+ejecuta todas las suites `*_guile.scm`, comprueba sus resultados SRFI-64 y
+rechaza suites ausentes, vacías, incompletas o con salida anticipada.
 
 **EN:** Create the Guile source and `.gitignore` only when absent, preserving
-existing files and rejecting symlinks at these paths. The current runner does
-not yet select multiple suites or guarantee nonzero status on SRFI-64 failures.
+existing files and rejecting symlinks at these paths. The command runs all
+`*_guile.scm` suites, checks SRFI-64 results and rejects missing, empty,
+incomplete or prematurely exited suites.
+
+```bash
+cd test && { found=0; failed=0; for suite in ./*_guile.scm; do [ -f "$suite" ] || continue; found=1; guile --no-auto-compile -c '(use-modules (srfi srfi-64)) (define runner (test-runner-simple)) (define bad-group #f) (define old-count (test-runner-on-bad-count runner)) (define old-name (test-runner-on-bad-end-name runner)) (test-runner-on-bad-count! runner (lambda args (set! bad-group #t) (apply old-count args))) (test-runner-on-bad-end-name! runner (lambda args (set! bad-group #t) (apply old-name args))) (test-runner-current runner) (catch (quote quit) (lambda () (load (canonicalize-path (cadr (command-line))))) (lambda (key . args) (error "Scheme suite exited before validation" args))) (when (or bad-group (not (null? (test-runner-group-stack runner)))) (error "Scheme test group mismatch")) (when (= 0 (+ (test-runner-pass-count runner) (test-runner-fail-count runner) (test-runner-xfail-count runner) (test-runner-xpass-count runner))) (error "No Scheme test cases executed")) (exit (= 0 (test-runner-fail-count runner) (test-runner-xpass-count runner)))' "$suite" || failed=1; done; if [ "$found" -eq 0 ]; then printf 'No Scheme test files configured in test/\n' >&2; false; else [ "$failed" -eq 0 ]; fi; }
+```
 
 ```bash
 if [[ -L src || -L test || -L src/{module}.scm || -L .gitignore ||
