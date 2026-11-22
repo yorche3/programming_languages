@@ -1,3 +1,9 @@
+---
+layout: default
+title: Auditorías / Audits
+nav_order: 5
+---
+
 # 🧪 Auditorías de módulo / Module audits
 
 **ES:** Esta carpeta guarda la **deuda técnica** de los módulos ya homologados y el plan para devolver cada lenguaje al estado homologado. Una auditoría **no** corrige nada: verifica contra la especificación y el contrato, deja la evidencia y planifica el arreglo, que se hace en una rama del lenguaje.
@@ -117,6 +123,7 @@ done
 | `core.foundations.numbers` | 🔴 0 · 🟡 0 · 🔵 0 · 🟢 50 — **cerrado**: las 50 suites ejecutadas, los 11 casos por variante comprobados y los 7 hallazgos corregidos en 7 commits de `align`, integrados y empujados el 2026-10-16 | [`04_Audited_Numbers.md`](04_Audited_Numbers.md) |
 | `core.algorithms.naive_sort` | 🔴 0 · 🟡 0 · 🔵 0 · 🟢 50 — **cerrado**: las 50 suites ejecutadas, 4 hallazgos corregidos en 4 commits de `align` (uno por submódulo), integrados y empujados el 2026-10-17 | [`05_Audited_Naive_Sort.md`](05_Audited_Naive_Sort.md) |
 | `core.algorithms.data_structures_basics` | 🔴 0 · 🟡 0 · 🔵 0 · 🟢 50 — **cerrado**: las 50 suites ejecutadas, 10 hallazgos corregidos en 10 commits de `align` (dos en `ocaml`, `groovy` y `nim`), integrados y empujados el 2026-10-17 | [`06_Audited_Data_Structures_Basics.md`](06_Audited_Data_Structures_Basics.md) |
+| `core.algorithms.data_structures_advanced` | **Preparación / Preparation** — contrato propuesto pendiente de revisión; pase y clasificación pendientes / proposed contract under review; pass and classification pending | [`07_Audited_Data_Structures_Advanced.md`](07_Audited_Data_Structures_Advanced.md) |
 
 ---
 
@@ -134,6 +141,7 @@ done
 | `04 numbers` | Los cinco algoritmos en las variantes que el lenguaje permita —`_rec` siempre; `_acc` solo con TCO garantizado; `_ite` solo con iteración nativa—, sin delegarlos en una rutina de biblioteca, el README declarando la combinación aplicada y su porqué, separación código/pruebas y solo biblioteca estándar. *(Capa corregida el 2026-10-16: antes pedía las tres variantes siempre y el trabajo sobre la secuencia indexable, que este módulo no usa.)* | $O(n)$ en sumatorias y factorial; $O(\log n)$ en el MCD |
 | `05 naive_sort` | Los tres algoritmos sin biblioteca de ordenamiento **ni de selección**, salida temprana de la burbuja, indicador de fallo, aislamiento de tests | $O(n^2)$ estricto |
 | `06 data_structures_basics` | `Node`, `LinkedList`, `Stack` y `Queue` desde cero, política de resultados por operación, sin colección de biblioteca, suite | $O(1)$ salvo `delete` ($O(n)$); los extremos finales son $O(n)$ solo con celda inmutable y declarados *(techo corregido el 2026-10-17: antes decía «$O(1)$ por operación»)* |
+| `07 data_structures_advanced` | `Node`, `TreeNode`, `BinaryTree`, `GraphNode` y `Graph`, registro y operaciones manuales, política de resultados, suite y README; el contrato de vecinos está en revisión / registry and manual operations, result policy, suite and README; neighbour contract under review | ABB / BST: `O(h)` insertar y pertenencia / insert and membership; grafo / graph: `O(V + d(u))` para aristas y vecinos / for edges and neighbours |
 
 **ES:** Un módulo se audita **solo** contra su capa declarada aquí más los 9 ejes: lo que no esté en la especificación no se le puede exigir, y lo que la especificación exija de más se corrige en ella y se avisa en el registro del pase.
 
