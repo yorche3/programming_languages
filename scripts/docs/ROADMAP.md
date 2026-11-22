@@ -313,6 +313,20 @@ the native task and report, checking structured results to reject failures and
 runs with no passing cases. Passing, failing and ignored cases were verified,
 as was single execution.
 
+**ES — Swift (2026-11-22):** SwiftPM 6.3.3 generó una prueba `example`
+sin aserciones; `swift test` la informó como un caso aprobado. Al retirar
+solo ese ejemplo en un laboratorio aislado, `swift test` devolvió éxito
+con cero tests tanto para XCTest como para Swift Testing. Quedan pendientes
+la retirada segura de la muestra reconocida y un runner que detecte ausencia
+de casos en ambos frameworks sin ocultar fallos.
+
+**EN — Swift (2026-11-22):** SwiftPM 6.3.3 generated an `example` test
+without assertions; `swift test` reported it as a passing case. Removing only
+that example in an isolated lab made `swift test` succeed with zero tests in
+both XCTest and Swift Testing. Safe removal of the recognized sample and a
+runner detecting missing cases across both frameworks without hiding failures
+remain pending.
+
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
 si faltan, preserva archivos existentes y avisa de su revisión. El selector
 anterior rechazaba las dos suites de `numbers` como ambiguas y Tcltest 2.5.11
