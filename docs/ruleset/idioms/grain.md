@@ -1,3 +1,9 @@
+---
+layout: default
+title: Convenciones de Grain / Grain idioms
+nav_exclude: true
+---
+
 # 🗣️ Grain — Convenciones e Idioms / Idioms and Conventions
 
 > **ES:** Este documento es la referencia de convenciones del lenguaje `grain` en el monorepo, con sus desviaciones aceptadas. Complementa [`PSEUDOCODE_CONVENTION.md`](../PSEUDOCODE_CONVENTION.md) y los TSV de `data/`.

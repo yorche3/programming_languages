@@ -1,3 +1,9 @@
+---
+layout: default
+title: Niveles de idiomaticidad / Idiomaticity levels
+nav_exclude: true
+---
+
 # 🎚️ Niveles de Idiomaticidad / Idiomaticity Levels
 
 > **ES:** Este documento define la **escala de 4 niveles** con la que se clasifica cada implementación de cada módulo en cada lenguaje. El nivel **no es una opinión**: se calcula aplicando una lista de verificación binaria por eje. Es la pieza que convierte la auditoría en un procedimiento reproducible.

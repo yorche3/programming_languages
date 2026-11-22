@@ -1,3 +1,9 @@
+---
+layout: default
+title: Roadmap
+nav_order: 3
+---
+
 # 🗺️ Roadmap
 
 > **Cierre / Closure:** registra la evidencia en [`ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) antes de cambiar el estado de un módulo o fase.
@@ -79,7 +85,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 | `core.algorithms.naive_sort` | ✅ | selection, bubble, insertion | [`📄 05_Naive_Sort.md`](core/algorithms/05_Naive_Sort.md) · auditoría 05 cerrada el 2026-10-17 (🟢 50) |
 | `core.algorithms.data_structures_basics` | ✅ | Node, linked_list, stack y queue construidos desde cero | [`📄 06_Data_Structures_Basics.md`](core/algorithms/06_Data_Structures_Basics.md) · auditoría 06 cerrada el 2026-10-17 (🟢 50) |
 | `core.algorithms.data_structures_advanced` | 📋 | Node con múltiples enlaces, binary tree y graph dirigidos construidos desde cero | [`📄 07_Data_Structures_Advanced.md`](core/algorithms/07_Data_Structures_Advanced.md) |
-| `core.algorithms.efficient_sort` | 📋 | quick, merge, heap; puede usar ADTs optimizados del lenguaje salvo `sort()` | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |
+| `core.algorithms.efficient_sort` | 📋 | quick, merge, heap y árbol rojo-negro para ordenar; estructuras y algoritmos manuales | [`📄 08_Efficient_Sort.md`](core/algorithms/08_Efficient_Sort.md) |
 | `core.algorithms.distributed_sort` | 📋 | radix, bucket, shell, counting | [`📄 09_Distributed_Sort.md`](core/algorithms/09_Distributed_Sort.md) |
 | `core.algorithms.searching` | 📋 | linear sobre arrays numéricos; binary, jump e interpolation con precondición de array ordenado | [`📄 10_Searching.md`](core/algorithms/10_Searching.md) |
 
@@ -90,7 +96,7 @@ Luego sigue la numeración secuencial para avanzar en el flujo de implementació
 | 05 — naive sort | $O(n^2)$ | array numérico mutable | comparación, intercambio e invariante de prefijo ordenado |
 | 06 — data structures basics | operaciones locales; depende del ADT | Node y enlaces simples | valor, referencia, inicialización explícita, invariantes y contrato |
 | 07 — data structures advanced | operaciones locales; depende de la estructura | Node con múltiples enlaces y representación de vecinos | jerarquía, adyacencia, invariantes y contrato |
-| 08 — efficient sort | $O(n \log n)$ esperado/típico | arrays; heap/colección optimizada permitida | divide & conquer, recursión y partición |
+| 08 — efficient sort | $O(n \log n)$ típico; quick sort $O(n^2)$ peor | secuencias indexables, heap y árbol rojo-negro manuales | partición, fusión, heap y balance por rotaciones |
 | 09 — distributed sort | $O(n+k)$ o dependiente de dígitos | arrays de conteo/cubetas | rango, distribución y estabilidad como límites de aplicabilidad |
 | 10 — searching | $O(n)$ a $O(\log n)$, más preparación cuando aplica | array numérico; acceso indexado | consumo de una secuencia ordenada; contrato y composición con sort |
 

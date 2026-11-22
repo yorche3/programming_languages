@@ -1,3 +1,9 @@
+---
+layout: default
+title: Auditoría 05 — Naive Sort
+nav_exclude: true
+---
+
 # Auditoría de Módulo: 05_Naive_Sort
 # Module Audit: 05_Naive_Sort
 

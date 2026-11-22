@@ -2,7 +2,7 @@
 layout: default
 title: 🤝 Contributing
 description: Guía de contribución y convención de commits / Contribution guide and commit convention
-nav_order: 5
+nav_order: 6
 ---
 
 # 🤝 Guía de Contribución / Contributing Guide

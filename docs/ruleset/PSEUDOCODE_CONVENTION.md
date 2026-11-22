@@ -1,3 +1,9 @@
+---
+layout: default
+title: Convención de pseudocódigo / Pseudocode convention
+nav_exclude: true
+---
+
 # 🧭 Convención de Pseudocódigo / Pseudocode Convention
 
 > **ES:** Este documento define el **contrato canónico** del monorepo: cómo se escribe el pseudocódigo de cada módulo y cómo se traduce a cada lenguaje. El pseudocódigo **no es un lenguaje**, es la **especificación del comportamiento esperado**, expresada en el paradigma dominante de la familia del lenguaje. Los nombres que aparecen en él son **conceptuales**; cada lenguaje los traduce idiomáticamente. Este documento es la pieza bloqueante de la auditoría: sin él no se puede verificar si una implementación es correcta.

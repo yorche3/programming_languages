@@ -1,3 +1,9 @@
+---
+layout: default
+title: Ciclo de trabajo / Workflow
+nav_order: 4
+---
+
 # 🔁 Ciclo de trabajo de un módulo / Module work cycle (sprint)
 
 **ES:** Este documento es la **norma** del ciclo con el que se lleva un módulo desde su especificación hasta su cierre con evidencia. Aplica a **todos** los lenguajes homologados, no solo al tooling. Lo que dice [`docs/CONTRIBUTING.md`](CONTRIBUTING.md) sobre Git y submódulos manda sobre este documento; lo que dice [`docs/ROADMAP.md`](ROADMAP.md) sobre contadores y cierre de fase, también.

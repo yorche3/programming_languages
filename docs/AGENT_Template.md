@@ -1,3 +1,9 @@
+---
+layout: default
+title: Guía para agentes / Agent guide
+nav_exclude: true
+---
+
 # Guía para Agentes de IA / AI Agent Guide
 
 Esta guía complementa las instrucciones de `AGENTS.md` y describe cómo generar

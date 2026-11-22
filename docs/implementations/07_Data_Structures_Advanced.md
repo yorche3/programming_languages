@@ -1,3 +1,9 @@
+---
+layout: default
+title: Guía 07 — Data Structures Advanced
+nav_exclude: true
+---
+
 # 07 — Data Structures Advanced: cómo se implementa en cada familia
 # 07 — Data Structures Advanced: how it is implemented in each family
 

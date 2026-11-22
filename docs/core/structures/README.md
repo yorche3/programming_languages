@@ -4,7 +4,6 @@ title: Algoritmos sobre Estructuras / Algorithms on Structures
 description: Índice de la sección de algoritmos sobre estructuras — grafos, backtracking, programación dinámica, greedy / Index for the algorithms on structures section — graphs, backtracking, dynamic programming, greedy
 nav_order: 4
 parent: Core
-grand_parent: Programming Languages Monorepo
 has_children: true
 ---
 

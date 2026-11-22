@@ -1,3 +1,9 @@
+---
+layout: default
+title: Auditoría 04 — Numbers
+nav_exclude: true
+---
+
 # Auditoría de Módulo: 04_Numbers
 # Module Audit: 04_Numbers
 

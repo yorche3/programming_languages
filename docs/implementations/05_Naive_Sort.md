@@ -1,3 +1,9 @@
+---
+layout: default
+title: Guía 05 — Naive Sort
+nav_exclude: true
+---
+
 # 05 — Naive Sort: cómo se implementa en cada familia
 # 05 — Naive Sort: how it is implemented in each family
 

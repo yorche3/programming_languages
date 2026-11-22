@@ -1,8 +1,8 @@
 ---
 layout: default
-title: 🧱 Core
+title: Core
 description: Índice principal de la documentación base / Main index for the core documentation
-nav_order: 1
+nav_order: 2
 has_children: true
 ---
 

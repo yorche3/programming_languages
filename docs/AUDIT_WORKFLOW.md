@@ -1,3 +1,9 @@
+---
+layout: default
+title: Ciclo de auditoría / Audit cycle
+nav_exclude: true
+---
+
 # 🧪 Ciclo de auditoría y `align` / Audit and `align` cycle
 
 **ES:** Este documento es la **norma** del segundo ciclo del monorepo: el que lleva un módulo **ya cerrado a `50/50`** a un estado homogéneo en los 50 lenguajes antes de arrancar el **módulo siguiente**. El primer ciclo —el sprint— vive en [`WORKFLOW.md`](WORKFLOW.md) y no se toca: lo de aquí es una **capa nueva** —la de la idiomaticidad—, con su propio registro, su propio estado y su propio cierre. La convención de los registros, los estados y los criterios vive en [`audits/README.md`](audits/README.md); la escala con la que se clasifica cada implementación, en [`ruleset/IDIOMATICITY_LEVELS.md`](ruleset/IDIOMATICITY_LEVELS.md).

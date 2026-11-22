@@ -1,204 +1,63 @@
 ---
 layout: default
-title: 🌐 Programming Languages Monorepo
-description: Implementación de conceptos de programación en múltiples lenguajes / Programming concepts implemented in multiple languages
+title: Inicio / Home
+description: Especificaciones y práctica en múltiples lenguajes / Specifications and practice in multiple languages
+nav_order: 1
 ---
 
 # 🌐 Lenguajes de Programación / Programming Languages
 
-> **Implementación de conceptos de programación basados en especificaciones generales y adaptaciones específicas para cada lenguaje.**  
-> *Implementation of programming concepts based on general specifications and specific adaptations for each programming language.*
+**ES:** Practica conceptos de programación en distintos lenguajes a partir de
+especificaciones comunes y adaptaciones idiomáticas.
+**EN:** Practise programming concepts in different languages using shared
+specifications and idiomatic adaptations.
 
----
+## 🧭 Empieza aquí / Start here
 
-## 📖 Descripción / Description
+**ES:** Elige una ruta. El menú lateral organiza Core por fase y módulo;
+la búsqueda encuentra temas en el sitio.
+**EN:** Choose a path. The sidebar organizes Core by phase and module;
+search finds topics across the site.
 
-**ES:** Este monorepo proporciona un entorno de aprendizaje y experimentación completo para varios lenguajes de programación. Cubre desde fundamentos hasta temas avanzados como microservicios, interfaces gráficas y CI/CD enfocado en seguridad de código.
+| Quiero… / I want to… | Ir a / Go to |
+|---|---|
+| Practicar desde el principio / Practise from the beginning | [Fundamentos / Foundations](core/foundations/README.md) · [Primer módulo / First module](core/foundations/01_Hello_World.md) |
+| Consultar especificaciones / Browse specifications | [Core y sus fases / Core and its phases](core/README.md) |
+| Consultar el estado vigente / Check current status | [Roadmap](ROADMAP.md) |
+| Trabajar en un módulo / Work on a module | [Ciclo de trabajo / Workflow](WORKFLOW.md) · [Contribuir / Contributing](CONTRIBUTING.md) |
+| Revisar auditorías / Review audits | [Índice de auditorías / Audit index](audits/README.md) · [Ciclo de auditoría / Audit cycle](AUDIT_WORKFLOW.md) |
+| Preparar documentación o un encargo / Prepare documentation or a request | [Guía de agentes / Agent guide](AGENT_Template.md) · [Roles](AGENT_ROLES.md) · [Plantilla README](README_Template.md) |
 
-**EN:** This monorepo provides a comprehensive learning and experimentation environment for various programming languages. It covers fundamentals of each language up to advanced topics like microservices, GUIs and CI/CD focused on code security.
+## 📚 Ruta de aprendizaje / Learning path
 
----
+| Fase / Phase | Contenido / Content |
+|---|---|
+| 0 | [Fundamentos / Foundations](core/foundations/README.md) |
+| 1 | [Algoritmos puros / Algorithms Pure](core/algorithms/README.md) |
+| 2 | [Procesamiento contiguo / Contiguous Processing](core/text/README.md) |
+| 3 | [Algoritmos sobre estructuras / Algorithms on Structures](core/structures/README.md) |
+| 4 | [Abstracción y persistencia / Abstraction and Persistence](core/data/README.md) |
+| 5 | [Matemáticas / Mathematics](core/math/README.md) |
 
-## 🧭 Navegación / Navigation
+**ES:** Los documentos numerados indican la progresión; el
+[roadmap](ROADMAP.md) es la fuente de verdad del estado. Las implementaciones
+viven en los submódulos de lenguaje; las especificaciones generales viven aquí.
+**EN:** Numbered documents indicate progression; the [roadmap](ROADMAP.md) is the
+source of truth for status. Implementations live in language submodules; shared
+specifications live here.
 
-| Ruta / Path | Contenido / Content |
-|-------------|--------------------|
-| [`🗺️ ROADMAP.md`](ROADMAP.md) | Plan de desarrollo completo / Full development plan |
-| [`📜 CHANGELOG.md`](../CHANGELOG.md) | Historial de releases del monorepo / Monorepo release history |
-| [`🧱 Core`](core/README.md) | Índice general de la documentación base / Main core documentation index |
-| [`📄 README_Template.md`](README_Template.md) | Plantilla de README para sub-proyectos individuales / README template for individual sub-projects |
-| [`🤖 AGENT_Template.md`](AGENT_Template.md) | Guía operativa para agentes de IA que documentan o corrigen el repo / Operational guide for AI agents documenting or fixing the repo |
-| [`✅ ROADMAP_UPDATE_CHECKLIST.md`](ROADMAP_UPDATE_CHECKLIST.md) | Registro de cierres que autorizan actualizaciones del roadmap / Closure record authorizing roadmap updates |
-| [`🤝 CONTRIBUTING.md`](CONTRIBUTING.md) | Convención de commits / Commit convention |
-| [`🔁 WORKFLOW.md`](WORKFLOW.md) | Ciclo de trabajo de un módulo (sprint) / Module work cycle (sprint) |
+## 🔧 Referencias / References
 
-> 💡 **Convención de nombres / Naming convention:** Los documentos siguen una numeración secuencial (`01_`, `02_`, `03_`…) que indica el orden recomendado de implementación. Sigue la numeración para avanzar en el flujo.
+- [Guía de inicialización / Project initialization guide](core/00_Project_Initialization_Guide.md)
+- Guías de implementación por familia / Family implementation guides:
+  [04 Numbers](implementations/04_Numbers.md) · [05 Naive Sort](implementations/05_Naive_Sort.md) · [06 Data Structures Basics](implementations/06_Data_Structures_Basics.md) · [07 Data Structures Advanced](implementations/07_Data_Structures_Advanced.md)
+- [Niveles de idiomaticidad / Idiomaticity levels](ruleset/IDIOMATICITY_LEVELS.md)
+- [Política de desviaciones / Deviation policy](ruleset/DEVIATION_POLICY.md)
+- [Registro de cierres / Closure record](ROADMAP_UPDATE_CHECKLIST.md)
+- [Repositorio y lenguajes / Repository and languages](https://github.com/yorche3/programming_languages)
+- [Historial de cambios / Changelog](https://github.com/yorche3/programming_languages/blob/main/CHANGELOG.md)
 
----
-
-## 📁 Estructura / Structure
-
-```text
-programming_languages/
-├── docs/                          # 🌐 Sitio web / Website (GitHub Pages)
-│   ├── index.md                   # Portada / Landing page
-│   ├── ROADMAP.md                 # Plan de desarrollo / Development roadmap
-│   ├── WORKFLOW.md                # Ciclo de trabajo de un módulo / Module work cycle
-│   ├── audits/                    # Registro de deuda técnica por módulo / Per-module technical debt log
-│   └── core/
-│       ├── README.md              # Índice general / Main core index
-│       ├── foundations/           # Fase 0 (01_ a 04_)
-│       │   ├── README.md
-│       │   ├── 01_Hello_World.md
-│       │   ├── 02_Hello_User.md
-│       │   ├── 03_Unit_Test_Calculator.md
-│       │   └── 04_Numbers.md
-│       ├── algorithms/            # Fase 1 — Algoritmos Puros (05_ a 10_)
-│       │   ├── README.md
-│       │   ├── 05_Naive_Sort.md
-│       │   ├── 06_Data_Structures_Basics.md
-│       │   ├── 07_Data_Structures_Advanced.md
-│       │   ├── 08_Efficient_Sort.md
-│       │   ├── 09_Distributed_Sort.md
-│       │   └── 10_Searching.md
-│       ├── text/                  # Fase 2 — Procesamiento Contiguo (11_ a 15_)
-│       │   ├── README.md
-│       │   └── ...
-│       ├── structures/            # Fase 3 — Algoritmos sobre Estructuras (16_ a 19_)
-│       │   ├── README.md
-│       │   ├── 16_Graph_Algorithms.md
-│       │   ├── 17_Backtracking.md
-│       │   ├── 18_Dynamic_Programming.md
-│       │   └── 19_Greedy.md
-│       ├── data/                  # Fase 4 — Abstracción y Persistencia
-│       │   └── README.md
-│       └── math/                  # Fase 5 — Matemáticas
-│           └── README.md
-├── _experimental/                 # 🧪 Sandbox / Legacy Staging (primeros acercamientos)
-├── scripts/                       # 🛠️ Tooling del monorepo / Monorepo tooling (`glot` + `docs/` + `versions/`)
-├── python/                        # 🐍 Implementaciones Python (submódulo o legacy)
-├── java/                          # ☕ Implementaciones Java (submódulo)
-├── go/                            # 🔵 Implementaciones Go (submódulo)
-└── ... (resto de lenguajes)
-```
-
----
-
-## 📁 Convenciones de archivos / File Naming Conventions
-
-**ES:** En las especificaciones encontrarás referencias como `hello_world.ext`. El `.ext` es un marcador de posición (placeholder) que debes reemplazar por la extensión estándar de tu lenguaje (`.py`, `.java`, `.go`, `.rs`, etc.). El nombre base (en `snake_case` como `hello_world`) debe adaptarse a la convención de nomenclatura que dicta cada lenguaje (CamelCase, PascalCase, etc.).
-
-**EN:** In the specifications you'll find references like `hello_world.ext`. The `.ext` is a placeholder that you must replace with your language's standard extension (`.py`, `.java`, `.go`, `.rs`, etc.). The base name (in `snake_case` like `hello_world`) must adapt to the naming convention dictated by each language (CamelCase, PascalCase, etc.).
-
-| Ejemplo / Example | Lenguaje / Language |
-|-------------------|-------------------|
-| `hello_world.py` | Python |
-| `HelloWorld.java` | Java |
-| `hello_world.go` | Go |
-| `HelloWorld.cs` | C# |
-| `hello_world.rs` | Rust |
-| `hello_world.ex` | Elixir |
-
----
-
-## 🔗 Submódulos y Entornos / Submodules & Environments
-
-**ES:** El repositorio organiza sus implementaciones en tres estados o niveles:
-
-1. **Lenguajes homologados (submódulo Git):** Migrados formalmente a la jerarquía estándar `core/{fase}/{módulo}/` documentada en este sitio. Cuentan con repositorio independiente conectado como submódulo Git (ver [`.gitmodules`](https://github.com/yorche3/programming_languages/blob/main/.gitmodules)).
-2. **Lenguajes en estructura legacy:** Conservan carpetas planas en la raíz (`helloworld/`, `hellouser/`, `numbers/`, `words/`) directamente en el monorepo sin submódulo. Se migran progresivamente al estándar.
-3. **`_experimental/` (Sandbox & Legacy Staging):** Espacio donde se preserva el primer acercamiento experimental del autor con cada lenguaje (estructuras con `numbers/`, `words/`, `unit_test/demo/`). Funciona como banco de pruebas y archivo histórico de implementaciones previas a su homologación en `core/`.
-
-**EN:** The repository organizes its implementations into three tiers:
-
-1. **Homologated languages (Git submodule):** Formally migrated to the standardized `core/{phase}/{module}/` hierarchy documented on this site. They have their own repository linked as a Git submodule (see [`.gitmodules`](https://github.com/yorche3/programming_languages/blob/main/.gitmodules)).
-2. **Languages in legacy structure:** Maintain flat folders at the root (`helloworld/`, `hellouser/`, `numbers/`, `words/`) directly in the monorepo without a submodule. They are incrementally migrated to the standard.
-3. **`_experimental/` (Sandbox & Legacy Staging):** Space preserving the author's initial experimental exploration with each language (folders with `numbers/`, `words/`, `unit_test/demo/`). It acts as a sandbox and historical staging area prior to formal standardization in `core/`.
-
-> **ES:** Antes de crear o corregir documentación para un lenguaje, verifica si está en `.gitmodules` (homologado), en la raíz (legacy) o en `_experimental/` — la estructura y las plantillas aplicables difieren. Ver [`AGENT_Template.md`](AGENT_Template.md).
-> **EN:** Before creating or fixing documentation for a language, check whether it is in `.gitmodules` (homologated), in the root (legacy), or in `_experimental/` — the applicable structure and templates differ. See [`AGENT_Template.md`](AGENT_Template.md).
-
-```bash
-# Clonar con submódulos / Clone with submodules
-git clone --recurse-submodules https://github.com/yorche3/programming_languages.git
-
-# Inicializar submódulos si ya clonaste / Initialize submodules if already cloned
-git submodule update --init --recursive
-```
-
----
-
-## 🚀 Inicio rápido / Quick Start
-
-**ES:** El punto de entrada recomendado es el documento [`01_Hello_World.md`](core/foundations/01_Hello_World.md). Allí encontrarás la primera especificación para implementar en el lenguaje que elijas.
-
-**EN:** The recommended entry point is the [`01_Hello_World.md`](core/foundations/01_Hello_World.md) document. There you will find the first specification to implement in the language of your choice.
-
-| Paso / Step | Acción / Action |
-|-------------|----------------|
-| 1️⃣ | Elige un lenguaje / Choose a language (e.g. `python/`) |
-| 2️⃣ | Lee el `README.md` del lenguaje para instalar dependencias / Read the language's `README.md` to install dependencies |
-| 3️⃣ | Sigue el flujo desde [`01_Hello_World.md`](core/foundations/01_Hello_World.md) / Follow the flow from `01_Hello_World.md` |
-| 4️⃣ | Implementa, prueba y avanza al siguiente documento numerado / Implement, test, and advance to the next numbered document |
-| 5️⃣ | Sigue el ciclo de evidencia y cierre de [`WORKFLOW.md`](WORKFLOW.md), sin requerir glot / Follow the evidence and closure cycle without requiring glot |
-
----
-
-## 🗺️ Roadmap
-
-**ES:** Consulta el [`ROADMAP.md`](ROADMAP.md) para ver el plan completo de desarrollo y el estado actual de cada módulo.
-
-**EN:** Check the [`ROADMAP.md`](ROADMAP.md) for the complete development plan and current status of each module.
-
-👉 **[Abrir ROADMAP.md →](ROADMAP.md)**
-
----
-
-## 🔢 Flujo de implementación / Implementation Flow
-
-**ES:** Los documentos de especificación en **Core** siguen una numeración secuencial canónica (`01_`, `02_`, `03_`… hasta `19_`). Una vez dominada la base de Core, las fases de aplicación (**UI** y **Web**) pueden abordarse en paralelo, reiniciando su curva pedagógica desde el bootstrapping elemental de la interfaz hasta servicios reales:
-
-**EN:** Specification documents in **Core** follow a canonical sequential numbering (`01_`, `02_`, `03_`… through `19_`). Once the Core foundation is mastered, the application tracks (**UI** and **Web**) can be tackled in parallel, restarting their pedagogical curve from elemental interface bootstrapping to real-world services:
-
-```text
-📂 docs/core/
-├── README.md               ← Índice general / Main index
-├── foundations/            ← Fase 0 (Sintaxis, E/S básica, testing, recursión)
-│   ├── README.md
-│   ├── 01_Hello_World.md   ← 🚀 INICIO / START
-│   ├── 02_Hello_User.md
-│   ├── 03_Unit_Test_Calculator.md
-│   └── 04_Numbers.md
-├── algorithms/             ← Fase 1 — Algoritmos Puros (arrays, centinelas, O(n²) a O(n log n))
-│   ├── README.md
-│   ├── 05_Naive_Sort.md
-│   ├── 06_Data_Structures_Basics.md
-│   ├── 07_Data_Structures_Advanced.md
-│   ├── 08_Efficient_Sort.md
-│   ├── 09_Distributed_Sort.md
-│   └── 10_Searching.md
-├── text/                   ← Fase 2 — Procesamiento Contiguo (11_ a 15_; strings, excepciones, I/O)
-│   ├── README.md
-│   ├── 11_Transformations.md
-│   └── ... (hasta 15_ETL_Basico.md)
-├── structures/             ← Fase 3 — Algoritmos sobre Estructuras (16_ a 19_; grafos, backtracking, DP, greedy)
-│   ├── README.md
-│   ├── 16_Graph_Algorithms.md
-│   ├── 17_Backtracking.md
-│   ├── 18_Dynamic_Programming.md
-│   └── 19_Greedy.md
-├── data/                   ← Fase 4 — Abstracción y Persistencia (Result/Option, BD, ORM)
-│   └── README.md
-└── math/                   ← Fase 5 — Matemáticas (estadística, álgebra lineal)
-    └── README.md
-
-🔀 Tracks Paralelos de Aplicación (post-Core o en paralelo):
-├── UI (Fase 6)            ← Bootstrapping CLI/TUI/GUI → Menús con Core → Servicios CRUD (Exit Codes)
-└── Web (Fase 7)           ← Servidor MVC/REST → Despacho a Core → APIs con persistencia (HTTP Status)
-```
-
-> **Consejo / Tip:** Si estás en GitHub Pages, usa la navegación del sitio. Si estás en el repositorio directamente, abre los archivos `.md` en orden numérico dentro de `docs/core/`.
-
----
-
-*🌐 [github.com/yorche3/programming_languages](https://github.com/yorche3/programming_languages)*
+**ES:** `scripts/` contiene glot, una herramienta personal del autor. No es
+un módulo académico ni un requisito para seguir el ciclo.
+**EN:** `scripts/` contains glot, the author's personal helper. It is not an
+academic module or a requirement for following the cycle.

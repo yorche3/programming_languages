@@ -1,3 +1,9 @@
+---
+layout: default
+title: Registro de cierres / Closure record
+nav_exclude: true
+---
+
 # Roadmap Update Checklist / Registro de cierre
 
 Este archivo registra los cierres que autorizan una actualización de

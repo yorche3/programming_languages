@@ -1,3 +1,9 @@
+---
+layout: default
+title: Familias de lenguajes / Language families
+nav_exclude: true
+---
+
 # 👨‍👩‍👧‍👦 Familias de Lenguajes / Language Families
 
 > **ES:** Este documento agrupa los 50 lenguajes del monorepo en **9 familias prácticas**. Una familia es un conjunto de lenguajes que **comparten la forma de implementar el mismo módulo**: misma variante de pseudocódigo, mismo modelo de fallo, misma gestión de memoria. La agrupación no es por "similitud lingüística" (no es un árbol genealógico) sino por **decisión de implementación compartida**.

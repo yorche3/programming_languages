@@ -1,3 +1,9 @@
+---
+layout: default
+title: Plan de documentación / Documentation plan
+nav_exclude: true
+---
+
 # 📋 Plan de Documentación / Documentation Plan
 
 > **ES:** Registro maestro para el seguimiento de la documentación en todo el monorepo. Este archivo es la fuente única de verdad sobre **qué documentación existe, en qué estado se encuentra y qué pasos siguen**. Este documento realiza seguimiento **únicamente de la documentación, no del código ni de las pruebas** —estos últimos se gestionan en el roadmap y en el ciclo de sprint de cada rama—.
