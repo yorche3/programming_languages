@@ -256,6 +256,17 @@ gitfile, sin modificarlo. La limpieza segura de Git preexistente sigue pendiente
 **EN:** `new` and `scaffold` also block a nested `.git` gitfile without
 modifying it. Safe cleanup of pre-existing Git remains pending.
 
+**ES:** Scala preserva archivos existentes, rechaza enlaces y crea un build
+sbt/ScalaTest basado en las referencias. `sbt test` compiló el scaffold aislado
+sin casos y propagó casos sintéticos aprobado y fallido. La fuente y el build
+previos requieren revisión; detectar ejecuciones sin tests sigue pendiente.
+
+**EN:** Scala preserves existing files, rejects symlinks and creates an
+sbt/ScalaTest build based on the references. `sbt test` compiled the isolated
+scaffold with no cases, and propagated passing and failing synthetic tests.
+Existing source and build files need review; detecting empty test runs remains
+pending.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

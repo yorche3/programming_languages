@@ -164,6 +164,15 @@ preserva archivos existentes y rechaza enlaces.
 **EN:** Scheme creates a Guile module and excludes SRFI-64 logs when the ignore
 file is missing; existing files are preserved and symlinks rejected.
 
+**ES:** Scala crea solo si faltan fuente mínima, build sbt con ScalaTest,
+versión sbt e ignore, basados en las dos referencias homologadas. Protege
+rutas simbólicas; los archivos existentes y la adecuación del contrato requieren
+revisión.
+
+**EN:** Scala creates a missing minimal source, sbt build with ScalaTest, sbt
+version and ignore file based on the two homologated references. Symbolic paths
+are rejected; existing files and contract-specific source need review.
+
 **ES:** Tcl crea una fuente de paquete, su índice y el ignore si faltan,
 preservando archivos previos y rechazando enlaces. Los archivos previos
 necesitan revisión.

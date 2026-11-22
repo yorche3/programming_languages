@@ -348,6 +348,9 @@ sandbox_make() {
 [submodule "scheme"]
         path = scheme
         url = ../remote/scheme.git
+[submodule "scala"]
+        path = scala
+        url = ../remote/scala.git
 [submodule "tcl-tk"]
         path = tcl-tk
         url = ../remote/tcl-tk.git
@@ -2436,6 +2439,48 @@ mkdir -p -- "$RX_DRY"
 glot_run_sandbox -n scaffold rexx algorithms/naive_sort
 assert_eq 'scaffold Rexx dry-run: código' '0' "$rc_last"
 assert_eq 'scaffold Rexx dry-run: no crea archivos' '0' "$(find "$RX_DRY" -mindepth 1 | wc -l | tr -d ' ')"
+
+# Scala: build homologado y conservación de archivos existentes.
+SCALA="$SANDBOX/scala/core/algorithms/data_structures_basics"
+mkdir -p -- "$SCALA"
+glot_run_sandbox -n scaffold scala algorithms/data_structures_basics
+assert_eq 'scaffold Scala dry-run: código' '0' "$rc_last"
+assert_eq 'scaffold Scala dry-run: no crea archivos' '0' "$(find "$SCALA" -mindepth 1 | wc -l | tr -d ' ')"
+glot_run_sandbox scaffold scala algorithms/data_structures_basics
+assert_eq 'scaffold Scala: código' '0' "$rc_last"
+assert_eq 'scaffold Scala: fuente mínima' 'object DataStructuresBasics' "$(cat -- "$SCALA/src/main/scala/DataStructuresBasics.scala")"
+assert_contains 'scaffold Scala: dependencia ScalaTest' 'libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test' "$(cat -- "$SCALA/build.sbt")"
+assert_eq 'scaffold Scala: versión sbt' 'sbt.version=1.10.1' "$(cat -- "$SCALA/project/build.properties")"
+assert_contains 'scaffold Scala: avisa revisión' 'revisar archivos previos' "$err"
+assert_eq 'scaffold Scala: ignora compilados' '1' "$(git -C "$SCALA" check-ignore target/test.class | wc -l | tr -d ' ')"
+printf 'author source\n' >"$SCALA/src/main/scala/DataStructuresBasics.scala"
+printf 'author build\n' >"$SCALA/build.sbt"
+printf 'author sbt\n' >"$SCALA/project/build.properties"
+printf 'author ignore\n' >"$SCALA/.gitignore"
+glot_run_sandbox scaffold scala algorithms/data_structures_basics
+assert_eq 'scaffold Scala repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Scala repetido: conserva fuente' 'author source' "$(cat -- "$SCALA/src/main/scala/DataStructuresBasics.scala")"
+assert_eq 'scaffold Scala repetido: conserva build' 'author build' "$(cat -- "$SCALA/build.sbt")"
+assert_eq 'scaffold Scala repetido: conserva versión' 'author sbt' "$(cat -- "$SCALA/project/build.properties")"
+assert_eq 'scaffold Scala repetido: conserva ignore' 'author ignore' "$(cat -- "$SCALA/.gitignore")"
+printf 'author target\n' >"$SCALA/target-file"
+rm -- "$SCALA/src/main/scala/DataStructuresBasics.scala"
+ln -s "$SCALA/target-file" "$SCALA/src/main/scala/DataStructuresBasics.scala"
+glot_run_sandbox scaffold scala algorithms/data_structures_basics
+assert_eq 'scaffold Scala symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Scala symlink: conserva destino' 'author target' "$(cat -- "$SCALA/target-file")"
+SCALA_EMPTY="$SANDBOX/scala/core/algorithms/searching"
+mkdir -p -- "$SCALA_EMPTY"
+: >"$SCALA_EMPTY/build.sbt"
+glot_run_sandbox scaffold scala algorithms/searching
+assert_eq 'scaffold Scala build vacío: código' '0' "$rc_last"
+assert_eq 'scaffold Scala build vacío: no reemplaza' 'yes' "$([[ -f "$SCALA_EMPTY/build.sbt" && ! -s "$SCALA_EMPTY/build.sbt" ]] && echo yes || echo no)"
+SCALA_LINK="$SANDBOX/scala/core/algorithms/naive_sort"
+mkdir -p -- "$SCALA_LINK" "$WORK_DIR/scala-project-target"
+ln -s "$WORK_DIR/scala-project-target" "$SCALA_LINK/project"
+glot_run_sandbox scaffold scala algorithms/naive_sort
+assert_eq 'scaffold Scala proyecto symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Scala proyecto symlink: no crea archivos' '0' "$(find "$WORK_DIR/scala-project-target" -mindepth 1 | wc -l | tr -d ' ')"
 
 # Scheme: módulo Guile seguro y comprobación del runner.
 SC="$SANDBOX/scheme/core/algorithms/data_structures_basics"

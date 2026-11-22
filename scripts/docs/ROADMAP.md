@@ -295,6 +295,22 @@ errors are not lost on return from `CALL`; it is not integrated. A further
 test with `exit 0` inside a test method returned success: ooRexxUnit treated
 that exit as a method return even with the wrappers.
 
+**ES — Scala (2026-11-22):** el scaffold sobrescribía la fuente en cada
+ejecución y dejaba `build.sbt` y `build.properties` vacíos. Ahora crea
+fuente, build, versión sbt e ignore solo si faltan; rechaza enlaces y pide
+revisar archivos previos. Un scaffold aislado compiló con `sbt test` sin
+casos: esa salida es andamiaje, no valida una suite. `glot test` la informó
+como verde; queda pendiente distinguirla de una suite real. También se
+verificaron un caso aprobado y otro fallido de ScalaTest.
+
+**EN — Scala (2026-11-22):** scaffold overwrote the source on every run and
+left `build.sbt` and `build.properties` empty. It now creates missing source,
+build, sbt version and ignore files, rejects symlinks and requests review of
+existing files. An isolated scaffold compiled with `sbt test` and no cases:
+that result is scaffolding, not a validated suite. `glot test` reported it as
+green; distinguishing it from a real suite remains pending. A passing and a
+failing ScalaTest case were also verified.
+
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
 si faltan, preserva archivos existentes y avisa de su revisión. El selector
 anterior rechazaba las dos suites de `numbers` como ambiguas y Tcltest 2.5.11

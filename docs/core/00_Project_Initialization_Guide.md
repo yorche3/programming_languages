@@ -129,7 +129,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **rexx** | ✅ `mkdir -p src test` | — | ✅ `rexx test/{suite}.rexx` |
 | **ruby** | ⛓️ ✅ `mkdir -p src test` (después `bundle init` y `bundle install`) | `Gemfile`, `.rspec` | ✅ `bundle exec rspec` |
 | **rust** | ✅ `cargo init --lib` | `Cargo.toml` | ✅ `cargo test` |
-| **scala** | ✍️ `mkdir -p src/main/scala src/test/scala project` + `build.sbt` (el runner instalado, sbt 2.0.8, ya no trae `sbt new`) | `build.sbt`, `project/build.properties` | ✅ `sbt -batch -no-colors test` |
+| **scala** | ✅ `mkdir -p src/main/scala src/test/scala project` + build sbt (el runner instalado, sbt 2.0.8, ya no trae `sbt new`) | `build.sbt`, `project/build.properties` | ✅ `sbt -batch -no-colors test` |
 | **scheme** | ✍️ `mkdir -p src test` | — | ✅ Guile + SRFI-64 (comando abajo / command below) |
 | **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Module}/` | ✅ `swift test` |
 | **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ Tcltest (comando abajo / command below) |
@@ -761,16 +761,44 @@ en un paquete temporal, sin tocar módulos homologados.
 the contract suite. Verified offline in a temporary package, not actual modules.
 
 ### Scala — layout sbt estándar
+
+**ES:** Crear la fuente mínima, el build con ScalaTest, la versión sbt y el
+ignore solo si faltan, siguiendo las bases homologadas. Conservar los archivos
+existentes y rechazar enlaces simbólicos en estas rutas. Revisar los archivos
+previos vacíos y adecuar la fuente al contrato del módulo. `sbt test` sin casos
+solo verifica que arranca el andamiaje.
+
+**EN:** Create the minimal source, ScalaTest build, sbt version and ignore file
+only when missing, following the homologated bases. Preserve existing files and
+reject symlinks at these paths. Review empty existing files and adapt the source
+to the module contract. `sbt test` with no cases only verifies the scaffold.
+
 ```bash
-mkdir -p src/main/scala src/test/scala project
+if [[ -L src || -L src/main || -L src/main/scala || -L src/test ||
+      -L src/test/scala || -L project || -L src/main/scala/{Module}.scala ||
+      -L build.sbt || -L project/build.properties || -L .gitignore ||
+      ( -e src/main/scala/{Module}.scala && ! -f src/main/scala/{Module}.scala ) ||
+      ( -e build.sbt && ! -f build.sbt ) ||
+      ( -e project/build.properties && ! -f project/build.properties ) ||
+      ( -e .gitignore && ! -f .gitignore ) ]]; then
+  printf 'scaffold: ruta de Scala no segura / unsafe Scala path\n' >&2
+  false
+else
+  mkdir -p src/main/scala src/test/scala project &&
+    { test -e src/main/scala/{Module}.scala || (set -C; printf 'object {Module}\n' > src/main/scala/{Module}.scala); } &&
+    { test -e build.sbt || (set -C; printf 'ThisBuild / version := "0.1.0-SNAPSHOT"\nThisBuild / scalaVersion := "3.9.0"\n\nlazy val root = (project in file("."))\n  .settings(\n    name := "{module}",\n    libraryDependencies += "org.scalatest" %%%% "scalatest" %% "3.2.19" %% Test\n  )\n' > build.sbt); } &&
+    { test -e project/build.properties || (set -C; printf 'sbt.version=1.10.1\n' > project/build.properties); } &&
+    { test -e .gitignore || (set -C; printf 'target/\n.bsp/\n.scala-build/\n.metals/\n.idea/\n' > .gitignore); }
+fi
 ```
 
 ```text
 {module}/
 ├── build.sbt
 ├── project/build.properties
+├── .gitignore
 └── src/
-    ├── main/scala/          # objeto del módulo
+    ├── main/scala/{Module}.scala  # fuente mínima
     └── test/scala/          # suites ScalaTest por enfoque
 ```
 
