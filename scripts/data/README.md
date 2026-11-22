@@ -108,6 +108,14 @@ only when the module has no `Makefile`. `scaffold` also ensures a `.gitignore`
 without replacing existing contents. The 4a request adds or adjusts
 language-specific patterns and verifies an artifact with `git check-ignore`.
 
+**ES:** Assembly crea una fuente NASM mínima y un runner que anuncia que no
+hay tests; también crea `.gitignore` con patrones si falta el archivo. Los
+archivos existentes se conservan; el paso de suite conecta los grupos al runner.
+
+**EN:** Assembly creates a minimal NASM source and a runner announcing that
+there are no tests, plus an ignore file when absent. Existing content is preserved;
+the suite step connects its groups to the runner.
+
 **ES:** La revisión v2.1.0 preserva los layouts comprobados de C++
 (`src/include/tests`), Crystal (`src/spec`), F# (proyectos anidados con
 referencia declarada por dotnet), Go (`src/tests`), Haskell (`lib/test` y

@@ -190,7 +190,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 
 | Lenguaje / Language | Comandos / Commands | Declaración idiomática / Idiomatic declaration |
 |---|---|---|
-| `assembly` | `mkdir -p src test` · `touch src/{module}.asm` | `global {module}_init` + `.text` |
+| `assembly` | `mkdir -p src test` · crear `src/{module}.asm` si falta | `section .text`; el contrato declara sus símbolos en el paso 4b |
 | `c` | `mkdir -p include src test` · `touch include/{module}.h src/{module}.c` | `#ifndef {MODULE}_H` + `#define {MODULE}_H` en la cabecera; `#include "{module}.h"` en la fuente |
 | `cobol` | `mkdir -p src/copybooks src/lib test` · `touch src/lib/{module}.cbl` | `IDENTIFICATION DIVISION.` + `PROGRAM-ID. {Module}.` |
 | `forth` | `mkdir -p src test` · `touch src/{module}.forth` | `: {module}-init` |
@@ -222,6 +222,16 @@ mkdir -p src test
 ├── src/                     # un archivo .asm por enfoque
 └── test/                    # suites + run_tests.asm + test_macros.inc + test_utils.asm
 ```
+
+**ES:** El scaffold incluye un runner NASM mínimo que informa que todavía no
+hay tests; la suite debe conectar sus grupos y propagar los fallos. Si falta
+`.gitignore`, se crea con exclusiones para `obj/` y el ejecutable del runner;
+uno existente se conserva y debe verificarse.
+
+**EN:** Scaffold includes a minimal NASM runner reporting that no tests are
+configured; the suite must connect its groups and propagate failures. A missing
+`.gitignore` is created with patterns for `obj/` and the runner executable;
+an existing one is preserved and must be checked.
 
 ### Ballerina — biblioteca en la raíz y tests/
 

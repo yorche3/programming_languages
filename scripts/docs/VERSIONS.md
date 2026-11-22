@@ -85,6 +85,17 @@ exact Spago 1.0.4 samples. In an isolated project, `spago test --offline --stric
 compiled with zero warnings and errors and ran the runner. `test-unit`
 configuration and the remaining review are still pending.
 
+**ES:** Assembly incorpora un runner NASM mínimo que informa de la ausencia
+de tests, una fuente ensamblable y patrones para objetos/ejecutable; preserva
+archivos existentes y completa el antiguo runner vacío. Verificado en un
+directorio aislado con `make run`, NASM y `ld`; la suite debe conectar sus
+grupos y propagar los fallos.
+
+**EN:** Assembly now provides an executable empty NASM runner, an assemblable
+source and ignore patterns, preserving existing contents. Verified in an
+isolated directory with `make run`, NASM and `ld`; the suite must connect its
+groups and propagate failures.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

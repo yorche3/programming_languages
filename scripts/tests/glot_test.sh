@@ -1776,16 +1776,49 @@ assert_eq 'sandbox scaffold assembly: garantiza .gitignore' 'si' \
     "$([[ -f "$AB/.gitignore" ]] && echo si || echo no)"
 assert_contains 'sandbox scaffold assembly: avisa del delegate' \
     'glot prompt scaffold assembly algorithms/naive_sort' "$err"
+assert_eq 'sandbox scaffold assembly: declaración NASM válida' 'section .text' "$(cat "$AB/src/naive_sort.asm")"
+assert_eq 'sandbox scaffold assembly: crea runner mínimo' '0' \
+    "$(cmp -s "$AB/test/run_tests.asm" "$TESTS_DIR/../data/scaffold_templates/assembly.runner.asm"; echo $?)"
+assert_eq 'sandbox scaffold assembly: excluye objetos y ejecutable' '2' \
+    "$(git -C "$AB" check-ignore obj/example.o test/run_tests | wc -l | tr -d ' ')"
+if command -v nasm >/dev/null 2>&1 && command -v ld >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
+    assembly_rc=0
+    assembly_out="$(make -s -C "$AB" run 2>&1)" || assembly_rc=$?
+    assert_eq 'sandbox scaffold assembly: runner compila y ejecuta' '0' "$assembly_rc"
+    assert_contains 'sandbox scaffold assembly: runner declara ausencia de pruebas' 'Scaffold: no tests configured' "$assembly_out"
+fi
 
 # Repetir scaffold no reemplaza los artefactos declarados como preservables.
 printf 'custom-pattern\n' >"$AB/.gitignore"
 printf 'custom-makefile\n' >"$AB/Makefile"
+printf 'custom source\n' >"$AB/src/naive_sort.asm"
+printf 'custom runner\n' >"$AB/test/run_tests.asm"
 glot_run_sandbox scaffold assembly algorithms/naive_sort
 assert_eq 'sandbox scaffold repetido: código' '0' "$rc_last"
 assert_eq 'sandbox scaffold repetido: conserva .gitignore' 'custom-pattern' \
     "$(cat -- "$AB/.gitignore")"
 assert_eq 'sandbox scaffold repetido: conserva Makefile' 'custom-makefile' \
     "$(cat -- "$AB/Makefile")"
+assert_eq 'sandbox scaffold assembly repetido: conserva fuente' 'custom source' "$(cat "$AB/src/naive_sort.asm")"
+assert_eq 'sandbox scaffold assembly repetido: conserva runner' 'custom runner' "$(cat "$AB/test/run_tests.asm")"
+
+AB_SAFE="$SANDBOX/assembly/core/algorithms/data_structures_basics"
+mkdir -p "$AB_SAFE/src" "$AB_SAFE/test"
+touch "$AB_SAFE/test/run_tests.asm"
+glot_run_sandbox scaffold assembly algorithms/data_structures_basics
+assert_eq 'assembly runner vacío anterior: completa andamiaje' '0' "$rc_last"
+assert_eq 'assembly runner vacío anterior: usa runner mínimo' '0' \
+    "$(cmp -s "$AB_SAFE/test/run_tests.asm" "$TESTS_DIR/../data/scaffold_templates/assembly.runner.asm"; echo $?)"
+rm -- "$AB_SAFE/test/run_tests.asm"
+ln -s "$AB_SAFE/src/data_structures_basics.asm" "$AB_SAFE/test/run_tests.asm"
+glot_run_sandbox scaffold assembly algorithms/data_structures_basics
+assert_eq 'assembly runner symlink: bloquea' '4' "$rc_last"
+assert_eq 'assembly runner symlink: conserva destino' 'section .text' "$(cat "$AB_SAFE/src/data_structures_basics.asm")"
+rm -- "$AB_SAFE/test/run_tests.asm" "$AB_SAFE/Makefile"
+ln -s "$AB_SAFE/src/data_structures_basics.asm" "$AB_SAFE/Makefile"
+glot_run_sandbox scaffold assembly algorithms/data_structures_basics
+assert_eq 'assembly Makefile symlink: bloquea' '4' "$rc_last"
+assert_eq 'assembly Makefile symlink: conserva destino' 'section .text' "$(cat "$AB_SAFE/src/data_structures_basics.asm")"
 
 # v2.1.0: el nombre del fuente y el archivo vacío de pruebas son comandos del catálogo.
 BB="$SANDBOX/ballerina/core/algorithms/naive_sort"
