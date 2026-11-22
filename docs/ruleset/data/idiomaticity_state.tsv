@@ -322,7 +322,7 @@ grain	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adja
 groovy	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (contains in add and lookup); insertion manual and sorted	a4885da	2026-11-22
 haskell	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (elem on neighbours in add and lookup); insertion manual and sorted	25d756a	2026-11-22
 haxe	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (indexOf in add and lookup); insertion manual and sorted	e4b30ac	2026-11-22
-java	data_structures_advanced	algorithms	mostly-idiomatic	-	0	Library membership on the adjacency in duplicate detection (contains in add and lookup); insertion manual and sorted	36ef2c9	2026-11-22
+java	data_structures_advanced	algorithms	idiomatic	-	0	Aligned 2026-11-22: hand-written adjacency lookup (hasNeighbor) plus manual sorted insertion; no contains, indexOf or sort	715ef35	2026-11-22
 javascript	data_structures_advanced	algorithms	transitional	complexity	0	Library sort in getNeighbors output path plus includes in add and lookup	271fd70	2026-11-22
 julia	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	0013f8a	2026-11-22
 kotlin	data_structures_advanced	algorithms	idiomatic	-	0	Clean: hand-written adjacency search and sorted insertion, no library search or sort	71599a3	2026-11-22

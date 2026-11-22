@@ -18,7 +18,7 @@ in the roadmap at `50/50`.
 - **Convención / Convention:** [`README.md`](README.md)
 - **Escala / Scale:** [`IDIOMATICITY_LEVELS.md`](../ruleset/IDIOMATICITY_LEVELS.md)
 - **Severidad / Severity:** [`DEVIATION_POLICY.md`](../ruleset/DEVIATION_POLICY.md)
-- **Estado / Status:** **pase ejecutado (primer barrido)**; contrato resuelto el 2026-11-22 (se mantiene el orden creciente); 15 hallazgos 🟡/🟠 con `align` planificado y 35 lenguajes 🟢 / **pass run (first sweep)**; contract settled on 2026-11-22 (ascending order stays); 15 🟡/🟠 findings with a planned `align` and 35 languages 🟢
+- **Estado / Status:** **pase ejecutado (primer barrido)**; contrato resuelto el 2026-11-22 (se mantiene el orden creciente); 14 hallazgos 🟡/🟠 con `align` planificado, 1 alineado (`java`) y 35 lenguajes 🟢 / **pass run (first sweep)**; contract settled on 2026-11-22 (ascending order stays); 14 🟡/🟠 findings with a planned `align`, 1 aligned (`java`) and 35 languages 🟢
 - **Última verificación / Last verification:** 2026-11-22
 
 ---
@@ -192,7 +192,6 @@ deviation is in **module fidelity**, not in output.
 | `groovy` | `Graph.groovy:43,60` — `neighbors.contains(v)` | 🟡 |
 | `haskell` | `DataStructuresAdvanced.hs:139,154` — `` v `elem` neighbours `` | 🟡 |
 | `haxe` | `Graph.hx:55,63` — `neighbors.indexOf(v)` | 🟡 |
-| `java` | `Graph.java:54,64` — `neighbors.contains(v)` | 🟡 |
 | `ocaml` | `graph.ml:134,144` — `List.mem v u_vertex.neighbors` | 🟡 |
 | `prolog` | `data_structures_advanced.pl:124,149` — `member(To, Neighbors)` | 🟡 |
 | `ruby` | `graph.rb:25,36` — `neighbors.include?(v)` | 🟡 |
@@ -218,10 +217,10 @@ path, a delegated design decision, hence 🟠 (structural). The other fourteen a
 
 ### 🟢 Homologados / Homologated
 
-- **35 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`,
-  `common-lisp`, `cpp`, `d`, `dart`, `elixir`, `forth`, `go`, `grain`, `julia`,
-  `kotlin`, `lua`, `nim`, `perl`, `php`, `purescript`, `python`, `r`, `racket`,
-  `raku`, `rescript`, `rexx`, `scala`, `scheme`, `swift`, `tcl-tk`,
+- **36 lenguajes**: `ada`, `assembly`, `ballerina`, `c`, `clojure`, `cobol`,
+  `common-lisp`, `cpp`, `d`, `dart`, `elixir`, `forth`, `go`, `grain`, `java`,
+  `julia`, `kotlin`, `lua`, `nim`, `perl`, `php`, `purescript`, `python`, `r`,
+  `racket`, `raku`, `rescript`, `rexx`, `scala`, `scheme`, `swift`, `tcl-tk`,
   `typescript`, `v`, `vala`, `zig`
 
 **ES:** 🟢 significa que el barrido léxico no encontró ninguna búsqueda ni
@@ -262,7 +261,7 @@ bound and output do not change — the deviation belongs to the **module layer**
 | `groovy` | `contains` en alta y consulta | `align` — bucle propio / own loop |
 | `haskell` | `` `elem` `` en alta y consulta | `align` — función propia sobre la lista / own list function |
 | `haxe` | `indexOf` en alta y consulta | `align` — bucle propio / own loop |
-| `java` | `contains` en alta y consulta | `align` — bucle propio / own loop |
+| `java` | `contains` en alta y consulta | ✅ cerrado en `715ef35`: `hasNeighbor` recorre la adyacencia / closed: `hasNeighbor` scans the adjacency |
 | `javascript` | `includes` en alta y consulta; `sort` en la salida | `align` — bucle propio e inserción ordenada manual / own loop and manual sorted insertion |
 | `ocaml` | `List.mem` en alta y consulta | `align` — recursión propia / own recursion |
 | `prolog` | `member/2` en alta y consulta | `align` — recorrido propio / own traversal, si el contrato lo permite |
@@ -372,6 +371,7 @@ submodule pointer commit on the monorepo's `audit/...` branch.
 | 2026-11-22 | Suites nativas / Native suites | `glot test {lang} algorithms/data_structures_advanced` (50 ejecuciones) | **50/50 en verde**: p. ej. `ada` 0 fallos, `assembly` 23, `c` 153, `clojure` 19 tests/159 aserciones, `elixir` 24, `erlang` 24, `fsharp` 24, `forth` 180, `grain` 102, `julia` 137, `php` 23, `python` 23, `racket` 158, `ruby` 23 / **50/50 green** |
 | 2026-11-22 | Documentación / Documentation | `test -f {lang}/core/algorithms/data_structures_advanced/README.md` | 50/50 presentes / 50/50 present |
 | 2026-11-22 | Estado del árbol / Worktree state | `git -C {lang} status --short` | 50/50 sin cambios locales / 50/50 with no local changes |
+| 2026-11-22 | `align` de `java` / `java` align | `mvn test` + `glot evidence java algorithms/data_structures_advanced` | Rama `align/algorithms/data-structures-advanced`: `c65e7f8` (código), `7eed001` (README), merge `715ef35`; 23 tests, 0 fallos; verificador `-` (no declarado) / branch, code commit, README commit, merge; 23 tests, 0 failures; verifier `-` (not declared) |
 
 **ES:** El pase **no cierra** con este barrido: quedan 15 hallazgos por resolver
 o aceptar, y la propuesta de contrato del autor puede cambiar su criterio.
