@@ -217,6 +217,19 @@ development command collects all `*_test.pl` and `*_tests.pl` suites, reports
 an empty scaffold and rejects suites with no executed cases. Verified against
 all three `numbers` suites and `calculator`, whose name differs from its id.
 
+**ES — Hallazgo Perl (2026-11-22):** en un laboratorio aislado,
+`prove --ext=.pl` devolvió código 0 y `Result: NOTESTS` tanto con el
+directorio de pruebas vacío como con una suite que solo declara
+`plan skip_all`. `glot test` puede anunciar «en verde» sin ejecutar casos.
+Queda pendiente distinguir el scaffold vacío de una suite sin casos y
+evitar presentar esta última como validada, sin alterar suites existentes.
+
+**EN — Perl finding (2026-11-22):** in an isolated laboratory, `prove
+--ext=.pl` returned exit code 0 and `Result: NOTESTS` both for an empty test
+directory and for a suite with only `plan skip_all`. `glot test` can report
+green without running cases. Distinguishing an empty scaffold from a suite
+with no executed cases, without changing existing suites, remains pending.
+
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su
 delegate, con archivos sobrantes. El catálogo anterior solo declaraba
