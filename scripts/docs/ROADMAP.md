@@ -259,9 +259,11 @@ suite al cargarla; descubrir clases y ejecutarlas otra vez duplicaría los
 tests y sus posibles efectos. Un prototipo con `CALL` y una subclase instalada
 mediante `ooRexxUnit.default.TestResult.Class` capturó los resultados sin
 repetir las suites homologadas de `numbers` y `data_structures_basics`;
-detectó una aserción fallida, una suite vacía y `exit 7`. Sigue pendiente
-validar las suites que proporcionen su propio resultado o cambien esa
-configuración antes de adoptar el runner: no deben generar un falso verde.
+detectó una aserción fallida, una suite vacía y `exit 7`. No es una solución:
+una suite sintética ejecutó un test aprobado con el resultado predeterminado
+y otro fallido con `.TestResult~new` explícito; el prototipo devolvió 0. Es
+necesario detectar también resultados proporcionados explícitamente y cambios
+en la configuración sin generar falsos verdes.
 
 **EN — Rexx (2026-11-22):** scaffold preserves sources and rejects symbolic
 paths, but the runner remains pending. `glot test` rejects the two `numbers`
@@ -274,9 +276,11 @@ on load, so discovering and executing its classes afterward would run tests
 and their potential side effects twice. A prototype using `CALL` and a
 subclass registered as `ooRexxUnit.default.TestResult.Class` captured results
 without repeating the homologated `numbers` and `data_structures_basics`
-suites; it detected an assertion failure, an empty suite and `exit 7`.
-Suites supplying their own result or changing that configuration still need
-validation before adopting the runner: they must not produce false success.
+suites; it detected an assertion failure, an empty suite and `exit 7`. It is not
+a solution: a synthetic suite ran a passing test with the default result and
+a failing one with an explicit `.TestResult~new`; the prototype returned 0.
+Explicit results and configuration changes must also be detected without false
+success.
 
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
 si faltan, preserva archivos existentes y avisa de su revisión. El selector
