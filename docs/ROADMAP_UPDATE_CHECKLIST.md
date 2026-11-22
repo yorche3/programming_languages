@@ -1981,6 +1981,7 @@ Fecha / Date: 2026-11-22
 Fase / Phase: core.algorithms
 Módulo(s) / Module(s): core.algorithms.data_structures_advanced (especificación 07_Data_Structures_Advanced)
 Lenguaje(s) / Language(s): 50 auditados; 15 con hallazgo alineado (java, csharp, groovy, haxe, crystal, ruby, haskell, elm, ocaml, fsharp, gleam, rust, erlang, prolog, javascript)
+Lenguajes sin cambios / Unchanged languages: los otros 35 (ada, assembly, ballerina, c, clojure, cobol, common-lisp, cpp, d, dart, elixir, forth, go, grain, julia, kotlin, lua, nim, perl, php, purescript, python, r, racket, raku, rescript, rexx, scala, scheme, swift, tcl-tk, typescript, v, vala, zig)
 Código verificado / Code verified: yes (auditoría en docs/audits/07_Audited_Data_Structures_Advanced.md; evidencia en docs/evidence/algorithms/data_structures_advanced/)
 Tests y comandos / Tests and commands:
 - `glot test {lang} algorithms/data_structures_advanced` sobre los 50 lenguajes -> 50/50 en verde en el barrido inicial

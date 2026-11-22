@@ -280,9 +280,11 @@ autor). Detalle en el plan de trabajo de la sección siguiente.
    commit del submódulo / N3 README updated **if structure or complexity
    changed**; on integration the TSV row moves up with the submodule commit.
 6. **Integración / Integration:** merge en el `main` del submódulo y, en el
-   monorepo, `glot pointer` + `glot save 9` en la rama `audit/...` / merge into
-   the submodule's `main`, then `glot pointer` + `glot save 9` on the
-   `audit/...` branch.
+   monorepo, el commit del puntero a mano en la rama `audit/...`
+   (`chore(repo): point data_structures_advanced {lang} align`); `glot pointer` y
+   `glot save` no se usan porque exigen datos de sprint / merge into the
+   submodule's `main`, then the pointer commit by hand on the `audit/...` branch;
+   `glot pointer` and `glot save` are not used because they require sprint data.
 7. **Cierre / Closure:** el pase cierra cuando los 50 están 🟢 o con desviación
    aceptada por escrito en `ruleset/idioms/{lang}.md`; lo decide el autor /
    the pass closes when all 50 are 🟢 or have a written accepted deviation in

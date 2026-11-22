@@ -98,7 +98,7 @@ git -C racket switch -c align/algorithms/naive-sort main   # cada submódulo que
 | 4 | Acta | `glot evidence {lang} {fase}/{modulo}` | `docs/evidence/{fase}/{modulo}/{lang}.md` regenerada |
 | 5 | README del módulo | [`README_Template.md`](README_Template.md), si el `align` cambió estructura o complejidad | README de Nivel 3 al día |
 | 6 | Commit | `fix({fase}): align {modulo} with the audit` + la causa en el cuerpo | Commit del submódulo |
-| 7 | Integración y puntero | Merge en el `main` del submódulo; en el monorepo `glot pointer` + `glot save 9` | Gitlink actualizado en la rama `audit/...` |
+| 7 | Integración y puntero | Merge en el `main` del submódulo; en el monorepo, `git add {lang}` + `chore(repo): point {modulo} {lang} align` | Gitlink actualizado en la rama `audit/...` |
 
 **ES:** El `align` deja **un commit por paso** en la rama del submódulo —código
 (`fix({fase}): align {modulo} with the audit`), documentación del módulo
