@@ -129,7 +129,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **rexx** | ✅ `mkdir -p src test` | — | ✅ `rexx test/{suite}.rexx` |
 | **ruby** | ⛓️ ✅ `mkdir -p src test` (después `bundle init` y `bundle install`) | `Gemfile`, `.rspec` | ✅ `bundle exec rspec` |
 | **rust** | ✅ `cargo init --lib` | `Cargo.toml` | ✅ `cargo test` |
-| **scala** | ✅ `mkdir -p src/main/scala src/test/scala project` + build sbt (el runner instalado, sbt 2.0.8, ya no trae `sbt new`) | `build.sbt`, `project/build.properties` | ✅ `sbt -batch -no-colors test` |
+| **scala** | ✅ `mkdir -p src/main/scala src/test/scala project` + build sbt (el runner instalado, sbt 2.0.8, ya no trae `sbt new`) | `build.sbt`, `project/build.properties` | ✅ sbt + ScalaTest (comando abajo / command below) |
 | **scheme** | ✍️ `mkdir -p src test` | — | ✅ Guile + SRFI-64 (comando abajo / command below) |
 | **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Module}/` | ✅ `swift test` |
 | **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ Tcltest (comando abajo / command below) |
@@ -200,7 +200,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | `perl` | `mkdir -p lib test` · `touch lib/{module}.pl` | `package {Module};` + `use strict;` + `use warnings;` + `1;` |
 | `php` | `mkdir -p src test` · `touch src/{Module}.php` | `<?php` + `declare(strict_types=1);` + `namespace {Module};` |
 | `prolog` | `mkdir -p src test` · crear `src/{module}.pl` si falta | Fuente inicialmente vacía, consultada como en las bases homologadas |
-| `scala` | `mkdir -p src/main/scala src/test/scala project` · `touch src/main/scala/{Module}.scala` | `object {Module}` |
+| `scala` | `mkdir -p src/main/scala src/test/scala project` · crear `src/main/scala/{Module}.scala` si falta | `object {Module}` |
 | `scheme` | `mkdir -p src test` · crear `src/{module}.scm` si falta | `(define-module ({module}))` (Guile) |
 
 **ES:** En los lenguajes con herramienta, la secuencia manual equivalente es su comando de la **tabla maestra** seguido de lo que lista la sección **Secuencias de varios pasos**.
@@ -765,13 +765,12 @@ the contract suite. Verified offline in a temporary package, not actual modules.
 **ES:** Crear la fuente mínima, el build con ScalaTest, la versión sbt y el
 ignore solo si faltan, siguiendo las bases homologadas. Conservar los archivos
 existentes y rechazar enlaces simbólicos en estas rutas. Revisar los archivos
-previos vacíos y adecuar la fuente al contrato del módulo. `sbt test` sin casos
-solo verifica que arranca el andamiaje.
+previos vacíos y adecuar la fuente al contrato del módulo.
 
 **EN:** Create the minimal source, ScalaTest build, sbt version and ignore file
 only when missing, following the homologated bases. Preserve existing files and
 reject symlinks at these paths. Review empty existing files and adapt the source
-to the module contract. `sbt test` with no cases only verifies the scaffold.
+to the module contract.
 
 ```bash
 if [[ -L src || -L src/main || -L src/main/scala || -L src/test ||
@@ -800,6 +799,18 @@ fi
 └── src/
     ├── main/scala/{Module}.scala  # fuente mínima
     └── test/scala/          # suites ScalaTest por enfoque
+```
+
+**ES:** El comando conserva `test` y su informe nativos, y comprueba sus
+resultados estructurados para rechazar ejecuciones sin casos aprobados.
+Está verificado para los proyectos sbt de un módulo usados aquí.
+
+**EN:** The command keeps native `test` and its report, and checks structured
+results to reject runs without passing cases. It is verified for the
+single-project sbt builds used here.
+
+```bash
+sbt -batch -no-colors 'set Test / test := { (Test / test).value; val result = (Test / executeTests).value; if (result.overall != sbt.protocol.testing.TestResult.Passed) throw new MessageOnlyException("Scala tests failed"); if (result.events.values.map(_.passedCount).sum == 0) throw new MessageOnlyException("No Scala test cases passed") }' test
 ```
 
 ### Scheme — src/ + test/

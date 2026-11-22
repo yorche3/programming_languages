@@ -299,17 +299,19 @@ that exit as a method return even with the wrappers.
 ejecución y dejaba `build.sbt` y `build.properties` vacíos. Ahora crea
 fuente, build, versión sbt e ignore solo si faltan; rechaza enlaces y pide
 revisar archivos previos. Un scaffold aislado compiló con `sbt test` sin
-casos: esa salida es andamiaje, no valida una suite. `glot test` la informó
-como verde; queda pendiente distinguirla de una suite real. También se
-verificaron un caso aprobado y otro fallido de ScalaTest.
+casos y el comando anterior lo informó como verde. El comando en desarrollo
+conserva la tarea y el informe nativos, y comprueba el resultado estructurado:
+rechaza ejecuciones sin casos aprobados o con fallos. Se verificaron casos
+aprobados, fallidos y omitidos y que no se ejecuten dos veces.
 
 **EN — Scala (2026-11-22):** scaffold overwrote the source on every run and
 left `build.sbt` and `build.properties` empty. It now creates missing source,
 build, sbt version and ignore files, rejects symlinks and requests review of
-existing files. An isolated scaffold compiled with `sbt test` and no cases:
-that result is scaffolding, not a validated suite. `glot test` reported it as
-green; distinguishing it from a real suite remains pending. A passing and a
-failing ScalaTest case were also verified.
+existing files. An isolated scaffold compiled with `sbt test` and no cases,
+which the previous command reported as green. The development command retains
+the native task and report, checking structured results to reject failures and
+runs with no passing cases. Passing, failing and ignored cases were verified,
+as was single execution.
 
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
 si faltan, preserva archivos existentes y avisa de su revisión. El selector

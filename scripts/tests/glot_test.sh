@@ -2453,6 +2453,27 @@ assert_contains 'scaffold Scala: dependencia ScalaTest' 'libraryDependencies += 
 assert_eq 'scaffold Scala: versión sbt' 'sbt.version=1.10.1' "$(cat -- "$SCALA/project/build.properties")"
 assert_contains 'scaffold Scala: avisa revisión' 'revisar archivos previos' "$err"
 assert_eq 'scaffold Scala: ignora compilados' '1' "$(git -C "$SCALA" check-ignore target/test.class | wc -l | tr -d ' ')"
+if command -v sbt >/dev/null 2>&1; then
+    glot_run_sandbox test scala algorithms/data_structures_basics
+    assert_eq 'test Scala: rechaza scaffold sin casos' '4' "$rc_last"
+    assert_contains 'test Scala: explica ausencia de casos' 'No Scala test cases passed' "$out$err"
+    printf 'import org.scalatest.funsuite.AnyFunSuite\nclass ScaffoldTest extends AnyFunSuite {\n  test("runs") { java.nio.file.Files.writeString(java.nio.file.Path.of("runs.txt"), "run\\n", java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND); assert(1 == 1) }\n}\n' >"$SCALA/src/test/scala/ScaffoldTest.scala"
+    glot_run_sandbox test scala algorithms/data_structures_basics
+    assert_eq 'test Scala: suite aprobada' '0' "$rc_last"
+    assert_eq 'test Scala: ejecuta una sola vez' '1' "$(wc -l <"$SCALA/runs.txt" | tr -d ' ')"
+    assert_contains 'test Scala: conserva informe nativo' 'All tests passed' "$out"
+    printf 'import org.scalatest.funsuite.AnyFunSuite\nclass ScaffoldTest extends AnyFunSuite {\n  test("fails") { assert(1 == 2) }\n}\n' >"$SCALA/src/test/scala/ScaffoldTest.scala"
+    glot_run_sandbox test scala algorithms/data_structures_basics
+    assert_eq 'test Scala: propaga fallo' '4' "$rc_last"
+    assert_contains 'test Scala: informa fallo' 'TEST FAILED' "$out$err"
+    printf 'import org.scalatest.funsuite.AnyFunSuite\nclass ScaffoldTest extends AnyFunSuite {\n  ignore("skipped") { assert(1 == 1) }\n}\n' >"$SCALA/src/test/scala/ScaffoldTest.scala"
+    glot_run_sandbox test scala algorithms/data_structures_basics
+    assert_eq 'test Scala: rechaza todos omitidos' '4' "$rc_last"
+    assert_contains 'test Scala: explica todos omitidos' 'No Scala test cases passed' "$out$err"
+    printf 'import org.scalatest.funsuite.AnyFunSuite\nclass ScaffoldTest extends AnyFunSuite {\n  ignore("skipped") { assert(1 == 1) }\n  test("runs") { assert(1 == 1) }\n}\n' >"$SCALA/src/test/scala/ScaffoldTest.scala"
+    glot_run_sandbox test scala algorithms/data_structures_basics
+    assert_eq 'test Scala: acepta aprobados con omitidos' '0' "$rc_last"
+fi
 printf 'author source\n' >"$SCALA/src/main/scala/DataStructuresBasics.scala"
 printf 'author build\n' >"$SCALA/build.sbt"
 printf 'author sbt\n' >"$SCALA/project/build.properties"

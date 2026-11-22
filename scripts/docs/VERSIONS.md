@@ -259,13 +259,21 @@ modifying it. Safe cleanup of pre-existing Git remains pending.
 **ES:** Scala preserva archivos existentes, rechaza enlaces y crea un build
 sbt/ScalaTest basado en las referencias. `sbt test` compiló el scaffold aislado
 sin casos y propagó casos sintéticos aprobado y fallido. La fuente y el build
-previos requieren revisión; detectar ejecuciones sin tests sigue pendiente.
+previos requieren revisión; el cambio siguiente aborda ejecuciones sin tests.
 
 **EN:** Scala preserves existing files, rejects symlinks and creates an
 sbt/ScalaTest build based on the references. `sbt test` compiled the isolated
 scaffold with no cases, and propagated passing and failing synthetic tests.
-Existing source and build files need review; detecting empty test runs remains
-pending.
+Existing source and build files need review; the following change addresses
+empty test runs.
+
+**ES:** El comando Scala comprueba los resultados estructurados de sbt sin
+repetir las pruebas; rechaza ejecuciones vacías o con todos los casos omitidos.
+Verificadas las dos bases homologadas en copias aisladas.
+
+**EN:** Scala's command checks sbt's structured results without rerunning tests;
+it rejects empty and entirely ignored runs. Both homologated bases were verified
+in isolated copies.
 
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 

@@ -92,6 +92,8 @@ Raku usa el descubrimiento y harness de prove6 con la misma protección; suma
 los resultados individuales porque TAP 0.3.15 no agrega correctamente `skipped`.
 Scheme ejecuta cada suite `*_guile.scm` y comprueba su runner SRFI-64.
 Tcl ejecuta cada suite `.test` y comprueba los contadores de Tcltest al limpiar.
+Scala conserva la tarea e informe nativos de sbt y comprueba sus resultados
+estructurados; rechaza las ejecuciones sin casos aprobados.
 
 **EN:** **Column 5 is maintained by hand** and only with verifiers **actually run**
 in the corresponding module; coverage is reported by `doctor` as
@@ -106,6 +108,8 @@ Raku uses prove6's discovery and harness with the same protection; it sums
 per-file results because TAP 0.3.15 does not aggregate `skipped` correctly.
 Scheme runs every `*_guile.scm` suite and checks its SRFI-64 runner.
 Tcl runs every `.test` suite and checks Tcltest counters at cleanup.
+Scala retains sbt's native task and report and checks structured results;
+it rejects runs without passing cases.
 
 **ES:** Los esqueletos de `Makefile` compartidos por `assembly`, `c`, `cobol`,
 `grain` y `r` viven en [`scaffold_templates/`](scaffold_templates/); el catálogo
