@@ -2321,13 +2321,36 @@ if command -v raku >/dev/null 2>&1 && command -v prove6 >/dev/null 2>&1; then
     raku_rc=0
     raku_out="$(cd "$RK" && raku -c lib/DataStructuresBasics.rakumod 2>&1)" || raku_rc=$?
     assert_eq 'scaffold Raku: fuente compilable' '0' "$raku_rc"
-    printf 'use Test;\nuse DataStructuresBasics;\nok True, "module loads";\ndone-testing;\n' >"$RK/t/module.rakutest"
     glot_run_sandbox test raku algorithms/data_structures_basics
-    assert_eq 'scaffold Raku: runner descubre suite' '0' "$rc_last"
+    assert_eq 'test Raku: scaffold sin suites falla' '4' "$rc_last"
+    assert_contains 'test Raku: explica ausencia de suites' 'No Raku test files configured' "$err"
+    printf 'use Test;\nplan 2;\nskip "not ready", 2;\n' >"$RK/t/module.rakutest"
+    glot_run_sandbox test raku algorithms/data_structures_basics
+    assert_eq 'test Raku: rechaza todos los casos omitidos' '4' "$rc_last"
+    assert_contains 'test Raku: explica casos omitidos' 'No Raku test cases executed' "$err"
+    printf 'say "1..0 # SKIP not ready";\n' >"$RK/t/empty.t"
+    glot_run_sandbox test raku algorithms/data_structures_basics
+    assert_eq 'test Raku: rechaza varias suites sin casos' '4' "$rc_last"
+    printf 'use Test;\nplan 2;\nskip "not ready";\nok True, "executed";\n' >"$RK/t/module.rakutest"
+    glot_run_sandbox test raku algorithms/data_structures_basics
+    assert_eq 'test Raku: acepta omisiones con casos ejecutados' '0' "$rc_last"
+    printf 'use Test;\nuse DataStructuresBasics;\nok True, "module loads";\ndone-testing;\n' >"$RK/t/module.rakutest"
+    mkdir -- "$RK/t/nested"
+    printf 'use Test;\nok True, "nested";\ndone-testing;\n' >"$RK/t/nested/nested.t6"
+    glot_run_sandbox test raku algorithms/data_structures_basics
+    assert_eq 'scaffold Raku: runner descubre suites' '0' "$rc_last"
     assert_contains 'scaffold Raku: ejecuta suite' 'module.rakutest' "$out"
+    assert_contains 'scaffold Raku: descubre suite anidada' 'nested.t6' "$out"
     printf 'use Test;\nok False, "failure";\ndone-testing;\n' >"$RK/t/module.rakutest"
     glot_run_sandbox test raku algorithms/data_structures_basics
     assert_eq 'scaffold Raku: propaga fallo' '4' "$rc_last"
+    printf 'this is not valid raku ;\n' >"$RK/t/module.rakutest"
+    glot_run_sandbox test raku algorithms/data_structures_basics
+    assert_eq 'test Raku: propaga error de sintaxis' '4' "$rc_last"
+    printf 'use Test;\nbail-out "blocked";\n' >"$RK/t/module.rakutest"
+    glot_run_sandbox test raku algorithms/data_structures_basics
+    assert_eq 'test Raku: rechaza bailout' '4' "$rc_last"
+    assert_contains 'test Raku: explica bailout' 'Bailed out' "$err"
 fi
 printf 'author Raku\n' >"$RK/lib/DataStructuresBasics.rakumod"
 printf 'author ignore\n' >"$RK/.gitignore"

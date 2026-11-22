@@ -124,7 +124,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **python** | ⛓️ ✅ `uv init --lib .` | `pyproject.toml`, `src/{module}/`, `conftest.py`, `tests/` | ✅ `pytest` |
 | **r** | ✅ `mkdir -p R tests/testthat` + `Makefile` | `Makefile` | ✅ `make test` |
 | **racket** | ⛓️ 🔧 `raco new library {module}` | `info.rkt`, `{module}.rkt` (con guiones), `tests/`, `Makefile` | ✅ `raco test -x .` |
-| **raku** | ✅ `mkdir -p lib t` | — | ✅ `prove6 -l t/` |
+| **raku** | ✅ `mkdir -p lib t` | — | ✅ TAP + Path::Finder (comando abajo / command below) |
 | **rescript** | ⛓️ ✅ `mkdir -p src test` (después el manifiesto con `npm pkg set`) | `rescript.json`, `package.json`, `jest.config.js` | ✅ `npm test` |
 | **rexx** | ✅ `mkdir -p src test` | — | ✅ `rexx test/{suite}.rexx` |
 | **ruby** | ⛓️ ✅ `mkdir -p src test` (después `bundle init` y `bundle install`) | `Gemfile`, `.rspec` | ✅ `bundle exec rspec` |
@@ -661,11 +661,18 @@ rm -rf .github pull_request_template.md render-template.sh profile
 ### Raku — lib/ + t/
 
 **ES:** Crear la fuente y el `.gitignore` solo si faltan; conservar contenido
-existente y rechazar enlaces simbólicos en estas rutas. El runner `prove6`
-descubre las suites en `t/`.
+existente y rechazar enlaces simbólicos en estas rutas. El comando usa el
+descubrimiento y harness de `prove6 -l t/`, pero falla cuando no hay suites o
+todos los casos se omiten; un scaffold vacío necesita su suite antes de validar.
 
 **EN:** Create the source and `.gitignore` only when absent; preserve existing
-content and reject symlinks at these paths. `prove6` discovers suites in `t/`.
+content and reject symlinks at these paths. The test command uses prove6's
+discovery and TAP harness but rejects runs without suites or non-skipped cases;
+an empty scaffold needs its suite before validation.
+
+```bash
+raku -e 'use TAP:ver<0.3.4+>; use Path::Finder:ver<0.4.4+>; my @sources = find("t/", :and[ :or[ { :depth(0) }, { :ext(any(<t rakutest t6>)), :skip-hidden } ], :file ]).sort; @sources.elems or die "No Raku test files configured in t/\n"; my $result = TAP::Harness.new.run(@sources, :cwd($*CWD), :include-dirs[$*CWD.add("lib")]).result; if $result.bailout.defined { note $result.bailout.message; exit 1 }; exit 1 if $result.has-errors; die "Raku test execution incomplete\n" unless $result.result-count == @sources.elems; die "No Raku test cases executed\n" unless [+] $result.results.map({ .tests-run - .skipped });'
+```
 
 ```bash
 if [[ -L lib || -L t || -L lib/{Module}.rakumod || -L .gitignore ||

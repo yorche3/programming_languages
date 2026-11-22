@@ -193,12 +193,20 @@ suite before validation.
 **ES:** Raku preserva la fuente y el ignore existentes, protege rutas
 simbólicas y crea patrones de precompilación si falta el ignore. Verificado
 con el compilador, una suite de prueba y `numbers`. La salida exitosa de
-`prove6` sin casos sigue pendiente de corrección.
+`prove6` sin casos se aborda en el cambio siguiente.
 
 **EN:** Raku preserves existing source and ignore files, protects symbolic
 paths and creates missing precompilation ignore patterns. Verified with the
-compiler, a test suite and `numbers`. `prove6` succeeding with no cases remains
-to be addressed.
+compiler, a test suite and `numbers`. `prove6` succeeding with no cases was
+addressed in the following change.
+
+**ES:** El comando Raku conserva el descubrimiento y harness de `prove6` y
+rechaza la ausencia de suites, ejecuciones incompletas y casos todos omitidos.
+Las suites homologadas de `numbers` y `data_structures_basics` pasan.
+
+**EN:** Raku's test command retains prove6's discovery and harness and rejects
+missing suites, incomplete runs and entirely skipped cases. The homologated
+`numbers` and `data_structures_basics` suites pass.
 
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 

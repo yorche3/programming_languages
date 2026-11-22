@@ -88,6 +88,8 @@ contra el módulo real antes de ejecutar, y `-n` imprime el resultado. El régim
 que no lo siga necesitará revisar su fila. Prolog recoge todas las suites
 `*_test.pl` y `*_tests.pl` con PlUnit. Perl usa la selección de archivos y el
 harness TAP de prove, pero rechaza las ejecuciones sin casos o con todos omitidos.
+Raku usa el descubrimiento y harness de prove6 con la misma protección; suma
+los resultados individuales porque TAP 0.3.15 no agrega correctamente `skipped`.
 
 **EN:** **Column 5 is maintained by hand** and only with verifiers **actually run**
 in the corresponding module; coverage is reported by `doctor` as
@@ -98,6 +100,8 @@ and `ruby` rows rely on the file name, so a module not following it will need it
 reviewed. Prolog collects all `*_test.pl` and `*_tests.pl` suites with PlUnit.
 Perl uses prove's file discovery and TAP harness, rejecting empty or entirely
 skipped runs instead of reporting them as successful.
+Raku uses prove6's discovery and harness with the same protection; it sums
+per-file results because TAP 0.3.15 does not aggregate `skipped` correctly.
 
 **ES:** Los esqueletos de `Makefile` compartidos por `assembly`, `c`, `cobol`,
 `grain` y `r` viven en [`scaffold_templates/`](scaffold_templates/); el catálogo
