@@ -495,7 +495,9 @@ multiproyecto probado. No demuestra que una suite existente ejecute casos.
 En una repetición rápida de la regresión, GHC recompiló la suite modificada
 sin mostrar reenlace y ejecutó el binario anterior; otra repetición pasó.
 La prueba separa las modificaciones dos segundos. La posible interacción
-con marcas de tiempo requiere investigación antes de garantizar reruns rápidos.
+con marcas de tiempo requiere investigación antes de garantizar reruns rápidos:
+en otro laboratorio, ocho cambios alternos rápidos sí provocaron el reenlace
+y devolvieron los resultados esperados, sin reproducir el incidente.
 
 **EN — Package without suites:** Cabal 3.16 returned success from `cabal test`
 when the package declared no suites. The `.:tests` selector rejects that case
@@ -504,7 +506,9 @@ tested. It does not prove that an existing suite executes cases.
 In one fast regression rerun, GHC recompiled the modified suite without
 reporting a relink and ran the previous binary; another rerun passed. The test
 separates edits by two seconds. A possible timestamp interaction needs further
-investigation before rapid reruns can be considered reliable.
+investigation before rapid reruns can be considered reliable: in a separate
+lab, eight rapid alternating edits did relink and returned the expected
+results, without reproducing the incident.
 
 Criterios para la siguiente versión / Next-version acceptance criteria:
 
