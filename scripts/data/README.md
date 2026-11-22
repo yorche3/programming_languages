@@ -91,6 +91,7 @@ harness TAP de prove, pero rechaza las ejecuciones sin casos o con todos omitido
 Raku usa el descubrimiento y harness de prove6 con la misma protección; suma
 los resultados individuales porque TAP 0.3.15 no agrega correctamente `skipped`.
 Scheme ejecuta cada suite `*_guile.scm` y comprueba su runner SRFI-64.
+Tcl ejecuta cada suite `.test` y comprueba los contadores de Tcltest al limpiar.
 
 **EN:** **Column 5 is maintained by hand** and only with verifiers **actually run**
 in the corresponding module; coverage is reported by `doctor` as
@@ -104,6 +105,7 @@ skipped runs instead of reporting them as successful.
 Raku uses prove6's discovery and harness with the same protection; it sums
 per-file results because TAP 0.3.15 does not aggregate `skipped` correctly.
 Scheme runs every `*_guile.scm` suite and checks its SRFI-64 runner.
+Tcl runs every `.test` suite and checks Tcltest counters at cleanup.
 
 **ES:** Los esqueletos de `Makefile` compartidos por `assembly`, `c`, `cobol`,
 `grain` y `r` viven en [`scaffold_templates/`](scaffold_templates/); el catálogo
@@ -163,12 +165,11 @@ preserva archivos existentes y rechaza enlaces.
 file is missing; existing files are preserved and symlinks rejected.
 
 **ES:** Tcl crea una fuente de paquete, su índice y el ignore si faltan,
-preservando archivos previos y rechazando enlaces. El runner y los archivos
-previos necesitan revisión.
+preservando archivos previos y rechazando enlaces. Los archivos previos
+necesitan revisión.
 
 **EN:** Tcl creates a missing package source, index and ignore file, preserving
-existing files and rejecting symlinks. The runner and pre-existing files need
-review.
+existing files and rejecting symlinks. Pre-existing files need review.
 
 **ES:** Forth crea una fuente vacía, un framework y un runner que anuncia que
 no hay tests; conserva archivos existentes. La suite conecta los grupos y el

@@ -269,16 +269,20 @@ on load, so discovering and executing its classes afterward would run tests
 and their potential side effects twice.
 
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
-si faltan, preserva archivos existentes y avisa de su revisión. `glot test`
-rechaza las dos suites de `numbers` como ambiguas; Tcltest 2.5.11 informó una
-aserción fallida y devolvió 0 en una prueba aislada. El runner y los archivos
-vacíos de scaffolds anteriores requieren tratamiento.
+si faltan, preserva archivos existentes y avisa de su revisión. El selector
+anterior rechazaba las dos suites de `numbers` como ambiguas y Tcltest 2.5.11
+devolvió 0 ante una aserción fallida. El comando en desarrollo ejecuta todas
+las suites `.test` y comprueba los contadores en `cleanupTests`; rechaza
+fallos, suites sin casos efectivos, casos sin finalizar y salidas anticipadas.
+Los archivos vacíos de scaffolds anteriores requieren revisión.
 
 **EN — Tcl (2026-11-22):** scaffold creates a loadable package and index when
-missing, preserves existing files and announces their review. `glot test`
-rejects the two `numbers` suites as ambiguous; Tcltest 2.5.11 reported a failing
-assertion but returned 0 in an isolated test. The runner and empty files from
-older scaffolds still require attention.
+missing, preserves existing files and announces their review. The previous
+selector rejected the two `numbers` suites as ambiguous, and Tcltest 2.5.11
+returned 0 for a failing assertion. The development command runs all `.test`
+suites and checks the counters at `cleanupTests`; it rejects failures, suites
+without effective cases, unfinished cases and early exits. Empty files from
+older scaffolds still need review.
 
 **ES — Scheme (2026-11-22):** el scaffold crea un módulo Guile cargable,
 preserva los archivos existentes y excluye logs SRFI-64 si falta el ignore.

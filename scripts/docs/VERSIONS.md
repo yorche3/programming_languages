@@ -242,6 +242,14 @@ existing files and announces pending runner and old-scaffold review. Rexx
 executed the suite body when creating a `.Package`, so running its classes
 again would duplicate tests.
 
+**ES:** El runner Tcl ejecuta todas las suites `.test` y comprueba los
+contadores de Tcltest para detectar fallos y ejecuciones vacías o incompletas.
+Se verificaron `numbers` y `data_structures_basics`.
+
+**EN:** The Tcl runner executes all `.test` suites and checks Tcltest counters
+for failures and empty or incomplete runs. Verified against `numbers` and
+`data_structures_basics`.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

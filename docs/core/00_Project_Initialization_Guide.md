@@ -132,7 +132,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **scala** | ✍️ `mkdir -p src/main/scala src/test/scala project` + `build.sbt` (el runner instalado, sbt 2.0.8, ya no trae `sbt new`) | `build.sbt`, `project/build.properties` | ✅ `sbt -batch -no-colors test` |
 | **scheme** | ✍️ `mkdir -p src test` | — | ✅ Guile + SRFI-64 (comando abajo / command below) |
 | **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Module}/` | ✅ `swift test` |
-| **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ `cd test && TCLLIBPATH="$(cd ../src && pwd)" tclsh9.0 {suite}.test` |
+| **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ Tcltest (comando abajo / command below) |
 | **typescript** | ✅ `npm init -y` | `package.json`, `tsconfig.json`, `jest.config.cjs` | ✅ `npm test` |
 | **v** | ⛓️ ✅ `v init --lib` (no interactivo; quitar el `.git` anidado y fijar la versión) | `v.mod`, `{module}.v`, `test/` | ✅ `v test .` |
 | **vala** | ⛓️ 🔧 `meson init --language vala --type library --name {module}` | `meson.build`, `src/`, `test/` | ✅ `valac src/{module}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{module}-tests && /tmp/{module}-tests` |
@@ -826,12 +826,11 @@ mkdir -p Sources/{Module} Tests/{Module}Tests
 
 **ES:** Crear la fuente, el índice de paquete y el ignore solo si faltan;
 conservar archivos existentes y rechazar enlaces simbólicos en estas rutas.
-El runner actual no admite varias suites; revisar también archivos previos
-que estén vacíos.
+Revisar los archivos previos que estén vacíos.
 
 **EN:** Create the source, package index and ignore file only when missing;
-preserve existing files and reject symlinks at these paths. The current runner
-does not handle multiple suites; also review any pre-existing empty files.
+preserve existing files and reject symlinks at these paths. Review any
+pre-existing empty files.
 
 ```bash
 if [[ -L src || -L test || -L src/{module}.tcl || -L src/pkgIndex.tcl ||
@@ -856,12 +855,17 @@ fi
 └── .gitignore               # logs de tests
 ```
 
-**ES:** Las suites cargan el paquete con TCLLIBPATH, no con una ruta relativa:
+**ES:** El comando ejecuta cada suite `.test`, añade `src/` a `auto_path` y
+comprueba los contadores de Tcltest en `cleanupTests`. Rechaza suites sin
+casos efectivos, fallos, salidas anticipadas y cambios en el hook de limpieza.
+Las suites deben finalizar sus casos con `cleanupTests` y no sustituir ese hook.
 
-**EN:** Suites load the package through TCLLIBPATH, not a relative path:
+**EN:** The command runs each `.test` suite, adds `src/` to `auto_path` and
+checks Tcltest counters at `cleanupTests`. It rejects suites with no effective
+cases, failures, premature exits and changes to the cleanup hook. Suites must
+finalize their cases with `cleanupTests` and must not replace that hook.
 ```bash
-cd test
-TCLLIBPATH="$(cd ../src && pwd)" tclsh9.0 recursive.test
+cd test && { found=0; failed=0; for suite in ./*.test; do [ -f "$suite" ] || continue; found=1; printf '%s\n' 'set suite [file normalize [lindex $argv 0]]; set argv {}; set argv0 $suite; package require tcltest; set auto_path [linsert $auto_path 0 [file normalize ../src]]; set ::glotTotal 0; set ::glotSkipped 0; set ::glotFailed 0; set ::glotCleanups 0; proc ::tcltest::cleanupTestsHook {} {variable numTests; incr ::glotCleanups; incr ::glotTotal $numTests(Total); incr ::glotSkipped $numTests(Skipped); incr ::glotFailed $numTests(Failed)}; set ::glotHookBody [info body ::tcltest::cleanupTestsHook]; rename ::exit ::glotExit; proc ::exit {{status 0}} {return -code error "Tcl test suite exited before validation ($status)"}; if {[catch {source $suite} message options]} {puts stderr "Tcl suite error: $message"; if {[dict exists $options -errorinfo]} {puts stderr [dict get $options -errorinfo]}; ::glotExit 1}; if {![llength [info procs ::tcltest::cleanupTestsHook]] || [info body ::tcltest::cleanupTestsHook] ne $::glotHookBody} {puts stderr "Tcl cleanup hook changed"; ::glotExit 1}; if {$::glotCleanups == 0} {puts stderr "Tcl test suite did not call cleanupTests"; ::glotExit 1}; if {$::tcltest::numTests(Total) != 0} {puts stderr "Tcl test cases not finalized"; ::glotExit 1}; if {$::glotTotal == $::glotSkipped} {puts stderr "No Tcl test cases executed"; ::glotExit 1}; ::glotExit [expr {$::glotFailed > 0}]' | tclsh9.0 /dev/stdin "$suite" || failed=1; done; if [ "$found" -eq 0 ]; then printf 'No Tcl test files configured in test/\n' >&2; false; else [ "$failed" -eq 0 ]; fi; }
 ```
 
 ### Vala — src/ + test/

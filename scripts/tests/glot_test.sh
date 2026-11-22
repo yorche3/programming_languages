@@ -919,7 +919,7 @@ assert_contains 'test -n: {suite} dentro de una ruta' 'test/naive_sort_tests.val
 assert_contains 'test -n: {module} en el binario' '/tmp/naive_sort-tests' "$out"
 
 glot_run -n test tcl-tk algorithms/naive_sort
-assert_contains 'test -n: suite con extensión .test' 'naive_sort.test' "$out"
+assert_contains 'test -n: recoge suites Tcl' './*.test' "$out"
 
 glot_run -n test ada algorithms/naive_sort
 assert_contains 'test -n: comando corregido de ada' 'alr -C tests run' "$out"
@@ -2507,12 +2507,51 @@ assert_eq 'scaffold Tcl: código' '0' "$rc_last"
 assert_contains 'scaffold Tcl: declara paquete' 'package provide data_structures_basics 1.0' "$(cat -- "$TC/src/data_structures_basics.tcl")"
 assert_contains 'scaffold Tcl: índice nativo' 'package ifneeded data_structures_basics 1.0' "$(cat -- "$TC/src/pkgIndex.tcl")"
 assert_eq 'scaffold Tcl: ignora logs' '1' "$(git -C "$TC" check-ignore test/suite.log | wc -l | tr -d ' ')"
-assert_contains 'scaffold Tcl: anuncia revisión' 'runner Tcltest' "$err"
+assert_contains 'scaffold Tcl: anuncia revisión' 'revisar archivos previos' "$err"
 if command -v tclsh9.0 >/dev/null 2>&1; then
     tcl_rc=0
     tcl_out="$(cd "$TC" && printf 'lappend auto_path [file normalize src]\nputs [package require data_structures_basics 1.0]\nputs [namespace exists ::DataStructuresBasics]\n' | tclsh9.0 2>&1)" || tcl_rc=$?
     assert_eq 'scaffold Tcl: paquete cargable' '0' "$tcl_rc"
     assert_eq 'scaffold Tcl: versión y namespace' "$(printf '1.0\n1')" "$tcl_out"
+    glot_run_sandbox test tcl-tk algorithms/data_structures_basics
+    assert_eq 'test Tcl: rechaza scaffold sin suites' '4' "$rc_last"
+    assert_contains 'test Tcl: explica ausencia de suites' 'No Tcl test files configured' "$err"
+    printf 'package require tcltest\npackage require data_structures_basics 1.0\nnamespace import ::tcltest::*\ntest first {first} -body {return 1} -result 1\ncleanupTests\n' >"$TC/test/first.test"
+    printf 'package require tcltest\nnamespace import ::tcltest::*\ntest second {second} -body {return 2} -result 2\ncleanupTests\n' >"$TC/test/second.test"
+    glot_run_sandbox test tcl-tk algorithms/data_structures_basics
+    assert_eq 'test Tcl: ejecuta varias suites' '0' "$rc_last"
+    assert_contains 'test Tcl: incluye primera suite' 'first.test:' "$out"
+    assert_contains 'test Tcl: incluye segunda suite' 'second.test:' "$out"
+    printf 'package require tcltest\nnamespace import ::tcltest::*\ntest first {failed} -body {return 1} -result 2\ncleanupTests\n' >"$TC/test/first.test"
+    glot_run_sandbox test tcl-tk algorithms/data_structures_basics
+    assert_eq 'test Tcl: propaga aserción fallida' '4' "$rc_last"
+    assert_contains 'test Tcl: ejecuta segunda tras fallo' 'second.test:' "$out"
+    printf 'package require tcltest\nnamespace import ::tcltest::*\ntest omitted {skipped} -constraints missing -body {return 1} -result 1\ncleanupTests\n' >"$TC/test/first.test"
+    glot_run_sandbox test tcl-tk algorithms/data_structures_basics
+    assert_eq 'test Tcl: rechaza suite totalmente omitida' '4' "$rc_last"
+    assert_contains 'test Tcl: explica ausencia de casos' 'No Tcl test cases executed' "$err"
+    printf 'package require tcltest\nnamespace import ::tcltest::*\ntest omitted {skipped} -constraints missing -body {return 1} -result 1\ntest passed {passed} -body {return 1} -result 1\ncleanupTests\ntest later {later} -body {return 2} -result 2\ncleanupTests\n' >"$TC/test/first.test"
+    glot_run_sandbox test tcl-tk algorithms/data_structures_basics
+    assert_eq 'test Tcl: acepta omisiones y múltiples limpiezas' '0' "$rc_last"
+    printf 'exit 0\n' >"$TC/test/first.test"
+    glot_run_sandbox test tcl-tk algorithms/data_structures_basics
+    assert_eq 'test Tcl: rechaza salida anticipada' '4' "$rc_last"
+    assert_contains 'test Tcl: explica salida anticipada' 'Tcl test suite exited before validation' "$err"
+    printf 'package require tcltest\nnamespace import ::tcltest::*\ntest first {first} -body {return 1} -result 1\n' >"$TC/test/first.test"
+    glot_run_sandbox test tcl-tk algorithms/data_structures_basics
+    assert_eq 'test Tcl: requiere limpieza' '4' "$rc_last"
+    assert_contains 'test Tcl: explica limpieza ausente' 'did not call cleanupTests' "$err"
+    printf 'package require tcltest\nnamespace import ::tcltest::*\ntest first {first} -body {return 1} -result 1\ncleanupTests\ntest late {late} -body {return 1} -result 2\n' >"$TC/test/first.test"
+    glot_run_sandbox test tcl-tk algorithms/data_structures_basics
+    assert_eq 'test Tcl: rechaza casos sin finalizar' '4' "$rc_last"
+    assert_contains 'test Tcl: explica casos sin finalizar' 'Tcl test cases not finalized' "$err"
+    printf 'package require tcltest\nnamespace import ::tcltest::*\ntest first {first} -body {return 1} -result 1\ncleanupTests\nproc ::tcltest::cleanupTestsHook {} {}\ntest failed {failed} -body {return 1} -result 2\ncleanupTests\n' >"$TC/test/first.test"
+    glot_run_sandbox test tcl-tk algorithms/data_structures_basics
+    assert_eq 'test Tcl: rechaza sustitución del hook' '4' "$rc_last"
+    assert_contains 'test Tcl: explica hook sustituido' 'Tcl cleanup hook changed' "$err"
+    printf 'if {1} {\n' >"$TC/test/first.test"
+    glot_run_sandbox test tcl-tk algorithms/data_structures_basics
+    assert_eq 'test Tcl: propaga error de suite' '4' "$rc_last"
 fi
 printf 'author source\n' >"$TC/src/data_structures_basics.tcl"
 printf 'author index\n' >"$TC/src/pkgIndex.tcl"
