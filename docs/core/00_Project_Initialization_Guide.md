@@ -108,7 +108,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **go** | ✅ `go mod init example.com/{module}` | `go.mod` | ✅ `go test ./...` |
 | **grain** | ✍️ `mkdir -p src tests` + `Makefile` | `Makefile` | ✅ `make test` |
 | **groovy** | ⛓️ ✅ `gradle init --type groovy-library --dsl groovy --use-defaults` | `settings.gradle`, `lib/build.gradle`, `gradle/` | ✅ `./gradlew test` |
-| **haskell** | 🔧 `cabal init --lib` | `{module}.cabal` | ✅ `cabal test` |
+| **haskell** | 🔧 `cabal init --lib` | `{module}.cabal` | ✅ `cabal test --ghc-options=-Werror=missing-home-modules` |
 | **haxe** | ⛓️ ✅ `mkdir -p src test` (después `haxelib install utest`) | `build.hxml`, `RunTests.hx` | ✅ `haxe build.hxml` |
 | **java** | ✍️ `pom.xml` a mano (el arquetipo quickstart es de aplicación: R2) | `pom.xml` | ✅ `mvn test` |
 | **javascript** | 🔧 `npm init -y` | `package.json`, `jest.config.js` | ✅ `npm test` |

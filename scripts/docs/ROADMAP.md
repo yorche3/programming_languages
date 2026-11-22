@@ -475,6 +475,19 @@ undeclared. Even `--main-is=RunTests.hs` retained `Main.hs` in the isolated
 test. Adding `--tests` alone therefore does not synchronize helpers or
 reproduce the homologated runner.
 
+**ES — Protección parcial:** `glot test` para Haskell trata
+`missing-home-modules` como error, sin editar el manifiesto. En un proyecto
+aislado detectó un helper de producción y otro de pruebas no declarados;
+ambas bases homologadas pasaron en copias aisladas. Esto no sincroniza
+manifiestos ni detecta archivos que no formen parte de los targets compilados;
+los criterios siguientes siguen pendientes.
+
+**EN — Partial safeguard:** Haskell `glot test` treats
+`missing-home-modules` as an error without editing the manifest. In an isolated
+project it detected undeclared production and test helpers; both homologated
+bases passed in isolated copies. It does not synchronize manifests or detect
+files outside compiled targets; the criteria below remain pending.
+
 Criterios para la siguiente versión / Next-version acceptance criteria:
 
 - Revisar los lenguajes y generadores donde los archivos de un target deben

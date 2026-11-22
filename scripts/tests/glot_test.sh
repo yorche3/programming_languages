@@ -2124,6 +2124,54 @@ assert_eq 'scaffold PureScript sin manifiesto: bloquea' '4' "$rc_last"
 assert_contains 'scaffold PureScript sin manifiesto: diagnóstico' 'missing regular Spago manifest' "$err"
 assert_eq 'scaffold PureScript sin manifiesto: no crea fuentes' 'no' "$([[ -e "$PS_MISSING/src" ]] && echo yes || echo no)"
 
+# Haskell: los módulos locales importados deben declararse en cada target Cabal.
+if command -v cabal >/dev/null 2>&1 && command -v ghc >/dev/null 2>&1; then
+    HS_CHECK="$SANDBOX/haskell/core/algorithms/searching"
+    mkdir -p "$HS_CHECK/lib" "$HS_CHECK/test"
+    cat >"$HS_CHECK/cabal.project" <<'EOF'
+packages: .
+active-repositories: :none
+EOF
+    cat >"$HS_CHECK/searching.cabal" <<'EOF'
+cabal-version: 3.0
+name: searching
+version: 0.1.0.0
+build-type: Simple
+library
+    exposed-modules: Core
+    hs-source-dirs: lib
+    build-depends: base
+    default-language: Haskell2010
+test-suite searching-test
+    type: exitcode-stdio-1.0
+    main-is: RunTests.hs
+    hs-source-dirs: test
+    build-depends: base, searching
+    default-language: Haskell2010
+EOF
+    printf 'module Core (answer) where\nimport Helper (value)\nanswer :: Int\nanswer = value\n' >"$HS_CHECK/lib/Core.hs"
+    printf 'module Helper (value) where\nvalue :: Int\nvalue = 42\n' >"$HS_CHECK/lib/Helper.hs"
+    printf 'module Check (check) where\ncheck :: Int -> Bool\ncheck n = n == 42\n' >"$HS_CHECK/test/Check.hs"
+    printf 'module Main (main) where\nimport Check (check)\nimport Core (answer)\nmain :: IO ()\nmain = if check answer then pure () else fail "unexpected answer"\n' >"$HS_CHECK/test/RunTests.hs"
+    glot_run_sandbox test haskell algorithms/searching
+    assert_eq 'test Haskell: rechaza helper de producción ausente' '4' "$rc_last"
+    assert_contains 'test Haskell: identifica helper de producción' 'Helper' "$out$err"
+    assert_contains 'test Haskell: informa diagnóstico de módulos' 'missing-home-modules' "$out$err"
+    sed -i '/exposed-modules: Core/a\    other-modules: Helper' "$HS_CHECK/searching.cabal"
+    glot_run_sandbox test haskell algorithms/searching
+    assert_eq 'test Haskell: rechaza helper de test ausente' '4' "$rc_last"
+    assert_contains 'test Haskell: identifica helper de test' 'Check' "$out$err"
+    assert_contains 'test Haskell: informa diagnóstico de test' 'missing-home-modules' "$out$err"
+    sed -i '/type: exitcode-stdio-1.0/a\    other-modules: Check' "$HS_CHECK/searching.cabal"
+    glot_run_sandbox test haskell algorithms/searching
+    assert_eq 'test Haskell: ejecuta suite con helpers declarados' '0' "$rc_last"
+    assert_contains 'test Haskell: conserva informe Cabal' 'PASS' "$out$err"
+    printf 'module Check (check) where\ncheck :: Int -> Bool\ncheck n = n == 0\n' >"$HS_CHECK/test/Check.hs"
+    glot_run_sandbox test haskell algorithms/searching
+    assert_eq 'test Haskell: propaga fallo de la suite' '4' "$rc_last"
+    assert_contains 'test Haskell: informa fallo de la suite' 'FAIL' "$out$err"
+fi
+
 # scaffold: las acciones repetibles preparan Assembly antes del paso 4c.
 AB="$SANDBOX/assembly/core/algorithms/naive_sort"
 mkdir -p -- "$AB"

@@ -289,6 +289,12 @@ la protección del runner y la integración de `test-unit` siguen pendientes.
 **EN:** PureScript warns that its minimal runner still succeeds without cases;
 runner protection and `test-unit` integration remain pending.
 
+**ES:** Haskell rechaza durante `glot test` los módulos locales importados y
+no declarados en targets Cabal compilados; no modifica el manifiesto.
+
+**EN:** Haskell `glot test` rejects imported local modules missing from compiled
+Cabal targets; it does not edit the manifest.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de
