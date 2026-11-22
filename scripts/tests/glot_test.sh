@@ -2088,6 +2088,7 @@ assert_eq 'scaffold PureScript: conserva fuente' 'author code' "$(cat "$PSB/src/
 assert_eq 'scaffold PureScript: crea módulo idiomático' 'module NaiveSort where' "$(cat "$PSB/src/NaiveSort.purs")"
 assert_eq 'scaffold PureScript: crea runner vacío' '0' \
     "$(cmp -s "$PSB/test/Test/Main.purs" "$TESTS_DIR/../data/scaffold_templates/purescript.runner.purs"; echo $?)"
+assert_contains 'scaffold PureScript: avisa falso verde' 'runner vacío puede devolver éxito' "$err"
 assert_contains 'scaffold PureScript: anuncia análisis' 'glot prompt scaffold purescript algorithms/naive_sort' "$err"
 PS_NATIVE="$SANDBOX/purescript/core/algorithms/data_structures_basics"
 mkdir -p "$PS_NATIVE/src" "$PS_NATIVE/test/Test"

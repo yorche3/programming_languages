@@ -185,6 +185,12 @@ otras suites y manifiestos. El runner todavía puede aceptar cero casos.
 6.3.3 test sample in `scaffold_templates/swift.Test.swift`; other suites and
 manifests are preserved. The runner may still accept zero cases.
 
+**ES:** El runner mínimo de PureScript puede devolver éxito sin ejecutar casos;
+completar y verificar la suite sigue siendo necesario.
+
+**EN:** The minimal PureScript runner can succeed without executing cases;
+the suite still needs to be completed and verified.
+
 **ES:** Tcl crea una fuente de paquete, su índice y el ignore si faltan,
 preservando archivos previos y rechazando enlaces. Los archivos previos
 necesitan revisión.

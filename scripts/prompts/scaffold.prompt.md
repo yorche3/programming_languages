@@ -133,6 +133,8 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 - En Swift, `swift test` puede devolver éxito con cero casos: verifica la salida
   y no lo presentes como una suite validada. Si el ejemplo generado no coincidía
   con la muestra reconocida, revísalo sin eliminar código propio.
+- En PureScript, el runner mínimo puede devolver éxito sin ejecutar casos;
+  no lo presentes como una suite validada.
 - Si el comando no arranca porque el framework no trae runner, **escríbelo aquí** (mínimo y sin
   casos) y vuelve a comprobarlo. Si aun así no arranca, **detente y dilo** con la salida real.
   No escribas la suite para «arreglarlo»: eso es el paso 4c.

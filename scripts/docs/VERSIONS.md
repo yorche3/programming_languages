@@ -283,6 +283,12 @@ El runner aún informa éxito con cero tests y sigue pendiente de corrección.
 replaces only the verified SwiftPM 6.3.3 example with a case-free file. The
 runner still reports success with zero tests and remains pending.
 
+**ES:** PureScript advierte que su runner mínimo aún devuelve éxito sin casos;
+la protección del runner y la integración de `test-unit` siguen pendientes.
+
+**EN:** PureScript warns that its minimal runner still succeeds without cases;
+runner protection and `test-unit` integration remain pending.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

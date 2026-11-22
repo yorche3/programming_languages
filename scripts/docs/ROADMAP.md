@@ -417,6 +417,20 @@ PureScript 0.15.16, Spago 1.0.4 and `test-unit` 17.0.0, a clean strict test
 exited 0 but reported 15 dependency warnings and 0 project warnings. The
 warning-free gate still needs resolution before automating this dependency.
 
+**ES — Runner vacío:** con Spago 1.0.4 y PureScript 0.15.16, `spago test
+--offline --strict` terminó con éxito y cero warnings al ejecutar el runner
+mínimo sin casos. Intentos de hacer fallar ese runner con `Effect.Exception`
+y `Partial.Unsafe` no compilaron con las dependencias del proyecto nativo.
+Se advierte el falso verde; queda pendiente una protección fiable que respete
+el manifiesto y los runners propios.
+
+**EN — Empty runner:** with Spago 1.0.4 and PureScript 0.15.16, `spago test
+--offline --strict` succeeded with zero warnings when running the case-free
+minimal runner. Attempts to fail it using `Effect.Exception` and
+`Partial.Unsafe` did not compile with the native project's dependencies.
+The false green is flagged; a reliable safeguard preserving the manifest and
+authored runners remains pending.
+
 - Para el fix, verificar la salida real de `spago init` y el layout homologado;
   automatizar los cambios mecánicos de nombres, imports, runner y manifiesto
   que correspondan, manteniendo consistentes archivos y declaraciones.
