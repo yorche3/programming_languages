@@ -74,6 +74,17 @@ protected and blocks the operation pending a safe automatic solution. D removes
 only the verified native sample; D and PureScript announce pending analysis.
 The remaining scaffold review, build helpers and roadmap conditions are open.
 
+**ES:** Continuación: PureScript conserva sus layouts Spago, crea el módulo
+PascalCase y un runner vacío, y retira o sustituye únicamente las muestras
+exactas de Spago 1.0.4. En un proyecto aislado, `spago test --offline --strict`
+compiló con 0 warnings y 0 errores y ejecutó el runner. La configuración de
+`test-unit` y el resto de la revisión siguen pendientes.
+
+**EN:** Continued with a PureScript module and empty runner, replacing only
+exact Spago 1.0.4 samples. In an isolated project, `spago test --offline --strict`
+compiled with zero warnings and errors and ran the runner. `test-unit`
+configuration and the remaining review are still pending.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

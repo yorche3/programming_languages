@@ -296,6 +296,7 @@ sandbox_make() {
     printf '# 05 — Naive Sort\n' >"$SANDBOX/docs/core/algorithms/05_Naive_Sort.md"
     # el módulo 06 se partió en dos: el sandbox declara el actual, que es el que usan los casos
     printf '# 06 — Data Structures Basics\n' >"$SANDBOX/docs/core/algorithms/06_Data_Structures_Basics.md"
+    printf '# 10 — Searching\n' >"$SANDBOX/docs/core/algorithms/10_Searching.md"
     # Fase con nombres divergentes: el id del roadmap no es el de la carpeta ni el
     # del documento, que es justo lo que el conversor tiene que resolver.
     printf '# 01 — Hello World\n' >"$SANDBOX/docs/core/foundations/01_Hello_World.md"
@@ -1715,10 +1716,47 @@ assert_contains 'scaffold D repetido: anuncia análisis' 'glot prompt scaffold d
 PSB="$SANDBOX/purescript/core/algorithms/naive_sort"
 mkdir -p "$PSB/src"
 printf 'author code\n' >"$PSB/src/Main.purs"
+printf 'author manifest\n' >"$PSB/spago.yaml"
 glot_run_sandbox scaffold purescript algorithms/naive_sort
 assert_eq 'scaffold PureScript: código' '0' "$rc_last"
 assert_eq 'scaffold PureScript: conserva fuente' 'author code' "$(cat "$PSB/src/Main.purs")"
+assert_eq 'scaffold PureScript: crea módulo idiomático' 'module NaiveSort where' "$(cat "$PSB/src/NaiveSort.purs")"
+assert_eq 'scaffold PureScript: crea runner vacío' '0' \
+    "$(cmp -s "$PSB/test/Test/Main.purs" "$TESTS_DIR/../data/scaffold_templates/purescript.runner.purs"; echo $?)"
 assert_contains 'scaffold PureScript: anuncia análisis' 'glot prompt scaffold purescript algorithms/naive_sort' "$err"
+PS_NATIVE="$SANDBOX/purescript/core/algorithms/data_structures_basics"
+mkdir -p "$PS_NATIVE/src" "$PS_NATIVE/test/Test"
+printf 'native manifest\n' >"$PS_NATIVE/spago.yaml"
+cp "$TESTS_DIR/../data/scaffold_templates/purescript.Main.purs" "$PS_NATIVE/src/Main.purs"
+cp "$TESTS_DIR/../data/scaffold_templates/purescript.Test.Main.purs" "$PS_NATIVE/test/Test/Main.purs"
+printf '\n' >>"$PS_NATIVE/src/Main.purs"
+printf '\n' >>"$PS_NATIVE/test/Test/Main.purs"
+glot_run_sandbox -n scaffold purescript algorithms/data_structures_basics
+assert_eq 'scaffold PureScript -n: código' '0' "$rc_last"
+assert_eq 'scaffold PureScript -n: conserva plantilla' 'yes' "$([[ -f "$PS_NATIVE/src/Main.purs" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold purescript algorithms/data_structures_basics
+assert_eq 'scaffold PureScript nativo: código' '0' "$rc_last"
+assert_eq 'scaffold PureScript nativo: retira ejemplo exacto' 'no' "$([[ -e "$PS_NATIVE/src/Main.purs" ]] && echo yes || echo no)"
+assert_eq 'scaffold PureScript nativo: crea módulo' 'module DataStructuresBasics where' "$(cat "$PS_NATIVE/src/DataStructuresBasics.purs")"
+assert_eq 'scaffold PureScript nativo: reemplaza runner de ejemplo' '0' \
+    "$(cmp -s "$PS_NATIVE/test/Test/Main.purs" "$TESTS_DIR/../data/scaffold_templates/purescript.runner.purs"; echo $?)"
+printf 'author library\n' >"$PS_NATIVE/src/DataStructuresBasics.purs"
+printf 'author runner\n' >"$PS_NATIVE/test/Test/Main.purs"
+glot_run_sandbox scaffold purescript algorithms/data_structures_basics
+assert_eq 'scaffold PureScript repetido: código' '0' "$rc_last"
+assert_eq 'scaffold PureScript repetido: conserva módulo' 'author library' "$(cat "$PS_NATIVE/src/DataStructuresBasics.purs")"
+assert_eq 'scaffold PureScript repetido: conserva runner' 'author runner' "$(cat "$PS_NATIVE/test/Test/Main.purs")"
+rm -- "$PS_NATIVE/test/Test/Main.purs"
+ln -s "$PS_NATIVE/src/DataStructuresBasics.purs" "$PS_NATIVE/test/Test/Main.purs"
+glot_run_sandbox scaffold purescript algorithms/data_structures_basics
+assert_eq 'scaffold PureScript runner symlink: bloquea' '4' "$rc_last"
+assert_eq 'scaffold PureScript runner symlink: conserva destino' 'author library' "$(cat "$PS_NATIVE/src/DataStructuresBasics.purs")"
+PS_MISSING="$SANDBOX/purescript/core/algorithms/searching"
+mkdir -p "$PS_MISSING"
+glot_run_sandbox scaffold purescript algorithms/searching
+assert_eq 'scaffold PureScript sin manifiesto: bloquea' '4' "$rc_last"
+assert_contains 'scaffold PureScript sin manifiesto: diagnóstico' 'missing regular Spago manifest' "$err"
+assert_eq 'scaffold PureScript sin manifiesto: no crea fuentes' 'no' "$([[ -e "$PS_MISSING/src" ]] && echo yes || echo no)"
 
 # scaffold: las acciones repetibles preparan Assembly antes del paso 4c.
 AB="$SANDBOX/assembly/core/algorithms/naive_sort"

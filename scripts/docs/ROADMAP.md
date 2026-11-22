@@ -169,7 +169,7 @@ Criterios de aceptación / Acceptance criteria:
 
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su
-delegate, con archivos sobrantes. El catálogo actual solo declara
+delegate, con archivos sobrantes. El catálogo anterior solo declaraba
 `mkdir -p src test && touch .gitignore`, sin nota de completado. En el módulo
 activo existen `src/Main.purs`, el módulo avanzado y el runner con su suite;
 `src/Main.purs` también existe en la base homologada, por lo que su presencia
@@ -179,10 +179,20 @@ eliminarlos; no sobrescribir el trabajo activo.
 
 **EN — PureScript, reported 2026-11-17:** the author reports incomplete
 renaming and file creation/updates in both scaffold and its delegate, with
-leftover files. The catalog currently only creates directories and ensures
+leftover files. The previous catalog only created directories and ensured
 `.gitignore`, without a handoff note. The homologated base also contains
 `src/Main.purs`, so its presence alone does not justify deletion. Identify
 the actual unwanted files and renames before removing anything.
+
+**ES:** Avance: medido `spago init` 1.0.4 sin red, `scaffold` crea el módulo
+PascalCase y un runner mínimo, retira o sustituye únicamente las muestras
+idénticas a esa salida y conserva contenido diferente. El manifiesto de
+`test-unit` y la comprobación de otras versiones quedan pendientes.
+
+**EN:** Progress: after observing `spago init` 1.0.4 offline, scaffold creates
+the PascalCase module and a minimal runner, removes/replaces only exact
+matching samples, and preserves other content. The `test-unit` manifest and
+other generator versions remain to be checked.
 
 - Para el fix, verificar la salida real de `spago init` y el layout homologado;
   automatizar los cambios mecánicos de nombres, imports, runner y manifiesto

@@ -167,6 +167,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **nim** | `nimble init -y` → `rm -rf src/{module}` → la task `test` apuntando a `tests/{module}_tests.nim` | Borrar la muestra anidada `src/{module}/` y dejar la task `test` apuntando a `tests/{module}_tests.nim` |
 | **ocaml** | `dune init proj {module}` | El código va en `lib/` y la suite en `test/`: se usa el layout generado tal cual |
 | **python** | `uv init --lib .` | Borrar el `.git` que crea `uv`, añadir `conftest.py` y `tests/` con configuración de pytest, y declarar pytest (`uv add --dev pytest --no-sync`) |
+| **purescript** | `spago init` → crear `src/{Module}.purs` y `test/Test/Main.purs` mínimo si faltan → retirar o sustituir solo las muestras verificadas de `Main.purs` | Conservar código y runners propios; completar `spago.yaml` y `test-unit` según la suite y revisar `.gitignore` |
 | **racket** | `raco new library {module}` → render portátil (`mv` + `sed -i`, con el código renombrado a `{module}.rkt` con guiones) → `rm -rf .github pull_request_template.md render-template.sh profile` | Las suites requieren la librería por ruta relativa (`"../../{module}-lib/{module}.rkt"`, con guiones) y el runner es `raco test -x .`, sin enlazar paquetes |
 | **rescript** | `mkdir -p src test` → `npm init -y` → `npm pkg set` | El manifiesto y sus devDependencies se declaran con `npm pkg set`; los baja `npm install` |
 | **ruby** | `mkdir -p src test` → `bundle init` → `bundle install` | `rspec` en el `Gemfile` y `.rspec` |
