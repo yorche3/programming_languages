@@ -2380,6 +2380,33 @@ glot_run_sandbox -n scaffold raku algorithms/naive_sort
 assert_eq 'scaffold Raku dry-run: código' '0' "$rc_last"
 assert_eq 'scaffold Raku dry-run: no crea archivos' '0' "$(find "$RK_DRY" -mindepth 1 | wc -l | tr -d ' ')"
 
+# Rexx: preservar la fuente y avisar de los límites del runner.
+RX="$SANDBOX/rexx/core/algorithms/data_structures_basics"
+mkdir -p -- "$RX"
+glot_run_sandbox scaffold rexx algorithms/data_structures_basics
+assert_eq 'scaffold Rexx: código' '0' "$rc_last"
+assert_eq 'scaffold Rexx: fuente vacía' 'yes' "$([[ -f "$RX/src/data_structures_basics.rexx" && ! -s "$RX/src/data_structures_basics.rexx" ]] && echo yes || echo no)"
+assert_contains 'scaffold Rexx: avisa del runner pendiente' 'runner ooRexxUnit' "$err"
+printf 'author source\n' >"$RX/src/data_structures_basics.rexx"
+glot_run_sandbox scaffold rexx algorithms/data_structures_basics
+assert_eq 'scaffold Rexx repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Rexx repetido: conserva fuente' 'author source' "$(cat -- "$RX/src/data_structures_basics.rexx")"
+printf 'author target\n' >"$RX/target"
+rm -- "$RX/src/data_structures_basics.rexx"
+ln -s "$RX/target" "$RX/src/data_structures_basics.rexx"
+glot_run_sandbox scaffold rexx algorithms/data_structures_basics
+assert_eq 'scaffold Rexx symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Rexx symlink: conserva destino' 'author target' "$(cat -- "$RX/target")"
+rm -- "$RX/src/data_structures_basics.rexx"
+mkdir -- "$RX/src/data_structures_basics.rexx"
+glot_run_sandbox scaffold rexx algorithms/data_structures_basics
+assert_eq 'scaffold Rexx destino directorio: código' '4' "$rc_last"
+RX_DRY="$SANDBOX/rexx/core/algorithms/naive_sort"
+mkdir -p -- "$RX_DRY"
+glot_run_sandbox -n scaffold rexx algorithms/naive_sort
+assert_eq 'scaffold Rexx dry-run: código' '0' "$rc_last"
+assert_eq 'scaffold Rexx dry-run: no crea archivos' '0' "$(find "$RX_DRY" -mindepth 1 | wc -l | tr -d ' ')"
+
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"
 printf '[package]\nname = "naive_sort"\n' >"$RUSTB/Cargo.toml"

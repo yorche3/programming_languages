@@ -119,7 +119,7 @@ rescript	new	1	phase	run	mkdir -p {module}	-	-	-
 rescript	scaffold	1	module	run	mkdir -p src test	-	-	-
 rescript	scaffold	2	module	run	npm init -y && npm pkg set 'scripts.test=rescript && jest' 'devDependencies.rescript=^11.1.4' 'devDependencies.@rescript/core=^1.6.1' 'devDependencies.@glennsl/rescript-jest=^0.11.0' 'devDependencies.jest=^30.2.0'	-	-	el package.json va antes de instalar: sin manifiesto, npm install falla
 rexx	new	1	phase	run	mkdir -p {module}	-	-	-
-rexx	scaffold	1	module	run	mkdir -p src test && touch src/{module}.rexx	-	-	-
+rexx	scaffold	1	module	run	if [[ -L src || -L test || -L src/{module}.rexx || ( -e src/{module}.rexx && ! -f src/{module}.rexx ) ]]; then printf 'scaffold: ruta de Rexx no segura / unsafe Rexx path\n' >&2; false; else mkdir -p src test && { test -e src/{module}.rexx || (set -C; : > src/{module}.rexx); }; fi	-	-	revisar runner ooRexxUnit y propagación de fallos; el selector actual no admite varias suites
 ruby	new	1	module	run	mkdir -p src test	-	-	-
 ruby	scaffold	1	module	run	bundle init	-	-	-
 ruby	scaffold	2	module	run	bundle install --local	-	-	Gemfile con rspec y .rspec

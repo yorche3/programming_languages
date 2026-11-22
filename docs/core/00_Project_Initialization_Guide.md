@@ -695,8 +695,27 @@ fi
 ```
 
 ### Rexx — src/ + test/
+
+**ES:** Crear la fuente solo si falta y rechazar enlaces simbólicos en las
+rutas del scaffold. La selección de varias suites y la propagación de fallos
+de ooRexxUnit siguen pendientes: el comando actual solo admite una suite y
+una suite existente puede informar fallos sin devolver error.
+
+**EN:** Create the source only when absent and reject symbolic scaffold paths.
+Multiple-suite selection and ooRexxUnit failure propagation remain pending:
+the current command accepts only one suite, and an existing suite can report
+failures while returning success.
+
 ```bash
-mkdir -p src test
+if [[ -L src || -L test || -L src/{module}.rexx ||
+      ( -e src/{module}.rexx && ! -f src/{module}.rexx ) ]]; then
+  printf 'scaffold: ruta de Rexx no segura / unsafe Rexx path\n' >&2
+  false
+else
+  mkdir -p src test && {
+    test -e src/{module}.rexx || (set -C; : > src/{module}.rexx)
+  }
+fi
 ```
 
 ```text

@@ -248,6 +248,20 @@ returned 0 and `Result: PASS`. The development command uses prove6's discovery
 and harness but rejects missing suites, incomplete runs and entirely skipped
 cases. Verified against `numbers` and `data_structures_basics`.
 
+**ES — Rexx (2026-11-22):** el scaffold preserva fuentes y rechaza rutas
+simbólicas, pero el runner sigue pendiente. `glot test` rechaza las dos suites
+de `numbers` como ambiguas; una prueba aislada de ooRexxUnit informó una
+aserción fallida y devolvió 0. En esa prueba, `exit (aResult~failureCount +
+aResult~errorCount > 0)` devolvió 1. Falta un mecanismo que ejecute todas las
+suites y propague fallos sin modificar ni ocultar las suites existentes.
+
+**EN — Rexx (2026-11-22):** scaffold preserves sources and rejects symbolic
+paths, but the runner remains pending. `glot test` rejects the two `numbers`
+suites as ambiguous; an isolated ooRexxUnit assertion failure returned 0.
+In that test, exiting with the combined failure and error count returned 1.
+Running every suite and propagating failures without modifying or hiding
+existing suites still needs a solution.
+
 **ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
 generación/actualización incompletos tanto en `glot scaffold` como en su
 delegate, con archivos sobrantes. El catálogo anterior solo declaraba

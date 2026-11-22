@@ -148,6 +148,12 @@ propios y rechaza enlaces simbólicos en las rutas del scaffold.
 **EN:** Raku creates a missing source and `.gitignore`, preserves authored
 files and rejects symlinks at scaffold paths.
 
+**ES:** Rexx preserva la fuente y rechaza rutas simbólicas; avisa de la
+revisión pendiente del runner y la selección de varias suites.
+
+**EN:** Rexx preserves the source and rejects symbolic paths; it reports the
+pending runner review and multiple-suite selection.
+
 **ES:** Forth crea una fuente vacía, un framework y un runner que anuncia que
 no hay tests; conserva archivos existentes. La suite conecta los grupos y el
 framework devuelve código no cero ante aserciones fallidas.

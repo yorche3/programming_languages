@@ -208,6 +208,14 @@ Las suites homologadas de `numbers` y `data_structures_basics` pasan.
 missing suites, incomplete runs and entirely skipped cases. The homologated
 `numbers` and `data_structures_basics` suites pass.
 
+**ES:** Rexx preserva la fuente, protege rutas simbólicas y anuncia la
+revisión del runner. Permanecen pendientes la selección de varias suites y
+la propagación de fallos de las suites ooRexxUnit existentes.
+
+**EN:** Rexx preserves the source, protects symbolic paths and announces the
+pending runner review. Multiple-suite selection and failure propagation for
+existing ooRexxUnit suites remain open.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de
