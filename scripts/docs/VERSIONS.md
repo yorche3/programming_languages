@@ -295,6 +295,12 @@ no declarados en targets Cabal compilados; no modifica el manifiesto.
 **EN:** Haskell `glot test` rejects imported local modules missing from compiled
 Cabal targets; it does not edit the manifest.
 
+**ES:** El selector Haskell rechaza paquetes sin suites declaradas, sin
+garantizar que una suite existente contenga casos.
+
+**EN:** The Haskell selector rejects packages without declared suites, without
+guaranteeing that an existing suite contains cases.
+
 **ES:** Los encargos de scaffold y suite advierten de la selección limitada y
 del código de salida poco fiable de ooRexxUnit; el runner sigue pendiente.
 

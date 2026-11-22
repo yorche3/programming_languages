@@ -138,6 +138,8 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 - En Rexx, el selector actual no admite varias suites y ooRexxUnit puede
   informar fallos aunque el proceso termine con código 0. No tomes ese código
   como prueba de éxito; reporta el bloqueo y la salida real sin ocultar fallos.
+- En Haskell, el selector de Cabal rechaza un paquete sin `test-suite`: declara
+  el target y prepara su runner vacío como indica el catálogo; eso no valida casos.
 - Si el comando no arranca porque el framework no trae runner, **escríbelo aquí** (mínimo y sin
   casos) y vuelve a comprobarlo. Si aun así no arranca, **detente y dilo** con la salida real.
   No escribas la suite para «arreglarlo»: eso es el paso 4c.

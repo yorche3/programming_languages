@@ -488,6 +488,24 @@ project it detected undeclared production and test helpers; both homologated
 bases passed in isolated copies. It does not synchronize manifests or detect
 files outside compiled targets; the criteria below remain pending.
 
+**ES — Paquete sin suites:** Cabal 3.16 devolvió éxito con `cabal test`
+cuando el paquete no declaraba ninguna suite. El selector `.:tests` rechaza
+ese caso y conserva el alcance del paquete actual, también en el workspace
+multiproyecto probado. No demuestra que una suite existente ejecute casos.
+En una repetición rápida de la regresión, GHC recompiló la suite modificada
+sin mostrar reenlace y ejecutó el binario anterior; otra repetición pasó.
+La prueba separa las modificaciones dos segundos. La posible interacción
+con marcas de tiempo requiere investigación antes de garantizar reruns rápidos.
+
+**EN — Package without suites:** Cabal 3.16 returned success from `cabal test`
+when the package declared no suites. The `.:tests` selector rejects that case
+and retains the current-package scope, including in the multi-package workspace
+tested. It does not prove that an existing suite executes cases.
+In one fast regression rerun, GHC recompiled the modified suite without
+reporting a relink and ran the previous binary; another rerun passed. The test
+separates edits by two seconds. A possible timestamp interaction needs further
+investigation before rapid reruns can be considered reliable.
+
 Criterios para la siguiente versión / Next-version acceptance criteria:
 
 - Revisar los lenguajes y generadores donde los archivos de un target deben

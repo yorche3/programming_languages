@@ -2126,10 +2126,18 @@ assert_eq 'scaffold PureScript sin manifiesto: no crea fuentes' 'no' "$([[ -e "$
 
 # Haskell: los módulos locales importados deben declararse en cada target Cabal.
 if command -v cabal >/dev/null 2>&1 && command -v ghc >/dev/null 2>&1; then
+    HS_EMPTY="$SANDBOX/haskell/core/algorithms/naive_sort"
+    mkdir -p "$HS_EMPTY/lib"
+    printf 'packages: .\nactive-repositories: :none\n' >"$HS_EMPTY/cabal.project"
+    printf 'cabal-version: 3.0\nname: naive-sort\nversion: 0.1.0.0\nbuild-type: Simple\nlibrary\n    exposed-modules: NaiveSort\n    hs-source-dirs: lib\n    build-depends: base\n    default-language: Haskell2010\n' >"$HS_EMPTY/naive-sort.cabal"
+    printf 'module NaiveSort where\n' >"$HS_EMPTY/lib/NaiveSort.hs"
+    glot_run_sandbox test haskell algorithms/naive_sort
+    assert_eq 'test Haskell: rechaza paquete sin suites' '4' "$rc_last"
+    assert_contains 'test Haskell: informa ausencia de suites' 'does not contain any test suites' "$out$err"
     HS_CHECK="$SANDBOX/haskell/core/algorithms/searching"
-    mkdir -p "$HS_CHECK/lib" "$HS_CHECK/test"
+    mkdir -p "$HS_CHECK/lib" "$HS_CHECK/test" "$HS_CHECK/extra/test"
     cat >"$HS_CHECK/cabal.project" <<'EOF'
-packages: .
+packages: . extra
 active-repositories: :none
 EOF
     cat >"$HS_CHECK/searching.cabal" <<'EOF'
@@ -2149,6 +2157,19 @@ test-suite searching-test
     build-depends: base, searching
     default-language: Haskell2010
 EOF
+    cat >"$HS_CHECK/extra/extra.cabal" <<'EOF'
+cabal-version: 3.0
+name: extra
+version: 0.1.0.0
+build-type: Simple
+test-suite extra-test
+    type: exitcode-stdio-1.0
+    main-is: Main.hs
+    hs-source-dirs: test
+    build-depends: base
+    default-language: Haskell2010
+EOF
+    printf 'module Main (main) where\nmain :: IO ()\nmain = writeFile "extra-ran" "ran"\n' >"$HS_CHECK/extra/test/Main.hs"
     printf 'module Core (answer) where\nimport Helper (value)\nanswer :: Int\nanswer = value\n' >"$HS_CHECK/lib/Core.hs"
     printf 'module Helper (value) where\nvalue :: Int\nvalue = 42\n' >"$HS_CHECK/lib/Helper.hs"
     printf 'module Check (check) where\ncheck :: Int -> Bool\ncheck n = n == 42\n' >"$HS_CHECK/test/Check.hs"
@@ -2166,6 +2187,9 @@ EOF
     glot_run_sandbox test haskell algorithms/searching
     assert_eq 'test Haskell: ejecuta suite con helpers declarados' '0' "$rc_last"
     assert_contains 'test Haskell: conserva informe Cabal' 'PASS' "$out$err"
+    assert_eq 'test Haskell: no ejecuta otro paquete' 'no' "$([[ -e "$HS_CHECK/extra-ran" || -e "$HS_CHECK/extra/extra-ran" ]] && echo yes || echo no)"
+    # Separar cambios evita la carrera de marcas de tiempo observada en GHC.
+    sleep 2
     printf 'module Check (check) where\ncheck :: Int -> Bool\ncheck n = n == 0\n' >"$HS_CHECK/test/Check.hs"
     glot_run_sandbox test haskell algorithms/searching
     assert_eq 'test Haskell: propaga fallo de la suite' '4' "$rc_last"

@@ -19,7 +19,7 @@ gleam	tool	gleam test	-
 go	tool	go test ./...	test -z "$(gofmt -l src)"
 grain	manual	make test	-
 groovy	tool	./gradlew test	-
-haskell	tool	cabal test --ghc-options=-Werror=missing-home-modules	-
+haskell	tool	cabal test .:tests --ghc-options=-Werror=missing-home-modules	-
 haxe	manual	haxe build.hxml	-
 java	manual	mvn test	-
 javascript	tool	npm test	-

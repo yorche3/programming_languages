@@ -94,9 +94,10 @@ Scheme ejecuta cada suite `*_guile.scm` y comprueba su runner SRFI-64.
 Tcl ejecuta cada suite `.test` y comprueba los contadores de Tcltest al limpiar.
 Scala conserva la tarea e informe nativos de sbt y comprueba sus resultados
 estructurados; rechaza las ejecuciones sin casos aprobados.
-Haskell convierte en error `missing-home-modules` durante `cabal test`, para
-detectar módulos locales importados pero no declarados en los targets compilados.
-No modifica el manifiesto ni comprueba archivos que no se compilan.
+Haskell selecciona las suites del paquete actual y rechaza su ausencia;
+convierte en error `missing-home-modules` para detectar módulos locales
+importados pero no declarados en los targets compilados. No modifica el
+manifiesto ni garantiza que una suite existente contenga casos.
 
 **EN:** **Column 5 is maintained by hand** and only with verifiers **actually run**
 in the corresponding module; coverage is reported by `doctor` as
@@ -113,9 +114,10 @@ Scheme runs every `*_guile.scm` suite and checks its SRFI-64 runner.
 Tcl runs every `.test` suite and checks Tcltest counters at cleanup.
 Scala retains sbt's native task and report and checks structured results;
 it rejects runs without passing cases.
-Haskell promotes `missing-home-modules` to an error during `cabal test` to
-detect imported local modules missing from compiled targets. It does not edit
-the manifest or check files outside the compiled targets.
+Haskell selects the current package's test suites and rejects their absence;
+it promotes `missing-home-modules` to an error to detect imported local modules
+missing from compiled targets. It does not edit the manifest or guarantee that
+an existing suite contains cases.
 
 **ES:** Los esqueletos de `Makefile` compartidos por `assembly`, `c`, `cobol`,
 `grain` y `r` viven en [`scaffold_templates/`](scaffold_templates/); el catálogo
