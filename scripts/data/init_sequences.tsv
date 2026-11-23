@@ -83,8 +83,7 @@ kotlin	scaffold	1	module	run	bash {root}/scripts/data/gradle_scaffold.sh kotlin 
 lua	new	1	module	run	luarocks init	-	-	-
 lua	scaffold	1	module	run	mkdir -p src test && touch .gitignore	-	-	-
 nim	new	1	module	run	nimble init -y	-	-	-
-nim	scaffold	1	module	run	rm -rf src/{module}	-	-	-
-nim	scaffold	2	module	run	printf 'task test, "Run the unit tests":\n    exec "nim c -r tests/{module}_tests.nim"\n' >> {module}.nimble	-	-	la task apunta a la suite que escribe el paso 4c
+nim	scaffold	1	module	run	bash {root}/scripts/data/nim_scaffold.sh {module}	-	-	retirar solo las muestras Nim verificadas y conservar archivos propios
 ocaml	new	1	phase	run	dune init proj {module}	-	-	-
 ocaml	scaffold	1	module	run	touch .gitignore	-	-	usar el layout generado tal cual: el código en lib/ y la suite en test/
 perl	new	1	phase	run	mkdir -p {module}	-	-	-

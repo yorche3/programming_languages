@@ -327,6 +327,12 @@ conserva archivos propios y advierte del éxito sin casos.
 **EN:** Kotlin shares Groovy's Gradle sample protection, preserves authored
 files and warns about success without cases.
 
+**ES:** Nim retira solo las muestras exactas de Nimble y ejecuta las suites
+directamente para rechazar casos vacíos o fallidos.
+
+**EN:** Nim removes only exact Nimble samples and executes suites directly to
+reject empty or failing runs.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

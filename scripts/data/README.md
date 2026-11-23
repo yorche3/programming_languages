@@ -209,6 +209,12 @@ Gradle 9.6.1 sample pair when there are no other files or links in `lib/src`.
 It rejects unsafe paths and preserves other content; Gradle can still report
 success without cases. Other layouts need review.
 
+**ES:** Nim usa una retirada conservadora para sus muestras exactas y un runner
+directo que rechaza suites ausentes o sin casos.
+
+**EN:** Nim uses conservative removal for exact samples and a direct runner
+that rejects missing suites or runs with no executed cases.
+
 **ES:** El runner mínimo de PureScript puede devolver éxito sin ejecutar casos;
 completar y verificar la suite sigue siendo necesario.
 

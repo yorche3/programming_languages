@@ -115,7 +115,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **julia** | ⛓️ 🔧 `julia -e 'using Pkg; Pkg.generate("{module}")'` | `Project.toml`, `src/{Module}.jl`, `test/` | ✅ `julia --project=. test/run_tests.jl` |
 | **kotlin** | ⛓️ ✅ `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | `build.gradle.kts`, `settings.gradle.kts` | ✅ `gradle test` |
 | **lua** | 🔧 `luarocks init` | `{module}.rockspec`, `.busted` | ✅ `busted` |
-| **nim** | ⛓️ ✅ `nimble init` (tipo library; `nimble init -y`) | `{module}.nimble`, `src/{module}.nim`, `test/config.nims` | ✅ `nimble test` |
+| **nim** | ⛓️ ✅ `nimble init` (tipo library; `nimble init -y`) | `{module}.nimble`, `src/{module}.nim`, `test/config.nims` | ✅ runner directo sobre `tests/*.nim` |
 | **ocaml** | ⛓️ ✅ `dune init proj {module}` (crea la carpeta del módulo) | `dune-project`, `lib/dune`, `test/dune` | ✅ `dune runtest` |
 | **perl** | ✍️ `mkdir -p lib test` | — | ✅ TAP::Harness (comando abajo / command below) |
 | **php** | ✍️ `mkdir -p src test` + `composer init -n` + `composer require --dev --no-update phpunit/phpunit` | `composer.json`, `phpunit.xml`, `.gitignore` | ✅ `composer test` |
@@ -165,7 +165,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **haxe** | `mkdir -p src test` → `haxelib install utest` | `build.hxml` y `RunTests.hx` son contenido del sprint |
 | **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` | Completar `test/` y su runner; añadir `uuid`, `[compat]`, `[extras]` y `[targets]` |
 | **kotlin** | `gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project` → retirar solo la pareja de muestras verificada, si no hay otros archivos en `lib/src` | Conservar muestras distintas o con otros archivos y revisar; Gradle puede devolver éxito sin casos |
-| **nim** | `nimble init -y`; la normalización automática de `glot scaffold` requiere revisión | No ejecutar el borrado recursivo sobre contenido propio; revisar las muestras y la task `test`. Nimble puede informar errores y devolver código 0 |
+| **nim** | `nimble init -y` → retirar solo muestras exactas → task `test` idempotente | Conservar fuentes propias y añadir o conservar la suite; ejecutar los archivos de `tests/` directamente y rechazar ausencia o cero casos |
 | **ocaml** | `dune init proj {module}` | El código va en `lib/` y la suite en `test/`: se usa el layout generado tal cual |
 | **python** | `uv init --lib .` | Borrar el `.git` que crea `uv`, añadir `conftest.py` y `tests/` con configuración de pytest, y declarar pytest (`uv add --dev pytest --no-sync`) |
 | **purescript** | `spago init` → crear `src/{Module}.purs` y `test/Test/Main.purs` mínimo si faltan → retirar o sustituir solo las muestras verificadas de `Main.purs` | Conservar código y runners propios; completar `spago.yaml` y `test-unit` según la suite y revisar `.gitignore`. El runner vacío devuelve éxito sin validar una suite / The empty runner succeeds without validating a suite |

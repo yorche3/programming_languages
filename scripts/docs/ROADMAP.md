@@ -353,23 +353,21 @@ exact pair when `lib/src` has no other files. In the lab, `gradle test
 --offline` reported `NO-SOURCE` and succeeded; runner protection and other
 layouts remain pending.
 
-**ES — Investigación Nim:** Nimble 0.22.2 creó `src/{module}.nim`,
+**ES — Nim (2026-11-22):** Nimble 0.22.2 creó `src/{module}.nim`,
 `src/{module}/submodule.nim` y `tests/test1.nim` de ejemplo. El scaffold
-actual borra recursivamente el directorio anidado y añade la task `test` en
-cada ejecución: ambos pasos requieren una corrección conservadora. En un
-laboratorio aislado, `nimble --offline test` informó que no pudo instalar Nim
-y devolvió 0; `nimble --legacy --offline test` también devolvió 0 tanto sin
-tests como con una aserción fallida. El runner seguro sigue pendiente; no
-debe interpretarse el código 0 por sí solo como validación.
+ahora retira solo las muestras exactas y añade la task `test` una sola vez.
+El runner nuevo ejecuta las suites `.nim` directamente, rechaza ninguna suite
+y cuenta casos aprobados. En un laboratorio aislado rechazó una aserción fallida
+con código 1 y aceptó una suite aprobada. Nimble puede devolver código 0 con
+fallos o sin tests, por lo que no se usa como único criterio.
 
-**EN — Nim investigation:** Nimble 0.22.2 generated sample files
+**EN — Nim (2026-11-22):** Nimble 0.22.2 generated sample files
 `src/{module}.nim`, `src/{module}/submodule.nim` and `tests/test1.nim`.
-The current scaffold recursively deletes the nested directory and appends the
-`test` task on every run: both steps need a conservative fix. In an isolated
-lab, `nimble --offline test` reported that it could not install Nim and exited
-0; `nimble --legacy --offline test` also exited 0 with no tests and with a
-failed assertion. A safe runner remains pending; exit code 0 alone is not
-validation.
+The scaffold now removes only exact samples and appends the `test` task once.
+The new runner executes `.nim` suites directly, rejects missing suites and
+counts passing cases. In an isolated lab it rejected a failed assertion with
+exit 1 and accepted a passing suite. Nimble may exit 0 for failures or missing
+tests, so it is not used as the sole criterion.
 
 **ES — Scala (2026-11-22):** el scaffold sobrescribía la fuente en cada
 ejecución y dejaba `build.sbt` y `build.properties` vacíos. Ahora crea

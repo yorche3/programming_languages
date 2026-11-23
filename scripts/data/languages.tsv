@@ -26,7 +26,7 @@ javascript	tool	npm test	-
 julia	tool	julia --project=. test/run_tests.jl	julia --project=. -e 'for f in filter(x->endswith(x,".jl"), readdir("src")); Meta.parse(read("src/$f", String)); end'
 kotlin	tool	gradle test	-
 lua	tool	busted	-
-nim	tool	nimble test	nim check src/{module}.nim
+nim	tool	bash {root}/scripts/data/nim_test.sh	nim check src/{module}.nim
 ocaml	tool	dune runtest	-
 perl	manual	perl -MApp::Prove::State -MTAP::Harness::Env -e 'my $s = App::Prove::State->new({extensions => [".pl"]}); my @tests = $s->get_tests(0, "test/"); @tests or die "No Perl test files configured in test/\n"; my $result = TAP::Harness::Env->create({})->runtests(@tests); exit 1 if $result->has_errors; die "No Perl test cases executed\n" unless $result->total > $result->skipped;'	find lib -type f -name '*.p[lm]' -print0 | xargs -0 -r -n1 perl -Ilib -c
 php	tool	composer test	php -l src/{Module}.php

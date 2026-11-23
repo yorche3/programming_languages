@@ -390,6 +390,9 @@ sandbox_make() {
 [submodule "kotlin"]
         path = kotlin
         url = ../remote/kotlin.git
+[submodule "nim"]
+        path = nim
+        url = ../remote/nim.git
 [submodule "v"]
         path = v
         url = ../remote/v.git
@@ -2393,6 +2396,37 @@ glot_run_sandbox scaffold kotlin algorithms/naive_sort
 assert_eq 'scaffold Kotlin layout distinto: rechaza' '4' "$rc_last"
 assert_eq 'scaffold Kotlin layout distinto: conserva pareja' 'si' "$([[ -f "$KT/lib/src.saved/main/kotlin/naive_sort/Library.kt" && -f "$KT/lib/src.saved/test/kotlin/naive_sort/LibraryTest.kt" ]] && echo si || echo no)"
 mv -- "$KT/lib/src.saved" "$KT/lib/src"
+
+# Nim: retirar solo muestras exactas y no duplicar la task.
+NM="$SANDBOX/nim/core/algorithms/naive_sort"
+mkdir -p "$NM/src/naive_sort" "$NM/tests"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/nim.main.nim" >"$NM/src/naive_sort.nim"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/nim.submodule.nim" >"$NM/src/naive_sort/submodule.nim"
+sed 's/@MODULE@/naive_sort/g' "$DATA_DIR/scaffold_templates/nim.test1.nim" >"$NM/tests/test1.nim"
+printf 'requires "nim >= 2.0.0"\n' >"$NM/naive_sort.nimble"
+glot_run_sandbox -n scaffold nim algorithms/naive_sort
+assert_eq 'scaffold Nim dry-run: código' '0' "$rc_last"
+glot_run_sandbox scaffold nim algorithms/naive_sort
+assert_eq 'scaffold Nim: código' '0' "$rc_last"
+assert_eq 'scaffold Nim: retira muestras' 'no' "$([[ -e "$NM/src/naive_sort.nim" || -e "$NM/src/naive_sort/submodule.nim" || -e "$NM/tests/test1.nim" ]] && echo si || echo no)"
+assert_eq 'scaffold Nim: añade task una vez' '1' "$(grep -Fc 'nim c -r tests/naive_sort_tests.nim' "$NM/naive_sort.nimble")"
+glot_run_sandbox scaffold nim algorithms/naive_sort
+assert_eq 'scaffold Nim repetido: no duplica task' '1' "$(grep -Fc 'nim c -r tests/naive_sort_tests.nim' "$NM/naive_sort.nimble")"
+mkdir -p "$NM/src"
+printf 'proc add*(x, y: int): int = x + y\n' >"$NM/src/naive_sort.nim"
+cat >"$NM/tests/naive_sort_tests.nim" <<'EOF'
+import unittest
+import naive_sort
+suite "naive_sort":
+  test "addition":
+    check add(5, 5) == 10
+EOF
+cp -- "$DATA_DIR/nim_test.sh" "$NM/nim_test.sh"
+(
+    cd "$NM"
+    bash ./nim_test.sh
+) >/dev/null 2>&1
+assert_eq 'test Nim caso aprobado: código' '0' "$?"
 
 # v2.1.0: el nombre del fuente y el archivo vacío de pruebas son comandos del catálogo.
 BB="$SANDBOX/ballerina/core/algorithms/naive_sort"
