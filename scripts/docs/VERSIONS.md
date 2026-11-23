@@ -494,11 +494,19 @@ idempotent reruns. It does not infer targets, exports or runner connections;
 other configurations are preserved for review. Synchronization for other
 manifests and languages remains pending.
 
+**ES:** El runner Swift ejecuta ahora `swift test` sin `--skip-build`. La
+regresión parte de un paquete nuevo sin `.build`, para comprobar compilación y
+ejecución en un checkout limpio.
+
+**EN:** The Swift runner now uses `swift test` without `--skip-build`. Its
+regression starts from a new package with no `.build` directory, verifying
+compilation and execution from a clean checkout.
+
 ```text
 glot tests: 1804 passed, 0 failed
 cabal test .:tests --offline --ghc-options=-Werror=missing-home-modules: passed
 Haskell native scaffold/sync-build lab: passed
-Integrated scaffold lab: 230 passed, 0 failed
+Integrated scaffold lab (clean Swift + Haskell sync): 230 passed, 0 failed
 docs checks: 30 passed, 2 failed (known command drift and indented blocks)
 git diff --check
 ```

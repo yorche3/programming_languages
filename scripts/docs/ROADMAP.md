@@ -415,6 +415,8 @@ omitido por framework, `swift test` devolvió éxito: XCTest contó un test
 ejecutado y omitido, y Swift Testing informó un test aprobado en el resumen
 aunque sus eventos indicaban `testSkipped`. No basta con contar tests del
 resumen; también hay que distinguir omitidos y ejecuciones incompletas.
+La regresión actual invoca `swift_test.sh` en un paquete nuevo sin `.build`;
+el runner usa `swift test` normal para compilar checkouts limpios.
 
 **EN — Swift (2026-11-22):** SwiftPM 6.3.3 generated an `example` test
 without assertions; `swift test` reported it as a passing case. Removing only
@@ -430,6 +432,8 @@ framework, `swift test` returned success: XCTest counted one executed and
 skipped test, and the Swift Testing summary reported one passing test even
 though its events showed `testSkipped`. Summary counts alone are insufficient;
 skips and incomplete runs must also be distinguished.
+The regression now invokes `swift_test.sh` in a fresh package without `.build`;
+the runner uses normal `swift test` so clean checkouts are compiled.
 
 **ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
 si faltan, preserva archivos existentes y avisa de su revisión. El selector

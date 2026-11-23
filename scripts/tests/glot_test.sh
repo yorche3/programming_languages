@@ -3214,7 +3214,6 @@ EOF
 cp -- "$DATA_DIR/swift_test.sh" "$SW_RUN/swift_test.sh"
 (
     cd "$SW_RUN"
-    swift test >/dev/null 2>&1
     bash ./swift_test.sh
 ) >/dev/null 2>&1
 assert_eq 'test Swift caso aprobado: código' '0' "$?"

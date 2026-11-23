@@ -10,7 +10,7 @@ if [[ -L Package.swift || ! -f Package.swift ]]; then
 fi
 
 output="$(mktemp)"
-if swift test --skip-build >"$output" 2>&1; then
+if swift test >"$output" 2>&1; then
     rc=0
 else
     rc=$?
