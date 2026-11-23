@@ -126,7 +126,7 @@ Criterios de aceptación / Acceptance criteria:
   / Test state identity, actual cleanup, reruns, non-mutating dry-run and
   authored Git protection across Crystal and other affected generators.
 
-### Fix pendiente: scaffold incompleto y aviso ausente / Pending fix: incomplete scaffold and missing handoff
+### Fix cerrado: scaffold incompleto y aviso ausente / Closed fix: incomplete scaffold and missing handoff
 
 **ES:** Reportado el 2026-11-09 en D. `glot scaffold` imprimió
 `rm -f source/app.d && rm -rf .git && touch .gitignore`, anunció garantizar
@@ -144,7 +144,7 @@ layout/file creation nor a delegate completion note. Verify required artifacts
 against the guide and homologated bases rather than treating printed commands
 as evidence of a complete scaffold.
 
-Criterios de aceptación / Acceptance criteria:
+Cierre verificable / Verified closure:
 
 - Revisar D y los demás lenguajes: ejecutar desde `glot scaffold` todos los
   `mkdir`, `touch`, configuraciones y runners repetibles que correspondan a
@@ -167,6 +167,14 @@ Criterios de aceptación / Acceptance criteria:
   rerun sin pérdida de contenido y dry-run sin modificaciones.
   / Test required artifacts, hidden files, handoff messages, visible failures,
   non-destructive reruns and non-mutating dry-run.
+
+**ES — Cierre:** los criterios están cubiertos por las pruebas de D en
+`scripts/tests/glot_test.sh`: `.gitignore`, fuente, `test/`, configuración
+unittest, rerun, contenido propio, symlinks y salida nativa sin tests/fallida.
+
+**EN — Closure:** the criteria are covered by the D tests in
+`scripts/tests/glot_test.sh`: `.gitignore`, source, `test/`, unittest
+configuration, rerun, authored content, symlinks and native empty/failing runs.
 
 **ES — Hallazgo D (2026-11-22):** `dub describe --build=unittest
 --data=source-files --data-list --skip-registry=all` en la base homologada
