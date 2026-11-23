@@ -419,6 +419,7 @@ EOF
     cp -- "$TESTS_DIR/../data/purescript_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/typescript_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/csharp_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/common_lisp_scaffold.sh" "$SANDBOX/scripts/data/"
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
@@ -2235,6 +2236,42 @@ assert_eq 'scaffold Zig: rerun preserva main' 'author main' \
     "$(cat "$ZIG_SCAFFOLD/src/main.zig")"
 assert_eq 'scaffold Zig: rerun preserva ignore' 'author ignore' \
     "$(cat "$ZIG_SCAFFOLD/.gitignore")"
+git -C "$SANDBOX" checkout -q -- .gitmodules
+
+# Common Lisp: move generated files only when destinations are free; reruns retain files.
+printf '[submodule "common-lisp"]\n\tpath = common-lisp\n\turl = ../remote/common-lisp.git\n' \
+    >>"$SANDBOX/.gitmodules"
+CL_SCAFFOLD="$SANDBOX/common-lisp/core/algorithms/naive_sort"
+mkdir -p "$CL_SCAFFOLD/src" "$CL_SCAFFOLD/tests"
+printf 'generated source\n' >"$CL_SCAFFOLD/src/main.lisp"
+printf 'generated tests\n' >"$CL_SCAFFOLD/tests/main.lisp"
+glot_run_sandbox scaffold common-lisp algorithms/naive_sort
+assert_eq 'scaffold Common Lisp: código' '0' "$rc_last"
+assert_eq 'scaffold Common Lisp: renombra fuente' 'generated source' \
+    "$(cat "$CL_SCAFFOLD/src/naive_sort.lisp")"
+assert_eq 'scaffold Common Lisp: renombra suite' 'generated tests' \
+    "$(cat "$CL_SCAFFOLD/tests/naive_sort-test.lisp")"
+assert_eq 'scaffold Common Lisp: crea runner vacío' '0' \
+    "$(test -f "$CL_SCAFFOLD/run-tests.lisp" && test ! -s "$CL_SCAFFOLD/run-tests.lisp"; echo $?)"
+printf 'authored runner\n' >"$CL_SCAFFOLD/run-tests.lisp"
+glot_run_sandbox scaffold common-lisp algorithms/naive_sort
+assert_eq 'scaffold Common Lisp: rerun preserva fuente' 'generated source' \
+    "$(cat "$CL_SCAFFOLD/src/naive_sort.lisp")"
+assert_eq 'scaffold Common Lisp: rerun preserva runner' 'authored runner' \
+    "$(cat "$CL_SCAFFOLD/run-tests.lisp")"
+printf 'new generated source\n' >"$CL_SCAFFOLD/src/main.lisp"
+glot_run_sandbox scaffold common-lisp algorithms/naive_sort
+assert_eq 'scaffold Common Lisp: bloquea destino existente' '4' "$rc_last"
+assert_eq 'scaffold Common Lisp: conserva origen en conflicto' 'new generated source' \
+    "$(cat "$CL_SCAFFOLD/src/main.lisp")"
+assert_eq 'scaffold Common Lisp: conserva destino en conflicto' 'generated source' \
+    "$(cat "$CL_SCAFFOLD/src/naive_sort.lisp")"
+rm -- "$CL_SCAFFOLD/src/main.lisp"
+ln -s "$CL_SCAFFOLD/run-tests.lisp" "$CL_SCAFFOLD/src/main.lisp"
+glot_run_sandbox scaffold common-lisp algorithms/naive_sort
+assert_eq 'scaffold Common Lisp: bloquea origen symlink' '4' "$rc_last"
+assert_eq 'scaffold Common Lisp: conserva origen symlink' 'yes' \
+    "$([[ -L "$CL_SCAFFOLD/src/main.lisp" ]] && echo yes || echo no)"
 git -C "$SANDBOX" checkout -q -- .gitmodules
 
 mkdir -p "$PSB/src"

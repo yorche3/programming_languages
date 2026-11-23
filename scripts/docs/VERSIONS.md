@@ -563,6 +563,25 @@ Focused C# + Zig scaffold regressions: 24 passed, 0 failed
 Zig 0.17.1 scaffold integration: 3/3 tests passed; build passed
 ```
 
+## 2.1.0-dev — 2026-11-23 (renombrado Common Lisp / Common Lisp rename)
+
+**ES:** `cl-project` genera `src/main.lisp` y `tests/main.lisp`. El scaffold
+ahora los mueve a los nombres del módulo solo cuando los destinos están libres;
+si ya existen los destinos, conserva ambos archivos y falla explícitamente.
+Los reruns conservan fuentes renombradas y `run-tests.lisp` propio. Medido con
+Roswell 19.08.10, Quicklisp y `cl-project` ya disponibles localmente.
+
+**EN:** `cl-project` generates `src/main.lisp` and `tests/main.lisp`. Scaffold
+now moves them to module-named files only when destinations are free; if a
+destination already exists, it preserves both files and fails explicitly.
+Reruns preserve renamed sources and an authored `run-tests.lisp`. Measured
+with Roswell 19.08.10, Quicklisp and `cl-project` already available locally.
+
+```text
+Focused C# + Zig + Common Lisp scaffold regressions: 35 passed, 0 failed
+Common Lisp scaffold integration: rename, rerun and conflict preservation passed
+```
+
 ## 2.1.0-dev — 2026-11-02 (rutas y perfiles / routes and profiles)
 
 **ES:** Tres rutas explícitas, perfiles independientes del modelo, Sonnet para

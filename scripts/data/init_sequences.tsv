@@ -22,7 +22,7 @@ cobol	scaffold	1	module	run	if [[ -L src || -L src/copybooks || -L src/lib || -L
 cobol	scaffold	2	module	run	if [[ -L Makefile || ( -e Makefile && ! -f Makefile ) ]]; then printf 'scaffold: Makefile no seguro / unsafe Makefile\n' >&2; false; else test -e Makefile || (set -C; cat {root}/scripts/data/scaffold_templates/cobol.Makefile > Makefile); fi	-	-	-
 cobol	scaffold	3	module	run	test -e .gitignore || (set -C; cat {root}/scripts/data/scaffold_templates/cobol.gitignore > .gitignore)	-	-	-
 common-lisp	new	1	phase	run	ros -e '(ql:quickload :cl-project :silent t)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'	-	-	descarga cl-project con Quicklisp la primera vez; queda en ~/.roswell
-common-lisp	scaffold	1	module	run	mv src/main.lisp src/{module}.lisp && mv tests/main.lisp tests/{module}-test.lisp && touch run-tests.lisp	-	-	homologar el .asd (defsystem/test-op y uiop:symbol-call), el paquete con guion y el sistema de pruebas sobre fiveam
+common-lisp	scaffold	1	module	run	bash {root}/scripts/data/common_lisp_scaffold.sh {module}	-	-	adaptar el .asd al nombre de los archivos y homologar defsystem/test-op, uiop:symbol-call, paquete con guion y FiveAM
 cpp	new	1	phase	run	mkdir -p {module}	-	-	-
 cpp	scaffold	1	module	run	mkdir -p src include tests && touch MODULE.bazel BUILD .bazelversion .gitignore	-	-	-
 crystal	new	1	phase	run	crystal init lib {module}	-	-	-
