@@ -533,6 +533,12 @@ because it allowed empty green runs. `typescript_test.sh` requires Jest JSON
 and rejects zero cases, skipped tests and failures. Temporary measurements
 passed for a green suite and rejected empty and failing suites.
 
+**ES — JavaScript (2026-11-22):** reutiliza el runner Jest JSON de TypeScript,
+rechazando ejecuciones vacías, omitidas y fallidas.
+
+**EN — JavaScript (2026-11-22):** reuses the TypeScript Jest JSON runner,
+rejecting empty, skipped and failing runs.
+
 - Para el fix, verificar la salida real de `spago init` y el layout homologado;
   automatizar los cambios mecánicos de nombres, imports, runner y manifiesto
   que correspondan, manteniendo consistentes archivos y declaraciones.

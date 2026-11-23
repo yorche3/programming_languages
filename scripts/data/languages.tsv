@@ -22,7 +22,7 @@ groovy	tool	bash {root}/scripts/data/gradle_test.sh	-
 haskell	tool	cabal test .:tests --ghc-options=-Werror=missing-home-modules	-
 haxe	manual	haxe build.hxml	-
 java	manual	mvn test	-
-javascript	tool	npm test	-
+javascript	tool	bash {root}/scripts/data/typescript_test.sh	-
 julia	tool	julia --project=. test/run_tests.jl	julia --project=. -e 'for f in filter(x->endswith(x,".jl"), readdir("src")); Meta.parse(read("src/$f", String)); end'
 kotlin	tool	bash {root}/scripts/data/gradle_test.sh	-
 lua	tool	busted	-

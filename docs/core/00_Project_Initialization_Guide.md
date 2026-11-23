@@ -111,7 +111,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **haskell** | 🔧 `cabal init --lib` | `{module}.cabal` | ✅ `cabal test .:tests --ghc-options=-Werror=missing-home-modules` |
 | **haxe** | ⛓️ ✅ `mkdir -p src test` (después `haxelib install utest`) | `build.hxml`, `RunTests.hx` | ✅ `haxe build.hxml` |
 | **java** | ✍️ `pom.xml` a mano (el arquetipo quickstart es de aplicación: R2) | `pom.xml` | ✅ `mvn test` |
-| **javascript** | 🔧 `npm init -y` | `package.json`, `jest.config.js` | ✅ `npm test` |
+| **javascript** | 🔧 `npm init -y` | `package.json`, `jest.config.js` | ✅ informe Jest con rechazo de cero casos |
 | **julia** | ⛓️ 🔧 `julia -e 'using Pkg; Pkg.generate("{module}")'` | `Project.toml`, `src/{Module}.jl`, `test/` | ✅ `julia --project=. test/run_tests.jl` |
 | **kotlin** | ⛓️ ✅ `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | `build.gradle.kts`, `settings.gradle.kts` | ✅ XML Gradle con rechazo de NO-SOURCE |
 | **lua** | 🔧 `luarocks init` | `{module}.rockspec`, `.busted` | ✅ `busted` |

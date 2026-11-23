@@ -341,6 +341,12 @@ omitidos y fallos.
 **EN:** TypeScript requires the Jest JSON report and rejects zero cases,
 skipped tests and failures.
 
+**ES:** JavaScript reutiliza el runner JSON de Jest y rechaza ejecuciones vacías,
+omitidas o fallidas.
+
+**EN:** JavaScript reuses the Jest JSON runner and rejects empty, skipped or
+failing runs.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

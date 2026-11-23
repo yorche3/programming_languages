@@ -233,6 +233,12 @@ informe JSON de Jest y rechaza cero casos, omitidos y fallos.
 **EN:** TypeScript removes `--passWithNoTests`; `typescript_test.sh` requires the
 Jest JSON report and rejects zero cases, skipped tests and failures.
 
+**ES:** JavaScript reutiliza el runner Jest de TypeScript, con el mismo rechazo
+de cero casos, omitidos y fallos.
+
+**EN:** JavaScript reuses the TypeScript Jest runner, with the same rejection
+of zero cases, skipped tests and failures.
+
 **ES:** V puede devolver éxito con cero casos; `v_test.sh` exige un resumen con
 al menos un caso aprobado.
 

@@ -3074,6 +3074,28 @@ ts_rc=0
 ) >/dev/null 2>&1 || ts_rc=$?
 assert_eq 'test TypeScript cero casos: rechaza' '1' "$ts_rc"
 
+JS_RUN="$SANDBOX/javascript/core/foundations/unit_test/calculator"
+mkdir -p "$JS_RUN/node_modules/.bin"
+printf '{}\n' >"$JS_RUN/package.json"
+cat >"$JS_RUN/node_modules/.bin/jest" <<'EOF'
+#!/usr/bin/env bash
+output=""
+for arg in "$@"; do
+  case "$arg" in
+    --outputFile=*) output="${arg#*=}" ;;
+  esac
+done
+printf '{"success":true,"numTotalTests":1,"numPassedTests":1,"numFailedTests":0,"numPendingTests":0}\n' >"$output"
+EOF
+chmod +x "$JS_RUN/node_modules/.bin/jest"
+cp -- "$DATA_DIR/typescript_test.sh" "$JS_RUN/typescript_test.sh"
+js_rc=0
+(
+    cd "$JS_RUN"
+    bash ./typescript_test.sh
+) >/dev/null 2>&1 || js_rc=$?
+assert_eq 'test JavaScript caso aprobado: código' '0' "$js_rc"
+
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"
 printf '[package]\nname = "naive_sort"\n' >"$RUSTB/Cargo.toml"

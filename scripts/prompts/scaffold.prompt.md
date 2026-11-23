@@ -145,6 +145,8 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
   prueba de éxito y reporta fallos o errores.
 - En TypeScript, no uses `--passWithNoTests`; `typescript_test.sh` exige el
   informe JSON de Jest con al menos un caso aprobado y rechaza omitidos/fallos.
+- En JavaScript, usa el mismo informe JSON de Jest; `typescript_test.sh`
+  rechaza cero casos, omitidos y fallos.
 - En Haskell, el selector de Cabal rechaza un paquete sin `test-suite`: declara
   el target y prepara su runner vacío como indica el catálogo; eso no valida casos.
 - En Ballerina, `bal test` puede devolver éxito sin casos o con todos los tests
