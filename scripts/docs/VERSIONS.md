@@ -61,16 +61,18 @@ the harness. The remaining scaffold review is pending.
 **ES:** Se inicia el fix sin cerrar la versión. `new` inspecciona el `.git/`
 recién generado en un módulo inicialmente vacío y solo lo retira si es seguro;
 el estado se resuelve desde Git anidado y se eliminan del catálogo los borrados
-incondicionales de `.git`. Un Git preexistente se preserva y bloquea la
-operación; el fix está cerrado y cubierto por regresiones.
+incondicionales de `.git`. Este caso está cubierto por regresiones; `scaffold`
+aún bloquea cualquier Git anidado preexistente, incluso uno vacío generado
+anteriormente, y no está cubierto por ese cierre parcial.
 En D se retira únicamente el ejemplo nativo verificado; D y PureScript anuncian
 el análisis pendiente. Siguen abiertas la revisión de los scaffolds, los helpers
 de build y las demás condiciones del [`ROADMAP.md`](ROADMAP.md).
 
 **EN:** The fix has started; the release remains open. `new` checks and removes
 freshly generated Git only when safe, nested Git resolves the superproject
-state, and unconditional catalog cleanup is removed. Pre-existing Git is
-protected and blocks the operation. D removes
+state, and unconditional catalog cleanup is removed. `scaffold` still blocks
+any pre-existing nested Git, including an empty repository from an earlier
+generator run; that case is not covered by the partial closure. D removes
 only the verified native sample; D and PureScript announce pending analysis.
 The remaining scaffold review, build helpers and roadmap conditions are open.
 
