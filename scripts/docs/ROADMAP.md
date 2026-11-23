@@ -871,11 +871,15 @@ Criterios para la siguiente versión / Next-version acceptance criteria:
 | No hay verbo para **retirar un módulo** ni para deshacer un cierre: `close`/`finish` solo añaden y `clean` solo borra artefactos ignorados. Medido el 2026-10-12 al planear la retirada de `naive_sort`, `numbers` y `calculator` en los 50 submódulos (los commits que los introdujeron añadieron entre 2 y 30 rutas de `core/`, así que no hay un commit por módulo que revertir) | Un verbo `retire` (o `unclose`) que borre las rutas del módulo en el submódulo, baje el contador del roadmap y el registro del checklist, y deje el gitlink confirmado; mientras no exista, la retirada es `git rm -r` + commit por lenguaje y edición a mano de los contadores |
 | El **puntero a mano** (workaround de `SPRINT.md`) salta el portón de `pointer`, y ni `status` ni `close` avisan de que el gitlink del lenguaje apunta a una rama sin integrar. Medido en `prolog` el 2026-10-12 (`ed42ba7` frente a un `main` en `69f1e9f`) | Que `status`/`doctor` marquen el gitlink cuyo commit no está en el `main` del submódulo, y que `close` lo compruebe también cuando el puntero se confirmó a mano |
 
-#### ⏳ Abierta — la paga la v1.6.5 / Open — v1.6.5 pays it
+#### ⏳ Abierta — Dart (declarada v1.6.5) / Open — Dart (declared v1.6.5)
 
-**ES:** Dos entradas. La primera, declarada el **2026-10-02** al pasar el andamiaje de **C#** (`csharp` + `data_structures_basics`, rama `fix/repo/glot-v1.6.5`): la secuencia de `csharp` deja el proyecto de pruebas **sin referencia al de producción**, y esa corrección vive **solo como nota** —ni `glot` la ejecuta ni la comprueba, y el encargo `4a` no la nombra—, así que se cuela hasta el paso `4c`.
+**ES:** Esta sección registra dos entradas: la de C# se cerró el **2026-11-23**
+como se documenta abajo; la de Dart, declarada el **2026-10-03**, permanece
+abierta.
 
-**EN:** Two entries. The first, declared on **2026-10-02** while running the **C#** scaffolding (`csharp` + `data_structures_basics`, branch `fix/repo/glot-v1.6.5`): the `csharp` sequence leaves the test project **without a reference to the production one**, and that correction lives **only as a note** —`glot` neither runs nor checks it, and the `4a` request does not name it—, so it slips through to step `4c`.
+**EN:** This section records two entries: the C# entry was closed on
+**2026-11-23**, as documented below; the Dart entry, declared on **2026-10-03**,
+remains open.
 
 **ES:** **Estado el 2026-10-02 (v1.6.5, en curso):** el **dato** ya lleva el paso —la secuencia de `csharp` termina en `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj`—, la **guía** refleja ese paso y deja el completado en `Class1.cs`, `UnitTest1.cs` y el `.gitignore`, el encargo [`scaffold`](../prompts/scaffold.prompt.md) nombra el resto y el harness tiene su caso. La medición del mismo día, sobre el módulo que lo destapó, dice lo que estaba en juego: añadida la referencia **a mano**, `dotnet test {Module}.slnx` **pasa a compilar `src/`** y falla con **tres errores y un aviso en `Node.cs`** —`CS0161` («not all code paths return a value»), `CS0246` («the type or namespace name `get` could not be found») y `CS0168`— que hasta entonces eran **invisibles**, porque sin la referencia el proyecto de producción **ni se compila**. Falta la **comprobación de ciclo completo**: un `glot new` de C# y su `4a`.
 
@@ -885,18 +889,23 @@ Criterios para la siguiente versión / Next-version acceptance criteria:
 se ejecutó la secuencia del catálogo, incluido `dotnet add reference`; una
 prueba importó un tipo de producción y `dotnet test` aprobó el caso. `glot -n
 new` mostró los cinco pasos y `glot -n scaffold` mostró la retirada de las
-muestras. `scaffold` ahora copia un `.gitignore` .NET medido solo cuando falta;
-el harness verifica `bin/`, `obj/`, dry-run y preservación de un ignore propio.
-La fila C# de la tabla siguiente queda como registro histórico; Dart es la
-entrada que permanece abierta en esta sección.
+muestras. `Class1.cs` y `UnitTest1.cs` solo se retiran si coinciden con las
+muestras medidas de .NET 10 tras normalizar BOM/CRLF; se preservan cambios y
+se bloquean symlinks. `scaffold` también copia un `.gitignore` .NET medido solo
+cuando falta; el harness verifica las muestras, `bin/`, `obj/`, dry-run y
+preservación de un ignore propio. La fila C# de la tabla siguiente queda como
+registro histórico; Dart es la entrada que permanece abierta en esta sección.
 
 **EN — C# closure (2026-11-23):** in a temporary .NET 10.0.115 project, the
 catalogue sequence was executed, including `dotnet add reference`; a test
 imported a production type and `dotnet test` passed. `glot -n new` showed all
-five steps and `glot -n scaffold` showed sample removal. Scaffold now copies a
-measured .NET `.gitignore` only when missing; the harness verifies `bin/`,
-`obj/`, dry-run and preservation of an authored ignore file. The C# row below
-is historical; Dart is the entry that remains open in this section.
+five steps and `glot -n scaffold` showed sample removal. `Class1.cs` and
+`UnitTest1.cs` are removed only when they match the measured .NET 10 samples
+after BOM/CRLF normalization; edits are preserved and symlinks are blocked.
+Scaffold also copies a measured .NET `.gitignore` only when missing; the
+harness verifies samples, `bin/`, `obj/`, dry-run and preservation of an
+authored ignore file. The C# row below is historical; Dart remains open in
+this section.
 
 | Deuda | Qué la cierra / What closes it |
 |-------|--------------------------------|

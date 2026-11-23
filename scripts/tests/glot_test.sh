@@ -418,6 +418,7 @@ EOF
     cp -- "$TESTS_DIR/../data/swift_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/purescript_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/typescript_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/csharp_scaffold.sh" "$SANDBOX/scripts/data/"
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
@@ -2149,7 +2150,7 @@ assert_eq 'scaffold Prolog symlink: bloquea' '4' "$rc_last"
 assert_eq 'scaffold Prolog symlink: conserva destino' 'author ignore' "$(cat "$PRB/.gitignore")"
 
 PSB="$SANDBOX/purescript/core/algorithms/naive_sort"
-# C#: scaffold instala ignore patterns al faltar y preserva archivos propios en reruns.
+# C#: scaffold conserva archivos propios y retira solo ejemplos dotnet new intactos.
 CSHARP_SCAFFOLD="$SANDBOX/csharp/core/algorithms/naive_sort"
 mkdir -p -- "$CSHARP_SCAFFOLD"
 glot_run_sandbox -n scaffold csharp algorithms/naive_sort
@@ -2160,6 +2161,29 @@ glot_run_sandbox scaffold csharp algorithms/naive_sort
 assert_eq 'scaffold C#: código' '0' "$rc_last"
 assert_eq 'scaffold C#: instala plantilla ignore' '0' \
     "$(cmp -s "$CSHARP_SCAFFOLD/.gitignore" "$TESTS_DIR/../data/scaffold_templates/csharp.gitignore"; echo $?)"
+mkdir -p "$CSHARP_SCAFFOLD/src/NaiveSort" "$CSHARP_SCAFFOLD/test/NaiveSort.Tests"
+for sample in Class1 UnitTest1; do
+    if [[ "$sample" == Class1 ]]; then
+        target="$CSHARP_SCAFFOLD/src/NaiveSort/Class1.cs"
+        template="$TESTS_DIR/../data/scaffold_templates/csharp.Class1.cs"
+    else
+        target="$CSHARP_SCAFFOLD/test/NaiveSort.Tests/UnitTest1.cs"
+        template="$TESTS_DIR/../data/scaffold_templates/csharp.UnitTest1.cs"
+    fi
+    { printf '\357\273\277'; sed 's/@MODULE@/NaiveSort/g; s/$/\r/' "$template"; } >"$target"
+done
+glot_run_sandbox scaffold csharp algorithms/naive_sort
+assert_eq 'scaffold C#: retira ejemplos intactos' 'no' \
+    "$([[ -e "$CSHARP_SCAFFOLD/src/NaiveSort/Class1.cs" || -e "$CSHARP_SCAFFOLD/test/NaiveSort.Tests/UnitTest1.cs" ]] && echo yes || echo no)"
+printf 'namespace NaiveSort;\npublic class Class1 { public int Value => 1; }\n' \
+    >"$CSHARP_SCAFFOLD/src/NaiveSort/Class1.cs"
+printf 'namespace NaiveSort.Tests;\npublic class UnitTest1 { }\n' \
+    >"$CSHARP_SCAFFOLD/test/NaiveSort.Tests/UnitTest1.cs"
+glot_run_sandbox scaffold csharp algorithms/naive_sort
+assert_eq 'scaffold C#: conserva ejemplo de producción editado' \
+    'namespace NaiveSort;' "$(head -n 1 "$CSHARP_SCAFFOLD/src/NaiveSort/Class1.cs")"
+assert_eq 'scaffold C#: conserva test editado' \
+    'namespace NaiveSort.Tests;' "$(head -n 1 "$CSHARP_SCAFFOLD/test/NaiveSort.Tests/UnitTest1.cs")"
 CSHARP_IGNORE="$WORK_DIR/csharp-ignore"
 mkdir -p -- "$CSHARP_IGNORE"
 cp -- "$CSHARP_SCAFFOLD/.gitignore" "$CSHARP_IGNORE/.gitignore"
@@ -2171,6 +2195,14 @@ assert_eq 'scaffold C#: excluye obj' '1' \
 printf 'author ignore\n' >"$CSHARP_SCAFFOLD/.gitignore"
 glot_run_sandbox scaffold csharp algorithms/naive_sort
 assert_eq 'scaffold C#: rerun preserva ignore propio' 'author ignore' "$(cat -- "$CSHARP_SCAFFOLD/.gitignore")"
+rm -- "$CSHARP_SCAFFOLD/src/NaiveSort/Class1.cs"
+ln -s "$CSHARP_SCAFFOLD/test/NaiveSort.Tests/UnitTest1.cs" "$CSHARP_SCAFFOLD/src/NaiveSort/Class1.cs"
+glot_run_sandbox scaffold csharp algorithms/naive_sort
+assert_eq 'scaffold C#: bloquea muestra symlink' '4' "$rc_last"
+assert_eq 'scaffold C#: conserva muestra symlink' 'yes' \
+    "$([[ -L "$CSHARP_SCAFFOLD/src/NaiveSort/Class1.cs" ]] && echo yes || echo no)"
+assert_eq 'scaffold C#: conserva destino del symlink' \
+    'namespace NaiveSort.Tests;' "$(head -n 1 "$CSHARP_SCAFFOLD/test/NaiveSort.Tests/UnitTest1.cs")"
 
 mkdir -p "$PSB/src"
 printf 'author code\n' >"$PSB/src/Main.purs"

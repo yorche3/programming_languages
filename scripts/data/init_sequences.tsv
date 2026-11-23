@@ -32,7 +32,7 @@ csharp	new	2	module	run	dotnet new classlib -n {Module} -o src/{Module}	-	-	-
 csharp	new	3	module	run	dotnet new xunit --no-restore -n {Module}.Tests -o test/{Module}.Tests	-	-	-
 csharp	new	4	module	run	dotnet sln add src/{Module}/{Module}.csproj test/{Module}.Tests/{Module}.Tests.csproj	-	-	-
 csharp	new	5	module	run	dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj	-	-	-
-csharp	scaffold	1	module	run	rm -f src/{Module}/Class1.cs test/{Module}.Tests/UnitTest1.cs	-	-	-
+csharp	scaffold	1	module	run	bash {root}/scripts/data/csharp_scaffold.sh {Module}	-	-	conservar Class1.cs y UnitTest1.cs si difieren de las muestras generadas por dotnet new
 csharp	scaffold	2	module	run	test -e .gitignore || (set -C; cat {root}/scripts/data/scaffold_templates/csharp.gitignore > .gitignore)	-	-	-
 d	new	1	phase	run	dub init {module} --format=sdl	-	-	-
 d	scaffold	1	module	run	if [[ -L dub.sdl || ! -f dub.sdl || -L source || -L test || -L source/app.d || -L source/{module}.d || ( -e source/app.d && ! -f source/app.d ) || ( -e source/{module}.d && ! -f source/{module}.d ) ]]; then printf 'scaffold: manifiesto o ruta D no segura / unsafe D manifest or path\n' >&2; false; elif [[ -f source/app.d ]]; then test -f {root}/scripts/data/scaffold_templates/d.app.d && { cmp -s source/app.d {root}/scripts/data/scaffold_templates/d.app.d; result=$?; if [[ "$result" == 0 ]]; then rm -- source/app.d; elif [[ "$result" != 1 ]]; then printf 'scaffold: no se pudo comparar la plantilla D / could not compare D template\n' >&2; false; fi; }; fi	-	-	revisar source/app.d si difiere del ejemplo verificado y comprobar que el manifiesto incluye test/ en la configuración unittest
