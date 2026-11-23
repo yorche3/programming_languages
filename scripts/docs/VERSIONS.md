@@ -62,7 +62,7 @@ the harness. The remaining scaffold review is pending.
 recién generado en un módulo inicialmente vacío y solo lo retira si es seguro;
 el estado se resuelve desde Git anidado y se eliminan del catálogo los borrados
 incondicionales de `.git`. Un Git preexistente se preserva y bloquea la
-operación: la limpieza automática segura de esos casos sigue pendiente.
+operación; el fix está cerrado y cubierto por regresiones.
 En D se retira únicamente el ejemplo nativo verificado; D y PureScript anuncian
 el análisis pendiente. Siguen abiertas la revisión de los scaffolds, los helpers
 de build y las demás condiciones del [`ROADMAP.md`](ROADMAP.md).
@@ -70,7 +70,7 @@ de build y las demás condiciones del [`ROADMAP.md`](ROADMAP.md).
 **EN:** The fix has started; the release remains open. `new` checks and removes
 freshly generated Git only when safe, nested Git resolves the superproject
 state, and unconditional catalog cleanup is removed. Pre-existing Git is
-protected and blocks the operation pending a safe automatic solution. D removes
+protected and blocks the operation. D removes
 only the verified native sample; D and PureScript announce pending analysis.
 The remaining scaffold review, build helpers and roadmap conditions are open.
 
@@ -251,10 +251,10 @@ for failures and empty or incomplete runs. Verified against `numbers` and
 `data_structures_basics`.
 
 **ES:** `new` y `scaffold` bloquean también un `.git` anidado en formato
-gitfile, sin modificarlo. La limpieza segura de Git preexistente sigue pendiente.
+gitfile, sin modificarlo. Git preexistente queda protegido por el fix cerrado.
 
 **EN:** `new` and `scaffold` also block a nested `.git` gitfile without
-modifying it. Safe cleanup of pre-existing Git remains pending.
+modifying it. Pre-existing Git is protected by the closed fix.
 
 **ES:** Scala preserva archivos existentes, rechaza enlaces y crea un build
 sbt/ScalaTest basado en las referencias. `sbt test` compiló el scaffold aislado

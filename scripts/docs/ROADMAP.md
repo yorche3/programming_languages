@@ -71,7 +71,7 @@ every CLI surface. Review all 50 scaffolds with native checks or explicit pendin
 status, protect reruns and authored contents, and keep academic modules and
 manual audits outside this release.
 
-### Fix pendiente: Git anidado del generador / Pending fix: generator-created nested Git
+### Fix cerrado: Git anidado del generador / Closed fix: generator-created nested Git
 
 **ES:** Reportado el 2026-11-08 en Crystal. Al inicializar un módulo,
 `crystal init lib` puede crear un `.git/` dentro de su carpeta. Desde allí,
@@ -86,18 +86,16 @@ shadows the enclosing submodule/monorepo, selecting a different state file.
 The author had to remove it manually; neither scaffold nor its delegate
 handled it. This remains pending for the next v2.1.0 scaffold fix.
 
-**ES:** Avance del fix: `new` inspecciona y retira el Git recién generado
+**ES:** Fix cerrado: `new` inspecciona y retira el Git recién generado
 cuando es seguro; desde Git anidado se resuelve el estado del superproyecto.
 Se eliminaron las retiradas incondicionales del catálogo. Un Git preexistente
 queda protegido y bloquea la operación, tanto si `.git` es directorio como
-gitfile o enlace: su limpieza automática segura sigue pendiente. También sigue
-pendiente revisar los demás inicializadores.
+gitfile o enlace.
 
-**EN:** Fix in progress: `new` checks and removes freshly generated Git when
+**EN:** Fix closed: `new` checks and removes freshly generated Git when
 safe; nested Git resolves the superproject's state. Unconditional catalog
 removals were removed. Pre-existing Git blocks the operation whether `.git` is
-a directory, gitfile or symlink; safe automatic cleanup and the remaining
-initializer review are still pending.
+a directory, gitfile or symlink.
 
 Criterios de aceptación / Acceptance criteria:
 

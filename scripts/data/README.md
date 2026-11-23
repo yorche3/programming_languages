@@ -392,6 +392,12 @@ Notes describe judgment/content not determined by the catalogue. The harness
 checks the nine-column schema and per-phase order; failed steps stop execution.
 Renames preserve existing destinations and manual recipes mirror adaptations.
 
+**ES:** `new` retira solo el `.git/` vacío generado por un inicializador y
+preserva o bloquea Git preexistente, incluidos directorios, gitfiles y enlaces.
+
+**EN:** `new` removes only an initializer-generated empty `.git/` and preserves
+or blocks pre-existing Git, including directories, gitfiles and symlinks.
+
 **ES:** Primer bloque v2.1.0-dev: Ballerina crea pruebas vacías, renombra con
 guardas y elimina solo el ejemplo idéntico a
 [`ballerina.main.bal`](scaffold_templates/ballerina.main.bal). Perl escribe
