@@ -148,8 +148,16 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
   informe JSON de Jest con al menos un caso aprobado y rechaza omitidos/fallos.
 - En JavaScript, usa el mismo informe JSON de Jest; `typescript_test.sh`
   rechaza cero casos, omitidos y fallos.
-- En Haskell, el selector de Cabal rechaza un paquete sin `test-suite`: declara
-  el target y prepara su runner vacío como indica el catálogo; eso no valida casos.
+- En Haskell, `cabal init --lib --tests` puede dejar un `test-suite` con
+  `test/Main.hs` que solo anuncia que no hay suite. `glot scaffold` adapta la
+  plantilla Cabal reconocida a Hspec; revisa lo que conserve y sigue la sección
+  Haskell de la guía si la adaptación sigue pendiente. Mantén `main-is` y el
+  nombre del archivo sincronizados; conserva y revisa manifiestos y runners propios.
+  Declara `hspec` en el test-suite junto con `base` y el paquete, no en la
+  biblioteca por defecto. Cabal puede dar `PASS` con cero ejemplos: eso no valida
+  casos. Comprueba el arranque vacío con `cabal test .:tests
+  --ghc-options=-Werror=missing-home-modules`; `glot test` rechaza la ausencia
+  de ejemplos, resultados pendientes o un resumen Hspec no reconocido.
 - En Ballerina, `bal test` puede devolver éxito sin casos o con todos los tests
   deshabilitados. `ballerina_test.sh` genera el informe JSON, rechaza cero casos
   y fallos, y conserva el resultado real.
@@ -188,7 +196,8 @@ eso corresponde a otra delegación.
 - Escribir el código de la implementación del pseudocódigo ni modificar `src/` con lógica.
 - Modificar la especificación, el roadmap ni `scripts/data/`.
 - Generar documentación, READMEs ni índices.
-- Introducir dependencias externas no estándar del lenguaje.
+- Introducir dependencias externas que no estén autorizadas por la guía de
+  inicialización para el andamiaje del lenguaje.
 - Ejecutar `git add`, `git commit` ni `git push`.
 
 ---

@@ -1616,6 +1616,44 @@ _glot_cmd_verify() {
     _glot_cmd_run verify "$@"
 }
 
+_glot_cmd_sync_build() {
+    local component="${1:-}"
+    local hs_module="${2:-}"
+    local target="" lang="" phase="" module="" root="" dir="" data="" mode=apply
+
+    if [[ ( "$component" != library && "$component" != test ) || -z "$hs_module" ]]; then
+        _glot_error 'uso / usage: glot sync-build <library|test> <Haskell.Module> [lenguaje] [fase/módulo]'
+        return 2
+    fi
+    shift 2
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+    if [[ "$lang" != haskell ]]; then
+        _glot_error "sync-build no disponible para / not available for: $lang"
+        return 1
+    fi
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+    dir="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    if [[ -L "$root/$lang" || -L "$root/$lang/core" || -L "$root/$lang/core/$phase" ||
+          -L "$dir" || ! -d "$dir" ]]; then
+        _glot_error 'directorio del módulo ausente o inseguro / missing or unsafe module directory'
+        return 1
+    fi
+    data="$(_glot_data_dir)" || {
+        _glot_error 'falta el catálogo de datos / missing data catalogue'
+        return 1
+    }
+    if [[ ! -f "$data/haskell_sync.sh" ]]; then
+        _glot_error 'falta el sincronizador Haskell / missing Haskell synchronizer'
+        return 1
+    fi
+    ((_glot_dry_run)) && mode=dry-run
+    (cd -- "$dir" && bash "$data/haskell_sync.sh" "$module" "$component" "$hs_module" "$mode")
+}
+
 # --- delegación (L4) ---------------------------------------------------------
 
 # _glot_prompts_dir — carpeta de las plantillas versionadas del tooling.
@@ -4053,6 +4091,11 @@ Verbos / Verbs:
                      del runner va a stdout. Sin argumentos usa el estado del sprint
                      Runs the assigned module's suite in its directory; the runner's
                      output goes to stdout. With no arguments it uses the sprint state
+  sync-build <library|test> <Haskell.Module> [lenguaje] [fase/módulo]
+                     Declara un módulo interno Haskell en el target reconocido.
+                     `-n` muestra el cambio; configuraciones propias se conservan
+                     Declares a Haskell internal module in a recognized target.
+                     `-n` previews the change; custom configurations are preserved
   verify [lenguaje] [fase/módulo]
                      Ejecuta el verificador: lint idiomático (sintaxis y formato), con la
                      herramienta del lenguaje; `skipped` si aún no tiene uno. **No**
@@ -4296,6 +4339,14 @@ _glot_help_verb() {
             printf 'En el directorio del módulo, con el comando nativo del lenguaje; la salida del runner va a stdout\n'
             printf 'In the module directory, with the language native command; the runner output goes to stdout\n'
             printf 'Códigos / codes: 0 verde · 1 no se pudo preparar · 4 falló / failed\n'
+            ;;
+        sync-build)
+            printf 'glot sync-build <library|test> <Haskell.Module> [lenguaje] [fase/módulo]\n'
+            printf 'Declara un módulo interno existente en el target Cabal reconocido; -n muestra el cambio.\n'
+            printf 'Declares an existing internal module in the recognized Cabal target; -n previews changes.\n'
+            printf 'Solo Haskell; no conecta runners ni modifica configuraciones Cabal desconocidas.\n'
+            printf 'Haskell only; it neither connects runners nor edits unrecognized Cabal configurations.\n'
+            printf 'Códigos / codes: 0 correcto · 1 no reconocido o inseguro · 2 uso\n'
             ;;
         verify)
             printf 'glot verify [lenguaje] [fase/módulo] — ejecuta el verificador del lenguaje\n'
@@ -6171,6 +6222,9 @@ _glot_main() {
         test)
             # Ejecuta la suite del módulo asignado / Runs the assigned module suite
             _glot_cmd_test "$@"
+            ;;
+        sync-build)
+            _glot_cmd_sync_build "$@"
             ;;
         verify)
             # Ejecuta el verificador del lenguaje / Runs the language verifier

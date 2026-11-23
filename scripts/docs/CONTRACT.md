@@ -16,6 +16,20 @@ Agreed v2.1.0 delegate expansion,
 override restrictions and scaffold guarantees are in [`ROADMAP.md`](ROADMAP.md),
 awaiting implementation.
 
+**ES — 2.1.0-dev:** `sync-build <library|test> <Nombre.Modulo> [lenguaje]
+[fase/módulo]` declara un módulo interno Haskell existente en el target
+reconocido de Cabal; imprime `updated` o `unchanged`. `-n` muestra el diff
+cuando hay cambios y no modifica el manifiesto. Devuelve `2` por uso inválido y `1` si no puede
+identificar o actualizar el target de forma segura. No modifica `test` ni
+`save`, no descubre módulos y no conecta el runner.
+
+**EN — 2.1.0-dev:** `sync-build <library|test> <Module.Name> [language]
+[phase/module]` declares an existing internal Haskell module in the
+recognized Cabal target and prints `updated` or `unchanged`. `-n` previews
+any diff without modifying the manifest. It returns `2` for invalid usage and
+`1` if it cannot identify or update the target safely. It does not change
+`test` or `save`, discover modules, or connect the runner.
+
 ---
 
 ## � Frontera con la documentación / Boundary with the documentation

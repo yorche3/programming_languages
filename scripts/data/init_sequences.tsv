@@ -66,8 +66,9 @@ grain	scaffold	3	module	run	if [[ -L Makefile || ( -e Makefile && ! -f Makefile 
 grain	scaffold	4	module	run	test -e .gitignore || (set -C; cat {root}/scripts/data/scaffold_templates/grain.gitignore > .gitignore)	-	-	-
 groovy	new	1	module	run	gradle init --type groovy-library --dsl groovy --project-name {module} --package {module} --use-defaults	-	-	-
 groovy	scaffold	1	module	run	bash {root}/scripts/data/gradle_scaffold.sh groovy {module}	-	-	revisar muestras Groovy conservadas; Gradle puede devolver éxito sin casos; solo retirar pareja exacta sin otros archivos en lib/src
-haskell	new	1	module	run	cabal init --lib -n --source-dir=lib --package-name="$(printf '%s' {module} | tr '_' '-')" --expose-module={Module}	-	-	-
-haskell	scaffold	1	module	run	if [[ -L lib || -L test || -L lib/{Module}.hs || ( -e lib/{Module}.hs && ! -f lib/{Module}.hs ) ]]; then printf 'scaffold: ruta de Haskell no segura / unsafe Haskell path\n' >&2; false; else mkdir -p lib test && { test -e lib/{Module}.hs || (set -C; printf 'module {Module} where\n' > lib/{Module}.hs); }; fi	-	-	conservar lib/ y hs-source-dirs del proyecto Cabal; declarar el test-suite y su runner sin imponer src/
+haskell	new	1	module	run	cabal init --lib --tests -n --source-dir=lib --package-name="$(printf '%s' {module} | tr '_' '-')" --expose-module={Module}	-	-	-
+haskell	scaffold	1	module	run	if [[ -L lib || -L test || -L lib/{Module}.hs || ( -e lib/{Module}.hs && ! -f lib/{Module}.hs ) ]]; then printf 'scaffold: ruta de Haskell no segura / unsafe Haskell path\n' >&2; false; else mkdir -p lib test && { test -e lib/{Module}.hs || (set -C; printf 'module {Module} where\n' > lib/{Module}.hs); }; fi	-	-	-
+haskell	scaffold	2	module	run	bash {root}/scripts/data/haskell_scaffold.sh {module}	-	-	revisar manifiestos y runners Haskell conservados; cero casos no validan una suite
 haxe	new	1	phase	run	mkdir -p {module}	-	-	-
 haxe	scaffold	1	module	run	mkdir -p src test	-	-	-
 haxe	scaffold	2	module	run	haxelib install utest	-	-	instala utest la primera vez (queda en la ruta de haxelib); build.hxml y RunTests.hx son contenido del sprint

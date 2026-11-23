@@ -297,11 +297,11 @@ no declarados en targets Cabal compilados; no modifica el manifiesto.
 **EN:** Haskell `glot test` rejects imported local modules missing from compiled
 Cabal targets; it does not edit the manifest.
 
-**ES:** El selector Haskell rechaza paquetes sin suites declaradas, sin
-garantizar que una suite existente contenga casos.
+**ES:** El selector Haskell rechaza paquetes sin suites declaradas; por sí
+solo no garantiza que una suite existente contenga casos.
 
-**EN:** The Haskell selector rejects packages without declared suites, without
-guaranteeing that an existing suite contains cases.
+**EN:** The Haskell selector rejects packages without declared suites; alone,
+it does not guarantee that an existing suite contains cases.
 
 **ES:** Los encargos de scaffold y suite advierten de la selección limitada y
 del código de salida poco fiable de ooRexxUnit; el runner sigue pendiente.
@@ -442,6 +442,66 @@ líneas de comandos indentadas que ya estaban en la guía en `HEAD`. / The docs
 checker still reports two pre-existing issues: general command drift between
 the guide and `languages.tsv`, and two indented command lines already present
 in the committed guide.
+
+## 2.1.0-dev — 2026-11-23 (test-suite de Haskell / Haskell test suite)
+
+**ES:** `cabal init` recibe `--tests` para generar también el test-suite y
+`test/Main.hs`; la guía distingue ese runner nativo vacío de los casos que
+añadirá el sprint. En un laboratorio aislado, Cabal 3.16.1.0 compiló y ejecutó
+el runner con `cabal test .:tests --offline
+--ghc-options=-Werror=missing-home-modules`. La sincronización de helpers en
+Cabal es explícita y parcial; la revisión de los demás scaffolds permanece
+pendiente.
+
+**EN:** `cabal init` now receives `--tests` to generate the test suite and
+`test/Main.hs`; the guide distinguishes this empty native runner from sprint
+test cases. In an isolated lab, Cabal 3.16.1.0 compiled and ran the runner with
+`cabal test .:tests --offline
+--ghc-options=-Werror=missing-home-modules`. Helper synchronization in Cabal
+remains explicit and partial; the remaining scaffold review is still pending.
+
+**ES:** Las bases usan Hspec, pero el runner generado no lo conecta. La guía
+y el encargo explican la adaptación del test-suite y `main-is`. El helper adapta
+solo la pareja generada reconocida y conserva los manifiestos y runners propios.
+En un laboratorio aislado, Hspec arrancó con cero ejemplos,
+aprobó un caso y devolvió fallo con una aserción fallida.
+
+**EN:** The references use Hspec, but the generated runner does not connect it.
+The guide and scaffold request explain the test-suite and `main-is` adaptation;
+the helper adapts only the recognized generated pair and preserves authored
+manifests and runners. In an isolated lab, Hspec ran with zero examples, passed
+one case, and returned failure for a failing assertion.
+
+**ES:** `glot test` comprueba cada resumen Hspec, rechaza suites vacías,
+pendientes o no reconocidas y conserva la comprobación de módulos declarados.
+Las dos bases homologadas pasaron en copias aisladas; también se verificó un
+proyecto con dos suites. No sincroniza manifiestos automáticamente.
+
+**EN:** `glot test` checks each Hspec summary, rejects empty, pending or
+unrecognized suites, and retains the declared-module check. Both homologated
+references passed in isolated copies; a two-suite project was also verified.
+It does not synchronize manifests automatically.
+
+**ES:** `glot sync-build library|test Nombre.Modulo` permite declarar un
+helper interno por ejecución en la plantilla Cabal reconocida, con plan `-n`
+y reruns idempotentes. No infiere targets, exports ni conexiones al runner;
+las configuraciones distintas se conservan y requieren revisión. La
+sincronización para otros manifiestos y lenguajes sigue pendiente.
+
+**EN:** `glot sync-build library|test Module.Name` declares one internal
+helper per invocation in the recognized Cabal template, with `-n` preview and
+idempotent reruns. It does not infer targets, exports or runner connections;
+other configurations are preserved for review. Synchronization for other
+manifests and languages remains pending.
+
+```text
+glot tests: 1804 passed, 0 failed
+cabal test .:tests --offline --ghc-options=-Werror=missing-home-modules: passed
+Haskell native scaffold/sync-build lab: passed
+Integrated scaffold lab: 230 passed, 0 failed
+docs checks: 30 passed, 2 failed (known command drift and indented blocks)
+git diff --check
+```
 
 ## 2.1.0-dev — 2026-11-02 (rutas y perfiles / routes and profiles)
 

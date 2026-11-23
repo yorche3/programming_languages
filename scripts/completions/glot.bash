@@ -13,7 +13,7 @@ _glot_complete() {
     local glot="${GLOT_CMD:-glot}"
     local words=""
     local keys="lang phase module branch spec repo target cause antigravity-model copilot-model open-router-model"
-    local verbs="version help doctor greet langs modules models delegates progress completion use new scaffold save test verify evidence close validate prompt ask status pointer finish clean install uninstall set get unset list path"
+    local verbs="version help doctor greet langs modules models delegates progress completion use new scaffold save test sync-build verify evidence close validate prompt ask status pointer finish clean install uninstall set get unset list path"
     local i=""
     local positional=0
     local route=copilot
@@ -36,6 +36,15 @@ _glot_complete() {
             ;;
         modules | progress)
             words="$("$glot" modules 2>/dev/null | cut -f2 | LC_ALL=C sort -u)"
+            ;;
+        sync-build)
+            if ((COMP_CWORD == 2)); then
+                words="library test"
+            elif ((COMP_CWORD == 4)); then
+                words="haskell"
+            elif ((COMP_CWORD >= 5)); then
+                words="$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"
+            fi
             ;;
         test | verify | evidence | close | finish | scaffold)
             if ((COMP_CWORD == 2)); then

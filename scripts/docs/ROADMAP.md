@@ -589,6 +589,41 @@ undeclared. Even `--main-is=RunTests.hs` retained `Main.hs` in the isolated
 test. Adding `--tests` alone therefore does not synchronize helpers or
 reproduce the homologated runner.
 
+**ES — Andamiaje inicial:** `new` usa ahora `cabal init --lib --tests`, que
+genera también el test-suite y `test/Main.hs`. Con la fuente vacía de `lib/`
+presente, `cabal test .:tests --offline
+--ghc-options=-Werror=missing-home-modules` compiló y ejecutó ese runner en un
+laboratorio aislado. El mensaje «Test suite not yet implemented» confirma que
+es solo un punto de partida: no aporta casos y los helpers que agregue el
+sprint al test-suite siguen requiriendo declaración explícita en
+`other-modules`.
+
+**EN — Initial scaffold:** `new` now uses `cabal init --lib --tests`, which
+also generates the test suite and `test/Main.hs`. With the empty `lib/` source
+present, `cabal test .:tests --offline
+--ghc-options=-Werror=missing-home-modules` compiled and ran this placeholder
+in an isolated lab. Its “Test suite not yet implemented” message confirms it
+is only a starting point: it adds no cases, and helper modules added to the
+test suite still require explicit `other-modules` declarations.
+
+**ES — Adaptación Hspec:** `Main.hs` no conecta Hspec. En una copia
+aislada se configuró Hspec solo para el test-suite y se verificó un runner
+`RunTests.hs`: cero ejemplos devolvieron éxito; un caso aprobado pasó y uno
+fallido devolvió error. `scaffold` adapta el test-suite y runner nativos de Cabal
+3.16.1.0 solo cuando coinciden con la plantilla reconocida; otros manifiestos
+y runners se conservan para revisión. La guía y el encargo explican el proceso.
+Con Cabal 3.16.1.0, `--dependency=hspec` modifica también las dependencias de
+la biblioteca y reemplaza `base`, por lo que no se usa como atajo.
+
+**EN — Hspec adaptation:** `Main.hs` does not connect Hspec. An
+isolated test-only Hspec configuration and `RunTests.hs` runner returned
+success for zero examples, passed one passing case, and failed one failing
+case. `scaffold` adapts the recognized Cabal 3.16.1.0 test-suite and runner;
+other manifests and runners are preserved for review. The guide and request
+describe the process. Cabal 3.16.1.0
+`--dependency=hspec` also changes library dependencies and replaces `base`,
+so it is not used as a shortcut.
+
 **ES — Protección parcial:** `glot test` para Haskell trata
 `missing-home-modules` como error, sin editar el manifiesto. En un proyecto
 aislado detectó un helper de producción y otro de pruebas no declarados;
@@ -602,10 +637,60 @@ project it detected undeclared production and test helpers; both homologated
 bases passed in isolated copies. It does not synchronize manifests or detect
 files outside compiled targets; the criteria below remain pending.
 
+**ES — Verificación adicional:** en un laboratorio aislado, `cabal check` no
+detectó los helpers importados omitidos. Con la opción estricta, la compilación
+detectó primero el helper de biblioteca y después el de pruebas; al declararlos,
+la suite pasó aun con un archivo de pruebas desconectado. Los encargos de
+contrato y suite incluyen una comprobación provisional de declaraciones y
+conexión. No sustituye la sincronización automática ni cierra este fix.
+
+**EN — Additional verification:** in an isolated lab, `cabal check` did not
+detect missing declarations for imported helpers. Strict compilation detected
+first the library helper and then the test helper; after declaring them, the
+suite passed despite a disconnected test file. The contract and suite requests
+now include a provisional declaration and connection check. This does not
+replace automatic synchronization or close this fix.
+
+**ES — Punto de integración:** `contract_stub` y `suite` pueden escribirse
+fuera de `glot`; `prompt` solo imprime el encargo y `ask` retorna tras el
+delegado. Por tanto, el tooling no observa automáticamente cada archivo nuevo
+en ambas vías. En un laboratorio con GHC 9.10.3, el diagnóstico JSON de
+`missing-home-modules` proporcionó el código 32850, pero los nombres y el
+identificador de unidad seguían dentro del texto del mensaje, no como campos
+estructurados. Esto no resuelve la edición segura de targets, condiciones ni
+la conexión de grupos desconectados.
+
+**EN — Integration point:** `contract_stub` and `suite` can be written
+outside `glot`; `prompt` only prints the request and `ask` returns after the
+delegate. Tooling therefore cannot automatically observe each new file in
+both workflows. In a GHC 9.10.3 lab, the JSON `missing-home-modules`
+diagnostic provided code 32850, but module names and the unit identifier
+remained embedded in message text rather than structured fields. This does not
+solve safe target and conditional edits or connect disconnected groups.
+
+**ES — Sincronización explícita parcial:** `glot sync-build` recibe el target
+`library` o `test` y el nombre de un módulo interno existente. Para la plantilla
+reconocida de Cabal 3.16.1.0, actualiza `other-modules`; `-n` muestra el diff
+y repetirlo no duplica la declaración. No infiere pertenencia, exports ni
+conexión al runner y rechaza sin modificar configuraciones distintas. Un
+laboratorio compiló con `missing-home-modules` como error y ejecutó un ejemplo
+Hspec con helpers de producción y pruebas declarados por el helper. Los
+demás manifiestos y lenguajes siguen pendientes.
+
+**EN — Partial explicit synchronization:** `glot sync-build` takes a `library`
+or `test` target and an existing internal module name. For the recognized
+Cabal 3.16.1.0 template, it updates `other-modules`; `-n` previews the diff and
+reruns do not duplicate declarations. It does not infer membership, exports
+or runner connections, and rejects other configurations without editing them.
+A lab compiled with `missing-home-modules` as an error and ran an Hspec example
+with production and test helpers declared by the helper. Other manifests and
+languages remain open.
+
 **ES — Paquete sin suites:** Cabal 3.16 devolvió éxito con `cabal test`
 cuando el paquete no declaraba ninguna suite. El selector `.:tests` rechaza
 ese caso y conserva el alcance del paquete actual, también en el workspace
-multiproyecto probado. No demuestra que una suite existente ejecute casos.
+multiproyecto probado. El selector por sí solo no demuestra que una suite
+existente ejecute casos.
 En una repetición rápida de la regresión, GHC recompiló la suite modificada
 sin mostrar reenlace y ejecutó el binario anterior; otra repetición pasó.
 La prueba separa las modificaciones dos segundos. La posible interacción
@@ -616,13 +701,38 @@ y devolvieron los resultados esperados, sin reproducir el incidente.
 **EN — Package without suites:** Cabal 3.16 returned success from `cabal test`
 when the package declared no suites. The `.:tests` selector rejects that case
 and retains the current-package scope, including in the multi-package workspace
-tested. It does not prove that an existing suite executes cases.
+tested. The selector alone does not prove that an existing suite executes cases.
 In one fast regression rerun, GHC recompiled the modified suite without
 reporting a relink and ran the previous binary; another rerun passed. The test
 separates edits by two seconds. A possible timestamp interaction needs further
 investigation before rapid reruns can be considered reliable: in a separate
 lab, eight rapid alternating edits did relink and returned the expected
 results, without reproducing the incident.
+In a second isolated package, twelve rapid alternating edits to an imported
+test helper also relinked and produced the expected pass/fail results. This
+does not identify the original cause or guarantee all rapid reruns.
+
+**ES:** En un segundo paquete aislado, doce cambios rápidos alternos a un
+helper de pruebas importado también reenlazaron y devolvieron los resultados
+esperados. Esto no identifica la causa original ni garantiza todos los reruns.
+
+**ES — Resúmenes Hspec:** `haskell_test.sh` conserva el selector y
+`-Werror=missing-home-modules`, ejecuta las suites secuencialmente y exige en
+cada una un resumen Hspec con ejemplos y sin fallos ni pendientes. Rechaza
+resúmenes ausentes o ambiguos y no reconoce otros runners por defecto. En
+copias aisladas, las bases `data_structures_basics` y `numbers` pasaron con
+51 y 33 ejemplos; un proyecto con dos suites rechazó la segunda vacía y pasó
+cuando ambas tuvieron casos. La sincronización automática de helpers y la
+posible interacción con marcas de tiempo siguen pendientes.
+
+**EN — Hspec summaries:** `haskell_test.sh` retains the selector and
+`-Werror=missing-home-modules`, runs suites sequentially and requires each
+Hspec summary to report examples with no failures or pending cases. Missing
+or ambiguous summaries and other runners are rejected. In isolated copies,
+`data_structures_basics` and `numbers` passed with 51 and 33 examples; a
+two-suite project rejected its empty second suite and passed with both filled.
+Automatic helper synchronization and the possible timestamp interaction remain
+open.
 
 Criterios para la siguiente versión / Next-version acceptance criteria:
 

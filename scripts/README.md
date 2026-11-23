@@ -23,6 +23,16 @@ superproject from inside nested Git.
 Configuración vigente de las tres rutas y BYOK / Current three-route and BYOK
 configuration: [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
+**ES:** Para un helper interno Haskell ya creado, `glot sync-build library
+Nombre.Modulo` o `glot sync-build test Nombre.Modulo` actualiza el target de
+la plantilla Cabal reconocida; `-n` muestra el cambio. Manifiestos propios,
+exports y conexión del runner requieren revisión.
+
+**EN:** For an existing internal Haskell helper, `glot sync-build library
+Module.Name` or `glot sync-build test Module.Name` updates the recognized Cabal
+target; `-n` previews it. Custom manifests, exports and runner connection require
+review.
+
 ---
 
 ## 🎯 Objetivo y límites / Goal and boundaries

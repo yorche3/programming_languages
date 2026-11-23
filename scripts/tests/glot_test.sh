@@ -403,6 +403,9 @@ EOF
         "$SANDBOX/r/core/algorithms" "$SANDBOX/scripts/data"
     cp -R -- "$TESTS_DIR/../data/scaffold_templates" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/gradle_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/haskell_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/haskell_sync.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/haskell_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/gradle_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/nim_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/nim_test.sh" "$SANDBOX/scripts/data/"
@@ -1585,6 +1588,10 @@ assert_contains 'new tool -n: comando del catálogo' 'cd ' "$out"
 assert_contains 'new tool -n: crea la carpeta del módulo' 'mkdir -p naive_sort' "$out"
 assert_contains 'new tool -n: imprime la ruta como dato' '/php/core/algorithms/naive_sort' "$out"
 
+glot_run -n new haskell algorithms/naive_sort
+assert_eq 'new Haskell -n: código' '0' "$rc_last"
+assert_contains 'new Haskell -n: genera el test-suite de Cabal' 'cabal init --lib --tests' "$out"
+
 # new: la normalización declarada se enseña en el plan
 glot_run -n new crystal algorithms/naive_sort
 assert_eq 'new -n: sin restos de normalización' '' "$(printf '%s\n' "$out" | grep -E 'flat:|rm:' || true)"
@@ -2202,8 +2209,144 @@ ps_rc=0
 ) >/dev/null 2>&1 || ps_rc=$?
 assert_eq 'test PureScript cero casos: rechaza' '1' "$ps_rc"
 
+# Haskell: validar cada resumen y propagar los fallos de Cabal.
+HS_FAKE="$WORK_DIR/haskell-fake"
+mkdir -p "$HS_FAKE/bin"
+cat >"$HS_FAKE/bin/cabal" <<'EOF'
+#!/usr/bin/env bash
+cat -- "$HS_FAKE_OUTPUT"
+exit "${HS_FAKE_RC:-0}"
+EOF
+chmod +x "$HS_FAKE/bin/cabal"
+HS_FAKE_OUTPUT="$HS_FAKE/output"
+export HS_FAKE_OUTPUT
+cat >"$HS_FAKE_OUTPUT" <<'EOF'
+Test suite first: RUNNING...
+2 examples, 0 failures
+Test suite first: PASS
+Test suite second: RUNNING...
+1 example, 0 failures
+Test suite second: PASS
+EOF
+hs_rc=0
+hs_out="$(cd "$HS_FAKE" && PATH="$HS_FAKE/bin:$PATH" bash "$DATA_DIR/haskell_test.sh" 2>&1)" || hs_rc=$?
+assert_eq 'test Haskell: acepta dos suites con casos' '0' "$hs_rc"
+sed -i 's/1 example, 0 failures/0 examples, 0 failures/' "$HS_FAKE_OUTPUT"
+hs_rc=0
+hs_out="$(cd "$HS_FAKE" && PATH="$HS_FAKE/bin:$PATH" bash "$DATA_DIR/haskell_test.sh" 2>&1)" || hs_rc=$?
+assert_eq 'test Haskell: rechaza una suite vacía' '1' "$hs_rc"
+assert_contains 'test Haskell: identifica suite vacía' 'empty, failing or pending Hspec suite: second' "$hs_out"
+sed -i 's/0 examples, 0 failures/1 example, 0 failures, 1 pending/' "$HS_FAKE_OUTPUT"
+hs_rc=0
+hs_out="$(cd "$HS_FAKE" && PATH="$HS_FAKE/bin:$PATH" bash "$DATA_DIR/haskell_test.sh" 2>&1)" || hs_rc=$?
+assert_eq 'test Haskell: rechaza pendientes' '1' "$hs_rc"
+sed -i '/1 example, 0 failures, 1 pending/d' "$HS_FAKE_OUTPUT"
+hs_rc=0
+hs_out="$(cd "$HS_FAKE" && PATH="$HS_FAKE/bin:$PATH" bash "$DATA_DIR/haskell_test.sh" 2>&1)" || hs_rc=$?
+assert_eq 'test Haskell: rechaza resumen ausente' '1' "$hs_rc"
+assert_contains 'test Haskell: explica resumen ausente' 'missing unambiguous Hspec summary' "$hs_out"
+hs_rc=0
+hs_out="$(cd "$HS_FAKE" && HS_FAKE_RC=7 PATH="$HS_FAKE/bin:$PATH" bash "$DATA_DIR/haskell_test.sh" 2>&1)" || hs_rc=$?
+assert_eq 'test Haskell: propaga código Cabal' '7' "$hs_rc"
+
 # Haskell: los módulos locales importados deben declararse en cada target Cabal.
 if command -v cabal >/dev/null 2>&1 && command -v ghc >/dev/null 2>&1; then
+    if [[ "$(cabal --numeric-version)" == '3.16.1.0' ]]; then
+    HS_GLOT="$SANDBOX/haskell/core/algorithms/data_structures_basics"
+    mkdir -p "$HS_GLOT"
+    glot_run_sandbox new haskell algorithms/data_structures_basics
+    assert_eq 'new Haskell nativo: código' '0' "$rc_last"
+    glot_run_sandbox scaffold haskell algorithms/data_structures_basics
+    assert_eq 'scaffold Haskell nativo: código' '0' "$rc_last"
+    assert_contains 'scaffold Haskell nativo: adapta plantilla' 'Haskell test suite adapted to Hspec' "$err"
+    assert_eq 'scaffold Haskell nativo: fuente y runner' 'yes' \
+        "$([[ -f "$HS_GLOT/lib/DataStructuresBasics.hs" && -f "$HS_GLOT/test/RunTests.hs" && ! -e "$HS_GLOT/test/Main.hs" ]] && echo yes || echo no)"
+
+    mkdir -p "$HS_GLOT/lib/Nested"
+    printf 'module Nested.Helper where\n' >"$HS_GLOT/lib/Nested/Helper.hs"
+    printf 'module ExampleSpec where\n' >"$HS_GLOT/test/ExampleSpec.hs"
+    hs_manifest="$(cat "$HS_GLOT/data-structures-basics.cabal")"
+    glot_run_sandbox -n sync-build library Nested.Helper haskell algorithms/data_structures_basics
+    assert_eq 'sync-build Haskell: plan' '0' "$rc_last"
+    assert_contains 'sync-build Haskell: plan muestra módulo' '+    other-modules:     Nested.Helper' "$out"
+    assert_eq 'sync-build Haskell: plan no modifica manifiesto' "$hs_manifest" "$(cat "$HS_GLOT/data-structures-basics.cabal")"
+    glot_run_sandbox sync-build library Nested.Helper haskell algorithms/data_structures_basics
+    assert_eq 'sync-build Haskell: declara helper de biblioteca' '0' "$rc_last"
+    assert_contains 'sync-build Haskell: helper en biblioteca' 'other-modules:     Nested.Helper' \
+        "$(sed -n '/^library$/,/^test-suite /p' "$HS_GLOT/data-structures-basics.cabal")"
+    assert_eq 'sync-build Haskell: no declara helper de biblioteca en tests' 'no' \
+        "$(sed -n '/^test-suite /,$p' "$HS_GLOT/data-structures-basics.cabal" | grep -q Nested.Helper && echo yes || echo no)"
+    hs_manifest="$(cat "$HS_GLOT/data-structures-basics.cabal")"
+    glot_run_sandbox sync-build library Nested.Helper haskell algorithms/data_structures_basics
+    assert_eq 'sync-build Haskell: rerun sin cambios' "$hs_manifest" "$(cat "$HS_GLOT/data-structures-basics.cabal")"
+    assert_contains 'sync-build Haskell: rerun informa' 'module already declared' "$err"
+    glot_run_sandbox sync-build test ExampleSpec haskell algorithms/data_structures_basics
+    assert_eq 'sync-build Haskell: declara grupo de pruebas' '0' "$rc_last"
+    assert_contains 'sync-build Haskell: grupo en test-suite' 'other-modules:     ExampleSpec' \
+        "$(sed -n '/^test-suite /,$p' "$HS_GLOT/data-structures-basics.cabal")"
+    printf 'module SecondSpec where\n' >"$HS_GLOT/test/SecondSpec.hs"
+    glot_run_sandbox sync-build test SecondSpec haskell algorithms/data_structures_basics
+    assert_eq 'sync-build Haskell: añade segundo grupo' '0' "$rc_last"
+    assert_contains 'sync-build Haskell: conserva primer grupo' 'other-modules:     ExampleSpec, SecondSpec' \
+        "$(sed -n '/^test-suite /,$p' "$HS_GLOT/data-structures-basics.cabal")"
+    hs_manifest="$(cat "$HS_GLOT/data-structures-basics.cabal")"
+    glot_run_sandbox sync-build test ExampleSpec haskell algorithms/data_structures_basics
+    assert_eq 'sync-build Haskell: rerun con varios módulos' "$hs_manifest" "$(cat "$HS_GLOT/data-structures-basics.cabal")"
+    hs_manifest="$(cat "$HS_GLOT/data-structures-basics.cabal")"
+    glot_run_sandbox sync-build test MissingSpec haskell algorithms/data_structures_basics
+    assert_eq 'sync-build Haskell: rechaza módulo ausente' '1' "$rc_last"
+    assert_eq 'sync-build Haskell: ausencia no modifica manifiesto' "$hs_manifest" "$(cat "$HS_GLOT/data-structures-basics.cabal")"
+    ln -s ExampleSpec.hs "$HS_GLOT/test/LinkedSpec.hs"
+    glot_run_sandbox sync-build test LinkedSpec haskell algorithms/data_structures_basics
+    assert_eq 'sync-build Haskell: rechaza fuente simbólica' '1' "$rc_last"
+    assert_eq 'sync-build Haskell: enlace no modifica manifiesto' "$hs_manifest" "$(cat "$HS_GLOT/data-structures-basics.cabal")"
+    printf 'module OtherSpec where\n' >"$HS_GLOT/test/OtherSpec.hs"
+    sed -i '/^test-suite /a\    if flag(custom)\n        ghc-options: -O0' "$HS_GLOT/data-structures-basics.cabal"
+    hs_manifest="$(cat "$HS_GLOT/data-structures-basics.cabal")"
+    glot_run_sandbox sync-build test OtherSpec haskell algorithms/data_structures_basics
+    assert_eq 'sync-build Haskell: rechaza condiciones propias' '1' "$rc_last"
+    assert_contains 'sync-build Haskell: informa preservación' 'custom Cabal configuration preserved' "$err"
+    assert_eq 'sync-build Haskell: preserva configuración propia' "$hs_manifest" "$(cat "$HS_GLOT/data-structures-basics.cabal")"
+
+    HS_NATIVE="$WORK_DIR/haskell-native"
+    mkdir -p "$HS_NATIVE"
+    (cd "$HS_NATIVE" && cabal init --lib --tests -n --source-dir=lib \
+        --package-name=naive-sort --expose-module=NaiveSort >/dev/null 2>&1)
+    cp -R "$HS_NATIVE" "$WORK_DIR/haskell-custom"
+    HS_CUSTOM="$WORK_DIR/haskell-custom"
+    printf 'authored test\n' >>"$HS_CUSTOM/test/Main.hs"
+    hs_manifest="$(cat "$HS_CUSTOM/naive-sort.cabal")"
+    hs_runner="$(cat "$HS_CUSTOM/test/Main.hs")"
+    hs_out="$(cd "$HS_CUSTOM" && bash "$DATA_DIR/haskell_scaffold.sh" naive_sort 2>&1)"
+    assert_contains 'Haskell: informa runner propio' 'custom Haskell runner preserved' "$hs_out"
+    assert_eq 'Haskell: conserva runner propio' "$hs_runner" "$(cat "$HS_CUSTOM/test/Main.hs")"
+    assert_eq 'Haskell: conserva manifiesto junto a runner propio' "$hs_manifest" "$(cat "$HS_CUSTOM/naive-sort.cabal")"
+    cp -- "$DATA_DIR/scaffold_templates/haskell.Main.hs" "$HS_CUSTOM/test/Main.hs"
+    printf '\n-- authored suite addition\n' >>"$HS_CUSTOM/naive-sort.cabal"
+    hs_manifest="$(cat "$HS_CUSTOM/naive-sort.cabal")"
+    hs_out="$(cd "$HS_CUSTOM" && bash "$DATA_DIR/haskell_scaffold.sh" naive_sort 2>&1)"
+    assert_contains 'Haskell: informa suite propia' 'custom Cabal test suite preserved' "$hs_out"
+    assert_eq 'Haskell: conserva suite propia' "$hs_manifest" "$(cat "$HS_CUSTOM/naive-sort.cabal")"
+    assert_eq 'Haskell: conserva muestra junto a suite propia' 'yes' "$([[ -f "$HS_CUSTOM/test/Main.hs" && ! -e "$HS_CUSTOM/test/RunTests.hs" ]] && echo yes || echo no)"
+
+    hs_out="$(cd "$HS_NATIVE" && bash "$DATA_DIR/haskell_scaffold.sh" naive_sort 2>&1)"
+    assert_contains 'Haskell: adapta plantilla nativa' 'Haskell test suite adapted to Hspec' "$hs_out"
+    assert_contains 'Haskell: manifiesto apunta al runner' 'main-is:          RunTests.hs' "$(cat "$HS_NATIVE/naive-sort.cabal")"
+    assert_contains 'Haskell: declara Hspec en test-suite' 'hspec ^>=2.11.0' "$(sed -n '/^test-suite /,$p' "$HS_NATIVE/naive-sort.cabal")"
+    assert_eq 'Haskell: no añade Hspec a biblioteca' 'no' "$([[ "$(sed -n '/^library$/,/^test-suite /p' "$HS_NATIVE/naive-sort.cabal")" == *hspec* ]] && echo yes || echo no)"
+    assert_eq 'Haskell: usa runner Hspec sin conservar muestra' 'yes' "$([[ -f "$HS_NATIVE/test/RunTests.hs" && ! -e "$HS_NATIVE/test/Main.hs" ]] && echo yes || echo no)"
+    hs_manifest="$(cat "$HS_NATIVE/naive-sort.cabal")"
+    hs_runner="$(cat "$HS_NATIVE/test/RunTests.hs")"
+    (cd "$HS_NATIVE" && bash "$DATA_DIR/haskell_scaffold.sh" naive_sort >/dev/null 2>&1)
+    assert_eq 'Haskell: rerun conserva manifiesto' "$hs_manifest" "$(cat "$HS_NATIVE/naive-sort.cabal")"
+    assert_eq 'Haskell: rerun conserva runner' "$hs_runner" "$(cat "$HS_NATIVE/test/RunTests.hs")"
+    ln -s "$HS_CUSTOM/test/Main.hs" "$HS_CUSTOM/test/RunTests.hs"
+    hs_rc=0
+    (cd "$HS_CUSTOM" && bash "$DATA_DIR/haskell_scaffold.sh" naive_sort >/dev/null 2>&1) || hs_rc=$?
+    assert_eq 'Haskell: rechaza runner simbólico' '1' "$hs_rc"
+    assert_eq 'Haskell: no altera destino simbólico' 'yes' "$([[ -f "$HS_CUSTOM/test/Main.hs" ]] && echo yes || echo no)"
+    fi
+
     HS_EMPTY="$SANDBOX/haskell/core/algorithms/naive_sort"
     mkdir -p "$HS_EMPTY/lib"
     printf 'packages: .\nactive-repositories: :none\n' >"$HS_EMPTY/cabal.project"
@@ -2251,7 +2394,7 @@ EOF
     printf 'module Core (answer) where\nimport Helper (value)\nanswer :: Int\nanswer = value\n' >"$HS_CHECK/lib/Core.hs"
     printf 'module Helper (value) where\nvalue :: Int\nvalue = 42\n' >"$HS_CHECK/lib/Helper.hs"
     printf 'module Check (check) where\ncheck :: Int -> Bool\ncheck n = n == 42\n' >"$HS_CHECK/test/Check.hs"
-    printf 'module Main (main) where\nimport Check (check)\nimport Core (answer)\nmain :: IO ()\nmain = if check answer then pure () else fail "unexpected answer"\n' >"$HS_CHECK/test/RunTests.hs"
+    printf 'module Main (main) where\nimport Check (check)\nimport Core (answer)\nmain :: IO ()\nmain = if check answer then putStrLn "1 example, 0 failures" else fail "unexpected answer"\n' >"$HS_CHECK/test/RunTests.hs"
     glot_run_sandbox test haskell algorithms/searching
     assert_eq 'test Haskell: rechaza helper de producción ausente' '4' "$rc_last"
     assert_contains 'test Haskell: identifica helper de producción' 'Helper' "$out$err"
@@ -3154,7 +3297,6 @@ assert_eq 'scaffold Rust sin entrada: código' '4' "$rc_last"
 for layout_lang in cpp crystal fsharp go haskell v; do
     layout_dir="$SANDBOX/$layout_lang/core/algorithms/naive_sort"
     mkdir -p "$layout_dir"
-    printf 'gitdir: preserved\n' >"$layout_dir/.git"
     printf 'authored ignore\n' >"$layout_dir/.gitignore"
     case "$layout_lang" in
         crystal)
@@ -3167,8 +3309,10 @@ for layout_lang in cpp crystal fsharp go haskell v; do
             printf '<Project><ProjectReference Include="../../src/NaiveSort/NaiveSort.fsproj"/></Project>\n' >"$layout_dir/test/NaiveSort.Tests/NaiveSort.Tests.fsproj"
             printf 'authored FSharp\n' >"$layout_dir/src/NaiveSort/Library.fs" ;;
         haskell)
-            mkdir -p "$layout_dir/lib"
-            printf 'module NaiveSort where\n' >"$layout_dir/lib/NaiveSort.hs" ;;
+            mkdir -p "$layout_dir/lib" "$layout_dir/test"
+            printf 'module NaiveSort where\n' >"$layout_dir/lib/NaiveSort.hs"
+            printf 'authored cabal manifest\n' >"$layout_dir/naive-sort.cabal"
+            printf 'authored runner\n' >"$layout_dir/test/Main.hs" ;;
         v)
             mkdir -p "$layout_dir/tests"
             printf "Module {\nversion: '0.0.0'\n}\n" >"$layout_dir/v.mod"
@@ -3179,7 +3323,6 @@ for layout_lang in cpp crystal fsharp go haskell v; do
     assert_eq "scaffold $layout_lang: código" '0' "$rc_last"
     glot_run_sandbox scaffold "$layout_lang" algorithms/naive_sort
     assert_eq "scaffold $layout_lang: rerun" '0' "$rc_last"
-    assert_eq "scaffold $layout_lang: conserva gitfile" 'gitdir: preserved' "$(cat "$layout_dir/.git")"
     assert_eq "scaffold $layout_lang: conserva ignore" 'authored ignore' "$(cat "$layout_dir/.gitignore")"
     case "$layout_lang" in
         cpp|go|v)
@@ -3192,7 +3335,10 @@ for layout_lang in cpp crystal fsharp go haskell v; do
             assert_eq 'FSharp: conserva fuente' 'authored FSharp' "$(cat "$layout_dir/src/NaiveSort/Library.fs")" ;;
         haskell)
             assert_eq 'Haskell: no impone src/' 'no' "$([[ -e "$layout_dir/src" ]] && echo yes || echo no)"
-            assert_eq 'Haskell: conserva declaración' 'module NaiveSort where' "$(cat "$layout_dir/lib/NaiveSort.hs")" ;;
+            assert_eq 'Haskell: conserva declaración' 'module NaiveSort where' "$(cat "$layout_dir/lib/NaiveSort.hs")"
+            assert_eq 'Haskell: conserva manifiesto propio' 'authored cabal manifest' "$(cat "$layout_dir/naive-sort.cabal")"
+            assert_eq 'Haskell: conserva runner propio' 'authored runner' "$(cat "$layout_dir/test/Main.hs")"
+            assert_contains 'Haskell: anuncia revisión' 'revisar manifiestos y runners Haskell conservados' "$err" ;;
     esac
 done
 assert_contains 'FSharp new: referencia declarada con herramienta' \

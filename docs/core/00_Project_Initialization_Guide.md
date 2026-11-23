@@ -108,7 +108,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **go** | ✅ `go mod init example.com/{module}` | `go.mod` | ✅ `go test ./...` |
 | **grain** | ✍️ `mkdir -p src tests` + `Makefile` | `Makefile` | ✅ `make test` |
 | **groovy** | ⛓️ ✅ `gradle init --type groovy-library --dsl groovy --use-defaults` | `settings.gradle`, `lib/build.gradle`, `gradle/` | ✅ XML Gradle con rechazo de NO-SOURCE |
-| **haskell** | 🔧 `cabal init --lib` | `{module}.cabal` | ✅ `cabal test .:tests --ghc-options=-Werror=missing-home-modules` |
+| **haskell** | 🔧 `cabal init --lib --tests` | `{module}.cabal`, `lib/`, `test/Main.hs` | ✅ `bash {root}/scripts/data/haskell_test.sh` |
 | **haxe** | ⛓️ ✅ `mkdir -p src test` (después `haxelib install utest`) | `build.hxml`, `RunTests.hx` | ✅ `haxe build.hxml` |
 | **java** | ✍️ `pom.xml` a mano (el arquetipo quickstart es de aplicación: R2) | `pom.xml` | ✅ `mvn test` |
 | **javascript** | 🔧 `npm init -y` | `package.json`, `jest.config.js` | ✅ informe Jest con rechazo de cero casos |
@@ -148,6 +148,18 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 
 **EN:** A language that does not appear here is handled by the **master table**'s command.
 
+**ES:** Que un generador cree una carpeta o suite de pruebas no implica que
+ya use el framework y el runner de las bases. La secuencia distingue los
+comandos repetibles de la adaptación posterior: sincroniza nombres,
+dependencias y referencias, y conserva contenido propio. Un arranque con
+cero casos verifica el andamiaje, no la suite.
+
+**EN:** A generated test directory or suite does not necessarily use the
+references' framework and runner. The sequence distinguishes repeatable
+commands from later adaptation: keep names, dependencies and references in
+sync, and preserve authored content. A zero-case run checks the scaffold,
+not the test suite.
+
 | Lenguaje / Language | Secuencia de inicialización / Initialisation sequence | Completado posterior a mano / Later completion by hand |
 |---|---|---|
 | **ada** | `alr init --lib --in-place {module}` → `alr init --bin tests` → `alr with {module} --use=..` → `alr with aunit` (los dos últimos, dentro de `tests/`) | Licencia GPL-3.0-or-later en `alire.toml` y `tests/alire.toml`, y `description` del subproyecto de pruebas |
@@ -161,7 +173,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **fsharp** | Igual que C# con `-lang F#`, incluido `dotnet add test/{Module}.Tests/{Module}.Tests.fsproj reference src/{Module}/{Module}.fsproj` | Conservar los proyectos anidados y su referencia; cualquier renombrado de `Library.fs`/`Tests.fs` actualiza sus `Compile Include` y conserva contenido propio |
 | **groovy** | `gradle init --type groovy-library --dsl groovy --project-name {module} --package {module} --use-defaults` → retirar solo la pareja de muestras verificada, si no hay otros archivos en `lib/src` | Conservar muestras distintas o con otros archivos y revisar; Gradle puede devolver éxito sin casos |
 | **go** | `go mod init example.com/{module}` → `mkdir -p src tests` | El paquete externo de `tests/` importa `example.com/{module}/src`, sin imponer `test/` |
-| **haskell** | `cabal init --lib -n --source-dir=lib --package-name={module-kebab} --expose-module={Module}` → crear `lib/{Module}.hs` solo si falta | `{module-kebab}` sustituye subrayados por guiones; declarar `module {Module} where`, conservar `hs-source-dirs: lib` y completar test-suite/runner |
+| **haskell** | `cabal init --lib --tests -n --source-dir=lib --package-name={module-kebab} --expose-module={Module}` → crear `lib/{Module}.hs` solo si falta → `bash {root}/scripts/data/haskell_scaffold.sh {module}` | `{module-kebab}` sustituye subrayados por guiones. El helper adapta a Hspec solo la plantilla Cabal reconocida; conservar y revisar configuración y código propios |
 | **haxe** | `mkdir -p src test` → `haxelib install utest` | `build.hxml` y `RunTests.hx` son contenido del sprint |
 | **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` | Completar `test/` y su runner; añadir `uuid`, `[compat]`, `[extras]` y `[targets]` |
 | **kotlin** | `gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project` → retirar solo la pareja de muestras verificada, si no hay otros archivos en `lib/src` | Conservar muestras distintas o con otros archivos y revisar; Gradle puede devolver éxito sin casos |
@@ -443,6 +455,69 @@ bash "{root}/scripts/data/gradle_scaffold.sh" groovy {module}
 **ES / EN:** El helper compartido comprueba las rutas y compara las plantillas
 antes de borrar. / The shared helper checks paths and compares templates before
 deleting.
+
+### Haskell — Cabal + Hspec
+
+**ES:** `cabal init --lib --tests` crea el manifiesto con un `test-suite` y
+`test/Main.hs`, pero ese runner solo imprime que la suite no está implementada.
+`glot scaffold` prepara la fuente de biblioteca si falta y adapta la pareja
+de test-suite y runner de Cabal 3.16.1.0 solo cuando coincide con la plantilla
+reconocida. Declara Hspec en el test-suite y prepara `test/RunTests.hs`. Si
+encuentra cambios propios o una plantilla distinta, conserva ambos y anuncia
+su revisión. Para verificar o completar manualmente la adaptación:
+
+1. Revisa el manifiesto y el runner generados. Conserva archivos y configuración
+   propios; no sustituyas automáticamente un runner distinto del placeholder.
+2. En el `test-suite` correspondiente, conserva `base` y el paquete propio en
+   `build-depends` y añade `hspec`, compatible con las bases. Mantén
+   `hs-source-dirs: test`; si se cambia el nombre del runner a `RunTests.hs`,
+   actualiza `main-is` a la vez y evita dejar dos puntos de entrada activos.
+   No añadas Hspec a la biblioteca de producción por accidente.
+3. Sustituye el placeholder reconocido por un runner Hspec sin casos como:
+
+```haskell
+module Main (main) where
+
+import Test.Hspec (hspec)
+
+main :: IO ()
+main = hspec (pure ())
+```
+
+4. Comprueba el runner con `cabal test .:tests --ghc-options=-Werror=missing-home-modules`.
+   Cabal puede informar `PASS` con `0 examples`; eso verifica el arranque,
+   **no** que exista una suite. `glot test` usa `haskell_test.sh`, que rechaza
+   explícitamente cero ejemplos o pendientes y exige un resumen Hspec por
+   test-suite. Ejecuta las suites secuencialmente con formato `progress`, sin
+   color ni dry-run; otros runners requieren revisión. En 4c se conectan todos
+   los grupos. Para cada módulo interno incorporado, `glot sync-build library
+   Nombre.Modulo` o `glot sync-build test Nombre.Modulo` declara
+   `other-modules` en la plantilla reconocida; `-n` muestra el cambio.
+   El comando no conecta grupos ni determina exports públicos y rechaza
+   configuraciones distintas sin modificarlas. Fuera de ese caso se requiere
+   revisión del manifiesto.
+
+**EN:** `cabal init --lib --tests` generates a test suite and a placeholder
+`test/Main.hs`, not an Hspec runner. `glot scaffold` creates a missing library
+source and adapts the recognized Cabal 3.16.1.0 test-suite and runner together;
+it preserves other manifests and runners for review. Configure Hspec **only in
+the test suite**, retaining `base` and the package dependency, and keep
+`main-is` consistent with the runner's name. The empty runner above starts with
+zero examples; Cabal may report `PASS`, which does not validate test coverage.
+`glot test` checks each Hspec summary and rejects empty or pending examples.
+Suites run sequentially with progress output, no color and no dry-run; other
+runners require review.
+Step 4c connects each group. For every new internal module, `glot sync-build
+library Module.Name` or `glot sync-build test Module.Name` adds an
+`other-modules` declaration to the recognized template; `-n` previews it.
+The command neither connects groups nor decides public exports, and rejects
+different configurations without editing them. Those require manifest review.
+
+**ES / EN:** En Cabal 3.16.1.0, `--dependency=hspec` afecta también a la
+biblioteca y sustituye la dependencia predeterminada `base`; no es un atajo
+para configurar solo el test-suite. / In Cabal 3.16.1.0, `--dependency=hspec`
+also affects the library and replaces the default `base` dependency; it is
+not a test-only shortcut.
 
 ### Haxe — build.hxml + src/ + test/
 ```bash

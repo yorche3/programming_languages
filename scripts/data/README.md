@@ -94,10 +94,13 @@ Scheme ejecuta cada suite `*_guile.scm` y comprueba su runner SRFI-64.
 Tcl ejecuta cada suite `.test` y comprueba los contadores de Tcltest al limpiar.
 Scala conserva la tarea e informe nativos de sbt y comprueba sus resultados
 estructurados; rechaza las ejecuciones sin casos aprobados.
-Haskell selecciona las suites del paquete actual y rechaza su ausencia;
-convierte en error `missing-home-modules` para detectar módulos locales
-importados pero no declarados en los targets compilados. No modifica el
-manifiesto ni garantiza que una suite existente contenga casos.
+Haskell selecciona las suites del paquete actual y comprueba el resumen Hspec
+de cada una: rechaza resultados ausentes, vacíos o pendientes. Convierte en
+error `missing-home-modules` para detectar módulos locales importados pero no
+declarados en los targets compilados. Ejecuta las suites secuencialmente con
+formato Hspec `progress`, sin color ni dry-run. No modifica el manifiesto;
+runners que no admitan esas opciones o no emitan el resumen esperado requieren
+revisión.
 
 **EN:** **Column 5 is maintained by hand** and only with verifiers **actually run**
 in the corresponding module; coverage is reported by `doctor` as
@@ -114,10 +117,28 @@ Scheme runs every `*_guile.scm` suite and checks its SRFI-64 runner.
 Tcl runs every `.test` suite and checks Tcltest counters at cleanup.
 Scala retains sbt's native task and report and checks structured results;
 it rejects runs without passing cases.
-Haskell selects the current package's test suites and rejects their absence;
-it promotes `missing-home-modules` to an error to detect imported local modules
-missing from compiled targets. It does not edit the manifest or guarantee that
-an existing suite contains cases.
+Haskell selects the current package's test suites and checks each Hspec summary,
+rejecting missing, empty or pending results. It promotes `missing-home-modules`
+to an error to detect imported local modules missing from compiled targets.
+Suites run sequentially with Hspec's progress format, no color and no dry-run.
+It does not edit the manifest; runners that do not accept those options or
+emit the expected summary require review.
+
+**ES:** `haskell_sync.sh` respalda `glot sync-build`: declara un módulo interno
+existente por ejecución en la biblioteca o test-suite de la plantilla Cabal
+3.16.1.0 adaptada a Hspec. Acepta únicamente el layout `lib/` y `test/` y las
+declaraciones de una línea que genera el propio comando; las secciones de
+target y `common warnings` deben coincidir con la plantilla. Si la
+configuración, lista o ruta no coincide, falla y conserva el manifiesto. No
+descubre módulos, no decide exports públicos ni conecta el runner.
+
+**EN:** `haskell_sync.sh` backs `glot sync-build`: one existing internal module
+per invocation in the library or test suite of the recognized Cabal 3.16.1.0
+Hspec-adapted template. It accepts only the `lib/` and `test/` layout and
+single-line declarations produced by the command; the target and `common
+warnings` sections must match the template. Other configurations, lists or
+unsafe paths fail without editing the manifest. It does not discover modules,
+decide public exports or connect the runner.
 
 **ES:** Los esqueletos de `Makefile` compartidos por `assembly`, `c`, `cobol`,
 `grain` y `r` viven en [`scaffold_templates/`](scaffold_templates/); el catálogo
