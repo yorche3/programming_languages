@@ -164,11 +164,11 @@ propios y rechaza enlaces simbólicos en las rutas del scaffold.
 **EN:** Raku creates a missing source and `.gitignore`, preserves authored
 files and rejects symlinks at scaffold paths.
 
-**ES:** Rexx preserva la fuente y rechaza rutas simbólicas; avisa de la
-revisión pendiente del runner y la selección de varias suites.
+**ES:** Rexx preserva la fuente y rechaza rutas simbólicas; `rexx_test.sh`
+ejecuta todas las suites y valida contadores, fallos y errores.
 
-**EN:** Rexx preserves the source and rejects symbolic paths; it reports the
-pending runner review and multiple-suite selection.
+**EN:** Rexx preserves the source and rejects symbolic paths; `rexx_test.sh`
+runs all suites and validates counters, failures and errors.
 
 **ES:** Scheme crea un módulo Guile y excluye logs SRFI-64 si falta el ignore;
 preserva archivos existentes y rechaza enlaces.

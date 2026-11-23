@@ -138,8 +138,9 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 - En PureScript, el runner mínimo puede devolver éxito sin ejecutar casos;
   no lo presentes como una suite validada.
 - En Rexx, el selector actual no admite varias suites y ooRexxUnit puede
-  informar fallos aunque el proceso termine con código 0. No tomes ese código
-  como prueba de éxito; reporta el bloqueo y la salida real sin ocultar fallos.
+  informar fallos aunque el proceso termine con código 0. `rexx_test.sh` ejecuta
+  todas las suites `test/*.rexx` y valida los contadores; no tomes código 0 como
+  prueba de éxito y reporta fallos o errores.
 - En Haskell, el selector de Cabal rechaza un paquete sin `test-suite`: declara
   el target y prepara su runner vacío como indica el catálogo; eso no valida casos.
 - En Ballerina, `bal test` puede devolver éxito sin casos o con todos los tests

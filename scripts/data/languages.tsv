@@ -37,7 +37,7 @@ r	manual	make test	Rscript -e 'invisible(lapply(list.files("R", full.names=TRUE)
 racket	tool	raco test -x .	-
 raku	manual	raku -e 'use TAP:ver<0.3.4+>; use Path::Finder:ver<0.4.4+>; my @sources = find("t/", :and[ :or[ { :depth(0) }, { :ext(any(<t rakutest t6>)), :skip-hidden } ], :file ]).sort; @sources.elems or die "No Raku test files configured in t/\n"; my $result = TAP::Harness.new.run(@sources, :cwd($*CWD), :include-dirs[$*CWD.add("lib")]).result; if $result.bailout.defined { note $result.bailout.message; exit 1 }; exit 1 if $result.has-errors; die "Raku test execution incomplete\n" unless $result.result-count == @sources.elems; die "No Raku test cases executed\n" unless [+] $result.results.map({ .tests-run - .skipped });'	-
 rescript	manual	npm test	-
-rexx	manual	rexx test/{suite}.rexx	-
+rexx	manual	bash {root}/scripts/data/rexx_test.sh	-
 ruby	manual	bundle exec rspec	ruby -c src/{module}.rb
 rust	tool	cargo test	cargo fmt --check
 scala	manual	sbt -batch -no-colors 'set Test / test := { (Test / test).value; val result = (Test / executeTests).value; if (result.overall != sbt.protocol.testing.TestResult.Passed) throw new MessageOnlyException("Scala tests failed"); if (result.events.values.map(_.passedCount).sum == 0) throw new MessageOnlyException("No Scala test cases passed") }' test	-

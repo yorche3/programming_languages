@@ -735,14 +735,13 @@ fi
 ### Rexx — src/ + test/
 
 **ES:** Crear la fuente solo si falta y rechazar enlaces simbólicos en las
-rutas del scaffold. La selección de varias suites y la propagación de fallos
-de ooRexxUnit siguen pendientes: el comando actual solo admite una suite y
-una suite existente puede informar fallos sin devolver error.
+rutas del scaffold. `rexx_test.sh` ejecuta todas las suites `test/*.rexx`
+y valida sus contadores; rechaza cero pruebas, fallos y errores aunque `rexx`
+devuelva código 0.
 
 **EN:** Create the source only when absent and reject symbolic scaffold paths.
-Multiple-suite selection and ooRexxUnit failure propagation remain pending:
-the current command accepts only one suite, and an existing suite can report
-failures while returning success.
+`rexx_test.sh` runs all `test/*.rexx` suites and validates counters; it rejects
+zero runs, failures and errors even if `rexx` returns exit 0.
 
 ```bash
 if [[ -L src || -L test || -L src/{module}.rexx ||

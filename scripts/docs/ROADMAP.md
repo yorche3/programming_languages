@@ -251,8 +251,10 @@ and harness but rejects missing suites, incomplete runs and entirely skipped
 cases. Verified against `numbers` and `data_structures_basics`.
 
 **ES — Rexx (2026-11-22):** el scaffold preserva fuentes y rechaza rutas
-simbólicas, pero el runner sigue pendiente. `glot test` rechaza las dos suites
-de `numbers` como ambiguas; una prueba aislada de ooRexxUnit informó una
+simbólicas. `rexx_test.sh` ejecuta todas las suites `test/*.rexx` y valida
+los contadores impresos por ooRexxUnit, rechazando fallos, errores y ejecuciones
+vacías. `glot test` antes rechazaba las dos suites de `numbers` como ambiguas;
+una prueba aislada de ooRexxUnit informó una
 aserción fallida y devolvió 0. En esa prueba, `exit (aResult~failureCount +
 aResult~errorCount > 0)` devolvió 1. Falta un mecanismo que ejecute todas las
 suites y propague fallos sin modificar ni ocultar las suites existentes.
@@ -274,8 +276,9 @@ prueba con `exit 0` dentro de un método de test devolvió éxito: ooRexxUnit
 interpretó esa salida como retorno del método, incluso con los wrappers.
 
 **EN — Rexx (2026-11-22):** scaffold preserves sources and rejects symbolic
-paths, but the runner remains pending. `glot test` rejects the two `numbers`
-suites as ambiguous; an isolated ooRexxUnit assertion failure returned 0.
+paths. `rexx_test.sh` runs all `test/*.rexx` suites and validates ooRexxUnit
+counters, rejecting failures, errors and empty runs. `glot test` previously
+rejected the two `numbers` suites as ambiguous; an isolated ooRexxUnit assertion failure returned 0.
 In that test, exiting with the combined failure and error count returned 1.
 Running every suite and propagating failures without modifying or hiding
 existing suites still needs a solution.

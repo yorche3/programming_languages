@@ -208,13 +208,13 @@ Las suites homologadas de `numbers` y `data_structures_basics` pasan.
 missing suites, incomplete runs and entirely skipped cases. The homologated
 `numbers` and `data_structures_basics` suites pass.
 
-**ES:** Rexx preserva la fuente, protege rutas simbólicas y anuncia la
-revisión del runner. Permanecen pendientes la selección de varias suites y
-la propagación de fallos de las suites ooRexxUnit existentes.
+**ES:** Rexx preserva la fuente, protege rutas simbólicas y ejecuta todas las
+suites con `rexx_test.sh`, que valida contadores y rechaza fallos, errores y
+ejecuciones vacías.
 
-**EN:** Rexx preserves the source, protects symbolic paths and announces the
-pending runner review. Multiple-suite selection and failure propagation for
-existing ooRexxUnit suites remain open.
+**EN:** Rexx preserves the source, protects symbolic paths and runs all suites
+with `rexx_test.sh`, which validates counters and rejects failures, errors and
+empty runs.
 
 **ES:** Scheme crea una fuente Guile cargable sin sobrescribir archivos y
 excluye logs SRFI-64 cuando falta el ignore. La selección de varias suites y

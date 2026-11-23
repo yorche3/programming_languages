@@ -407,6 +407,7 @@ EOF
     cp -- "$TESTS_DIR/../data/nim_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/v_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/ballerina_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/rexx_test.sh" "$SANDBOX/scripts/data/"
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
@@ -2679,6 +2680,15 @@ mkdir -p -- "$RX_DRY"
 glot_run_sandbox -n scaffold rexx algorithms/naive_sort
 assert_eq 'scaffold Rexx dry-run: código' '0' "$rc_last"
 assert_eq 'scaffold Rexx dry-run: no crea archivos' '0' "$(find "$RX_DRY" -mindepth 1 | wc -l | tr -d ' ')"
+RX_RUN="$SANDBOX/rexx/core/foundations/unit_test/calculator"
+mkdir -p "$RX_RUN/test"
+cp -- "$DATA_DIR/rexx_test.sh" "$RX_RUN/rexx_test.sh"
+rx_rc=0
+(
+    cd "$RX_RUN"
+    bash ./rexx_test.sh
+) >/dev/null 2>&1 || rx_rc=$?
+assert_eq 'test Rexx sin suites: rechaza' '1' "$rx_rc"
 
 # Scala: build homologado y conservación de archivos existentes.
 SCALA="$SANDBOX/scala/core/algorithms/data_structures_basics"
