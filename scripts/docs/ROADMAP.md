@@ -394,8 +394,8 @@ sin aserciones; `swift test` la informó como un caso aprobado. Al retirar
 solo ese ejemplo en un laboratorio aislado, `swift test` devolvió éxito
 con cero tests tanto para XCTest como para Swift Testing. El scaffold en
 desarrollo sustituye solo la muestra exacta y conserva las variantes propias.
-Queda pendiente un runner que detecte ausencia de casos en ambos frameworks
-sin ocultar fallos. El informe xUnit se generó solo con `--parallel` y no
+El runner integrado `swift_test.sh` valida los resúmenes de XCTest y Swift
+Testing, rechaza cero casos, omisiones y fallos. El informe xUnit se generó solo con `--parallel` y no
 incluyó Swift Testing, por lo que no se adoptó como solución general.
 La opción interna `--event-stream-output-path` registró eventos de Swift
 Testing, pero no creó archivo en una ejecución solo XCTest. Con un test
@@ -408,10 +408,10 @@ resumen; también hay que distinguir omitidos y ejecuciones incompletas.
 without assertions; `swift test` reported it as a passing case. Removing only
 that example in an isolated lab made `swift test` succeed with zero tests in
 both XCTest and Swift Testing. The development scaffold replaces only the exact
-sample and preserves authored variants. A runner detecting missing cases across
-both frameworks without hiding failures remains pending. The xUnit report was
-generated only with `--parallel` and omitted Swift Testing, so it was not
-adopted as a general solution.
+sample and preserves authored variants. The integrated `swift_test.sh` validates
+XCTest and Swift Testing summaries and rejects missing cases, skips and failures.
+The xUnit report was generated only with `--parallel` and omitted Swift Testing,
+so it was not adopted as a general solution.
 The internal `--event-stream-output-path` option recorded Swift Testing events
 but created no file in an XCTest-only run. With one skipped test per
 framework, `swift test` returned success: XCTest counted one executed and

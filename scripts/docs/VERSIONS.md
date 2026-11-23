@@ -276,12 +276,12 @@ it rejects empty and entirely ignored runs. Both homologated bases were verified
 in isolated copies.
 
 **ES:** Swift conserva suites y manifiestos existentes, protege rutas y
-sustituye solo el ejemplo SwiftPM 6.3.3 comprobado por un archivo sin casos.
-El runner aún informa éxito con cero tests y sigue pendiente de corrección.
+sustituye solo el ejemplo SwiftPM 6.3.3 comprobado. `swift_test.sh` valida
+XCTest y Swift Testing y rechaza cero casos, fallos y omisiones.
 
 **EN:** Swift preserves existing suites and manifests, protects paths and
-replaces only the verified SwiftPM 6.3.3 example with a case-free file. The
-runner still reports success with zero tests and remains pending.
+replaces only the verified SwiftPM 6.3.3 example. `swift_test.sh` validates
+XCTest and Swift Testing and rejects zero cases, failures and skips.
 
 **ES:** PureScript advierte que su runner mínimo aún devuelve éxito sin casos;
 la protección del runner y la integración de `test-unit` siguen pendientes.

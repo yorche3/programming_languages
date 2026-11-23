@@ -408,6 +408,7 @@ EOF
     cp -- "$TESTS_DIR/../data/v_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/ballerina_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/rexx_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/swift_test.sh" "$SANDBOX/scripts/data/"
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
@@ -2965,6 +2966,36 @@ glot_run_sandbox scaffold swift algorithms/searching
 assert_eq 'scaffold Swift plantilla ausente: falla' '4' "$rc_last"
 assert_contains 'scaffold Swift plantilla ausente: conserva muestra' '@Test func example()' "$(cat -- "$SW_MISSING/Tests/searchingTests/searchingTests.swift")"
 mv -- "$SANDBOX/scripts/data/scaffold_templates/swift.Test.saved" "$SANDBOX/scripts/data/scaffold_templates/swift.Test.swift"
+
+SW_RUN="$SANDBOX/swift/core/foundations/unit_test/calculator"
+mkdir -p "$SW_RUN/Sources/calculator" "$SW_RUN/Tests/calculatorTests"
+cat >"$SW_RUN/Package.swift" <<'EOF'
+// swift-tools-version: 6.0
+import PackageDescription
+let package = Package(
+    name: "calculator",
+    targets: [
+        .executableTarget(name: "calculator"),
+        .testTarget(name: "calculatorTests", dependencies: ["calculator"])
+    ]
+)
+EOF
+printf 'public func add(_ a: Int, _ b: Int) -> Int { a + b }\n' >"$SW_RUN/Sources/calculator/calculator.swift"
+cat >"$SW_RUN/Tests/calculatorTests/CalculatorTests.swift" <<'EOF'
+import XCTest
+@testable import calculator
+
+final class CalculatorTests: XCTestCase {
+    func testAdd() { XCTAssertEqual(add(1, 2), 3) }
+}
+EOF
+cp -- "$DATA_DIR/swift_test.sh" "$SW_RUN/swift_test.sh"
+(
+    cd "$SW_RUN"
+    swift test >/dev/null 2>&1
+    bash ./swift_test.sh
+) >/dev/null 2>&1
+assert_eq 'test Swift caso aprobado: código' '0' "$?"
 
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"

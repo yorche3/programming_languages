@@ -187,11 +187,12 @@ are rejected; existing files and contract-specific source need review.
 
 **ES:** Swift rechaza enlaces en las rutas del scaffold y sustituye solo la muestra
 de SwiftPM 6.3.3 verificada en `scaffold_templates/swift.Test.swift`; preserva
-otras suites y manifiestos. El runner todavía puede aceptar cero casos.
+otras suites y manifiestos. `swift_test.sh` rechaza cero casos, fallos y omisiones.
 
 **EN:** Swift rejects symlinks in scaffold paths and replaces only the verified SwiftPM
 6.3.3 test sample in `scaffold_templates/swift.Test.swift`; other suites and
-manifests are preserved. The runner may still accept zero cases.
+manifests are preserved. `swift_test.sh` validates XCTest and Swift Testing,
+rejecting zero cases, failures and skipped tests.
 
 **ES:** Ballerina usa `tests/lib_test.bal` como la base homologada.
 `ballerina_test.sh` genera el informe JSON y rechaza cero casos o fallos.
