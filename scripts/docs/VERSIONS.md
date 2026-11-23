@@ -307,11 +307,9 @@ del código de salida poco fiable de ooRexxUnit; el runner sigue pendiente.
 **EN:** Scaffold and suite requests warn about limited selection and unreliable
 ooRexxUnit exit codes; the runner remains pending.
 
-**ES:** Ballerina advierte del éxito de `bal test` sin casos; el runner sigue
-pendiente de protección.
+**ES:** Ballerina usa el informe JSON para rechazar cero casos y fallos.
 
-**EN:** Ballerina warns that `bal test` can succeed without cases; runner
-protection remains pending.
+**EN:** Ballerina uses the JSON report to reject zero cases and failures.
 
 **ES:** Groovy conserva archivos propios y retira solo la pareja de ejemplos
 Gradle 9.6.1 verificada si no hay más archivos en `lib/src`. Se advierte que

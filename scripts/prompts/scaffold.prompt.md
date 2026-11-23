@@ -143,7 +143,8 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 - En Haskell, el selector de Cabal rechaza un paquete sin `test-suite`: declara
   el target y prepara su runner vacío como indica el catálogo; eso no valida casos.
 - En Ballerina, `bal test` puede devolver éxito sin casos o con todos los tests
-  deshabilitados; verifica la salida y no lo presentes como una suite validada.
+  deshabilitados. `ballerina_test.sh` genera el informe JSON, rechaza cero casos
+  y fallos, y conserva el resultado real.
 - En Groovy y Kotlin, Gradle puede devolver éxito con `test NO-SOURCE`: eso no
   valida una suite. Conserva cualquier muestra que el catálogo no haya retirado
   y revisa su contenido junto con el código existente.

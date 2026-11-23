@@ -1,6 +1,6 @@
 ada	tool	alr -C tests run	-
 assembly	manual	make run	-
-ballerina	tool	bal test	-
+ballerina	tool	bash {root}/scripts/data/ballerina_test.sh	-
 c	manual	make test	-
 clojure	tool	clojure -T:build test	-
 cobol	manual	make test	-

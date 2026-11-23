@@ -89,7 +89,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 |---|---|---|---|
 | **ada** | ⛓️ ✅ `alr init --lib --in-place {module}` | `alire.toml`, `{module}.gpr`, `config/`, `tests/` | ✅ `alr -C tests run` |
 | **assembly** | ✍️ `mkdir -p src test` + `Makefile` | `Makefile` | ✅ `make run` |
-| **ballerina** | ⛓️ 🔧 `bal new {module}` → adecuaciones de biblioteca / library adaptations | `Ballerina.toml`, `{module}.bal`, `tests/lib_test.bal` | ✅ `bal test` |
+| **ballerina** | ⛓️ 🔧 `bal new {module}` → adecuaciones de biblioteca / library adaptations | `Ballerina.toml`, `{module}.bal`, `tests/lib_test.bal` | ✅ informe JSON con rechazo de cero casos |
 | **c** | ✍️ `mkdir -p include src test` + `Makefile` | `include/{module}.h`, `Makefile` | ✅ `make test` |
 | **clojure** | ⛓️ 🔧 `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib` | `deps.edn`, `build.clj`, `src/{module}/` | ✅ `clojure -T:build test` |
 | **cobol** | ✍️ `mkdir -p src/copybooks src/lib test` | `Makefile`, `run_tests` | ✅ `make test` |

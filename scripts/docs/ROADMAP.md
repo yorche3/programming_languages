@@ -300,28 +300,27 @@ produjeron la biblioteca vacía y `tests/lib_test.bal` de la base homologada.
 Con Ballerina 2201.13.4, `bal test --offline --test-report` devolvió éxito
 sin casos y también con un test deshabilitado. Los informes JSON registraron
 cero casos en ambos escenarios y un caso aprobado en una prueba positiva;
-un fallo de aserción devolvió código no cero. Queda por investigar cómo usar
-esos resultados sin alterar el alcance, el caché o los archivos propios,
-incluidos proyectos multipaquete, ejecuciones incompletas e informes ausentes.
+un fallo de aserción devolvió código no cero. El runner integrado
+`ballerina_test.sh` genera el informe predeterminado, valida sus contadores,
+rechaza cero casos y fallos y conserva la salida nativa.
 En un paquete con dos módulos, uno sin casos y otro con un caso aprobado,
 el informe agregó ambos resultados y el comando tuvo éxito. Un parser
-prototipo escrito en Ballerina distinguió los informes vacío y aprobado;
-no está integrado y aún hay que verificar aislamiento y ciclo de vida de
-los informes, además de los escenarios pendientes.
+prototipo escrito en Ballerina distinguió los informes vacío y aprobado.
+El runner integrado cubre los contadores superiores; quedan por ampliar
+el aislamiento y los proyectos multipaquete.
 
 **EN — Ballerina (2026-11-22):** in an isolated project, `new` and `scaffold`
 produced the empty library and `tests/lib_test.bal` used by the homologated
 base. With Ballerina 2201.13.4, `bal test --offline --test-report` succeeded
 with no cases and also with a disabled test. JSON reports recorded zero cases
 in both scenarios and one passing case in a positive test; an assertion failure
-returned nonzero. Safe use of these results without changing scope, cache or
-authored files, including multi-package projects, incomplete executions and
-missing reports, remains to be investigated.
+returned nonzero. The integrated `ballerina_test.sh` validates top-level
+counters, rejects zero cases and failures, and preserves native output.
 In a two-module package with no cases in one module and a passing case in the
 other, the report aggregated both results and the command succeeded. A
-prototype Ballerina parser distinguished empty and passing reports; it is not
-integrated, and report isolation and lifecycle still need verification along
-with the remaining scenarios.
+prototype Ballerina parser distinguished empty and passing reports. The shell
+runner is now integrated for top-level counters; multi-package, incomplete and
+missing-report scenarios still need broader verification.
 
 **ES — Groovy (2026-11-22):** el borrado previo buscaba `Library*.groovy`
 en todo `lib` y podía eliminar archivos propios. El scaffold en desarrollo

@@ -403,6 +403,10 @@ EOF
         "$SANDBOX/r/core/algorithms" "$SANDBOX/scripts/data"
     cp -R -- "$TESTS_DIR/../data/scaffold_templates" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/gradle_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/nim_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/nim_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/v_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/ballerina_test.sh" "$SANDBOX/scripts/data/"
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
@@ -2439,6 +2443,18 @@ v_rc=0
     bash ./v_test.sh
 ) >/dev/null 2>&1 || v_rc=$?
 assert_eq 'test V cero casos: rechaza' '1' "${v_rc:-0}"
+
+# Ballerina: el informe JSON rechaza cero casos.
+BB_RUN="$SANDBOX/ballerina/core/foundations/unit_test/calculator"
+mkdir -p "$BB_RUN/tests"
+printf '[package]\nname = "naive_sort"\nversion = "0.1.0"\n' >"$BB_RUN/Ballerina.toml"
+cp -- "$DATA_DIR/ballerina_test.sh" "$BB_RUN/ballerina_test.sh"
+ba_rc=0
+(
+    cd "$BB_RUN"
+    bash ./ballerina_test.sh
+) >/dev/null 2>&1 || ba_rc=$?
+assert_eq 'test Ballerina cero casos: rechaza' '1' "$ba_rc"
 
 # v2.1.0 continúa con los comandos manuales de la siguiente revisión.
 # v2.1.0: el nombre del fuente y el archivo vacío de pruebas son comandos del catálogo.

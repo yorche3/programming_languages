@@ -193,11 +193,11 @@ otras suites y manifiestos. El runner todavía puede aceptar cero casos.
 6.3.3 test sample in `scaffold_templates/swift.Test.swift`; other suites and
 manifests are preserved. The runner may still accept zero cases.
 
-**ES:** Ballerina usa `tests/lib_test.bal` como la base homologada y advierte
-que `bal test` puede devolver éxito sin ejecutar casos.
+**ES:** Ballerina usa `tests/lib_test.bal` como la base homologada.
+`ballerina_test.sh` genera el informe JSON y rechaza cero casos o fallos.
 
-**EN:** Ballerina uses `tests/lib_test.bal` as in the homologated base and warns
-that `bal test` can succeed without executing cases.
+**EN:** Ballerina uses `tests/lib_test.bal` as in the homologated base.
+`ballerina_test.sh` generates the JSON report and rejects zero cases or failures.
 
 **ES:** Groovy y Kotlin usan `gradle_scaffold.sh`: retira solo la pareja exacta
 de ejemplos Gradle 9.6.1 cuando no hay otros archivos o enlaces en `lib/src`.
