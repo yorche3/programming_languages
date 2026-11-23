@@ -133,7 +133,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **scheme** | ✍️ `mkdir -p src test` | — | ✅ Guile + SRFI-64 (comando abajo / command below) |
 | **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Module}/` | ✅ runner con conteo XCTest/Swift Testing |
 | **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ Tcltest (comando abajo / command below) |
-| **typescript** | ✅ `npm init -y` | `package.json`, `tsconfig.json`, `jest.config.cjs` | ✅ `npm test` |
+| **typescript** | ✅ `npm init -y` | `package.json`, `tsconfig.json`, `jest.config.cjs` | ✅ informe Jest con rechazo de cero casos |
 | **v** | ⛓️ ✅ `v init --lib` (no interactivo; quitar el `.git` anidado y fijar la versión) | `v.mod`, `{module}.v`, `test/` | ✅ runner directo con resumen y rechazo de cero casos |
 | **vala** | ⛓️ 🔧 `meson init --language vala --type library --name {module}` | `meson.build`, `src/`, `test/` | ✅ `valac src/{module}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{module}-tests && /tmp/{module}-tests` |
 | **zig** | ✅ `zig init` | `build.zig` | ✅ `zig build test` |

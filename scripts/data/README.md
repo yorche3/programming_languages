@@ -227,6 +227,12 @@ incluidos los runners vacíos que antes daban falso verde.
 **EN:** `purescript_test.sh` rejects runners without `All N tests passed!`,
 including empty runners that previously produced a false green.
 
+**ES:** TypeScript elimina `--passWithNoTests`; `typescript_test.sh` exige el
+informe JSON de Jest y rechaza cero casos, omitidos y fallos.
+
+**EN:** TypeScript removes `--passWithNoTests`; `typescript_test.sh` requires the
+Jest JSON report and rejects zero cases, skipped tests and failures.
+
 **ES:** V puede devolver éxito con cero casos; `v_test.sh` exige un resumen con
 al menos un caso aprobado.
 

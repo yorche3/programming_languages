@@ -411,6 +411,7 @@ EOF
     cp -- "$TESTS_DIR/../data/rexx_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/swift_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/purescript_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/typescript_test.sh" "$SANDBOX/scripts/data/"
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
@@ -3033,6 +3034,45 @@ cp -- "$DATA_DIR/swift_test.sh" "$SW_RUN/swift_test.sh"
     bash ./swift_test.sh
 ) >/dev/null 2>&1
 assert_eq 'test Swift caso aprobado: código' '0' "$?"
+
+TS_RUN="$SANDBOX/typescript/core/foundations/unit_test/calculator"
+mkdir -p "$TS_RUN/node_modules/.bin" "$TS_RUN/test"
+printf '{}\n' >"$TS_RUN/package.json"
+cat >"$TS_RUN/node_modules/.bin/jest" <<'EOF'
+#!/usr/bin/env bash
+output=""
+for arg in "$@"; do
+  case "$arg" in
+    --outputFile=*) output="${arg#*=}" ;;
+  esac
+done
+printf '{"success":true,"numTotalTests":1,"numPassedTests":1,"numFailedTests":0,"numPendingTests":0}\n' >"$output"
+EOF
+chmod +x "$TS_RUN/node_modules/.bin/jest"
+cp -- "$DATA_DIR/typescript_test.sh" "$TS_RUN/typescript_test.sh"
+ts_rc=0
+(
+    cd "$TS_RUN"
+    bash ./typescript_test.sh
+) >/dev/null 2>&1 || ts_rc=$?
+assert_eq 'test TypeScript caso aprobado: código' '0' "$ts_rc"
+cat >"$TS_RUN/node_modules/.bin/jest" <<'EOF'
+#!/usr/bin/env bash
+output=""
+for arg in "$@"; do
+  case "$arg" in
+    --outputFile=*) output="${arg#*=}" ;;
+  esac
+done
+printf '{"success":true,"numTotalTests":0,"numPassedTests":0,"numFailedTests":0,"numPendingTests":0}\n' >"$output"
+EOF
+chmod +x "$TS_RUN/node_modules/.bin/jest"
+ts_rc=0
+(
+    cd "$TS_RUN"
+    bash ./typescript_test.sh
+) >/dev/null 2>&1 || ts_rc=$?
+assert_eq 'test TypeScript cero casos: rechaza' '1' "$ts_rc"
 
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"

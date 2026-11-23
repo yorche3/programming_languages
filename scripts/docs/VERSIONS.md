@@ -335,6 +335,12 @@ cero casos.
 **EN:** V preserves its generated layout and rejects runs whose summary reports
 zero cases.
 
+**ES:** TypeScript exige el informe JSON de Jest y rechaza cero casos,
+omitidos y fallos.
+
+**EN:** TypeScript requires the Jest JSON report and rejects zero cases,
+skipped tests and failures.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

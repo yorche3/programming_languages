@@ -523,6 +523,16 @@ across suites and rejects zero cases or runs with missing summaries.
 `v test .` succeeded with `0 total` after `tests/` was emptied.
 `v_test.sh` now requires at least one passing case in the summary.
 
+**ES — TypeScript (2026-11-22):** el scaffold retiró `--passWithNoTests`
+porque permitía verdes vacíos. `typescript_test.sh` exige el informe JSON de
+Jest y rechaza cero casos, omitidos y fallos. La medición temporal aprobó,
+rechazó vacío y rechazó fallo.
+
+**EN — TypeScript (2026-11-22):** the scaffold removed `--passWithNoTests`
+because it allowed empty green runs. `typescript_test.sh` requires Jest JSON
+and rejects zero cases, skipped tests and failures. Temporary measurements
+passed for a green suite and rejected empty and failing suites.
+
 - Para el fix, verificar la salida real de `spago init` y el layout homologado;
   automatizar los cambios mecánicos de nombres, imports, runner y manifiesto
   que correspondan, manteniendo consistentes archivos y declaraciones.
