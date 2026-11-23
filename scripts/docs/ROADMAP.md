@@ -337,7 +337,7 @@ devolvió éxito; queda pendiente rechazar ejecuciones sin casos de forma fiable
 removes only the exact Gradle 9.6.1 sample pair when no other files or links
 exist in `lib/src`, preserving other variants for review. In an isolated
 project, `./gradlew test --offline` reported `NO-SOURCE` and succeeded;
-reliably rejecting runs without cases remains pending.
+`gradle_test.sh` now rejects `NO-SOURCE` and requires XML reports with passing cases.
 
 **ES — Kotlin (2026-11-22):** el borrado previo recorría todo el módulo
 buscando `Library*.kt`, por lo que también podía eliminar archivos propios.
@@ -352,8 +352,8 @@ for `Library*.kt` and could also remove authored files. Gradle 9.6.1 generated
 `lib/src` even with `--no-split-project`, matching both homologated bases.
 The helper shared with Groovy preserves authored files and removes only the
 exact pair when `lib/src` has no other files. In the lab, `gradle test
---offline` reported `NO-SOURCE` and succeeded; runner protection and other
-layouts remain pending.
+--offline` reported `NO-SOURCE` and succeeded; `gradle_test.sh` now rejects
+`NO-SOURCE` and requires XML reports with passing cases.
 
 **ES — Nim (2026-11-22):** Nimble 0.22.2 creó `src/{module}.nim`,
 `src/{module}/submodule.nim` y `tests/test1.nim` de ejemplo. El scaffold

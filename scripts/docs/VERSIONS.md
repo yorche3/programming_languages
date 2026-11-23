@@ -312,18 +312,16 @@ ooRexxUnit exit codes; the runner remains pending.
 **EN:** Ballerina uses the JSON report to reject zero cases and failures.
 
 **ES:** Groovy conserva archivos propios y retira solo la pareja de ejemplos
-Gradle 9.6.1 verificada si no hay más archivos en `lib/src`. Se advierte que
-Gradle todavía puede devolver éxito sin casos.
+Gradle 9.6.1 verificada. `gradle_test.sh` rechaza NO-SOURCE y exige informes XML.
 
 **EN:** Groovy preserves authored files and removes only the verified Gradle
-9.6.1 sample pair when `lib/src` has no other files. Gradle can still succeed
-without cases and this is flagged.
+9.6.1 sample pair. `gradle_test.sh` rejects NO-SOURCE and requires XML reports.
 
-**ES:** Kotlin comparte la protección de muestras de Gradle con Groovy;
-conserva archivos propios y advierte del éxito sin casos.
+**ES:** Kotlin comparte la protección y el runner de Gradle con Groovy;
+conserva archivos propios y rechaza NO-SOURCE.
 
-**EN:** Kotlin shares Groovy's Gradle sample protection, preserves authored
-files and warns about success without cases.
+**EN:** Kotlin shares Groovy's Gradle sample protection and runner, preserves
+authored files and rejects NO-SOURCE.
 
 **ES:** Nim retira solo las muestras exactas de Nimble y ejecuta las suites
 directamente para rechazar casos vacíos o fallidos.

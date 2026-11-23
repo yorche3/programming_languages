@@ -210,6 +210,11 @@ Gradle 9.6.1 sample pair when there are no other files or links in `lib/src`.
 It rejects unsafe paths and preserves other content; Gradle can still report
 success without cases. Other layouts need review.
 
+**ES:** `gradle_test.sh` rechaza `NO-SOURCE` y exige informes XML con casos aprobados.
+
+**EN:** `gradle_test.sh` rejects `NO-SOURCE` and requires XML reports with passing
+cases.
+
 **ES:** Nim usa una retirada conservadora para sus muestras exactas y un runner
 directo que rechaza suites ausentes o sin casos.
 

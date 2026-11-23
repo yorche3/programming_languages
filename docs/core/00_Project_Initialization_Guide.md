@@ -107,13 +107,13 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **gleam** | ✅ `gleam new {module}` | `gleam.toml`, `manifest.toml` | ✅ `gleam test` |
 | **go** | ✅ `go mod init example.com/{module}` | `go.mod` | ✅ `go test ./...` |
 | **grain** | ✍️ `mkdir -p src tests` + `Makefile` | `Makefile` | ✅ `make test` |
-| **groovy** | ⛓️ ✅ `gradle init --type groovy-library --dsl groovy --use-defaults` | `settings.gradle`, `lib/build.gradle`, `gradle/` | ✅ `./gradlew test` |
+| **groovy** | ⛓️ ✅ `gradle init --type groovy-library --dsl groovy --use-defaults` | `settings.gradle`, `lib/build.gradle`, `gradle/` | ✅ XML Gradle con rechazo de NO-SOURCE |
 | **haskell** | 🔧 `cabal init --lib` | `{module}.cabal` | ✅ `cabal test .:tests --ghc-options=-Werror=missing-home-modules` |
 | **haxe** | ⛓️ ✅ `mkdir -p src test` (después `haxelib install utest`) | `build.hxml`, `RunTests.hx` | ✅ `haxe build.hxml` |
 | **java** | ✍️ `pom.xml` a mano (el arquetipo quickstart es de aplicación: R2) | `pom.xml` | ✅ `mvn test` |
 | **javascript** | 🔧 `npm init -y` | `package.json`, `jest.config.js` | ✅ `npm test` |
 | **julia** | ⛓️ 🔧 `julia -e 'using Pkg; Pkg.generate("{module}")'` | `Project.toml`, `src/{Module}.jl`, `test/` | ✅ `julia --project=. test/run_tests.jl` |
-| **kotlin** | ⛓️ ✅ `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | `build.gradle.kts`, `settings.gradle.kts` | ✅ `gradle test` |
+| **kotlin** | ⛓️ ✅ `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | `build.gradle.kts`, `settings.gradle.kts` | ✅ XML Gradle con rechazo de NO-SOURCE |
 | **lua** | 🔧 `luarocks init` | `{module}.rockspec`, `.busted` | ✅ `busted` |
 | **nim** | ⛓️ ✅ `nimble init` (tipo library; `nimble init -y`) | `{module}.nimble`, `src/{module}.nim`, `test/config.nims` | ✅ runner directo sobre `tests/*.nim` |
 | **ocaml** | ⛓️ ✅ `dune init proj {module}` (crea la carpeta del módulo) | `dune-project`, `lib/dune`, `test/dune` | ✅ `dune runtest` |

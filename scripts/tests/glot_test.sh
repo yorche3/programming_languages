@@ -403,6 +403,7 @@ EOF
         "$SANDBOX/r/core/algorithms" "$SANDBOX/scripts/data"
     cp -R -- "$TESTS_DIR/../data/scaffold_templates" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/gradle_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/gradle_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/nim_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/nim_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/v_test.sh" "$SANDBOX/scripts/data/"
@@ -2421,6 +2422,23 @@ glot_run_sandbox scaffold kotlin algorithms/naive_sort
 assert_eq 'scaffold Kotlin layout distinto: rechaza' '4' "$rc_last"
 assert_eq 'scaffold Kotlin layout distinto: conserva pareja' 'si' "$([[ -f "$KT/lib/src.saved/main/kotlin/naive_sort/Library.kt" && -f "$KT/lib/src.saved/test/kotlin/naive_sort/LibraryTest.kt" ]] && echo si || echo no)"
 mv -- "$KT/lib/src.saved" "$KT/lib/src"
+
+# Gradle: rechazar NO-SOURCE mediante el runner compartido.
+GR_RUN="$SANDBOX/groovy/core/algorithms/naive_sort"
+mkdir -p "$GR_RUN"
+cat >"$GR_RUN/gradlew" <<'EOF'
+#!/usr/bin/env bash
+echo '> Task :lib:test NO-SOURCE'
+echo 'BUILD SUCCESSFUL'
+EOF
+chmod +x "$GR_RUN/gradlew"
+cp -- "$DATA_DIR/gradle_test.sh" "$GR_RUN/gradle_test.sh"
+gr_rc=0
+(
+    cd "$GR_RUN"
+    bash ./gradle_test.sh
+) >/dev/null 2>&1 || gr_rc=$?
+assert_eq 'test Gradle NO-SOURCE: rechaza' '1' "$gr_rc"
 
 # Nim: retirar solo muestras exactas y no duplicar la task.
 NM="$SANDBOX/nim/core/algorithms/naive_sort"

@@ -149,7 +149,8 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
   deshabilitados. `ballerina_test.sh` genera el informe JSON, rechaza cero casos
   y fallos, y conserva el resultado real.
 - En Groovy y Kotlin, Gradle puede devolver éxito con `test NO-SOURCE`: eso no
-  valida una suite. Conserva cualquier muestra que el catálogo no haya retirado
+  valida una suite. `gradle_test.sh` inspecciona informes XML y rechaza NO-SOURCE.
+  Conserva cualquier muestra que el catálogo no haya retirado
   y revisa su contenido junto con el código existente.
 - En Nim, el helper conserva fuentes propias y retira solo las muestras exactas
   de Nimble. La task `test` se añade una sola vez. El runner ejecuta directamente
