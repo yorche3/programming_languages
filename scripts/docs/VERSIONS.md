@@ -511,6 +511,30 @@ docs checks: 30 passed, 2 failed (known command drift and indented blocks)
 git diff --check
 ```
 
+## 2.1.0-dev — 2026-11-23 (andamiaje C# / C# scaffold)
+
+**ES:** `scaffold` copia la plantilla `.gitignore` de C# solo si falta y
+conserva archivos existentes. La plantilla excluye artefactos .NET medidos en
+las bases homologadas, incluidos `bin/` y `obj/`. El harness verifica dry-run,
+rerun, preservación y `git check-ignore`. En un proyecto temporal con .NET
+10.0.115, la secuencia del catálogo agregó la referencia del test a producción;
+un test que importó un tipo de producción pasó. `glot -n new` y
+`glot -n scaffold` mostraron los pasos esperados.
+
+**EN:** `scaffold` copies the C# `.gitignore` template only when missing and
+preserves existing files. The template excludes .NET artifacts measured in
+homologated modules, including `bin/` and `obj/`. The harness checks dry-run,
+rerun, preservation and `git check-ignore`. In a temporary .NET 10.0.115
+project, the catalogue sequence added the test-to-production reference; a
+test importing a production type passed. `glot -n new` and `glot -n scaffold`
+showed the expected steps.
+
+```text
+Integrated scaffold lab: 238 passed, 0 failed
+dotnet test Sample.slnx: 1 passed, 0 failed
+git diff --check
+```
+
 ## 2.1.0-dev — 2026-11-02 (rutas y perfiles / routes and profiles)
 
 **ES:** Tres rutas explícitas, perfiles independientes del modelo, Sonnet para

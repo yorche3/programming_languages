@@ -366,6 +366,9 @@ sandbox_make() {
 [submodule "crystal"]
         path = crystal
         url = ../remote/crystal.git
+[submodule "csharp"]
+        path = csharp
+        url = ../remote/csharp.git
 [submodule "d"]
         path = d
         url = ../remote/d.git
@@ -2146,6 +2149,29 @@ assert_eq 'scaffold Prolog symlink: bloquea' '4' "$rc_last"
 assert_eq 'scaffold Prolog symlink: conserva destino' 'author ignore' "$(cat "$PRB/.gitignore")"
 
 PSB="$SANDBOX/purescript/core/algorithms/naive_sort"
+# C#: scaffold instala ignore patterns al faltar y preserva archivos propios en reruns.
+CSHARP_SCAFFOLD="$SANDBOX/csharp/core/algorithms/naive_sort"
+mkdir -p -- "$CSHARP_SCAFFOLD"
+glot_run_sandbox -n scaffold csharp algorithms/naive_sort
+assert_eq 'scaffold C#: dry-run' '0' "$rc_last"
+assert_contains 'scaffold C#: dry-run muestra plantilla ignore' 'csharp.gitignore' "$out"
+assert_eq 'scaffold C#: dry-run no escribe ignore' 'no' "$([[ -e "$CSHARP_SCAFFOLD/.gitignore" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold csharp algorithms/naive_sort
+assert_eq 'scaffold C#: código' '0' "$rc_last"
+assert_eq 'scaffold C#: instala plantilla ignore' '0' \
+    "$(cmp -s "$CSHARP_SCAFFOLD/.gitignore" "$TESTS_DIR/../data/scaffold_templates/csharp.gitignore"; echo $?)"
+CSHARP_IGNORE="$WORK_DIR/csharp-ignore"
+mkdir -p -- "$CSHARP_IGNORE"
+cp -- "$CSHARP_SCAFFOLD/.gitignore" "$CSHARP_IGNORE/.gitignore"
+git -C "$CSHARP_IGNORE" init -q
+assert_eq 'scaffold C#: excluye bin' '1' \
+    "$(git -C "$CSHARP_IGNORE" check-ignore bin/Debug/build.dll | wc -l | tr -d ' ')"
+assert_eq 'scaffold C#: excluye obj' '1' \
+    "$(git -C "$CSHARP_IGNORE" check-ignore obj/project.assets.json | wc -l | tr -d ' ')"
+printf 'author ignore\n' >"$CSHARP_SCAFFOLD/.gitignore"
+glot_run_sandbox scaffold csharp algorithms/naive_sort
+assert_eq 'scaffold C#: rerun preserva ignore propio' 'author ignore' "$(cat -- "$CSHARP_SCAFFOLD/.gitignore")"
+
 mkdir -p "$PSB/src"
 printf 'author code\n' >"$PSB/src/Main.purs"
 printf 'author manifest\n' >"$PSB/spago.yaml"

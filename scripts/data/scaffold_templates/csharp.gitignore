@@ -1,0 +1,21 @@
+# .NET build artifacts
+bin/
+obj/
+
+# NuGet cache
+.nuget/
+packages/
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln.docstates
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# macOS
+.DS_Store
