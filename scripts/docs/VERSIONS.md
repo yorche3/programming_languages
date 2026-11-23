@@ -415,6 +415,32 @@ renombrados acoplados a referencias y artefactos de configuración faltantes.
 / v2.1.0 remains open pending the other 41 languages and their coupled
 reference/configuration corrections.
 
+## 2.1.0-dev — 2026-11-23 (preservación de Racket / Racket preservation)
+
+**ES:** Racket deja de borrar recursivamente `.github/`, `profile/` y archivos
+auxiliares de `raco new`; la guía y el encargo scaffold ahora exigen preservar
+extras que no bloquean el módulo. El harness verifica esos artefactos con un
+generador simulado, y `glot new` se probó con `raco-new` 9.1 real.
+
+**EN:** Racket no longer recursively deletes `.github/`, `profile/` or other
+`raco new` files. The guide and scaffold request now preserve extras that do
+not block module use. The harness checks these artifacts with a fake generator;
+`glot new` was also exercised with real `raco-new` 9.1.
+
+```text
+bash -n scripts/tests/glot_test.sh
+Integrated scaffold: 184 passed, 0 failed
+glot new racket algorithms/naive_sort: generated auxiliary files preserved
+git diff --check
+```
+
+**ES / EN:** `docs/tests/docs_check.sh` aún presenta dos fallos previos a este
+bloque: deriva general entre comandos documentados y `languages.tsv`, y dos
+líneas de comandos indentadas que ya estaban en la guía en `HEAD`. / The docs
+checker still reports two pre-existing issues: general command drift between
+the guide and `languages.tsv`, and two indented command lines already present
+in the committed guide.
+
 ## 2.1.0-dev — 2026-11-02 (rutas y perfiles / routes and profiles)
 
 **ES:** Tres rutas explícitas, perfiles independientes del modelo, Sonnet para

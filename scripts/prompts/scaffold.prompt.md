@@ -99,13 +99,14 @@ detecta cada caso:
 | **Índice de fuentes obsoleto**: el inicializador generó el *autoloader* del lenguaje con `src/` **vacío** | El comando de pruebas falla con «clase o símbolo no encontrado» aunque el archivo exista (caso real medido el 2026-09-28: el `composer require` de `new` deja el `classmap` del `src/` vacío y PHPUnit no ve la clase nueva) | **Regenerarlo** después de crear los archivos (`composer dump-autoload`, `dotnet restore`, …) y decir el comando en la evidencia |
 | **Nombres predefinidos** que no encajan | Un archivo o manifiesto se llama como la plantilla (`MyLib.hs`, `<dir>_spec.<ext>`, `library.cabal`) y no como el módulo | Renombrar a la convención del módulo y ajustar el manifiesto (nombre, versión, descripción) para que concuerde con `{module}` / `{Module}` |
 | **Layout divergente** | El inicializador creó `bin/`+`lib/` y este repositorio usa `src/`+`test/` en ese lenguaje, o al revés | Dejar **una** disposición: la que ya usan los módulos homologados |
-| **Andamiaje de otro fin** | CI propia del inicializador, *samples*, `example/`, utilidades que el módulo no usa | Conservar si el repositorio también lo conserva en otros módulos del lenguaje; quitar solo lo que rompe o contradice la convención, y decirlo |
+| **Andamiaje de otro fin** | CI propia del inicializador, *samples*, `example/`, utilidades que el módulo no usa | Conservar lo que no impida usar el módulo, aunque las bases homologadas no lo tengan; no borrar extras para uniformar. Retirar solo lo que lo rompa o contradiga una convención, y decirlo |
 | **Referencia entre proyectos ausente** | El comando de pruebas **arranca** pero el proyecto de producción **ni se compila** —su código defectuoso es invisible— y la suite no compila: «clase o símbolo no encontrado» (`CS0246`/`CS0103` en C#) aunque el tipo exista en `src/` | Añadir la referencia del proyecto de pruebas al de producción (`dotnet add <pruebas.csproj> reference <produccion.csproj>`) y **volver a ejecutar**: con el enlace, el compilador ya revisa `src/` y lo que diga es del paso que escribió ese código |
 | **Fichero de construcción esperado ausente** | La guía o un módulo homologado exige un `Makefile` u otro fichero y `glot scaffold` no lo dejó | Si el patrón ya existe, completar el dato/catálogo para que lo genere de forma repetible; no dejar este bloqueo para 4c/4d. Solo un fallo de construcción no previsto después de 4c pasa a `build` (4d) |
 
 **Regla de conservación:** lo que el inicializador haga bien se queda (estructura de pruebas,
-manifiesto, `LICENSE`, el `README` generado si el módulo no tiene el suyo). Solo se cambia lo
-que **contradice** al módulo o al repositorio, y cada cambio se justifica en una línea.
+manifiesto, `LICENSE`, el `README` generado si el módulo no tiene el suyo y los archivos
+auxiliares que no impidan usarlo). Solo se cambia lo que **contradice** al módulo o al
+repositorio, y cada cambio se justifica en una línea.
 **No** escribas la implementación ni la suite.
 
 ### 3. `.gitignore` del módulo

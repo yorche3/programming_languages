@@ -1730,6 +1730,47 @@ assert_eq 'scaffold gitfile dry-run: bloquea' '4' "$rc_last"
 assert_eq 'gitfile preexistente: conserva contenido' 'gitdir: ../authored-git' "$(cat -- "$GIT_FILE_MODULE/.git")"
 assert_eq 'gitfile preexistente: no crea scaffold' 'no' "$([[ -e "$GIT_FILE_MODULE/.gitignore" ]] && echo yes || echo no)"
 
+# Racket conserva los auxiliares inofensivos de raco-new en vez de borrarlos recursivamente.
+RACKET_BIN="$WORK_DIR/racket-bin"
+RACKET_MODULE="$SANDBOX/racket/core/algorithms/naive_sort"
+mkdir -p -- "$RACKET_BIN" "$RACKET_MODULE"
+printf '[submodule "racket"]\n\tpath = racket\n\turl = ../remote/racket.git\n' >>"$SANDBOX/.gitmodules"
+cat >"$RACKET_BIN/raco" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 3 && "$1" == "new" && "$2" == "library" ]] || exit 2
+mkdir -p "$3/project" "$3/project-lib" "$3/project-test/tests" "$3/project-doc/scribblings" \
+    "$3/.github/workflows" "$3/profile"
+for file in CONTRIBUTING.rst Makefile README.rst project/info.rkt project-lib/info.rkt \
+    project-test/info.rkt project-doc/info.rkt \
+    project-test/tests/project.rkt project-doc/scribblings/project.scrbl \
+    project-lib/main.rkt .github/workflows/ci.yml pull_request_template.md \
+    render-template.sh profile/example.rkt; do
+    printf '<project> <username>\n' >"$3/$file"
+done
+printf 'naive_sort)\n' >"$3/project-test/tests/project.rkt"
+EOF
+chmod +x -- "$RACKET_BIN/raco"
+old_path="$PATH"
+PATH="$RACKET_BIN:$PATH"
+export PATH
+glot_run_sandbox new racket algorithms/naive_sort
+assert_eq 'new Racket: código' '0' "$rc_last"
+for generated_path in \
+    .github/workflows/ci.yml \
+    pull_request_template.md \
+    render-template.sh \
+    profile/example.rkt; do
+    assert_eq "new Racket: conserva $generated_path" 'si' \
+        "$([[ -f "$RACKET_MODULE/$generated_path" ]] && echo si || echo no)"
+done
+printf 'authored profile\n' >"$RACKET_MODULE/profile/example.rkt"
+glot_run_sandbox new racket algorithms/naive_sort
+assert_eq 'new Racket repetido: conserva contenido auxiliar propio' 'authored profile' \
+    "$(cat -- "$RACKET_MODULE/profile/example.rkt")"
+PATH="$old_path"
+export PATH
+
 # Un repositorio anidado no debe ocultar el estado del superproyecto de un submódulo.
 NESTED_ROOT="$WORK_DIR/nested-root"
 NESTED_MODULE="$NESTED_ROOT/crystal/core/algorithms/naive_sort"
