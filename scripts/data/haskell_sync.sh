@@ -108,6 +108,7 @@ if [[ ! "$base" =~ ^base\ \^\>=([0-9]+\.)*[0-9]+$ ]]; then
 fi
 if [[ "$target" == library ]]; then
     sed -e "s/@EXPOSED@/$exposed/g" -e "s/@BASE@/$base/g" "$template" >"$tmp/expected"
+    printf '\n' >>"$tmp/expected"
 else
     sed -e "s/@PACKAGE@/$package/g" -e "s/@BASE@/$base/g" \
         -e 's/    main-is:          Main.hs/    main-is:          RunTests.hs/' \
