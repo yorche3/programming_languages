@@ -505,6 +505,16 @@ minimal runner. Attempts to fail it using `Effect.Exception` and
 The false green is flagged; a reliable safeguard preserving the manifest and
 authored runners remains pending.
 
+- **ES — V (2026-11-22):** `v init --lib` creó `fixture.v`, `tests/` y
+`v.mod` con `0.0.0`; conservó el layout nativo y produjo un test aprobado.
+`v test .` devolvió éxito con `0 total` al vaciar `tests/`. El runner
+`v_test.sh` ahora exige al menos un caso aprobado en el resumen.
+
+- **EN — V (2026-11-22):** `v init --lib` created `fixture.v`, `tests/` and
+`v.mod` at `0.0.0`; it preserved the native layout and produced a passing test.
+`v test .` succeeded with `0 total` after `tests/` was emptied.
+`v_test.sh` now requires at least one passing case in the summary.
+
 - Para el fix, verificar la salida real de `spago init` y el layout homologado;
   automatizar los cambios mecánicos de nombres, imports, runner y manifiesto
   que correspondan, manteniendo consistentes archivos y declaraciones.

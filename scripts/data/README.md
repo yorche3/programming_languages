@@ -221,6 +221,12 @@ completar y verificar la suite sigue siendo necesario.
 **EN:** The minimal PureScript runner can succeed without executing cases;
 the suite still needs to be completed and verified.
 
+**ES:** V puede devolver éxito con cero casos; `v_test.sh` exige un resumen con
+al menos un caso aprobado.
+
+**EN:** V can succeed with zero cases; `v_test.sh` requires a summary containing
+at least one passing case.
+
 **ES:** Tcl crea una fuente de paquete, su índice y el ignore si faltan,
 preservando archivos previos y rechazando enlaces. Los archivos previos
 necesitan revisión.

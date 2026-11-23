@@ -2428,6 +2428,19 @@ cp -- "$DATA_DIR/nim_test.sh" "$NM/nim_test.sh"
 ) >/dev/null 2>&1
 assert_eq 'test Nim caso aprobado: código' '0' "$?"
 
+# V: rechaza un resumen con cero casos.
+VB="$SANDBOX/v/core/algorithms/naive_sort"
+mkdir -p "$VB/tests"
+printf "Module {\\n name: 'naive_sort'\\n version: '0.1.0'\\n license: 'MIT'\\n}\n" >"$VB/v.mod"
+cp -- "$DATA_DIR/v_test.sh" "$VB/v_test.sh"
+v_rc=0
+(
+    cd "$VB"
+    bash ./v_test.sh
+) >/dev/null 2>&1 || v_rc=$?
+assert_eq 'test V cero casos: rechaza' '1' "${v_rc:-0}"
+
+# v2.1.0 continúa con los comandos manuales de la siguiente revisión.
 # v2.1.0: el nombre del fuente y el archivo vacío de pruebas son comandos del catálogo.
 BB="$SANDBOX/ballerina/core/algorithms/naive_sort"
 mkdir -p -- "$BB"

@@ -333,6 +333,12 @@ directamente para rechazar casos vacíos o fallidos.
 **EN:** Nim removes only exact Nimble samples and executes suites directly to
 reject empty or failing runs.
 
+**ES:** V conserva su layout generado y rechaza ejecuciones cuyo resumen tenga
+cero casos.
+
+**EN:** V preserves its generated layout and rejects runs whose summary reports
+zero cases.
+
 ## 2.1.0-dev — 2026-11-02 (tarifas vigentes / current rates)
 
 **ES:** El perfil balanced, el alias `terra` y su adaptador pasan de

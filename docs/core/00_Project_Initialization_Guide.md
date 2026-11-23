@@ -134,7 +134,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Module}/` | ✅ `swift test` |
 | **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ Tcltest (comando abajo / command below) |
 | **typescript** | ✅ `npm init -y` | `package.json`, `tsconfig.json`, `jest.config.cjs` | ✅ `npm test` |
-| **v** | ⛓️ ✅ `v init --lib` (no interactivo; quitar el `.git` anidado y fijar la versión) | `v.mod`, `{module}.v`, `test/` | ✅ `v test .` |
+| **v** | ⛓️ ✅ `v init --lib` (no interactivo; quitar el `.git` anidado y fijar la versión) | `v.mod`, `{module}.v`, `test/` | ✅ runner directo con resumen y rechazo de cero casos |
 | **vala** | ⛓️ 🔧 `meson init --language vala --type library --name {module}` | `meson.build`, `src/`, `test/` | ✅ `valac src/{module}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{module}-tests && /tmp/{module}-tests` |
 | **zig** | ✅ `zig init` | `build.zig` | ✅ `zig build test` |
 
@@ -172,7 +172,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **racket** | `raco new library {module}` → render portátil (`mv` + `sed -i`, con el código renombrado a `{module}.rkt` con guiones) → `rm -rf .github pull_request_template.md render-template.sh profile` | Las suites requieren la librería por ruta relativa (`"../../{module}-lib/{module}.rkt"`, con guiones) y el runner es `raco test -x .`, sin enlazar paquetes |
 | **rescript** | `mkdir -p src test` → `npm init -y` → `npm pkg set` | El manifiesto y sus devDependencies se declaran con `npm pkg set`; los baja `npm install` |
 | **ruby** | `mkdir -p src test` → `bundle init` → `bundle install` | `rspec` en el `Gemfile` y `.rspec` |
-| **v** | `v init --lib` (no interactivo) → `mkdir -p src tests` | Conservar `tests/`, fuentes y gitfile; fijar `version: '0.1.0'` en `v.mod`. No renombrar carpetas sin actualizar imports |
+| **v** | `v init --lib` (no interactivo) → conservar layout generado y verificar el resumen de `v test .` | Conservar `tests/`, fuentes y gitfile; fijar `version: '0.1.0'` en `v.mod`. El runner rechaza cero casos y no renombra carpetas sin actualizar imports |
 | **vala** | `meson init --language vala --type library --name {module}` | Completar `src/` y `test/` y decidir el build con meson |
 
 > **ES:** Si el generador crea un `main` o un `app` de ejemplo (`dub init` en D, `zig init`; `cargo init --lib` genera solo la librería), debe retirarse cuando el módulo sea una biblioteca: un `main` propio rompe el runner de tests. En D solo se retira automáticamente la muestra verificada; el contenido diferente se conserva para revisión.
