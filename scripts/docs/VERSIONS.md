@@ -283,11 +283,11 @@ XCTest y Swift Testing y rechaza cero casos, fallos y omisiones.
 replaces only the verified SwiftPM 6.3.3 example. `swift_test.sh` validates
 XCTest and Swift Testing and rejects zero cases, failures and skips.
 
-**ES:** PureScript advierte que su runner mínimo aún devuelve éxito sin casos;
-la protección del runner y la integración de `test-unit` siguen pendientes.
+**ES:** PureScript usa `purescript_test.sh` para contar los resúmenes
+`All N tests passed!` y rechazar runners vacíos o fallidos.
 
-**EN:** PureScript warns that its minimal runner still succeeds without cases;
-runner protection and `test-unit` integration remain pending.
+**EN:** PureScript uses `purescript_test.sh` to count `All N tests passed!`
+summaries and reject empty or failing runners.
 
 **ES:** Haskell rechaza durante `glot test` los módulos locales importados y
 no declarados en targets Cabal compilados; no modifica el manifiesto.

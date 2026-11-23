@@ -31,7 +31,7 @@ ocaml	tool	dune runtest	-
 perl	manual	perl -MApp::Prove::State -MTAP::Harness::Env -e 'my $s = App::Prove::State->new({extensions => [".pl"]}); my @tests = $s->get_tests(0, "test/"); @tests or die "No Perl test files configured in test/\n"; my $result = TAP::Harness::Env->create({})->runtests(@tests); exit 1 if $result->has_errors; die "No Perl test cases executed\n" unless $result->total > $result->skipped;'	find lib -type f -name '*.p[lm]' -print0 | xargs -0 -r -n1 perl -Ilib -c
 php	tool	composer test	php -l src/{Module}.php
 prolog	manual	cd test && swipl -q --on-error=status -g "use_module(library(plunit)), expand_file_name('*_test.pl', A), expand_file_name('*_tests.pl', B), append(A, B, Fs), (Fs = [] -> (expand_file_name('*.pl', Other), (Other = [] -> (consult('../src/{module}.pl'), writeln('Scaffold: no tests configured')); (format(user_error, 'No recognized Prolog test files~n', []), fail))); (maplist(consult, Fs), run_tests(all, [summary(S)]), get_dict(passed, S, P), get_dict(failed, S, F), get_dict(timeout, S, T), get_dict(blocked, S, BCount), format('Prolog tests: ~d passed, ~d failed, ~d timed out, ~d blocked~n', [P, F, T, BCount]), (P > 0, F =:= 0, T =:= 0 -> true; (P =:= 0, F =:= 0, T =:= 0 -> (format(user_error, 'No Prolog test cases executed~n', []), fail); fail)))), halt" -t 'halt(1)'	-
-purescript	tool	spago test	-
+purescript	tool	bash {root}/scripts/data/purescript_test.sh	-
 python	tool	pytest	python3 -m compileall -q src
 r	manual	make test	Rscript -e 'invisible(lapply(list.files("R", full.names=TRUE), parse))'
 racket	tool	raco test -x .	-

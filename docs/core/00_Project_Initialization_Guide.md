@@ -120,7 +120,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **perl** | ✍️ `mkdir -p lib test` | — | ✅ TAP::Harness (comando abajo / command below) |
 | **php** | ✍️ `mkdir -p src test` + `composer init -n` + `composer require --dev --no-update phpunit/phpunit` | `composer.json`, `phpunit.xml`, `.gitignore` | ✅ `composer test` |
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ SWI-Prolog + PlUnit (comando abajo / command below) |
-| **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `spago test` |
+| **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ conteo Test.Unit con rechazo de cero casos |
 | **python** | ⛓️ ✅ `uv init --lib .` | `pyproject.toml`, `src/{module}/`, `conftest.py`, `tests/` | ✅ `pytest` |
 | **r** | ✅ `mkdir -p R tests/testthat` + `Makefile` | `Makefile` | ✅ `make test` |
 | **racket** | ⛓️ 🔧 `raco new library {module}` | `info.rkt`, `{module}.rkt` (con guiones), `tests/`, `Makefile` | ✅ `raco test -x .` |
@@ -168,7 +168,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **nim** | `nimble init -y` → retirar solo muestras exactas → task `test` idempotente | Conservar fuentes propias y añadir o conservar la suite; ejecutar los archivos de `tests/` directamente y rechazar ausencia o cero casos |
 | **ocaml** | `dune init proj {module}` | El código va en `lib/` y la suite en `test/`: se usa el layout generado tal cual |
 | **python** | `uv init --lib .` | Borrar el `.git` que crea `uv`, añadir `conftest.py` y `tests/` con configuración de pytest, y declarar pytest (`uv add --dev pytest --no-sync`) |
-| **purescript** | `spago init` → crear `src/{Module}.purs` y `test/Test/Main.purs` mínimo si faltan → retirar o sustituir solo las muestras verificadas de `Main.purs` | Conservar código y runners propios; completar `spago.yaml` y `test-unit` según la suite y revisar `.gitignore`. El runner vacío devuelve éxito sin validar una suite / The empty runner succeeds without validating a suite |
+| **purescript** | `spago init` → crear `src/{Module}.purs` y `test/Test/Main.purs` mínimo si faltan → retirar o sustituir solo las muestras verificadas de `Main.purs` | Conservar código y runners propios; completar `spago.yaml` y `test-unit` según la suite y revisar `.gitignore`. `purescript_test.sh` rechaza runners sin casos / The empty runner is rejected |
 | **racket** | `raco new library {module}` → render portátil (`mv` + `sed -i`, con el código renombrado a `{module}.rkt` con guiones) → `rm -rf .github pull_request_template.md render-template.sh profile` | Las suites requieren la librería por ruta relativa (`"../../{module}-lib/{module}.rkt"`, con guiones) y el runner es `raco test -x .`, sin enlazar paquetes |
 | **rescript** | `mkdir -p src test` → `npm init -y` → `npm pkg set` | El manifiesto y sus devDependencies se declaran con `npm pkg set`; los baja `npm install` |
 | **ruby** | `mkdir -p src test` → `bundle init` → `bundle install` | `rspec` en el `Gemfile` y `.rspec` |

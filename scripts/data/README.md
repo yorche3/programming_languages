@@ -216,11 +216,11 @@ directo que rechaza suites ausentes o sin casos.
 **EN:** Nim uses conservative removal for exact samples and a direct runner
 that rejects missing suites or runs with no executed cases.
 
-**ES:** El runner mínimo de PureScript puede devolver éxito sin ejecutar casos;
-completar y verificar la suite sigue siendo necesario.
+**ES:** `purescript_test.sh` rechaza runners sin `All N tests passed!`,
+incluidos los runners vacíos que antes daban falso verde.
 
-**EN:** The minimal PureScript runner can succeed without executing cases;
-the suite still needs to be completed and verified.
+**EN:** `purescript_test.sh` rejects runners without `All N tests passed!`,
+including empty runners that previously produced a false green.
 
 **ES:** V puede devolver éxito con cero casos; `v_test.sh` exige un resumen con
 al menos un caso aprobado.

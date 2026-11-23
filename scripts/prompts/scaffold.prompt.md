@@ -136,8 +136,9 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
   con la muestra reconocida, revísalo sin eliminar código propio.
 - En V, `v test .` puede devolver éxito con `0 total`; `v_test.sh` exige al menos
   un caso aprobado en el resumen y conserva el layout generado.
-- En PureScript, el runner mínimo puede devolver éxito sin ejecutar casos;
-  no lo presentes como una suite validada.
+- En PureScript, el runner mínimo puede devolver éxito sin ejecutar casos.
+  `purescript_test.sh` suma los resúmenes `All N tests passed!` y rechaza cero
+  casos; no lo presentes como suite validada.
 - En Rexx, el selector actual no admite varias suites y ooRexxUnit puede
   informar fallos aunque el proceso termine con código 0. `rexx_test.sh` ejecuta
   todas las suites `test/*.rexx` y valida los contadores; no tomes código 0 como

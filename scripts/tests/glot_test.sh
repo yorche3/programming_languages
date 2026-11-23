@@ -409,6 +409,7 @@ EOF
     cp -- "$TESTS_DIR/../data/ballerina_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/rexx_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/swift_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/purescript_test.sh" "$SANDBOX/scripts/data/"
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
@@ -2139,6 +2140,24 @@ glot_run_sandbox scaffold purescript algorithms/searching
 assert_eq 'scaffold PureScript sin manifiesto: bloquea' '4' "$rc_last"
 assert_contains 'scaffold PureScript sin manifiesto: diagnóstico' 'missing regular Spago manifest' "$err"
 assert_eq 'scaffold PureScript sin manifiesto: no crea fuentes' 'no' "$([[ -e "$PS_MISSING/src" ]] && echo yes || echo no)"
+
+PS_RUN="$SANDBOX/purescript/core/foundations/unit_test/calculator"
+mkdir -p "$PS_RUN/test/Test" "$PS_RUN/bin"
+printf 'package: {\\n  name: calculator\\n}' >"$PS_RUN/spago.yaml"
+printf 'module Test.Main where\\n' >"$PS_RUN/test/Test/Main.purs"
+cat >"$PS_RUN/bin/spago" <<'EOF'
+#!/usr/bin/env bash
+printf 'Running tests for package: calculator\n'
+exit 0
+EOF
+chmod +x "$PS_RUN/bin/spago"
+cp -- "$DATA_DIR/purescript_test.sh" "$PS_RUN/purescript_test.sh"
+ps_rc=0
+(
+    cd "$PS_RUN"
+    PATH="$PWD/bin:$PATH" bash ./purescript_test.sh
+) >/dev/null 2>&1 || ps_rc=$?
+assert_eq 'test PureScript cero casos: rechaza' '1' "$ps_rc"
 
 # Haskell: los módulos locales importados deben declararse en cada target Cabal.
 if command -v cabal >/dev/null 2>&1 && command -v ghc >/dev/null 2>&1; then

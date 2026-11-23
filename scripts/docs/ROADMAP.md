@@ -497,15 +497,15 @@ warning-free gate still needs resolution before automating this dependency.
 --offline --strict` terminó con éxito y cero warnings al ejecutar el runner
 mínimo sin casos. Intentos de hacer fallar ese runner con `Effect.Exception`
 y `Partial.Unsafe` no compilaron con las dependencias del proyecto nativo.
-Se advierte el falso verde; queda pendiente una protección fiable que respete
-el manifiesto y los runners propios.
+Se integró `purescript_test.sh`: suma `All N tests passed!` de todas las suites,
+rechaza cero casos y propaga fallos o resultados sin resumen.
 
 **EN — Empty runner:** with Spago 1.0.4 and PureScript 0.15.16, `spago test
 --offline --strict` succeeded with zero warnings when running the case-free
 minimal runner. Attempts to fail it using `Effect.Exception` and
 `Partial.Unsafe` did not compile with the native project's dependencies.
-The false green is flagged; a reliable safeguard preserving the manifest and
-authored runners remains pending.
+The false green is guarded by `purescript_test.sh`: it sums `All N tests passed!`
+across suites and rejects zero cases or runs with missing summaries.
 
 - **ES — V (2026-11-22):** `v init --lib` creó `fixture.v`, `tests/` y
 `v.mod` con `0.0.0`; conservó el layout nativo y produjo un test aprobado.
