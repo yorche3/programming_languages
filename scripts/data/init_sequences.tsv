@@ -142,4 +142,4 @@ v	scaffold	3	module	run	sed -i "s/version: '0.0.0'/version: '0.1.0'/" v.mod	-	-	
 vala	new	1	module	run	meson init --language vala --type library --name {module}	-	-	-
 vala	scaffold	1	module	run	mkdir -p src test	-	-	decidir el build con meson
 zig	new	1	module	run	zig init	-	-	-
-zig	scaffold	1	module	run	rm -f src/main.zig && touch .gitignore	-	-	-
+zig	scaffold	1	module	run	test -e .gitignore || (set -C; cat {root}/scripts/data/scaffold_templates/zig.gitignore > .gitignore)	-	-	conservar src/main.zig hasta adaptar build.zig: el test target generado por zig init usa ese archivo como raíz y zig build test falla si se retira antes

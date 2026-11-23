@@ -540,6 +540,29 @@ dotnet test Sample.slnx: 1 passed, 0 failed
 git diff --check
 ```
 
+## 2.1.0-dev — 2026-11-23 (scaffold Zig / Zig scaffold)
+
+**ES:** `zig init` 0.17.1 genera `src/main.zig`, que también es la raíz del
+test target en su `build.zig`: retirarlo antes de adaptar el target hace fallar
+`zig build test` (`unable to load "main.zig"`). `scaffold` deja de borrarlo,
+añade `.gitignore` con las cachés y salidas Zig, y avisa que `build.zig` y la
+suite deben adaptarse antes de retirar el `main`. El laboratorio integrado
+ejecutó `zig build test --summary all` (3/3 tests) y `zig build` después del
+scaffold.
+
+**EN:** `zig init` 0.17.1 generates `src/main.zig`, which is also the test
+target's root in its `build.zig`; removing it before adapting that target makes
+`zig build test` fail (`unable to load "main.zig"`). `scaffold` no longer
+deletes it, adds `.gitignore` for Zig caches and outputs, and warns that
+`build.zig` and the suite must be adapted before removing `main`. The isolated
+lab ran `zig build test --summary all` (3/3 tests) and `zig build` after
+scaffolding.
+
+```text
+Focused C# + Zig scaffold regressions: 24 passed, 0 failed
+Zig 0.17.1 scaffold integration: 3/3 tests passed; build passed
+```
+
 ## 2.1.0-dev — 2026-11-02 (rutas y perfiles / routes and profiles)
 
 **ES:** Tres rutas explícitas, perfiles independientes del modelo, Sonnet para

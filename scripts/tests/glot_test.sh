@@ -2204,6 +2204,39 @@ assert_eq 'scaffold C#: conserva muestra symlink' 'yes' \
 assert_eq 'scaffold C#: conserva destino del symlink' \
     'namespace NaiveSort.Tests;' "$(head -n 1 "$CSHARP_SCAFFOLD/test/NaiveSort.Tests/UnitTest1.cs")"
 
+# Zig: preserve main.zig because zig init's generated test target depends on it.
+printf '[submodule "zig"]\n\tpath = zig\n\turl = ../remote/zig.git\n' >>"$SANDBOX/.gitmodules"
+ZIG_SCAFFOLD="$SANDBOX/zig/core/algorithms/naive_sort"
+mkdir -p "$ZIG_SCAFFOLD/src"
+printf 'generated main\n' >"$ZIG_SCAFFOLD/src/main.zig"
+glot_run_sandbox -n scaffold zig algorithms/naive_sort
+assert_eq 'scaffold Zig: dry-run' '0' "$rc_last"
+assert_contains 'scaffold Zig: dry-run muestra plantilla ignore' 'zig.gitignore' "$out"
+assert_eq 'scaffold Zig: dry-run conserva main' 'generated main' \
+    "$(cat "$ZIG_SCAFFOLD/src/main.zig")"
+glot_run_sandbox scaffold zig algorithms/naive_sort
+assert_eq 'scaffold Zig: código' '0' "$rc_last"
+assert_eq 'scaffold Zig: conserva main' 'generated main' \
+    "$(cat "$ZIG_SCAFFOLD/src/main.zig")"
+assert_eq 'scaffold Zig: instala plantilla ignore' '0' \
+    "$(cmp -s "$ZIG_SCAFFOLD/.gitignore" "$TESTS_DIR/../data/scaffold_templates/zig.gitignore"; echo $?)"
+ZIG_IGNORE="$WORK_DIR/zig-ignore"
+mkdir -p -- "$ZIG_IGNORE"
+cp -- "$ZIG_SCAFFOLD/.gitignore" "$ZIG_IGNORE/.gitignore"
+git -C "$ZIG_IGNORE" init -q
+assert_eq 'scaffold Zig: excluye cache' '1' \
+    "$(git -C "$ZIG_IGNORE" check-ignore .zig-cache/o/test | wc -l | tr -d ' ')"
+assert_eq 'scaffold Zig: excluye salida' '1' \
+    "$(git -C "$ZIG_IGNORE" check-ignore zig-out/lib.a | wc -l | tr -d ' ')"
+printf 'author main\n' >"$ZIG_SCAFFOLD/src/main.zig"
+printf 'author ignore\n' >"$ZIG_SCAFFOLD/.gitignore"
+glot_run_sandbox scaffold zig algorithms/naive_sort
+assert_eq 'scaffold Zig: rerun preserva main' 'author main' \
+    "$(cat "$ZIG_SCAFFOLD/src/main.zig")"
+assert_eq 'scaffold Zig: rerun preserva ignore' 'author ignore' \
+    "$(cat "$ZIG_SCAFFOLD/.gitignore")"
+git -C "$SANDBOX" checkout -q -- .gitmodules
+
 mkdir -p "$PSB/src"
 printf 'author code\n' >"$PSB/src/Main.purs"
 printf 'author manifest\n' >"$PSB/spago.yaml"

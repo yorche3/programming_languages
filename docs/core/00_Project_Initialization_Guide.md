@@ -136,7 +136,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **typescript** | ✅ `npm init -y` | `package.json`, `tsconfig.json`, `jest.config.cjs` | ✅ informe Jest con rechazo de cero casos |
 | **v** | ⛓️ ✅ `v init --lib` (no interactivo; quitar el `.git` anidado y fijar la versión) | `v.mod`, `{module}.v`, `test/` | ✅ runner directo con resumen y rechazo de cero casos |
 | **vala** | ⛓️ 🔧 `meson init --language vala --type library --name {module}` | `meson.build`, `src/`, `test/` | ✅ `valac src/{module}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{module}-tests && /tmp/{module}-tests` |
-| **zig** | ✅ `zig init` | `build.zig` | ✅ `zig build test` |
+| **zig** | ✅ `zig init` | `build.zig`, `build.zig.zon`, `src/main.zig`, `src/root.zig`; `.gitignore` añadido por scaffold | ✅ `zig build test` |
 
 ## 🔗 Secuencias de varios pasos / Multi-step sequences
 
@@ -186,10 +186,11 @@ not the test suite.
 | **ruby** | `mkdir -p src test` → `bundle init` → `bundle install` | `rspec` en el `Gemfile` y `.rspec` |
 | **v** | `v init --lib` (no interactivo) → conservar layout generado y verificar el resumen de `v test .` | Conservar `tests/`, fuentes y gitfile; fijar `version: '0.1.0'` en `v.mod`. El runner rechaza cero casos y no renombra carpetas sin actualizar imports |
 | **vala** | `meson init --language vala --type library --name {module}` | Completar `src/` y `test/` y decidir el build con meson |
+| **zig** | `zig init` → añadir `.gitignore` para `.zig-cache/`, `zig-cache/` y `zig-out/`; conservar `src/main.zig` | El `test` target generado usa `src/main.zig` como raíz. Adaptar `build.zig` a biblioteca y al archivo de suite antes de retirarlo; borrarlo antes hace fallar `zig build test` |
 
-> **ES:** Si el generador crea un `main` o un `app` de ejemplo (`dub init` en D, `zig init`; `cargo init --lib` genera solo la librería), debe retirarse cuando el módulo sea una biblioteca: un `main` propio rompe el runner de tests. En D solo se retira automáticamente la muestra verificada; el contenido diferente se conserva para revisión.
+> **ES:** Si un generador crea un `main` o un `app` de ejemplo, no se retira a ciegas: en D solo se elimina la muestra verificada; en Zig `src/main.zig` se conserva hasta que `build.zig` use la suite de la biblioteca como raíz del test. `cargo init --lib` genera solo la librería.
 >
-> **EN:** If the generator creates an example main or app (`dub init` in D, `zig init`; `cargo init --lib` generates only the library), remove it for a library: a main of your own breaks the test runner. For D only the verified sample is removed automatically; different content is preserved for review.
+> **EN:** Do not blindly remove a generated `main` or app: D removes only its verified sample; Zig keeps `src/main.zig` until `build.zig` uses the library suite as the test root. `cargo init --lib` generates only the library.
 
 ## 🔨 Generación manual (lib) / Manual generation (lib)
 
