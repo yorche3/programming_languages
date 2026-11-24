@@ -21,18 +21,35 @@ Verification is recorded in [`VERSIONS.md`](VERSIONS.md).
 **ES:** La siguiente entrega es **v2.1.0**, con especificación acordada en
 este roadmap: `--delegate antigravity|copilot|open-router`,
 configuración BYOK por ruta, overrides autorizados por encargo y revisión del
-scaffold de los 50 lenguajes. El primer bloque de scaffold está implementado en
-**2.1.0-dev**; rutas/perfiles y correcciones de nueve lenguajes están
-verificados. La revisión/corrección de los otros 41 scaffolds sigue pendiente.
+scaffold de los 50 lenguajes. En **2.1.0** están verificados las rutas,
+los perfiles, los runners de falsos verdes y los bloques de scaffold medidos;
+los casos no medidos conservan su estado explícito en [`VERSIONS.md`](VERSIONS.md).
 v2.0.3 quedó archivada como snapshot exacto antes de editar código.
 
 **EN:** The next delivery is **v2.1.0**, specified in
 this roadmap: three explicit delegate routes, route-specific BYOK
 configuration, authorized per-request overrides and a 50-language scaffold
-review. The first scaffold block is implemented in **2.1.0-dev**; routing and
-profiles and nine scaffold corrections are verified; the remaining
-41-language review/corrections are pending.
+review. Routing, profiles and the first nine scaffold corrections are verified
+in **2.1.0**; later progress and explicit unmeasured cases are recorded in
+[`VERSIONS.md`](VERSIONS.md). The release is closed without implying native
+coverage that was not measured.
 v2.0.3 was archived before code edits.
+
+**ES:** La pasada en curso corrigió los esqueletos Java, JavaScript, PHP, Ruby,
+ReScript y TypeScript: POM/clase Maven ejecutables, configuración npm/Jest,
+configuración PHPUnit/Composer, declaración de RSpec y configuraciones de
+ReScript/Jest y TypeScript/Jest. Julia evita el falso verde con un runner vacío;
+C++ genera configuración Bazel funcional, y PHPUnit y el runner R fallan sin
+casos aprobados.
+La cobertura de los demás lenguajes sigue abierta.
+
+**EN:** The current pass corrected the Java, JavaScript, PHP, Ruby, ReScript and
+TypeScript skeletons: a buildable Maven POM/class, npm/Jest configuration,
+Composer/PHPUnit configuration, RSpec declaration, and ReScript/Jest and
+TypeScript/Jest configuration. Julia now prevents a false green from an empty
+runner; C++ generates functional Bazel configuration and PHPUnit fails on an
+empty suite; the R runner also fails when no test cases pass. Coverage of the
+remaining languages is still open.
 
 ---
 
@@ -70,20 +87,34 @@ every CLI surface. Review all 50 scaffolds with native checks or explicit pendin
 status, protect reruns and authored contents, and keep academic modules and
 manual audits outside this release.
 
-### Fix pendiente: Git anidado del generador / Pending fix: generator-created nested Git
+### Fix: Git anidado del generador / Fix: generator-created nested Git
 
 **ES:** Reportado el 2026-11-08 en Crystal. Al inicializar un módulo,
 `crystal init lib` puede crear un `.git/` dentro de su carpeta. Desde allí,
 `glot` detecta esa carpeta como raíz y busca otro estado: `get lang` pierde
 la clave y `scaffold` informa que faltan datos del sprint aunque el estado
 del monorepo esté completo. El autor tuvo que retirar la carpeta manualmente;
-ni `scaffold` ni su delegado resolvieron el caso. La corrección queda pendiente
-para el siguiente fix del bloque de scaffold de v2.1.0.
+ni `scaffold` ni su delegado resolvieron el caso entonces. El reporte motivó
+el fix de `new` y `scaffold` descrito abajo.
 
 **EN:** Reported on 2026-11-08 for Crystal. A generated module-local `.git/`
 shadows the enclosing submodule/monorepo, selecting a different state file.
 The author had to remove it manually; neither scaffold nor its delegate
-handled it. This remains pending for the next v2.1.0 scaffold fix.
+handled it at the time. This report prompted the `new`/`scaffold` fix below.
+
+**ES:** Fix aplicado a `new` y `scaffold`: ambos inspeccionan y retiran Git
+solo cuando su estructura vacía es reconocible y segura; desde un módulo con
+Git anidado se resuelve el estado del superproyecto. `scaffold --dry-run`
+informa la limpieza prevista sin modificarlo. Los Git ambiguos, con commits,
+remotos o configuración propia permanecen protegidos; las retiradas
+incondicionales del catálogo se eliminaron.
+
+**EN:** Fix applied to `new` and `scaffold`: both inspect and remove Git only
+when its empty structure is recognizable and safe; a module-local nested Git
+resolves the enclosing superproject's state. `scaffold --dry-run` reports the
+planned cleanup without changing it. Ambiguous Git, repositories with commits,
+remotes or authored configuration remain protected; unconditional catalog
+removals were removed.
 
 Criterios de aceptación / Acceptance criteria:
 
@@ -93,9 +124,10 @@ Criterios de aceptación / Acceptance criteria:
   / Resolve the enclosing monorepo and existing state before scaffold,
   without another `use`, manual root override or duplicate state.
 - `glot scaffold` retira automáticamente el `.git/` generado dentro del
-  módulo; es una operación de tooling, no una tarea del delegate ni del autor.
-  Donde el inicializador admita una opción nativa comprobada, evitar crearlo
-  en `new`, pero también resolver módulos ya generados.
+  módulo, preserva los casos ambiguos y no modifica Git en `--dry-run`; es una
+  operación de tooling, no una tarea del delegate ni del autor. Donde el
+  inicializador admita una opción nativa comprobada, evitar crearlo en `new`,
+  pero también resolver módulos ya generados.
   / Scaffold removes generator-created module-local Git itself; use a verified
   native opt-out during initialization where available, and handle existing modules.
 - Limitar la retirada al directorio `.git/` del módulo reconocido; preservar
@@ -114,7 +146,7 @@ Criterios de aceptación / Acceptance criteria:
   / Test state identity, actual cleanup, reruns, non-mutating dry-run and
   authored Git protection across Crystal and other affected generators.
 
-### Fix pendiente: scaffold incompleto y aviso ausente / Pending fix: incomplete scaffold and missing handoff
+### Fix cerrado: scaffold incompleto y aviso ausente / Closed fix: incomplete scaffold and missing handoff
 
 **ES:** Reportado el 2026-11-09 en D. `glot scaffold` imprimió
 `rm -f source/app.d && rm -rf .git && touch .gitignore`, anunció garantizar
@@ -132,7 +164,7 @@ layout/file creation nor a delegate completion note. Verify required artifacts
 against the guide and homologated bases rather than treating printed commands
 as evidence of a complete scaffold.
 
-Criterios de aceptación / Acceptance criteria:
+Cierre verificable / Verified closure:
 
 - Revisar D y los demás lenguajes: ejecutar desde `glot scaffold` todos los
   `mkdir`, `touch`, configuraciones y runners repetibles que correspondan a
@@ -155,6 +187,761 @@ Criterios de aceptación / Acceptance criteria:
   rerun sin pérdida de contenido y dry-run sin modificaciones.
   / Test required artifacts, hidden files, handoff messages, visible failures,
   non-destructive reruns and non-mutating dry-run.
+
+**ES — Cierre:** los criterios están cubiertos por las pruebas de D en
+`scripts/tests/glot_test.sh`: `.gitignore`, fuente, `test/`, configuración
+unittest, rerun, contenido propio, symlinks y salida nativa sin tests/fallida.
+
+**EN — Closure:** the criteria are covered by the D tests in
+`scripts/tests/glot_test.sh`: `.gitignore`, source, `test/`, unittest
+configuration, rerun, authored content, symlinks and native empty/failing runs.
+
+**ES — Hallazgo D (2026-11-22):** `dub describe --build=unittest
+--data=source-files --data-list --skip-registry=all` en la base homologada
+`data_structures_basics` lista solo `source/data_structures_basics.d`, no su
+suite en `test/`. El scaffold en desarrollo configura `test/` para el
+manifiesto generado reconocido y comprueba un test fallido; los módulos D
+existentes y los manifiestos distintos aún requieren revisión y corrección.
+
+**EN — D finding (2026-11-22):** `dub describe` for the homologated base
+lists its production source but not its suite in `test/`. The development
+scaffold configures `test/` for the recognized generated manifest and checks
+a failing test; existing D modules and other manifests still need review.
+
+**ES — Hallazgo Forth (2026-11-22):** al ejecutar una aserción fallida con
+`test.forth` de la base `data_structures_basics`, el reporte indicó un fallo
+pero Gforth devolvió código 0. El scaffold en desarrollo incorpora un
+`test-report` que devuelve 1 ante fallos; los frameworks ya existentes
+requieren revisión por separado.
+
+**EN — Forth finding (2026-11-22):** a failing assertion using the homologated
+base's `test.forth` was reported but Gforth exited 0. The development
+scaffold's `test-report` exits 1 on failures; existing frameworks need a
+separate review.
+
+**ES — Hallazgo Grain (2026-11-22):** una prueba aislada con el framework
+de `data_structures_basics` reportó un caso fallido pero `grain run` devolvió
+0: `printSummary` devuelve una bandera que el runner no comprueba. El
+scaffold incorpora `TestStatus.finish` para convertir la bandera en código de
+salida y actualiza el runner vacío anterior reconocido; el framework aún debe
+adaptarse al dominio. Los módulos existentes requieren revisión por separado.
+
+**EN — Grain finding (2026-11-22):** an isolated failing case using the
+homologated framework was reported but `grain run` exited 0: the runner
+ignores the flag returned by `printSummary`. Scaffold now provides
+`TestStatus.finish` to translate that flag into an exit status and upgrades
+the recognized previous empty runner. Framework adaptation and review of
+existing modules remain open.
+
+**ES — Prolog (2026-11-22):** las bases usan `consult/1` y no declaran un
+módulo con exportaciones vacías; el scaffold preserva fuentes o crea una vacía.
+El comando en desarrollo recoge todas las suites `*_test.pl` y `*_tests.pl`,
+informa scaffold vacío y rechaza suites sin casos ejecutados. Validado con las
+tres suites de `numbers` y con `calculator`, cuyo nombre difiere del id.
+
+**EN — Prolog (2026-11-22):** the bases use `consult/1` without an empty-export
+module declaration; scaffold preserves or creates an empty source. The
+development command collects all `*_test.pl` and `*_tests.pl` suites, reports
+an empty scaffold and rejects suites with no executed cases. Verified against
+all three `numbers` suites and `calculator`, whose name differs from its id.
+
+**ES — Hallazgo Perl (2026-11-22):** en un laboratorio aislado,
+`prove --ext=.pl` devolvió código 0 y `Result: NOTESTS` tanto con el
+directorio de pruebas vacío como con una suite que solo declara
+`plan skip_all`. El comando en desarrollo usa la selección de archivos de
+prove y su harness TAP, pero falla si no hay suites o si todos los casos se
+omiten. Verificado con las bases `numbers` y `data_structures_basics`; el
+scaffold vacío requiere una suite antes de validar.
+
+**EN — Perl finding (2026-11-22):** in an isolated laboratory, `prove
+--ext=.pl` returned exit code 0 and `Result: NOTESTS` both for an empty test
+directory and for a suite with only `plan skip_all`. The development command
+uses prove's file selection and TAP harness but fails when there are no suites
+or all cases are skipped. Verified with the `numbers` and
+`data_structures_basics` bases; an empty scaffold needs a suite before validation.
+
+**ES — Raku (2026-11-22):** el scaffold preserva la fuente y el `.gitignore`
+existentes, rechaza rutas simbólicas y crea patrones de precompilación cuando
+falta el ignore. En `numbers`, `prove6` ejecutó tres suites. En un directorio
+vacío devolvió código 0 con `Result: NOTESTS`. Con dos casos omitidos también
+devolvió 0 y `Result: PASS`. El comando en desarrollo usa el descubrimiento y
+harness de prove6 y rechaza suites ausentes, ejecuciones incompletas y casos
+todos omitidos. Se verificaron `numbers` y `data_structures_basics`.
+
+**EN — Raku (2026-11-22):** scaffold preserves existing source and ignore files,
+rejects symbolic paths and creates precompilation patterns when the ignore file
+is missing. In `numbers`, `prove6` ran three suites. For an empty directory it
+returned exit code 0 with `Result: NOTESTS`. With two skipped cases it also
+returned 0 and `Result: PASS`. The development command uses prove6's discovery
+and harness but rejects missing suites, incomplete runs and entirely skipped
+cases. Verified against `numbers` and `data_structures_basics`.
+
+**ES — Rexx (2026-11-22):** el scaffold preserva fuentes y rechaza rutas
+simbólicas. `rexx_test.sh` ejecuta todas las suites `test/*.rexx` y valida
+los contadores impresos por ooRexxUnit, rechazando fallos, errores y ejecuciones
+vacías. `glot test` antes rechazaba las dos suites de `numbers` como ambiguas;
+una prueba aislada de ooRexxUnit informó una
+aserción fallida y devolvió 0. En esa prueba, `exit (aResult~failureCount +
+aResult~errorCount > 0)` devolvió 1. Falta un mecanismo que ejecute todas las
+suites y propague fallos sin modificar ni ocultar las suites existentes.
+En una prueba adicional, `.Package~new` ejecutó el cuerpo principal de la
+suite al cargarla; descubrir clases y ejecutarlas otra vez duplicaría los
+tests y sus posibles efectos. Un prototipo con `CALL` y una subclase instalada
+mediante `ooRexxUnit.default.TestResult.Class` capturó los resultados sin
+repetir las suites homologadas de `numbers` y `data_structures_basics`;
+detectó una aserción fallida, una suite vacía y `exit 7`. No es una solución:
+una suite sintética ejecutó un test aprobado con el resultado predeterminado
+y otro fallido con `.TestResult~new` explícito; el prototipo devolvió 0. Es
+necesario detectar también resultados proporcionados explícitamente y cambios
+en la configuración sin generar falsos verdes. Un segundo prototipo envolvió
+los métodos de ejecución de `TestSuite` y `TestCase`: detectó ese fallo con
+resultado explícito y rechazó una suite vacía. Todavía necesita garantizar
+que los overrides de `execute` no esquiven la instrumentación y que sus
+errores no se pierdan al retornar de `CALL`; no está integrado. Además, una
+prueba con `exit 0` dentro de un método de test devolvió éxito: ooRexxUnit
+interpretó esa salida como retorno del método, incluso con los wrappers.
+
+**EN — Rexx (2026-11-22):** scaffold preserves sources and rejects symbolic
+paths. `rexx_test.sh` runs all `test/*.rexx` suites and validates ooRexxUnit
+counters, rejecting failures, errors and empty runs. `glot test` previously
+rejected the two `numbers` suites as ambiguous; an isolated ooRexxUnit assertion failure returned 0.
+In that test, exiting with the combined failure and error count returned 1.
+Running every suite and propagating failures without modifying or hiding
+existing suites still needs a solution.
+An additional check showed that `.Package~new` executes the suite's main body
+on load, so discovering and executing its classes afterward would run tests
+and their potential side effects twice. A prototype using `CALL` and a
+subclass registered as `ooRexxUnit.default.TestResult.Class` captured results
+without repeating the homologated `numbers` and `data_structures_basics`
+suites; it detected an assertion failure, an empty suite and `exit 7`. It is not
+a solution: a synthetic suite ran a passing test with the default result and
+a failing one with an explicit `.TestResult~new`; the prototype returned 0.
+Explicit results and configuration changes must also be detected without false
+success. A second prototype wrapped `TestSuite` and `TestCase` execution:
+it caught the explicit-result failure and rejected an empty suite. It still
+needs to ensure `execute` overrides cannot evade instrumentation and that
+errors are not lost on return from `CALL`; it is not integrated. A further
+test with `exit 0` inside a test method returned success: ooRexxUnit treated
+that exit as a method return even with the wrappers.
+
+**ES — Ballerina (2026-11-23):** en un proyecto aislado, `new` y `scaffold`
+produjeron la biblioteca vacía y `tests/lib_test.bal` de la base homologada.
+Con Ballerina 2201.13.4, `bal test --offline --test-report` devolvió éxito
+sin casos y también con un test deshabilitado. Los informes JSON registraron
+cero casos en ambos escenarios y un caso aprobado en una prueba positiva;
+un fallo de aserción devolvió código no cero. El runner integrado
+`ballerina_test.sh` dirige cada ejecución a un subdirectorio exclusivo de
+`target/report`, valida sus contadores, rechaza cero casos y fallos y conserva
+la salida nativa. El harness comprueba que un informe anterior no puede sustituir
+al ausente en la ejecución actual y rechaza informes JSON incompletos.
+En un paquete con dos módulos, uno sin casos y otro con un caso aprobado,
+el informe agregó ambos resultados y el comando tuvo éxito. Un parser
+prototipo escrito en Ballerina distinguió los informes vacío y aprobado.
+También se midió un workspace con dos paquetes y casos aprobados en ambos:
+`bal test --offline --test-report --test-report-dir=...` generó un único JSON
+agregado con 6/6 aprobados al pasar por el runner integrado. Sigue pendiente
+probar otros layouts de workspace y variantes de generación del informe.
+
+**EN — Ballerina (2026-11-23):** in an isolated project, `new` and `scaffold`
+produced the empty library and `tests/lib_test.bal` used by the homologated
+base. With Ballerina 2201.13.4, `bal test --offline --test-report` succeeded
+with no cases and also with a disabled test. JSON reports recorded zero cases
+in both scenarios and one passing case in a positive test; an assertion failure
+returned nonzero. The integrated `ballerina_test.sh` directs each run to a
+dedicated subdirectory under `target/report`, validates its counters, rejects
+zero cases and failures, and preserves native output. The harness verifies that
+an earlier report cannot replace a missing report from the current run and
+rejects incomplete JSON reports.
+In a two-module package with no cases in one module and a passing case in the
+other, the report aggregated both results and the command succeeded. A
+prototype Ballerina parser distinguished empty and passing reports. A workspace
+with two packages and passing cases in both was also measured:
+`bal test --offline --test-report --test-report-dir=...` generated one
+aggregate JSON report with 6/6 passing through the integrated runner. Other
+workspace layouts and report-generation variants still need testing.
+
+**ES — Elixir:** Mix 1.20.4 genera una fuente `hello/0` y una suite de
+ejemplo que pasa, no la suite del contrato. El scaffold retira la fuente y
+sustituye el test por un sentinel fallido solo cuando ambos archivos y
+`test_helper.exs` coinciden con los ejemplos verificados y no existen otros
+archivos o enlaces en `lib/` o `test/`. Conserva variantes y contenido propio.
+`mix test` devuelve éxito tanto sin tests como con todos omitidos; el runner
+en desarrollo usa un callback ExUnit, exige al menos un caso aprobado y
+rechaza resultados ausentes, múltiples ejecuciones o salidas prematuras.
+Acepta mezclas e informa omitidos y excluidos sin sustituir formatters.
+También falta verificar otras versiones de Mix.
+
+**EN — Elixir:** Mix 1.20.4 generates a `hello/0` source and a passing
+example suite, not the contract suite. Scaffold removes the source and replaces
+the test with a failing sentinel only when both files and `test_helper.exs`
+match the verified examples and `lib/` and `test/` contain no other files or
+links. Authored content and other variants are preserved. `mix test` succeeds
+with no tests or all tests skipped; the development runner
+uses an ExUnit callback, requires at least one passing case and rejects missing
+results, multiple runs and premature exits. It accepts mixed results and reports
+skipped and excluded cases without replacing formatters. Other Mix versions
+remain unverified.
+
+**ES — Crystal:** Crystal 1.20.2 genera un ejemplo deliberadamente fallido;
+sin specs o con todos pendientes, `crystal spec` devuelve éxito. El runner
+valida un informe JUnit temporal con Python 3 y exige ejemplos aprobados.
+Las dos bases pasaron en copias aisladas con 4 y 10 ejemplos. Otros formatos
+y versiones permanecen pendientes.
+
+**EN — Crystal:** Crystal 1.20.2 generates a deliberately failing example;
+without specs or when all are pending, `crystal spec` succeeds. The runner
+validates a temporary JUnit report using Python 3 and requires passing
+examples. Both references passed in isolated copies with 4 and 10 examples.
+Other formats and versions remain unverified.
+
+**ES — OCaml:** Dune 3.24.2 generó un test vacío que devuelve éxito.
+El scaffold configura Alcotest y añade un sentinel fallido solo para la
+plantilla exacta sin otros archivos en `test/`. El runner fuerza la ejecución
+y rechaza resúmenes ausentes o con cero casos, incluso en una mezcla con otra
+suite aprobada. Las bases pasaron en copias aisladas con 4 y 15 casos.
+Limitación pendiente: un ejecutable silencioso puede quedar oculto si otro
+emite un resumen válido; verificar todos los targets y otras versiones.
+
+**EN — OCaml:** Dune 3.24.2 generated an empty test that succeeds. Scaffold
+configures Alcotest and adds a failing sentinel only for the exact template
+without other files in `test/`. The runner forces execution and rejects missing
+or zero-case summaries, even alongside a passing suite. The references passed
+in isolated copies with 4 and 15 cases. Open limitation: a silent executable
+can be hidden by another valid summary; check all targets and other versions.
+
+**ES — Vala:** con Meson 1.3.2 y Vala 0.56.16, el helper mueve las muestras
+exactas generadas a `src/` y `test/`, actualiza las rutas y reemplaza el test
+por un sentinel GLib.Test fallido. `vala_test.sh` compila cada suite y exige
+TAP real; rechaza la demo, cero casos, omitidos y fallos. Las bases homologadas
+`data_structures_basics` y `numbers` pasan en copias aisladas.
+
+**EN — Vala:** with Meson 1.3.2 and Vala 0.56.16, the helper moves exact
+generated samples to `src/` and `test/`, updates paths and replaces the test
+with a failing GLib.Test sentinel. `vala_test.sh` compiles every suite and
+requires real TAP; it rejects the demo, zero cases, skips and failures. The
+homologated `data_structures_basics` and `numbers` references pass in isolated
+copies.
+
+**ES — Erlang:** rebar3 3.27.0 generó una fuente vacía y no creó `test/`;
+`rebar3 eunit` devolvió éxito con cero casos. El scaffold crea un sentinel
+fallido solo para la fuente reconocida sin otros archivos. El runner valida
+el resumen nativo, incluidos colores ANSI, y rechaza cero casos y reportes
+ausentes o ambiguos. Las dos bases pasaron en copias aisladas con 23 y 10
+tests; una ejecución cancelada falló. Otros reporters siguen sin verificar.
+
+**EN — Erlang:** rebar3 3.27.0 generated an empty source and no `test/`;
+`rebar3 eunit` succeeded with zero cases. Scaffold creates a failing sentinel
+only for the recognized source with no other files. The runner validates the
+native summary, including ANSI colors, and rejects zero cases and missing or
+ambiguous reports. Both references passed in isolated copies with 23 and 10
+tests; a canceled run failed. Other reporters remain unverified.
+
+**ES — Gleam:** Gleam 1.18.1 generó un `main` ejecutable y un test de
+ejemplo que pasa; Gleeunit 1.11.0 devolvió éxito sin casos. El scaffold
+sustituye solo la pareja exacta y sin otros archivos por un sentinel fallido.
+El runner exige un resumen Gleeunit con casos aprobados; acepta mezclas con
+omitidos y rechaza resúmenes ausentes o ambiguos. Las bases pasaron en copias
+aisladas sin red con 4 y 10 casos; también se verificó el target JavaScript.
+Otros reporters y versiones permanecen pendientes.
+
+**EN — Gleam:** Gleam 1.18.1 generated an executable `main` and a passing
+example test; Gleeunit 1.11.0 succeeded with no cases. Scaffold replaces
+only the exact sample pair without other files with a failing sentinel.
+The runner requires a Gleeunit summary with passing cases; it accepts mixtures
+with skips and rejects missing or ambiguous summaries. The references passed
+offline in isolated copies with 4 and 10 cases; the JavaScript target was
+also verified. Other reporters and versions remain unverified.
+
+**ES — Groovy (2026-11-23):** el borrado previo buscaba `Library*.groovy`
+en todo `lib` y podía eliminar archivos propios. El scaffold en desarrollo
+retira solo la pareja exacta generada por Gradle 9.6.1 cuando no hay otros
+archivos o enlaces en `lib/src`, y conserva las demás variantes para revisión.
+En un proyecto aislado, `./gradlew test --offline` informó `NO-SOURCE` y
+devolvió éxito. `gradle_test.sh` rechaza ejecuciones sin XML con casos
+aprobados; una respuesta `NO-SOURCE` de una tarea auxiliar no invalida otros
+casos aprobados en los informes XML.
+
+**EN — Groovy (2026-11-23):** the previous deletion searched all of `lib` for
+`Library*.groovy` and could remove authored files. The development scaffold
+removes only the exact Gradle 9.6.1 sample pair when no other files or links
+exist in `lib/src`, preserving other variants for review. In an isolated
+project, `./gradlew test --offline` reported `NO-SOURCE` and succeeded.
+`gradle_test.sh` rejects runs without XML reports containing passing cases; an
+auxiliary task reporting `NO-SOURCE` does not invalidate other passing XML tests.
+
+**ES — Kotlin (2026-11-23):** el borrado previo recorría todo el módulo
+buscando `Library*.kt`, por lo que también podía eliminar archivos propios.
+Gradle 9.6.1 generó `lib/src` incluso con `--no-split-project`, como las dos
+bases homologadas. El helper compartido con Groovy conserva archivos propios
+y retira solo la pareja exacta sin otros archivos en `lib/src`. En el
+laboratorio, `gradle test --offline` informó `NO-SOURCE` y devolvió éxito.
+El runner compartido exige casos aprobados en XML y permite que una tarea
+auxiliar reporte `NO-SOURCE`; otros layouts permanecen pendientes.
+
+**EN — Kotlin (2026-11-23):** the previous deletion searched the entire module
+for `Library*.kt` and could also remove authored files. Gradle 9.6.1 generated
+`lib/src` even with `--no-split-project`, matching both homologated bases.
+The helper shared with Groovy preserves authored files and removes only the
+exact pair when `lib/src` has no other files. In the lab, `gradle test
+--offline` reported `NO-SOURCE` and succeeded; `gradle_test.sh` now rejects
+runs without passing XML cases while allowing `NO-SOURCE` in an auxiliary task.
+Other layouts still need review.
+
+**ES — Nim (2026-11-22):** Nimble 0.22.2 creó `src/{module}.nim`,
+`src/{module}/submodule.nim` y `tests/test1.nim` de ejemplo. El scaffold
+ahora retira solo las muestras exactas y añade la task `test` una sola vez.
+El runner nuevo ejecuta las suites `.nim` directamente, rechaza ninguna suite
+y cuenta casos aprobados. En un laboratorio aislado rechazó una aserción fallida
+con código 1 y aceptó una suite aprobada. Nimble puede devolver código 0 con
+fallos o sin tests, por lo que no se usa como único criterio.
+
+**EN — Nim (2026-11-22):** Nimble 0.22.2 generated sample files
+`src/{module}.nim`, `src/{module}/submodule.nim` and `tests/test1.nim`.
+The scaffold now removes only exact samples and appends the `test` task once.
+The new runner executes `.nim` suites directly, rejects missing suites and
+counts passing cases. In an isolated lab it rejected a failed assertion with
+exit 1 and accepted a passing suite. Nimble may exit 0 for failures or missing
+tests, so it is not used as the sole criterion.
+
+**ES — Scala (2026-11-22):** el scaffold sobrescribía la fuente en cada
+ejecución y dejaba `build.sbt` y `build.properties` vacíos. Ahora crea
+fuente, build, versión sbt e ignore solo si faltan; rechaza enlaces y pide
+revisar archivos previos. Un scaffold aislado compiló con `sbt test` sin
+casos y el comando anterior lo informó como verde. El comando en desarrollo
+conserva la tarea y el informe nativos, y comprueba el resultado estructurado:
+rechaza ejecuciones sin casos aprobados o con fallos. Se verificaron casos
+aprobados, fallidos y omitidos y que no se ejecuten dos veces.
+
+**EN — Scala (2026-11-22):** scaffold overwrote the source on every run and
+left `build.sbt` and `build.properties` empty. It now creates missing source,
+build, sbt version and ignore files, rejects symlinks and requests review of
+existing files. An isolated scaffold compiled with `sbt test` and no cases,
+which the previous command reported as green. The development command retains
+the native task and report, checking structured results to reject failures and
+runs with no passing cases. Passing, failing and ignored cases were verified,
+as was single execution.
+
+**ES — Swift (2026-11-22):** SwiftPM 6.3.3 generó una prueba `example`
+sin aserciones; `swift test` la informó como un caso aprobado. Al retirar
+solo ese ejemplo en un laboratorio aislado, `swift test` devolvió éxito
+con cero tests tanto para XCTest como para Swift Testing. El scaffold en
+desarrollo sustituye solo la muestra exacta y conserva las variantes propias.
+El runner integrado `swift_test.sh` valida los resúmenes de XCTest y Swift
+Testing, rechaza cero casos, omisiones y fallos. El informe xUnit se generó solo con `--parallel` y no
+incluyó Swift Testing, por lo que no se adoptó como solución general.
+La opción interna `--event-stream-output-path` registró eventos de Swift
+Testing, pero no creó archivo en una ejecución solo XCTest. Con un test
+omitido por framework, `swift test` devolvió éxito: XCTest contó un test
+ejecutado y omitido, y Swift Testing informó un test aprobado en el resumen
+aunque sus eventos indicaban `testSkipped`. No basta con contar tests del
+resumen; también hay que distinguir omitidos y ejecuciones incompletas.
+La regresión actual invoca `swift_test.sh` en un paquete nuevo sin `.build`;
+el runner usa `swift test` normal para compilar checkouts limpios.
+
+**EN — Swift (2026-11-22):** SwiftPM 6.3.3 generated an `example` test
+without assertions; `swift test` reported it as a passing case. Removing only
+that example in an isolated lab made `swift test` succeed with zero tests in
+both XCTest and Swift Testing. The development scaffold replaces only the exact
+sample and preserves authored variants. The integrated `swift_test.sh` validates
+XCTest and Swift Testing summaries and rejects missing cases, skips and failures.
+The xUnit report was generated only with `--parallel` and omitted Swift Testing,
+so it was not adopted as a general solution.
+The internal `--event-stream-output-path` option recorded Swift Testing events
+but created no file in an XCTest-only run. With one skipped test per
+framework, `swift test` returned success: XCTest counted one executed and
+skipped test, and the Swift Testing summary reported one passing test even
+though its events showed `testSkipped`. Summary counts alone are insufficient;
+skips and incomplete runs must also be distinguished.
+The regression now invokes `swift_test.sh` in a fresh package without `.build`;
+the runner uses normal `swift test` so clean checkouts are compiled.
+
+**ES — Swift scaffold (2026-11-23):** En un paquete temporal con una ruta que
+contiene espacios, `glot new` generó la muestra exacta de SwiftPM 6.3.3 y
+`glot scaffold` la sustituyó por los imports vacíos previstos. Desde un checkout
+sin `.build`, `glot test` compiló el paquete y rechazó los cero casos de XCTest
+y Swift Testing con código 4. La prueba nativa confirma que el `swift test`
+vacío que sale en verde no se acepta como suite validada.
+
+**EN — Swift scaffold (2026-11-23):** In a temporary package under a path
+containing spaces, `glot new` generated the exact SwiftPM 6.3.3 sample and
+`glot scaffold` replaced it with the intended empty imports. From a checkout
+without `.build`, `glot test` compiled the package and rejected zero XCTest and
+Swift Testing cases with exit code 4. The native test confirms that a green
+zero-case `swift test` is not accepted as a validated suite.
+
+**ES — Tcl (2026-11-22):** el scaffold crea un paquete cargable y su índice
+si faltan, preserva archivos existentes y avisa de su revisión. El selector
+anterior rechazaba las dos suites de `numbers` como ambiguas y Tcltest 2.5.11
+devolvió 0 ante una aserción fallida. El comando en desarrollo ejecuta todas
+las suites `.test` y comprueba los contadores en `cleanupTests`; rechaza
+fallos, suites sin casos efectivos, casos sin finalizar y salidas anticipadas.
+Los archivos vacíos de scaffolds anteriores requieren revisión.
+
+**EN — Tcl (2026-11-22):** scaffold creates a loadable package and index when
+missing, preserves existing files and announces their review. The previous
+selector rejected the two `numbers` suites as ambiguous, and Tcltest 2.5.11
+returned 0 for a failing assertion. The development command runs all `.test`
+suites and checks the counters at `cleanupTests`; it rejects failures, suites
+without effective cases, unfinished cases and early exits. Empty files from
+older scaffolds still need review.
+
+**ES — Scheme (2026-11-22):** el scaffold crea un módulo Guile cargable,
+preserva los archivos existentes y excluye logs SRFI-64 si falta el ignore.
+`glot test` rechaza como ambiguas las tres suites Guile de `numbers`; en
+una prueba aislada SRFI-64 devolvió 0 tras una aserción fallida. Una prueba
+con `test-runner-simple` permite consultar sus contadores: el comando en
+desarrollo ejecuta todas las suites Guile y rechaza fallos, suites sin casos,
+grupos incompletos y salidas anticipadas. Verificado con las tres suites
+de `numbers`.
+
+**EN — Scheme (2026-11-22):** scaffold creates a loadable Guile module,
+preserves existing files and excludes SRFI-64 logs when the ignore file is
+missing. `glot test` rejects the three `numbers` Guile suites as ambiguous;
+an isolated failing SRFI-64 assertion returned 0. The development command uses
+`test-runner-simple` counters, runs every Guile suite and rejects failures,
+empty suites, incomplete groups and early exits. Verified with the three
+`numbers` suites.
+
+**ES — PureScript, reportado el 2026-11-17:** el autor señala renombrado y
+generación/actualización incompletos tanto en `glot scaffold` como en su
+delegate, con archivos sobrantes. El catálogo anterior solo declaraba
+`mkdir -p src test && touch .gitignore`, sin nota de completado. En el módulo
+activo existen `src/Main.purs`, el módulo avanzado y el runner con su suite;
+`src/Main.purs` también existe en la base homologada, por lo que su presencia
+por sí sola no prueba que deba borrarse. Identificar con el autor y las
+convenciones vigentes qué restos y renombres concretos corresponden antes de
+eliminarlos; no sobrescribir el trabajo activo.
+
+**EN — PureScript, reported 2026-11-17:** the author reports incomplete
+renaming and file creation/updates in both scaffold and its delegate, with
+leftover files. The previous catalog only created directories and ensured
+`.gitignore`, without a handoff note. The homologated base also contains
+`src/Main.purs`, so its presence alone does not justify deletion. Identify
+the actual unwanted files and renames before removing anything.
+
+**ES:** Avance: medido `spago init` 1.0.4 sin red, `scaffold` crea el módulo
+PascalCase y un runner mínimo, retira o sustituye únicamente las muestras
+idénticas a esa salida y conserva contenido diferente. El manifiesto de
+`test-unit` y la comprobación de otras versiones quedan pendientes.
+
+**EN:** Progress: after observing `spago init` 1.0.4 offline, scaffold creates
+the PascalCase module and a minimal runner, removes/replaces only exact
+matching samples, and preserves other content. The `test-unit` manifest and
+other generator versions remain to be checked.
+The initialization guide now names `spago install --test-deps test-unit` as a
+manual, optional step; it remains outside automatic scaffolding until the
+dependency-warning gate is resolved.
+
+**ES — Investigación (2026-11-22):** `spago install --offline --test-deps
+test-unit` añadió la dependencia al manifiesto y actualizó el lockfile en un
+proyecto aislado. Con PureScript 0.15.16, Spago 1.0.4 y `test-unit` 17.0.0,
+una compilación limpia con `spago test --offline --strict` terminó con código
+0, pero informó 15 warnings de la dependencia y 0 de los fuentes del proyecto.
+La regla del encargo exige ausencia de warnings: queda por resolver cómo
+conciliarla con esta dependencia antes de automatizar su incorporación.
+
+**EN — Investigation (2026-11-22):** offline `spago install --test-deps
+test-unit` updated the manifest and lockfile in an isolated project. With
+PureScript 0.15.16, Spago 1.0.4 and `test-unit` 17.0.0, a clean strict test
+exited 0 but reported 15 dependency warnings and 0 project warnings. The
+warning-free gate still needs resolution before automating this dependency.
+The command is documented as an optional manual step, not an accepted 4a result.
+
+**ES — Confirmación (2026-11-24):** una compilación limpia aislada con las
+mismas versiones confirmó `Warnings: Src 0, Lib 15, All 15` y código 0: los
+15 avisos proceden de `test-unit`. Al añadir una declaración de proyecto sin
+firma de tipo, `--strict` devolvió código 1 con `MissingTypeDeclaration`.
+La opción hace fallar por warnings del proyecto, pero no elimina los de las
+dependencias. `purescript_test.sh` ahora convierte esa condición en un bloqueo
+del runner: rechaza cualquier resumen `Warnings: ... All > 0`, incluidos los
+15 de `test-unit`; esta dependencia no queda aceptada como resultado de 4a.
+
+**EN — Confirmation (2026-11-24):** an isolated clean build with the same
+versions confirmed `Warnings: Src 0, Lib 15, All 15` and exit 0: all 15
+warnings came from `test-unit`. Adding a project declaration without a type
+signature caused `--strict` to exit 1 with `MissingTypeDeclaration`. The option
+fails on project warnings but does not remove dependency warnings.
+`purescript_test.sh` now blocks any summary with `All > 0`, including the
+15 `test-unit` warnings; this dependency is not accepted as a 4a result.
+
+**ES — Runner vacío:** con Spago 1.0.4 y PureScript 0.15.16, `spago test
+--offline --strict` terminó con éxito y cero warnings al ejecutar el runner
+mínimo sin casos. Intentos de hacer fallar ese runner con `Effect.Exception`
+y `Partial.Unsafe` no compilaron con las dependencias del proyecto nativo.
+Se integró `purescript_test.sh`: suma `All N tests passed!` de todas las suites,
+rechaza cero casos y propaga fallos o resultados sin resumen.
+
+**EN — Empty runner:** with Spago 1.0.4 and PureScript 0.15.16, `spago test
+--offline --strict` succeeded with zero warnings when running the case-free
+minimal runner. Attempts to fail it using `Effect.Exception` and
+`Partial.Unsafe` did not compile with the native project's dependencies.
+The false green is guarded by `purescript_test.sh`: it sums `All N tests passed!`
+across suites and rejects zero cases or runs with missing summaries.
+
+- **ES — V (2026-11-22):** `v init --lib` creó `fixture.v`, `tests/` y
+`v.mod` con `0.0.0`; conservó el layout nativo y produjo un test aprobado.
+`v test .` devolvió éxito con `0 total` al vaciar `tests/`. El runner
+`v_test.sh` ahora exige al menos un caso aprobado en el resumen.
+
+- **EN — V (2026-11-22):** `v init --lib` created `fixture.v`, `tests/` and
+`v.mod` at `0.0.0`; it preserved the native layout and produced a passing test.
+`v test .` succeeded with `0 total` after `tests/` was emptied.
+`v_test.sh` now requires at least one passing case in the summary.
+
+**ES — TypeScript (2026-11-22):** el scaffold retiró `--passWithNoTests`
+porque permitía verdes vacíos. `typescript_test.sh` exige el informe JSON de
+Jest y rechaza cero casos, omitidos y fallos. La medición temporal aprobó,
+rechazó vacío y rechazó fallo.
+
+**EN — TypeScript (2026-11-22):** the scaffold removed `--passWithNoTests`
+because it allowed empty green runs. `typescript_test.sh` requires Jest JSON
+and rejects zero cases, skipped tests and failures. Temporary measurements
+passed for a green suite and rejected empty and failing suites.
+
+**ES — JavaScript (2026-11-22):** reutiliza el runner Jest JSON de TypeScript,
+rechazando ejecuciones vacías, omitidas y fallidas.
+
+**EN — JavaScript (2026-11-22):** reuses the TypeScript Jest JSON runner,
+rejecting empty, skipped and failing runs.
+
+**ES — Go (2026-11-24):** `go mod init` y scaffold dejan `src/` y `tests/`
+vacíos. Con Go 1.26.5, `go test ./...` devolvió código 1 sin paquetes;
+con un archivo fuente y sin tests devolvió 0, y también devolvió 0 con un
+único test omitido. La secuencia protege ambos directorios frente a enlaces y
+tipos inesperados. `glot test` usa ahora `go_test_runner.go`: ejecuta Go una
+sola vez, sin caché, muestra su salida y rechaza ejecuciones sin pruebas finales
+aprobadas o con errores; informa las omitidas y acepta mezclas. Se verificaron
+los casos vacío, omitido, mixto y fallido, y copias de las dos bases
+homologadas. La cuenta excluye padres con subpruebas, pues Go puede marcarlos
+como aprobados aunque todas sus subpruebas se hayan omitido.
+
+**EN — Go (2026-11-24):** `go mod init` and scaffold leave empty `src/` and
+`tests/` directories. With Go 1.26.5, `go test ./...` returned exit 1 with no
+packages; it returned 0 with a source file and no tests, and also with a
+single skipped test. The sequence guards both directories against symlinks
+and unexpected types. `glot test` now uses `go_test_runner.go`: it runs Go
+once without caching, displays its output and rejects executions without
+passing leaf tests or with errors; it reports skips and accepts mixed results.
+Empty, skipped, mixed and failing cases and isolated copies of both homologated
+bases were verified. The count excludes parents with subtests, since Go can
+mark a parent passed when all its subtests were skipped.
+
+- La salida de Spago 1.0.4 y el layout homologado ya se verificaron. El
+  scaffold automatiza los nombres y el runner solo para muestras reconocidas,
+  conserva archivos diferentes y anuncia lo que queda para el delegate.
+  Siguen pendientes otras versiones del generador y la identificación con el
+  autor de archivos sobrantes en módulos activos.
+  / Spago 1.0.4 output and the homologated layout are verified. The scaffold
+  handles names and runner only for recognized samples, preserves other files
+  and hands off remaining work. Other generator versions and identifying
+  unwanted files in active modules with the author remain pending.
+- Las regresiones de `glot_test.sh` cubren creación de nombres y runner,
+  retirada de muestras exactas, conservación de archivos propios, reruns,
+  `--dry-run`, symlinks y manifiesto ausente; el harness completo pasó.
+  / `glot_test.sh` regressions cover module and runner creation, exact sample
+  removal, authored-file preservation, reruns, `--dry-run`, symlinks and a
+  missing manifest; the full harness passed.
+
+### Fix pendiente: helpers declarados en los builds / Pending fix: helpers declared in build targets
+
+**ES:** Reportado el 2026-11-14 tras un bloqueo de validación en Haskell:
+GHC advirtió `-Wmissing-home-modules` porque el módulo de pruebas
+`DataStructuresAdvancedSpec`, importado por `RunTests.hs`, no estaba
+declarado en `other-modules` del test-suite Cabal. El patrón correcto está
+en la base `data_structures_basics`; el archivo de trabajo adjunto ya muestra
+la declaración explícita. El problema no es exclusivo de Haskell: los módulos
+futuros pueden separar helpers de producción o de tests, y cada lenguaje
+resuelve de forma distinta qué archivos pertenecen a cada target.
+
+**EN:** Reported on 2026-11-14 after a Haskell validation block: GHC emitted
+`-Wmissing-home-modules` because the test module imported by `RunTests.hs`
+was missing from the Cabal test-suite's `other-modules`. The homologated
+`data_structures_basics` package has the required pattern; the attached
+working Cabal file now includes the declaration. This generalizes to future
+modules with production or test helpers because build systems differ in how
+they assign source files to targets.
+
+**ES — Investigación (2026-11-22):** con Cabal 3.16.1.0, `cabal init
+--lib --tests` genera el test-suite y `test/Main.hs`, pero deja
+`other-modules` sin declarar. Incluso con `--main-is=RunTests.hs` conservó
+`Main.hs` en la prueba aislada. Por tanto, añadir `--tests` no resuelve la
+sincronización de helpers ni reproduce por sí solo el runner homologado.
+
+**EN — Investigation (2026-11-22):** Cabal 3.16.1.0 `init --lib --tests`
+generates a test suite and `test/Main.hs`, but leaves `other-modules`
+undeclared. Even `--main-is=RunTests.hs` retained `Main.hs` in the isolated
+test. Adding `--tests` alone therefore does not synchronize helpers or
+reproduce the homologated runner.
+
+**ES — Andamiaje inicial:** `new` usa ahora `cabal init --lib --tests`, que
+genera también el test-suite y `test/Main.hs`. Con la fuente vacía de `lib/`
+presente, `cabal test .:tests --offline
+--ghc-options=-Werror=missing-home-modules` compiló y ejecutó ese runner en un
+laboratorio aislado. El mensaje «Test suite not yet implemented» confirma que
+es solo un punto de partida: no aporta casos y los helpers que agregue el
+sprint al test-suite siguen requiriendo declaración explícita en
+`other-modules`.
+
+**EN — Initial scaffold:** `new` now uses `cabal init --lib --tests`, which
+also generates the test suite and `test/Main.hs`. With the empty `lib/` source
+present, `cabal test .:tests --offline
+--ghc-options=-Werror=missing-home-modules` compiled and ran this placeholder
+in an isolated lab. Its “Test suite not yet implemented” message confirms it
+is only a starting point: it adds no cases, and helper modules added to the
+test suite still require explicit `other-modules` declarations.
+
+**ES — Adaptación Hspec:** `Main.hs` no conecta Hspec. En una copia
+aislada se configuró Hspec solo para el test-suite y se verificó un runner
+`RunTests.hs`: cero ejemplos devolvieron éxito; un caso aprobado pasó y uno
+fallido devolvió error. `scaffold` adapta el test-suite y runner nativos de Cabal
+3.16.1.0 solo cuando coinciden con la plantilla reconocida; otros manifiestos
+y runners se conservan para revisión. La guía y el encargo explican el proceso.
+Con Cabal 3.16.1.0, `--dependency=hspec` modifica también las dependencias de
+la biblioteca y reemplaza `base`, por lo que no se usa como atajo.
+
+**EN — Hspec adaptation:** `Main.hs` does not connect Hspec. An
+isolated test-only Hspec configuration and `RunTests.hs` runner returned
+success for zero examples, passed one passing case, and failed one failing
+case. `scaffold` adapts the recognized Cabal 3.16.1.0 test-suite and runner;
+other manifests and runners are preserved for review. The guide and request
+describe the process. Cabal 3.16.1.0
+`--dependency=hspec` also changes library dependencies and replaces `base`,
+so it is not used as a shortcut.
+
+**ES — Protección parcial:** `glot test` para Haskell trata
+`missing-home-modules` como error, sin editar el manifiesto. En un proyecto
+aislado detectó un helper de producción y otro de pruebas no declarados;
+ambas bases homologadas pasaron en copias aisladas. Esto no sincroniza
+manifiestos ni detecta archivos que no formen parte de los targets compilados;
+los criterios siguientes siguen pendientes.
+
+**EN — Partial safeguard:** Haskell `glot test` treats
+`missing-home-modules` as an error without editing the manifest. In an isolated
+project it detected undeclared production and test helpers; both homologated
+bases passed in isolated copies. It does not synchronize manifests or detect
+files outside compiled targets; the criteria below remain pending.
+
+**ES — Verificación adicional:** en un laboratorio aislado, `cabal check` no
+detectó los helpers importados omitidos. Con la opción estricta, la compilación
+detectó primero el helper de biblioteca y después el de pruebas; al declararlos,
+la suite pasó aun con un archivo de pruebas desconectado. Los encargos de
+contrato y suite incluyen una comprobación provisional de declaraciones y
+conexión. No sustituye la sincronización automática ni cierra este fix.
+
+**EN — Additional verification:** in an isolated lab, `cabal check` did not
+detect missing declarations for imported helpers. Strict compilation detected
+first the library helper and then the test helper; after declaring them, the
+suite passed despite a disconnected test file. The contract and suite requests
+now include a provisional declaration and connection check. This does not
+replace automatic synchronization or close this fix.
+
+**ES — Punto de integración:** `contract_stub` y `suite` pueden escribirse
+fuera de `glot`; `prompt` solo imprime el encargo y `ask` retorna tras el
+delegado. Por tanto, el tooling no observa automáticamente cada archivo nuevo
+en ambas vías. En un laboratorio con GHC 9.10.3, el diagnóstico JSON de
+`missing-home-modules` proporcionó el código 32850, pero los nombres y el
+identificador de unidad seguían dentro del texto del mensaje, no como campos
+estructurados. Esto no resuelve la edición segura de targets, condiciones ni
+la conexión de grupos desconectados.
+
+**EN — Integration point:** `contract_stub` and `suite` can be written
+outside `glot`; `prompt` only prints the request and `ask` returns after the
+delegate. Tooling therefore cannot automatically observe each new file in
+both workflows. In a GHC 9.10.3 lab, the JSON `missing-home-modules`
+diagnostic provided code 32850, but module names and the unit identifier
+remained embedded in message text rather than structured fields. This does not
+solve safe target and conditional edits or connect disconnected groups.
+
+**ES — Sincronización explícita parcial:** `glot sync-build` recibe el target
+`library` o `test` y el nombre de un módulo interno existente. Para la plantilla
+reconocida de Cabal 3.16.1.0, actualiza `other-modules`; `-n` muestra el diff
+y repetirlo no duplica la declaración. No infiere pertenencia, exports ni
+conexión al runner y rechaza sin modificar configuraciones distintas. Un
+laboratorio compiló con `missing-home-modules` como error y ejecutó un ejemplo
+Hspec con helpers de producción y pruebas declarados por el helper. Los
+demás manifiestos y lenguajes siguen pendientes.
+
+**EN — Partial explicit synchronization:** `glot sync-build` takes a `library`
+or `test` target and an existing internal module name. For the recognized
+Cabal 3.16.1.0 template, it updates `other-modules`; `-n` previews the diff and
+reruns do not duplicate declarations. It does not infer membership, exports
+or runner connections, and rejects other configurations without editing them.
+A lab compiled with `missing-home-modules` as an error and ran an Hspec example
+with production and test helpers declared by the helper. Other manifests and
+languages remain open.
+
+**ES — Paquete sin suites:** Cabal 3.16 devolvió éxito con `cabal test`
+cuando el paquete no declaraba ninguna suite. El selector `.:tests` rechaza
+ese caso y conserva el alcance del paquete actual, también en el workspace
+multiproyecto probado. El selector por sí solo no demuestra que una suite
+existente ejecute casos.
+En una repetición rápida de la regresión, GHC recompiló la suite modificada
+sin mostrar reenlace y ejecutó el binario anterior; otra repetición pasó.
+La prueba separa las modificaciones dos segundos. La posible interacción
+con marcas de tiempo requiere investigación antes de garantizar reruns rápidos:
+en otro laboratorio, ocho cambios alternos rápidos sí provocaron el reenlace
+y devolvieron los resultados esperados, sin reproducir el incidente.
+
+**EN — Package without suites:** Cabal 3.16 returned success from `cabal test`
+when the package declared no suites. The `.:tests` selector rejects that case
+and retains the current-package scope, including in the multi-package workspace
+tested. The selector alone does not prove that an existing suite executes cases.
+In one fast regression rerun, GHC recompiled the modified suite without
+reporting a relink and ran the previous binary; another rerun passed. The test
+separates edits by two seconds. A possible timestamp interaction needs further
+investigation before rapid reruns can be considered reliable: in a separate
+lab, eight rapid alternating edits did relink and returned the expected
+results, without reproducing the incident.
+In a second isolated package, twelve rapid alternating edits to an imported
+test helper also relinked and produced the expected pass/fail results. This
+does not identify the original cause or guarantee all rapid reruns.
+
+**ES:** En un segundo paquete aislado, doce cambios rápidos alternos a un
+helper de pruebas importado también reenlazaron y devolvieron los resultados
+esperados. Esto no identifica la causa original ni garantiza todos los reruns.
+
+**ES — Resúmenes Hspec:** `haskell_test.sh` conserva el selector y
+`-Werror=missing-home-modules`, ejecuta las suites secuencialmente y exige en
+cada una un resumen Hspec con ejemplos y sin fallos ni pendientes. Rechaza
+resúmenes ausentes o ambiguos y no reconoce otros runners por defecto. En
+copias aisladas, las bases `data_structures_basics` y `numbers` pasaron con
+51 y 33 ejemplos; un proyecto con dos suites rechazó la segunda vacía y pasó
+cuando ambas tuvieron casos. La sincronización automática de helpers queda
+como `sync-build` explícito y limitado a configuraciones reconocidas; el runner
+ejecuta `cabal clean` antes de probar para evitar binarios obsoletos.
+
+**EN — Hspec summaries:** `haskell_test.sh` retains the selector and
+`-Werror=missing-home-modules`, runs suites sequentially and requires each
+Hspec summary to report examples with no failures or pending cases. Missing
+or ambiguous summaries and other runners are rejected. In isolated copies,
+`data_structures_basics` and `numbers` passed with 51 and 33 examples; a
+two-suite project rejected its empty second suite and passed with both filled.
+Automatic helper synchronization remains an explicit command, and unrelated
+manifests remain outside it. The runner performs `cabal clean` before testing
+to avoid stale binaries; rapid timestamp reruns remain outside guarantees.
+
+Criterios para la siguiente versión / Next-version acceptance criteria:
+
+- Revisar los lenguajes y generadores donde los archivos de un target deben
+  declararse explícitamente: módulos de producción, módulos de test y helpers
+  importados. Mantener sincronizados imports, source roots y manifiestos
+  (`other-modules` en Cabal, u otros mecanismos nativos equivalentes); no
+  asumir que encontrar el archivo basta para compilarlo.
+  / Audit languages whose build targets require explicit source/module
+  declarations; keep imports, source roots and native manifests synchronized.
+- Aplicar la regla en el paso que crea o incorpora el helper (scaffold,
+  contrato/esqueletos o suite, según el flujo); no depender de que el autor
+  descubra una advertencia después ni de pedir al delegate que haga cambios
+  mecánicos que conoce el tooling.
+  / Apply the rule at the workflow step that introduces the helper, rather
+  than leaving deterministic manifest edits to the author or delegate.
+- Agregar pruebas representativas con al menos un helper importado por un
+  test y uno por código de producción en los lenguajes aplicables. Ejecutar
+  build/test con las advertencias del proyecto habilitadas y exigir cero
+  diagnósticos de módulos locales omitidos; comprobar también reruns y que no
+  se borren helpers propios.
+  / Add representative production/test helper cases, validate with project
+  warnings enabled, and cover reruns and preservation of authored helpers.
 
 **ES:** `glot` convierte el ciclo de trabajo de un módulo —**situar, crear, ejecutar, delegar, cerrar y publicar**— en comandos reproducibles, y deja la evidencia en el repositorio.
 
@@ -236,7 +1023,7 @@ Criterios de aceptación / Acceptance criteria:
 | 1.7.6 | fix de la 1.7.5 | 4a–8 | **El andamiaje de Perl pasa a `manual`**: `module-starter` generaba `Makefile.PL`, `lib/{module}.pm` y `t/`, que no es el layout homologado; la fila del catálogo queda con `mkdir -p lib test`, el paso único sale de `init_sequences.tsv` y la guía lo lee de la tabla maestra. Cierra la corrección de Perl que abrió la v1.7.5 (verificador `lib/` + `-Ilib`) | **No abre capa**: fix sobre la 1.7.5; la rama `fix/repo/glot-v1.7.6` ya lleva el número de la entrega que cierra | ✅ cerrada |
 | 1.7.7 | fix de la 1.7.6 | 4a–8 | **El layout de R es el de un paquete**: la fila del catálogo apuntaba a `src/{module}.R` y a `Rscript test/run_tests.R`, rutas que desaparecieron al homologar los cuatro módulos de R a `DESCRIPTION` + `NAMESPACE` + `R/` + `tests/testthat/`, así que el andamiaje pasa a `mkdir -p R tests/testthat`, el runner a `make test` (`testthat::test_local()`, que carga el paquete sin instalarlo) y el verificador a los fuentes de `R/`; la guía de inicialización lo documenta | **No abre capa**: fix sobre la 1.7.6; la rama `fix/repo/glot-v1.7.7` ya lleva el número de la entrega que cierra | ✅ cerrada |
 | 1.7.8 | fix de la 1.7.7 | 4a–8 | **El estándar de Racket es `raco new library {module}`** —el layout lib/test/doc de la comunidad— con su render portátil (`mv` + `sed -i` de GNU, porque el `render-template.sh` del template es interactivo y de BSD, y sin él los cuatro `info.rkt` conservan los marcadores `<project>`/`<username>`), el borrado de `.github/`, `pull_request_template.md`, `render-template.sh` y `profile/`, y las suites requiriendo la librería por ruta relativa para correr sin enlazar paquetes; el runner pasa a `raco test -x .`, porque `racket test/run_tests.rkt` no existía en los dos módulos de un solo archivo y, en los tres que sí lo tienen, **salía con código 0 aunque la suite fallara** (falso verde en `test`/`evidence`) | **No abre capa**: fix sobre la 1.7.7; la rama `fix/repo/glot-v1.7.8` ya lleva el número de la entrega que cierra | ✅ cerrada |
-| 2.1.0 | L4/L6.5 y andamiaje / scaffolding | 4a–8 | Tres rutas con `--delegate`, configuración BYOK y overrides por encargo; Sonnet para suite; revisión de acciones repetibles y recetas manuales de los 50 lenguajes / Three routes, BYOK, constrained overrides and scaffold review | Continúa v2.0.3 y recoge la revisión residual del plan 1.8.0 / Continues v2.0.3 and carries residual 1.8.0 review | 🔄 primer bloque scaffold; resto pendiente / first scaffold block; remainder pending |
+| 2.1.0 | L4/L6.5 y andamiaje / scaffolding | 4a–8 | Tres rutas con `--delegate`, configuración BYOK y overrides por encargo; Sonnet para suite; revisión de acciones repetibles y recetas manuales de los 50 lenguajes / Three routes, BYOK, constrained overrides and scaffold review | Continúa v2.0.3 y recoge la revisión residual del plan 1.8.0 / Continues v2.0.3 and carries residual 1.8.0 review | ✅ cerrada / Closed |
 | ⏳ | 1.8.0 (plan histórico / historical plan) | 4a | **El reparto entre `new` y `scaffold`**: iniciado por v2.0.0/v2.0.3; la revisión residual de archivos, renombrados y notas automatizables se incorpora a v2.1.0 / Split introduced by v2.0.0/v2.0.3; residual adaptation review carried into v2.1.0 | No es una entrega futura independiente / Not a separate future release | Revisión residual en v2.1.0 / Residual review in v2.1.0 |
 | ⏳ | L9 | — | Versión esperada por lenguaje y comprobación/instalación | Segunda acepción de «manejador de versiones»; llega después del ciclo del roadmap |
 ### Deuda técnica / Technical debt
@@ -266,15 +1053,41 @@ Criterios de aceptación / Acceptance criteria:
 | No hay verbo para **retirar un módulo** ni para deshacer un cierre: `close`/`finish` solo añaden y `clean` solo borra artefactos ignorados. Medido el 2026-10-12 al planear la retirada de `naive_sort`, `numbers` y `calculator` en los 50 submódulos (los commits que los introdujeron añadieron entre 2 y 30 rutas de `core/`, así que no hay un commit por módulo que revertir) | Un verbo `retire` (o `unclose`) que borre las rutas del módulo en el submódulo, baje el contador del roadmap y el registro del checklist, y deje el gitlink confirmado; mientras no exista, la retirada es `git rm -r` + commit por lenguaje y edición a mano de los contadores |
 | El **puntero a mano** (workaround de `SPRINT.md`) salta el portón de `pointer`, y ni `status` ni `close` avisan de que el gitlink del lenguaje apunta a una rama sin integrar. Medido en `prolog` el 2026-10-12 (`ed42ba7` frente a un `main` en `69f1e9f`) | Que `status`/`doctor` marquen el gitlink cuyo commit no está en el `main` del submódulo, y que `close` lo compruebe también cuando el puntero se confirmó a mano |
 
-#### ⏳ Abierta — la paga la v1.6.5 / Open — v1.6.5 pays it
+#### ⏳ Abierta — Dart (declarada v1.6.5) / Open — Dart (declared v1.6.5)
 
-**ES:** Dos entradas. La primera, declarada el **2026-10-02** al pasar el andamiaje de **C#** (`csharp` + `data_structures_basics`, rama `fix/repo/glot-v1.6.5`): la secuencia de `csharp` deja el proyecto de pruebas **sin referencia al de producción**, y esa corrección vive **solo como nota** —ni `glot` la ejecuta ni la comprueba, y el encargo `4a` no la nombra—, así que se cuela hasta el paso `4c`.
+**ES:** Esta sección registra dos entradas: la de C# se cerró el **2026-11-23**
+como se documenta abajo; la de Dart, declarada el **2026-10-03**, permanece
+abierta.
 
-**EN:** Two entries. The first, declared on **2026-10-02** while running the **C#** scaffolding (`csharp` + `data_structures_basics`, branch `fix/repo/glot-v1.6.5`): the `csharp` sequence leaves the test project **without a reference to the production one**, and that correction lives **only as a note** —`glot` neither runs nor checks it, and the `4a` request does not name it—, so it slips through to step `4c`.
+**EN:** This section records two entries: the C# entry was closed on
+**2026-11-23**, as documented below; the Dart entry, declared on **2026-10-03**,
+remains open.
 
 **ES:** **Estado el 2026-10-02 (v1.6.5, en curso):** el **dato** ya lleva el paso —la secuencia de `csharp` termina en `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj`—, la **guía** refleja ese paso y deja el completado en `Class1.cs`, `UnitTest1.cs` y el `.gitignore`, el encargo [`scaffold`](../prompts/scaffold.prompt.md) nombra el resto y el harness tiene su caso. La medición del mismo día, sobre el módulo que lo destapó, dice lo que estaba en juego: añadida la referencia **a mano**, `dotnet test {Module}.slnx` **pasa a compilar `src/`** y falla con **tres errores y un aviso en `Node.cs`** —`CS0161` («not all code paths return a value»), `CS0246` («the type or namespace name `get` could not be found») y `CS0168`— que hasta entonces eran **invisibles**, porque sin la referencia el proyecto de producción **ni se compila**. Falta la **comprobación de ciclo completo**: un `glot new` de C# y su `4a`.
 
 **EN:** **Status on 2026-10-02 (v1.6.5, in progress):** the **datum** already carries the step —`csharp`'s sequence ends with `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj`—, the **guide** reflects that step and leaves the completion to `Class1.cs`, `UnitTest1.cs` and the `.gitignore`, the [`scaffold`](../prompts/scaffold.prompt.md) request names the leftover and the harness has its case. The same day's measurement, on the module that uncovered it, tells what was at stake: with the reference added **by hand**, `dotnet test {Module}.slnx` **starts compiling `src/`** and fails with **three errors and a warning in `Node.cs`** that until then were **invisible**, because without the reference the production project is **never compiled**. What remains is the **end-to-end check**: a C# `glot new` and its `4a`.
+
+**ES — Cierre C# (2026-11-23):** en un proyecto temporal con .NET 10.0.115
+se ejecutó la secuencia del catálogo, incluido `dotnet add reference`; una
+prueba importó un tipo de producción y `dotnet test` aprobó el caso. `glot -n
+new` mostró los cinco pasos y `glot -n scaffold` mostró la retirada de las
+muestras. `Class1.cs` y `UnitTest1.cs` solo se retiran si coinciden con las
+muestras medidas de .NET 10 tras normalizar BOM/CRLF; se preservan cambios y
+se bloquean symlinks. `scaffold` también copia un `.gitignore` .NET medido solo
+cuando falta; el harness verifica las muestras, `bin/`, `obj/`, dry-run y
+preservación de un ignore propio. La fila C# de la tabla siguiente queda como
+registro histórico; Dart es la entrada que permanece abierta en esta sección.
+
+**EN — C# closure (2026-11-23):** in a temporary .NET 10.0.115 project, the
+catalogue sequence was executed, including `dotnet add reference`; a test
+imported a production type and `dotnet test` passed. `glot -n new` showed all
+five steps and `glot -n scaffold` showed sample removal. `Class1.cs` and
+`UnitTest1.cs` are removed only when they match the measured .NET 10 samples
+after BOM/CRLF normalization; edits are preserved and symlinks are blocked.
+Scaffold also copies a measured .NET `.gitignore` only when missing; the
+harness verifies samples, `bin/`, `obj/`, dry-run and preservation of an
+authored ignore file. The C# row below is historical; Dart remains open in
+this section.
 
 | Deuda | Qué la cierra / What closes it |
 |-------|--------------------------------|

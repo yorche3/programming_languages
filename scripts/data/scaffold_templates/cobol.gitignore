@@ -1,0 +1,7 @@
+/run_tests
+*.so
+*.dll
+*.o
+/target/
+/build/
+/dist/

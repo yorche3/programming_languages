@@ -8,8 +8,30 @@ Versión de desarrollo / Development version: **v2.1.0-dev** en [`glot.sh`](glot
 Última versión verificada / Last verified release: **v2.0.3** en
 [`versions/glot_2.0.3.sh`](versions/glot_2.0.3.sh).
 
+**ES:** En desarrollo, `new` retira el `.git/` creado durante la inicialización
+de un módulo vacío solo si sus metadatos pasan las comprobaciones de seguridad.
+Un Git anidado preexistente se conserva y bloquea `new`/`scaffold` con un
+diagnóstico: revísalo antes de decidir qué hacer. Desde el Git anidado, glot
+detecta el superproyecto del submódulo para consultar el mismo estado.
+
+**EN:** In development, `new` removes a module-local `.git/` created during
+initialization of an empty module only after safety checks. Pre-existing
+nested Git is preserved and blocks `new`/`scaffold` with a diagnostic; inspect
+it before deciding what to do. State lookup still resolves the submodule's
+superproject from inside nested Git.
+
 Configuración vigente de las tres rutas y BYOK / Current three-route and BYOK
 configuration: [`docs/VALIDATION.md`](docs/VALIDATION.md).
+
+**ES:** Para un helper interno Haskell ya creado, `glot sync-build library
+Nombre.Modulo` o `glot sync-build test Nombre.Modulo` actualiza el target de
+la plantilla Cabal reconocida; `-n` muestra el cambio. Manifiestos propios,
+exports y conexión del runner requieren revisión.
+
+**EN:** For an existing internal Haskell helper, `glot sync-build library
+Module.Name` or `glot sync-build test Module.Name` updates the recognized Cabal
+target; `-n` previews it. Custom manifests, exports and runner connection require
+review.
 
 ---
 

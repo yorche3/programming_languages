@@ -1,0 +1,10 @@
+module TestStatus
+
+from "result" include Result
+from "wasi/process" include Process
+
+provide let finish = (passed: Bool) => {
+  if (!passed) {
+    Result.unwrap(Process.exit(1))
+  }
+}

@@ -150,7 +150,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="2.1.0-dev"
+GLOT_VERSION="2.1.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -177,16 +177,27 @@ GLOT_SCRIPT_DIR="$(_glot_script_dir)"
 # _glot_repo_root — raíz del monorepo: GLOT_ROOT > superproyecto > raíz git.
 _glot_repo_root() {
     local root=""
+    local current=""
+    local parent=""
+    local super=""
 
     if [[ -n "${GLOT_ROOT:-}" ]]; then
         printf '%s\n' "$GLOT_ROOT"
         return 0
     fi
 
-    root="$(git rev-parse --show-superproject-working-tree 2>/dev/null || true)"
-    if [[ -z "$root" ]]; then
-        root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-    fi
+    root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+    current="$root"
+    while [[ -n "$current" ]]; do
+        super="$(git -C "$current" rev-parse --show-superproject-working-tree 2>/dev/null || true)"
+        if [[ -n "$super" ]]; then
+            printf '%s\n' "$super"
+            return 0
+        fi
+        parent="$(git -C "$current/.." rev-parse --show-toplevel 2>/dev/null || true)"
+        [[ -n "$parent" && "$parent" != "$current" ]] || break
+        current="$parent"
+    done
 
     [[ -n "$root" ]] || return 1
     printf '%s\n' "$root"
@@ -1605,6 +1616,44 @@ _glot_cmd_verify() {
     _glot_cmd_run verify "$@"
 }
 
+_glot_cmd_sync_build() {
+    local component="${1:-}"
+    local hs_module="${2:-}"
+    local target="" lang="" phase="" module="" root="" dir="" data="" mode=apply
+
+    if [[ ( "$component" != library && "$component" != test ) || -z "$hs_module" ]]; then
+        _glot_error 'uso / usage: glot sync-build <library|test> <Haskell.Module> [lenguaje] [fase/módulo]'
+        return 2
+    fi
+    shift 2
+    target="$(_glot_exec_target "$@")" || return $?
+    IFS=$'\t' read -r lang phase module <<<"$target"
+    if [[ "$lang" != haskell ]]; then
+        _glot_error "sync-build no disponible para / not available for: $lang"
+        return 1
+    fi
+    root="$(_glot_repo_root)" || {
+        _glot_error 'no se detectó la raíz del monorepo / monorepo root not detected'
+        return 1
+    }
+    dir="$(_glot_module_dir "$root" "$lang" "$phase" "$module")"
+    if [[ -L "$root/$lang" || -L "$root/$lang/core" || -L "$root/$lang/core/$phase" ||
+          -L "$dir" || ! -d "$dir" ]]; then
+        _glot_error 'directorio del módulo ausente o inseguro / missing or unsafe module directory'
+        return 1
+    fi
+    data="$(_glot_data_dir)" || {
+        _glot_error 'falta el catálogo de datos / missing data catalogue'
+        return 1
+    }
+    if [[ ! -f "$data/haskell_sync.sh" ]]; then
+        _glot_error 'falta el sincronizador Haskell / missing Haskell synchronizer'
+        return 1
+    fi
+    ((_glot_dry_run)) && mode=dry-run
+    (cd -- "$dir" && bash "$data/haskell_sync.sh" "$module" "$component" "$hs_module" "$mode")
+}
+
 # --- delegación (L4) ---------------------------------------------------------
 
 # _glot_prompts_dir — carpeta de las plantillas versionadas del tooling.
@@ -2598,6 +2647,53 @@ _glot_cmd_pointer() {
 
 # --- creación y registro (L5) ------------------------------------------------
 
+# Solo se retira Git generado cuando su estructura vacía es reconocible.
+_glot_remove_generated_git() {
+    local dir="$1" dry_run="${2:-0}" gitdir="$1/.git" path="" key="" keys="" entries="" objects="" remotes=""
+    [[ -e "$gitdir" || -L "$gitdir" ]] || return 0
+    if [[ -L "$dir" || "$(cd -- "$dir" && pwd -P)" != "$dir" || -L "$gitdir" || ! -d "$gitdir" ]]; then
+        _glot_error "Git generado no es directorio seguro / generated Git is not a safe directory: $gitdir"
+        return 1
+    fi
+    if [[ ! -d "$gitdir/objects" || ! -d "$gitdir/refs" ]] ||
+        ! entries="$(find "$gitdir" ! -type d ! -type f -print -quit)" ||
+        ! objects="$(find "$gitdir/objects" "$gitdir/refs" -type f -print -quit)" ||
+        ! remotes="$(git -C "$dir" remote)" ||
+        ! keys="$(git -C "$dir" config --local --name-only --list)"; then
+        _glot_error "no se pudo inspeccionar Git generado / could not inspect generated Git: $gitdir"
+        return 1
+    fi
+    if [[ -e "$gitdir/index" || -e "$gitdir/packed-refs" || -n "$entries" || -n "$objects" || -n "$remotes" ]] ||
+        ! git -C "$dir" symbolic-ref -q HEAD >/dev/null ||
+        [[ "$(git -C "$dir" rev-parse --is-inside-work-tree)" != true ]] ||
+        [[ "$(git -C "$dir" rev-parse --show-toplevel)" != "$dir" ]]; then
+        _glot_error "Git generado contiene datos propios; no se elimina / generated Git contains authored data; not removed: $gitdir"
+        return 1
+    fi
+    while IFS= read -r key; do
+        case "$key" in
+            core.repositoryformatversion|core.filemode|core.bare|core.logallrefupdates) ;;
+            *) _glot_error "configuración Git no reconocida / unrecognized Git configuration: $key"; return 1 ;;
+        esac
+    done <<<"$keys"
+    entries="$(find "$gitdir" -type f -print)" || {
+        _glot_error "no se pudo inspeccionar Git generado / could not inspect generated Git: $gitdir"
+        return 1
+    }
+    while IFS= read -r path; do
+        case "${path#"$gitdir"/}" in
+            HEAD|config|description|info/exclude|hooks/*.sample) ;;
+            *) _glot_error "metadato Git no reconocido / unrecognized Git metadata: $path"; return 1 ;;
+        esac
+    done <<<"$entries"
+    if ((dry_run)); then
+        _glot_info "scaffold: retirar Git generado si es seguro / remove generated Git if safe: $gitdir"
+        return 0
+    fi
+    _glot_info "retirar Git generado / remove generated Git: $gitdir"
+    rm -rf -- "$gitdir"
+}
+
 # _glot_cmd_new [lenguaje] [fase/módulo] — la carpeta del módulo y, si el lenguaje trae
 # herramienta que además la genera, el avance de antemano con ella (v2). Ejecuta las filas
 # `phase=new` de `data/init_sequences.tsv` respetando su `cwd`: lo mínimo es crear la
@@ -2707,6 +2803,7 @@ _glot_cmd_new() {
             printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
             [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
         done <<<"$steps"
+        printf '# retirar Git generado en %s/.git si es seguro / remove generated Git if safe\n' "$dir"
         [[ "$kind" == "manual" ]] && printf '# el manifiesto y la suite son del encargo / manifest and suite belong to the request\n'
         _glot_init_completion_report "$steps" "$module"
         printf '%s\n' "$dir"
@@ -2715,6 +2812,10 @@ _glot_cmd_new() {
 
     # El directorio del módulo lo deja vacío `use`. Con contenido, el esqueleto ya
     # está hecho: no se pisa nada (misma política que `use` con un módulo existente).
+    if [[ -e "$dir/.git" || -L "$dir/.git" ]]; then
+        _glot_error "Git anidado preexistente: no se elimina sin verificar su origen / pre-existing nested Git: not removed without provenance: $dir/.git"
+        return 4
+    fi
     if [[ -n "$(ls -A -- "$dir" 2>/dev/null)" ]]; then
         _glot_warn "el módulo ya tiene contenido, no se genera esqueleto / module already has content, no scaffolding: $dir"
         printf '%s\n' "$dir"
@@ -2756,6 +2857,8 @@ _glot_cmd_new() {
             return 4
         fi
     done <<<"$steps"
+
+    _glot_remove_generated_git "$dir" || return 4
 
     if [[ "$kind" == "manual" ]]; then
         _glot_info "estructura manual creada / manual layout created: $dir"
@@ -2824,6 +2927,13 @@ _glot_cmd_scaffold() {
         _glot_info 'revisa / check: scripts/data/init_sequences.tsv'
         return 1
     }
+
+    if [[ -e "$dir/.git" || -L "$dir/.git" ]]; then
+        if ! _glot_remove_generated_git "$dir" "$_glot_dry_run"; then
+            _glot_error "Git anidado preexistente: no se elimina sin verificar su origen / pre-existing nested Git: not removed without provenance: $dir/.git"
+            return 4
+        fi
+    fi
 
     # Sin filas de `scaffold` no hay nada que completar: se dice por stderr y se imprime
     # el directorio, que es lo que la capa cargable usa para dejar al autor dentro.
@@ -3987,6 +4097,11 @@ Verbos / Verbs:
                      del runner va a stdout. Sin argumentos usa el estado del sprint
                      Runs the assigned module's suite in its directory; the runner's
                      output goes to stdout. With no arguments it uses the sprint state
+  sync-build <library|test> <Haskell.Module> [lenguaje] [fase/módulo]
+                     Declara un módulo interno Haskell en el target reconocido.
+                     `-n` muestra el cambio; configuraciones propias se conservan
+                     Declares a Haskell internal module in a recognized target.
+                     `-n` previews the change; custom configurations are preserved
   verify [lenguaje] [fase/módulo]
                      Ejecuta el verificador: lint idiomático (sintaxis y formato), con la
                      herramienta del lenguaje; `skipped` si aún no tiene uno. **No**
@@ -4230,6 +4345,14 @@ _glot_help_verb() {
             printf 'En el directorio del módulo, con el comando nativo del lenguaje; la salida del runner va a stdout\n'
             printf 'In the module directory, with the language native command; the runner output goes to stdout\n'
             printf 'Códigos / codes: 0 verde · 1 no se pudo preparar · 4 falló / failed\n'
+            ;;
+        sync-build)
+            printf 'glot sync-build <library|test> <Haskell.Module> [lenguaje] [fase/módulo]\n'
+            printf 'Declara un módulo interno existente en el target Cabal reconocido; -n muestra el cambio.\n'
+            printf 'Declares an existing internal module in the recognized Cabal target; -n previews changes.\n'
+            printf 'Solo Haskell; no conecta runners ni modifica configuraciones Cabal desconocidas.\n'
+            printf 'Haskell only; it neither connects runners nor edits unrecognized Cabal configurations.\n'
+            printf 'Códigos / codes: 0 correcto · 1 no reconocido o inseguro · 2 uso\n'
             ;;
         verify)
             printf 'glot verify [lenguaje] [fase/módulo] — ejecuta el verificador del lenguaje\n'
@@ -6105,6 +6228,9 @@ _glot_main() {
         test)
             # Ejecuta la suite del módulo asignado / Runs the assigned module suite
             _glot_cmd_test "$@"
+            ;;
+        sync-build)
+            _glot_cmd_sync_build "$@"
             ;;
         verify)
             # Ejecuta el verificador del lenguaje / Runs the language verifier

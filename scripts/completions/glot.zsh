@@ -29,6 +29,7 @@ _glot_zsh() {
         'scaffold:completa la estructura idiomática del módulo'
         'save:confirma con la convención del repositorio'
         'test:ejecuta la suite del módulo asignado'
+        'sync-build:declara un módulo Haskell en un target reconocido'
         'verify:ejecuta el verificador del lenguaje'
         'evidence:deja el acta del sprint con la salida real'
         'close:cierra el módulo: checklist y roadmap'
@@ -75,6 +76,16 @@ _glot_zsh() {
                 lenguajes=(${(f)"$("$glot" langs 2>/dev/null | cut -f1)"})
                 _describe 'lenguaje' lenguajes
             else
+                modulos=(${(f)"$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"})
+                _describe 'módulo' modulos
+            fi
+            ;;
+        sync-build)
+            if ((CURRENT == 3)); then
+                _values 'target' library test
+            elif ((CURRENT == 5)); then
+                _values 'lenguaje' haskell
+            elif ((CURRENT >= 6)); then
                 modulos=(${(f)"$("$glot" modules 2>/dev/null | cut -f2,3 | tr '\t' '/')"})
                 _describe 'módulo' modulos
             fi

@@ -30,6 +30,17 @@
 | 7 | Cierre documental del módulo | `glot prompt docs-module` (0.8.0; alcance **solo N3** desde la 1.6.0) · `glot save 7` (0.9.0) → README de Nivel 3 desde [`README_Template.md`](../../docs/README_Template.md) | `docs(naive-sort): add README for naive sort module` | **agente** |
 | 8 | Índices del lenguaje | `glot prompt docs-language` (0.8.0; alcance **solo N1/N2** desde la 1.6.0) · `glot save 8` (0.9.0) → `{lang}/README.md` y los `README.md` de fase | `docs: add README for {phase} and update indexes` | **agente** |
 
+**ES:** En Haskell, al incorporar un módulo interno en 4b o 4c, ejecuta
+`glot sync-build library Nombre.Modulo` o `glot sync-build test Nombre.Modulo`.
+Es explícito y limitado a la plantilla Cabal reconocida; si la configuración
+es distinta, se conserva y se reporta para revisión. No conecta el runner.
+
+**EN:** In Haskell, when adding an internal module in 4b or 4c, run
+`glot sync-build library Module.Name` or `glot sync-build test Module.Name`.
+This is explicit and limited to the recognized Cabal template; other
+configurations are preserved and reported for review. It does not connect the
+runner.
+
 **ES:** El paso 8 es del **submódulo**, igual que el 7: sube los índices N1/N2 que enumeran el módulo nuevo. Va aquí, **antes** de la integración, para que el merge y el puntero se hagan una sola vez. Confirmarlo **después** del `pointer` deja el gitlink apuntando a un commit anterior: `glot status` lo enseña como `differs` y `glot close` **frena** hasta que el puntero se vuelva a preparar.
 
 **EN:** Step 8 belongs to the **submodule**, like step 7: it updates the N1/N2 indexes that list the new module. It goes here, **before** the integration, so that the merge and the pointer happen once. Confirming it **after** the `pointer` leaves the gitlink pointing at an earlier commit: `glot status` shows it as `differs` and `glot close` **stops** until the pointer is prepared again.

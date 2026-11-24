@@ -1,0 +1,13 @@
+-main RunTests
+
+# Source and test code live below the module root.
+-cp .
+
+# Run on the Haxe Eval interpreter.
+--interp
+
+# Enable the unit test library.
+-lib utest
+
+# Suppress the library's deprecated enum abstract warning.
+-w -WDeprecatedEnumAbstract

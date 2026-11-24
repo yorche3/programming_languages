@@ -133,11 +133,29 @@ grupos reales al runner existente; no se crea ni reemplaza la infraestructura de
 | Hay un **runner de ejemplo** o no existe el runner requerido | Detente y reporta el defecto del paso 4a con archivo, comando y salida real; no escribas casos ni sustituyas infraestructura |
 | El fichero del runner lo **genera la construcción** | Reporta la dependencia de construcción; el 4d puede ajustar su generación sin pedir que se vuelva a escribir la suite |
 
+En Grain, cuando el scaffold proporciona `TestStatus.finish`, conecta los
+grupos y pasa a esa función el resultado booleano del framework, por ejemplo
+`TestStatus.finish(Testing.printSummary())`. No ignores el resultado: una
+suite con fallos debe devolver código no cero.
+
+En Haskell, importa y conecta cada grupo al runner que le corresponda. Para
+cada módulo no principal del test-suite generado, ejecuta `glot sync-build test
+<Nombre.Modulo>` después de crearlo; no agregues archivos a targets por
+encontrarlos. El comando conserva configuraciones desconocidas: si las rechaza,
+reporta el bloqueo sin reescribir el manifiesto. `glot test` detecta módulos
+importados pero no declarados en targets compilados; no detecta un grupo que
+nunca se conectó al runner.
+
 Un fallo de construcción no deshace ni invalida los archivos de suite ya escritos. Repórtalo con
 el comando, el código de salida y la salida real; se corrige en 4d y luego se vuelve a ejecutar
 `glot test` sobre esta misma suite. No se repite la delegación `suite`.
 
 ### 5. Verificación: la fase roja
+
+En Rexx, `glot test` puede rechazar varias suites como ambiguas y una suite
+ooRexxUnit puede informar fallos con código 0. No infieras éxito ni cobertura
+por el código de salida: conserva la salida y reporta el bloqueo si el comando
+no permite verificar todos los grupos. No elimines suites para superar el selector.
 
 La suite está bien cuando **falla por la razón correcta**. El criterio no es «falla»: son **cuatro
 datos** que se copian al reporte junto a la salida real del comando nativo (sin editar, sin
@@ -272,7 +290,8 @@ el framework, o un test agregado que no permita identificar qué caso o paso fal
 
 **NO DEBES**
 
-- Tocar el esqueleto ni el `.gitignore`: son del encargo `scaffold` (paso 4a).
+- Rehacer el esqueleto ni tocar el `.gitignore`: son del encargo `scaffold` (paso 4a).
+  Solo se actualizan las declaraciones del target necesarias para los grupos nuevos.
 - Declarar ni modificar el contrato del módulo —tipo, firmas o indicador de fallo—: es del
   encargo `contract_stub` (paso 4b). Si falta o no compila, se avisa y se detiene.
 - Modificar la implementación (`src/`, `lib/`, `source/`): si existe, se deja tal cual.
@@ -296,7 +315,9 @@ el framework, o un test agregado que no permita identificar qué caso o paso fal
 - [ ] *Fixtures* nombrados, patrón de ejecución compartido y aislamiento verificado.
 - [ ] Comando nativo de pruebas ejecutado con salida real y sin warnings.
 - [ ] Contra-verificación hecha y revertida, o trasladada explícitamente al paso 6 por faltar implementación.
-- [ ] Sin cambios en el esqueleto, el `.gitignore`, el contrato, `src/`, la especificación, el roadmap ni los READMEs.
+- [ ] Sin cambios en el resto del esqueleto, el `.gitignore`, el contrato, `src/`,
+      la especificación, el roadmap ni los READMEs; solo las declaraciones de
+      target necesarias para los grupos nuevos.
 
 ---
 

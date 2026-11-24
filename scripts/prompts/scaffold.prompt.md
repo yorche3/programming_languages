@@ -67,7 +67,7 @@ comandos; resuélvelas aquí cuando correspondan a tu rol.
 | Aspecto | Detalle |
 |---|---|
 | **Entrada** | El directorio del módulo con lo que dejó `glot new`, la especificación, la fila de `{lang}` en `scripts/data/languages.tsv` y los módulos homologados del lenguaje |
-| **Salida** | Un esqueleto idiomático cuyo **runner de pruebas arranca sin casos** —andamiaje, no suite—; `.gitignore` con patrones pertinentes y verificado; sin ejecutables de ejemplo ni nombres que no encajen |
+| **Salida** | Un esqueleto idiomático cuyo **runner de pruebas arranca sin casos** —andamiaje, no suite—; en Perl, Raku, Scala, Scheme y Tcl, el comando informa y rechaza explícitamente la ausencia de casos. `.gitignore` con patrones pertinentes y verificado; sin ejecutables de ejemplo ni nombres que no encajen |
 | **Fuera de alcance** | El contrato del módulo (encargo `contract_stub`, paso 4b), la suite (encargo `suite`, paso 4c), la implementación (paso 5), el README (paso 7) y los commits (`glot save`) |
 | **Evidencia** | La salida real del comando nativo de pruebas y de `git check-ignore -v`, pegadas sin editar |
 
@@ -99,13 +99,14 @@ detecta cada caso:
 | **Índice de fuentes obsoleto**: el inicializador generó el *autoloader* del lenguaje con `src/` **vacío** | El comando de pruebas falla con «clase o símbolo no encontrado» aunque el archivo exista (caso real medido el 2026-09-28: el `composer require` de `new` deja el `classmap` del `src/` vacío y PHPUnit no ve la clase nueva) | **Regenerarlo** después de crear los archivos (`composer dump-autoload`, `dotnet restore`, …) y decir el comando en la evidencia |
 | **Nombres predefinidos** que no encajan | Un archivo o manifiesto se llama como la plantilla (`MyLib.hs`, `<dir>_spec.<ext>`, `library.cabal`) y no como el módulo | Renombrar a la convención del módulo y ajustar el manifiesto (nombre, versión, descripción) para que concuerde con `{module}` / `{Module}` |
 | **Layout divergente** | El inicializador creó `bin/`+`lib/` y este repositorio usa `src/`+`test/` en ese lenguaje, o al revés | Dejar **una** disposición: la que ya usan los módulos homologados |
-| **Andamiaje de otro fin** | CI propia del inicializador, *samples*, `example/`, utilidades que el módulo no usa | Conservar si el repositorio también lo conserva en otros módulos del lenguaje; quitar solo lo que rompe o contradice la convención, y decirlo |
+| **Andamiaje de otro fin** | CI propia del inicializador, *samples*, `example/`, utilidades que el módulo no usa | Conservar lo que no impida usar el módulo, aunque las bases homologadas no lo tengan; no borrar extras para uniformar. Retirar solo lo que lo rompa o contradiga una convención, y decirlo |
 | **Referencia entre proyectos ausente** | El comando de pruebas **arranca** pero el proyecto de producción **ni se compila** —su código defectuoso es invisible— y la suite no compila: «clase o símbolo no encontrado» (`CS0246`/`CS0103` en C#) aunque el tipo exista en `src/` | Añadir la referencia del proyecto de pruebas al de producción (`dotnet add <pruebas.csproj> reference <produccion.csproj>`) y **volver a ejecutar**: con el enlace, el compilador ya revisa `src/` y lo que diga es del paso que escribió ese código |
 | **Fichero de construcción esperado ausente** | La guía o un módulo homologado exige un `Makefile` u otro fichero y `glot scaffold` no lo dejó | Si el patrón ya existe, completar el dato/catálogo para que lo genere de forma repetible; no dejar este bloqueo para 4c/4d. Solo un fallo de construcción no previsto después de 4c pasa a `build` (4d) |
 
 **Regla de conservación:** lo que el inicializador haga bien se queda (estructura de pruebas,
-manifiesto, `LICENSE`, el `README` generado si el módulo no tiene el suyo). Solo se cambia lo
-que **contradice** al módulo o al repositorio, y cada cambio se justifica en una línea.
+manifiesto, `LICENSE`, el `README` generado si el módulo no tiene el suyo y los archivos
+auxiliares que no impidan usarlo). Solo se cambia lo que **contradice** al módulo o al
+repositorio, y cada cambio se justifica en una línea.
 **No** escribas la implementación ni la suite.
 
 ### 3. `.gitignore` del módulo
@@ -124,7 +125,70 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 - El proyecto debe compilar, resolver o instalar sin warnings ni errores.
 - Ejecuta el comando nativo de pruebas: el runner mínimo debe **arrancar sin casos**. Si la
   herramienta necesita el runner en un archivo dedicado, este paso lo deja listo; el 4c solo
-  conecta los grupos de pruebas. Copia la salida real, sin editar.
+  conecta los grupos de pruebas. En Perl, Raku, Scala, Scheme y Tcl, verifica que el comando
+  informa `No Perl test files configured`, `No Raku test files configured`,
+  `No Scala test cases passed`, `No Scheme test files configured` o `No Tcl test files configured`,
+  respectivamente, y devuelve fallo cuando el
+  directorio de pruebas está vacío: es la protección esperada, no un bloqueo ni
+  una suite validada. Copia la salida real, sin editar.
+- En Swift, `swift test` puede devolver éxito con cero casos. `swift_test.sh`
+  valida XCTest y Swift Testing, rechaza omitidos y fallos; no lo presentes como
+  suite validada si no hay casos. Si el ejemplo generado no coincidía
+  con la muestra reconocida, revísalo sin eliminar código propio.
+- En Go, `go test` puede aprobar sin casos o con todos omitidos. `glot test`
+  ejecuta Go sin caché y falla si no hay pruebas finales aprobadas; este fallo
+  es esperable antes de escribir la suite y no valida el módulo.
+- En Elixir, el test sentinel del scaffold reconocido debe fallar hasta que
+  `suite` lo sustituya. `mix test` puede devolver éxito sin casos o con todos
+  omitidos; `glot test` exige al menos un caso aprobado e informa las omisiones.
+  Conserva y revisa ejemplos de Mix que no coincidan con la plantilla reconocida.
+- En Erlang y Gleam, el sentinel del scaffold reconocido debe fallar hasta
+  que `suite` lo sustituya. `glot test` exige un resumen EUnit o Gleeunit con
+  casos aprobados; conserva y revisa cualquier variante de los ejemplos.
+- En Crystal, el ejemplo generado falla hasta que `suite` lo sustituya.
+  `glot test` verifica el informe JUnit y exige ejemplos aprobados; un
+  conjunto vacío o completamente pendiente no valida el módulo.
+- En OCaml, el sentinel de la plantilla Dune reconocida debe fallar hasta
+  que `suite` lo sustituya. `glot test` exige resúmenes Alcotest con casos,
+  pero no detecta un ejecutable silencioso si otro emite un resumen válido;
+  revisa todos los targets y conserva variantes del scaffold.
+- En Vala, el helper mueve solo la pareja exacta de Meson 1.3.2 a `src/` y
+  `test/`, actualiza el manifiesto y deja un sentinel GLib.Test fallido.
+  `vala_test.sh` exige TAP real con casos aprobados y rechaza omitidos/fallos.
+- En V, `v test .` puede devolver éxito con `0 total`; `v_test.sh` exige al menos
+  un caso aprobado en el resumen y conserva el layout generado.
+- En PureScript, el runner mínimo puede devolver éxito sin ejecutar casos.
+  `purescript_test.sh` suma los resúmenes `All N tests passed!` y rechaza cero
+  casos; no lo presentes como suite validada.
+- En Rexx, el selector actual no admite varias suites y ooRexxUnit puede
+  informar fallos aunque el proceso termine con código 0. `rexx_test.sh` ejecuta
+  todas las suites `test/*.rexx` y valida los contadores; no tomes código 0 como
+  prueba de éxito y reporta fallos o errores.
+- En TypeScript, no uses `--passWithNoTests`; `typescript_test.sh` exige el
+  informe JSON de Jest con al menos un caso aprobado y rechaza omitidos/fallos.
+- En JavaScript, usa el mismo informe JSON de Jest; `typescript_test.sh`
+  rechaza cero casos, omitidos y fallos.
+- En Haskell, `cabal init --lib --tests` puede dejar un `test-suite` con
+  `test/Main.hs` que solo anuncia que no hay suite. `glot scaffold` adapta la
+  plantilla Cabal reconocida a Hspec; revisa lo que conserve y sigue la sección
+  Haskell de la guía si la adaptación sigue pendiente. Mantén `main-is` y el
+  nombre del archivo sincronizados; conserva y revisa manifiestos y runners propios.
+  Declara `hspec` en el test-suite junto con `base` y el paquete, no en la
+  biblioteca por defecto. Cabal puede dar `PASS` con cero ejemplos: eso no valida
+  casos. Comprueba el arranque vacío con `cabal test .:tests
+  --ghc-options=-Werror=missing-home-modules`; `glot test` rechaza la ausencia
+  de ejemplos, resultados pendientes o un resumen Hspec no reconocido.
+- En Ballerina, `bal test` puede devolver éxito sin casos o con todos los tests
+  deshabilitados. `ballerina_test.sh` genera el informe JSON, rechaza cero casos
+  y fallos, y conserva el resultado real.
+- En Groovy y Kotlin, Gradle puede devolver éxito con `test NO-SOURCE`: eso no
+  valida una suite. `gradle_test.sh` inspecciona informes XML y rechaza NO-SOURCE.
+  Conserva cualquier muestra que el catálogo no haya retirado
+  y revisa su contenido junto con el código existente.
+- En Nim, el helper conserva fuentes propias y retira solo las muestras exactas
+  de Nimble. La task `test` se añade una sola vez. El runner ejecuta directamente
+  las suites de `tests/`; Nimble puede devolver código 0 pese a fallos o suites
+  vacías, así que no se usa como único criterio.
 - Si el comando no arranca porque el framework no trae runner, **escríbelo aquí** (mínimo y sin
   casos) y vuelve a comprobarlo. Si aun así no arranca, **detente y dilo** con la salida real.
   No escribas la suite para «arreglarlo»: eso es el paso 4c.
@@ -152,7 +216,8 @@ eso corresponde a otra delegación.
 - Escribir el código de la implementación del pseudocódigo ni modificar `src/` con lógica.
 - Modificar la especificación, el roadmap ni `scripts/data/`.
 - Generar documentación, READMEs ni índices.
-- Introducir dependencias externas no estándar del lenguaje.
+- Introducir dependencias externas que no estén autorizadas por la guía de
+  inicialización para el andamiaje del lenguaje.
 - Ejecutar `git add`, `git commit` ni `git push`.
 
 ---

@@ -1,0 +1,6 @@
+module(
+    name = "cpp_@MODULE@",
+    version = "1.0",
+)
+
+bazel_dep(name = "googletest", version = "1.15.2", repo_name = "com_google_googletest")

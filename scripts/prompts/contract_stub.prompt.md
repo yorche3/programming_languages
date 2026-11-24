@@ -104,6 +104,13 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 **Regla de conservación:** lo que el esqueleto ya declara y encaja se respeta: el contrato se
 **añade**, no se reescribe la estructura.
 
+En Haskell, si el contrato incorpora un módulo **interno** de biblioteca,
+ejecuta `glot sync-build library <Nombre.Modulo>` para ese módulo después de
+crearlo. El comando admite la plantilla Cabal reconocida, no infiere la
+pertenencia y conserva configuraciones desconocidas: si las rechaza, reporta el
+bloqueo sin reescribir el manifiesto. Los módulos de interfaz pública requieren
+revisar `exposed-modules`; este comando no decide qué se exporta.
+
 ### 3. Declarar los esqueletos de las operaciones
 
 El contrato no basta: en lenguajes como Ada o C, un contrato sin su cuerpo **no enlaza**, y la
