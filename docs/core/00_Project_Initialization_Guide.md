@@ -692,13 +692,15 @@ bash {root}/scripts/data/ocaml_scaffold.sh {module}
 bash {root}/scripts/data/ocaml_test.sh
 ```
 
-**ES:** El runner fuerza Dune y rechaza resúmenes Alcotest vacíos o ausentes,
-pero una suite silenciosa puede pasar inadvertida si otra emite un resumen
-válido; comprueba que todos los targets de tests producen su resumen.
+**ES:** El runner fuerza Dune y exige un resumen Alcotest no vacío por acción
+`runtest` reconocida; rechaza también una acción etiquetada silenciosa junto a
+otra aprobada. Una acción personalizada con varios programas o una dependencia
+sin etiqueta `runtest` aún puede ocultar un ejecutable silencioso.
 
-**EN:** The runner forces Dune and rejects empty or missing Alcotest summaries,
-but a silent suite can go unnoticed if another emits a valid summary; check
-that every test target produces its summary.
+**EN:** The runner forces Dune and requires one nonempty Alcotest summary per
+recognized `runtest` action; it also rejects a labeled silent action alongside
+a passing one. A custom action running multiple programs or a dependency
+without a `runtest` label can still hide a silent executable.
 
 ```text
 {module}/

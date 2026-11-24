@@ -171,7 +171,7 @@ review those cases and other versions.
 
 ```text
 OCaml scaffold and runner focused assertions: 21 passed, 0 failed
-OCaml references: 4 and 15 cases, 0 failures
+OCaml references: 3, 4 and 15 cases, 0 failures
 OCaml runner: silent action rejected; two passing actions accepted
 ```
 
