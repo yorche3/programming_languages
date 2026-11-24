@@ -347,6 +347,33 @@ dart --version: 3.12.2
 dart create --no-pub -t package: expected package files generated in temporary directory
 ```
 
+## 2.1.0-dev — 2026-11-24 (runner Dart / Dart runner)
+
+**ES:** Dart 3.12.2 y `package:test` 1.32.0 (versión del lockfile homologado)
+devuelven éxito si todos los casos están omitidos (`+0 ~1: All tests passed!`);
+una suite sin casos sí devuelve 79. `dart_test.sh` conserva la salida de
+`dart test --reporter expanded --no-color`, propaga errores del proceso y
+exige un resumen único con al menos un caso aprobado. La mezcla de aprobados y
+omitidos se acepta. El módulo homologado aprobó sus tres casos y una copia
+aislada confirmó el comportamiento vacío/omitido; no se modificó el submódulo.
+
+**EN:** Dart 3.12.2 and `package:test` 1.32.0 (the homologated module's lockfile)
+exit successfully when all cases are skipped (`+0 ~1: All tests passed!`);
+an empty suite exits 79.
+`dart_test.sh` preserves `dart test --reporter expanded --no-color` output,
+propagates process failures and requires one summary with at least one passing
+case. Mixed passes and skips are accepted. The homologated module passed its
+three cases; an isolated copy confirmed the empty/skipped behavior. The
+submodule was not modified.
+
+```text
+dart --version: 3.12.2
+package:test: 1.32.0 (homologated module lockfile)
+homologated Dart tests: 3 passed
+isolated module copy: empty suite exit 79; skipped-only exit 0
+dart runner assertions: pass, mixed pass/skip accepted; empty summary and skipped-only rejected
+```
+
 ## 2.1.0-dev — 2026-11-23 (revisión de Elm / Elm review)
 
 **ES:** `elm init` deja `elm.json` y `src/`, pero no `tests/`, `.gitignore`

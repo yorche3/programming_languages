@@ -447,6 +447,14 @@ output and requires at least one passing leaf test. It counts leaf subtests
 without counting their parent and reports skips; mixed passes and skips are
 accepted.
 
+**ES:** `dart_test.sh` conserva la salida de Dart y valida el resumen del
+reporter `expanded`: exige al menos un caso aprobado y rechaza suites vacías
+o solo omitidas; una mezcla de aprobados y omitidos se acepta.
+
+**EN:** `dart_test.sh` preserves Dart's output and validates the `expanded`
+reporter summary: it requires at least one passing case and rejects empty or
+all-skipped suites; mixed passes and skips are accepted.
+
 **ES:** Nim usa una retirada conservadora para sus muestras exactas y un runner
 directo que rechaza suites ausentes o sin casos.
 

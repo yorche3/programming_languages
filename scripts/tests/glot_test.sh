@@ -4596,6 +4596,48 @@ js_rc=0
 ) >/dev/null 2>&1 || js_rc=$?
 assert_eq 'test JavaScript caso aprobado: código' '0' "$js_rc"
 
+DART_COMMAND="$(awk -F '\t' '$1 == "dart" { print $3 }' "$DATA_DIR/languages.tsv")"
+assert_eq 'catálogo Dart: runner estricto' \
+    'bash {root}/scripts/data/dart_test.sh' "$DART_COMMAND"
+DART_RUN="$WORK_DIR/dart-runner"
+mkdir -p -- "$DART_RUN/bin"
+cat >"$DART_RUN/bin/dart" <<'EOF'
+#!/usr/bin/env bash
+[[ "$*" == "test --reporter expanded --no-color" ]] || exit 2
+cat -- "$DART_FAKE_OUTPUT"
+exit "${DART_FAKE_RC:-0}"
+EOF
+chmod +x -- "$DART_RUN/bin/dart"
+cp -- "$DATA_DIR/dart_test.sh" "$DART_RUN/dart_test.sh"
+dart_runner_run() {
+    local rc=0
+    out="$(cd -- "$DART_RUN" && DART_FAKE_OUTPUT="$DART_FAKE_OUTPUT" \
+        DART_FAKE_RC="${1:-0}" PATH="$DART_RUN/bin:$PATH" \
+        bash ./dart_test.sh 2>"$WORK_DIR/dart-runner.err")" || rc=$?
+    err="$(cat -- "$WORK_DIR/dart-runner.err")"
+    rc_last="$rc"
+}
+DART_FAKE_OUTPUT="$DART_RUN/output"
+printf '00:00 +1: All tests passed!\n' >"$DART_FAKE_OUTPUT"
+dart_runner_run
+assert_eq 'test Dart: acepta caso aprobado' '0' "$rc_last"
+printf '00:00 +1 ~1: All tests passed!\n' >"$DART_FAKE_OUTPUT"
+dart_runner_run
+assert_eq 'test Dart: acepta aprobados con omitidos' '0' "$rc_last"
+printf '00:00 +0 ~1: All tests passed!\n' >"$DART_FAKE_OUTPUT"
+dart_runner_run
+assert_eq 'test Dart: rechaza solo omitidos' '1' "$rc_last"
+assert_contains 'test Dart: explica cero casos aprobados' 'sin casos aprobados' "$err"
+printf 'No tests ran.\n' >"$DART_FAKE_OUTPUT"
+dart_runner_run
+assert_eq 'test Dart: rechaza resumen ausente' '1' "$rc_last"
+printf '00:00 +1: All tests passed!\n00:00 +2: All tests passed!\n' >"$DART_FAKE_OUTPUT"
+dart_runner_run
+assert_eq 'test Dart: rechaza resumen ambiguo' '1' "$rc_last"
+printf '00:00 +1: All tests passed!\n' >"$DART_FAKE_OUTPUT"
+dart_runner_run 7
+assert_eq 'test Dart: propaga fallo del proceso' '7' "$rc_last"
+
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"
 printf '[package]\nname = "naive_sort"\n' >"$RUSTB/Cargo.toml"

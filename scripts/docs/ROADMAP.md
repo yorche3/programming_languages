@@ -1117,15 +1117,15 @@ Criterios para la siguiente versión / Next-version acceptance criteria:
 | No hay verbo para **retirar un módulo** ni para deshacer un cierre: `close`/`finish` solo añaden y `clean` solo borra artefactos ignorados. Medido el 2026-10-12 al planear la retirada de `naive_sort`, `numbers` y `calculator` en los 50 submódulos (los commits que los introdujeron añadieron entre 2 y 30 rutas de `core/`, así que no hay un commit por módulo que revertir) | Un verbo `retire` (o `unclose`) que borre las rutas del módulo en el submódulo, baje el contador del roadmap y el registro del checklist, y deje el gitlink confirmado; mientras no exista, la retirada es `git rm -r` + commit por lenguaje y edición a mano de los contadores |
 | El **puntero a mano** (workaround de `SPRINT.md`) salta el portón de `pointer`, y ni `status` ni `close` avisan de que el gitlink del lenguaje apunta a una rama sin integrar. Medido en `prolog` el 2026-10-12 (`ed42ba7` frente a un `main` en `69f1e9f`) | Que `status`/`doctor` marquen el gitlink cuyo commit no está en el `main` del submódulo, y que `close` lo compruebe también cuando el puntero se confirmó a mano |
 
-#### ⏳ Abierta — Dart (declarada v1.6.5) / Open — Dart (declared v1.6.5)
+#### ✅ Cerrada — Dart (declarada v1.6.5) / Closed — Dart (declared v1.6.5)
 
-**ES:** Esta sección registra dos entradas: la de C# se cerró el **2026-11-23**
-como se documenta abajo; la de Dart, declarada el **2026-10-03**, permanece
-abierta.
+**ES:** Esta sección registra dos entradas ya cerradas: C# el **2026-11-23**
+y Dart el **2026-11-24**, como se documenta abajo. La entrada de Dart se
+declaró el **2026-10-03**.
 
-**EN:** This section records two entries: the C# entry was closed on
-**2026-11-23**, as documented below; the Dart entry, declared on **2026-10-03**,
-remains open.
+**EN:** This section records two closed entries: C# on **2026-11-23** and Dart
+on **2026-11-24**, as documented below. The Dart entry was declared on
+**2026-10-03**.
 
 **ES:** **Estado el 2026-10-02 (v1.6.5, en curso):** el **dato** ya lleva el paso —la secuencia de `csharp` termina en `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj`—, la **guía** refleja ese paso y deja el completado en `Class1.cs`, `UnitTest1.cs` y el `.gitignore`, el encargo [`scaffold`](../prompts/scaffold.prompt.md) nombra el resto y el harness tiene su caso. La medición del mismo día, sobre el módulo que lo destapó, dice lo que estaba en juego: añadida la referencia **a mano**, `dotnet test {Module}.slnx` **pasa a compilar `src/`** y falla con **tres errores y un aviso en `Node.cs`** —`CS0161` («not all code paths return a value»), `CS0246` («the type or namespace name `get` could not be found») y `CS0168`— que hasta entonces eran **invisibles**, porque sin la referencia el proyecto de producción **ni se compila**. Falta la **comprobación de ciclo completo**: un `glot new` de C# y su `4a`.
 
@@ -1140,7 +1140,7 @@ muestras medidas de .NET 10 tras normalizar BOM/CRLF; se preservan cambios y
 se bloquean symlinks. `scaffold` también copia un `.gitignore` .NET medido solo
 cuando falta; el harness verifica las muestras, `bin/`, `obj/`, dry-run y
 preservación de un ignore propio. La fila C# de la tabla siguiente queda como
-registro histórico; Dart es la entrada que permanece abierta en esta sección.
+registro histórico; la deuda de Dart se cerró con el runner descrito abajo.
 
 **EN — C# closure (2026-11-23):** in a temporary .NET 10.0.115 project, the
 catalogue sequence was executed, including `dotnet add reference`; a test
@@ -1150,8 +1150,8 @@ five steps and `glot -n scaffold` showed sample removal. `Class1.cs` and
 after BOM/CRLF normalization; edits are preserved and symlinks are blocked.
 Scaffold also copies a measured .NET `.gitignore` only when missing; the
 harness verifies samples, `bin/`, `obj/`, dry-run and preservation of an
-authored ignore file. The C# row below is historical; Dart remains open in
-this section.
+authored ignore file. The C# row below is historical; the Dart debt was closed
+with the runner described below.
 
 | Deuda | Qué la cierra / What closes it |
 |-------|--------------------------------|
@@ -1161,6 +1161,22 @@ this section.
 **ES:** **Estado el 2026-10-03:** el **dato** y la **guía** ya están corregidos (`dart test` en la columna 4, sin el `·`), el acta se regeneró **en verde** (`verdict=green`, `test_exit=0`, `verify_exit=0`) y el arnés sigue en **950/0**. La copia instalada del `HOME` queda `install_stale: yes` hasta un `glot install` lanzado **desde el clon** (el de la copia solo se recopia). Queda solo lo **opcional**: el caso del arnés que rechace `·` en la columna 4.
 
 **EN:** **Status on 2026-10-03:** the **datum** and the **guide** are already fixed (`dart test` in column 4, without the `·`), the record was regenerated **green** (`verdict=green`, `test_exit=0`, `verify_exit=0`) and the harness is still at **950/0**. The installed copy in `HOME` stays `install_stale: yes` until a `glot install` run **from the clone** (the copy's own only re-copies itself). Only the **optional** part remains: the harness case rejecting `·` in column 4.
+
+**ES — Cierre Dart (2026-11-24):** además de conservar la corrección del
+comando nativo `dart test`, el catálogo y la guía usan ahora el runner
+`dart_test.sh`, que rechaza suites vacías y solo omitidas. El harness comprueba
+el comando exacto del catálogo y los casos aprobados, mixtos, omitidos,
+resumen ausente/ambiguo y propagación del fallo del proceso. La prueba nativa
+del módulo homologado pasó **3 casos**; Dart 3.12.2 confirmó que una suite solo
+omitida devuelve éxito, causa que el runner ahora detecta.
+
+**EN — Dart closure (2026-11-24):** in addition to preserving the corrected
+native `dart test` command, the catalogue and guide now use `dart_test.sh`,
+which rejects empty and all-skipped suites. The harness checks the exact
+catalogue command and passing, mixed, skipped-only, missing/ambiguous summary
+and process-failure cases. The homologated module's native suite passed **3
+cases**; Dart 3.12.2 confirmed that an all-skipped suite exits successfully,
+which the runner now detects.
 
 #### ⏳ Abierta — la paga la v1.6.1 / Open — v1.6.1 pays it
 

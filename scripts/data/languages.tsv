@@ -9,7 +9,7 @@ cpp	manual	bazelisk test //...	-
 crystal	tool	bash {root}/scripts/data/crystal_test.sh	crystal tool format --check src
 csharp	tool	dotnet test {Module}.slnx	-
 d	tool	dub test	-
-dart	tool	dart test	dart analyze
+dart	tool	bash {root}/scripts/data/dart_test.sh	dart analyze
 elixir	tool	bash {root}/scripts/data/elixir_test.sh	mix format --check-formatted
 elm	tool	elm-test	-
 erlang	tool	bash {root}/scripts/data/erlang_test.sh	-
