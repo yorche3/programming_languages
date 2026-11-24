@@ -639,14 +639,26 @@ Authored manifests are preserved for review. The homologated D base also
 needs its test inclusion reviewed.
 
 **ES:** Forth crea una fuente vacía, un framework y un runner que anuncia la
-ausencia de tests, sin sobrescribir archivos propios. Gforth 0.7.3 ejecutó el
-runner y devolvió 1 ante una aserción fallida. El framework de la base
-homologada todavía necesita revisar su código de salida.
+ausencia de tests, sin sobrescribir archivos propios. Aunque el sentinel de
+scaffold falla, Gforth 0.7.3 devuelve 0 para las aserciones fallidas de las
+bases: el contador `failed` solo se imprime. `forth_test.sh` valida los dos
+formatos de resumen homologados, sus contadores y un mínimo de un caso
+aprobado, sin modificar los submódulos.
 
 **EN:** Forth creates an empty source, a framework and a runner announcing no
-tests without overwriting authored files. Gforth 0.7.3 ran the runner and
-returned 1 on a failed assertion. The homologated base's framework still
-needs its exit status reviewed.
+tests without overwriting authored files. Although the scaffold sentinel
+fails, Gforth 0.7.3 exits 0 for failed assertions in the homologated bases:
+the `failed` counter is only printed. `forth_test.sh` validates both
+homologated summary formats, their counters and at least one passing case,
+without modifying the submodules.
+
+```text
+Gforth 0.7.3 references through glot: calculator 5, numbers 22, naive_sort 78,
+  data_structures_basics 114, data_structures_advanced 180 cases passed
+Injected failed assertions: native exit 0 in both summary formats; wrapper exit 1
+Forth summary parser: valid formats, failures, empty/incomplete/malformed,
+  ambiguous, inconsistent and process-failure cases rejected or accepted as expected
+```
 
 **ES:** COBOL crea una fuente y un runner mínimos, Makefile y `.gitignore`
 sin sobrescribir los existentes. Con GnuCOBOL 3.2.0 se verificaron el punto de

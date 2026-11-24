@@ -4638,6 +4638,97 @@ printf '00:00 +1: All tests passed!\n' >"$DART_FAKE_OUTPUT"
 dart_runner_run 7
 assert_eq 'test Dart: propaga fallo del proceso' '7' "$rc_last"
 
+FORTH_RUN="$WORK_DIR/forth-runner"
+mkdir -p -- "$FORTH_RUN/bin" "$FORTH_RUN/test"
+: >"$FORTH_RUN/test/run-tests.forth"
+cat >"$FORTH_RUN/bin/gforth" <<'EOF'
+#!/usr/bin/env bash
+[[ "$*" == "run-tests.forth" ]] || exit 2
+cat -- "$FORTH_FAKE_OUTPUT"
+exit "${FORTH_FAKE_RC:-0}"
+EOF
+chmod +x -- "$FORTH_RUN/bin/gforth"
+cp -- "$DATA_DIR/forth_test.sh" "$FORTH_RUN/forth_test.sh"
+forth_runner_run() {
+    local rc=0
+    out="$(cd -- "$FORTH_RUN" && FORTH_FAKE_OUTPUT="$FORTH_FAKE_OUTPUT" \
+        FORTH_FAKE_RC="${1:-0}" PATH="$FORTH_RUN/bin:$PATH" \
+        bash ./forth_test.sh 2>"$WORK_DIR/forth-runner.err")" || rc=$?
+    err="$(cat -- "$WORK_DIR/forth-runner.err")"
+    rc_last="$rc"
+}
+FORTH_FAKE_OUTPUT="$FORTH_RUN/output"
+cat >"$FORTH_FAKE_OUTPUT" <<'EOF'
+tests runned 3
+passed 3
+failed 0
+EOF
+forth_runner_run
+assert_eq 'test Forth: acepta resumen de tres líneas' '0' "$rc_last"
+cat >"$FORTH_FAKE_OUTPUT" <<'EOF'
+Tests run: 3 , Passed: 3 , Failed: 0
+EOF
+forth_runner_run
+assert_eq 'test Forth: acepta resumen de calculator' '0' "$rc_last"
+cat >"$FORTH_FAKE_OUTPUT" <<'EOF'
+Tests run: 3 , Passed: 2 , Failed: 1
+EOF
+forth_runner_run
+assert_eq 'test Forth: rechaza fallo en resumen de calculator' '1' "$rc_last"
+cat >"$FORTH_FAKE_OUTPUT" <<'EOF'
+tests runned 3
+passed 2
+failed 1
+EOF
+forth_runner_run
+assert_eq 'test Forth: rechaza fallo reportado' '1' "$rc_last"
+assert_contains 'test Forth: informa los fallos' 'con fallos' "$err"
+cat >"$FORTH_FAKE_OUTPUT" <<'EOF'
+tests runned 0
+passed 0
+failed 0
+EOF
+forth_runner_run
+assert_eq 'test Forth: rechaza suite vacía' '1' "$rc_last"
+printf 'tests runned 3\npassed 3\n' >"$FORTH_FAKE_OUTPUT"
+forth_runner_run
+assert_eq 'test Forth: rechaza resumen incompleto' '1' "$rc_last"
+cat >"$FORTH_FAKE_OUTPUT" <<'EOF'
+tests runned invalid
+passed 3
+failed 0
+EOF
+forth_runner_run
+assert_eq 'test Forth: rechaza contadores malformados' '1' "$rc_last"
+cat >"$FORTH_FAKE_OUTPUT" <<'EOF'
+tests runned 3
+passed 3
+failed 0
+Tests run: 3 , Passed: 3 , Failed: 0
+EOF
+forth_runner_run
+assert_eq 'test Forth: rechaza formatos de resumen ambiguos' '1' "$rc_last"
+cat >"$FORTH_FAKE_OUTPUT" <<'EOF'
+tests runned 3
+passed 3
+failed 0
+EOF
+forth_runner_run 7
+assert_eq 'test Forth: propaga fallo del proceso' '7' "$rc_last"
+mv -- "$FORTH_RUN/test" "$FORTH_RUN/test-original"
+ln -s -- test-original "$FORTH_RUN/test"
+forth_runner_run
+assert_eq 'test Forth: rechaza directorio test enlazado' '1' "$rc_last"
+assert_contains 'test Forth: explica ruta insegura' 'safe path' "$err"
+rm -- "$FORTH_RUN/test"
+mv -- "$FORTH_RUN/test-original" "$FORTH_RUN/test"
+mv -- "$FORTH_RUN/test/run-tests.forth" "$FORTH_RUN/run-tests-original.forth"
+ln -s -- ../run-tests-original.forth "$FORTH_RUN/test/run-tests.forth"
+forth_runner_run
+assert_eq 'test Forth: rechaza runner enlazado' '1' "$rc_last"
+rm -- "$FORTH_RUN/test/run-tests.forth"
+mv -- "$FORTH_RUN/run-tests-original.forth" "$FORTH_RUN/test/run-tests.forth"
+
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"
 printf '[package]\nname = "naive_sort"\n' >"$RUSTB/Cargo.toml"

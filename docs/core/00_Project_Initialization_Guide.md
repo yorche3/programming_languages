@@ -102,7 +102,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **elixir** | 🔧 `mix new {module} --module {Module}` | `mix.exs` | ✅ `bash {root}/scripts/data/elixir_test.sh` |
 | **elm** | ⛓️ 🔧 `elm init` | `elm.json`, `src/`, `tests/`, `.gitignore` | ✅ `elm-test` |
 | **erlang** | ⛓️ ✅ `rebar3 new lib {module}` | `rebar.config`, `src/{module}.app.src` | ✅ `bash {root}/scripts/data/erlang_test.sh` |
-| **forth** | ✍️ `mkdir -p src test` | — (runner casero `test.forth`) | ✅ `cd test && gforth run-tests.forth` |
+| **forth** | ✍️ `mkdir -p src test` | — (runner casero `test.forth`) | ✅ `bash {root}/scripts/data/forth_test.sh` |
 | **fsharp** | ⛓️ 🔧 `dotnet new sln -n {Module}` (después `classlib -lang F#` y `xunit`; el layout homologado es plano) | `{Module}.slnx`, `src/{Module}.fsproj`, `test/{Module}.Tests.fsproj` | ✅ `dotnet test` |
 | **gleam** | ⛓️ ✅ `gleam new {module}` | `gleam.toml`, `manifest.toml` | ✅ `bash {root}/scripts/data/gleam_test.sh` |
 | **go** | ✅ `go mod init example.com/{module}` | `go.mod` | ✅ `go run {root}/scripts/data/go_test_runner.go` |

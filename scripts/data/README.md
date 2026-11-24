@@ -455,6 +455,16 @@ o solo omitidas; una mezcla de aprobados y omitidos se acepta.
 reporter summary: it requires at least one passing case and rejects empty or
 all-skipped suites; mixed passes and skips are accepted.
 
+**ES:** `forth_test.sh` ejecuta Gforth desde `test/` y valida uno de los
+formatos de resumen del framework homologado. Comprueba los contadores,
+requiere al menos un caso aprobado y cero fallos; el código de salida nativo
+por sí solo no detecta aserciones fallidas.
+
+**EN:** `forth_test.sh` runs Gforth from `test/` and validates one of the
+homologated framework's summary formats. It checks the counters, requires at
+least one passing case and zero failures; the native exit status alone does
+not detect failed assertions.
+
 **ES:** Nim usa una retirada conservadora para sus muestras exactas y un runner
 directo que rechaza suites ausentes o sin casos.
 

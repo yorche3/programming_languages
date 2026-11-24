@@ -13,7 +13,7 @@ dart	tool	bash {root}/scripts/data/dart_test.sh	dart analyze
 elixir	tool	bash {root}/scripts/data/elixir_test.sh	mix format --check-formatted
 elm	tool	elm-test	-
 erlang	tool	bash {root}/scripts/data/erlang_test.sh	-
-forth	manual	cd test && gforth run-tests.forth	-
+forth	manual	bash {root}/scripts/data/forth_test.sh	-
 fsharp	tool	dotnet test	-
 gleam	tool	bash {root}/scripts/data/gleam_test.sh	-
 go	tool	go run {root}/scripts/data/go_test_runner.go	test -z "$(gofmt -l src)"
