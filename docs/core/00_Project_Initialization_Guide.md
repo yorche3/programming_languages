@@ -112,7 +112,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **haxe** | ⛓️ ✅ `mkdir -p src test` → `haxelib install utest` → `bash {root}/scripts/data/haxe_scaffold.sh {module} {Module}` | `build.hxml`, `RunTests.hx`, `src/`, `test/` | ✅ `haxe build.hxml` |
 | **java** | ✍️ `mkdir -p src/main/java/{module} src/test/java/{module}` + generar `pom.xml` Maven/JUnit | `pom.xml`, `src/main/java/{module}/{Module}.java` | ✅ `mvn test` |
 | **javascript** | ⛓️ 🔧 `npm init -y` → `bash {root}/scripts/data/javascript_scaffold.sh {module}` | `package.json`, `jest.config.js`, `.gitignore`, `src/`, `test/` | ✅ `bash {root}/scripts/data/typescript_test.sh` |
-| **julia** | ⛓️ 🔧 `julia -e 'using Pkg; Pkg.generate("{module}")'` → `glot scaffold julia {phase}/{module}` | `Project.toml`, `src/{Module}.jl`, `test/run_tests.jl` | ✅ `julia --project=. test/run_tests.jl` |
+| **julia** | ⛓️ 🔧 `julia -e 'using Pkg; Pkg.generate("{module}")'` → `glot scaffold julia {phase}/{module}` | `Project.toml`, `src/{Module}.jl`, `test/run_tests.jl`, `test/runtests.jl` | ✅ `julia --project=. test/run_tests.jl` |
 | **kotlin** | ⛓️ ✅ `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | `build.gradle.kts`, `settings.gradle.kts` | ✅ `bash {root}/scripts/data/gradle_test.sh` |
 | **lua** | 🔧 `luarocks init` | `{module}.rockspec`, `.busted` | ✅ `busted` |
 | **nim** | ⛓️ ✅ `nimble init` (tipo library; `nimble init -y`) | `{module}.nimble`, `src/{module}.nim`, `test/config.nims` | ✅ `bash {root}/scripts/data/nim_test.sh` |
@@ -181,7 +181,7 @@ not the test suite.
 | **haskell** | `cabal init --lib --tests -n --source-dir=lib --package-name={module-kebab} --expose-module={Module}` → crear `lib/{Module}.hs` solo si falta → `bash {root}/scripts/data/haskell_scaffold.sh {module}` | `{module-kebab}` sustituye subrayados por guiones. El helper adapta a Hspec solo la plantilla Cabal reconocida; conservar y revisar configuración y código propios |
 | **haxe** | `mkdir -p src test` → `haxelib install utest` → `bash {root}/scripts/data/haxe_scaffold.sh {module} {Module}` | El helper crea `build.hxml`, `RunTests.hx`, `.gitignore` y un test sentinel que falla hasta que la suite lo sustituye. El runner existente se conserva en las fases siguientes |
 | **javascript** | `npm init -y` → `bash {root}/scripts/data/javascript_scaffold.sh {module}` → `npm install` | Completa el script `test`, Jest, el punto de entrada y la configuración según CommonJS/ESM; conserva la configuración propia y no instala dependencias |
-| **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` → `glot scaffold julia {phase}/{module}` | El scaffold deja un sentinel que falla mientras no se conecte la suite; completar `test/` y el runner, y añadir `uuid`, `[compat]`, `[extras]` y `[targets]` |
+| **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` → `glot scaffold julia {phase}/{module}` | El scaffold adapta la muestra exacta y el `Project.toml` generado reconocido, crea runners sentinel para glot y `Pkg.test()` y conserva variantes propias; conectar la suite y revisar configuraciones no reconocidas |
 | **kotlin** | `gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project` → retirar solo la pareja de muestras verificada, si no hay otros archivos en `lib/src` | Conservar muestras distintas o con otros archivos y revisar; Gradle puede devolver éxito sin casos |
 | **nim** | `nimble init -y` → retirar solo muestras exactas → task `test` idempotente | Conservar fuentes propias y añadir o conservar la suite; ejecutar los archivos de `tests/` directamente y rechazar ausencia o cero casos |
 | **ocaml** | `dune init proj {module}` → `glot scaffold ocaml {phase}/{module}` | Conserva `lib/` y `test/`. Para la plantilla exacta de Dune 3.24 sin otros archivos en `test/`, configura Alcotest y crea un sentinel fallido; conservar y revisar variantes. `glot test` exige un resumen Alcotest por acción `runtest` reconocida; una acción compuesta o dependencia sin etiqueta puede ocultar un ejecutable silencioso |
@@ -627,9 +627,13 @@ dependencies or create source code or test suites.
 
 ### Julia — paquete estándar de Pkg
 
-**ES:** Herramienta (R1): julia -e 'using Pkg; Pkg.generate("{module}")', desde la carpeta de la fase (Pkg.generate(".") falla). Lo que sigue es la estructura homologada actual; el generador crea src/{module}.jl en minúscula, así que el módulo se actualizará al retomarlo (R6). `glot scaffold` crea un sentinel que falla explícitamente hasta que se conecte una suite; completar `test/`, el runner, y uuid, [compat], [extras] y [targets] en el Project.toml.
+**ES:** Herramienta (R1): `julia -e 'using Pkg; Pkg.generate("{module}")'`, desde la carpeta de la fase (`Pkg.generate(".")` falla). El generador crea `src/{module}.jl` con una muestra de saludo en minúsculas. `glot scaffold` renombra y convierte a `{Module}.jl` solo esa muestra exacta cuando no hay otras fuentes y el nombre del paquete queda alineado; también completa `Project.toml` solo si coincide con la plantilla generada reconocida. Si hay contenido propio o una variante, lo conserva para revisión.
 
-**EN:** Tool (R1): julia -e 'using Pkg; Pkg.generate("{module}")', from the phase folder (Pkg.generate(".") fails). What follows is the current homologated structure; the generator creates lowercase src/{module}.jl, so the module will be updated when retaken (R6). `glot scaffold` creates a sentinel that fails explicitly until a suite is wired in; complete `test/`, the runner, and uuid, [compat], [extras] and [targets] in Project.toml.
+El scaffold crea `test/run_tests.jl` con un sentinel que falla hasta conectar la suite y `test/runtests.jl` como adaptador para `Pkg.test()`, que requiere ese nombre convencional. `glot test` ejecuta directamente `test/run_tests.jl`. `Test`, `[compat]`, `[extras]` y `[targets]` se añaden solo al manifiesto generado reconocido. El `.gitignore` del submódulo Julia cubre los artefactos; no hace falta duplicarlo en cada módulo.
+
+**EN:** Tool (R1): `julia -e 'using Pkg; Pkg.generate("{module}")'`, from the phase directory (`Pkg.generate(".")` fails). The generator creates a lowercase `src/{module}.jl` with a greeting sample. `glot scaffold` renames and converts only that exact sample to `{Module}.jl` when no other source files exist and the package name is aligned; it also completes `Project.toml` only when it matches the recognized generated template. It preserves authored content and variants for review.
+
+The scaffold creates `test/run_tests.jl` with a failing sentinel until the suite is connected, and `test/runtests.jl` as the adapter for `Pkg.test()`, which requires that conventional filename. `glot test` runs `test/run_tests.jl` directly. `Test`, `[compat]`, `[extras]` and `[targets]` are added only to the recognized generated manifest. The Julia submodule's `.gitignore` covers artifacts; each module does not need a duplicate.
 ```bash
 mkdir -p src test
 ```
@@ -639,7 +643,7 @@ mkdir -p src test
 ├── Project.toml
 ├── Manifest.toml
 ├── src/{Module}.jl
-└── test/                    # suites + run_tests.jl
+└── test/                    # suites + run_tests.jl + runtests.jl
 ```
 
 ### Kotlin — layout Gradle estándar

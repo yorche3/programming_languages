@@ -470,6 +470,7 @@ EOF
     cp -- "$TESTS_DIR/../data/haxe_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/java_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/javascript_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/julia_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/php_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/ruby_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/rescript_scaffold.sh" "$SANDBOX/scripts/data/"
@@ -495,6 +496,9 @@ EOF
     local extra=""
     for extra in ruby python java rescript javascript typescript julia; do
         mkdir -p -- "$SANDBOX/$extra/core/algorithms"
+        if [[ "$extra" == julia ]]; then
+            cp -- "$REPO/julia/.gitignore" "$SANDBOX/$extra/.gitignore"
+        fi
         git init -q --bare "$SANDBOX/remote/$extra.git"
         git -C "$SANDBOX/remote/$extra.git" symbolic-ref HEAD refs/heads/main
         git -C "$SANDBOX/$extra" init -q -b main
@@ -2509,23 +2513,112 @@ assert_eq 'sandbox scaffold TypeScript repetido: conserva Jest' 'authored Jest c
 assert_eq 'sandbox scaffold TypeScript repetido: conserva ignore' 'authored ignore' "$(cat "$TSB/.gitignore")"
 
 JLB="$SANDBOX/julia/core/algorithms/naive_sort"
-mkdir -p -- "$JLB/test"
-glot_run_sandbox scaffold julia algorithms/naive_sort
-assert_eq 'sandbox scaffold Julia: runner ausente, código' '0' "$rc_last"
-assert_contains 'sandbox scaffold Julia: runner ausente falla explícitamente' \
-    'error("scaffold: runner Julia no configurado / Julia test runner not configured")' \
-    "$(cat "$JLB/test/run_tests.jl")"
-: >"$JLB/test/run_tests.jl"
+mkdir -p -- "$JLB/src"
+cat >"$JLB/Project.toml" <<'EOF'
+name = "naive_sort"
+uuid = "a96f58fe-899f-4f32-bd97-f062093da5d5"
+version = "0.1.0"
+authors = ["test"]
+EOF
+cat >"$JLB/src/naive_sort.jl" <<'EOF'
+module naive_sort
+
+greet() = print("Hello World!")
+
+end # module naive_sort
+EOF
+glot_run_sandbox -n scaffold julia algorithms/naive_sort
+assert_eq 'sandbox scaffold Julia -n: código' '0' "$rc_last"
+assert_contains 'sandbox scaffold Julia -n: muestra el helper' 'julia_scaffold.sh naive_sort NaiveSort' "$out"
+assert_eq 'sandbox scaffold Julia -n: no crea test' 'no' "$([[ -e "$JLB/test" ]] && echo yes || echo no)"
 glot_run_sandbox scaffold julia algorithms/naive_sort
 assert_eq 'sandbox scaffold Julia: código' '0' "$rc_last"
-assert_contains 'sandbox scaffold Julia: runner vacío falla explícitamente' \
+assert_eq 'sandbox scaffold Julia: renombra muestra exacta' 'yes' \
+    "$([[ -f "$JLB/src/NaiveSort.jl" && ! -e "$JLB/src/naive_sort.jl" ]] && echo yes || echo no)"
+assert_contains 'sandbox scaffold Julia: capitaliza el módulo' 'module NaiveSort' "$(cat "$JLB/src/NaiveSort.jl")"
+assert_contains 'sandbox scaffold Julia: alinea el nombre del paquete' 'name = "NaiveSort"' "$(cat "$JLB/Project.toml")"
+assert_contains 'sandbox scaffold Julia: agrega compatibilidad' 'julia = "1.10"' "$(cat "$JLB/Project.toml")"
+assert_contains 'sandbox scaffold Julia: agrega Test' 'Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"' "$(cat "$JLB/Project.toml")"
+assert_contains 'sandbox scaffold Julia: runner glot falla explícitamente' \
     'error("scaffold: runner Julia no configurado / Julia test runner not configured")' \
     "$(cat "$JLB/test/run_tests.jl")"
+assert_eq 'sandbox scaffold Julia: agrega adaptador Pkg' 'include("run_tests.jl")' \
+    "$(cat "$JLB/test/runtests.jl")"
+assert_eq 'sandbox scaffold Julia: usa ignore del submódulo' 'no' \
+    "$([[ -e "$JLB/.gitignore" ]] && echo yes || echo no)"
+assert_contains 'sandbox scaffold Julia: avisa suite pendiente' \
+    'glot prompt scaffold julia algorithms/naive_sort' "$err"
+if command -v julia >/dev/null 2>&1; then
+    julia_rc=0
+    julia_out="$(cd "$JLB" && JULIA_PKG_OFFLINE=true julia --startup-file=no --project=. -e 'using Pkg; Pkg.test()' 2>&1)" || julia_rc=$?
+    assert_eq 'sandbox scaffold Julia: Pkg.test rechaza sentinel' 'yes' \
+        "$([[ "$julia_rc" != 0 ]] && echo yes || echo no)"
+    assert_contains 'sandbox scaffold Julia: Pkg.test ejecuta sentinel' \
+        'runner Julia no configurado' "$julia_out"
+    printf 'using Test\n@test true\n' >"$JLB/test/run_tests.jl"
+    julia_rc=0
+    julia_out="$(cd "$JLB" && JULIA_PKG_OFFLINE=true julia --startup-file=no --project=. -e 'using Pkg; Pkg.test()' 2>&1)" || julia_rc=$?
+    assert_eq 'sandbox scaffold Julia: Pkg.test ejecuta suite conectada' '0' "$julia_rc"
+    julia_rc=0
+    julia_out="$(cd "$JLB" && julia --startup-file=no --project=. test/run_tests.jl 2>&1)" || julia_rc=$?
+    assert_eq 'sandbox scaffold Julia: runner glot ejecuta suite conectada' '0' "$julia_rc"
+fi
+printf 'authored Julia source\n' >"$JLB/src/naive_sort.jl"
 printf 'authored Julia runner\n' >"$JLB/test/run_tests.jl"
+printf 'authored Pkg runner\n' >"$JLB/test/runtests.jl"
+printf '\n# custom metadata\n' >>"$JLB/Project.toml"
 glot_run_sandbox scaffold julia algorithms/naive_sort
-assert_eq 'sandbox scaffold Julia repetido: código' '0' "$rc_last"
-assert_eq 'sandbox scaffold Julia repetido: conserva runner' \
+assert_eq 'sandbox scaffold Julia repetido: conserva fuente propia' \
+    'authored Julia source' "$(cat "$JLB/src/naive_sort.jl")"
+assert_eq 'sandbox scaffold Julia repetido: conserva runner glot' \
     'authored Julia runner' "$(cat "$JLB/test/run_tests.jl")"
+assert_eq 'sandbox scaffold Julia repetido: conserva runner Pkg' \
+    'authored Pkg runner' "$(cat "$JLB/test/runtests.jl")"
+assert_contains 'sandbox scaffold Julia repetido: conserva configuración' \
+    '# custom metadata' "$(cat "$JLB/Project.toml")"
+JLC="$SANDBOX/julia/core/algorithms/custom_julia"
+mkdir -p -- "$JLC/src" "$JLC/test"
+cat >"$JLC/Project.toml" <<'EOF'
+name = "custom_julia"
+uuid = "11111111-2222-4333-8444-555555555555"
+version = "0.2.0"
+authors = ["test"]
+
+[deps]
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+EOF
+cat >"$JLC/src/custom_julia.jl" <<'EOF'
+module custom_julia
+
+greet() = print("Hello World!")
+
+end # module custom_julia
+EOF
+custom_project="$(cat "$JLC/Project.toml")"
+(cd "$JLC" && bash "$REPO/scripts/data/julia_scaffold.sh" custom_julia CustomJulia)
+assert_eq 'sandbox scaffold Julia manifiesto propio: no altera Project.toml' \
+    "$custom_project" "$(cat "$JLC/Project.toml")"
+assert_eq 'sandbox scaffold Julia manifiesto propio: conserva ruta fuente' 'yes' \
+    "$([[ -f "$JLC/src/custom_julia.jl" && ! -e "$JLC/src/CustomJulia.jl" ]] && echo yes || echo no)"
+JLS="$SANDBOX/julia/core/algorithms/sibling_module"
+mkdir -p -- "$JLS/src" "$JLS/test"
+cat >"$JLS/Project.toml" <<'EOF'
+name = "SiblingModule"
+uuid = "22222222-3333-4444-8555-666666666666"
+version = "0.1.0"
+authors = ["test"]
+EOF
+cat >"$JLS/src/sibling_module.jl" <<'EOF'
+module sibling_module
+
+greet() = print("Hello World!")
+
+end # module sibling_module
+EOF
+printf 'module Helper end\n' >"$JLS/src/helper.jl"
+(cd "$JLS" && bash "$REPO/scripts/data/julia_scaffold.sh" sibling_module SiblingModule)
+assert_eq 'sandbox scaffold Julia fuente compañera: conserva muestra' 'yes' \
+    "$([[ -f "$JLS/src/sibling_module.jl" && ! -e "$JLS/src/SiblingModule.jl" ]] && echo yes || echo no)"
 
 PB="$SANDBOX/php/core/algorithms/naive_sort"
 glot_run_sandbox use php algorithms/naive_sort

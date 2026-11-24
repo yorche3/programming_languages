@@ -577,13 +577,19 @@ auditoría global sigue abierta.
 Jest/ts-jest and ignore configuration; it completes npm defaults without
 overwriting authored scripts or installing dependencies. The full audit remains open.
 
-**ES:** Julia deja de crear un `run_tests.jl` vacío que termina con éxito sin
-ejecutar casos. Si falta o está vacío, el scaffold crea un sentinel de error;
-un runner propio se conserva. La auditoría global sigue abierta.
+**ES:** Julia configura `Test` y el target de pruebas en el manifiesto generado
+reconocido, adapta la muestra exacta a `src/{Module}.jl` cuando no hay otras
+fuentes y crea un sentinel que falla en `test/run_tests.jl`. Añade
+`test/runtests.jl` como adaptador porque `Pkg.test()` requiere ese entrypoint;
+la suite conectada pasó por ambos runners. Conserva manifiestos y fuentes
+propias. La auditoría global sigue abierta.
 
-**EN:** Julia no longer creates an empty `run_tests.jl` that succeeds without
-executing tests. A missing or empty runner becomes a failing sentinel, while
-an authored runner is preserved. The full audit remains open.
+**EN:** Julia configures `Test` and the test target in the recognized generated
+manifest, adapts the exact sample to `src/{Module}.jl` when no other sources
+exist, and creates a failing sentinel in `test/run_tests.jl`. It adds
+`test/runtests.jl` as an adapter because `Pkg.test()` requires that entrypoint;
+the connected suite passed through both runners. Authored manifests and sources
+are preserved. The full audit remains open.
 
 **ES:** C conserva archivos y Makefile existentes, rechaza rutas simbólicas
 y crea `.gitignore` cuando falta. En un laboratorio aislado, Criterion 2.4.1

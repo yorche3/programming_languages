@@ -41,7 +41,8 @@ v2.0.3 was archived before code edits.
 **ES:** La pasada en curso corrigió los esqueletos Java, JavaScript, PHP, Ruby,
 ReScript y TypeScript: POM/clase Maven ejecutables, configuración npm/Jest,
 configuración PHPUnit/Composer, declaración de RSpec y configuraciones de
-ReScript/Jest y TypeScript/Jest. Julia evita el falso verde con un runner vacío;
+ReScript/Jest y TypeScript/Jest. Julia evita el falso verde con un runner vacío
+y ya configura el entrypoint estándar de `Pkg.test()`;
 C++ genera configuración Bazel funcional, y PHPUnit y el runner R fallan sin
 casos aprobados.
 La cobertura de los demás lenguajes sigue abierta.
@@ -214,6 +215,21 @@ Scaffold now also recognizes the homologated simple library manifest and adds
 `test/` only to `unittest`; an isolated copy changed from false green to a
 detected failure, with an idempotent rerun. The submodule was not modified.
 Unrecognized D manifests remain preserved and require explicit review.
+
+**ES — Julia (2026-11-24):** la salida real de `Pkg.generate` trae una muestra
+en minúsculas y `Pkg.test()` exige `test/runtests.jl`, no el runner
+`test/run_tests.jl` de glot. El scaffold adapta solo la muestra y el manifiesto
+generado reconocidos, añade `Test` y el adaptador, y conserva variantes propias.
+La prueba aislada detectó el sentinel sin suite y pasó tras conectarla; el
+módulo homologado también pasó 24/24 con `Pkg.test()` y con el runner directo.
+
+**EN — Julia (2026-11-24):** actual `Pkg.generate` output contains a lowercase
+sample and `Pkg.test()` requires `test/runtests.jl`, not glot's
+`test/run_tests.jl` runner. Scaffold adapts only the recognized generated
+sample and manifest, adds `Test` and the adapter, and preserves authored
+variants. The isolated test detected the no-suite sentinel and passed after
+connecting it; the homologated module also passed 24/24 through `Pkg.test()`
+and its direct runner.
 
 **ES — Hallazgo Forth (2026-11-22):** al ejecutar una aserción fallida con
 `test.forth` de la base `data_structures_basics`, el reporte indicó un fallo
