@@ -4,15 +4,15 @@
 
 **EN:** History of closed versions and of the live version. **Future** versions and the layer each one covers are in [`ROADMAP.md`](ROADMAP.md).
 
-**ES:** v2.1.0 está en desarrollo según [`ROADMAP.md`](ROADMAP.md).
-El script se identifica como **2.1.0-dev**, no como una entrega cerrada.
-v2.0.3 se archivó antes de editar código; la separación de rutas/modelos está
-verificada en el harness. La revisión restante de scaffold sigue pendiente.
+**ES:** v2.1.0 quedó cerrada según [`ROADMAP.md`](ROADMAP.md).
+El script se identifica como **2.1.0**. La separación de rutas/modelos, los
+scaffolds/runners corregidos y el gate warning/build están verificados;
+los casos no medidos conservan su estado explícito en el roadmap.
 
-**EN:** v2.1.0 is in development according to [`ROADMAP.md`](ROADMAP.md).
-The script identifies as **2.1.0-dev**, not a completed release.
-v2.0.3 was archived before code edits; route/model separation is verified by
-the harness. The remaining scaffold review is pending.
+**EN:** v2.1.0 is closed according to [`ROADMAP.md`](ROADMAP.md).
+The script identifies as **2.1.0**. Route/model separation, corrected
+scaffolds/runners and warning/build gates are verified; unmeasured cases retain
+their explicit roadmap status.
 
 | Versión | Fecha | Archivo | Añade | Estado |
 |---------|-------|---------|-------|:------:|
@@ -52,7 +52,380 @@ the harness. The remaining scaffold review is pending.
 | 2.0.1 | 2026-10-23 (archivo) | [`versions/glot_2.0.1.sh`](../versions/glot_2.0.1.sh) | Base previa al hotfix, archivada como copia exacta del script vivo antes de editarlo; conserva sus cambios anteriores de andamiaje y encargos / Pre-hotfix baseline, archived as an exact copy before editing | ✅ cerrada |
 | 2.0.2 | 2026-10-23 (archivo) | [`versions/glot_2.0.2.sh`](../versions/glot_2.0.2.sh) | Snapshot exacto previo al hotfix 2.0.3 / Exact pre-2.0.3 hotfix snapshot | ✅ cerrada |
 | 2.0.3 | 2026-10-26 | [`versions/glot_2.0.3.sh`](../versions/glot_2.0.3.sh) | `scaffold` automatiza `.gitignore` y Makefiles declarados, avisa si queda análisis delegado; `build` queda excepcional y conserva la suite / `scaffold` automates `.gitignore` and declared Makefiles, announces remaining delegated analysis; `build` is exceptional and preserves the suite | ✅ cerrada como línea base; snapshot exacto archivado el 2026-11-02, publicación del autor pendiente / Baseline closed; exact snapshot archived, author publication pending |
-| 2.1.0-dev | 2026-11-02 | [`glot.sh`](../glot.sh) | Primer bloque: scaffold seguro de Ballerina, layout `lib/` de Perl y punto de entrada Cargo de Rust / First block: safe Ballerina scaffold, Perl library layout and preserved Rust entry point | En desarrollo; no cerrada / In development; not closed |
+| 2.1.0 | 2026-11-24 | [`glot.sh`](../glot.sh) | Rutas BYOK/verificadas, overrides por categoría, scaffolds/runners corregidos y gates de falsos verdes; cobertura catalogada de los 50 lenguajes / Verified routes/BYOK, category overrides, corrected scaffolds/runners and false-green gates; 50-language catalog coverage | ✅ cerrada / Closed |
+
+---
+
+## 2.1.0-dev — PureScript y Haskell / PureScript and Haskell
+
+**ES:** PureScript rechaza ahora los resúmenes con warnings totales mayores
+que cero, por lo que los 15 warnings de `test-unit` no pueden pasar bajo
+`--strict`. Haskell ejecuta `cabal clean` antes de `cabal test`, evitando
+reruns con binarios obsoletos en el camino común; conserva `sync-build`
+explícito y limitado a plantillas reconocidas.
+
+**EN:** PureScript now rejects summaries with more than zero total warnings,
+so the 15 `test-unit` warnings cannot pass under `--strict`. Haskell runs
+`cabal clean` before `cabal test`, preventing stale binaries in the common
+rerun path; `sync-build` remains explicit and limited to recognized templates.
+
+```text
+PureScript runner: rejects dependency warnings and empty suites
+Haskell runner: cleans before test and preserves Hspec validation
+```
+
+## 2.1.0-dev — scaffold y runner OCaml / OCaml scaffold and runner
+
+**ES:** La plantilla exacta de Dune 3.24 se adapta a Alcotest con un sentinel
+fallido; se conservan variantes y archivos propios. El runner fuerza Dune y
+rechaza resúmenes Alcotest ausentes o vacíos. Un ejecutable silencioso puede
+quedar oculto por el resumen válido de otro; la revisión de todos los targets
+y otras versiones sigue pendiente.
+
+**EN:** The exact Dune 3.24 template is adapted to Alcotest with a failing
+sentinel; authored files and variants are preserved. The runner forces Dune
+and rejects missing or empty Alcotest summaries. A silent executable can be
+hidden by another valid summary; review of all targets and other versions
+remains pending.
+
+```text
+OCaml scaffold and runner focused assertions: 21 passed, 0 failed
+OCaml references: 4 and 15 cases, 0 failures
+```
+
+## 2.1.0-dev — runner Crystal / Crystal runner
+
+**ES:** Crystal 1.20.2 devuelve éxito sin specs y con todos los ejemplos
+pendientes. `glot test` valida el informe JUnit temporal con Python 3 y
+exige un ejemplo aprobado; acepta pendientes junto con aprobados y rechaza
+informes ausentes o inconsistentes. El ejemplo generado ya falla sin cambios.
+
+**EN:** Crystal 1.20.2 succeeds without specs and with all examples pending.
+`glot test` validates a temporary JUnit report using Python 3 and requires a
+passing example; it accepts pending examples alongside passing ones and
+rejects missing or inconsistent reports. The generated example already fails.
+
+```text
+Crystal focused assertions: 10 passed, 0 failed
+Crystal references: 4 and 10 examples, 0 failures
+```
+
+## 2.1.0-dev — Erlang y Gleam
+
+**ES:** EUnit y Gleeunit devolvieron éxito sin casos. Erlang ahora crea un
+sentinel para el scaffold generado reconocido; Gleam sustituye su pareja
+exacta de ejemplos por otro sentinel. Ambos conservan contenido propio y
+rechazan rutas simbólicas. Los runners comprueban los resúmenes nativos y
+rechazan cero casos y resúmenes ausentes o ambiguos. Gleam admite omitidos
+si también hay casos aprobados. Otros reporters y versiones siguen pendientes.
+
+**EN:** EUnit and Gleeunit succeeded with no cases. Erlang now creates a
+sentinel for the recognized generated scaffold; Gleam replaces its exact
+sample pair with another sentinel. Both preserve authored content and reject
+symlinked paths. Their runners validate native summaries and reject zero
+cases and missing or ambiguous reports. Gleam accepts skipped cases when
+some pass. Other reporters and versions remain unverified.
+
+```text
+Erlang focused assertions: 16 passed, 0 failed
+Gleam focused assertions: 19 passed, 0 failed
+EUnit references: 23 and 10 tests, 0 failures
+Gleeunit references: 4 and 10 passed
+Gleam JavaScript target: 1 passed
+```
+
+## 2.1.0-dev — runner ExUnit / ExUnit runner
+
+**ES:** `mix test` puede devolver éxito sin pruebas o con todas omitidas.
+`glot test` ejecuta la CLI de Mix una vez, conserva los formatters configurados
+y comprueba los contadores del callback `ExUnit.after_suite/1`. Exige un caso
+aprobado, informa omitidos y excluidos, acepta mezclas y rechaza resultados
+ausentes, ejecuciones múltiples y terminaciones prematuras. La protección se
+verificó con Mix 1.20.4; otras versiones permanecen pendientes.
+
+**EN:** `mix test` can succeed with no tests or all tests skipped. `glot test`
+runs the Mix CLI once, preserves configured formatters and checks the
+`ExUnit.after_suite/1` counters. It requires a passing case, reports skipped
+and excluded tests, accepts mixed results and rejects missing results,
+multiple runs and premature exits. This was verified with Mix 1.20.4; other
+versions remain unverified.
+
+```text
+Elixir runner assertions: 18 passed, 0 failed
+data_structures_basics: 4 passed
+numbers: 10 passed
+glot test (empty Elixir suite): exit 4
+glot test (data_structures_basics, path with spaces): 4 passed
+```
+
+## 2.1.0-dev — scaffold Elixir / Elixir scaffold
+
+**ES:** Mix 1.20.4 generó una fuente `hello/0` y dos casos de muestra.
+El scaffold sustituye solo esa pareja reconocida, con el helper original y
+sin otros archivos o enlaces en `lib/` y `test/`, por un test sentinel que
+falla hasta escribir la suite. Conserva variantes y rechaza rutas simbólicas.
+En un proyecto aislado, `glot test` rechazó el sentinel con código 4.
+El runner general queda pendiente: `mix test` dio éxito con cero casos y
+con todos omitidos.
+
+**EN:** Mix 1.20.4 generated a `hello/0` source and two example cases.
+Scaffold replaces only that recognized pair, with the original helper and
+no other files or links in `lib/` and `test/`, with a failing sentinel until
+the suite is written. Other variants are preserved and symlinked paths are
+rejected. In an isolated project, `glot test` rejected the sentinel with
+exit code 4. General runner protection remains pending: `mix test` succeeded
+with zero cases and with all cases skipped.
+
+```text
+mix test (generated sample): 2 passed (1 doctest, 1 test)
+mix test (empty): 0 tests, exit 0
+mix test (skipped): 0 tests, 1 skipped, exit 0
+glot test (scaffold sentinel): exit 4
+Elixir focused assertions: 14 passed, 0 failed
+```
+
+## 2.1.0-dev — 2026-11-23 (runners y scaffolds PHP, R y C++ / PHP, R and C++ runners and scaffolds)
+
+**ES:** PHPUnit 13.3.4 devolvía código 0 sin ejecutar pruebas en el scaffold
+PHP. La plantilla ahora exige `failOnEmptyTestSuite`, y una prueba real sigue
+pasando. El runner R también daba código 0 con `PASS 0`; ahora `make test`
+falla si testthat no informa casos aprobados, y pasa con una prueba real.
+C++ reemplaza los archivos Bazel vacíos por `MODULE.bazel`, `WORKSPACE` y
+targets de biblioteca/Google Test basados en la base homologada; fija Bazel
+7.1.1 y conserva configuraciones existentes. En una copia aislada, Bazelisk
+compiló y ejecutó la suite C++ homologada. El harness comprueba generación,
+rerun, contenido propio y rechazo de `BUILD` simbólico. La revisión de los
+demás scaffolds sigue abierta.
+
+**EN:** PHPUnit 13.3.4 previously returned zero without running tests in the
+PHP scaffold. Its template now sets `failOnEmptyTestSuite`; a real smoke test
+still passes. The R runner also returned zero with `PASS 0`; `make test` now
+fails unless testthat reports passing cases and succeeds with a real test.
+C++ replaces empty Bazel files with `MODULE.bazel`, `WORKSPACE` and
+library/Google Test targets based on the homologated project, pins Bazel
+7.1.1 and preserves existing configuration. Bazelisk built and ran the
+homologated C++ suite in an isolated copy. The harness covers generation,
+reruns, authored content and rejection of a symlinked `BUILD`. The remaining
+scaffold review is still open.
+
+```text
+bazelisk test //... --noshow_progress --color=no: 1 test passed
+glot tests: 1943 passed, 0 failed
+docs checks: 32 passed, 0 failed
+bash -n scripts/data/cpp_scaffold.sh
+bash -n scripts/tests/glot_test.sh
+git diff --check
+```
+
+## 2.1.0-dev — 2026-11-23 (revisión de Vala / Vala review)
+
+**ES:** La fila de Vala solo creaba `src/` y `test/`, aunque Meson 1.3.2
+genera `meson.build` y ambas fuentes en la raíz; además, su archivo de test es
+una demo, no una suite GLib.Test. El nuevo helper mueve solo la pareja exacta,
+actualiza las rutas Meson y sustituye el test por un sentinel GLib.Test fallido.
+`vala_test.sh` compila todas las suites y exige TAP con casos aprobados, sin
+omitidos ni fallos. Las bases homologadas pasaron en copias aisladas.
+No se modificaron submódulos.
+
+**EN:** Vala's row only created `src/` and `test/`, while Meson 1.3.2 generates
+`meson.build` and both source files at the root; its test file is a demo, not a
+GLib.Test suite. The helper moves only the exact pair, updates Meson paths and
+replaces the test with a failing GLib.Test sentinel. `vala_test.sh` compiles all
+suites and requires TAP with passing cases and no skips or failures. The
+homologated references passed in isolated copies. No submodules were modified.
+
+```text
+meson 1.3.2 / Vala 0.56.16: generated pair adapted, sentinel rejected
+Vala references: data_structures_basics 4, numbers 10 cases
+glot tests: 1950 passed, 0 failed
+docs checks: 32 passed, 0 failed
+git diff --check
+```
+
+## 2.1.0-dev — 2026-11-23 (revisión de Dart / Dart review)
+
+**ES:** `dart create --no-pub -t package` genera el layout `lib/src/`, `test/`
+y `example/` ya alineado con las bases, pero deja muestras `Awesome` en la
+fuente, el test y el ejemplo. La secuencia de scaffold y la guía ahora indican
+explícitamente conservar la estructura y configuración del paquete y adaptar
+las tres muestras al contrato; el test inicial no cuenta como suite
+homologada. Se inspeccionó la salida de Dart 3.12.2 en un directorio temporal,
+sin descargar dependencias ni modificar submódulos.
+
+**EN:** `dart create --no-pub -t package` generates `lib/src/`, `test/` and
+`example/`, already aligned with the homologated layout, but leaves `Awesome`
+samples in the source, test and example. The scaffold sequence and guide now
+explicitly preserve the package structure/configuration and adapt all three
+samples to the contract; the generated test is not a homologated suite. Dart
+3.12.2 output was inspected in a temporary directory without fetching
+dependencies or modifying submodules.
+
+```text
+dart --version: 3.12.2
+dart create --no-pub -t package: expected package files generated in temporary directory
+```
+
+## 2.1.0-dev — 2026-11-23 (revisión de Elm / Elm review)
+
+**ES:** `elm init` deja `elm.json` y `src/`, pero no `tests/`, `.gitignore`
+ni las dependencias de `elm-test`. El scaffold ahora valida el manifiesto,
+crea `src/` y `tests/` con protección de rutas y añade el ignore específico
+solo si falta. La nota de completado y la guía hacen explícito `elm-test init`,
+que declara `elm-explorations/test` y crea una suite de ejemplo; no se ejecuta
+ni instala durante `glot scaffold`. Se verificó `elm init` temporalmente y el
+harness cubre scaffold, rerun, preservación del ignore y rechazo de symlinks.
+
+**EN:** `elm init` leaves `elm.json` and `src/`, but not `tests/`, `.gitignore`
+or `elm-test` dependencies. Scaffold now validates the manifest, creates `src/`
+and `tests/` with path protection, and adds the language-specific ignore file
+only when missing. The completion note and guide make `elm-test init` explicit;
+it declares `elm-explorations/test` and creates a sample suite, and is not run
+or installed by `glot scaffold`. `elm init` was verified temporarily, and the
+harness covers scaffolding, reruns, ignore preservation and symlink rejection.
+
+```text
+elm init (temporary project): elm.json and src/ created; tests/ and .gitignore absent
+glot tests: 1959 passed, 0 failed
+docs checks: 32 passed, 0 failed
+git diff --check
+```
+
+## 2.1.0-dev — 2026-11-23 (runner mínimo de Haxe / Haxe minimal runner)
+
+**ES:** El workflow requiere que el runner exista antes de escribir la suite,
+pero el scaffold de Haxe solo creaba directorios e instalaba `utest`. Ahora
+`haxe_scaffold.sh` crea de forma idempotente `build.hxml`, `RunTests.hx`, un
+test sentinel fallido y `.gitignore`, preservando archivos propios y rechazando
+rutas simbólicas. Haxe 4.3.7 con utest 1.13.2 ejecutó el sentinel y devolvió
+código 1. El harness cubre la instalación simulada, rerun, preservación y
+rechazo de symlink; la auditoría global sigue abierta.
+
+**EN:** The workflow requires a runner before the suite is written, but Haxe's
+scaffold only created directories and installed `utest`. `haxe_scaffold.sh` now
+idempotently creates `build.hxml`, `RunTests.hx`, a failing sentinel test and
+`.gitignore`, preserving authored files and rejecting symlinked paths. Haxe
+4.3.7 with utest 1.13.2 ran the sentinel and returned exit code 1. The harness
+covers simulated installation, reruns, preservation and symlink rejection;
+the global audit remains open.
+
+```text
+haxe build.hxml (temporary scaffold): 1 failure, "No tests configured", exit 1
+glot tests: 1972 passed, 0 failed
+docs checks: 32 passed, 0 failed
+bash -n scripts/data/haxe_scaffold.sh scripts/tests/glot_test.sh
+git diff --check
+```
+
+## 2.1.0-dev — 2026-11-23 (verificación nativa de scaffold Swift / native Swift scaffold check)
+
+**ES:** En un checkout temporal con espacios en la ruta y sin `.build`,
+`swift package init` produjo la muestra exacta de SwiftPM 6.3.3; `glot
+scaffold` la sustituyó por los imports vacíos. `glot test` compiló desde cero
+y rechazó que XCTest y Swift Testing no ejecutaran casos (código 4), aunque
+`swift test` presenta ambos resúmenes vacíos como éxito. No se modificó el
+submódulo Swift.
+
+**EN:** In a temporary checkout with spaces in its path and no `.build`,
+`swift package init` produced the exact SwiftPM 6.3.3 sample; `glot scaffold`
+replaced it with empty imports. `glot test` built from scratch and rejected
+the zero XCTest and Swift Testing cases (exit code 4), although `swift test`
+reports both empty summaries as successful. The Swift submodule was untouched.
+
+```text
+SwiftPM 6.3.3: sample matched and was replaced
+glot test: zero cases rejected, exit code 4
+Swift native scaffold check: passed
+```
+
+## 2.1.0-dev — 2026-11-23 (paso manual de PureScript / PureScript manual step)
+
+**ES:** La guía y el completado de scaffold nombran ahora `spago install
+--test-deps test-unit` como paso manual opcional. No se automatiza: con Spago
+1.0.4 y test-unit 17.0.0, la prueba estricta produjo 15 warnings de
+dependencia, aunque no hubo warnings del código del proyecto. El bloqueo de
+4a sigue abierto.
+
+**EN:** The guide and scaffold completion note now name
+`spago install --test-deps test-unit` as an optional manual step. It is not
+automated: with Spago 1.0.4 and test-unit 17.0.0, the strict test produced 15
+dependency warnings, though there were no project-code warnings. The 4a gate
+remains open.
+
+**ES — Confirmación (2026-11-24):** una compilación limpia aislada reprodujo
+los 15 warnings de dependencia con código 0; al añadir una declaración de
+proyecto sin firma de tipo, `--strict` devolvió código 1. El aviso del scaffold
+conserva también la advertencia del runner vacío y ambas notas tienen regresión.
+
+**EN — Confirmation (2026-11-24):** an isolated clean build reproduced the 15
+dependency warnings with exit 0; adding a project declaration without a type
+signature made `--strict` exit 1. The scaffold notice also retains the empty
+runner warning, and both handoffs have regression coverage.
+
+```text
+spago test --offline --strict: Src 0 warnings, Lib 15 warnings, exit 0
+strict project warning probe: MissingTypeDeclaration, exit 1
+PureScript targeted tests: 23 passed, 0 failed
+docs checks: 32 passed, 0 failed
+git diff --check
+```
+
+## 2.1.0-dev — 2026-11-24 (revisión del scaffold Go / Go scaffold review)
+
+**ES:** El scaffold crea `src/` y `tests/` sin seguir enlaces ni aceptar
+archivos en lugar de directorios, y conserva contenido propio. Go 1.26.5
+rechazó el scaffold sin paquetes, pero devolvió éxito tanto con una fuente sin
+tests como con un solo test omitido. La guía y el completado advierten que
+esto no valida una suite; sigue pendiente un runner que detecte esos casos.
+
+**EN:** Scaffold creates `src/` and `tests/` without following symlinks or
+accepting files in place of directories, preserving authored contents. Go
+1.26.5 rejected the scaffold without packages, but succeeded both with a
+source file and no tests and with a single skipped test. The guide and
+completion notice warn that this does not validate a suite; a runner detecting
+these cases remains pending.
+
+```text
+go test ./...: no packages, exit 1
+go test ./...: source without tests, exit 0
+go test -count=1 -json ./...: skipped-only test, exit 0
+go test -count=1 -run '^TestPass$' ./...: passed
+go test -count=1 -run '^TestFail$' ./...: exit 1
+Go targeted tests: 14 passed, 0 failed
+docs checks: 32 passed, 0 failed
+git diff --check
+```
+
+## 2.1.0-dev — 2026-11-24 (runner Go / Go runner)
+
+**ES:** `glot test` para Go ejecuta ahora `go_test_runner.go`, que invoca
+`go test -count=1 -json ./...` una sola vez, muestra la salida nativa y
+requiere al menos una prueba final aprobada. Rechaza resultados incompletos,
+fallos, JSON inválido y suites vacías o totalmente omitidas; informa
+omisiones y permite combinarlas con pruebas aprobadas. No cuenta como caso
+aprobado un padre cuyas subpruebas fueron omitidas. Se probaron ambos
+proyectos homologados en copias aisladas y el flujo de `glot test` con
+espacios en la ruta.
+
+**EN:** `glot test` for Go now runs `go_test_runner.go`, invoking
+`go test -count=1 -json ./...` once, displaying native output and requiring
+at least one passing leaf test. It rejects incomplete results, failures,
+invalid JSON, empty and entirely skipped suites; it reports skips and permits
+them alongside passes. A parent with skipped subtests does not count as a
+passing case. Both homologated projects were tested in isolated copies, as was
+`glot test` under a path containing spaces.
+
+```text
+Go runner regressions: 15 passed, 0 failed
+Go native edge cases: empty, skipped-only and failing rejected; mixed passed
+Go compilation failure: error displayed and rejected
+data_structures_basics: 15 passing leaf tests
+numbers: 10 passing leaf tests
+glot test go algorithms/data_structures_basics (isolated copy): passed
+glot test with no test files (isolated copy): exit 4
+go vet scripts/data/go_test_runner.go
+docs checks: 32 passed, 0 failed
+git diff --check
+```
 
 ---
 
@@ -97,6 +470,33 @@ grupos y propagar los fallos.
 source and ignore patterns, preserving existing contents. Verified in an
 isolated directory with `make run`, NASM and `ld`; the suite must connect its
 groups and propagate failures.
+
+**ES:** JavaScript corrige el andamiaje npm/Jest: deja de forzar ESM sobre la
+base CommonJS, completa el script de test y los archivos de configuración,
+conserva scripts propios y no instala dependencias. Se añade cobertura de
+generación e idempotencia; la auditoría global sigue abierta.
+
+**EN:** JavaScript's npm/Jest scaffold no longer forces ESM on the CommonJS
+base; it completes the test script and configuration, preserves authored
+scripts, and does not install dependencies. Generation and idempotence are
+covered; the full audit remains open.
+
+**ES:** TypeScript reemplaza los archivos vacíos que dejaba el scaffold por
+configuración strict/NodeNext, Jest/ts-jest y `.gitignore`; completa los scripts
+predeterminados sin sobrescribir los propios ni instalar dependencias. La
+auditoría global sigue abierta.
+
+**EN:** TypeScript replaces the scaffold's empty files with strict/NodeNext,
+Jest/ts-jest and ignore configuration; it completes npm defaults without
+overwriting authored scripts or installing dependencies. The full audit remains open.
+
+**ES:** Julia deja de crear un `run_tests.jl` vacío que termina con éxito sin
+ejecutar casos. Si falta o está vacío, el scaffold crea un sentinel de error;
+un runner propio se conserva. La auditoría global sigue abierta.
+
+**EN:** Julia no longer creates an empty `run_tests.jl` that succeeds without
+executing tests. A missing or empty runner becomes a failing sentinel, while
+an authored runner is preserved. The full audit remains open.
 
 **ES:** C conserva archivos y Makefile existentes, rechaza rutas simbólicas
 y crea `.gitignore` cuando falta. En un laboratorio aislado, Criterion 2.4.1
@@ -309,9 +709,12 @@ del código de salida poco fiable de ooRexxUnit; el runner sigue pendiente.
 **EN:** Scaffold and suite requests warn about limited selection and unreliable
 ooRexxUnit exit codes; the runner remains pending.
 
-**ES:** Ballerina usa el informe JSON para rechazar cero casos y fallos.
+**ES:** Ballerina aísla el informe JSON de cada ejecución para no aceptar
+resultados antiguos y rechaza cero casos y fallos; el workspace probado agrega
+los resultados de sus paquetes.
 
-**EN:** Ballerina uses the JSON report to reject zero cases and failures.
+**EN:** Ballerina isolates each run's JSON report to prevent stale results and
+rejects zero cases and failures; the tested workspace aggregates package results.
 
 **ES:** Groovy conserva archivos propios y retira solo la pareja de ejemplos
 Gradle 9.6.1 verificada. `gradle_test.sh` rechaza NO-SOURCE y exige informes XML.

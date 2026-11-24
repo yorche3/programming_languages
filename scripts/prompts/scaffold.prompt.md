@@ -135,6 +135,26 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
   valida XCTest y Swift Testing, rechaza omitidos y fallos; no lo presentes como
   suite validada si no hay casos. Si el ejemplo generado no coincidía
   con la muestra reconocida, revísalo sin eliminar código propio.
+- En Go, `go test` puede aprobar sin casos o con todos omitidos. `glot test`
+  ejecuta Go sin caché y falla si no hay pruebas finales aprobadas; este fallo
+  es esperable antes de escribir la suite y no valida el módulo.
+- En Elixir, el test sentinel del scaffold reconocido debe fallar hasta que
+  `suite` lo sustituya. `mix test` puede devolver éxito sin casos o con todos
+  omitidos; `glot test` exige al menos un caso aprobado e informa las omisiones.
+  Conserva y revisa ejemplos de Mix que no coincidan con la plantilla reconocida.
+- En Erlang y Gleam, el sentinel del scaffold reconocido debe fallar hasta
+  que `suite` lo sustituya. `glot test` exige un resumen EUnit o Gleeunit con
+  casos aprobados; conserva y revisa cualquier variante de los ejemplos.
+- En Crystal, el ejemplo generado falla hasta que `suite` lo sustituya.
+  `glot test` verifica el informe JUnit y exige ejemplos aprobados; un
+  conjunto vacío o completamente pendiente no valida el módulo.
+- En OCaml, el sentinel de la plantilla Dune reconocida debe fallar hasta
+  que `suite` lo sustituya. `glot test` exige resúmenes Alcotest con casos,
+  pero no detecta un ejecutable silencioso si otro emite un resumen válido;
+  revisa todos los targets y conserva variantes del scaffold.
+- En Vala, el helper mueve solo la pareja exacta de Meson 1.3.2 a `src/` y
+  `test/`, actualiza el manifiesto y deja un sentinel GLib.Test fallido.
+  `vala_test.sh` exige TAP real con casos aprobados y rechaza omitidos/fallos.
 - En V, `v test .` puede devolver éxito con `0 total`; `v_test.sh` exige al menos
   un caso aprobado en el resumen y conserva el layout generado.
 - En PureScript, el runner mínimo puede devolver éxito sin ejecutar casos.

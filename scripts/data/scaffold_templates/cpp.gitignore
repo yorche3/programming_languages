@@ -1,0 +1,7 @@
+# Bazel artifacts
+/bazel-*
+MODULE.bazel.lock
+
+# Compilation databases
+compile_commands.json
+.cache/

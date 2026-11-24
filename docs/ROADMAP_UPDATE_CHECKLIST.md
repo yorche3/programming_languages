@@ -37,11 +37,29 @@ Observaciones / Notes:
 
 ## Pendientes / Pending closures
 
-Sin pendientes a 2026-09-28: la implementación, la documentación y el registro de cierre de `core.algorithms.data_structures_basics` (Clojure y COBOL) están completos.
+Sin pendientes de módulos académicos conocidos a 2026-11-24.
 
 ## Historial / History
 
 <!-- Las entradas cerradas se conservan debajo con su fecha y evidencia. -->
+
+```text
+Fecha / Date: 2026-11-24
+Fase / Phase: tooling release
+Módulo(s) / Module(s): glot 2.1.0
+Lenguaje(s) / Language(s): 50 submódulos catalogados
+Código verificado / Code verified: yes
+Tests y comandos / Tests and commands:
+- `bash -n scripts/glot.sh scripts/data/*.sh scripts/tests/glot_test.sh`
+- `git diff --check`
+- `bash docs/tests/docs_check.sh` -> 32 passed
+- `scripts/glot.sh doctor` -> 50/50 toolchains present and 50/50 native/new/init rows
+- PureScript fake runner -> warning 1, clean 0
+- Haskell fake runner -> clean-and-test 0
+README(s) verificado(s) / README(s) verified: yes, tooling documentation synchronized
+Cambio en ROADMAP.md / ROADMAP.md change: v2.1.0 remains closed without claiming unmeasured native cases
+Observaciones / Notes: No se ejecutó el harness completo porque contiene verbos glot prohibidos; no se modificaron submódulos, ni se hicieron commits/push.
+```
 
 ```text
 Fecha / Date: 2026-10-17

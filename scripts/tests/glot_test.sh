@@ -309,12 +309,24 @@ sandbox_make() {
 [submodule "ruby"]
         path = ruby
         url = ../remote/ruby.git
+[submodule "rescript"]
+        path = rescript
+        url = ../remote/rescript.git
 [submodule "python"]
         path = python
         url = ../remote/python.git
 [submodule "java"]
         path = java
         url = ../remote/java.git
+[submodule "javascript"]
+        path = javascript
+        url = ../remote/javascript.git
+[submodule "typescript"]
+        path = typescript
+        url = ../remote/typescript.git
+[submodule "julia"]
+        path = julia
+        url = ../remote/julia.git
 [submodule "assembly"]
         path = assembly
         url = ../remote/assembly.git
@@ -351,6 +363,12 @@ sandbox_make() {
 [submodule "scala"]
         path = scala
         url = ../remote/scala.git
+[submodule "elm"]
+        path = elm
+        url = ../remote/elm.git
+[submodule "vala"]
+        path = vala
+        url = ../remote/vala.git
 [submodule "swift"]
         path = swift
         url = ../remote/swift.git
@@ -396,14 +414,19 @@ sandbox_make() {
 [submodule "nim"]
         path = nim
         url = ../remote/nim.git
+[submodule "haxe"]
+        path = haxe
+        url = ../remote/haxe.git
 [submodule "v"]
         path = v
         url = ../remote/v.git
 EOF
+    cp -- "$SANDBOX/.gitmodules" "$WORK_DIR/gitmodules.base"
     git -C "$SANDBOX" init -q
     mkdir -p -- "$SANDBOX/assembly/core/algorithms" "$SANDBOX/c/core/algorithms" \
         "$SANDBOX/cobol/core/algorithms" "$SANDBOX/grain/core/algorithms" \
-        "$SANDBOX/r/core/algorithms" "$SANDBOX/scripts/data"
+        "$SANDBOX/r/core/algorithms" "$SANDBOX/haxe/core/algorithms" \
+        "$SANDBOX/scripts/data"
     cp -R -- "$TESTS_DIR/../data/scaffold_templates" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/gradle_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/haskell_scaffold.sh" "$SANDBOX/scripts/data/"
@@ -420,6 +443,35 @@ EOF
     cp -- "$TESTS_DIR/../data/typescript_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/csharp_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/common_lisp_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/cpp_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/go_test_runner.go" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/elixir_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/elixir_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/elixir_test_runner.exs" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/erlang_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/erlang_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/gleam_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/gleam_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/crystal_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/ocaml_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/ocaml_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/vala_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/vala_test.sh" "$SANDBOX/scripts/data/"
+    cp -R -- "$TESTS_DIR/../data/scaffold_templates/vala.source.vala" \
+        "$SANDBOX/scripts/data/scaffold_templates/vala.source.vala"
+    cp -R -- "$TESTS_DIR/../data/scaffold_templates/vala.test.vala" \
+        "$SANDBOX/scripts/data/scaffold_templates/vala.test.vala"
+    cp -R -- "$TESTS_DIR/../data/scaffold_templates/vala.meson.build" \
+        "$SANDBOX/scripts/data/scaffold_templates/vala.meson.build"
+    cp -R -- "$TESTS_DIR/../data/scaffold_templates/vala.sentinel.vala" \
+        "$SANDBOX/scripts/data/scaffold_templates/vala.sentinel.vala"
+    cp -- "$TESTS_DIR/../data/haxe_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/java_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/javascript_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/php_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/ruby_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/rescript_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/typescript_scaffold.sh" "$SANDBOX/scripts/data/"
     git init -q --bare "$SANDBOX/remote/php.git"
     git -C "$SANDBOX/remote/php.git" symbolic-ref HEAD refs/heads/main
 
@@ -439,7 +491,7 @@ EOF
     # `new` necesita más de un tipo de inicialización: `ruby` tiene secuencia
     # (mkdir + Bundler) y `java` es manual (crea carpetas, sin red).
     local extra=""
-    for extra in ruby python java; do
+    for extra in ruby python java rescript javascript typescript julia; do
         mkdir -p -- "$SANDBOX/$extra/core/algorithms"
         git init -q --bare "$SANDBOX/remote/$extra.git"
         git -C "$SANDBOX/remote/$extra.git" symbolic-ref HEAD refs/heads/main
@@ -523,6 +575,10 @@ glot_run_delegate() {
 }
 
 sandbox_make
+
+sandbox_restore_gitmodules() {
+    cp -- "$WORK_DIR/gitmodules.base" "$SANDBOX/.gitmodules"
+}
 
 # módulo nuevo: crea la rama desde main, la publica con -u y crea su carpeta
 glot_run_sandbox use php algorithms/naive_sort
@@ -950,6 +1006,635 @@ assert_contains 'test -n: recoge suites Guile' './*_guile.scm' "$out"
 glot_run -n test vala algorithms/naive_sort
 assert_contains 'test -n: {suite} dentro de una ruta' 'test/naive_sort_tests.vala' "$out"
 assert_contains 'test -n: {module} en el binario' '/tmp/naive_sort-tests' "$out"
+
+VALA_SCAFFOLD="$SANDBOX/vala/core/algorithms/naive_sort"
+mkdir -p -- "$VALA_SCAFFOLD"
+glot_run_sandbox scaffold vala algorithms/naive_sort
+assert_eq 'scaffold Vala: crea directorios' '0' "$rc_last"
+assert_eq 'scaffold Vala: crea src y test' 'yes' \
+    "$([[ -d "$VALA_SCAFFOLD/src" && -d "$VALA_SCAFFOLD/test" ]] && echo yes || echo no)"
+glot_run_sandbox scaffold vala algorithms/naive_sort
+assert_eq 'scaffold Vala: rerun' '0' "$rc_last"
+
+VALA_HELPER="$TESTS_DIR/../data/vala_scaffold.sh"
+VALA_EXACT="$WORK_DIR/vala-exact"
+mkdir -p -- "$VALA_EXACT"
+sed 's/@MODULE@/naive_sort/g' \
+    "$TESTS_DIR/../data/scaffold_templates/vala.source.vala" \
+    >"$VALA_EXACT/naive_sort.vala"
+sed 's/@MODULE@/naive_sort/g' \
+    "$TESTS_DIR/../data/scaffold_templates/vala.test.vala" \
+    >"$VALA_EXACT/naive_sort_test.vala"
+sed 's/@MODULE@/naive_sort/g' "$TESTS_DIR/../data/scaffold_templates/vala.meson.build" \
+    >"$VALA_EXACT/meson.build"
+(cd -- "$VALA_EXACT" && bash "$VALA_HELPER" naive_sort)
+assert_contains 'scaffold Vala: mueve fuente exacta' 'namespace naive_sort' \
+    "$(cat -- "$VALA_EXACT/src/naive_sort.vala")"
+assert_contains 'scaffold Vala: crea sentinel exacto' 'assert_not_reached' \
+    "$(cat -- "$VALA_EXACT/test/naive_sort_test.vala")"
+assert_contains 'scaffold Vala: actualiza fuente Meson' "'src/naive_sort.vala'" \
+    "$(cat -- "$VALA_EXACT/meson.build")"
+assert_contains 'scaffold Vala: actualiza test Meson' "'test/naive_sort_test.vala'" \
+    "$(cat -- "$VALA_EXACT/meson.build")"
+if command -v valac >/dev/null 2>&1; then
+    rc=0
+    (cd -- "$VALA_EXACT" && bash "$TESTS_DIR/../data/vala_test.sh") \
+        >/dev/null 2>&1 || rc=$?
+    assert_eq 'test Vala: sentinel falla' '1' "$([[ "$rc" -ne 0 ]] && echo 1 || echo 0)"
+fi
+printf 'authored suite\n' >"$VALA_EXACT/test/naive_sort_test.vala"
+(cd -- "$VALA_EXACT" && bash "$VALA_HELPER" naive_sort)
+assert_eq 'scaffold Vala: conserva suite propia en rerun' 'authored suite' \
+    "$(cat -- "$VALA_EXACT/test/naive_sort_test.vala")"
+
+if command -v valac >/dev/null 2>&1; then
+    VALA_BASES="$WORK_DIR/vala-bases"
+    mkdir -p -- "$VALA_BASES/data_structures_basics/src" "$VALA_BASES/data_structures_basics/test"
+    mkdir -p -- "$VALA_BASES/numbers/src" "$VALA_BASES/numbers/test"
+    cp -- "$REPO/vala/core/algorithms/data_structures_basics/src/"*.vala \
+        "$VALA_BASES/data_structures_basics/src/"
+    cp -- "$REPO/vala/core/algorithms/data_structures_basics/test/"*.vala \
+        "$VALA_BASES/data_structures_basics/test/"
+    cp -- "$REPO/vala/core/foundations/numbers/src/"*.vala \
+        "$VALA_BASES/numbers/src/"
+    cp -- "$REPO/vala/core/foundations/numbers/test/"*.vala \
+        "$VALA_BASES/numbers/test/"
+    for reference in data_structures_basics numbers; do
+        rc=0
+        (cd -- "$VALA_BASES/$reference" && bash "$TESTS_DIR/../data/vala_test.sh") \
+            >/dev/null 2>&1 || rc=$?
+        assert_eq "test Vala: $reference pasa" '0' "$rc"
+    done
+fi
+
+VALA_TARGET="$WORK_DIR/vala-scaffold-target"
+VALA_LINK_SCAFFOLD="$SANDBOX/vala/core/algorithms/data_structures_basics"
+mkdir -p -- "$VALA_TARGET"
+printf 'authored marker\n' >"$VALA_TARGET/marker"
+mkdir -p -- "$VALA_LINK_SCAFFOLD"
+ln -s -- "$VALA_TARGET" "$VALA_LINK_SCAFFOLD/src"
+glot_run_sandbox scaffold vala algorithms/data_structures_basics
+assert_eq 'scaffold Vala symlink: bloquea' '4' "$rc_last"
+assert_contains 'scaffold Vala symlink: diagnóstico' 'unsafe Vala path' "$err"
+assert_eq 'scaffold Vala symlink: preserva destino' 'authored marker' \
+    "$(cat -- "$VALA_TARGET/marker")"
+assert_eq 'scaffold Vala symlink: no crea test' 'no' \
+    "$([[ -e "$VALA_LINK_SCAFFOLD/test" ]] && echo yes || echo no)"
+
+ELM_SCAFFOLD="$SANDBOX/elm/core/foundations/unit_test/calculator"
+mkdir -p -- "$ELM_SCAFFOLD"
+printf '{}\n' >"$ELM_SCAFFOLD/elm.json"
+glot_run_sandbox scaffold elm foundations/unit_test/calculator
+assert_eq 'scaffold Elm: prepara directorios e ignore' '0' "$rc_last"
+assert_eq 'scaffold Elm: src y tests' 'yes' \
+    "$([[ -d "$ELM_SCAFFOLD/src" && -d "$ELM_SCAFFOLD/tests" ]] && echo yes || echo no)"
+assert_eq 'scaffold Elm: ignore correcto' '0' \
+    "$(cmp -s "$ELM_SCAFFOLD/.gitignore" "$TESTS_DIR/../data/scaffold_templates/elm.gitignore"; echo $?)"
+printf 'authored pattern\n' >>"$ELM_SCAFFOLD/.gitignore"
+glot_run_sandbox scaffold elm foundations/unit_test/calculator
+assert_eq 'scaffold Elm: rerun' '0' "$rc_last"
+assert_contains 'scaffold Elm: conserva ignore propio' 'authored pattern' \
+    "$(cat -- "$ELM_SCAFFOLD/.gitignore")"
+
+ELM_TARGET="$WORK_DIR/elm-scaffold-target"
+ELM_LINK="$SANDBOX/elm/core/foundations/helloworld"
+mkdir -p -- "$ELM_TARGET" "$ELM_LINK"
+printf 'authored marker\n' >"$ELM_TARGET/marker"
+printf '{}\n' >"$ELM_LINK/elm.json"
+ln -s -- "$ELM_TARGET" "$ELM_LINK/tests"
+glot_run_sandbox scaffold elm foundations/helloworld
+assert_eq 'scaffold Elm symlink: bloquea' '4' "$rc_last"
+assert_contains 'scaffold Elm symlink: diagnóstico' 'unsafe Elm path' "$err"
+assert_eq 'scaffold Elm symlink: preserva destino' 'authored marker' \
+    "$(cat -- "$ELM_TARGET/marker")"
+assert_eq 'scaffold Elm symlink: no crea src' 'no' \
+    "$([[ -e "$ELM_LINK/src" ]] && echo yes || echo no)"
+
+ELIXIR_SCAFFOLD="$WORK_DIR/elixir-scaffold"
+ELIXIR_HELPER="$TESTS_DIR/../data/elixir_scaffold.sh"
+mkdir -p -- "$ELIXIR_SCAFFOLD/lib" "$ELIXIR_SCAFFOLD/test"
+sed 's/@MODULE@/NaiveSort/g' "$TESTS_DIR/../data/scaffold_templates/elixir.module.ex" \
+    >"$ELIXIR_SCAFFOLD/lib/naive_sort.ex"
+sed 's/@MODULE@/NaiveSort/g' "$TESTS_DIR/../data/scaffold_templates/elixir.module_test.exs" \
+    >"$ELIXIR_SCAFFOLD/test/naive_sort_test.exs"
+printf 'ExUnit.start()\n' >"$ELIXIR_SCAFFOLD/test/test_helper.exs"
+(cd -- "$ELIXIR_SCAFFOLD" && bash "$ELIXIR_HELPER" naive_sort NaiveSort)
+assert_eq 'scaffold Elixir: retira fuente de muestra' 'no' \
+    "$([[ -e "$ELIXIR_SCAFFOLD/lib/naive_sort.ex" ]] && echo yes || echo no)"
+assert_contains 'scaffold Elixir: sentinel' 'No tests configured' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/test/naive_sort_test.exs")"
+printf 'authored suite\n' >"$ELIXIR_SCAFFOLD/test/naive_sort_test.exs"
+(cd -- "$ELIXIR_SCAFFOLD" && bash "$ELIXIR_HELPER" naive_sort NaiveSort)
+assert_eq 'scaffold Elixir: conserva suite en rerun' 'authored suite' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/test/naive_sort_test.exs")"
+
+sed 's/@MODULE@/NaiveSort/g' "$TESTS_DIR/../data/scaffold_templates/elixir.module.ex" \
+    >"$ELIXIR_SCAFFOLD/lib/naive_sort.ex"
+sed 's/@MODULE@/NaiveSort/g' "$TESTS_DIR/../data/scaffold_templates/elixir.module_test.exs" \
+    >"$ELIXIR_SCAFFOLD/test/naive_sort_test.exs"
+printf 'authored extra\n' >"$ELIXIR_SCAFFOLD/test/extra.exs"
+(cd -- "$ELIXIR_SCAFFOLD" && bash "$ELIXIR_HELPER" naive_sort NaiveSort)
+assert_contains 'scaffold Elixir: conserva pareja con otros archivos' 'def hello do' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/lib/naive_sort.ex")"
+assert_contains 'scaffold Elixir: conserva test de muestra con otros archivos' 'greets the world' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/test/naive_sort_test.exs")"
+printf '# authored change\n' >>"$ELIXIR_SCAFFOLD/lib/naive_sort.ex"
+rm -- "$ELIXIR_SCAFFOLD/test/extra.exs"
+(cd -- "$ELIXIR_SCAFFOLD" && bash "$ELIXIR_HELPER" naive_sort NaiveSort)
+assert_contains 'scaffold Elixir: conserva fuente modificada' '# authored change' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/lib/naive_sort.ex")"
+assert_contains 'scaffold Elixir: conserva test si fuente modificada' 'greets the world' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/test/naive_sort_test.exs")"
+sed 's/@MODULE@/NaiveSort/g' "$TESTS_DIR/../data/scaffold_templates/elixir.module.ex" \
+    >"$ELIXIR_SCAFFOLD/lib/naive_sort.ex"
+printf '# authored test\n' >>"$ELIXIR_SCAFFOLD/test/naive_sort_test.exs"
+(cd -- "$ELIXIR_SCAFFOLD" && bash "$ELIXIR_HELPER" naive_sort NaiveSort)
+assert_contains 'scaffold Elixir: conserva test modificado' '# authored test' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/test/naive_sort_test.exs")"
+assert_contains 'scaffold Elixir: conserva fuente si test modificado' 'def hello do' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/lib/naive_sort.ex")"
+sed 's/@MODULE@/NaiveSort/g' "$TESTS_DIR/../data/scaffold_templates/elixir.module_test.exs" \
+    >"$ELIXIR_SCAFFOLD/test/naive_sort_test.exs"
+printf '# authored helper\n' >>"$ELIXIR_SCAFFOLD/test/test_helper.exs"
+(cd -- "$ELIXIR_SCAFFOLD" && bash "$ELIXIR_HELPER" naive_sort NaiveSort)
+assert_contains 'scaffold Elixir: conserva fuente si helper modificado' 'def hello do' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/lib/naive_sort.ex")"
+assert_contains 'scaffold Elixir: conserva test si helper modificado' 'greets the world' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/test/naive_sort_test.exs")"
+mv -- "$ELIXIR_SCAFFOLD/test/naive_sort_test.exs" "$ELIXIR_SCAFFOLD/original-test"
+ln -s -- "$ELIXIR_SCAFFOLD/original-test" "$ELIXIR_SCAFFOLD/test/naive_sort_test.exs"
+rc=0
+(cd -- "$ELIXIR_SCAFFOLD" && bash "$ELIXIR_HELPER" naive_sort NaiveSort) \
+    2>"$WORK_DIR/elixir-scaffold.err" || rc=$?
+assert_eq 'scaffold Elixir symlink: bloquea' '1' "$rc"
+assert_contains 'scaffold Elixir symlink: diagnóstico' 'unsafe Elixir file' \
+    "$(cat -- "$WORK_DIR/elixir-scaffold.err")"
+assert_contains 'scaffold Elixir symlink: preserva destino' 'greets the world' \
+    "$(cat -- "$ELIXIR_SCAFFOLD/original-test")"
+
+if command -v elixir >/dev/null 2>&1; then
+    ELIXIR_TEST_PROJECT="$WORK_DIR/elixir-test-project"
+    mkdir -p -- "$ELIXIR_TEST_PROJECT/test"
+    cat >"$ELIXIR_TEST_PROJECT/mix.exs" <<'EOF'
+defmodule GlotTest.MixProject do
+  use Mix.Project
+  def project, do: [app: :glot_test, version: "0.1.0"]
+end
+EOF
+    cat >"$ELIXIR_TEST_PROJECT/test/test_helper.exs" <<'EOF'
+defmodule GlotTestFormatter do
+  use GenServer
+  def init(opts), do: {:ok, opts}
+  def handle_cast({:suite_finished, _}, state) do
+    File.write!("formatter-ran", "yes")
+    {:noreply, state}
+  end
+  def handle_cast(_, state), do: {:noreply, state}
+end
+ExUnit.start(formatters: [ExUnit.CLIFormatter, GlotTestFormatter], exclude: [:excluded])
+EOF
+    elixir_runner_run() {
+        local rc=0
+        out="$(cd -- "$ELIXIR_TEST_PROJECT" && MIX_HOME="$WORK_DIR/mix-home" \
+            HEX_HOME="$WORK_DIR/hex-home" bash "$TESTS_DIR/../data/elixir_test.sh" \
+            2>"$WORK_DIR/elixir-runner.err")" || rc=$?
+        err="$(cat -- "$WORK_DIR/elixir-runner.err")"
+        rc_last=$rc
+    }
+
+    elixir_runner_run
+    assert_eq 'test Elixir: rechaza ausencia de archivos' '1' "$rc_last"
+    assert_contains 'test Elixir: informa cero casos sin archivos' 'no passing ExUnit cases' "$err"
+    cat >"$ELIXIR_TEST_PROJECT/test/example_test.exs" <<'EOF'
+defmodule ExampleTest do
+  use ExUnit.Case
+end
+EOF
+    elixir_runner_run
+    assert_eq 'test Elixir: rechaza suite vacía' '1' "$rc_last"
+    assert_contains 'test Elixir: informa cero casos' 'no passing ExUnit cases' "$err"
+    cat >"$ELIXIR_TEST_PROJECT/test/example_test.exs" <<'EOF'
+defmodule ExampleTest do
+  use ExUnit.Case
+  @tag :skip
+  test "skipped", do: flunk("skipped")
+  @tag :excluded
+  test "excluded", do: flunk("excluded")
+end
+EOF
+    elixir_runner_run
+    assert_eq 'test Elixir: rechaza solo omitidos y excluidos' '1' "$rc_last"
+    assert_contains 'test Elixir: informa omitidos y excluidos' '1 skipped, 1 excluded' "$out"
+    cat >"$ELIXIR_TEST_PROJECT/test/example_test.exs" <<'EOF'
+defmodule ExampleTest do
+  use ExUnit.Case
+  test "pass" do
+    assert 1 + 1 == 2
+    assert System.argv() == ["test"]
+  end
+  @tag :skip
+  test "skipped", do: flunk("skipped")
+  @tag :excluded
+  test "excluded", do: flunk("excluded")
+end
+EOF
+    elixir_runner_run
+    assert_eq 'test Elixir: acepta aprobados con omitidos' '0' "$rc_last"
+    assert_contains 'test Elixir: cuenta casos' '1 passed, 0 failed, 1 skipped, 1 excluded' "$out"
+    assert_eq 'test Elixir: conserva formatter propio' 'yes' "$(cat -- "$ELIXIR_TEST_PROJECT/formatter-ran")"
+    cat >"$ELIXIR_TEST_PROJECT/test/example_test.exs" <<'EOF'
+defmodule ExampleTest do
+  use ExUnit.Case
+  test "failure", do: flunk("intentional failure")
+end
+EOF
+    elixir_runner_run
+    assert_eq 'test Elixir: rechaza fallo' '2' "$rc_last"
+    assert_contains 'test Elixir: muestra fallo' 'intentional failure' "$out"
+    printf 'defmodule Broken do\n' >"$ELIXIR_TEST_PROJECT/test/example_test.exs"
+    elixir_runner_run
+    assert_eq 'test Elixir: rechaza error de compilación' '1' "$rc_last"
+    printf 'ExUnit.start(after_suite: [])\n' >"$ELIXIR_TEST_PROJECT/test/test_helper.exs"
+    cat >"$ELIXIR_TEST_PROJECT/test/example_test.exs" <<'EOF'
+defmodule ExampleTest do
+  use ExUnit.Case
+  test "pass", do: assert(true)
+end
+EOF
+    elixir_runner_run
+    assert_eq 'test Elixir: rechaza callback reemplazado' '1' "$rc_last"
+    assert_contains 'test Elixir: informa resultado ausente' 'missing ExUnit result' "$err"
+    printf 'ExUnit.start()\nExUnit.run()\n' >"$ELIXIR_TEST_PROJECT/test/test_helper.exs"
+    elixir_runner_run
+    assert_eq 'test Elixir: rechaza ejecuciones múltiples' '1' "$rc_last"
+    assert_contains 'test Elixir: informa ejecuciones múltiples' 'multiple runs' "$err"
+    printf 'ExUnit.start()\n' >"$ELIXIR_TEST_PROJECT/test/test_helper.exs"
+    cat >"$ELIXIR_TEST_PROJECT/test/example_test.exs" <<'EOF'
+defmodule ExampleTest do
+  use ExUnit.Case
+  test "abort", do: System.halt(0)
+end
+EOF
+    elixir_runner_run
+    assert_eq 'test Elixir: rechaza salida prematura' '1' "$rc_last"
+    assert_contains 'test Elixir: informa ejecución incompleta' 'incomplete ExUnit run' "$err"
+fi
+
+ERLANG_SCAFFOLD="$WORK_DIR/erlang-scaffold"
+ERLANG_HELPER="$TESTS_DIR/../data/erlang_scaffold.sh"
+mkdir -p -- "$ERLANG_SCAFFOLD/src"
+sed 's/@MODULE@/naive_sort/g' "$TESTS_DIR/../data/scaffold_templates/erlang.module.erl" \
+    >"$ERLANG_SCAFFOLD/src/naive_sort.erl"
+(cd -- "$ERLANG_SCAFFOLD" && bash "$ERLANG_HELPER" naive_sort)
+assert_contains 'scaffold Erlang: crea sentinel' 'no_contract_tests_configured' \
+    "$(cat -- "$ERLANG_SCAFFOLD/test/naive_sort_test.erl")"
+printf 'authored suite\n' >"$ERLANG_SCAFFOLD/test/naive_sort_test.erl"
+(cd -- "$ERLANG_SCAFFOLD" && bash "$ERLANG_HELPER" naive_sort)
+assert_eq 'scaffold Erlang: conserva suite en rerun' 'authored suite' \
+    "$(cat -- "$ERLANG_SCAFFOLD/test/naive_sort_test.erl")"
+rm -- "$ERLANG_SCAFFOLD/test/naive_sort_test.erl"
+printf 'authored extra\n' >"$ERLANG_SCAFFOLD/test/another_test.erl"
+(cd -- "$ERLANG_SCAFFOLD" && bash "$ERLANG_HELPER" naive_sort)
+assert_eq 'scaffold Erlang: no crea sentinel con otra suite' 'no' \
+    "$([[ -e "$ERLANG_SCAFFOLD/test/naive_sort_test.erl" ]] && echo yes || echo no)"
+rm -- "$ERLANG_SCAFFOLD/test/another_test.erl"
+printf '%% authored source\n' >>"$ERLANG_SCAFFOLD/src/naive_sort.erl"
+(cd -- "$ERLANG_SCAFFOLD" && bash "$ERLANG_HELPER" naive_sort)
+assert_eq 'scaffold Erlang: no crea sentinel con fuente propia' 'no' \
+    "$([[ -e "$ERLANG_SCAFFOLD/test/naive_sort_test.erl" ]] && echo yes || echo no)"
+assert_contains 'scaffold Erlang: conserva fuente propia' '% authored source' \
+    "$(cat -- "$ERLANG_SCAFFOLD/src/naive_sort.erl")"
+rmdir -- "$ERLANG_SCAFFOLD/test"
+ln -s -- "$ERLANG_SCAFFOLD/src" "$ERLANG_SCAFFOLD/test"
+rc=0
+(cd -- "$ERLANG_SCAFFOLD" && bash "$ERLANG_HELPER" naive_sort) \
+    2>"$WORK_DIR/erlang-scaffold.err" || rc=$?
+assert_eq 'scaffold Erlang: rechaza directorio simbólico' '1' "$rc"
+assert_contains 'scaffold Erlang: informa directorio inseguro' 'unsafe or missing Erlang directory' \
+    "$(cat -- "$WORK_DIR/erlang-scaffold.err")"
+
+ERLANG_FAKE_BIN="$WORK_DIR/erlang-fake-bin"
+ERLANG_OUTPUT="$WORK_DIR/erlang-output"
+mkdir -p -- "$ERLANG_FAKE_BIN"
+cat >"$ERLANG_FAKE_BIN/rebar3" <<'EOF'
+#!/usr/bin/env bash
+[[ "$*" == eunit ]] || exit 2
+cat -- "$ERLANG_OUTPUT"
+exit "${ERLANG_FAKE_STATUS:-0}"
+EOF
+chmod +x -- "$ERLANG_FAKE_BIN/rebar3"
+erlang_runner_run() {
+    local rc=0
+    out="$(ERLANG_OUTPUT="$ERLANG_OUTPUT" ERLANG_FAKE_STATUS="${1:-0}" \
+        PATH="$ERLANG_FAKE_BIN:$PATH" bash "$TESTS_DIR/../data/erlang_test.sh" \
+        2>"$WORK_DIR/erlang-runner.err")" || rc=$?
+    err="$(cat -- "$WORK_DIR/erlang-runner.err")"
+    rc_last=$rc
+}
+printf 'Finished in 0.001 seconds\n0 tests\n' >"$ERLANG_OUTPUT"
+erlang_runner_run
+assert_eq 'test Erlang: rechaza cero casos' '1' "$rc_last"
+printf 'Finished in 0.001 seconds\n2 tests, 0 failures\n' >"$ERLANG_OUTPUT"
+erlang_runner_run
+assert_eq 'test Erlang: acepta casos aprobados' '0' "$rc_last"
+assert_contains 'test Erlang: conserva salida nativa' '2 tests, 0 failures' "$out"
+printf '\033[0;32m2 tests, 0 failures\n\033[0m\n' >"$ERLANG_OUTPUT"
+erlang_runner_run
+assert_eq 'test Erlang: acepta resumen coloreado' '0' "$rc_last"
+printf 'incomplete output\n' >"$ERLANG_OUTPUT"
+erlang_runner_run
+assert_eq 'test Erlang: rechaza resumen ausente' '1' "$rc_last"
+assert_contains 'test Erlang: explica resumen ausente' 'missing, ambiguous or empty EUnit summary' "$err"
+printf '1 tests, 0 failures\n2 tests, 0 failures\n' >"$ERLANG_OUTPUT"
+erlang_runner_run
+assert_eq 'test Erlang: rechaza resumen ambiguo' '1' "$rc_last"
+printf '1 tests, 1 failures\n' >"$ERLANG_OUTPUT"
+erlang_runner_run 7
+assert_eq 'test Erlang: propaga fallo del proceso' '7' "$rc_last"
+erlang_runner_run
+assert_eq 'test Erlang: rechaza fallo con proceso en cero' '1' "$rc_last"
+
+GLEAM_SCAFFOLD="$WORK_DIR/gleam-scaffold"
+GLEAM_HELPER="$TESTS_DIR/../data/gleam_scaffold.sh"
+mkdir -p -- "$GLEAM_SCAFFOLD/src" "$GLEAM_SCAFFOLD/test"
+sed 's/@MODULE@/naive_sort/g' "$TESTS_DIR/../data/scaffold_templates/gleam.module.gleam" \
+    >"$GLEAM_SCAFFOLD/src/naive_sort.gleam"
+cp -- "$TESTS_DIR/../data/scaffold_templates/gleam.module_test.gleam" \
+    "$GLEAM_SCAFFOLD/test/naive_sort_test.gleam"
+(cd -- "$GLEAM_SCAFFOLD" && bash "$GLEAM_HELPER" naive_sort)
+assert_eq 'scaffold Gleam: retira fuente de muestra' 'no' \
+    "$([[ -e "$GLEAM_SCAFFOLD/src/naive_sort.gleam" ]] && echo yes || echo no)"
+assert_contains 'scaffold Gleam: crea sentinel' 'No contract tests configured' \
+    "$(cat -- "$GLEAM_SCAFFOLD/test/naive_sort_test.gleam")"
+printf 'authored suite\n' >"$GLEAM_SCAFFOLD/test/naive_sort_test.gleam"
+(cd -- "$GLEAM_SCAFFOLD" && bash "$GLEAM_HELPER" naive_sort)
+assert_eq 'scaffold Gleam: conserva suite en rerun' 'authored suite' \
+    "$(cat -- "$GLEAM_SCAFFOLD/test/naive_sort_test.gleam")"
+sed 's/@MODULE@/naive_sort/g' "$TESTS_DIR/../data/scaffold_templates/gleam.module.gleam" \
+    >"$GLEAM_SCAFFOLD/src/naive_sort.gleam"
+cp -- "$TESTS_DIR/../data/scaffold_templates/gleam.module_test.gleam" \
+    "$GLEAM_SCAFFOLD/test/naive_sort_test.gleam"
+printf 'authored extra\n' >"$GLEAM_SCAFFOLD/test/extra.gleam"
+(cd -- "$GLEAM_SCAFFOLD" && bash "$GLEAM_HELPER" naive_sort)
+assert_contains 'scaffold Gleam: conserva pareja con otros archivos' 'Hello from naive_sort!' \
+    "$(cat -- "$GLEAM_SCAFFOLD/src/naive_sort.gleam")"
+assert_contains 'scaffold Gleam: conserva test con otros archivos' 'hello_world_test' \
+    "$(cat -- "$GLEAM_SCAFFOLD/test/naive_sort_test.gleam")"
+rm -- "$GLEAM_SCAFFOLD/test/extra.gleam"
+printf '// authored test\n' >>"$GLEAM_SCAFFOLD/test/naive_sort_test.gleam"
+(cd -- "$GLEAM_SCAFFOLD" && bash "$GLEAM_HELPER" naive_sort)
+assert_contains 'scaffold Gleam: conserva test modificado' '// authored test' \
+    "$(cat -- "$GLEAM_SCAFFOLD/test/naive_sort_test.gleam")"
+assert_contains 'scaffold Gleam: conserva fuente si test modificado' 'Hello from naive_sort!' \
+    "$(cat -- "$GLEAM_SCAFFOLD/src/naive_sort.gleam")"
+mv -- "$GLEAM_SCAFFOLD/test/naive_sort_test.gleam" "$GLEAM_SCAFFOLD/original-test"
+ln -s -- "$GLEAM_SCAFFOLD/original-test" "$GLEAM_SCAFFOLD/test/naive_sort_test.gleam"
+rc=0
+(cd -- "$GLEAM_SCAFFOLD" && bash "$GLEAM_HELPER" naive_sort) \
+    2>"$WORK_DIR/gleam-scaffold.err" || rc=$?
+assert_eq 'scaffold Gleam: rechaza symlink' '1' "$rc"
+assert_contains 'scaffold Gleam: informa symlink' 'unsafe Gleam file' \
+    "$(cat -- "$WORK_DIR/gleam-scaffold.err")"
+assert_contains 'scaffold Gleam: preserva destino' '// authored test' \
+    "$(cat -- "$GLEAM_SCAFFOLD/original-test")"
+
+GLEAM_FAKE_BIN="$WORK_DIR/gleam-fake-bin"
+GLEAM_OUTPUT="$WORK_DIR/gleam-output"
+mkdir -p -- "$GLEAM_FAKE_BIN"
+cat >"$GLEAM_FAKE_BIN/gleam" <<'EOF'
+#!/usr/bin/env bash
+[[ "$*" == test ]] || exit 2
+cat -- "$GLEAM_OUTPUT"
+exit "${GLEAM_FAKE_STATUS:-0}"
+EOF
+chmod +x -- "$GLEAM_FAKE_BIN/gleam"
+gleam_runner_run() {
+    local rc=0
+    out="$(GLEAM_OUTPUT="$GLEAM_OUTPUT" GLEAM_FAKE_STATUS="${1:-0}" \
+        PATH="$GLEAM_FAKE_BIN:$PATH" bash "$TESTS_DIR/../data/gleam_test.sh" \
+        2>"$WORK_DIR/gleam-runner.err")" || rc=$?
+    err="$(cat -- "$WORK_DIR/gleam-runner.err")"
+    rc_last=$rc
+}
+printf 'No tests found!\n' >"$GLEAM_OUTPUT"
+gleam_runner_run
+assert_eq 'test Gleam: rechaza cero casos' '1' "$rc_last"
+printf '\033[0;32m2 passed, no failures\033[0m\n' >"$GLEAM_OUTPUT"
+gleam_runner_run
+assert_eq 'test Gleam: acepta casos aprobados coloreados' '0' "$rc_last"
+printf '0 passed, 0 failures, 1 skipped\n' >"$GLEAM_OUTPUT"
+gleam_runner_run
+assert_eq 'test Gleam: rechaza solo omitidos' '1' "$rc_last"
+printf '1 passed, 0 failures, 1 skipped\n' >"$GLEAM_OUTPUT"
+gleam_runner_run
+assert_eq 'test Gleam: acepta mezcla con aprobados' '0' "$rc_last"
+printf 'incomplete output\n' >"$GLEAM_OUTPUT"
+gleam_runner_run
+assert_eq 'test Gleam: rechaza resumen ausente' '1' "$rc_last"
+assert_contains 'test Gleam: informa resumen ausente' 'missing, ambiguous or empty Gleeunit summary' "$err"
+printf '1 passed, no failures\n2 passed, no failures\n' >"$GLEAM_OUTPUT"
+gleam_runner_run
+assert_eq 'test Gleam: rechaza resumen ambiguo' '1' "$rc_last"
+printf '0 passed, 1 failures\n' >"$GLEAM_OUTPUT"
+gleam_runner_run 7
+assert_eq 'test Gleam: propaga fallo del proceso' '7' "$rc_last"
+gleam_runner_run
+assert_eq 'test Gleam: rechaza fallos aunque el proceso dé cero' '1' "$rc_last"
+
+if command -v python3 >/dev/null 2>&1; then
+    CRYSTAL_FAKE_BIN="$WORK_DIR/crystal-fake-bin"
+    CRYSTAL_REPORT="$WORK_DIR/crystal-report.xml"
+    mkdir -p -- "$CRYSTAL_FAKE_BIN"
+    cat >"$CRYSTAL_FAKE_BIN/crystal" <<'EOF'
+#!/usr/bin/env bash
+[[ "$1" == spec && "$2" == --junit_output && $# == 3 ]] || exit 2
+if [[ -f "$CRYSTAL_REPORT" ]]; then cp -- "$CRYSTAL_REPORT" "$3"; fi
+printf 'native Crystal output\n'
+exit "${CRYSTAL_FAKE_STATUS:-0}"
+EOF
+    chmod +x -- "$CRYSTAL_FAKE_BIN/crystal"
+    crystal_runner_run() {
+        local rc=0
+        out="$(CRYSTAL_REPORT="$CRYSTAL_REPORT" CRYSTAL_FAKE_STATUS="${1:-0}" \
+            PATH="$CRYSTAL_FAKE_BIN:$PATH" bash "$TESTS_DIR/../data/crystal_test.sh" \
+            2>"$WORK_DIR/crystal-runner.err")" || rc=$?
+        err="$(cat -- "$WORK_DIR/crystal-runner.err")"
+        rc_last=$rc
+    }
+    crystal_runner_run
+    assert_eq 'test Crystal: rechaza informe ausente' '1' "$rc_last"
+    assert_contains 'test Crystal: informa informe ausente' 'missing Crystal JUnit report' "$err"
+    cat >"$CRYSTAL_REPORT" <<'EOF'
+<testsuite tests="2" skipped="1" failures="0" errors="0"><testcase/><testcase><skipped/></testcase></testsuite>
+EOF
+    crystal_runner_run
+    assert_eq 'test Crystal: acepta casos aprobados y pendientes' '0' "$rc_last"
+    assert_contains 'test Crystal: conserva salida nativa' 'native Crystal output' "$out"
+    cat >"$CRYSTAL_REPORT" <<'EOF'
+<testsuite tests="1" skipped="1" failures="0" errors="0"><testcase><skipped/></testcase></testsuite>
+EOF
+    crystal_runner_run
+    assert_eq 'test Crystal: rechaza todos pendientes' '1' "$rc_last"
+    cat >"$CRYSTAL_REPORT" <<'EOF'
+<testsuite tests="0" skipped="0" failures="0" errors="0"/>
+EOF
+    crystal_runner_run
+    assert_eq 'test Crystal: rechaza cero casos' '1' "$rc_last"
+    printf '<testsuite' >"$CRYSTAL_REPORT"
+    crystal_runner_run
+    assert_eq 'test Crystal: rechaza XML inválido' '1' "$rc_last"
+    assert_contains 'test Crystal: informa XML inválido' 'invalid Crystal report' "$err"
+    cat >"$CRYSTAL_REPORT" <<'EOF'
+<testsuite tests="1" skipped="0" failures="0" errors="0"/>
+EOF
+    crystal_runner_run
+    assert_eq 'test Crystal: rechaza recuento inconsistente' '1' "$rc_last"
+    crystal_runner_run 7
+    assert_eq 'test Crystal: propaga fallo del proceso' '7' "$rc_last"
+fi
+
+OCAML_SCAFFOLD="$WORK_DIR/ocaml-scaffold"
+OCAML_HELPER="$TESTS_DIR/../data/ocaml_scaffold.sh"
+mkdir -p -- "$OCAML_SCAFFOLD/test"
+sed 's/@MODULE@/naive_sort/g' "$TESTS_DIR/../data/scaffold_templates/ocaml.dune-project" \
+    >"$OCAML_SCAFFOLD/dune-project"
+cp -- "$TESTS_DIR/../data/scaffold_templates/ocaml.generated.opam" "$OCAML_SCAFFOLD/naive_sort.opam"
+sed 's/@MODULE@/naive_sort/g' "$TESTS_DIR/../data/scaffold_templates/ocaml.test-dune" \
+    >"$OCAML_SCAFFOLD/test/dune"
+: >"$OCAML_SCAFFOLD/test/test_naive_sort.ml"
+(cd -- "$OCAML_SCAFFOLD" && bash "$OCAML_HELPER" naive_sort)
+assert_contains 'scaffold OCaml: dependencia Dune' '(depends ocaml (alcotest :with-test))' \
+    "$(cat -- "$OCAML_SCAFFOLD/dune-project")"
+assert_contains 'scaffold OCaml: dependencia opam' '"alcotest" {with-test}' \
+    "$(cat -- "$OCAML_SCAFFOLD/naive_sort.opam")"
+assert_contains 'scaffold OCaml: target Alcotest' '(libraries naive_sort alcotest)' \
+    "$(cat -- "$OCAML_SCAFFOLD/test/dune")"
+assert_contains 'scaffold OCaml: sentinel' 'No contract tests configured' \
+    "$(cat -- "$OCAML_SCAFFOLD/test/test_naive_sort.ml")"
+printf 'authored suite\n' >"$OCAML_SCAFFOLD/test/test_naive_sort.ml"
+(cd -- "$OCAML_SCAFFOLD" && bash "$OCAML_HELPER" naive_sort)
+assert_eq 'scaffold OCaml: conserva suite en rerun' 'authored suite' \
+    "$(cat -- "$OCAML_SCAFFOLD/test/test_naive_sort.ml")"
+assert_eq 'scaffold OCaml: no duplica dependencia' '1' \
+    "$(grep -c 'alcotest' "$OCAML_SCAFFOLD/dune-project")"
+sed 's/@MODULE@/naive_sort/g' "$TESTS_DIR/../data/scaffold_templates/ocaml.dune-project" \
+    >"$OCAML_SCAFFOLD/dune-project"
+cp -- "$TESTS_DIR/../data/scaffold_templates/ocaml.generated.opam" "$OCAML_SCAFFOLD/naive_sort.opam"
+sed 's/@MODULE@/naive_sort/g' "$TESTS_DIR/../data/scaffold_templates/ocaml.test-dune" \
+    >"$OCAML_SCAFFOLD/test/dune"
+: >"$OCAML_SCAFFOLD/test/test_naive_sort.ml"
+printf 'authored extra\n' >"$OCAML_SCAFFOLD/test/extra.ml"
+(cd -- "$OCAML_SCAFFOLD" && bash "$OCAML_HELPER" naive_sort)
+assert_eq 'scaffold OCaml: conserva proyecto con suite adicional' '0' \
+    "$(cmp -s "$OCAML_SCAFFOLD/naive_sort.opam" "$TESTS_DIR/../data/scaffold_templates/ocaml.generated.opam"; echo $?)"
+assert_eq 'scaffold OCaml: conserva test vacío con suite adicional' 'no' \
+    "$([[ -s "$OCAML_SCAFFOLD/test/test_naive_sort.ml" ]] && echo yes || echo no)"
+rm -- "$OCAML_SCAFFOLD/test/extra.ml"
+printf '# authored metadata\n' >>"$OCAML_SCAFFOLD/naive_sort.opam"
+(cd -- "$OCAML_SCAFFOLD" && bash "$OCAML_HELPER" naive_sort)
+assert_contains 'scaffold OCaml: conserva opam propio' '# authored metadata' \
+    "$(cat -- "$OCAML_SCAFFOLD/naive_sort.opam")"
+assert_eq 'scaffold OCaml: no cambia proyecto con opam propio' 'no' \
+    "$(grep -q 'alcotest' "$OCAML_SCAFFOLD/dune-project" && echo yes || echo no)"
+mv -- "$OCAML_SCAFFOLD/test/dune" "$OCAML_SCAFFOLD/original-dune"
+ln -s -- "$OCAML_SCAFFOLD/original-dune" "$OCAML_SCAFFOLD/test/dune"
+rc=0
+(cd -- "$OCAML_SCAFFOLD" && bash "$OCAML_HELPER" naive_sort) \
+    2>"$WORK_DIR/ocaml-scaffold.err" || rc=$?
+assert_eq 'scaffold OCaml: rechaza symlink' '1' "$rc"
+assert_contains 'scaffold OCaml: informa symlink' 'unsafe OCaml file' \
+    "$(cat -- "$WORK_DIR/ocaml-scaffold.err")"
+assert_contains 'scaffold OCaml: preserva destino' '(libraries naive_sort)' \
+    "$(cat -- "$OCAML_SCAFFOLD/original-dune")"
+
+OCAML_FAKE_BIN="$WORK_DIR/ocaml-fake-bin"
+OCAML_OUTPUT="$WORK_DIR/ocaml-output"
+mkdir -p -- "$OCAML_FAKE_BIN"
+cat >"$OCAML_FAKE_BIN/dune" <<'EOF'
+#!/usr/bin/env bash
+[[ "$*" == 'runtest --force --action-stdout-on-success=print --action-stderr-on-success=print' ]] || exit 2
+cat -- "$OCAML_OUTPUT"
+exit "${OCAML_FAKE_STATUS:-0}"
+EOF
+chmod +x -- "$OCAML_FAKE_BIN/dune"
+ocaml_runner_run() {
+    local rc=0
+    out="$(OCAML_OUTPUT="$OCAML_OUTPUT" OCAML_FAKE_STATUS="${1:-0}" \
+        PATH="$OCAML_FAKE_BIN:$PATH" bash "$TESTS_DIR/../data/ocaml_test.sh" \
+        2>"$WORK_DIR/ocaml-runner.err")" || rc=$?
+    err="$(cat -- "$WORK_DIR/ocaml-runner.err")"
+    rc_last=$rc
+}
+printf 'Test Successful in 0.000s. 0 test run.\n' >"$OCAML_OUTPUT"
+ocaml_runner_run
+assert_eq 'test OCaml: rechaza cero casos' '1' "$rc_last"
+printf '\033[32mTest Successful in 0.001s. 4 tests run.\033[0m\n' >"$OCAML_OUTPUT"
+ocaml_runner_run
+assert_eq 'test OCaml: acepta resumen coloreado' '0' "$rc_last"
+assert_contains 'test OCaml: conserva salida nativa' '4 tests run.' "$out"
+printf 'Test Successful in 0.000s. 1 test run.\nTest Successful in 0.001s. 5 tests run.\n' >"$OCAML_OUTPUT"
+ocaml_runner_run
+assert_eq 'test OCaml: acepta varias suites' '0' "$rc_last"
+printf 'Test Successful in 0.000s. 1 test run.\nTest Successful in 0.000s. 0 test run.\n' >"$OCAML_OUTPUT"
+ocaml_runner_run
+assert_eq 'test OCaml: rechaza suite vacía con otra aprobada' '1' "$rc_last"
+printf 'incomplete output\n' >"$OCAML_OUTPUT"
+ocaml_runner_run
+assert_eq 'test OCaml: rechaza resumen ausente' '1' "$rc_last"
+assert_contains 'test OCaml: informa resumen ausente' 'missing or empty Alcotest summary' "$err"
+ocaml_runner_run 7
+assert_eq 'test OCaml: propaga fallo del proceso' '7' "$rc_last"
+
+HAXE_SCAFFOLD="$SANDBOX/haxe/core/algorithms/naive_sort"
+HAXELIB_BIN="$WORK_DIR/haxelib-bin"
+HAXELIB_LOG="$WORK_DIR/haxelib.log"
+mkdir -p -- "$HAXELIB_BIN" "$HAXE_SCAFFOLD"
+cat >"$HAXELIB_BIN/haxelib" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"$HAXELIB_LOG"
+EOF
+chmod +x -- "$HAXELIB_BIN/haxelib"
+HAXELIB_LOG="$HAXELIB_LOG" PATH="$HAXELIB_BIN:$PATH" \
+    glot_run_sandbox scaffold haxe algorithms/naive_sort
+assert_eq 'scaffold Haxe: código' '0' "$rc_last"
+assert_eq 'scaffold Haxe: instala utest' 'install utest' \
+    "$(cat -- "$HAXELIB_LOG")"
+assert_eq 'scaffold Haxe: crea runner y sentinel' 'yes' \
+    "$([[ -s "$HAXE_SCAFFOLD/build.hxml" && -s "$HAXE_SCAFFOLD/RunTests.hx" \
+        && -s "$HAXE_SCAFFOLD/test/NaiveSortTest.hx" ]] && echo yes || echo no)"
+assert_eq 'scaffold Haxe: crea ignore' '0' \
+    "$(cmp -s "$HAXE_SCAFFOLD/.gitignore" \
+        "$TESTS_DIR/../data/scaffold_templates/haxe.gitignore"; echo $?)"
+if command -v haxe >/dev/null 2>&1 && command -v haxelib >/dev/null 2>&1 \
+    && haxelib list 2>/dev/null | grep -q '^utest:'; then
+    glot_run_sandbox test haxe algorithms/naive_sort
+    assert_eq 'scaffold Haxe: sentinel falla el test' '4' "$rc_last"
+    assert_contains 'scaffold Haxe: diagnóstico de sentinel' \
+        'No tests configured' "$out$err"
+fi
+printf 'authored runner\n' >"$HAXE_SCAFFOLD/RunTests.hx"
+printf 'authored pattern\n' >>"$HAXE_SCAFFOLD/.gitignore"
+HAXELIB_LOG="$HAXELIB_LOG" PATH="$HAXELIB_BIN:$PATH" \
+    glot_run_sandbox scaffold haxe algorithms/naive_sort
+assert_eq 'scaffold Haxe: rerun' '0' "$rc_last"
+assert_eq 'scaffold Haxe: conserva runner propio' 'authored runner' \
+    "$(cat -- "$HAXE_SCAFFOLD/RunTests.hx")"
+assert_contains 'scaffold Haxe: conserva ignore propio' 'authored pattern' \
+    "$(cat -- "$HAXE_SCAFFOLD/.gitignore")"
+
+HAXE_TARGET="$WORK_DIR/haxe-scaffold-target"
+HAXE_LINK="$SANDBOX/haxe/core/algorithms/data_structures_basics"
+mkdir -p -- "$HAXE_TARGET" "$HAXE_LINK"
+printf 'authored marker\n' >"$HAXE_TARGET/marker"
+ln -s -- "$HAXE_TARGET" "$HAXE_LINK/src"
+HAXELIB_LOG="$HAXELIB_LOG" PATH="$HAXELIB_BIN:$PATH" \
+    glot_run_sandbox scaffold haxe algorithms/data_structures_basics
+assert_eq 'scaffold Haxe symlink: bloquea' '4' "$rc_last"
+assert_contains 'scaffold Haxe symlink: diagnóstico' 'unsafe Haxe path' "$err"
+assert_eq 'scaffold Haxe symlink: preserva destino' 'authored marker' \
+    "$(cat -- "$HAXE_TARGET/marker")"
+assert_eq 'scaffold Haxe symlink: no crea test' 'no' \
+    "$([[ -e "$HAXE_LINK/test" ]] && echo yes || echo no)"
 
 glot_run -n test tcl-tk algorithms/naive_sort
 assert_contains 'test -n: recoge suites Tcl' './*.test' "$out"
@@ -1683,9 +2368,171 @@ assert_eq 'sandbox new: dato = ruta del módulo' "$JB" "$out"
 assert_eq 'sandbox new: crea la carpeta vacía' 'si' "$([[ -d "$JB" && -z "$(ls -A "$JB")" ]] && echo si || echo no)"
 glot_run_sandbox scaffold java algorithms/naive_sort
 assert_eq 'sandbox scaffold: código' '0' "$rc_last"
-assert_eq 'sandbox scaffold: crea src/main/java' 'si' "$([[ -d "$JB/src/main/java" ]] && echo si || echo no)"
-assert_eq 'sandbox scaffold: crea src/test/java' 'si' "$([[ -d "$JB/src/test/java" ]] && echo si || echo no)"
+assert_eq 'sandbox scaffold: crea package Java' 'si' "$([[ -f "$JB/src/main/java/naive_sort/NaiveSort.java" ]] && echo si || echo no)"
+assert_eq 'sandbox scaffold: declara package Java' 'package naive_sort;' "$(head -n 1 "$JB/src/main/java/naive_sort/NaiveSort.java")"
+assert_contains 'sandbox scaffold: genera POM con JUnit' '<artifactId>junit-jupiter</artifactId>' "$(cat "$JB/pom.xml")"
+assert_eq 'sandbox scaffold: POM Maven no vacío' 'si' "$([[ -s "$JB/pom.xml" ]] && echo si || echo no)"
+assert_eq 'sandbox scaffold: ignora target' 'target/' "$(cat "$JB/.gitignore")"
+assert_eq 'sandbox scaffold: crea package de tests' 'si' "$([[ -d "$JB/src/test/java/naive_sort" ]] && echo si || echo no)"
 assert_eq 'sandbox scaffold: no escribe la suite' '0' "$(find "$JB/src/test/java" -type f | wc -l | tr -d ' ')"
+printf 'authored class\n' >"$JB/src/main/java/naive_sort/NaiveSort.java"
+printf 'authored pom\n' >"$JB/pom.xml"
+glot_run_sandbox scaffold java algorithms/naive_sort
+assert_eq 'sandbox scaffold repetido: conserva clase' 'authored class' \
+    "$(cat "$JB/src/main/java/naive_sort/NaiveSort.java")"
+assert_eq 'sandbox scaffold repetido: conserva POM' 'authored pom' "$(cat "$JB/pom.xml")"
+
+JSB="$SANDBOX/javascript/core/algorithms/naive_sort"
+mkdir -p -- "$JSB"
+cat >"$JSB/package.json" <<'EOF'
+{
+  "name": "naive_sort",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
+EOF
+glot_run_sandbox scaffold javascript algorithms/naive_sort
+assert_eq 'sandbox scaffold JavaScript: código' '0' "$rc_last"
+assert_contains 'sandbox scaffold JavaScript: configura test' '"test": "jest"' "$(cat "$JSB/package.json")"
+assert_contains 'sandbox scaffold JavaScript: declara Jest' '"jest": "^30.0.5"' "$(cat "$JSB/package.json")"
+assert_contains 'sandbox scaffold JavaScript: ajusta main' '"main": "src/naive_sort.js"' "$(cat "$JSB/package.json")"
+assert_eq 'sandbox scaffold JavaScript: no fuerza ESM' 'no' \
+    "$([[ "$(node -p 'require(process.argv[1]).type || ""' "$JSB/package.json")" == module ]] && echo si || echo no)"
+assert_contains 'sandbox scaffold JavaScript: configura descubrimiento' '"**/test/**/*.test.js"' "$(cat "$JSB/jest.config.js")"
+assert_eq 'sandbox scaffold JavaScript: ignora dependencias' 'node_modules/' "$(cat "$JSB/.gitignore")"
+cat >"$JSB/package.json" <<'EOF'
+{
+  "name": "naive_sort",
+  "version": "1.0.0",
+  "main": "src/naive_sort.js",
+  "scripts": {
+    "test": "node custom-runner.js"
+  },
+  "devDependencies": {
+    "jest": "^30.0.5"
+  },
+  "private": true
+}
+EOF
+printf 'authored Jest config\n' >"$JSB/jest.config.js"
+printf 'authored ignore\n' >"$JSB/.gitignore"
+glot_run_sandbox scaffold javascript algorithms/naive_sort
+assert_eq 'sandbox scaffold JavaScript repetido: código' '0' "$rc_last"
+assert_contains 'sandbox scaffold JavaScript repetido: conserva test' '"test": "node custom-runner.js"' "$(cat "$JSB/package.json")"
+assert_contains 'sandbox scaffold JavaScript repetido: conserva package fields' '"private": true' "$(cat "$JSB/package.json")"
+assert_eq 'sandbox scaffold JavaScript repetido: conserva config' 'authored Jest config' "$(cat "$JSB/jest.config.js")"
+assert_eq 'sandbox scaffold JavaScript repetido: conserva ignore' 'authored ignore' "$(cat "$JSB/.gitignore")"
+
+TSB="$SANDBOX/typescript/core/algorithms/naive_sort"
+mkdir -p -- "$TSB"
+cat >"$TSB/package.json" <<'EOF'
+{
+  "name": "typescript-naive_sort",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
+EOF
+glot_run_sandbox scaffold typescript algorithms/naive_sort
+assert_eq 'sandbox scaffold TypeScript: código' '0' "$rc_last"
+assert_contains 'sandbox scaffold TypeScript: configura test' '"test": "jest --runInBand"' "$(cat "$TSB/package.json")"
+assert_contains 'sandbox scaffold TypeScript: configura build' '"build": "tsc --noEmit"' "$(cat "$TSB/package.json")"
+assert_contains 'sandbox scaffold TypeScript: declara ts-jest' '"ts-jest": "^29.2.5"' "$(cat "$TSB/package.json")"
+assert_contains 'sandbox scaffold TypeScript: configura compilación strict' '"strict": true' "$(cat "$TSB/tsconfig.json")"
+assert_contains 'sandbox scaffold TypeScript: configura Jest' "preset: 'ts-jest'" "$(cat "$TSB/jest.config.cjs")"
+assert_contains 'sandbox scaffold TypeScript: ignora salidas' 'dist/' "$(cat "$TSB/.gitignore")"
+cat >"$TSB/package.json" <<'EOF'
+{
+  "name": "typescript-naive_sort",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node custom-runner.js",
+    "build": "node custom-build.js"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.8.3"
+  }
+}
+EOF
+printf 'authored tsconfig\n' >"$TSB/tsconfig.json"
+printf 'authored Jest config\n' >"$TSB/jest.config.cjs"
+printf 'authored ignore\n' >"$TSB/.gitignore"
+glot_run_sandbox scaffold typescript algorithms/naive_sort
+assert_eq 'sandbox scaffold TypeScript repetido: código' '0' "$rc_last"
+assert_contains 'sandbox scaffold TypeScript repetido: conserva test' '"test": "node custom-runner.js"' "$(cat "$TSB/package.json")"
+assert_contains 'sandbox scaffold TypeScript repetido: conserva build' '"build": "node custom-build.js"' "$(cat "$TSB/package.json")"
+assert_eq 'sandbox scaffold TypeScript repetido: conserva tsconfig' 'authored tsconfig' "$(cat "$TSB/tsconfig.json")"
+assert_eq 'sandbox scaffold TypeScript repetido: conserva Jest' 'authored Jest config' "$(cat "$TSB/jest.config.cjs")"
+assert_eq 'sandbox scaffold TypeScript repetido: conserva ignore' 'authored ignore' "$(cat "$TSB/.gitignore")"
+
+JLB="$SANDBOX/julia/core/algorithms/naive_sort"
+mkdir -p -- "$JLB/test"
+glot_run_sandbox scaffold julia algorithms/naive_sort
+assert_eq 'sandbox scaffold Julia: runner ausente, código' '0' "$rc_last"
+assert_contains 'sandbox scaffold Julia: runner ausente falla explícitamente' \
+    'error("scaffold: runner Julia no configurado / Julia test runner not configured")' \
+    "$(cat "$JLB/test/run_tests.jl")"
+: >"$JLB/test/run_tests.jl"
+glot_run_sandbox scaffold julia algorithms/naive_sort
+assert_eq 'sandbox scaffold Julia: código' '0' "$rc_last"
+assert_contains 'sandbox scaffold Julia: runner vacío falla explícitamente' \
+    'error("scaffold: runner Julia no configurado / Julia test runner not configured")' \
+    "$(cat "$JLB/test/run_tests.jl")"
+printf 'authored Julia runner\n' >"$JLB/test/run_tests.jl"
+glot_run_sandbox scaffold julia algorithms/naive_sort
+assert_eq 'sandbox scaffold Julia repetido: código' '0' "$rc_last"
+assert_eq 'sandbox scaffold Julia repetido: conserva runner' \
+    'authored Julia runner' "$(cat "$JLB/test/run_tests.jl")"
+
+PB="$SANDBOX/php/core/algorithms/naive_sort"
+glot_run_sandbox use php algorithms/naive_sort
+assert_eq 'sandbox use PHP: prepara carpeta' '0' "$rc_last"
+glot_run_sandbox new php algorithms/naive_sort
+assert_eq 'sandbox new PHP: crea carpeta' '0' "$rc_last"
+glot_run_sandbox scaffold php algorithms/naive_sort
+assert_eq 'sandbox scaffold PHP: código' '0' "$rc_last"
+assert_contains 'sandbox scaffold PHP: configura autoload' '"classmap"' "$(cat "$PB/composer.json")"
+assert_contains 'sandbox scaffold PHP: configura composer test' '"test": "phpunit"' "$(cat "$PB/composer.json")"
+assert_contains 'sandbox scaffold PHP: configura PHPUnit' '<directory>test</directory>' "$(cat "$PB/phpunit.xml")"
+assert_contains 'sandbox scaffold PHP: falla con suite vacía' 'failOnEmptyTestSuite="true"' "$(cat "$PB/phpunit.xml")"
+assert_contains 'sandbox scaffold PHP: configura ignore' '/vendor/' "$(cat "$PB/.gitignore")"
+assert_eq 'sandbox scaffold PHP: crea fuente' 'si' "$([[ -f "$PB/src/NaiveSort.php" ]] && echo si || echo no)"
+printf 'authored composer\n' >"$PB/composer.json"
+printf 'authored source\n' >"$PB/src/NaiveSort.php"
+glot_run_sandbox scaffold php algorithms/naive_sort
+assert_eq 'sandbox scaffold PHP repetido: conserva composer' 'authored composer' "$(cat "$PB/composer.json")"
+assert_eq 'sandbox scaffold PHP repetido: conserva source' 'authored source' "$(cat "$PB/src/NaiveSort.php")"
+
+glot_run_sandbox scaffold ruby algorithms/naive_sort
+assert_eq 'sandbox scaffold Ruby: código' '0' "$rc_last"
+assert_contains 'sandbox scaffold Ruby: añade RSpec' 'gem "rspec"' "$(cat "$RB/Gemfile")"
+assert_contains 'sandbox scaffold Ruby: configura descubrimiento' '--pattern "**/*_tests.rb"' "$(cat "$RB/.rspec")"
+printf 'authored Gemfile\n' >"$RB/Gemfile"
+glot_run_sandbox scaffold ruby algorithms/naive_sort
+assert_eq 'sandbox scaffold Ruby repetido: conserva Gemfile' 'authored Gemfile' "$(cat "$RB/Gemfile")"
+
+RSB="$SANDBOX/rescript/core/algorithms/naive_sort"
+mkdir -p -- "$SANDBOX/docs/core/algorithms"
+if [[ ! -e "$SANDBOX/docs/core/algorithms/05_Naive_Sort.md" ]]; then
+    printf '# 05 — Naive Sort\n' >"$SANDBOX/docs/core/algorithms/05_Naive_Sort.md"
+fi
+mkdir -p -- "$RSB"
+glot_run_sandbox scaffold rescript algorithms/naive_sort
+assert_eq 'sandbox scaffold ReScript: código' '0' "$rc_last"
+assert_eq 'sandbox scaffold ReScript: crea compilador' 'si' "$([[ -f "$RSB/rescript.json" ]] && echo si || echo no)"
+assert_eq 'sandbox scaffold ReScript: crea Jest' 'si' "$([[ -f "$RSB/jest.config.js" && -f "$RSB/babel.config.js" ]] && echo si || echo no)"
+assert_contains 'sandbox scaffold ReScript: configura test' '"test": "rescript && jest"' "$(cat "$RSB/package.json")"
+printf 'authored package\n' >"$RSB/package.json"
+glot_run_sandbox scaffold rescript algorithms/naive_sort
+assert_eq 'sandbox scaffold ReScript repetido: conserva package' 'authored package' "$(cat "$RSB/package.json")"
 
 # Crystal crea Git en `new`: no debe quedar tras el inicializador.
 if command -v crystal >/dev/null 2>&1; then
@@ -1786,8 +2633,9 @@ export PATH
 # Un repositorio anidado no debe ocultar el estado del superproyecto de un submódulo.
 NESTED_ROOT="$WORK_DIR/nested-root"
 NESTED_MODULE="$NESTED_ROOT/crystal/core/algorithms/naive_sort"
-mkdir -p "$NESTED_MODULE" "$NESTED_ROOT/docs/core/algorithms"
+mkdir -p "$NESTED_MODULE/spec" "$NESTED_ROOT/docs/core/algorithms"
 printf '# 05 — Naive Sort\n' >"$NESTED_ROOT/docs/core/algorithms/05_Naive_Sort.md"
+printf 'name: naive_sort\n' >"$NESTED_MODULE/shard.yml"
 git -C "$NESTED_ROOT" init -q
 git -C "$NESTED_ROOT/crystal" init -q
 printf '[submodule "crystal"]\n\tpath = crystal\n\turl = ../crystal.git\n' >"$NESTED_ROOT/.gitmodules"
@@ -1805,10 +2653,28 @@ assert_eq 'Git anidado: estado coincide con monorepo' "$root_state" "$module_sta
 assert_eq 'Git anidado: lee sprint del monorepo' 'crystal' \
     "$(cd "$NESTED_MODULE" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" get lang)"
 rc_last=0
+out="$(cd "$NESTED_MODULE" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" -n scaffold 2>"$WORK_DIR/stderr")" || rc_last=$?
+err="$(cat "$WORK_DIR/stderr")"
+assert_eq 'scaffold Git generado -n desde el módulo: código' '0' "$rc_last"
+assert_contains 'scaffold Git generado -n: informa limpieza segura' 'remove generated Git if safe' "$err"
+assert_eq 'scaffold Git generado -n: conserva Git' 'yes' "$([[ -d "$NESTED_MODULE/.git" ]] && echo yes || echo no)"
+assert_eq 'scaffold Git generado -n: no crea .gitignore' 'no' "$([[ -e "$NESTED_MODULE/.gitignore" ]] && echo yes || echo no)"
+rc_last=0
+out="$(cd "$NESTED_MODULE" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" scaffold 2>"$WORK_DIR/stderr")" || rc_last=$?
+assert_eq 'scaffold Git generado desde el módulo: código' '0' "$rc_last"
+assert_eq 'scaffold Git generado: elimina solo Git vacío' 'no' "$([[ -e "$NESTED_MODULE/.git" ]] && echo yes || echo no)"
+assert_eq 'scaffold Git generado: crea .gitignore' 'yes' "$([[ -f "$NESTED_MODULE/.gitignore" ]] && echo yes || echo no)"
+rc_last=0
+out="$(cd "$NESTED_MODULE" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" scaffold 2>"$WORK_DIR/stderr")" || rc_last=$?
+assert_eq 'scaffold Git generado: rerun idempotente' '0' "$rc_last"
+git -C "$NESTED_MODULE" init -q
+git -C "$NESTED_MODULE" config user.name authored
+rc_last=0
 out="$(cd "$NESTED_MODULE" && env -u GLOT_ROOT -u GLOT_STATE_FILE GLOT_STATE_DIR="$NESTED_STATE" "$GLOT_SH" scaffold 2>"$WORK_DIR/stderr")" || rc_last=$?
 err="$(cat "$WORK_DIR/stderr")"
-assert_eq 'scaffold dentro de Git anidado: bloquea Git, no pierde sprint' '4' "$rc_last"
-assert_contains 'scaffold dentro de Git anidado: diagnóstico de Git' 'pre-existing nested Git' "$err"
+assert_eq 'scaffold Git propio desde el módulo: bloquea sin perder sprint' '4' "$rc_last"
+assert_contains 'scaffold Git propio: diagnóstico' 'pre-existing nested Git' "$err"
+assert_eq 'scaffold Git propio: conserva Git' 'yes' "$([[ -d "$NESTED_MODULE/.git" ]] && echo yes || echo no)"
 
 # D elimina únicamente el ejemplo nativo conocido y anuncia lo que falta.
 DB="$SANDBOX/d/core/algorithms/naive_sort"
@@ -2052,8 +2918,13 @@ assert_contains 'scaffold R: anuncia revisión' 'glot prompt scaffold r algorith
 if command -v Rscript >/dev/null 2>&1 && command -v make >/dev/null 2>&1 && Rscript -e 'quit(status = if (requireNamespace("testthat", quietly = TRUE)) 0 else 1)' >/dev/null 2>&1; then
     r_rc=0
     r_out="$(make -s -C "$RSC" test 2>&1)" || r_rc=$?
-    assert_eq 'scaffold R: testthat arranca sin casos' '0' "$r_rc"
-    assert_contains 'scaffold R: informa cero casos' 'PASS 0' "$r_out"
+    assert_eq 'scaffold R: falla sin casos ejecutados' 'yes' "$([[ "$r_rc" != 0 ]] && echo yes || echo no)"
+    assert_contains 'scaffold R: informa cero casos' 'No R test cases executed' "$r_out"
+    printf 'test_that("glot pass", { expect_true(TRUE) })\n' >"$RSC/tests/testthat/test-pass.R"
+    r_rc=0
+    r_out="$(make -s -C "$RSC" test 2>&1)" || r_rc=$?
+    assert_eq 'scaffold R: pasa con un caso aprobado' '0' "$r_rc"
+    assert_contains 'scaffold R: cuenta un caso aprobado' 'PASS 1' "$r_out"
     printf 'test_that("glot failure", { expect_equal(1, 2) })\n' >"$RSC/tests/testthat/test-failure.R"
     r_rc=0
     r_out="$(make -s -C "$RSC" test 2>&1)" || r_rc=$?
@@ -2236,7 +3107,7 @@ assert_eq 'scaffold Zig: rerun preserva main' 'author main' \
     "$(cat "$ZIG_SCAFFOLD/src/main.zig")"
 assert_eq 'scaffold Zig: rerun preserva ignore' 'author ignore' \
     "$(cat "$ZIG_SCAFFOLD/.gitignore")"
-git -C "$SANDBOX" checkout -q -- .gitmodules
+sandbox_restore_gitmodules
 
 # Common Lisp: move generated files only when destinations are free; reruns retain files.
 printf '[submodule "common-lisp"]\n\tpath = common-lisp\n\turl = ../remote/common-lisp.git\n' \
@@ -2272,7 +3143,7 @@ glot_run_sandbox scaffold common-lisp algorithms/naive_sort
 assert_eq 'scaffold Common Lisp: bloquea origen symlink' '4' "$rc_last"
 assert_eq 'scaffold Common Lisp: conserva origen symlink' 'yes' \
     "$([[ -L "$CL_SCAFFOLD/src/main.lisp" ]] && echo yes || echo no)"
-git -C "$SANDBOX" checkout -q -- .gitmodules
+sandbox_restore_gitmodules
 
 mkdir -p "$PSB/src"
 printf 'author code\n' >"$PSB/src/Main.purs"
@@ -2284,6 +3155,8 @@ assert_eq 'scaffold PureScript: crea módulo idiomático' 'module NaiveSort wher
 assert_eq 'scaffold PureScript: crea runner vacío' '0' \
     "$(cmp -s "$PSB/test/Test/Main.purs" "$TESTS_DIR/../data/scaffold_templates/purescript.runner.purs"; echo $?)"
 assert_contains 'scaffold PureScript: avisa falso verde' 'runner vacío puede devolver éxito' "$err"
+assert_contains 'scaffold PureScript: instrucción manual test-unit' 'spago install --test-deps test-unit' "$err"
+assert_contains 'scaffold PureScript: avisa warnings de dependencia' '15 warnings de dependencia' "$err"
 assert_contains 'scaffold PureScript: anuncia análisis' 'glot prompt scaffold purescript algorithms/naive_sort' "$err"
 PS_NATIVE="$SANDBOX/purescript/core/algorithms/data_structures_basics"
 mkdir -p "$PS_NATIVE/src" "$PS_NATIVE/test/Test"
@@ -2336,12 +3209,34 @@ ps_rc=0
     PATH="$PWD/bin:$PATH" bash ./purescript_test.sh
 ) >/dev/null 2>&1 || ps_rc=$?
 assert_eq 'test PureScript cero casos: rechaza' '1' "$ps_rc"
+cat >"$PS_RUN/bin/spago" <<'EOF'
+#!/usr/bin/env bash
+cat <<'OUT'
+All 1 tests passed!
+Warnings: Src 0, Lib 15, All 15
+OUT
+exit 0
+EOF
+chmod +x "$PS_RUN/bin/spago"
+ps_rc=0
+(cd "$PS_RUN" && PATH="$PWD/bin:$PATH" bash ./purescript_test.sh) >/dev/null 2>&1 || ps_rc=$?
+assert_eq 'test PureScript: rechaza warnings de dependencias' '1' "$ps_rc"
+cat >"$PS_RUN/bin/spago" <<'EOF'
+#!/usr/bin/env bash
+printf 'All 3 tests passed!\nWarnings: Src 0, Lib 0, All 0\n'
+exit 0
+EOF
+chmod +x "$PS_RUN/bin/spago"
+ps_rc=0
+(cd "$PS_RUN" && PATH="$PWD/bin:$PATH" bash ./purescript_test.sh) >/dev/null 2>&1 || ps_rc=$?
+assert_eq 'test PureScript: acepta casos sin warnings' '0' "$ps_rc"
 
 # Haskell: validar cada resumen y propagar los fallos de Cabal.
 HS_FAKE="$WORK_DIR/haskell-fake"
 mkdir -p "$HS_FAKE/bin"
 cat >"$HS_FAKE/bin/cabal" <<'EOF'
 #!/usr/bin/env bash
+if [[ "${1:-}" == clean ]]; then exit 0; fi
 cat -- "$HS_FAKE_OUTPUT"
 exit "${HS_FAKE_RC:-0}"
 EOF
@@ -2752,6 +3647,37 @@ gr_rc=0
     bash ./gradle_test.sh
 ) >/dev/null 2>&1 || gr_rc=$?
 assert_eq 'test Gradle NO-SOURCE: rechaza' '1' "$gr_rc"
+cat >"$GR_RUN/gradlew" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo '> Task :lib:compileTestJava NO-SOURCE'
+echo '> Task :lib:test'
+mkdir -p lib/build/test-results/test
+printf '<testsuite tests="1" failures="0" errors="0" skipped="0"></testsuite>\n' >lib/build/test-results/test/TEST-passing.xml
+EOF
+chmod +x "$GR_RUN/gradlew"
+gr_rc=0
+(
+    cd "$GR_RUN"
+    bash ./gradle_test.sh
+) >/dev/null 2>&1 || gr_rc=$?
+assert_eq 'test Gradle NO-SOURCE en tarea auxiliar: acepta casos aprobados' '0' "$gr_rc"
+cat >"$GR_RUN/gradlew" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+mkdir -p lib/build/test-results/test
+printf '<testsuite tests="1" failures="0" errors="0" skipped="0"></testsuite>\n' >lib/build/test-results/test/TEST-passing.xml
+printf '<testsuite' >lib/build/test-results/test/TEST-corrupt.xml
+EOF
+chmod +x "$GR_RUN/gradlew"
+gr_rc=0
+(
+    cd "$GR_RUN"
+    bash ./gradle_test.sh
+) >/dev/null 2>"$WORK_DIR/gradle-corrupt.err" || gr_rc=$?
+assert_eq 'test Gradle XML ilegible: rechaza' '1' "$gr_rc"
+assert_contains 'test Gradle XML ilegible: diagnóstico' 'unreadable Gradle XML report' \
+    "$(cat -- "$WORK_DIR/gradle-corrupt.err")"
 
 # Nim: retirar solo muestras exactas y no duplicar la task.
 NM="$SANDBOX/nim/core/algorithms/naive_sort"
@@ -2800,6 +3726,7 @@ assert_eq 'test V cero casos: rechaza' '1' "${v_rc:-0}"
 BB_RUN="$SANDBOX/ballerina/core/foundations/unit_test/calculator"
 mkdir -p "$BB_RUN/tests"
 printf '[package]\nname = "naive_sort"\nversion = "0.1.0"\n' >"$BB_RUN/Ballerina.toml"
+: >"$BB_RUN/naive_sort.bal"
 cp -- "$DATA_DIR/ballerina_test.sh" "$BB_RUN/ballerina_test.sh"
 ba_rc=0
 (
@@ -2807,6 +3734,57 @@ ba_rc=0
     bash ./ballerina_test.sh
 ) >/dev/null 2>&1 || ba_rc=$?
 assert_eq 'test Ballerina cero casos: rechaza' '1' "$ba_rc"
+
+# Ballerina: consume solo el informe de esta ejecución, no uno antiguo.
+BB_REPORT="$SANDBOX/ballerina/report_cases"
+mkdir -p "$BB_REPORT/tests" "$BB_REPORT/bin" "$BB_REPORT/target/report/previous"
+printf '[package]\nname = "report_cases"\nversion = "0.1.0"\n' >"$BB_REPORT/Ballerina.toml"
+printf '{"totalTests":1,"passed":1,"failed":0,"skipped":0}\n' >"$BB_REPORT/target/report/previous/old_test_results.json"
+cp -- "$DATA_DIR/ballerina_test.sh" "$BB_REPORT/ballerina_test.sh"
+cat >"$BB_REPORT/bin/bal" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+report_dir=''
+for arg in "$@"; do
+    case "$arg" in
+        --test-report-dir=*) report_dir="${arg#*=}" ;;
+    esac
+done
+mode="${FAKE_BAL_MODE:-pass}"
+if [[ "$mode" == pass || "$mode" == incomplete ]]; then
+    [[ -n "$report_dir" ]]
+    mkdir -p -- "$report_dir"
+    if [[ "$mode" == incomplete ]]; then
+        printf '{"totalTests":1}\n' >"$report_dir/current_test_results.json"
+    else
+        printf '{"totalTests":1,"passed":1,"failed":0,"skipped":0}\n' >"$report_dir/current_test_results.json"
+    fi
+fi
+EOF
+chmod +x "$BB_REPORT/bin/bal"
+ba_report_rc=0
+(
+    cd "$BB_REPORT"
+    PATH="$BB_REPORT/bin:$PATH" FAKE_BAL_MODE=pass bash ./ballerina_test.sh
+) >/dev/null 2>"$WORK_DIR/ballerina-report-pass.err" || ba_report_rc=$?
+assert_eq 'test Ballerina informe actual: acepta' '0' "$ba_report_rc"
+assert_eq 'test Ballerina informe actual: directorio aislado' 'si' "$(find "$BB_REPORT/target/report" -type f -name '*test_results.json' -path '*/glot-run.*/*' -print -quit | grep -q . && echo si || echo no)"
+ba_stale_rc=0
+(
+    cd "$BB_REPORT"
+    PATH="$BB_REPORT/bin:$PATH" FAKE_BAL_MODE=no-report bash ./ballerina_test.sh
+) >/dev/null 2>"$WORK_DIR/ballerina-report-stale.err" || ba_stale_rc=$?
+ba_stale_err="$(cat -- "$WORK_DIR/ballerina-report-stale.err")"
+assert_eq 'test Ballerina informe antiguo: rechaza' '1' "$ba_stale_rc"
+assert_contains 'test Ballerina informe antiguo: diagnóstico' 'missing or ambiguous Ballerina JSON test report' "$ba_stale_err"
+ba_incomplete_rc=0
+(
+    cd "$BB_REPORT"
+    PATH="$BB_REPORT/bin:$PATH" FAKE_BAL_MODE=incomplete bash ./ballerina_test.sh
+) >/dev/null 2>"$WORK_DIR/ballerina-report-incomplete.err" || ba_incomplete_rc=$?
+ba_incomplete_err="$(cat -- "$WORK_DIR/ballerina-report-incomplete.err")"
+assert_eq 'test Ballerina informe incompleto: rechaza' '1' "$ba_incomplete_rc"
+assert_contains 'test Ballerina informe incompleto: diagnóstico' 'incomplete Ballerina JSON report' "$ba_incomplete_err"
 
 # v2.1.0 continúa con los comandos manuales de la siguiente revisión.
 # v2.1.0: el nombre del fuente y el archivo vacío de pruebas son comandos del catálogo.
@@ -3452,7 +4430,28 @@ for layout_lang in cpp crystal fsharp go haskell v; do
     assert_eq "scaffold $layout_lang: rerun" '0' "$rc_last"
     assert_eq "scaffold $layout_lang: conserva ignore" 'authored ignore' "$(cat "$layout_dir/.gitignore")"
     case "$layout_lang" in
-        cpp|go|v)
+        cpp)
+            assert_contains 'C++ scaffold: módulo Bazel' 'name = "cpp_naive_sort"' "$(cat "$layout_dir/MODULE.bazel")"
+            assert_contains 'C++ scaffold: dependencia Google Test' 'version = "1.15.2"' "$(cat "$layout_dir/MODULE.bazel")"
+            assert_contains 'C++ scaffold: target library' 'name = "naive_sort_lib"' "$(cat "$layout_dir/BUILD")"
+            assert_contains 'C++ scaffold: target tests' 'srcs = ["tests/naive_sort_test.cpp"]' "$(cat "$layout_dir/BUILD")"
+            assert_eq 'C++ scaffold: versión Bazel' '7.1.1' "$(cat "$layout_dir/.bazelversion")"
+            printf 'authored Bazel module\n' >"$layout_dir/MODULE.bazel"
+            glot_run_sandbox scaffold cpp algorithms/naive_sort
+            assert_eq 'C++ scaffold: conserva configuración propia' 'authored Bazel module' \
+                "$(cat "$layout_dir/MODULE.bazel")"
+            rm -- "$layout_dir/BUILD"
+            ln -s .bazelversion "$layout_dir/BUILD"
+            glot_run_sandbox scaffold cpp algorithms/naive_sort
+            assert_eq 'C++ scaffold: rechaza BUILD simbólico' '4' "$rc_last"
+            assert_contains 'C++ scaffold: informa BUILD simbólico' \
+                'unsafe C++ file: BUILD' "$err"
+            rm -- "$layout_dir/BUILD"
+            ;;
+        go)
+            assert_eq 'scaffold go: tests no test' 'yes' "$([[ -d "$layout_dir/tests" && ! -e "$layout_dir/test" ]] && echo yes || echo no)"
+            assert_contains 'scaffold go: advierte sobre suites vacías u omitidas' 'go test puede aprobar sin casos o con todos omitidos' "$err" ;;
+        v)
             assert_eq "scaffold $layout_lang: tests no test" 'yes' "$([[ -d "$layout_dir/tests" && ! -e "$layout_dir/test" ]] && echo yes || echo no)" ;;
         crystal)
             assert_eq 'Crystal: no inventa test/' 'no' "$([[ -e "$layout_dir/test" ]] && echo yes || echo no)"
@@ -3468,6 +4467,96 @@ for layout_lang in cpp crystal fsharp go haskell v; do
             assert_contains 'Haskell: anuncia revisión' 'revisar manifiestos y runners Haskell conservados' "$err" ;;
     esac
 done
+GO_LINK_TARGET="$WORK_DIR/go-scaffold-target"
+GO_LINK_MODULE="$SANDBOX/go/core/algorithms/data_structures_basics"
+mkdir -p -- "$GO_LINK_TARGET" "$GO_LINK_MODULE"
+printf 'authored marker\n' >"$GO_LINK_TARGET/marker"
+ln -s -- "$GO_LINK_TARGET" "$GO_LINK_MODULE/src"
+glot_run_sandbox scaffold go algorithms/data_structures_basics
+assert_eq 'scaffold Go src symlink: bloquea' '4' "$rc_last"
+assert_contains 'scaffold Go src symlink: diagnóstico' 'unsafe Go path' "$err"
+assert_eq 'scaffold Go src symlink: preserva destino' 'authored marker' "$(cat -- "$GO_LINK_TARGET/marker")"
+assert_eq 'scaffold Go src symlink: no crea tests' 'no' "$([[ -e "$GO_LINK_MODULE/tests" ]] && echo yes || echo no)"
+rm -- "$GO_LINK_MODULE/src"
+ln -s -- "$GO_LINK_TARGET" "$GO_LINK_MODULE/tests"
+glot_run_sandbox scaffold go algorithms/data_structures_basics
+assert_eq 'scaffold Go tests symlink: bloquea' '4' "$rc_last"
+assert_eq 'scaffold Go tests symlink: no crea src' 'no' "$([[ -e "$GO_LINK_MODULE/src" ]] && echo yes || echo no)"
+rm -- "$GO_LINK_MODULE/tests"
+printf 'authored tests file\n' >"$GO_LINK_MODULE/tests"
+glot_run_sandbox scaffold go algorithms/data_structures_basics
+assert_eq 'scaffold Go tests archivo: bloquea' '4' "$rc_last"
+assert_eq 'scaffold Go tests archivo: conserva contenido' 'authored tests file' "$(cat -- "$GO_LINK_MODULE/tests")"
+assert_eq 'scaffold Go tests archivo: no crea src' 'no' "$([[ -e "$GO_LINK_MODULE/src" ]] && echo yes || echo no)"
+
+if command -v go >/dev/null 2>&1; then
+    GO_RUNNER_BIN="$WORK_DIR/go-test-runner"
+    GO_FAKE_BIN="$WORK_DIR/go-fake-bin"
+    GO_EVENTS="$WORK_DIR/go-events.json"
+    mkdir -p -- "$GO_FAKE_BIN"
+    go build -o "$GO_RUNNER_BIN" "$DATA_DIR/go_test_runner.go"
+    cat >"$GO_FAKE_BIN/go" <<'EOF'
+#!/usr/bin/env bash
+[[ "$*" == "test -count=1 -json ./..." ]] || exit 2
+cat -- "$GO_EVENTS"
+exit "${GO_FAKE_STATUS:-0}"
+EOF
+    chmod +x -- "$GO_FAKE_BIN/go"
+    go_runner_run() {
+        local rc=0
+        out="$(GO_EVENTS="$GO_EVENTS" GO_FAKE_STATUS="${1:-0}" PATH="$GO_FAKE_BIN:$PATH" \
+            "$GO_RUNNER_BIN" 2>"$WORK_DIR/stderr")" || rc=$?
+        err="$(cat -- "$WORK_DIR/stderr")"
+        rc_last="$rc"
+    }
+
+    cat >"$GO_EVENTS" <<'EOF'
+{"Action":"start","Package":"example/test"}
+{"Action":"run","Package":"example/test","Test":"TestParent"}
+{"Action":"run","Package":"example/test","Test":"TestParent/child"}
+{"Action":"skip","Package":"example/test","Test":"TestParent/child"}
+{"Action":"pass","Package":"example/test","Test":"TestParent"}
+{"Action":"pass","Package":"example/test"}
+EOF
+    go_runner_run
+    assert_eq 'test Go: padre verde con hijos omitidos falla' '1' "$rc_last"
+    assert_contains 'test Go: informa cero casos aprobados' 'no Go test cases passed' "$err"
+    cat >>"$GO_EVENTS" <<'EOF'
+{"Action":"start","Package":"example/other"}
+{"Action":"run","Package":"example/other","Test":"TestPass"}
+{"Action":"output","Package":"example/other","Test":"TestPass","Output":"native output\n"}
+{"Action":"pass","Package":"example/other","Test":"TestPass"}
+{"Action":"pass","Package":"example/other"}
+EOF
+    go_runner_run
+    assert_eq 'test Go: mezcla de aprobado y omitido' '0' "$rc_last"
+    assert_contains 'test Go: conserva salida nativa' 'native output' "$out"
+    assert_contains 'test Go: cuenta solo hojas' '1 passed, 1 skipped' "$out"
+    go_runner_run 7
+    assert_eq 'test Go: propaga fallo del proceso' '1' "$rc_last"
+    assert_contains 'test Go: informa fallo del proceso' 'Go failed' "$err"
+    printf '%s\n' '{"Action":"start","Package":"example/src"}' \
+        '{"Action":"output","Package":"example/src","Output":"[no test files]\n"}' \
+        '{"Action":"skip","Package":"example/src"}' >"$GO_EVENTS"
+    go_runner_run
+    assert_eq 'test Go: paquete sin casos falla' '1' "$rc_last"
+    assert_contains 'test Go: conserva salida de paquete sin casos' '[no test files]' "$out"
+    printf '%s\n' '{"Action":"start","Package":"example/test"}' \
+        '{"Action":"run","Package":"example/test","Test":"TestIncomplete"}' \
+        '{"Action":"pass","Package":"example/test"}' >"$GO_EVENTS"
+    go_runner_run
+    assert_eq 'test Go: prueba incompleta falla' '1' "$rc_last"
+    assert_contains 'test Go: diagnóstico de prueba incompleta' 'incomplete or failed Go test' "$err"
+    printf '%s\n' '{"Action":"start","Package":"example/test"}' '{invalid' >"$GO_EVENTS"
+    go_runner_run
+    assert_eq 'test Go: JSON inválido falla' '1' "$rc_last"
+    assert_contains 'test Go: diagnóstico de JSON inválido' 'invalid Go JSON report' "$err"
+    printf '%s\n' '{"Action":"build-fail","ImportPath":"example/test"}' >"$GO_EVENTS"
+    go_runner_run
+    assert_eq 'test Go: construcción fallida no da falso verde' '1' "$rc_last"
+    assert_contains 'test Go: diagnóstico de construcción fallida' 'Go build failed' "$err"
+fi
+
 assert_contains 'FSharp new: referencia declarada con herramienta' \
     'dotnet add test/{Module}.Tests/{Module}.Tests.fsproj reference src/{Module}/{Module}.fsproj' \
     "$(awk -F'\t' '$1=="fsharp" && $2=="new" && $3==5 {print $6}' "$TESTS_DIR/../data/init_sequences.tsv")"

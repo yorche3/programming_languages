@@ -13,8 +13,21 @@ if [[ -L tests || ( -e tests && ! -d tests ) ]]; then
     exit 1
 fi
 
+if [[ -L target || ( -e target && ! -d target ) || -L target/report || ( -e target/report && ! -d target/report ) ]]; then
+    printf 'test: ruta de informes Ballerina no segura / unsafe Ballerina report path\n' >&2
+    exit 1
+fi
+if ! mkdir -p -- target/report; then
+    printf 'test: no se pudo crear el directorio de informes Ballerina / could not create Ballerina report directory\n' >&2
+    exit 1
+fi
+report_dir="$(mktemp -d target/report/glot-run.XXXXXXXX)" || {
+    printf 'test: no se pudo aislar el informe Ballerina / could not isolate Ballerina report\n' >&2
+    exit 1
+}
+
 output="$(mktemp)"
-if bal test --offline --test-report >"$output" 2>&1; then
+if bal test --offline --test-report --test-report-dir="$report_dir" >"$output" 2>&1; then
     rc=0
 else
     rc=$?
@@ -22,11 +35,13 @@ fi
 cat -- "$output"
 rm -f -- "$output"
 
-report="$(find target/report -type f -name '*test_results.json' -print 2>/dev/null | sort | tail -n1)"
-if [[ -z "$report" || -L "$report" ]]; then
-    printf 'test: falta informe JSON de Ballerina / missing Ballerina JSON test report\n' >&2
+reports=()
+mapfile -t reports < <(find "$report_dir" -type f -name '*test_results.json' -print 2>/dev/null | sort)
+if (( ${#reports[@]} != 1 )); then
+    printf 'test: falta o es ambiguo el informe JSON de Ballerina / missing or ambiguous Ballerina JSON test report\n' >&2
     exit 1
 fi
+report="${reports[0]}"
 
 python3 - "$report" <<'PY'
 import json

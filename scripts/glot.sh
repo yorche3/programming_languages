@@ -150,7 +150,7 @@
 # script must not change the user's ones. All the logic lives in functions using
 # `return`.
 
-GLOT_VERSION="2.1.0-dev"
+GLOT_VERSION="2.1.0"
 
 # Contrato L0: stdout solo dato, stderr solo diagnóstico.
 # Códigos: 0 correcto · 1 error de entorno · 2 uso incorrecto · 3 estado ilegible
@@ -2647,9 +2647,9 @@ _glot_cmd_pointer() {
 
 # --- creación y registro (L5) ------------------------------------------------
 
-# Solo se retira el Git nacido en el directorio vacío que `new` acaba de generar.
-_glot_new_remove_generated_git() {
-    local dir="$1" gitdir="$1/.git" path="" key="" keys="" entries="" objects="" remotes=""
+# Solo se retira Git generado cuando su estructura vacía es reconocible.
+_glot_remove_generated_git() {
+    local dir="$1" dry_run="${2:-0}" gitdir="$1/.git" path="" key="" keys="" entries="" objects="" remotes=""
     [[ -e "$gitdir" || -L "$gitdir" ]] || return 0
     if [[ -L "$dir" || "$(cd -- "$dir" && pwd -P)" != "$dir" || -L "$gitdir" || ! -d "$gitdir" ]]; then
         _glot_error "Git generado no es directorio seguro / generated Git is not a safe directory: $gitdir"
@@ -2686,7 +2686,11 @@ _glot_new_remove_generated_git() {
             *) _glot_error "metadato Git no reconocido / unrecognized Git metadata: $path"; return 1 ;;
         esac
     done <<<"$entries"
-    _glot_info "new: retirar Git generado / remove generated Git: $gitdir"
+    if ((dry_run)); then
+        _glot_info "scaffold: retirar Git generado si es seguro / remove generated Git if safe: $gitdir"
+        return 0
+    fi
+    _glot_info "retirar Git generado / remove generated Git: $gitdir"
     rm -rf -- "$gitdir"
 }
 
@@ -2854,7 +2858,7 @@ _glot_cmd_new() {
         fi
     done <<<"$steps"
 
-    _glot_new_remove_generated_git "$dir" || return 4
+    _glot_remove_generated_git "$dir" || return 4
 
     if [[ "$kind" == "manual" ]]; then
         _glot_info "estructura manual creada / manual layout created: $dir"
@@ -2913,11 +2917,6 @@ _glot_cmd_scaffold() {
         return 1
     fi
 
-    if [[ -e "$dir/.git" || -L "$dir/.git" ]]; then
-        _glot_error "Git anidado preexistente: no se elimina sin verificar su origen / pre-existing nested Git: not removed without provenance: $dir/.git"
-        return 4
-    fi
-
     if [[ -L "$dir/.gitignore" || ( -e "$dir/.gitignore" && ! -f "$dir/.gitignore" ) ]]; then
         _glot_error "ruta .gitignore no segura / unsafe .gitignore path: $dir/.gitignore"
         return 4
@@ -2928,6 +2927,13 @@ _glot_cmd_scaffold() {
         _glot_info 'revisa / check: scripts/data/init_sequences.tsv'
         return 1
     }
+
+    if [[ -e "$dir/.git" || -L "$dir/.git" ]]; then
+        if ! _glot_remove_generated_git "$dir" "$_glot_dry_run"; then
+            _glot_error "Git anidado preexistente: no se elimina sin verificar su origen / pre-existing nested Git: not removed without provenance: $dir/.git"
+            return 4
+        fi
+    fi
 
     # Sin filas de `scaffold` no hay nada que completar: se dice por stderr y se imprime
     # el directorio, que es lo que la capa cargable usa para dejar al autor dentro.

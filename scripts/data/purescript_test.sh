@@ -23,11 +23,18 @@ while IFS= read -r count; do
     passed=$((passed + count))
 done < <(grep -E 'All [0-9]+ tests? passed!' "$output" | sed -E 's/.*All ([0-9]+) tests? passed!.*/\1/')
 
-rm -f -- "$output"
 if ((rc != 0)); then
+    rm -f -- "$output"
     exit "$rc"
 fi
+if grep -Eq 'Warnings:[[:space:]]+Src [0-9]+,[[:space:]]+Lib [0-9]+,[[:space:]]+All [1-9][0-9]*' "$output"; then
+    rm -f -- "$output"
+    printf 'test: hay warnings PureScript en dependencias / PureScript dependency warnings detected\n' >&2
+    exit 1
+fi
 if ((passed == 0)); then
+    rm -f -- "$output"
     printf 'test: no se ejecutaron casos PureScript / no PureScript test cases executed\n' >&2
     exit 1
 fi
+rm -f -- "$output"

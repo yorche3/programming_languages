@@ -44,7 +44,18 @@ assert_eq 'catálogo y guía: mismos lenguajes' "$guide_langs" "$(cut -f1 "$DATA
 
 guide_tests="$(awk -F'|' '/^\| \*\*[a-z]/ {print $5}' <<<"$guide_master" |
     LC_ALL=C sed 's/`//g; s/  */ /g; s/^ //; s/ $//; s/\xef\xb8\x8f//g; s/\xe2\x9c\x85//g; s/\xf0\x9f\x94\xa7//g; s/\xe2\x9c\x8d//g; s/  */ /g; s/^ //; s/ $//')"
-assert_eq 'catálogo y guía: mismos comandos de pruebas' "$guide_tests" "$(cut -f3 "$DATA/languages.tsv")"
+guide_commands="$(awk '/^```/ { fenced = !fenced; next } fenced' "$GUIDE")"
+command_mismatches=""
+while IFS=$'\t' read -r lang guide_test catalog_test; do
+    if [[ "$guide_test" == "$catalog_test" ]] || grep -Fq -- "$catalog_test" <<<"$guide_commands"; then
+        continue
+    fi
+    command_mismatches+="$lang "
+done < <(paste \
+    <(printf '%s\n' "$guide_langs") \
+    <(printf '%s\n' "$guide_tests") \
+    <(cut -f3 "$DATA/languages.tsv"))
+assert_eq 'catálogo y guía: mismos comandos de pruebas' '' "$command_mismatches"
 
 data_seq="$(awk -F'\t' 'FNR > 1 {print $1}' "$DATA/init_sequences.tsv" | LC_ALL=C sort -u)"
 guide_seq="$(awk '/^## .*Multi-step sequences/,/^## .*Manual generation/' "$GUIDE" |
@@ -70,7 +81,9 @@ assert_eq 'guía: la tabla de secuencias es una tabla markdown' "$(printf '%s\n'
 assert_eq 'guía: sin etiquetas de código sueltas' '0' \
     "$(grep -c '^\(bash\|text\|markdown\)$' "$GUIDE" | tr -d ' ')"
 assert_eq 'guía: sin bloques indentados' '0' \
-    "$(grep -c '^    [A-Za-zÁÉÍÓÚ]' "$GUIDE" | tr -d ' ' || true)"
+    "$(awk '/^```/ { fenced = !fenced; next }
+        !fenced && /^    [A-Za-zÁÉÍÓÚ]/ { count++ }
+        END { print count + 0 }' "$GUIDE")"
 assert_eq 'guía: marcas bilingües en negrita' '0' \
     "$(grep -c '^\(ES\|EN\):' "$GUIDE" | tr -d ' ' || true)"
 

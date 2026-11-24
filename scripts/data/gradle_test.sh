@@ -27,30 +27,26 @@ else
 fi
 cat -- "$output"
 
-python3 - "$output" "$rc" <<'PY'
+python3 - "$rc" <<'PY'
 import glob
 import sys
 import xml.etree.ElementTree as ET
 
-output_path = sys.argv[1]
-rc = int(sys.argv[2])
-text = open(output_path, "r", encoding="utf-8", errors="replace").read()
+rc = int(sys.argv[1])
 
 files = glob.glob("lib/build/test-results/test/*.xml") + glob.glob("build/test-results/test/*.xml")
 if rc != 0:
     print("test: Gradle test process failed", file=sys.stderr)
     raise SystemExit(rc)
-if re_no_source := ("NO-SOURCE" in text):
-    print("test: Gradle no ejecutó casos / Gradle ran no cases", file=sys.stderr)
-    raise SystemExit(1)
 
 tests = failures = errors = skipped = 0
 parsed = 0
 for path in files:
     try:
         root = ET.parse(path).getroot()
-    except Exception:
-        continue
+    except (ET.ParseError, OSError) as exc:
+        print(f"test: informe XML Gradle ilegible / unreadable Gradle XML report {path}: {exc}", file=sys.stderr)
+        raise SystemExit(1)
     parsed += 1
     suites = [root] if root.tag.endswith("testsuite") else root.findall(".//testsuite")
     for suite in suites:

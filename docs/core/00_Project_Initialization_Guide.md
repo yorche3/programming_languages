@@ -89,53 +89,53 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 |---|---|---|---|
 | **ada** | ⛓️ ✅ `alr init --lib --in-place {module}` | `alire.toml`, `{module}.gpr`, `config/`, `tests/` | ✅ `alr -C tests run` |
 | **assembly** | ✍️ `mkdir -p src test` + `Makefile` | `Makefile` | ✅ `make run` |
-| **ballerina** | ⛓️ 🔧 `bal new {module}` → adecuaciones de biblioteca / library adaptations | `Ballerina.toml`, `{module}.bal`, `tests/lib_test.bal` | ✅ informe JSON con rechazo de cero casos |
+| **ballerina** | ⛓️ 🔧 `bal new {module}` → adecuaciones de biblioteca / library adaptations | `Ballerina.toml`, `{module}.bal`, `tests/lib_test.bal` | ✅ `bash {root}/scripts/data/ballerina_test.sh` |
 | **c** | ✍️ `mkdir -p include src test` + `Makefile` | `include/{module}.h`, `Makefile` | ✅ `make test` |
 | **clojure** | ⛓️ 🔧 `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib` | `deps.edn`, `build.clj`, `src/{module}/` | ✅ `clojure -T:build test` |
 | **cobol** | ✍️ `mkdir -p src/copybooks src/lib test` | `Makefile`, `run_tests` | ✅ `make test` |
 | **common-lisp** | ⛓️ 🔧 `cl-project:make-project` vía `ros` + quicklisp | `{module}.asd`, `src/{module}.lisp` y `tests/{module}-test.lisp` (con guion), `run-tests.lisp` | ✅ `ros run --load run-tests.lisp --eval '(uiop:quit)'` |
-| **cpp** | ✅ Configuración manual de Bazel (`MODULE.bazel`, `WORKSPACE`, targets en `BUILD`) | `BUILD`, `MODULE.bazel`, `.bazelversion` | ✅ `bazelisk test //...` |
-| **crystal** | 🔧 `crystal init lib {module}` | `shard.yml` | ✅ `crystal spec` |
+| **cpp** | ✍️ `mkdir -p {module}` | `BUILD`, `MODULE.bazel`, `.bazelversion` | ✅ `bazelisk test //...` |
+| **crystal** | 🔧 `crystal init lib {module}` | `shard.yml` | ✅ `bash {root}/scripts/data/crystal_test.sh` |
 | **csharp** | ⛓️ ✅ `dotnet new sln -n {Module}` | `{Module}.slnx`, `src/{Module}/{Module}.csproj`, `test/{Module}.Tests/` | ✅ `dotnet test {Module}.slnx` |
 | **d** | ✅ `dub init {module} --format=sdl` | `dub.sdl` | ✅ `dub test` |
 | **dart** | ✅ `dart create -t package {module}` | `pubspec.yaml`, `analysis_options.yaml` | ✅ `dart test` |
-| **elixir** | 🔧 `mix new {module} --module {Module}` | `mix.exs` | ✅ `mix test` |
-| **elm** | 🔧 `elm init` | `elm.json` | ✅ `elm-test` |
-| **erlang** | ✅ `rebar3 new lib {module}` | `rebar.config`, `src/{module}.app.src` | ✅ `rebar3 eunit` |
+| **elixir** | 🔧 `mix new {module} --module {Module}` | `mix.exs` | ✅ `bash {root}/scripts/data/elixir_test.sh` |
+| **elm** | ⛓️ 🔧 `elm init` | `elm.json`, `src/`, `tests/`, `.gitignore` | ✅ `elm-test` |
+| **erlang** | ⛓️ ✅ `rebar3 new lib {module}` | `rebar.config`, `src/{module}.app.src` | ✅ `bash {root}/scripts/data/erlang_test.sh` |
 | **forth** | ✍️ `mkdir -p src test` | — (runner casero `test.forth`) | ✅ `cd test && gforth run-tests.forth` |
 | **fsharp** | ⛓️ 🔧 `dotnet new sln -n {Module}` (después `classlib -lang F#` y `xunit`; el layout homologado es plano) | `{Module}.slnx`, `src/{Module}.fsproj`, `test/{Module}.Tests.fsproj` | ✅ `dotnet test` |
-| **gleam** | ✅ `gleam new {module}` | `gleam.toml`, `manifest.toml` | ✅ `gleam test` |
-| **go** | ✅ `go mod init example.com/{module}` | `go.mod` | ✅ `go test ./...` |
+| **gleam** | ⛓️ ✅ `gleam new {module}` | `gleam.toml`, `manifest.toml` | ✅ `bash {root}/scripts/data/gleam_test.sh` |
+| **go** | ✅ `go mod init example.com/{module}` | `go.mod` | ✅ `go run {root}/scripts/data/go_test_runner.go` |
 | **grain** | ✍️ `mkdir -p src tests` + `Makefile` | `Makefile` | ✅ `make test` |
-| **groovy** | ⛓️ ✅ `gradle init --type groovy-library --dsl groovy --use-defaults` | `settings.gradle`, `lib/build.gradle`, `gradle/` | ✅ XML Gradle con rechazo de NO-SOURCE |
+| **groovy** | ⛓️ ✅ `gradle init --type groovy-library --dsl groovy --use-defaults` | `settings.gradle`, `lib/build.gradle`, `gradle/` | ✅ `bash {root}/scripts/data/gradle_test.sh` |
 | **haskell** | 🔧 `cabal init --lib --tests` | `{module}.cabal`, `lib/`, `test/Main.hs` | ✅ `bash {root}/scripts/data/haskell_test.sh` |
-| **haxe** | ⛓️ ✅ `mkdir -p src test` (después `haxelib install utest`) | `build.hxml`, `RunTests.hx` | ✅ `haxe build.hxml` |
-| **java** | ✍️ `pom.xml` a mano (el arquetipo quickstart es de aplicación: R2) | `pom.xml` | ✅ `mvn test` |
-| **javascript** | 🔧 `npm init -y` | `package.json`, `jest.config.js` | ✅ informe Jest con rechazo de cero casos |
-| **julia** | ⛓️ 🔧 `julia -e 'using Pkg; Pkg.generate("{module}")'` | `Project.toml`, `src/{Module}.jl`, `test/` | ✅ `julia --project=. test/run_tests.jl` |
-| **kotlin** | ⛓️ ✅ `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | `build.gradle.kts`, `settings.gradle.kts` | ✅ XML Gradle con rechazo de NO-SOURCE |
+| **haxe** | ⛓️ ✅ `mkdir -p src test` → `haxelib install utest` → `bash {root}/scripts/data/haxe_scaffold.sh {module} {Module}` | `build.hxml`, `RunTests.hx`, `src/`, `test/` | ✅ `haxe build.hxml` |
+| **java** | ✍️ `mkdir -p src/main/java/{module} src/test/java/{module}` + generar `pom.xml` Maven/JUnit | `pom.xml`, `src/main/java/{module}/{Module}.java` | ✅ `mvn test` |
+| **javascript** | ⛓️ 🔧 `npm init -y` → `bash {root}/scripts/data/javascript_scaffold.sh {module}` | `package.json`, `jest.config.js`, `.gitignore`, `src/`, `test/` | ✅ `bash {root}/scripts/data/typescript_test.sh` |
+| **julia** | ⛓️ 🔧 `julia -e 'using Pkg; Pkg.generate("{module}")'` → `glot scaffold julia {phase}/{module}` | `Project.toml`, `src/{Module}.jl`, `test/run_tests.jl` | ✅ `julia --project=. test/run_tests.jl` |
+| **kotlin** | ⛓️ ✅ `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | `build.gradle.kts`, `settings.gradle.kts` | ✅ `bash {root}/scripts/data/gradle_test.sh` |
 | **lua** | 🔧 `luarocks init` | `{module}.rockspec`, `.busted` | ✅ `busted` |
-| **nim** | ⛓️ ✅ `nimble init` (tipo library; `nimble init -y`) | `{module}.nimble`, `src/{module}.nim`, `test/config.nims` | ✅ runner directo sobre `tests/*.nim` |
-| **ocaml** | ⛓️ ✅ `dune init proj {module}` (crea la carpeta del módulo) | `dune-project`, `lib/dune`, `test/dune` | ✅ `dune runtest` |
+| **nim** | ⛓️ ✅ `nimble init` (tipo library; `nimble init -y`) | `{module}.nimble`, `src/{module}.nim`, `test/config.nims` | ✅ `bash {root}/scripts/data/nim_test.sh` |
+| **ocaml** | ⛓️ ✅ `dune init proj {module}` (crea la carpeta del módulo) | `dune-project`, `lib/dune`, `test/dune` | ✅ `bash {root}/scripts/data/ocaml_test.sh` |
 | **perl** | ✍️ `mkdir -p lib test` | — | ✅ TAP::Harness (comando abajo / command below) |
-| **php** | ✍️ `mkdir -p src test` + `composer init -n` + `composer require --dev --no-update phpunit/phpunit` | `composer.json`, `phpunit.xml`, `.gitignore` | ✅ `composer test` |
+| **php** | ✍️ `bash {root}/scripts/data/php_scaffold.sh {module} {Module}` | `composer.json`, `phpunit.xml`, `.gitignore`, `src/{Module}.php` | ✅ `composer test` |
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ SWI-Prolog + PlUnit (comando abajo / command below) |
-| **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ conteo Test.Unit con rechazo de cero casos |
+| **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `bash {root}/scripts/data/purescript_test.sh` |
 | **python** | ⛓️ ✅ `uv init --lib .` | `pyproject.toml`, `src/{module}/`, `conftest.py`, `tests/` | ✅ `pytest` |
 | **r** | ✅ `mkdir -p R tests/testthat` + `Makefile` | `Makefile` | ✅ `make test` |
 | **racket** | ⛓️ 🔧 `raco new library {module}` | `info.rkt`, `{module}.rkt` (con guiones), `tests/`, `Makefile`; conservar auxiliares generados | ✅ `raco test -x .` |
 | **raku** | ✅ `mkdir -p lib t` | — | ✅ TAP + Path::Finder (comando abajo / command below) |
-| **rescript** | ⛓️ ✅ `mkdir -p src test` (después el manifiesto con `npm pkg set`) | `rescript.json`, `package.json`, `jest.config.js` | ✅ `npm test` |
-| **rexx** | ✅ `mkdir -p src test` | — | ✅ `rexx test/{suite}.rexx` |
-| **ruby** | ⛓️ ✅ `mkdir -p src test` (después `bundle init` y `bundle install`) | `Gemfile`, `.rspec` | ✅ `bundle exec rspec` |
+| **rescript** | ⛓️ ✅ `bash {root}/scripts/data/rescript_scaffold.sh {module}` | `rescript.json`, `package.json`, `jest.config.js`, `babel.config.js` | ✅ `npm test` |
+| **rexx** | ✅ `mkdir -p src test` | — | ✅ `bash {root}/scripts/data/rexx_test.sh` |
+| **ruby** | ⛓️ ✅ `bash {root}/scripts/data/ruby_scaffold.sh {module}` | `Gemfile`, `.rspec` | ✅ `bundle exec rspec` |
 | **rust** | ✅ `cargo init --lib` | `Cargo.toml` | ✅ `cargo test` |
 | **scala** | ✅ `mkdir -p src/main/scala src/test/scala project` + build sbt (el runner instalado, sbt 2.0.8, ya no trae `sbt new`) | `build.sbt`, `project/build.properties` | ✅ sbt + ScalaTest (comando abajo / command below) |
 | **scheme** | ✍️ `mkdir -p src test` | — | ✅ Guile + SRFI-64 (comando abajo / command below) |
-| **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Module}/` | ✅ runner con conteo XCTest/Swift Testing |
+| **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Module}/` | ✅ `bash {root}/scripts/data/swift_test.sh` |
 | **tcl-tk** | ✅ `mkdir -p src test` | `src/pkgIndex.tcl` | ✅ Tcltest (comando abajo / command below) |
-| **typescript** | ✅ `npm init -y` | `package.json`, `tsconfig.json`, `jest.config.cjs` | ✅ informe Jest con rechazo de cero casos |
-| **v** | ⛓️ ✅ `v init --lib` (no interactivo; quitar el `.git` anidado y fijar la versión) | `v.mod`, `{module}.v`, `test/` | ✅ runner directo con resumen y rechazo de cero casos |
-| **vala** | ⛓️ 🔧 `meson init --language vala --type library --name {module}` | `meson.build`, `src/`, `test/` | ✅ `valac src/{module}.vala test/{suite}.vala --pkg glib-2.0 -o /tmp/{module}-tests && /tmp/{module}-tests` |
+| **typescript** | ⛓️ 🔧 `npm init -y` → `bash {root}/scripts/data/typescript_scaffold.sh {module}` | `package.json`, `tsconfig.json`, `jest.config.cjs`, `.gitignore`, `src/`, `test/` | ✅ `bash {root}/scripts/data/typescript_test.sh` |
+| **v** | ⛓️ ✅ `v init --lib` (no interactivo; quitar el `.git` anidado y fijar la versión) | `v.mod`, `{module}.v`, `test/` | ✅ `bash {root}/scripts/data/v_test.sh` |
+| **vala** | ⛓️ 🔧 `meson init --language vala --type library --name {module}` → `bash {root}/scripts/data/vala_scaffold.sh {module}` | `meson.build`, `src/`, `test/` | ✅ `bash {root}/scripts/data/vala_test.sh` |
 | **zig** | ✅ `zig init` | `build.zig`, `build.zig.zon`, `src/main.zig`, `src/root.zig`; `.gitignore` añadido por scaffold | ✅ `zig build test` |
 
 ## 🔗 Secuencias de varios pasos / Multi-step sequences
@@ -166,26 +166,34 @@ not the test suite.
 | **ballerina** | `bal new {module}` → renombrado protegido `main.bal` a `{module}.bal` → retirar solo el ejemplo verificado → crear `tests/lib_test.bal` vacío si falta | El generador no crea `tests/`; revisar únicamente contenido de ejemplo desconocido y patrones de `.gitignore` |
 | **clojure** | `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib :name {module} :target-dir {module}` | Sustituir el test de plantilla |
 | **common-lisp** | `ros -e '(ql:quickload :cl-project)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'` → `glot scaffold common-lisp {phase}/{module}` | `scaffold` renombra los archivos solo si el destino no existe; ante conflicto conserva ambos. Adaptar el `.asd` a los nombres, `defsystem/test-op`, `uiop:symbol-call`, paquete con guion y FiveAM |
-| **cpp** | `mkdir -p src include tests` → `touch MODULE.bazel BUILD .bazelversion .gitignore` | Declarar targets y dependencias Bazel; conservar `tests/` de las bases homologadas |
-| **crystal** | `crystal init lib {module}` → comprobar `shard.yml` y `spec/` | Conservar `src/`, `spec/spec_helper.cr` y `spec/`; no añadir `test/` ni borrar el gitfile |
+| **cpp** | `bash {root}/scripts/data/cpp_scaffold.sh {module}` | Crea targets de biblioteca y Google Test, fija Bazel y conserva archivos propios; el paso de contrato crea las fuentes y suites referenciadas |
+| **crystal** | `crystal init lib {module}` → comprobar `shard.yml` y `spec/` | Conservar `src/`, `spec/spec_helper.cr` y `spec/`; el test generado falla hasta sustituirse por la suite. `glot test` valida el informe JUnit y exige casos aprobados; no añadir `test/` ni borrar el gitfile |
 | **csharp** | `dotnet new sln` → `dotnet new classlib` → `dotnet new xunit` → `dotnet sln add` → `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj` → retirar solo `Class1.cs` y `UnitTest1.cs` sin cambios, y crear `.gitignore` con patrones .NET si falta | Conservar cualquier modificación hecha a los ejemplos de `dotnet new` |
+| **dart** | `dart create --no-pub -t package {module}` → `glot scaffold dart {phase}/{module}` | Conserva `lib/`, `lib/src/`, `test/`, `example/` y la configuración del paquete. Sustituye `Awesome` en la fuente, el test y el ejemplo por el contrato; el test generado es una muestra, no la suite homologada |
 | **d** | `dub init {module} --format=sdl` → retirar solo el ejemplo verificado → crear `source/{module}.d` y `test/` → configurar `unittest` solo en el manifiesto generado reconocido | En otros manifiestos comprobar que `dub test` incluye `test/`; revisar cualquier `source/app.d` diferente del ejemplo y conservar contenido propio |
+| **elixir** | `mix new {module} --module {Module}` → `glot scaffold elixir {phase}/{module}` | Conserva `lib/`, `test/` y `test/test_helper.exs`. Solo si la pareja de muestras y el helper coinciden con Mix 1.20.4 y no hay otros archivos o enlaces en esos directorios, retira la fuente de ejemplo y sustituye el test por un sentinel que falla. Revisar variantes conservadas; `glot test` exige al menos un caso aprobado porque `mix test` puede dar éxito sin pruebas o con todas omitidas |
+| **erlang** | `rebar3 new lib {module}` → `glot scaffold erlang {phase}/{module}` | El scaffold crea `test/` y, si la fuente es la muestra vacía reconocida y no hay otros archivos, un sentinel EUnit que falla. Conserva contenido propio; `glot test` rechaza resúmenes sin casos o ambiguos |
 | **fsharp** | Igual que C# con `-lang F#`, incluido `dotnet add test/{Module}.Tests/{Module}.Tests.fsproj reference src/{Module}/{Module}.fsproj` | Conservar los proyectos anidados y su referencia; cualquier renombrado de `Library.fs`/`Tests.fs` actualiza sus `Compile Include` y conserva contenido propio |
+| **elm** | `printf 'y\n' \| elm init` → `glot scaffold elm {phase}/{module}` → `elm-test init` | `elm init` crea `elm.json` y `src/`; scaffold asegura `src/`, `tests/` y `.gitignore`. `elm-test init` añade `elm-explorations/test` a `test-dependencies` y crea `tests/Example.elm`; sustituir la muestra por una suite del módulo. La dependencia y el runner no se descargan ni instalan durante `glot scaffold` |
 | **groovy** | `gradle init --type groovy-library --dsl groovy --project-name {module} --package {module} --use-defaults` → retirar solo la pareja de muestras verificada, si no hay otros archivos en `lib/src` | Conservar muestras distintas o con otros archivos y revisar; Gradle puede devolver éxito sin casos |
-| **go** | `go mod init example.com/{module}` → `mkdir -p src tests` | El paquete externo de `tests/` importa `example.com/{module}/src`, sin imponer `test/` |
+| **go** | `go mod init example.com/{module}` → `glot scaffold go {phase}/{module}` | Scaffold crea `src/` y `tests/` rechazando rutas simbólicas; la suite externa importa `example.com/{module}/src`. `glot test` ejecuta `go test -count=1 -json ./...` y rechaza ejecuciones sin pruebas finales aprobadas; informa omisiones y acepta mezclas |
+| **gleam** | `gleam new {module}` → `glot scaffold gleam {phase}/{module}` | Retira solo la pareja exacta de ejemplos de Gleam 1.18.1 sin otros archivos en `src/` o `test/` y deja un sentinel Gleeunit fallido. Conserva variantes propias; `glot test` exige un resumen Gleeunit con casos aprobados |
 | **haskell** | `cabal init --lib --tests -n --source-dir=lib --package-name={module-kebab} --expose-module={Module}` → crear `lib/{Module}.hs` solo si falta → `bash {root}/scripts/data/haskell_scaffold.sh {module}` | `{module-kebab}` sustituye subrayados por guiones. El helper adapta a Hspec solo la plantilla Cabal reconocida; conservar y revisar configuración y código propios |
-| **haxe** | `mkdir -p src test` → `haxelib install utest` | `build.hxml` y `RunTests.hx` son contenido del sprint |
-| **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` | Completar `test/` y su runner; añadir `uuid`, `[compat]`, `[extras]` y `[targets]` |
+| **haxe** | `mkdir -p src test` → `haxelib install utest` → `bash {root}/scripts/data/haxe_scaffold.sh {module} {Module}` | El helper crea `build.hxml`, `RunTests.hx`, `.gitignore` y un test sentinel que falla hasta que la suite lo sustituye. El runner existente se conserva en las fases siguientes |
+| **javascript** | `npm init -y` → `bash {root}/scripts/data/javascript_scaffold.sh {module}` → `npm install` | Completa el script `test`, Jest, el punto de entrada y la configuración según CommonJS/ESM; conserva la configuración propia y no instala dependencias |
+| **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` → `glot scaffold julia {phase}/{module}` | El scaffold deja un sentinel que falla mientras no se conecte la suite; completar `test/` y el runner, y añadir `uuid`, `[compat]`, `[extras]` y `[targets]` |
 | **kotlin** | `gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project` → retirar solo la pareja de muestras verificada, si no hay otros archivos en `lib/src` | Conservar muestras distintas o con otros archivos y revisar; Gradle puede devolver éxito sin casos |
 | **nim** | `nimble init -y` → retirar solo muestras exactas → task `test` idempotente | Conservar fuentes propias y añadir o conservar la suite; ejecutar los archivos de `tests/` directamente y rechazar ausencia o cero casos |
-| **ocaml** | `dune init proj {module}` | El código va en `lib/` y la suite en `test/`: se usa el layout generado tal cual |
+| **ocaml** | `dune init proj {module}` → `glot scaffold ocaml {phase}/{module}` | Conserva `lib/` y `test/`. Para la plantilla exacta de Dune 3.24 sin otros archivos en `test/`, configura Alcotest y crea un sentinel fallido; conservar y revisar variantes. `glot test` exige resúmenes Alcotest no vacíos, pero no detecta un ejecutable silencioso si otro emite un resumen válido |
 | **python** | `uv init --lib .` | Borrar el `.git` que crea `uv`, añadir `conftest.py` y `tests/` con configuración de pytest, y declarar pytest (`uv add --dev pytest --no-sync`) |
-| **purescript** | `spago init` → crear `src/{Module}.purs` y `test/Test/Main.purs` mínimo si faltan → retirar o sustituir solo las muestras verificadas de `Main.purs` | Conservar código y runners propios; completar `spago.yaml` y `test-unit` según la suite y revisar `.gitignore`. `purescript_test.sh` rechaza runners sin casos / The empty runner is rejected |
+| **purescript** | `spago init` → `glot scaffold purescript {phase}/{module}` → `spago install --test-deps test-unit` (manual, si se elige ese framework) | Scaffold conserva código propio y sustituye solo muestras verificadas. Con Spago 1.0.4 y test-unit 17.0.0, `spago test --offline --strict` reportó 15 warnings de dependencia: no automatizar ni cerrar 4a hasta resolverlos. `purescript_test.sh` rechaza runners sin casos |
 | **racket** | `raco new library {module}` → render portátil (`mv` + `sed -i`, con el código renombrado a `{module}.rkt` con guiones) | Conservar también los archivos auxiliares generados; las suites requieren la librería por ruta relativa (`"../../{module}-lib/{module}.rkt"`, con guiones) y el runner es `raco test -x .`, sin enlazar paquetes |
-| **rescript** | `mkdir -p src test` → `npm init -y` → `npm pkg set` | El manifiesto y sus devDependencies se declaran con `npm pkg set`; los baja `npm install` |
-| **ruby** | `mkdir -p src test` → `bundle init` → `bundle install` | `rspec` en el `Gemfile` y `.rspec` |
+| **rescript** | `bash {root}/scripts/data/rescript_scaffold.sh {module}` → `npm install` | Crea solo los archivos que faltan; conserva `package.json` propio y configura ReScript/Jest |
+| **ruby** | `bash {root}/scripts/data/ruby_scaffold.sh {module}` → `bundle install` | Crea Gemfile con RSpec y `.rspec`; conserva ambos archivos si ya existen |
+| **swift** | `swift package init --type library` → `glot scaffold swift {phase}/{module}` | Sustituye solo el test `example` exacto de SwiftPM 6.3.3; conserva suites distintas y pide revisarlas. `glot test` rechaza una suite sin casos |
+| **typescript** | `npm init -y` → `bash {root}/scripts/data/typescript_scaffold.sh {module}` → `npm install` | Configura TypeScript estricto, `ts-jest`, scripts `test`/`build` e ignore; preserva scripts y configuraciones propios |
 | **v** | `v init --lib` (no interactivo) → conservar layout generado y verificar el resumen de `v test .` | Conservar `tests/`, fuentes y gitfile; fijar `version: '0.1.0'` en `v.mod`. El runner rechaza cero casos y no renombra carpetas sin actualizar imports |
-| **vala** | `meson init --language vala --type library --name {module}` | Completar `src/` y `test/` y decidir el build con meson |
+| **vala** | `meson init --language vala --type library --name {module}` → `glot scaffold vala {phase}/{module}` | El helper mueve solo la pareja exacta de Meson 1.3.2 a `src/`/`test/`, actualiza el manifiesto y deja un sentinel GLib.Test fallido; conserva variantes |
 | **zig** | `zig init` → añadir `.gitignore` para `.zig-cache/`, `zig-cache/` y `zig-out/`; conservar `src/main.zig` | El `test` target generado usa `src/main.zig` como raíz. Adaptar `build.zig` a biblioteca y al archivo de suite antes de retirarlo; borrarlo antes hace fallar `zig build test` |
 
 > **ES:** Si un generador crea un `main` o un `app` de ejemplo, no se retira a ciegas: en D solo se elimina la muestra verificada; en Zig `src/main.zig` se conserva hasta que `build.zig` use la suite de la biblioteca como raíz del test. `cargo init --lib` genera solo la librería.
@@ -209,9 +217,9 @@ not the test suite.
 | `cobol` | `mkdir -p src/copybooks src/lib test` · crear `src/lib/{module}.cbl` y `test/RUN-TESTS.cbl` si faltan | Programa mínimo con `PROGRAM-ID. {Module}.` y `GOBACK.` |
 | `forth` | `mkdir -p src test` · crear `src/{module}.forth` y `test/run-tests.forth` si faltan | Fuente inicialmente vacía; el runner la carga y anuncia que no hay pruebas |
 | `grain` | `mkdir -p src tests` · crear `src/{module}.gr` y `tests/run_tests.gr` si faltan | `module {Module}`; el runner importa la fuente y anuncia que no hay tests |
-| `java` | `mkdir -p src/main/java src/test/java` · `touch src/main/java/{Module}.java` | `public class {Module} { }` |
+| `java` | `bash {root}/scripts/data/java_scaffold.sh {module} {Module}` | `package {module};` + `public class {Module} { }`; POM Maven con JUnit 5 |
 | `perl` | `mkdir -p lib test` · `touch lib/{module}.pl` | `package {Module};` + `use strict;` + `use warnings;` + `1;` |
-| `php` | `mkdir -p src test` · `touch src/{Module}.php` | `<?php` + `declare(strict_types=1);` + `namespace {Module};` |
+| `php` | `bash {root}/scripts/data/php_scaffold.sh {module} {Module}` | `<?php` + `declare(strict_types=1);`; conserva el espacio global de nombres de las bases homologadas |
 | `prolog` | `mkdir -p src test` · crear `src/{module}.pl` si falta | Fuente inicialmente vacía, consultada como en las bases homologadas |
 | `scala` | `mkdir -p src/main/scala src/test/scala project` · crear `src/main/scala/{Module}.scala` si falta | `object {Module}` |
 | `scheme` | `mkdir -p src test` · crear `src/{module}.scm` si falta | `(define-module ({module}))` (Guile) |
@@ -522,51 +530,105 @@ not a test-only shortcut.
 
 ### Haxe — build.hxml + src/ + test/
 ```bash
-mkdir -p src test
 haxelib install utest         # framework de pruebas (una vez)
+bash "{root}/scripts/data/haxe_scaffold.sh" {module} {Module}
 ```
 
 ```text
 {module}/
 ├── build.hxml               # target de compilación y de tests
 ├── RunTests.hx              # runner de utest
-├── src/{Module}.hx
-└── test/                    # una suite .hx por enfoque
+├── src/                     # módulo de biblioteca del contrato
+├── test/{Module}Test.hx     # sentinel fallido; sustituir por la suite del contrato
+└── .gitignore
 ```
+
+**ES:** El helper crea `src/` y `test/` de forma idempotente y conserva los
+archivos existentes. El sentinel falla deliberadamente hasta que el paso de
+suite lo sustituye; el runner conecta esa clase y permanece en las fases
+siguientes.
+
+**EN:** The helper idempotently creates `src/` and `test/` and preserves
+existing files. The sentinel deliberately fails until the suite step replaces
+it; the runner connects that class and remains in later phases.
 
 ### Java — layout Maven estándar
 ```bash
-mkdir -p src/main/java src/test/java
+bash "{root}/scripts/data/java_scaffold.sh" {module} {Module}
 ```
 
 ```text
 {module}/
 ├── pom.xml
 └── src/
-    ├── main/java/           # clase del módulo
-    └── test/java/           # una suite JUnit 5 por enfoque
+    ├── main/java/{module}/{Module}.java
+    └── test/java/{module}/  # una suite JUnit 5 por enfoque
 ```
+
+**ES:** El scaffold crea el POM con Java 25, JUnit 5 y Surefire; escribe la
+clase mínima solo si falta y conserva cualquier fuente o configuración previa.
+
+**EN:** Scaffold creates a POM with Java 25, JUnit 5 and Surefire; it writes the
+minimal class only when missing and preserves any existing source or configuration.
 
 ### JavaScript — npm + Jest
 ```bash
 npm init -y
-npm pkg set type=module 'devDependencies.jest=^30.0.5'    # lo declara; los baja npm install
-mkdir -p src test
+bash {root}/scripts/data/javascript_scaffold.sh {module}
+npm install
 ```
 
 ```text
 {module}/
 ├── package.json
 ├── jest.config.js
+├── .gitignore                  # ignora node_modules/
 ├── src/{module}.js
 └── test/                    # una suite por enfoque
 ```
 
+**ES:** El scaffold completa el script predeterminado de `npm init`, declara
+Jest y apunta `main` a `src/{module}.js`; no fuerza `"type": "module"`, porque
+la base homologada usa CommonJS. Si el paquete ya declara ESM, genera la
+configuración de Jest correspondiente. Conserva scripts, manifiestos y archivos
+propios; `npm install` sigue siendo explícito.
+
+**EN:** Scaffold replaces npm's default failing test script, declares Jest and
+points `main` to `src/{module}.js`; it does not force `"type": "module"`, since
+the homologated base uses CommonJS. If the package already declares ESM, it
+generates the matching Jest configuration. Existing scripts, manifests and
+files are preserved; `npm install` remains explicit.
+
+### TypeScript — npm + Jest
+```bash
+npm init -y
+bash {root}/scripts/data/typescript_scaffold.sh {module}
+npm install
+```
+
+```text
+{module}/
+├── package.json
+├── tsconfig.json              # modo estricto, NodeNext y src/ + test/
+├── jest.config.cjs            # preset ts-jest y patrón *.test.ts
+├── .gitignore
+├── src/
+└── test/
+```
+
+**ES:** El scaffold completa solo campos ausentes o los marcadores
+predeterminados de `npm init`; mantiene scripts, dependencias y configuraciones
+propias. No instala dependencias ni crea código o suites.
+
+**EN:** Scaffold fills only missing fields or npm-init placeholders; authored
+scripts, dependencies and configuration are preserved. It does not install
+dependencies or create source code or test suites.
+
 ### Julia — paquete estándar de Pkg
 
-**ES:** Herramienta (R1): julia -e 'using Pkg; Pkg.generate("{module}")', desde la carpeta de la fase (Pkg.generate(".") falla). Lo que sigue es la estructura homologada actual; el generador crea src/{module}.jl en minúscula, así que el módulo se actualizará al retomarlo (R6). A completar: uuid, [compat], [extras] y [targets] en el Project.toml, y el runner test/run_tests.jl.
+**ES:** Herramienta (R1): julia -e 'using Pkg; Pkg.generate("{module}")', desde la carpeta de la fase (Pkg.generate(".") falla). Lo que sigue es la estructura homologada actual; el generador crea src/{module}.jl en minúscula, así que el módulo se actualizará al retomarlo (R6). `glot scaffold` crea un sentinel que falla explícitamente hasta que se conecte una suite; completar `test/`, el runner, y uuid, [compat], [extras] y [targets] en el Project.toml.
 
-**EN:** Tool (R1): julia -e 'using Pkg; Pkg.generate("{module}")', from the phase folder (Pkg.generate(".") fails). What follows is the current homologated structure; the generator creates lowercase src/{module}.jl, so the module will be updated when retaken (R6). To complete: uuid, [compat], [extras] and [targets] in Project.toml, plus the test/run_tests.jl runner.
+**EN:** Tool (R1): julia -e 'using Pkg; Pkg.generate("{module}")', from the phase folder (Pkg.generate(".") fails). What follows is the current homologated structure; the generator creates lowercase src/{module}.jl, so the module will be updated when retaken (R6). `glot scaffold` creates a sentinel that fails explicitly until a suite is wired in; complete `test/`, the runner, and uuid, [compat], [extras] and [targets] in Project.toml.
 ```bash
 mkdir -p src test
 ```
@@ -606,10 +668,32 @@ bash "{root}/scripts/data/gradle_scaffold.sh" kotlin {module}
         └── test/kotlin/     # suites Kotest por enfoque
 ```
 
-### Ocaml — Dune
+### OCaml — Dune
+
+**ES:** Desde la fase, `dune init` crea el proyecto. El helper adapta solo la
+plantilla exacta de Dune 3.24 sin otros archivos en `test/`: declara Alcotest
+como dependencia de pruebas y crea un sentinel fallido. Conserva y revisa
+otras variantes. Instala Alcotest por separado si no está disponible.
+
+**EN:** From the phase directory, `dune init` creates the project. The helper
+adapts only the exact Dune 3.24 template without other files in `test/`: it
+declares the Alcotest test dependency and creates a failing sentinel.
+Preserve and review other variants. Install Alcotest separately if missing.
+
 ```bash
 dune init proj {module}
+cd {module}
+bash {root}/scripts/data/ocaml_scaffold.sh {module}
+bash {root}/scripts/data/ocaml_test.sh
 ```
+
+**ES:** El runner fuerza Dune y rechaza resúmenes Alcotest vacíos o ausentes,
+pero una suite silenciosa puede pasar inadvertida si otra emite un resumen
+válido; comprueba que todos los targets de tests producen su resumen.
+
+**EN:** The runner forces Dune and rejects empty or missing Alcotest summaries,
+but a silent suite can go unnoticed if another emits a valid summary; check
+that every test target produces its summary.
 
 ```text
 {module}/
@@ -619,7 +703,9 @@ dune init proj {module}
 ├── lib/
 │   ├── dune                 # declara la librería
 │   └── {module}.ml          # (+ {module}.mli opcional)
-└── test/dune                # declara el ejecutable de tests
+└── test/
+    ├── dune                 # declara el ejecutable y Alcotest
+    └── test_{module}.ml     # sentinel hasta escribir la suite
 ```
 
 ### Perl — lib/ + test/
@@ -662,9 +748,7 @@ fi
 
 ### PHP — src/ + test/ con Composer y PHPUnit
 ```bash
-mkdir -p src test
-composer init -n --name={module}/{module}
-composer require --dev --no-update phpunit/phpunit        # lo declara; los baja composer install
+bash "{root}/scripts/data/php_scaffold.sh" {module} {Module}
 ```
 
 ```text
@@ -675,6 +759,14 @@ composer require --dev --no-update phpunit/phpunit        # lo declara; los baja
 ├── src/{Module}.php
 └── test/{Module}Test.php    # una suite PHPUnit por enfoque
 ```
+
+**ES:** El scaffold escribe Composer, PHPUnit y `.gitignore` solo si faltan.
+`composer install` descarga después las dependencias; las clases siguen el
+espacio global de nombres de los módulos homologados.
+
+**EN:** Scaffold writes Composer, PHPUnit and `.gitignore` files only when
+missing. `composer install` later downloads dependencies; classes follow the
+global namespace used by the homologated modules.
 
 ### Prolog — src/ + test/
 ```bash
@@ -700,8 +792,7 @@ scaffold. With test files it requires executed cases and propagates failures
 or errors. Blocked cases are also reported and do not count as executed.
 
 ```bash
-cd test
-swipl -q --on-error=status -g "use_module(library(plunit)), expand_file_name('*_test.pl', A), expand_file_name('*_tests.pl', B), append(A, B, Fs), (Fs = [] -> (expand_file_name('*.pl', Other), (Other = [] -> (consult('../src/{module}.pl'), writeln('Scaffold: no tests configured')); (format(user_error, 'No recognized Prolog test files~n', []), fail))); (maplist(consult, Fs), run_tests(all, [summary(S)]), get_dict(passed, S, P), get_dict(failed, S, F), get_dict(timeout, S, T), get_dict(blocked, S, BCount), format('Prolog tests: ~d passed, ~d failed, ~d timed out, ~d blocked~n', [P, F, T, BCount]), (P > 0, F =:= 0, T =:= 0 -> true; (P =:= 0, F =:= 0, T =:= 0 -> (format(user_error, 'No Prolog test cases executed~n', []), fail); fail)))), halt" -t 'halt(1)'
+cd test && swipl -q --on-error=status -g "use_module(library(plunit)), expand_file_name('*_test.pl', A), expand_file_name('*_tests.pl', B), append(A, B, Fs), (Fs = [] -> (expand_file_name('*.pl', Other), (Other = [] -> (consult('../src/{module}.pl'), writeln('Scaffold: no tests configured')); (format(user_error, 'No recognized Prolog test files~n', []), fail))); (maplist(consult, Fs), run_tests(all, [summary(S)]), get_dict(passed, S, P), get_dict(failed, S, F), get_dict(timeout, S, T), get_dict(blocked, S, BCount), format('Prolog tests: ~d passed, ~d failed, ~d timed out, ~d blocked~n', [P, F, T, BCount]), (P > 0, F =:= 0, T =:= 0 -> true; (P =:= 0, F =:= 0, T =:= 0 -> (format(user_error, 'No Prolog test cases executed~n', []), fail); fail)))), halt" -t 'halt(1)'
 ```
 
 ### Python — src-layout (PEP 621)
@@ -723,9 +814,9 @@ mkdir -p src tests
 
 ### R — paquete (R/ + tests/testthat/)
 
-**ES:** El módulo es un paquete de R: DESCRIPTION (nombre, versión, licencia y dependencias), NAMESPACE (lo que se exporta), el código en R/ y las suites en tests/testthat/, con el prefijo test- que testthat descubre por defecto. El Makefile común deja el runner `make test`, que llama a `testthat::test_local()` —carga el paquete con pkgload::load_all(), sin instalarlo—; el "verificador" analiza los fuentes de R/ con `parse()`.
+**ES:** El módulo es un paquete de R: DESCRIPTION (nombre, versión, licencia y dependencias), NAMESPACE (lo que se exporta), el código en R/ y las suites en tests/testthat/, con el prefijo test- que testthat descubre por defecto. El Makefile común deja el runner `make test`, que llama a `testthat::test_local()` —carga el paquete con pkgload::load_all(), sin instalarlo— y falla si no hay casos aprobados; el "verificador" analiza los fuentes de R/ con `parse()`.
 
-**EN:** The module is an R package: DESCRIPTION (name, version, license and dependencies), NAMESPACE (what is exported), the code in R/ and the suites in tests/testthat/, with the test- prefix testthat discovers by default. Its shared Makefile provides `make test`, which calls `testthat::test_local()`—it loads the package with `pkgload::load_all()`, without installing it—and the verifier analyses sources under R/ with `parse()`.
+**EN:** The module is an R package: DESCRIPTION (name, version, license and dependencies), NAMESPACE (what is exported), the code in R/ and the suites in tests/testthat/, with the test- prefix testthat discovers by default. Its shared Makefile provides `make test`, which calls `testthat::test_local()`—it loads the package with `pkgload::load_all()`, without installing it—and fails if no cases pass; the verifier analyses sources under R/ with `parse()`.
 
 **ES:** Si faltan, el scaffold crea metadatos iniciales, fuente y NAMESPACE
 vacíos, `tests/testthat.R` y un `test-scaffold.R` sin casos para que
@@ -970,13 +1061,15 @@ revisarla. Conserva el manifiesto y el ignore existentes, rechaza enlaces en
 las rutas usadas por el scaffold y
 requiere un `Package.swift` regular. Hay que revisar fuentes y nombres.
 `swift test` puede devolver éxito con cero casos; no es una suite validada.
+`glot test` usa `swift_test.sh` para rechazar cero casos, omisiones y fallos.
 
 **EN:** The generator leaves an assertion-free `example` test. Scaffold
 replaces it only if it exactly matches the verified SwiftPM 6.3.3 template;
 it preserves and requests review of any other version. It preserves the
 manifest and ignore file, rejects symlinks in scaffold paths and requires a regular
 `Package.swift`. Source and names need review. `swift test` can succeed with
-zero cases; that is not a validated suite.
+zero cases; that is not a validated suite. `glot test` uses `swift_test.sh` to
+reject zero cases, skips and failures.
 
 ```bash
 if [[ -L Package.swift || ! -f Package.swift || -L Sources || -L Tests ||
@@ -1061,12 +1154,27 @@ cd test && { found=0; failed=0; for suite in ./*.test; do [ -f "$suite" ] || con
 
 ### Vala — src/ + test/
 
-**ES:** Herramienta (R1): meson init --language vala --type library --name {module} (R4: meson es el build más usado del ecosistema). El generador deja meson.build y las fuentes en la raíz, así que el módulo se actualizará al retomarlo (R6); lo de abajo es la estructura homologada actual. A completar: src/ y test/.
+**ES:** Herramienta (R1): `meson init --language vala --type library --name {module}` (R4: meson es el build más usado del ecosistema). Meson 1.3.2 deja `meson.build`, `{module}.vala` y `{module}_test.vala` en la raíz; el segundo archivo es una demo, no una suite GLib.Test. Lo de abajo es la estructura homologada actual y el generador no la adapta (R6). Para alinearla, mueve las fuentes sin sobrescribir destinos y actualiza las rutas en `meson.build`.
 
-**EN:** Tool (R1): meson init --language vala --type library --name {module} (R4: meson is the ecosystem's most used build). The generator leaves meson.build and the sources at the root, so the module will be updated when retaken (R6); what follows is the current homologated structure. To complete: src/ and test/.
+**EN:** Tool (R1): `meson init --language vala --type library --name {module}` (R4: Meson is the ecosystem's most used build). Meson 1.3.2 leaves `meson.build`, `{module}.vala` and `{module}_test.vala` at the root; the latter is a demo, not a GLib.Test suite. The structure below is the current homologated layout, which the generator does not adapt (R6). To align it, move the sources without overwriting destinations and update the paths in `meson.build`.
 ```bash
-mkdir -p src test
+if [[ -L src || -L test || ( -e src && ! -d src ) || ( -e test && ! -d test ) ||
+      -L {module}.vala || ! -f {module}.vala ||
+      -L {module}_test.vala || ! -f {module}_test.vala ||
+      -L src/{module}.vala || -e src/{module}.vala ||
+      -L test/{module}_test.vala || -e test/{module}_test.vala ]]; then
+  printf 'scaffold: ruta Vala no segura o conflicto / unsafe Vala path or conflict\n' >&2
+  false
+else
+  mkdir -p src test &&
+    mv -- {module}.vala src/{module}.vala &&
+    mv -- {module}_test.vala test/{module}_test.vala
+fi
 ```
+
+**ES:** Después, el helper cambia las rutas de ambos fuentes a `src/{module}.vala` y `test/{module}_test.vala`, y `include_directories('.')` a `include_directories('src')`. Sustituye la pareja exacta por un sentinel GLib.Test fallido. `vala_test.sh` compila cada suite y exige TAP con al menos un caso aprobado y sin omisiones o fallos.
+
+**EN:** The helper then changes both source paths to `src/{module}.vala` and `test/{module}_test.vala`, and `include_directories('.')` to `include_directories('src')`. It replaces the exact pair with a failing GLib.Test sentinel. `vala_test.sh` compiles each suite and requires TAP with at least one passing case and no skips or failures.
 
 ```text
 {module}/

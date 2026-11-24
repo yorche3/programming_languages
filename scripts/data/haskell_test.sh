@@ -8,6 +8,17 @@ fi
 output="$(mktemp)" || exit 1
 trap 'rm -f -- "$output"' EXIT
 
+if cabal clean >"$output" 2>&1; then
+    clean_rc=0
+else
+    clean_rc=$?
+fi
+cat -- "$output" >&2
+: >"$output"
+if ((clean_rc != 0)); then
+    exit "$clean_rc"
+fi
+
 if cabal test .:tests --jobs=1 --ghc-options=-Werror=missing-home-modules \
     --test-show-details=direct --test-options='--format=progress --no-color --no-dry-run' >"$output" 2>&1; then
     rc=0
