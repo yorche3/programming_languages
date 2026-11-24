@@ -5,12 +5,14 @@
 **EN:** History of closed versions and of the live version. **Future** versions and the layer each one covers are in [`ROADMAP.md`](ROADMAP.md).
 
 **ES:** El cierre de v2.1.0 sigue en curso. No se marcará como cerrada hasta
-resolver los seguimientos de scaffold, runner y builds que la versión asumió;
-50 filas de catálogo no equivalen a 50 comprobaciones nativas.
+resolver los seguimientos de scaffold y runner de su alcance; 50 filas de
+catálogo no equivalen a 50 comprobaciones nativas. La sincronización general
+de helpers de build figura como criterio de la siguiente versión.
 
 **EN:** v2.1.0 closure is still in progress. It will not be marked closed until
-the scaffold, runner and build follow-ups in scope are resolved; 50 catalog
-rows do not imply 50 native checks.
+the in-scope scaffold and runner follow-ups are resolved; 50 catalog rows do
+not imply 50 native checks. General build-helper synchronization is listed as
+a next-version criterion.
 
 | Versión | Fecha | Archivo | Añade | Estado |
 |---------|-------|---------|-------|:------:|
@@ -50,7 +52,7 @@ rows do not imply 50 native checks.
 | 2.0.1 | 2026-10-23 (archivo) | [`versions/glot_2.0.1.sh`](../versions/glot_2.0.1.sh) | Base previa al hotfix, archivada como copia exacta del script vivo antes de editarlo; conserva sus cambios anteriores de andamiaje y encargos / Pre-hotfix baseline, archived as an exact copy before editing | ✅ cerrada |
 | 2.0.2 | 2026-10-23 (archivo) | [`versions/glot_2.0.2.sh`](../versions/glot_2.0.2.sh) | Snapshot exacto previo al hotfix 2.0.3 / Exact pre-2.0.3 hotfix snapshot | ✅ cerrada |
 | 2.0.3 | 2026-10-26 | [`versions/glot_2.0.3.sh`](../versions/glot_2.0.3.sh) | `scaffold` automatiza `.gitignore` y Makefiles declarados, avisa si queda análisis delegado; `build` queda excepcional y conserva la suite / `scaffold` automates `.gitignore` and declared Makefiles, announces remaining delegated analysis; `build` is exceptional and preserves the suite | ✅ cerrada como línea base; snapshot exacto archivado el 2026-11-02, publicación del autor pendiente / Baseline closed; exact snapshot archived, author publication pending |
-| 2.1.0 | 2026-11-24 | [`glot.sh`](../glot.sh) | Rutas BYOK, overrides por categoría y avances verificados de scaffolds/runners; quedan seguimientos de scaffold, runner y build por cerrar / BYOK routes, category overrides and verified scaffold/runner progress; scaffold, runner and build follow-ups remain | ⏳ cierre en curso / closure in progress |
+| 2.1.0 | 2026-11-24 | [`glot.sh`](../glot.sh) | Rutas BYOK, overrides por categoría y avances verificados de scaffolds/runners; quedan seguimientos nativos de scaffold/runner por cerrar / BYOK routes, category overrides and verified scaffold/runner progress; native scaffold/runner follow-ups remain | ⏳ cierre en curso / closure in progress |
 
 ---
 
@@ -77,6 +79,29 @@ glot Rust: dry-run preserved sample; empty rejected; passing test accepted
 Rust focused assertions: 10 passed, 0 failed
 ```
 
+## 2.1.0 — Corrección del scaffold D / D scaffold fix
+
+**ES:** `dub describe --data=source-files` no demostraba que `dub test`
+incluyera `test/`: en una copia de la base homologada, un sentinel fallido
+devolvía éxito antes de configurar el manifiesto. El scaffold reconoce ahora
+el manifiesto generado y el layout simple de biblioteca homologado; configura
+`test/` solo en `unittest`, preserva manifiestos no reconocidos y es idempotente.
+En un root aislado el sentinel pasó de falso verde a fallo detectado. El
+submódulo no se modificó.
+
+**EN:** `dub describe --data=source-files` did not prove that `dub test`
+included `test/`: in a copied homologated base, a failing sentinel returned
+success before the manifest was configured. Scaffold now recognizes both the
+generated manifest and the homologated simple-library layout; it configures
+`test/` only for `unittest`, preserves unrecognized manifests and is
+idempotent. In an isolated root the sentinel changed from false green to a
+detected failure. The submodule was not modified.
+
+```text
+D scaffold: generated and homologated manifests configured; custom manifest preserved
+D base copy: false-green sentinel rejected after scaffold; rerun stable
+```
+
 ## 2.1.0 — Corrección del rerun de Vala / Vala rerun fix
 
 **ES:** El helper rechazaba su propia salida en una segunda ejecución.
@@ -94,8 +119,9 @@ Focused assertions also cover conflicts; the full harness was not run.
 
 ## 2.1.0 — Corrección de runners PureScript y Haskell / PureScript and Haskell runner fixes
 
-**ES:** PureScript rechaza ahora los resúmenes con warnings totales mayores
-que cero y los resúmenes ausentes o inconsistentes. Cada prueba recompila en
+**ES:** PureScript acepta el resumen de warnings censurados por Spago si los
+contadores visibles son cero; rechaza warnings visibles, resúmenes ausentes o
+inconsistentes. Cada prueba recompila en
 una salida temporal. Se confirmó que `workspace.buildOpts.censorLibraryWarnings: all`
 censura los 15 warnings de `test-unit` sin ocultar warnings de proyecto:
 Spago 1.0.4 terminó con cero warnings/errores y cinco casos aprobados en una
@@ -106,8 +132,9 @@ fallo y volvió a pasar; en un workspace de dos paquetes conservó el build
 compartido. El incidente original de marcas de tiempo no está explicado.
 `sync-build` sigue explícito y limitado a plantillas reconocidas.
 
-**EN:** PureScript now rejects nonzero, missing or inconsistent warning
-summaries. Each test rebuilds into a temporary output.
+**EN:** PureScript accepts Spago's censored-warning summary only when visible
+counts are zero; visible warnings, missing summaries and inconsistent totals
+are rejected. Each test rebuilds into a temporary output.
 `workspace.buildOpts.censorLibraryWarnings: all` was verified to censor the
 15 `test-unit` dependency warnings without hiding project warnings: Spago 1.0.4
 reported zero warnings/errors and five passing cases in an isolated copy.

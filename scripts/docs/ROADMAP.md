@@ -21,18 +21,20 @@ Verification is recorded in [`VERSIONS.md`](VERSIONS.md).
 **ES:** El cierre de **v2.1.0** sigue en curso. Su alcance acordado incluye
 `--delegate antigravity|copilot|open-router`, configuración BYOK por ruta,
 overrides autorizados por encargo y revisión del scaffold de los 50 lenguajes.
-El script integrado se identifica como **2.1.0**, pero la cobertura nativa y
-varios seguimientos de build todavía no están cerrados. El catálogo de 50
-lenguajes no demuestra por sí solo una revisión nativa de los 50. Los casos
+El script integrado se identifica como **2.1.0**, pero los seguimientos nativos
+de scaffold y runner todavía no están cerrados. El catálogo de 50 lenguajes no
+demuestra por sí solo una revisión nativa de los 50. La sincronización general
+de helpers de build queda en los criterios de la siguiente versión. Los casos
 medidos y pendientes se registran en [`VERSIONS.md`](VERSIONS.md) y aquí.
 v2.0.3 quedó archivada como snapshot exacto antes de editar código.
 
 **EN:** **v2.1.0 closure is in progress.** Its agreed scope includes three
 explicit delegate routes, route-specific BYOK configuration, authorized
 per-request overrides and a 50-language scaffold review. The integrated
-script identifies as **2.1.0**, but native coverage and several build
-follow-ups are not closed. A 50-language catalog does not by itself establish
-50 native scaffold reviews. Measured and pending cases are recorded in
+script identifies as **2.1.0**, but native scaffold and runner follow-ups are
+not closed. A 50-language catalog does not by itself establish 50 native
+scaffold reviews. General build-helper synchronization belongs to the
+next-version criteria. Measured and pending cases are recorded in
 [`VERSIONS.md`](VERSIONS.md) and this roadmap.
 v2.0.3 was archived before code edits.
 
@@ -197,17 +199,21 @@ unittest, rerun, contenido propio, symlinks y salida nativa sin tests/fallida.
 `scripts/tests/glot_test.sh`: `.gitignore`, source, `test/`, unittest
 configuration, rerun, authored content, symlinks and native empty/failing runs.
 
-**ES — Hallazgo D (2026-11-22):** `dub describe --build=unittest
---data=source-files --data-list --skip-registry=all` en la base homologada
-`data_structures_basics` lista solo `source/data_structures_basics.d`, no su
-suite en `test/`. El scaffold en desarrollo configura `test/` para el
-manifiesto generado reconocido y comprueba un test fallido; los módulos D
-existentes y los manifiestos distintos aún requieren revisión y corrección.
+**ES — D (2026-11-24):** `dub describe --data=source-files` no basta para
+probar qué tests ejecuta DUB: la base homologada listaba solo `source/`, y
+`dub test` devolvía 0 incluso con una aserción fallida en `test/`. El scaffold
+ahora reconoce también el manifiesto simple de biblioteca homologado y añade
+`test/` solo a `unittest`; una copia pasó de falso verde a fallo detectado,
+con rerun idempotente. No se modificó el submódulo. Los manifiestos D no
+reconocidos conservan el contenido y requieren revisión explícita.
 
-**EN — D finding (2026-11-22):** `dub describe` for the homologated base
-lists its production source but not its suite in `test/`. The development
-scaffold configures `test/` for the recognized generated manifest and checks
-a failing test; existing D modules and other manifests still need review.
+**EN — D (2026-11-24):** `dub describe --data=source-files` alone does not
+prove which tests DUB executes: the homologated base listed only `source/`,
+and `dub test` returned 0 even with a failing assertion under `test/`.
+Scaffold now also recognizes the homologated simple library manifest and adds
+`test/` only to `unittest`; an isolated copy changed from false green to a
+detected failure, with an idempotent rerun. The submodule was not modified.
+Unrecognized D manifests remain preserved and require explicit review.
 
 **ES — Hallazgo Forth (2026-11-22):** al ejecutar una aserción fallida con
 `test.forth` de la base `data_structures_basics`, el reporte indicó un fallo
@@ -1065,7 +1071,7 @@ Criterios para la siguiente versión / Next-version acceptance criteria:
 | 1.7.6 | fix de la 1.7.5 | 4a–8 | **El andamiaje de Perl pasa a `manual`**: `module-starter` generaba `Makefile.PL`, `lib/{module}.pm` y `t/`, que no es el layout homologado; la fila del catálogo queda con `mkdir -p lib test`, el paso único sale de `init_sequences.tsv` y la guía lo lee de la tabla maestra. Cierra la corrección de Perl que abrió la v1.7.5 (verificador `lib/` + `-Ilib`) | **No abre capa**: fix sobre la 1.7.5; la rama `fix/repo/glot-v1.7.6` ya lleva el número de la entrega que cierra | ✅ cerrada |
 | 1.7.7 | fix de la 1.7.6 | 4a–8 | **El layout de R es el de un paquete**: la fila del catálogo apuntaba a `src/{module}.R` y a `Rscript test/run_tests.R`, rutas que desaparecieron al homologar los cuatro módulos de R a `DESCRIPTION` + `NAMESPACE` + `R/` + `tests/testthat/`, así que el andamiaje pasa a `mkdir -p R tests/testthat`, el runner a `make test` (`testthat::test_local()`, que carga el paquete sin instalarlo) y el verificador a los fuentes de `R/`; la guía de inicialización lo documenta | **No abre capa**: fix sobre la 1.7.6; la rama `fix/repo/glot-v1.7.7` ya lleva el número de la entrega que cierra | ✅ cerrada |
 | 1.7.8 | fix de la 1.7.7 | 4a–8 | **El estándar de Racket es `raco new library {module}`** —el layout lib/test/doc de la comunidad— con su render portátil (`mv` + `sed -i` de GNU, porque el `render-template.sh` del template es interactivo y de BSD, y sin él los cuatro `info.rkt` conservan los marcadores `<project>`/`<username>`), el borrado de `.github/`, `pull_request_template.md`, `render-template.sh` y `profile/`, y las suites requiriendo la librería por ruta relativa para correr sin enlazar paquetes; el runner pasa a `raco test -x .`, porque `racket test/run_tests.rkt` no existía en los dos módulos de un solo archivo y, en los tres que sí lo tienen, **salía con código 0 aunque la suite fallara** (falso verde en `test`/`evidence`) | **No abre capa**: fix sobre la 1.7.7; la rama `fix/repo/glot-v1.7.8` ya lleva el número de la entrega que cierra | ✅ cerrada |
-| 2.1.0 | L4/L6.5 y andamiaje / scaffolding | 4a–8 | Tres rutas con `--delegate`, configuración BYOK y overrides por encargo; Sonnet para suite; revisión de acciones repetibles y recetas manuales de los 50 lenguajes / Three routes, BYOK, constrained overrides and scaffold review | Continúa v2.0.3 y recoge la revisión residual del plan 1.8.0 / Continues v2.0.3 and carries residual 1.8.0 review | ⏳ cierre en curso; quedan seguimientos nativos / closure in progress; native follow-ups remain |
+| 2.1.0 | L4/L6.5 y andamiaje / scaffolding | 4a–8 | Tres rutas con `--delegate`, configuración BYOK y overrides por encargo; Sonnet para suite; revisión de acciones repetibles y recetas manuales de los 50 lenguajes / Three routes, BYOK, constrained overrides and scaffold review | Continúa v2.0.3 y recoge la revisión residual del plan 1.8.0 / Continues v2.0.3 and carries residual 1.8.0 review | ⏳ cierre en curso; quedan seguimientos nativos de scaffold/runner / closure in progress; native scaffold/runner follow-ups remain |
 | ⏳ | 1.8.0 (plan histórico / historical plan) | 4a | **El reparto entre `new` y `scaffold`**: iniciado por v2.0.0/v2.0.3; la revisión residual de archivos, renombrados y notas automatizables se incorpora a v2.1.0 / Split introduced by v2.0.0/v2.0.3; residual adaptation review carried into v2.1.0 | No es una entrega futura independiente / Not a separate future release | Revisión residual en v2.1.0 / Residual review in v2.1.0 |
 | ⏳ | L9 | — | Versión esperada por lenguaje y comprobación/instalación | Segunda acepción de «manejador de versiones»; llega después del ciclo del roadmap |
 ### Deuda técnica / Technical debt

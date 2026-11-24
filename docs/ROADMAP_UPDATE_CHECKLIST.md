@@ -63,8 +63,9 @@ Cambio en ROADMAP.md / ROADMAP.md change: glot 2.1.0 -> closed; native pending w
 Observaciones / Notes: No se ejecutó el harness completo porque contiene verbos prohibidos. No se modificaron submódulos ni se hicieron commit/push.
 Corrección de estado / Status correction: la afirmación previa de cierre de
 v2.1.0 fue prematura; la versión vuelve a figurar en curso hasta cerrar los
-seguimientos de scaffolds, runners y builds. Snapshot e instalación se
-verificarán después de completar esos cambios.
+seguimientos de scaffold y runner de su alcance. La sincronización general de
+helpers de build permanece en los criterios de la siguiente versión. Snapshot
+e instalación se verificarán después de completar los cambios de v2.1.0.
 
 Seguimiento / Follow-up (2026-11-24):
 - PureScript: el runner ahora interpreta el resumen real de Spago
@@ -75,6 +76,10 @@ Seguimiento / Follow-up (2026-11-24):
 - Git anidado: la documentación ya no afirma que `scaffold` bloquea todo
   repositorio vacío previo; el harness contiene casos de eliminación segura,
   dry-run, rerun y preservación de configuración propia.
+- D: en copia aislada, el `dub test` original omitió un sentinel fallido y
+  devolvió 0; `glot scaffold` añadió la configuración `unittest` segura al
+  manifiesto homologado, el rerun no duplicó configuración y el sentinel
+  fallido devolvió código distinto de cero. El submódulo no se modificó.
 ```
 
 ```text

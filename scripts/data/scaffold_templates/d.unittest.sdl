@@ -1,0 +1,4 @@
+configuration "unittest" {
+    targetType "library"
+    sourcePaths "source" "test"
+}

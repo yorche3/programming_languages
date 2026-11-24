@@ -2753,6 +2753,29 @@ if command -v dub >/dev/null 2>&1 && command -v dmd >/dev/null 2>&1; then
     assert_eq 'scaffold D: acepta salida real de dub init' '0' "$rc_last"
     assert_contains 'scaffold D: configura manifiesto nativo' 'sourcePaths "source" "test"' \
         "$(cat "$SANDBOX/d/core/algorithms/data_structures_basics/dub.sdl")"
+
+    D_BASE="$SANDBOX/d/core/algorithms/data_structures_basics"
+    printf 'name "data_structures_basics"\ndescription "Basic linked data structures."\nauthors "test"\ncopyright "Copyright 2026, test"\nlicense "proprietary"\ntargetType "library"\n' \
+        >"$D_BASE/dub.sdl"
+    printf 'module data_structures_basics;\n' >"$D_BASE/source/data_structures_basics.d"
+    mkdir -p "$D_BASE/test"
+    printf 'module scaffold_sentinel;\nunittest { assert(0); }\n' >"$D_BASE/test/scaffold_sentinel.d"
+    d_rc=0
+    (cd "$D_BASE" && dub test --skip-registry=all) >/dev/null 2>&1 || d_rc=$?
+    assert_eq 'scaffold D: reproduce test/ omitido por manifiesto base' '0' "$d_rc"
+    glot_run_sandbox scaffold d algorithms/data_structures_basics
+    assert_eq 'scaffold D: configura manifiesto base reconocido' '0' "$rc_last"
+    assert_contains 'scaffold D: activa test/ en unittest' 'sourcePaths "source" "test"' \
+        "$(cat "$D_BASE/dub.sdl")"
+    d_base_manifest="$(cat "$D_BASE/dub.sdl")"
+    glot_run_sandbox scaffold d algorithms/data_structures_basics
+    assert_eq 'scaffold D: rerun base no duplica configuración' "$d_base_manifest" \
+        "$(cat "$D_BASE/dub.sdl")"
+    d_rc=0
+    d_out="$(cd "$D_BASE" && dub test --skip-registry=all 2>&1)" || d_rc=$?
+    assert_eq 'scaffold D: propaga test fallido en manifiesto base' 'yes' \
+        "$([[ "$d_rc" != 0 ]] && echo yes || echo no)"
+    assert_contains 'scaffold D: ejecuta test centinela base' 'FAILED unittests' "$d_out"
 fi
 printf 'author code\n' >"$DB/source/app.d"
 printf 'author module\n' >"$DB/source/naive_sort.d"
