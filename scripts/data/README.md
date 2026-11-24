@@ -94,11 +94,16 @@ Scheme ejecuta cada suite `*_guile.scm` y comprueba su runner SRFI-64.
 Tcl ejecuta cada suite `.test` y comprueba los contadores de Tcltest al limpiar.
 Scala conserva la tarea e informe nativos de sbt y comprueba sus resultados
 estructurados; rechaza las ejecuciones sin casos aprobados.
+Rust valida el resumen `libtest` de cada target Cargo y exige al menos un caso
+aprobado; admite casos omitidos junto a aprobados, pero rechaza targets sin
+resumen. Otros formatos requieren revisión.
 Haskell selecciona las suites del paquete actual y comprueba el resumen Hspec
 de cada una: rechaza resultados ausentes, vacíos o pendientes. Convierte en
 error `missing-home-modules` para detectar módulos locales importados pero no
 declarados en los targets compilados. Ejecuta las suites secuencialmente con
-formato Hspec `progress`, sin color ni dry-run. No modifica el manifiesto;
+formato Hspec `progress`, sin color ni dry-run. Usa un directorio de build
+temporal nuevo en cada ejecución, sin limpiar el build del proyecto o workspace;
+recompilar cuesta tiempo. No modifica el manifiesto;
 runners que no admitan esas opciones o no emitan el resumen esperado requieren
 revisión.
 
@@ -117,11 +122,16 @@ Scheme runs every `*_guile.scm` suite and checks its SRFI-64 runner.
 Tcl runs every `.test` suite and checks Tcltest counters at cleanup.
 Scala retains sbt's native task and report and checks structured results;
 it rejects runs without passing cases.
+Rust validates each Cargo target's `libtest` summary and requires at least one
+passing case; ignored cases may accompany passing cases, but targets without a
+summary are rejected. Other formats require review.
 Haskell selects the current package's test suites and checks each Hspec summary,
 rejecting missing, empty or pending results. It promotes `missing-home-modules`
 to an error to detect imported local modules missing from compiled targets.
 Suites run sequentially with Hspec's progress format, no color and no dry-run.
-It does not edit the manifest; runners that do not accept those options or
+Each run uses a fresh temporary build directory without cleaning the project's
+or workspace's build; recompilation costs time. It does not edit the manifest;
+runners that do not accept those options or
 emit the expected summary require review.
 
 **ES:** `haskell_sync.sh` respalda `glot sync-build`: declara un módulo interno
@@ -272,41 +282,58 @@ Pending examples are accepted when some examples pass.
 **ES:** OCaml conserva el layout generado por Dune. `ocaml_scaffold.sh`
 configura Alcotest y añade un sentinel fallido solo para la plantilla exacta
 de Dune 3.24 sin otros archivos en `test/`; conserva variantes y archivos
-propios. `ocaml_test.sh` fuerza `dune runtest`, muestra su salida y exige
-resúmenes Alcotest con casos ejecutados. No puede detectar un ejecutable sin
-resumen si otro sí lo emite: revisar que todos los targets de prueba usen
-Alcotest y produzcan su resumen.
+propios. `ocaml_test.sh` fuerza `dune runtest`, ejecuta las acciones en serie
+y exige un resumen Alcotest no vacío por acción `runtest` reconocida en la
+salida corta de Dune 3.24.2. Rechaza acciones `runtest` etiquetadas que sean
+silenciosas y ejecuciones sin etiquetas reconocidas. Una acción personalizada
+que ejecuta varios programas, o un programa ejecutado como dependencia sin
+etiqueta `runtest`, puede quedar oculto: revisar esas acciones y otras
+versiones de Dune.
 
 **EN:** OCaml keeps the Dune-generated layout. `ocaml_scaffold.sh` configures
 Alcotest and adds a failing sentinel only for the exact Dune 3.24 template
 without other files in `test/`; authored files and variants are preserved.
-`ocaml_test.sh` forces `dune runtest`, displays its output and requires
-Alcotest summaries with executed cases. It cannot detect a silent executable
-when another emits a summary: verify that every test target uses Alcotest and
-produces its summary.
+`ocaml_test.sh` forces `dune runtest`, runs actions sequentially and requires
+one nonempty Alcotest summary per `runtest` action recognized in Dune 3.24.2's
+short output. Labeled silent `runtest` actions and runs without recognized
+labels are rejected. A custom action running multiple programs, or a program
+run as a dependency without a `runtest` label, can still be hidden: review
+such actions and other Dune versions.
 
 **ES:** Vala conserva el layout Meson homologado. `vala_scaffold.sh` mueve
 solo las muestras exactas de Meson 1.3.2 a `src/` y `test/`, actualiza las
 rutas del manifiesto y sustituye el test por un sentinel GLib.Test fallido.
-Conserva variantes y rechaza conflictos o enlaces. `vala_test.sh` compila
+Conserva variantes y admite reruns con archivos propios ya en el layout;
+rechaza conflictos entre raíz y destino, o enlaces. `vala_test.sh` compila
 fuentes y suites separadas, exige TAP real y rechaza resúmenes ausentes,
 omitidos y fallidos.
 
 **EN:** Vala preserves the homologated Meson layout. `vala_scaffold.sh` moves
 only exact Meson 1.3.2 samples into `src/` and `test/`, updates manifest paths
 and replaces the test with a failing GLib.Test sentinel. It preserves variants
-and rejects conflicts or symlinks. `vala_test.sh` compiles sources and separate
+and allows reruns with authored files in the layout; root/destination conflicts
+and symlinks are rejected. `vala_test.sh` compiles sources and separate
 suites, requires real TAP and rejects missing, skipped or failed summaries.
 
-**ES:** `purescript_test.sh` exige casos aprobados y rechaza la salida Spago
-cuando el resumen reporta warnings totales mayores que cero. Así, los 15
-warnings de `test-unit` no quedan ocultos bajo `--strict`. `test-unit` sigue
-siendo una integración manual pendiente de reemplazo o conciliación.
+**ES:** `purescript_test.sh` compila en una salida temporal nueva en cada
+ejecución para no ocultar warnings por caché, sin borrar el `output/` del
+proyecto. Exige casos aprobados y una única tabla Spago reconocida con cero
+warnings; rechaza tablas ausentes o inconsistentes. Se verificó con Spago
+1.0.4; otros formatos quedan sin verificar y se rechazan. La compilación
+completa tiene un coste adicional. Al elegir `test-unit` 17.0.0, configura
+`workspace.buildOpts.censorLibraryWarnings: all` para censurar warnings de
+dependencias; `--strict` sigue rechazando warnings del proyecto. Una copia
+aislada de la base pasó con cero warnings/errores y cinco casos.
 
-**EN:** `purescript_test.sh` requires passing cases and rejects Spago output
-when its summary reports more than zero total warnings. This prevents the
-known 15 `test-unit` dependency warnings from passing under `--strict`.
-`test-unit` remains a manual integration requiring replacement or reconciliation.
+**EN:** `purescript_test.sh` builds into a fresh temporary output on every run
+so caching does not hide warnings, without deleting the project's `output/`.
+it requires passing cases and one recognized Spago table with zero warnings;
+missing or inconsistent tables are rejected. Verified with Spago 1.0.4;
+other formats remain unverified and are rejected. Full recompilation costs
+extra time. When choosing `test-unit` 17.0.0, set
+`workspace.buildOpts.censorLibraryWarnings: all` to censor dependency warnings;
+`--strict` still rejects project warnings. An isolated reference copy passed
+with zero warnings/errors and five tests.
 
 **ES:** Haxe instala `utest` y ejecuta `haxe_scaffold.sh`, que crea de forma
 segura `build.hxml`, `RunTests.hx`, `.gitignore` y un test sentinel que falla
@@ -429,14 +456,18 @@ that rejects missing suites or runs with no executed cases.
 **ES:** `purescript_test.sh` rechaza runners sin `All N tests passed!`,
 incluidos los runners vacíos que antes daban falso verde. Spago `--strict`
 trata los warnings del proyecto como errores, pero no los de dependencias:
-`test-unit` 17.0.0 produjo 15 en una compilación limpia. La dependencia sigue
-siendo una opción manual hasta resolver el requisito de cero warnings.
+`test-unit` 17.0.0 produjo 15 en una compilación limpia. Al elegirlo, configura
+`workspace.buildOpts.censorLibraryWarnings: all`; los warnings del proyecto
+siguen fallando con `--strict`. Verificado en una copia aislada con cero
+warnings/errores y cinco casos aprobados.
 
 **EN:** `purescript_test.sh` rejects runners without `All N tests passed!`,
 including empty runners that previously produced a false green. Spago `--strict`
 promotes project warnings to errors, but not dependency warnings: `test-unit`
-17.0.0 produced 15 in a clean build. The dependency remains a manual option
-until the zero-warning requirement is resolved.
+17.0.0 produced 15 in a clean build. When choosing it, set
+`workspace.buildOpts.censorLibraryWarnings: all`; project warnings still fail
+with `--strict`. Verified in an isolated copy with zero warnings/errors and
+five passing cases.
 
 **ES:** TypeScript elimina `--passWithNoTests`; `typescript_test.sh` exige el
 informe JSON de Jest y rechaza cero casos, omitidos y fallos.

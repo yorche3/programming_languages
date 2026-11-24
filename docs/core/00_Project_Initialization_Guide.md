@@ -128,7 +128,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **rescript** | ⛓️ ✅ `bash {root}/scripts/data/rescript_scaffold.sh {module}` | `rescript.json`, `package.json`, `jest.config.js`, `babel.config.js` | ✅ `npm test` |
 | **rexx** | ✅ `mkdir -p src test` | — | ✅ `bash {root}/scripts/data/rexx_test.sh` |
 | **ruby** | ⛓️ ✅ `bash {root}/scripts/data/ruby_scaffold.sh {module}` | `Gemfile`, `.rspec` | ✅ `bundle exec rspec` |
-| **rust** | ✅ `cargo init --lib` | `Cargo.toml` | ✅ `cargo test` |
+| **rust** | ⛓️ ✅ `cargo init --lib` | `Cargo.toml` | ✅ `bash {root}/scripts/data/rust_test.sh` |
 | **scala** | ✅ `mkdir -p src/main/scala src/test/scala project` + build sbt (el runner instalado, sbt 2.0.8, ya no trae `sbt new`) | `build.sbt`, `project/build.properties` | ✅ sbt + ScalaTest (comando abajo / command below) |
 | **scheme** | ✍️ `mkdir -p src test` | — | ✅ Guile + SRFI-64 (comando abajo / command below) |
 | **swift** | 🔧 `swift package init --type library` | `Package.swift`, `Sources/{Module}/` | ✅ `bash {root}/scripts/data/swift_test.sh` |
@@ -184,12 +184,13 @@ not the test suite.
 | **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` → `glot scaffold julia {phase}/{module}` | El scaffold deja un sentinel que falla mientras no se conecte la suite; completar `test/` y el runner, y añadir `uuid`, `[compat]`, `[extras]` y `[targets]` |
 | **kotlin** | `gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project` → retirar solo la pareja de muestras verificada, si no hay otros archivos en `lib/src` | Conservar muestras distintas o con otros archivos y revisar; Gradle puede devolver éxito sin casos |
 | **nim** | `nimble init -y` → retirar solo muestras exactas → task `test` idempotente | Conservar fuentes propias y añadir o conservar la suite; ejecutar los archivos de `tests/` directamente y rechazar ausencia o cero casos |
-| **ocaml** | `dune init proj {module}` → `glot scaffold ocaml {phase}/{module}` | Conserva `lib/` y `test/`. Para la plantilla exacta de Dune 3.24 sin otros archivos en `test/`, configura Alcotest y crea un sentinel fallido; conservar y revisar variantes. `glot test` exige resúmenes Alcotest no vacíos, pero no detecta un ejecutable silencioso si otro emite un resumen válido |
+| **ocaml** | `dune init proj {module}` → `glot scaffold ocaml {phase}/{module}` | Conserva `lib/` y `test/`. Para la plantilla exacta de Dune 3.24 sin otros archivos en `test/`, configura Alcotest y crea un sentinel fallido; conservar y revisar variantes. `glot test` exige un resumen Alcotest por acción `runtest` reconocida; una acción compuesta o dependencia sin etiqueta puede ocultar un ejecutable silencioso |
 | **python** | `uv init --lib .` | Borrar el `.git` que crea `uv`, añadir `conftest.py` y `tests/` con configuración de pytest, y declarar pytest (`uv add --dev pytest --no-sync`) |
-| **purescript** | `spago init` → `glot scaffold purescript {phase}/{module}` → `spago install --test-deps test-unit` (manual, si se elige ese framework) | Scaffold conserva código propio y sustituye solo muestras verificadas. Con Spago 1.0.4 y test-unit 17.0.0, `spago test --offline --strict` reportó 15 warnings de dependencia: no automatizar ni cerrar 4a hasta resolverlos. `purescript_test.sh` rechaza runners sin casos |
+| **purescript** | `spago init` → `glot scaffold purescript {phase}/{module}` → `spago install --test-deps test-unit` (manual, si se elige ese framework) | Para dejar fuera del gate los warnings conocidos de dependencias, configura `workspace.buildOpts.censorLibraryWarnings: all`; `--strict` sigue rechazando warnings del proyecto. Spago 1.0.4/test-unit 17.0.0 comprobado en copia aislada: 0 warnings, 0 errores y casos ejecutados. `purescript_test.sh` rechaza warnings, resumen ausente y runner sin casos |
 | **racket** | `raco new library {module}` → render portátil (`mv` + `sed -i`, con el código renombrado a `{module}.rkt` con guiones) | Conservar también los archivos auxiliares generados; las suites requieren la librería por ruta relativa (`"../../{module}-lib/{module}.rkt"`, con guiones) y el runner es `raco test -x .`, sin enlazar paquetes |
 | **rescript** | `bash {root}/scripts/data/rescript_scaffold.sh {module}` → `npm install` | Crea solo los archivos que faltan; conserva `package.json` propio y configura ReScript/Jest |
 | **ruby** | `bash {root}/scripts/data/ruby_scaffold.sh {module}` → `bundle install` | Crea Gemfile con RSpec y `.rspec`; conserva ambos archivos si ya existen |
+| **rust** | `cargo init --lib` → `glot scaffold rust {phase}/{module}` | Conserva `src/lib.rs` y crea `tests/`; vacía solo la muestra exacta sin otros fuentes o tests. Revisar variantes conservadas. `glot test` exige al menos un caso aprobado y un resumen reconocido por target |
 | **swift** | `swift package init --type library` → `glot scaffold swift {phase}/{module}` | Sustituye solo el test `example` exacto de SwiftPM 6.3.3; conserva suites distintas y pide revisarlas. `glot test` rechaza una suite sin casos |
 | **typescript** | `npm init -y` → `bash {root}/scripts/data/typescript_scaffold.sh {module}` → `npm install` | Configura TypeScript estricto, `ts-jest`, scripts `test`/`build` e ignore; preserva scripts y configuraciones propios |
 | **v** | `v init --lib` (no interactivo) → conservar layout generado y verificar el resumen de `v test .` | Conservar `tests/`, fuentes y gitfile; fijar `version: '0.1.0'` en `v.mod`. El runner rechaza cero casos y no renombra carpetas sin actualizar imports |
@@ -944,24 +945,31 @@ bundle install --local        # resuelve con las gemas instaladas; sin red
 
 ### Rust — conservar el punto de entrada de Cargo
 
-**ES:** `cargo init --lib` genera `Cargo.toml` y `src/lib.rs`. Ese es el punto de
-entrada predeterminado; no renombrarlo a `src/{module}.rs` sin una decisión y
-configuración explícita. El scaffold comprueba ambos archivos y los conserva:
+**ES:** `cargo init --lib` genera `Cargo.toml` y `src/lib.rs`. Ese es el punto
+de entrada predeterminado; no renombrarlo sin una configuración explícita.
+El scaffold crea `tests/` y vacía `src/lib.rs` solo si coincide con la muestra
+de Cargo 1.98.1 y no hay otros fuentes ni tests; conserva el contenido propio.
+Rechaza enlaces y rutas no seguras en los archivos y directorios que utiliza.
 
-**EN:** Cargo's library initializer generates its default entry point.
-Scaffolding checks and preserves it; do not rename it without explicit crate
-configuration.
+**EN:** Cargo's library initializer generates `Cargo.toml` and `src/lib.rs`;
+do not rename the entry point without explicit configuration. Scaffolding
+creates `tests/` and empties `src/lib.rs` only if it matches the Cargo 1.98.1
+sample and there are no other sources or tests. Authored content is preserved;
+unsafe paths and symlinks are rejected.
 
 ```bash
-test -f Cargo.toml && test -f src/lib.rs
+bash {root}/scripts/data/rust_scaffold.sh
 ```
 
-**ES:** Los ejemplos de funciones/tests que genere Cargo se revisan en el paso
-4a; no representan la suite del contrato. Verificado con `cargo test --offline`
-en un paquete temporal, sin tocar módulos homologados.
+**ES:** Las muestras distintas requieren revisión en 4a. El runner valida los
+resúmenes `libtest` de cada target y exige algún caso aprobado: permite mezclar
+casos omitidos con aprobados, pero rechaza ejecuciones vacías, enteramente
+omitidas o sin resumen. Otros harnesses requieren revisión.
 
-**EN:** Review Cargo-generated function/test examples in step 4a; they are not
-the contract suite. Verified offline in a temporary package, not actual modules.
+**EN:** Different samples require review in 4a. The runner validates each
+target's `libtest` summary and requires a passing case: passing and ignored
+cases may be mixed, but empty, entirely ignored or summary-free runs fail.
+Other harnesses require review.
 
 ### Scala — layout sbt estándar
 

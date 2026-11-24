@@ -4,15 +4,13 @@
 
 **EN:** History of closed versions and of the live version. **Future** versions and the layer each one covers are in [`ROADMAP.md`](ROADMAP.md).
 
-**ES:** v2.1.0 quedó cerrada según [`ROADMAP.md`](ROADMAP.md).
-El script se identifica como **2.1.0**. La separación de rutas/modelos, los
-scaffolds/runners corregidos y el gate warning/build están verificados;
-los casos no medidos conservan su estado explícito en el roadmap.
+**ES:** El cierre de v2.1.0 sigue en curso. No se marcará como cerrada hasta
+resolver los seguimientos de scaffold, runner y builds que la versión asumió;
+50 filas de catálogo no equivalen a 50 comprobaciones nativas.
 
-**EN:** v2.1.0 is closed according to [`ROADMAP.md`](ROADMAP.md).
-The script identifies as **2.1.0**. Route/model separation, corrected
-scaffolds/runners and warning/build gates are verified; unmeasured cases retain
-their explicit roadmap status.
+**EN:** v2.1.0 closure is still in progress. It will not be marked closed until
+the scaffold, runner and build follow-ups in scope are resolved; 50 catalog
+rows do not imply 50 native checks.
 
 | Versión | Fecha | Archivo | Añade | Estado |
 |---------|-------|---------|-------|:------:|
@@ -52,45 +50,102 @@ their explicit roadmap status.
 | 2.0.1 | 2026-10-23 (archivo) | [`versions/glot_2.0.1.sh`](../versions/glot_2.0.1.sh) | Base previa al hotfix, archivada como copia exacta del script vivo antes de editarlo; conserva sus cambios anteriores de andamiaje y encargos / Pre-hotfix baseline, archived as an exact copy before editing | ✅ cerrada |
 | 2.0.2 | 2026-10-23 (archivo) | [`versions/glot_2.0.2.sh`](../versions/glot_2.0.2.sh) | Snapshot exacto previo al hotfix 2.0.3 / Exact pre-2.0.3 hotfix snapshot | ✅ cerrada |
 | 2.0.3 | 2026-10-26 | [`versions/glot_2.0.3.sh`](../versions/glot_2.0.3.sh) | `scaffold` automatiza `.gitignore` y Makefiles declarados, avisa si queda análisis delegado; `build` queda excepcional y conserva la suite / `scaffold` automates `.gitignore` and declared Makefiles, announces remaining delegated analysis; `build` is exceptional and preserves the suite | ✅ cerrada como línea base; snapshot exacto archivado el 2026-11-02, publicación del autor pendiente / Baseline closed; exact snapshot archived, author publication pending |
-| 2.1.0 | 2026-11-24 | [`glot.sh`](../glot.sh) | Rutas BYOK/verificadas, overrides por categoría, scaffolds/runners corregidos y gates de falsos verdes; cobertura catalogada de los 50 lenguajes / Verified routes/BYOK, category overrides, corrected scaffolds/runners and false-green gates; 50-language catalog coverage | ✅ cerrada / Closed |
+| 2.1.0 | 2026-11-24 | [`glot.sh`](../glot.sh) | Rutas BYOK, overrides por categoría y avances verificados de scaffolds/runners; quedan seguimientos de scaffold, runner y build por cerrar / BYOK routes, category overrides and verified scaffold/runner progress; scaffold, runner and build follow-ups remain | ⏳ cierre en curso / closure in progress |
 
 ---
 
-## 2.1.0-dev — PureScript y Haskell / PureScript and Haskell
+## 2.1.0 — Scaffold y runner Rust / Rust scaffold and runner
 
-**ES:** PureScript rechaza ahora los resúmenes con warnings totales mayores
-que cero, por lo que los 15 warnings de `test-unit` no pueden pasar bajo
-`--strict`. Haskell ejecuta `cabal clean` antes de `cabal test`, evitando
-reruns con binarios obsoletos en el camino común; conserva `sync-build`
-explícito y limitado a plantillas reconocidas.
+**ES:** Cargo 1.98.1 devuelve éxito para su ejemplo generado, cero casos o
+solo casos omitidos. El scaffold conserva el punto de entrada y retira solo
+la muestra exacta sin otros fuentes ni tests. El runner comprueba el resumen
+`libtest` de cada target y exige al menos un caso aprobado; acepta omitidos
+junto a aprobados y rechaza targets silenciosos. Otros formatos quedan sin
+verificar.
 
-**EN:** PureScript now rejects summaries with more than zero total warnings,
-so the 15 `test-unit` warnings cannot pass under `--strict`. Haskell runs
-`cabal clean` before `cabal test`, preventing stale binaries in the common
-rerun path; `sync-build` remains explicit and limited to recognized templates.
+**EN:** Cargo 1.98.1 succeeds for its generated example, zero cases or only
+ignored cases. Scaffold preserves the entry point and removes only the exact
+sample without other sources or tests. The runner checks each target's
+`libtest` summary and requires at least one passing case; ignored cases may
+accompany passing cases, while silent targets are rejected. Other formats
+remain unverified.
 
 ```text
-PureScript runner: rejects dependency warnings and empty suites
-Haskell runner: cleans before test and preserves Hspec validation
+Rust native: empty, ignored-only and silent harness rejected; mixed passed
+Rust references: data_structures_basics 22, numbers 10 cases
+glot Rust: dry-run preserved sample; empty rejected; passing test accepted
+Rust focused assertions: 10 passed, 0 failed
+```
+
+## 2.1.0 — Corrección del rerun de Vala / Vala rerun fix
+
+**ES:** El helper rechazaba su propia salida en una segunda ejecución.
+Ahora conserva los archivos ya adaptados o propios y rechaza conflictos entre
+la raíz y el destino. Con Meson 1.3.2 y Vala 0.56.16, una generación aislada
+se adaptó, el rerun conservó fuente, test y manifiesto, y el sentinel falló
+como se esperaba. Las aserciones focalizadas también cubren conflictos; no se
+ejecutó el harness completo.
+
+**EN:** The helper rejected its own output on a second run. It now preserves
+adapted or authored files and rejects root/destination conflicts. With Meson
+1.3.2 and Vala 0.56.16, an isolated generated project was adapted, the rerun
+preserved source, test and manifest, and the sentinel failed as expected.
+Focused assertions also cover conflicts; the full harness was not run.
+
+## 2.1.0 — Corrección de runners PureScript y Haskell / PureScript and Haskell runner fixes
+
+**ES:** PureScript rechaza ahora los resúmenes con warnings totales mayores
+que cero y los resúmenes ausentes o inconsistentes. Cada prueba recompila en
+una salida temporal. Se confirmó que `workspace.buildOpts.censorLibraryWarnings: all`
+censura los 15 warnings de `test-unit` sin ocultar warnings de proyecto:
+Spago 1.0.4 terminó con cero warnings/errores y cinco casos aprobados en una
+copia aislada. Otros formatos de resumen no están verificados. Haskell ya no ejecuta
+`cabal clean`, que eliminaba el build compartido en un workspace aislado:
+recompila en un `--builddir` temporal. En una copia nativa pasó, rechazó un
+fallo y volvió a pasar; en un workspace de dos paquetes conservó el build
+compartido. El incidente original de marcas de tiempo no está explicado.
+`sync-build` sigue explícito y limitado a plantillas reconocidas.
+
+**EN:** PureScript now rejects nonzero, missing or inconsistent warning
+summaries. Each test rebuilds into a temporary output.
+`workspace.buildOpts.censorLibraryWarnings: all` was verified to censor the
+15 `test-unit` dependency warnings without hiding project warnings: Spago 1.0.4
+reported zero warnings/errors and five passing cases in an isolated copy.
+Other summary formats are unverified. Haskell no longer runs
+`cabal clean`, which removed the shared build in an isolated workspace; it
+rebuilds in a temporary `--builddir`. In a native copy it passed, rejected a
+failure and passed again; in a two-package workspace it preserved the shared
+build. The original timestamp incident remains unexplained. `sync-build` remains
+explicit and limited to recognized templates.
+
+```text
+PureScript native: dependency warnings 1 twice; warning-free smoke test 0
+Haskell native (offline): 51 passing, deliberate failure rejected, 51 passing
+Haskell native workspace (offline): current package only, shared build preserved
 ```
 
 ## 2.1.0-dev — scaffold y runner OCaml / OCaml scaffold and runner
 
 **ES:** La plantilla exacta de Dune 3.24 se adapta a Alcotest con un sentinel
 fallido; se conservan variantes y archivos propios. El runner fuerza Dune y
-rechaza resúmenes Alcotest ausentes o vacíos. Un ejecutable silencioso puede
-quedar oculto por el resumen válido de otro; la revisión de todos los targets
-y otras versiones sigue pendiente.
+exige un resumen Alcotest no vacío por acción `runtest` en salida corta. Con
+Dune 3.24.2 rechazó una acción silenciosa junto a una suite aprobada y aceptó
+dos suites aprobadas. Una acción personalizada con varios programas o una
+dependencia sin etiqueta `runtest` aún puede ocultar un ejecutable silencioso;
+revisar estos casos y otras versiones.
 
 **EN:** The exact Dune 3.24 template is adapted to Alcotest with a failing
 sentinel; authored files and variants are preserved. The runner forces Dune
-and rejects missing or empty Alcotest summaries. A silent executable can be
-hidden by another valid summary; review of all targets and other versions
-remains pending.
+and requires one nonempty Alcotest summary per `runtest` action in short
+output. With Dune 3.24.2 it rejected a silent action alongside a passing suite
+and accepted two passing suites. A custom action running multiple programs or
+a dependency without a `runtest` label can still hide a silent executable;
+review those cases and other versions.
 
 ```text
 OCaml scaffold and runner focused assertions: 21 passed, 0 failed
 OCaml references: 4 and 15 cases, 0 failures
+OCaml runner: silent action rejected; two passing actions accepted
 ```
 
 ## 2.1.0-dev — runner Crystal / Crystal runner
@@ -237,7 +292,7 @@ homologated references passed in isolated copies. No submodules were modified.
 ```text
 meson 1.3.2 / Vala 0.56.16: generated pair adapted, sentinel rejected
 Vala references: data_structures_basics 4, numbers 10 cases
-glot tests: 1950 passed, 0 failed
+Vala native TAP: passing case accepted; empty and mixed skipped cases rejected
 docs checks: 32 passed, 0 failed
 git diff --check
 ```
@@ -434,31 +489,36 @@ git diff --check
 **ES:** Se inicia el fix sin cerrar la versión. `new` inspecciona el `.git/`
 recién generado en un módulo inicialmente vacío y solo lo retira si es seguro;
 el estado se resuelve desde Git anidado y se eliminan del catálogo los borrados
-incondicionales de `.git`. Este caso está cubierto por regresiones; `scaffold`
-aún bloquea cualquier Git anidado preexistente, incluso uno vacío generado
-anteriormente, y no está cubierto por ese cierre parcial.
+incondicionales de `.git`. `scaffold` también retira un Git anidado vacío
+reconocible dejado por un generador anterior; las regresiones cubren invocación
+desde el módulo, `--dry-run`, limpieza real, rerun y bloqueo de configuración
+propia.
 En D se retira únicamente el ejemplo nativo verificado; D y PureScript anuncian
 el análisis pendiente. Siguen abiertas la revisión de los scaffolds, los helpers
 de build y las demás condiciones del [`ROADMAP.md`](ROADMAP.md).
 
 **EN:** The fix has started; the release remains open. `new` checks and removes
 freshly generated Git only when safe, nested Git resolves the superproject
-state, and unconditional catalog cleanup is removed. `scaffold` still blocks
-any pre-existing nested Git, including an empty repository from an earlier
-generator run; that case is not covered by the partial closure. D removes
-only the verified native sample; D and PureScript announce pending analysis.
-The remaining scaffold review, build helpers and roadmap conditions are open.
+state, and unconditional catalog cleanup is removed. `scaffold` also removes
+recognizable empty nested Git left by an earlier generator; regressions cover
+module-local invocation, non-mutating dry-run, cleanup, rerun and blocking
+authored configuration. D removes only the verified native sample; D and
+PureScript announce pending analysis. The remaining scaffold review, build
+helpers and roadmap conditions are open.
 
 **ES:** Continuación: PureScript conserva sus layouts Spago, crea el módulo
 PascalCase y un runner vacío, y retira o sustituye únicamente las muestras
 exactas de Spago 1.0.4. En un proyecto aislado, `spago test --offline --strict`
-compiló con 0 warnings y 0 errores y ejecutó el runner. La configuración de
-`test-unit` y el resto de la revisión siguen pendientes.
+compiló con 0 warnings y 0 errores y ejecutó el runner. Los warnings de
+`test-unit` se resuelven con el censor soportado por Spago; otras versiones
+del generador siguen por comprobar.
 
 **EN:** Continued with a PureScript module and empty runner, replacing only
 exact Spago 1.0.4 samples. In an isolated project, `spago test --offline --strict`
-compiled with zero warnings and errors and ran the runner. `test-unit`
-configuration and the remaining review are still pending.
+compiled with zero warnings and errors and ran the runner. `test-unit` warnings
+are handled with Spago's supported library-warning censor setting. The runner
+accepts Spago's `0/15` censored-warning summary only when visible warning
+counts remain zero; other generator versions remain to be checked.
 
 **ES:** Assembly incorpora un runner NASM mínimo que informa de la ausencia
 de tests, una fuente ensamblable y patrones para objetos/ejecutable; preserva

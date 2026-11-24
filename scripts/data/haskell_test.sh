@@ -5,21 +5,14 @@ if [[ $# != 0 ]]; then
     exit 1
 fi
 
-output="$(mktemp)" || exit 1
-trap 'rm -f -- "$output"' EXIT
+work_dir="$(mktemp -d)" || {
+    printf 'test: no se pudo crear directorio temporal / could not create temporary directory\n' >&2
+    exit 1
+}
+trap 'rm -rf -- "$work_dir"' EXIT
+output="$work_dir/cabal.log"
 
-if cabal clean >"$output" 2>&1; then
-    clean_rc=0
-else
-    clean_rc=$?
-fi
-cat -- "$output" >&2
-: >"$output"
-if ((clean_rc != 0)); then
-    exit "$clean_rc"
-fi
-
-if cabal test .:tests --jobs=1 --ghc-options=-Werror=missing-home-modules \
+if cabal test .:tests --builddir="$work_dir/build" --jobs=1 --ghc-options=-Werror=missing-home-modules \
     --test-show-details=direct --test-options='--format=progress --no-color --no-dry-run' >"$output" 2>&1; then
     rc=0
 else

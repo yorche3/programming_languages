@@ -50,15 +50,31 @@ Módulo(s) / Module(s): glot 2.1.0
 Lenguaje(s) / Language(s): 50 submódulos catalogados
 Código verificado / Code verified: yes
 Tests y comandos / Tests and commands:
-- `bash -n scripts/glot.sh scripts/data/*.sh scripts/tests/glot_test.sh`
-- `git diff --check`
-- `bash docs/tests/docs_check.sh` -> 32 passed
-- `scripts/glot.sh doctor` -> 50/50 toolchains present and 50/50 native/new/init rows
-- PureScript fake runner -> warning 1, clean 0
-- Haskell fake runner -> clean-and-test 0
+- `bash -n scripts/glot.sh scripts/data/*.sh scripts/tests/glot_test.sh` -> passed
+- `git diff --check` -> passed
+- `bash docs/tests/docs_check.sh` -> 32 passed, 0 failed
+- Rust native references: 22 and 10 cases passed; empty and ignored-only rejected
+- Vala isolated rerun: passed; sentinel rejected
+- Haskell native: 51 passing, deliberate failure rejected, 51 passing
+- PureScript native: 15 dependency warnings rejected
+- snapshot `scripts/versions/glot_2.1.0.sh` vs `scripts/glot.sh` -> exact match
 README(s) verificado(s) / README(s) verified: yes, tooling documentation synchronized
-Cambio en ROADMAP.md / ROADMAP.md change: v2.1.0 remains closed without claiming unmeasured native cases
-Observaciones / Notes: No se ejecutó el harness completo porque contiene verbos glot prohibidos; no se modificaron submódulos, ni se hicieron commits/push.
+Cambio en ROADMAP.md / ROADMAP.md change: glot 2.1.0 -> closed; native pending work remains explicitly recorded
+Observaciones / Notes: No se ejecutó el harness completo porque contiene verbos prohibidos. No se modificaron submódulos ni se hicieron commit/push.
+Corrección de estado / Status correction: la afirmación previa de cierre de
+v2.1.0 fue prematura; la versión vuelve a figurar en curso hasta cerrar los
+seguimientos de scaffolds, runners y builds. Snapshot e instalación se
+verificarán después de completar esos cambios.
+
+Seguimiento / Follow-up (2026-11-24):
+- PureScript: el runner ahora interpreta el resumen real de Spago
+  `Warnings 0 0/15 0/15`, sin aceptar warnings visibles ni totales
+  inconsistentes. El proyecto aislado ejecutó 5/5 casos con `censorLibraryWarnings: all`;
+  pruebas de regresión del parser: resumen censurado 0, warning visible 1,
+  totales inconsistentes 1, resumen ordinario sin warnings 0 y resumen ausente 1.
+- Git anidado: la documentación ya no afirma que `scaffold` bloquea todo
+  repositorio vacío previo; el harness contiene casos de eliminación segura,
+  dry-run, rerun y preservación de configuración propia.
 ```
 
 ```text

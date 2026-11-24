@@ -18,21 +18,22 @@ The v2.0.2 shared delegation policy retains `data_structures_basics` →
 `numbers` priority, with topic- and language-aware grouping and unchanged models.
 Verification is recorded in [`VERSIONS.md`](VERSIONS.md).
 
-**ES:** La siguiente entrega es **v2.1.0**, con especificación acordada en
-este roadmap: `--delegate antigravity|copilot|open-router`,
-configuración BYOK por ruta, overrides autorizados por encargo y revisión del
-scaffold de los 50 lenguajes. En **2.1.0** están verificados las rutas,
-los perfiles, los runners de falsos verdes y los bloques de scaffold medidos;
-los casos no medidos conservan su estado explícito en [`VERSIONS.md`](VERSIONS.md).
+**ES:** El cierre de **v2.1.0** sigue en curso. Su alcance acordado incluye
+`--delegate antigravity|copilot|open-router`, configuración BYOK por ruta,
+overrides autorizados por encargo y revisión del scaffold de los 50 lenguajes.
+El script integrado se identifica como **2.1.0**, pero la cobertura nativa y
+varios seguimientos de build todavía no están cerrados. El catálogo de 50
+lenguajes no demuestra por sí solo una revisión nativa de los 50. Los casos
+medidos y pendientes se registran en [`VERSIONS.md`](VERSIONS.md) y aquí.
 v2.0.3 quedó archivada como snapshot exacto antes de editar código.
 
-**EN:** The next delivery is **v2.1.0**, specified in
-this roadmap: three explicit delegate routes, route-specific BYOK
-configuration, authorized per-request overrides and a 50-language scaffold
-review. Routing, profiles and the first nine scaffold corrections are verified
-in **2.1.0**; later progress and explicit unmeasured cases are recorded in
-[`VERSIONS.md`](VERSIONS.md). The release is closed without implying native
-coverage that was not measured.
+**EN:** **v2.1.0 closure is in progress.** Its agreed scope includes three
+explicit delegate routes, route-specific BYOK configuration, authorized
+per-request overrides and a 50-language scaffold review. The integrated
+script identifies as **2.1.0**, but native coverage and several build
+follow-ups are not closed. A 50-language catalog does not by itself establish
+50 native scaffold reviews. Measured and pending cases are recorded in
+[`VERSIONS.md`](VERSIONS.md) and this roadmap.
 v2.0.3 was archived before code edits.
 
 **ES:** La pasada en curso corrigió los esqueletos Java, JavaScript, PHP, Ruby,
@@ -397,30 +398,59 @@ Other formats and versions remain unverified.
 **ES — OCaml:** Dune 3.24.2 generó un test vacío que devuelve éxito.
 El scaffold configura Alcotest y añade un sentinel fallido solo para la
 plantilla exacta sin otros archivos en `test/`. El runner fuerza la ejecución
-y rechaza resúmenes ausentes o con cero casos, incluso en una mezcla con otra
-suite aprobada. Las bases pasaron en copias aisladas con 4 y 15 casos.
-Limitación pendiente: un ejecutable silencioso puede quedar oculto si otro
-emite un resumen válido; verificar todos los targets y otras versiones.
+y exige un resumen Alcotest no vacío por acción `runtest` en la salida corta
+de Dune 3.24.2, ejecutadas en serie. En una prueba nativa rechazó una acción
+silenciosa junto a otra aprobada y aceptó dos suites aprobadas; las bases
+pasaron en copias aisladas con 4 y 15 casos. Una acción personalizada que
+ejecuta varios programas puede ocultar un ejecutable silencioso. Además, una
+prueba aislada confirmó que un programa silencioso ejecutado como dependencia
+sin etiqueta `runtest` queda oculto por otra suite aprobada. Revisar esas
+acciones y otras versiones.
 
 **EN — OCaml:** Dune 3.24.2 generated an empty test that succeeds. Scaffold
 configures Alcotest and adds a failing sentinel only for the exact template
-without other files in `test/`. The runner forces execution and rejects missing
-or zero-case summaries, even alongside a passing suite. The references passed
-in isolated copies with 4 and 15 cases. Open limitation: a silent executable
-can be hidden by another valid summary; check all targets and other versions.
+without other files in `test/`. The runner forces execution and requires one
+nonempty Alcotest summary per sequential `runtest` action in Dune 3.24.2's
+short output. A native check rejected a silent action alongside a passing one
+and accepted two passing suites; the isolated references passed with 4 and 15
+cases. A custom action running multiple programs can hide a silent executable.
+An isolated check also confirmed that a silent program run as a dependency
+without a `runtest` label is hidden by a passing suite. Review such actions and
+other versions.
+
+**ES — Rust:** Cargo 1.98.1 genera un test de ejemplo aprobado y devuelve
+éxito con cero casos o solo casos omitidos. El scaffold vacía únicamente la
+muestra exacta sin otros fuentes o tests y preserva `src/lib.rs`; crea `tests/`
+sin reemplazar contenido. El runner exige resúmenes `libtest` coherentes por
+target y al menos un caso aprobado, admite omitidos junto a aprobados y
+rechaza targets silenciosos. Una prueba nativa cubrió esos casos y las bases
+`data_structures_basics` y `numbers` pasaron con 22 y 10 casos. Otros formatos
+de harness y versiones quedan sin verificar.
+
+**EN — Rust:** Cargo 1.98.1 generates a passing sample test and succeeds with
+no tests or only ignored tests. Scaffold empties only the exact sample without
+other sources or tests, preserves `src/lib.rs`, and creates `tests/` without
+replacing contents. The runner requires consistent `libtest` summaries per
+target and at least one passing case, permits ignored cases alongside passing
+ones and rejects silent targets. Native checks covered those cases; the
+`data_structures_basics` and `numbers` references passed with 22 and 10 tests.
+Other harness formats and versions remain unverified.
 
 **ES — Vala:** con Meson 1.3.2 y Vala 0.56.16, el helper mueve las muestras
 exactas generadas a `src/` y `test/`, actualiza las rutas y reemplaza el test
 por un sentinel GLib.Test fallido. `vala_test.sh` compila cada suite y exige
 TAP real; rechaza la demo, cero casos, omitidos y fallos. Las bases homologadas
-`data_structures_basics` y `numbers` pasan en copias aisladas.
+`data_structures_basics` y `numbers` pasan en copias aisladas. Una comprobación
+nativa adicional aceptó un caso aprobado y rechazó tanto una suite vacía como
+una mezcla de casos aprobados y omitidos.
 
 **EN — Vala:** with Meson 1.3.2 and Vala 0.56.16, the helper moves exact
 generated samples to `src/` and `test/`, updates paths and replaces the test
 with a failing GLib.Test sentinel. `vala_test.sh` compiles every suite and
 requires real TAP; it rejects the demo, zero cases, skips and failures. The
 homologated `data_structures_basics` and `numbers` references pass in isolated
-copies.
+copies. An additional native check accepted a passing case and rejected both
+an empty suite and a mixture of passing and skipped cases.
 
 **ES — Erlang:** rebar3 3.27.0 generó una fuente vacía y no creó `test/`;
 `rebar3 eunit` devolvió éxito con cero casos. El scaffold crea un sentinel
@@ -628,9 +658,9 @@ idénticas a esa salida y conserva contenido diferente. El manifiesto de
 the PascalCase module and a minimal runner, removes/replaces only exact
 matching samples, and preserves other content. The `test-unit` manifest and
 other generator versions remain to be checked.
-The initialization guide now names `spago install --test-deps test-unit` as a
-manual, optional step; it remains outside automatic scaffolding until the
-dependency-warning gate is resolved.
+The initialization guide names `spago install --test-deps test-unit` as a
+manual, optional step; its dependency-warning gate is handled with Spago's
+library-warning censor, without suppressing project warnings.
 
 **ES — Investigación (2026-11-22):** `spago install --offline --test-deps
 test-unit` añadió la dependencia al manifiesto y actualizó el lockfile en un
@@ -648,21 +678,24 @@ warning-free gate still needs resolution before automating this dependency.
 The command is documented as an optional manual step, not an accepted 4a result.
 
 **ES — Confirmación (2026-11-24):** una compilación limpia aislada con las
-mismas versiones confirmó `Warnings: Src 0, Lib 15, All 15` y código 0: los
-15 avisos proceden de `test-unit`. Al añadir una declaración de proyecto sin
-firma de tipo, `--strict` devolvió código 1 con `MissingTypeDeclaration`.
-La opción hace fallar por warnings del proyecto, pero no elimina los de las
-dependencias. `purescript_test.sh` ahora convierte esa condición en un bloqueo
-del runner: rechaza cualquier resumen `Warnings: ... All > 0`, incluidos los
-15 de `test-unit`; esta dependencia no queda aceptada como resultado de 4a.
+mismas versiones confirmó `Warnings: Src 0, Lib 15, All 15`; los avisos
+proceden de `test-unit`. `--strict` falla ante warnings de proyecto pero no los
+oculta en dependencias. Spago 1.0.4 admite
+`workspace.buildOpts.censorLibraryWarnings: all`: en una copia aislada de la
+base, con esa opción el test compiló y terminó con `Warnings 0 0/15 0/15`,
+`Errors 0 0 0` y 5 casos aprobados. Se actualizó la receta manual; no se edita
+el submódulo ni se silencian warnings propios. El runner integrado acepta ese
+resumen cuando los contadores visibles son cero y rechaza resúmenes no nulos,
+ausentes o inconsistentes.
 
 **EN — Confirmation (2026-11-24):** an isolated clean build with the same
-versions confirmed `Warnings: Src 0, Lib 15, All 15` and exit 0: all 15
-warnings came from `test-unit`. Adding a project declaration without a type
-signature caused `--strict` to exit 1 with `MissingTypeDeclaration`. The option
-fails on project warnings but does not remove dependency warnings.
-`purescript_test.sh` now blocks any summary with `All > 0`, including the
-15 `test-unit` warnings; this dependency is not accepted as a 4a result.
+versions confirmed `Warnings: Src 0, Lib 15, All 15`, all from `test-unit`.
+`--strict` fails on project warnings but does not censor dependency warnings.
+Spago 1.0.4 supports `workspace.buildOpts.censorLibraryWarnings: all`: in an
+isolated base copy this produced `Warnings 0 0/15 0/15`, `Errors 0 0 0` and 5
+passing cases. The manual recipe is updated; no submodule is edited and project
+warnings are not hidden. The integrated runner accepts this summary only with
+zero visible counts and rejects nonzero, missing or inconsistent summaries.
 
 **ES — Runner vacío:** con Spago 1.0.4 y PureScript 0.15.16, `spago test
 --offline --strict` terminó con éxito y cero warnings al ejecutar el runner
@@ -907,8 +940,13 @@ resúmenes ausentes o ambiguos y no reconoce otros runners por defecto. En
 copias aisladas, las bases `data_structures_basics` y `numbers` pasaron con
 51 y 33 ejemplos; un proyecto con dos suites rechazó la segunda vacía y pasó
 cuando ambas tuvieron casos. La sincronización automática de helpers queda
-como `sync-build` explícito y limitado a configuraciones reconocidas; el runner
-ejecuta `cabal clean` antes de probar para evitar binarios obsoletos.
+como `sync-build` explícito y limitado a configuraciones reconocidas. Una
+prueba nativa aislada mostró que `cabal clean` desde un paquete elimina el
+build compartido de un workspace. El runner usa ahora un `--builddir` temporal
+nuevo, sin limpiar el del usuario; esto recompila en cada ejecución. En una
+copia de la base pasó, rechazó una suite alterada y volvió a pasar; en un
+workspace de dos paquetes ejecutó solo el actual y conservó el build compartido.
+Estas pruebas no identifican la causa original del incidente de marcas de tiempo.
 
 **EN — Hspec summaries:** `haskell_test.sh` retains the selector and
 `-Werror=missing-home-modules`, runs suites sequentially and requires each
@@ -917,8 +955,12 @@ or ambiguous summaries and other runners are rejected. In isolated copies,
 `data_structures_basics` and `numbers` passed with 51 and 33 examples; a
 two-suite project rejected its empty second suite and passed with both filled.
 Automatic helper synchronization remains an explicit command, and unrelated
-manifests remain outside it. The runner performs `cabal clean` before testing
-to avoid stale binaries; rapid timestamp reruns remain outside guarantees.
+manifests remain outside it. An isolated native check showed that `cabal clean`
+from one package removes a workspace's shared build. The runner now uses a
+fresh temporary `--builddir`, without cleaning the user's build; this rebuilds
+on each run. A copied reference passed, rejected an altered suite and passed
+again; in a two-package workspace only the current package ran and the shared
+build was preserved. These checks do not identify the original timestamp issue.
 
 Criterios para la siguiente versión / Next-version acceptance criteria:
 
@@ -1023,7 +1065,7 @@ Criterios para la siguiente versión / Next-version acceptance criteria:
 | 1.7.6 | fix de la 1.7.5 | 4a–8 | **El andamiaje de Perl pasa a `manual`**: `module-starter` generaba `Makefile.PL`, `lib/{module}.pm` y `t/`, que no es el layout homologado; la fila del catálogo queda con `mkdir -p lib test`, el paso único sale de `init_sequences.tsv` y la guía lo lee de la tabla maestra. Cierra la corrección de Perl que abrió la v1.7.5 (verificador `lib/` + `-Ilib`) | **No abre capa**: fix sobre la 1.7.5; la rama `fix/repo/glot-v1.7.6` ya lleva el número de la entrega que cierra | ✅ cerrada |
 | 1.7.7 | fix de la 1.7.6 | 4a–8 | **El layout de R es el de un paquete**: la fila del catálogo apuntaba a `src/{module}.R` y a `Rscript test/run_tests.R`, rutas que desaparecieron al homologar los cuatro módulos de R a `DESCRIPTION` + `NAMESPACE` + `R/` + `tests/testthat/`, así que el andamiaje pasa a `mkdir -p R tests/testthat`, el runner a `make test` (`testthat::test_local()`, que carga el paquete sin instalarlo) y el verificador a los fuentes de `R/`; la guía de inicialización lo documenta | **No abre capa**: fix sobre la 1.7.6; la rama `fix/repo/glot-v1.7.7` ya lleva el número de la entrega que cierra | ✅ cerrada |
 | 1.7.8 | fix de la 1.7.7 | 4a–8 | **El estándar de Racket es `raco new library {module}`** —el layout lib/test/doc de la comunidad— con su render portátil (`mv` + `sed -i` de GNU, porque el `render-template.sh` del template es interactivo y de BSD, y sin él los cuatro `info.rkt` conservan los marcadores `<project>`/`<username>`), el borrado de `.github/`, `pull_request_template.md`, `render-template.sh` y `profile/`, y las suites requiriendo la librería por ruta relativa para correr sin enlazar paquetes; el runner pasa a `raco test -x .`, porque `racket test/run_tests.rkt` no existía en los dos módulos de un solo archivo y, en los tres que sí lo tienen, **salía con código 0 aunque la suite fallara** (falso verde en `test`/`evidence`) | **No abre capa**: fix sobre la 1.7.7; la rama `fix/repo/glot-v1.7.8` ya lleva el número de la entrega que cierra | ✅ cerrada |
-| 2.1.0 | L4/L6.5 y andamiaje / scaffolding | 4a–8 | Tres rutas con `--delegate`, configuración BYOK y overrides por encargo; Sonnet para suite; revisión de acciones repetibles y recetas manuales de los 50 lenguajes / Three routes, BYOK, constrained overrides and scaffold review | Continúa v2.0.3 y recoge la revisión residual del plan 1.8.0 / Continues v2.0.3 and carries residual 1.8.0 review | ✅ cerrada / Closed |
+| 2.1.0 | L4/L6.5 y andamiaje / scaffolding | 4a–8 | Tres rutas con `--delegate`, configuración BYOK y overrides por encargo; Sonnet para suite; revisión de acciones repetibles y recetas manuales de los 50 lenguajes / Three routes, BYOK, constrained overrides and scaffold review | Continúa v2.0.3 y recoge la revisión residual del plan 1.8.0 / Continues v2.0.3 and carries residual 1.8.0 review | ⏳ cierre en curso; quedan seguimientos nativos / closure in progress; native follow-ups remain |
 | ⏳ | 1.8.0 (plan histórico / historical plan) | 4a | **El reparto entre `new` y `scaffold`**: iniciado por v2.0.0/v2.0.3; la revisión residual de archivos, renombrados y notas automatizables se incorpora a v2.1.0 / Split introduced by v2.0.0/v2.0.3; residual adaptation review carried into v2.1.0 | No es una entrega futura independiente / Not a separate future release | Revisión residual en v2.1.0 / Residual review in v2.1.0 |
 | ⏳ | L9 | — | Versión esperada por lenguaje y comprobación/instalación | Segunda acepción de «manejador de versiones»; llega después del ciclo del roadmap |
 ### Deuda técnica / Technical debt

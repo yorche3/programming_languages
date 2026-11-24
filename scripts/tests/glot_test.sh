@@ -457,6 +457,8 @@ EOF
     cp -- "$TESTS_DIR/../data/ocaml_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/vala_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/vala_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/rust_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/rust_test.sh" "$SANDBOX/scripts/data/"
     cp -R -- "$TESTS_DIR/../data/scaffold_templates/vala.source.vala" \
         "$SANDBOX/scripts/data/scaffold_templates/vala.source.vala"
     cp -R -- "$TESTS_DIR/../data/scaffold_templates/vala.test.vala" \
@@ -1036,6 +1038,18 @@ assert_contains 'scaffold Vala: actualiza fuente Meson' "'src/naive_sort.vala'" 
     "$(cat -- "$VALA_EXACT/meson.build")"
 assert_contains 'scaffold Vala: actualiza test Meson' "'test/naive_sort_test.vala'" \
     "$(cat -- "$VALA_EXACT/meson.build")"
+vala_source_before="$(cat -- "$VALA_EXACT/src/naive_sort.vala")"
+vala_test_before="$(cat -- "$VALA_EXACT/test/naive_sort_test.vala")"
+vala_meson_before="$(cat -- "$VALA_EXACT/meson.build")"
+rc=0
+(cd -- "$VALA_EXACT" && bash "$VALA_HELPER" naive_sort) || rc=$?
+assert_eq 'scaffold Vala: rerun tras adaptar' '0' "$rc"
+assert_eq 'scaffold Vala: conserva fuente adaptada' "$vala_source_before" \
+    "$(cat -- "$VALA_EXACT/src/naive_sort.vala")"
+assert_eq 'scaffold Vala: conserva sentinel en rerun' "$vala_test_before" \
+    "$(cat -- "$VALA_EXACT/test/naive_sort_test.vala")"
+assert_eq 'scaffold Vala: conserva Meson en rerun' "$vala_meson_before" \
+    "$(cat -- "$VALA_EXACT/meson.build")"
 if command -v valac >/dev/null 2>&1; then
     rc=0
     (cd -- "$VALA_EXACT" && bash "$TESTS_DIR/../data/vala_test.sh") \
@@ -1045,6 +1059,21 @@ fi
 printf 'authored suite\n' >"$VALA_EXACT/test/naive_sort_test.vala"
 (cd -- "$VALA_EXACT" && bash "$VALA_HELPER" naive_sort)
 assert_eq 'scaffold Vala: conserva suite propia en rerun' 'authored suite' \
+    "$(cat -- "$VALA_EXACT/test/naive_sort_test.vala")"
+printf 'conflicting source\n' >"$VALA_EXACT/naive_sort.vala"
+rc=0
+(cd -- "$VALA_EXACT" && bash "$VALA_HELPER" naive_sort) >/dev/null 2>&1 || rc=$?
+assert_eq 'scaffold Vala: rechaza conflicto de fuente' '1' "$rc"
+assert_eq 'scaffold Vala: conserva fuente ante conflicto' "$vala_source_before" \
+    "$(cat -- "$VALA_EXACT/src/naive_sort.vala")"
+assert_eq 'scaffold Vala: conserva archivo en raíz ante conflicto' 'conflicting source' \
+    "$(cat -- "$VALA_EXACT/naive_sort.vala")"
+rm -- "$VALA_EXACT/naive_sort.vala"
+printf 'conflicting test\n' >"$VALA_EXACT/naive_sort_test.vala"
+rc=0
+(cd -- "$VALA_EXACT" && bash "$VALA_HELPER" naive_sort) >/dev/null 2>&1 || rc=$?
+assert_eq 'scaffold Vala: rechaza conflicto de test' '1' "$rc"
+assert_eq 'scaffold Vala: conserva suite ante conflicto' 'authored suite' \
     "$(cat -- "$VALA_EXACT/test/naive_sort_test.vala")"
 
 if command -v valac >/dev/null 2>&1; then
@@ -1552,7 +1581,7 @@ OCAML_OUTPUT="$WORK_DIR/ocaml-output"
 mkdir -p -- "$OCAML_FAKE_BIN"
 cat >"$OCAML_FAKE_BIN/dune" <<'EOF'
 #!/usr/bin/env bash
-[[ "$*" == 'runtest --force --action-stdout-on-success=print --action-stderr-on-success=print' ]] || exit 2
+[[ "$*" == 'runtest --force --display=short -j 1 --action-stdout-on-success=print --action-stderr-on-success=print' ]] || exit 2
 cat -- "$OCAML_OUTPUT"
 exit "${OCAML_FAKE_STATUS:-0}"
 EOF
@@ -1565,19 +1594,25 @@ ocaml_runner_run() {
     err="$(cat -- "$WORK_DIR/ocaml-runner.err")"
     rc_last=$rc
 }
-printf 'Test Successful in 0.000s. 0 test run.\n' >"$OCAML_OUTPUT"
+printf '   suite alias test/runtest-suite\nTest Successful in 0.000s. 0 test run.\n' >"$OCAML_OUTPUT"
 ocaml_runner_run
 assert_eq 'test OCaml: rechaza cero casos' '1' "$rc_last"
-printf '\033[32mTest Successful in 0.001s. 4 tests run.\033[0m\n' >"$OCAML_OUTPUT"
+printf '   suite alias test/runtest-suite\n\033[32mTest Successful in 0.001s. 4 tests run.\033[0m\n' >"$OCAML_OUTPUT"
 ocaml_runner_run
 assert_eq 'test OCaml: acepta resumen coloreado' '0' "$rc_last"
 assert_contains 'test OCaml: conserva salida nativa' '4 tests run.' "$out"
-printf 'Test Successful in 0.000s. 1 test run.\nTest Successful in 0.001s. 5 tests run.\n' >"$OCAML_OUTPUT"
+printf '   first alias test/runtest-first\nTest Successful in 0.000s. 1 test run.\n  second alias test/runtest-second\nTest Successful in 0.001s. 5 tests run.\n' >"$OCAML_OUTPUT"
 ocaml_runner_run
 assert_eq 'test OCaml: acepta varias suites' '0' "$rc_last"
-printf 'Test Successful in 0.000s. 1 test run.\nTest Successful in 0.000s. 0 test run.\n' >"$OCAML_OUTPUT"
+printf '   first alias test/runtest-first\nTest Successful in 0.000s. 1 test run.\n  second alias test/runtest-second\nTest Successful in 0.000s. 0 test run.\n' >"$OCAML_OUTPUT"
 ocaml_runner_run
 assert_eq 'test OCaml: rechaza suite vacía con otra aprobada' '1' "$rc_last"
+printf '   first alias test/runtest-first\nTest Successful in 0.000s. 1 test run.\n  second alias test/runtest-second\n' >"$OCAML_OUTPUT"
+ocaml_runner_run
+assert_eq 'test OCaml: rechaza acción silenciosa con otra aprobada' '1' "$rc_last"
+printf '   first alias test/runtest-first\nTest Successful in 0.000s. 1 test run.\nTest Successful in 0.001s. 1 test run.\n  second alias test/runtest-second\n' >"$OCAML_OUTPUT"
+ocaml_runner_run
+assert_eq 'test OCaml: rechaza resúmenes dobles y acción silenciosa' '1' "$rc_last"
 printf 'incomplete output\n' >"$OCAML_OUTPUT"
 ocaml_runner_run
 assert_eq 'test OCaml: rechaza resumen ausente' '1' "$rc_last"
@@ -3198,7 +3233,7 @@ printf 'package: {\\n  name: calculator\\n}' >"$PS_RUN/spago.yaml"
 printf 'module Test.Main where\\n' >"$PS_RUN/test/Test/Main.purs"
 cat >"$PS_RUN/bin/spago" <<'EOF'
 #!/usr/bin/env bash
-printf 'Running tests for package: calculator\n'
+printf '           Src   Lib   All\nWarnings     0     0     0\nRunning tests for package: calculator\n'
 exit 0
 EOF
 chmod +x "$PS_RUN/bin/spago"
@@ -3212,8 +3247,10 @@ assert_eq 'test PureScript cero casos: rechaza' '1' "$ps_rc"
 cat >"$PS_RUN/bin/spago" <<'EOF'
 #!/usr/bin/env bash
 cat <<'OUT'
+           Src   Lib   All
+Warnings     0    15    15
+Errors       0     0     0
 All 1 tests passed!
-Warnings: Src 0, Lib 15, All 15
 OUT
 exit 0
 EOF
@@ -3223,20 +3260,76 @@ ps_rc=0
 assert_eq 'test PureScript: rechaza warnings de dependencias' '1' "$ps_rc"
 cat >"$PS_RUN/bin/spago" <<'EOF'
 #!/usr/bin/env bash
-printf 'All 3 tests passed!\nWarnings: Src 0, Lib 0, All 0\n'
+printf '           Src   Lib   All\nWarnings     0   0/15  0/15\nErrors       0     0     0\nAll 5 tests passed!\n'
+exit 0
+EOF
+chmod +x "$PS_RUN/bin/spago"
+ps_rc=0
+(cd "$PS_RUN" && PATH="$PWD/bin:$PATH" bash ./purescript_test.sh) >/dev/null 2>&1 || ps_rc=$?
+assert_eq 'test PureScript: acepta warnings de dependencia censurados' '0' "$ps_rc"
+cat >"$PS_RUN/bin/spago" <<'EOF'
+#!/usr/bin/env bash
+printf '           Src   Lib   All\nWarnings     0   1/15  1/15\nErrors       0     0     0\nAll 5 tests passed!\n'
+exit 0
+EOF
+chmod +x "$PS_RUN/bin/spago"
+ps_rc=0
+(cd "$PS_RUN" && PATH="$PWD/bin:$PATH" bash ./purescript_test.sh) >/dev/null 2>&1 || ps_rc=$?
+assert_eq 'test PureScript: rechaza warnings visibles con censor' '1' "$ps_rc"
+cat >"$PS_RUN/bin/spago" <<'EOF'
+#!/usr/bin/env bash
+printf '           Src   Lib   All\nWarnings     0     0     0\nErrors       0     0     0\nAll 3 tests passed!\n'
 exit 0
 EOF
 chmod +x "$PS_RUN/bin/spago"
 ps_rc=0
 (cd "$PS_RUN" && PATH="$PWD/bin:$PATH" bash ./purescript_test.sh) >/dev/null 2>&1 || ps_rc=$?
 assert_eq 'test PureScript: acepta casos sin warnings' '0' "$ps_rc"
+cat >"$PS_RUN/bin/spago" <<'EOF'
+#!/usr/bin/env bash
+printf 'All 3 tests passed!\n'
+EOF
+chmod +x "$PS_RUN/bin/spago"
+ps_rc=0
+(cd "$PS_RUN" && PATH="$PWD/bin:$PATH" bash ./purescript_test.sh) >/dev/null 2>&1 || ps_rc=$?
+assert_eq 'test PureScript: rechaza resumen de warnings ausente' '1' "$ps_rc"
+cat >"$PS_RUN/bin/spago" <<'EOF'
+#!/usr/bin/env bash
+printf '           Src   Lib   All\nWarnings     0     2     0\nAll 3 tests passed!\n'
+EOF
+chmod +x "$PS_RUN/bin/spago"
+ps_rc=0
+(cd "$PS_RUN" && PATH="$PWD/bin:$PATH" bash ./purescript_test.sh) >/dev/null 2>&1 || ps_rc=$?
+assert_eq 'test PureScript: rechaza resumen de warnings inconsistente' '1' "$ps_rc"
+cat >"$PS_RUN/bin/spago" <<'EOF'
+#!/usr/bin/env bash
+printf 'compiler failed\n'
+exit 42
+EOF
+chmod +x "$PS_RUN/bin/spago"
+ps_rc=0
+(cd "$PS_RUN" && PATH="$PWD/bin:$PATH" bash ./purescript_test.sh) >/dev/null 2>&1 || ps_rc=$?
+assert_eq 'test PureScript: propaga fallo de Spago' '42' "$ps_rc"
 
 # Haskell: validar cada resumen y propagar los fallos de Cabal.
 HS_FAKE="$WORK_DIR/haskell-fake"
-mkdir -p "$HS_FAKE/bin"
+mkdir -p "$HS_FAKE/bin" "$HS_FAKE/dist-newstyle"
+HS_FAKE_SHARED_MARKER="$HS_FAKE/dist-newstyle/marker"
+export HS_FAKE_SHARED_MARKER
+printf 'shared build\n' >"$HS_FAKE_SHARED_MARKER"
 cat >"$HS_FAKE/bin/cabal" <<'EOF'
 #!/usr/bin/env bash
-if [[ "${1:-}" == clean ]]; then exit 0; fi
+if [[ "${1:-}" == clean ]]; then
+    rm -f -- "$HS_FAKE_SHARED_MARKER"
+    exit 0
+fi
+if [[ "${1:-}" != test ]]; then exit 99; fi
+builddir=
+for arg in "$@"; do
+    case "$arg" in --builddir=*) builddir="${arg#--builddir=}" ;; esac
+done
+if [[ -z "$builddir" || -e "$builddir" ]]; then exit 98; fi
+mkdir -p -- "$builddir"
 cat -- "$HS_FAKE_OUTPUT"
 exit "${HS_FAKE_RC:-0}"
 EOF
@@ -3254,6 +3347,8 @@ EOF
 hs_rc=0
 hs_out="$(cd "$HS_FAKE" && PATH="$HS_FAKE/bin:$PATH" bash "$DATA_DIR/haskell_test.sh" 2>&1)" || hs_rc=$?
 assert_eq 'test Haskell: acepta dos suites con casos' '0' "$hs_rc"
+assert_eq 'test Haskell: preserva build compartido' 'shared build' \
+    "$(cat "$HS_FAKE_SHARED_MARKER")"
 sed -i 's/1 example, 0 failures/0 examples, 0 failures/' "$HS_FAKE_OUTPUT"
 hs_rc=0
 hs_out="$(cd "$HS_FAKE" && PATH="$HS_FAKE/bin:$PATH" bash "$DATA_DIR/haskell_test.sh" 2>&1)" || hs_rc=$?
@@ -4398,6 +4493,73 @@ assert_eq 'scaffold Rust: no inventa otra entrada' 'no' "$([[ -e "$RUSTB/src/nai
 rm -- "$RUSTB/src/lib.rs"
 glot_run_sandbox scaffold rust algorithms/naive_sort
 assert_eq 'scaffold Rust sin entrada: código' '4' "$rc_last"
+
+RUST_FIXTURE="$WORK_DIR/rust-fixture"
+mkdir -p "$RUST_FIXTURE/src"
+printf '[package]\nname = "fixture"\n' >"$RUST_FIXTURE/Cargo.toml"
+cp -- "$DATA_DIR/scaffold_templates/rust.lib.rs" "$RUST_FIXTURE/src/lib.rs"
+(cd "$RUST_FIXTURE" && bash "$DATA_DIR/rust_scaffold.sh")
+assert_eq 'scaffold Rust: retira solo muestra exacta' 'yes' \
+    "$([[ -f "$RUST_FIXTURE/src/lib.rs" && ! -s "$RUST_FIXTURE/src/lib.rs" && -d "$RUST_FIXTURE/tests" ]] && echo yes || echo no)"
+(cd "$RUST_FIXTURE" && bash "$DATA_DIR/rust_scaffold.sh")
+printf '// authored Rust\n' >"$RUST_FIXTURE/src/lib.rs"
+(cd "$RUST_FIXTURE" && bash "$DATA_DIR/rust_scaffold.sh")
+assert_eq 'scaffold Rust: rerun conserva fuente propia' '// authored Rust' \
+    "$(cat "$RUST_FIXTURE/src/lib.rs")"
+cp -- "$DATA_DIR/scaffold_templates/rust.lib.rs" "$RUST_FIXTURE/src/lib.rs"
+printf '// authored test\n' >"$RUST_FIXTURE/tests/authored.rs"
+(cd "$RUST_FIXTURE" && bash "$DATA_DIR/rust_scaffold.sh")
+assert_eq 'scaffold Rust: conserva muestra con test propio' '0' \
+    "$(cmp -s "$DATA_DIR/scaffold_templates/rust.lib.rs" "$RUST_FIXTURE/src/lib.rs"; echo $?)"
+rm -- "$RUST_FIXTURE/tests/authored.rs" "$RUST_FIXTURE/src/lib.rs"
+cp -- "$DATA_DIR/scaffold_templates/rust.lib.rs" "$RUST_FIXTURE/source-original"
+ln -- "$RUST_FIXTURE/source-original" "$RUST_FIXTURE/src/lib.rs"
+(cd "$RUST_FIXTURE" && bash "$DATA_DIR/rust_scaffold.sh")
+assert_eq 'scaffold Rust: conserva archivo enlazado por hardlink' '0' \
+    "$(cmp -s "$DATA_DIR/scaffold_templates/rust.lib.rs" "$RUST_FIXTURE/source-original"; echo $?)"
+rm -- "$RUST_FIXTURE/src/lib.rs"
+ln -s -- "$DATA_DIR/scaffold_templates/rust.lib.rs" "$RUST_FIXTURE/src/lib.rs"
+rust_rc=0
+(cd "$RUST_FIXTURE" && bash "$DATA_DIR/rust_scaffold.sh") >/dev/null 2>&1 || rust_rc=$?
+assert_eq 'scaffold Rust: rechaza entrada simbólica' '1' "$rust_rc"
+
+RUST_FAKE="$WORK_DIR/rust-fake"
+mkdir -p "$RUST_FAKE/bin"
+cat >"$RUST_FAKE/bin/cargo" <<'EOF'
+#!/usr/bin/env bash
+cat -- "$RUST_FAKE_OUTPUT"
+exit "${RUST_FAKE_RC:-0}"
+EOF
+chmod +x "$RUST_FAKE/bin/cargo"
+RUST_FAKE_OUTPUT="$RUST_FAKE/output"
+export RUST_FAKE_OUTPUT
+cat >"$RUST_FAKE_OUTPUT" <<'EOF'
+     Running unittests src/lib.rs (target/debug/deps/example)
+running 2 tests
+test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+   Doc-tests example
+running 0 tests
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+EOF
+rust_rc=0
+(cd "$RUST_FAKE" && PATH="$RUST_FAKE/bin:$PATH" bash "$DATA_DIR/rust_test.sh") >/dev/null 2>&1 || rust_rc=$?
+assert_eq 'test Rust: acepta caso aprobado con omitido y doc-tests vacíos' '0' "$rust_rc"
+sed -i 's/1 passed; 0 failed; 1 ignored/0 passed; 0 failed; 2 ignored/' "$RUST_FAKE_OUTPUT"
+rust_rc=0
+(cd "$RUST_FAKE" && PATH="$RUST_FAKE/bin:$PATH" bash "$DATA_DIR/rust_test.sh") >/dev/null 2>&1 || rust_rc=$?
+assert_eq 'test Rust: rechaza todos omitidos' '1' "$rust_rc"
+sed -i 's/0 passed; 0 failed; 2 ignored/1 passed; 0 failed; 1 ignored/' "$RUST_FAKE_OUTPUT"
+printf '     Running tests/silent.rs (target/debug/deps/silent)\n' >>"$RUST_FAKE_OUTPUT"
+rust_rc=0
+(cd "$RUST_FAKE" && PATH="$RUST_FAKE/bin:$PATH" bash "$DATA_DIR/rust_test.sh") >/dev/null 2>&1 || rust_rc=$?
+assert_eq 'test Rust: rechaza harness silencioso junto a suite aprobada' '1' "$rust_rc"
+sed -i '$d; s/running 2 tests/running 3 tests/' "$RUST_FAKE_OUTPUT"
+rust_rc=0
+(cd "$RUST_FAKE" && PATH="$RUST_FAKE/bin:$PATH" bash "$DATA_DIR/rust_test.sh") >/dev/null 2>&1 || rust_rc=$?
+assert_eq 'test Rust: rechaza contadores inconsistentes' '1' "$rust_rc"
+rust_rc=0
+(cd "$RUST_FAKE" && RUST_FAKE_RC=7 PATH="$RUST_FAKE/bin:$PATH" bash "$DATA_DIR/rust_test.sh") >/dev/null 2>&1 || rust_rc=$?
+assert_eq 'test Rust: propaga fallo Cargo' '7' "$rust_rc"
 
 for layout_lang in cpp crystal fsharp go haskell v; do
     layout_dir="$SANDBOX/$layout_lang/core/algorithms/naive_sort"

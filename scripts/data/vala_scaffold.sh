@@ -19,8 +19,10 @@ if [[ -L src || -L test || ( -e src && ! -d src ) || ( -e test && ! -d test ) ||
       -L meson.build || ( -e meson.build && ! -f meson.build ) ||
       -L "$module.vala" || ( -e "$module.vala" && ! -f "$module.vala" ) ||
       -L "${module}_test.vala" || ( -e "${module}_test.vala" && ! -f "${module}_test.vala" ) ||
-      -L "src/$module.vala" || -e "src/$module.vala" ||
-      -L "test/${module}_test.vala" || -e "test/${module}_test.vala" ]]; then
+      -L "src/$module.vala" || ( -e "src/$module.vala" && ! -f "src/$module.vala" ) ||
+      -L "test/${module}_test.vala" || ( -e "test/${module}_test.vala" && ! -f "test/${module}_test.vala" ) ||
+      ( -e "$module.vala" && -e "src/$module.vala" ) ||
+      ( -e "${module}_test.vala" && -e "test/${module}_test.vala" ) ]]; then
     printf 'scaffold: ruta Vala no segura o conflicto / unsafe Vala path or conflict\n' >&2
     exit 1
 fi
