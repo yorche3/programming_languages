@@ -18,23 +18,28 @@ The v2.0.2 shared delegation policy retains `data_structures_basics` →
 `numbers` priority, with topic- and language-aware grouping and unchanged models.
 Verification is recorded in [`VERSIONS.md`](VERSIONS.md).
 
-**ES:** El cierre de **v2.1.0** sigue en curso. Su alcance acordado incluye
+**ES:** El cierre de **v2.1.0** está preparado, pero sigue en curso hasta
+comprobar la instalación final. Su alcance acordado incluye
 `--delegate antigravity|copilot|open-router`, configuración BYOK por ruta,
 overrides autorizados por encargo y revisión del scaffold de los 50 lenguajes.
-El script integrado se identifica como **2.1.0**, pero los seguimientos nativos
-de scaffold y runner todavía no están cerrados. El catálogo de 50 lenguajes no
-demuestra por sí solo una revisión nativa de los 50. La sincronización general
-de helpers de build queda en los criterios de la siguiente versión. Los casos
-medidos y pendientes se registran en [`VERSIONS.md`](VERSIONS.md) y aquí.
+El script integrado se identifica como **2.1.0**. Los resultados y límites de
+la revisión de scaffold y runner están registrados; el catálogo de 50 lenguajes
+no demuestra por sí solo una comprobación nativa de los 50. El harness completo
+no se ejecutó y el target homologado de C++ permanece pendiente. El fix
+planificado v2.1.1 abordará la verificación aislada del harness; la
+sincronización general de helpers de build queda para una versión posterior.
+Los casos medidos y pendientes se registran en [`VERSIONS.md`](VERSIONS.md) y aquí.
 v2.0.3 quedó archivada como snapshot exacto antes de editar código.
 
-**EN:** **v2.1.0 closure is in progress.** Its agreed scope includes three
+**EN:** **v2.1.0 closure is prepared but remains in progress** until the final
+installation is checked. Its agreed scope includes three
 explicit delegate routes, route-specific BYOK configuration, authorized
 per-request overrides and a 50-language scaffold review. The integrated
-script identifies as **2.1.0**, but native scaffold and runner follow-ups are
-not closed. A 50-language catalog does not by itself establish 50 native
-scaffold reviews. General build-helper synchronization belongs to the
-next-version criteria. Measured and pending cases are recorded in
+script identifies as **2.1.0**. Scaffold and runner results and limitations
+are recorded; a 50-language catalog does not establish 50 native checks. The
+full harness was not run and the homologated C++ target remains pending.
+Planned fix v2.1.1 will address isolated harness verification; general
+build-helper synchronization belongs to a later version. Results are recorded in
 [`VERSIONS.md`](VERSIONS.md) and this roadmap.
 v2.0.3 was archived before code edits.
 
@@ -46,7 +51,7 @@ y ya configura el entrypoint estándar de `Pkg.test()`;
 C++ genera configuración Bazel funcional, y PHPUnit y el runner R fallan sin
 casos aprobados. LuaRocks `init` no crea la configuración `.busted`; el
 scaffold ahora la crea sin reemplazar archivos propios.
-La cobertura de los demás lenguajes sigue abierta.
+Los resultados y límites de los demás lenguajes están registrados en el log.
 
 **EN:** The current pass corrected the Java, JavaScript, PHP, Ruby, ReScript and
 TypeScript skeletons: a buildable Maven POM/class, npm/Jest configuration,
@@ -55,11 +60,39 @@ TypeScript/Jest configuration. Julia now prevents a false green from an empty
 runner; C++ generates functional Bazel configuration and PHPUnit fails on an
 empty suite; the R runner also fails when no test cases pass. LuaRocks `init`
 does not create `.busted`; scaffold now adds it without replacing authored
-files. Coverage of the remaining languages is still open.
+files. Results and limitations for the other languages are recorded in the log.
 
 ---
 
 ## 🎯 Objetivo / Goal
+
+### v2.1.1 planificada — verificación aislada / Planned v2.1.1 — isolated verification
+
+**ES:** Fix de tooling, sin cambiar el comportamiento de `glot use` ni de
+`glot ask`. Preparar una vía reproducible y versionada para verificar Glot
+sin ejecutar ninguno de esos dos verbos, ni siquiera en modo ensayo. `prompt`
+puede comprobarse por su salida y los agentes pueden consultar sus plantillas;
+no se invoca ningún delegado real.
+
+**EN:** Tooling fix, without changing `glot use` or `glot ask` behavior. Provide
+a reproducible, versioned way to verify Glot without executing either verb,
+even in dry-run mode. `prompt` output may be tested and agents may consult its
+templates; no real delegate is invoked.
+
+- Aislar raíz, estado, HOME, datos y repositorios de prueba; no modificar el
+  monorepo, sus submódulos ni el estado real. Sin red, credenciales ni remotos
+  reales; cualquier Git necesario debe permanecer en un directorio temporal.
+  / Isolate root, state, HOME, data and test repositories; no real worktree,
+  state, network, credentials or remote repositories.
+- Conservar las regresiones existentes; informar qué grupos se ejecutaron,
+  cuáles se omitieron y por qué, y devolver fallo ante errores. La vía limitada
+  no debe presentarse como cobertura completa de `use` o `ask`.
+  / Preserve existing regressions, report executed and skipped groups and reasons,
+  and fail on errors; do not claim coverage of omitted verbs.
+- Documentar el comando y sus límites, y comprobar en un entorno aislado que
+  detecta un fallo deliberado sin invocar los verbos excluidos.
+  / Document the command and limitations and verify that an intentional failure
+  is detected without invoking the excluded verbs.
 
 ### Alcance acordado de v2.1.0 / Agreed v2.1.0 scope
 
@@ -1007,7 +1040,7 @@ on each run. A copied reference passed, rejected an altered suite and passed
 again; in a two-package workspace only the current package ran and the shared
 build was preserved. These checks do not identify the original timestamp issue.
 
-Criterios para la siguiente versión / Next-version acceptance criteria:
+Criterios para una versión posterior / Later-version acceptance criteria:
 
 - Revisar los lenguajes y generadores donde los archivos de un target deben
   declararse explícitamente: módulos de producción, módulos de test y helpers

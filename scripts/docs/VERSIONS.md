@@ -4,15 +4,16 @@
 
 **EN:** History of closed versions and of the live version. **Future** versions and the layer each one covers are in [`ROADMAP.md`](ROADMAP.md).
 
-**ES:** El cierre de v2.1.0 sigue en curso. No se marcará como cerrada hasta
-resolver los seguimientos de scaffold y runner de su alcance; 50 filas de
-catálogo no equivalen a 50 comprobaciones nativas. La sincronización general
-de helpers de build figura como criterio de la siguiente versión.
+**ES:** El cierre de v2.1.0 está preparado, pendiente de la instalación y su
+comprobación. Se registran las limitaciones de las revisiones: 50 filas de
+catálogo no equivalen a 50 comprobaciones nativas. El harness completo no se
+ejecutó; la vía aislada sin `use` ni `ask` se planifica como fix v2.1.1.
+La sincronización general de helpers de build queda para una versión posterior.
 
-**EN:** v2.1.0 closure is still in progress. It will not be marked closed until
-the in-scope scaffold and runner follow-ups are resolved; 50 catalog rows do
-not imply 50 native checks. General build-helper synchronization is listed as
-a next-version criterion.
+**EN:** v2.1.0 closure is prepared, pending installation and its verification.
+Review limitations are recorded: 50 catalog rows do not imply 50 native checks.
+The full harness was not run; an isolated path without `use` or `ask` is planned
+as fix v2.1.1. General build-helper synchronization belongs to a later version.
 
 | Versión | Fecha | Archivo | Añade | Estado |
 |---------|-------|---------|-------|:------:|
@@ -52,9 +53,29 @@ a next-version criterion.
 | 2.0.1 | 2026-10-23 (archivo) | [`versions/glot_2.0.1.sh`](../versions/glot_2.0.1.sh) | Base previa al hotfix, archivada como copia exacta del script vivo antes de editarlo; conserva sus cambios anteriores de andamiaje y encargos / Pre-hotfix baseline, archived as an exact copy before editing | ✅ cerrada |
 | 2.0.2 | 2026-10-23 (archivo) | [`versions/glot_2.0.2.sh`](../versions/glot_2.0.2.sh) | Snapshot exacto previo al hotfix 2.0.3 / Exact pre-2.0.3 hotfix snapshot | ✅ cerrada |
 | 2.0.3 | 2026-10-26 | [`versions/glot_2.0.3.sh`](../versions/glot_2.0.3.sh) | `scaffold` automatiza `.gitignore` y Makefiles declarados, avisa si queda análisis delegado; `build` queda excepcional y conserva la suite / `scaffold` automates `.gitignore` and declared Makefiles, announces remaining delegated analysis; `build` is exceptional and preserves the suite | ✅ cerrada como línea base; snapshot exacto archivado el 2026-11-02, publicación del autor pendiente / Baseline closed; exact snapshot archived, author publication pending |
-| 2.1.0 | 2026-11-24 | [`glot.sh`](../glot.sh) | Rutas BYOK, overrides por categoría y avances verificados de scaffolds/runners; quedan seguimientos nativos de scaffold/runner por cerrar / BYOK routes, category overrides and verified scaffold/runner progress; native scaffold/runner follow-ups remain | ⏳ cierre en curso / closure in progress |
+| 2.1.0 | 2026-11-24 | [`glot.sh`](../glot.sh) | Rutas BYOK, overrides por categoría y revisión de scaffolds/runners con límites registrados / BYOK routes, category overrides and scaffold/runner review with recorded limitations | ⏳ cierre preparado; instalación pendiente / closure prepared; installation pending |
 
 ---
+
+## 2.1.0 — Preparación del cierre / Closure preparation
+
+**ES:** El 2026-11-25 las ocho regresiones del runner C++ pasaron aisladas.
+En una copia, `glot test` aceptó el resultado aprobado y rechazó el vacío,
+solo omitidos y error nativo (códigos 0, 4, 4 y 4). El target homologado en
+copia no llegó a ejecutar tests: sin red, Bazel no pudo consultar
+`bcr.bazel.build`. No se ejecutó el harness completo. El autor instalará la
+copia; la comprobación de instalación y el cierre definitivo quedan pendientes.
+La v2.1.1 planificada aportará una vía de verificación sin `use` ni `ask`,
+con cobertura y omisiones explícitas, según [`ROADMAP.md`](ROADMAP.md).
+
+**EN:** On 2026-11-25 all eight C++ runner regressions passed in isolation.
+In a copy, `glot test` accepted a passing result and rejected empty,
+skipped-only and native-error results (exit codes 0, 4, 4 and 4). The copied
+homologated target did not reach tests: offline Bazel could not access
+`bcr.bazel.build`. The full harness was not run. The author will install the
+copy; installation verification and final closure remain pending. Planned
+v2.1.1 will provide verification without `use` or `ask`, with explicit
+coverage and omissions, as specified in [`ROADMAP.md`](ROADMAP.md).
 
 ## 2.1.0 — Runner de C# y F# / C# and F# test runner
 

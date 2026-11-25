@@ -67,10 +67,19 @@ modificaron submódulos; los commits mencionados son locales y no hubo push.
 Corrección de estado / Status correction: la afirmación previa de cierre de
 v2.1.0 fue prematura; la versión vuelve a figurar en curso hasta cerrar los
 seguimientos de scaffold y runner de su alcance. La sincronización general de
-helpers de build permanece en los criterios de la siguiente versión. Snapshot
-e instalación se verificarán después de completar los cambios de v2.1.0.
+helpers de build permanece en los criterios de una versión posterior.
+Actualización / Update (2026-11-25): el snapshot se preparó de nuevo y
+coincide con el script; la instalación y su verificación siguen pendientes.
 
 Seguimiento / Follow-up (2026-11-24–25):
+- Preparación del cierre: el harness completo no se ejecutó. La v2.1.1
+  planificada incorporará una vía aislada sin ejecutar `use` ni `ask`, con
+  omisiones explícitas; podrá comprobar la salida de `prompt`. El autor
+  instalará la copia final y se verificará antes de cerrar.
+  / Closure preparation: the full harness was not run. Planned v2.1.1 will
+  provide an isolated path without executing `use` or `ask`, reporting omissions;
+  it may check `prompt` output. The author will install the final copy and it
+  will be verified before closure.
 - PureScript: el runner ahora interpreta el resumen real de Spago
   `Warnings 0 0/15 0/15`, sin aceptar warnings visibles ni totales
   inconsistentes. El proyecto aislado ejecutó 5/5 casos con `censorLibraryWarnings: all`;
@@ -179,7 +188,10 @@ Seguimiento / Follow-up (2026-11-24–25):
   resumen y error nativo. El target homologado no pudo volver a ejecutarse en
   este entorno: Bazel 7.1.1 falla al resolver `host_platform`; 7.4.1 y 7.6.1
   fallan después en `bazel_tools`, y 9.3.3 resuelve una versión incompatible
-  de GoogleTest. No se modificó el submódulo C++.
+  de GoogleTest. El 2026-11-25 pasaron las ocho regresiones aisladas y, con
+  Glot en una copia, los resultados aprobado/vacío/solo omitidos/error nativo
+  dieron 0/4/4/4. El intento offline del target homologado no llegó a los
+  tests: faltó acceso al registro de Bazel. No se modificó el submódulo C++.
 - Python: pytest 7.4.4 devolvió 0 para una suite solo omitida; el informe JUnit
   registró `tests=1`, `skipped=1`. `python_test.sh` exige al menos un aprobado
   y contadores JUnit coherentes. Las cinco referencias pasaron en copias

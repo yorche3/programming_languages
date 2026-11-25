@@ -2900,6 +2900,7 @@ _glot_cmd_scaffold() {
     local step_answers=""
     local step_complete=""
     local delegate_needed=0
+    local needs_module_gitignore=1
     local rc=0
 
     target="$(_glot_exec_target "$@")" || return $?
@@ -2943,7 +2944,13 @@ _glot_cmd_scaffold() {
         return 0
     fi
 
-    [[ -s "$dir/.gitignore" ]] || delegate_needed=1
+    if [[ -s "$dir/.gitignore" ]]; then
+        needs_module_gitignore=0
+    elif [[ "$lang" == julia && -s "$root/$lang/.gitignore" && ! -L "$root/$lang/.gitignore" ]]; then
+        needs_module_gitignore=0
+    else
+        delegate_needed=1
+    fi
 
     while IFS=$'\t' read -r order workdir mode command answers complete; do
         [[ -n "$order" ]] || continue
@@ -2970,7 +2977,9 @@ _glot_cmd_scaffold() {
             printf 'cd %s && %s\n' "$step_dir" "$step_cmd"
             [[ "$step_mode" == "expect" ]] && printf '# expect: %s\n' "$step_answers"
         done <<<"$steps"
-        printf 'cd %s && { test -e .gitignore || touch .gitignore; }  # preserves existing contents\n' "$dir"
+        if ((needs_module_gitignore)); then
+            printf 'cd %s && { test -e .gitignore || touch .gitignore; }  # preserves existing contents\n' "$dir"
+        fi
         if ((delegate_needed)); then
             _glot_info "para completar el análisis del paso 4a, ejecuta / to complete step 4a analysis, run: glot prompt scaffold $lang $phase/$module"
         fi
@@ -3008,11 +3017,13 @@ _glot_cmd_scaffold() {
         fi
     done <<<"$steps"
 
-    _glot_info "scaffold: garantizar .gitignore / ensure .gitignore"
-    { [[ -f "$dir/.gitignore" && ! -L "$dir/.gitignore" ]] || (set -C; : > "$dir/.gitignore"); } || {
-        _glot_error "no se pudo crear .gitignore / could not create .gitignore: $dir"
-        return 4
-    }
+    if ((needs_module_gitignore)); then
+        _glot_info "scaffold: garantizar .gitignore / ensure .gitignore"
+        { [[ -f "$dir/.gitignore" && ! -L "$dir/.gitignore" ]] || (set -C; : > "$dir/.gitignore"); } || {
+            _glot_error "no se pudo crear .gitignore / could not create .gitignore: $dir"
+            return 4
+        }
+    fi
 
     _glot_init_completion_report "$steps" "$module"
     if ((delegate_needed)); then
