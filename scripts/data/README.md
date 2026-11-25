@@ -181,13 +181,19 @@ even without cases; the suite adds tests without creating another `main`.
 
 **ES:** D crea `source/{module}.d` y `test/`, y un `.gitignore` si falta.
 Solo retira el `app.d` idéntico a la muestra verificada y configura `test/`
-en el manifiesto generado reconocido. Los demás contenidos se conservan;
-se anuncia la revisión del manifiesto y del ejemplo desconocido.
+en manifiestos generados o simples de biblioteca reconocidos. `d_test.sh`
+comprueba las fuentes de `test/` seleccionadas por DUB y, si un manifiesto
+homologado las omite, ejecuta la suite en una copia temporal configurada por
+el helper de scaffold; no modifica el módulo. Manifiestos no reconocidos se
+conservan y requieren adaptación explícita.
 
-**EN:** D creates `source/{module}.d`, `test/`, and a missing `.gitignore`.
-Only the verified `app.d` sample is removed, and `test/` is configured in the
-recognized generated manifest. Other content is preserved; the manifest and
-any unfamiliar sample are explicitly handed off for review.
+**EN:** D creates `source/{module}.d` and `test/`, and a missing `.gitignore`.
+It removes only the `app.d` sample identical to the verified template and
+configures `test/` for recognized generated or simple-library manifests.
+`d_test.sh` checks the test sources selected by DUB and, if a homologated
+manifest omits them, runs the suite in a temporary copy configured by the
+scaffold helper; it does not modify the module. Unrecognized manifests are
+preserved and require explicit adaptation.
 
 **ES:** Raku crea la fuente y `.gitignore` si faltan, preserva archivos
 propios y rechaza enlaces simbólicos en las rutas del scaffold.

@@ -81,6 +81,19 @@ Seguimiento / Follow-up (2026-11-24):
   manifiesto homologado, el rerun no duplicó configuración y el sentinel
   fallido devolvió código distinto de cero. El reconocimiento también tolera
   la línea vacía real del manifiesto. El submódulo no se modificó.
+- D runner: `glot test d algorithms/data_structures_basics` ejecutó un módulo
+  unittest en una copia temporal; una aserción fallida inyectada devolvió
+  código 2. El manifiesto del submódulo permaneció intacto.
+- Rexx: `glot test rexx foundations/numbers` ejecutó las dos suites (6 runs y
+  11 aserciones aprobadas por suite); `data_structures_basics` pasó 23 runs y
+  106 aserciones. El harness también cubre suites múltiples, contadores
+  fallidos con código nativo 0, informes incompletos y errores nativos.
+- Harness global (antes de actualizar expectativas): 2195 pruebas pasaron y 5
+  fallaron; cuatro expectativas de Vala/PureScript ya no reflejaban el comando
+  actual o las instrucciones vigentes, y la quinta es el conteo de 37
+  snapshots frente a 36 versiones cerradas mientras 2.1.0 sigue abierta.
+  Las cuatro expectativas se actualizaron y se verificaron de forma focalizada;
+  la puerta del snapshot se resolverá al cerrar la versión.
 ```
 
 ```text

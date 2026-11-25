@@ -207,7 +207,9 @@ ahora reconoce también el manifiesto simple de biblioteca homologado, incluso
 con líneas vacías, y añade `test/` solo a `unittest`; una copia pasó de falso
 verde a fallo detectado,
 con rerun idempotente. No se modificó el submódulo. Los manifiestos D no
-reconocidos conservan el contenido y requieren revisión explícita.
+reconocidos conservan el contenido y requieren adaptación explícita. `d_test.sh`
+ejecuta la base homologada en una copia temporal con esa configuración,
+valida que haya bloques `unittest` y propaga fallos sin modificar el submódulo.
 
 **EN — D (2026-11-24):** `dub describe --data=source-files` alone does not
 prove which tests DUB executes: the homologated base listed only `source/`,
@@ -215,7 +217,9 @@ and `dub test` returned 0 even with a failing assertion under `test/`.
 Scaffold now also recognizes the homologated simple library manifest,
 including blank lines, and adds `test/` only to `unittest`; an isolated copy
 changed from false green to a detected failure, with an idempotent rerun. The
-submodule was not modified.
+submodule was not modified. `d_test.sh` runs the homologated base in a
+temporary copy with this configuration, validates that `unittest` blocks
+exist, and propagates failures without changing the submodule.
 Unrecognized D manifests remain preserved and require explicit review.
 
 **ES — Julia (2026-11-24):** la salida real de `Pkg.generate` trae una muestra
@@ -307,8 +311,9 @@ los contadores impresos por ooRexxUnit, rechazando fallos, errores y ejecuciones
 vacías. `glot test` antes rechazaba las dos suites de `numbers` como ambiguas;
 una prueba aislada de ooRexxUnit informó una
 aserción fallida y devolvió 0. En esa prueba, `exit (aResult~failureCount +
-aResult~errorCount > 0)` devolvió 1. Falta un mecanismo que ejecute todas las
-suites y propague fallos sin modificar ni ocultar las suites existentes.
+aResult~errorCount > 0)` devolvió 1. `rexx_test.sh` resuelve la selección
+múltiple ejecutando cada fichero `test/*.rexx` en un proceso y valida sus
+contadores sin modificar ni ocultar las suites existentes.
 En una prueba adicional, `.Package~new` ejecutó el cuerpo principal de la
 suite al cargarla; descubrir clases y ejecutarlas otra vez duplicaría los
 tests y sus posibles efectos. Un prototipo con `CALL` y una subclase instalada
@@ -322,17 +327,20 @@ en la configuración sin generar falsos verdes. Un segundo prototipo envolvió
 los métodos de ejecución de `TestSuite` y `TestCase`: detectó ese fallo con
 resultado explícito y rechazó una suite vacía. Todavía necesita garantizar
 que los overrides de `execute` no esquiven la instrumentación y que sus
-errores no se pierdan al retornar de `CALL`; no está integrado. Además, una
-prueba con `exit 0` dentro de un método de test devolvió éxito: ooRexxUnit
-interpretó esa salida como retorno del método, incluso con los wrappers.
+errores no se pierdan al retornar de `CALL`; ese prototipo se descartó.
+`rexx_test.sh` no instrumenta ni vuelve a ejecutar las clases: inicia cada
+fichero de suite una vez, exige contadores completos y rechaza fallos aunque
+ooRexxUnit salga con código 0. La regresión cubre selección múltiple, informes
+incompletos y códigos de salida nativos.
 
 **EN — Rexx (2026-11-22):** scaffold preserves sources and rejects symbolic
 paths. `rexx_test.sh` runs all `test/*.rexx` suites and validates ooRexxUnit
 counters, rejecting failures, errors and empty runs. `glot test` previously
 rejected the two `numbers` suites as ambiguous; an isolated ooRexxUnit assertion failure returned 0.
 In that test, exiting with the combined failure and error count returned 1.
-Running every suite and propagating failures without modifying or hiding
-existing suites still needs a solution.
+`rexx_test.sh` resolves multiple-suite selection by running each `test/*.rexx`
+file in its own process and validating counters without modifying or hiding
+existing suites.
 An additional check showed that `.Package~new` executes the suite's main body
 on load, so discovering and executing its classes afterward would run tests
 and their potential side effects twice. A prototype using `CALL` and a
@@ -345,9 +353,11 @@ Explicit results and configuration changes must also be detected without false
 success. A second prototype wrapped `TestSuite` and `TestCase` execution:
 it caught the explicit-result failure and rejected an empty suite. It still
 needs to ensure `execute` overrides cannot evade instrumentation and that
-errors are not lost on return from `CALL`; it is not integrated. A further
-test with `exit 0` inside a test method returned success: ooRexxUnit treated
-that exit as a method return even with the wrappers.
+errors are not lost on return from `CALL`; this prototype was discarded
+because overrides and returned errors remain complicated to instrument.
+`rexx_test.sh` instead runs each suite file once, requires complete counters
+and rejects failures even when ooRexxUnit exits 0. Regression coverage
+includes multiple suites, incomplete reports and native process statuses.
 
 **ES — Ballerina (2026-11-23):** en un proyecto aislado, `new` y `scaffold`
 produjeron la biblioteca vacía y `tests/lib_test.bal` de la base homologada.

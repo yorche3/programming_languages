@@ -87,19 +87,25 @@ devolvía éxito antes de configurar el manifiesto. El scaffold reconoce ahora
 el manifiesto generado y el layout simple de biblioteca homologado, incluidas
 líneas vacías; configura `test/` solo en `unittest`, preserva manifiestos no
 reconocidos y es idempotente. En un root aislado el sentinel pasó de falso
-verde a fallo detectado. El submódulo no se modificó.
+verde a fallo detectado. `d_test.sh` valida las fuentes que selecciona DUB y
+usa una copia temporal configurada por el helper para manifiestos reconocidos
+que omiten `test/`; la base homologada pasó y un fallo inyectado se propagó.
+El manifiesto del submódulo permanece sin cambios.
 
 **EN:** `dub describe --data=source-files` did not prove that `dub test`
 included `test/`: in a copied homologated base, a failing sentinel returned
 success before the manifest was configured. Scaffold now recognizes both the
 generated manifest and the homologated simple-library layout, including blank
 lines; it configures `test/` only for `unittest`, preserves unrecognized
-manifests and is idempotent. In an isolated root the sentinel changed from
-false green to a detected failure. The submodule was not modified.
+manifests and is idempotent. `d_test.sh` validates DUB's selected sources and
+uses a temporary copy configured by the helper for recognized manifests that
+omit `test/`; the homologated base passed and an injected failure propagated.
+The submodule manifest remains unchanged.
 
 ```text
 D scaffold: generated and homologated manifests configured; custom manifest preserved
 D base copy: false-green sentinel rejected after scaffold; rerun stable
+D runner: recognized omitted-test manifest runs in temporary copy; source tree unchanged
 ```
 
 ## 2.1.0 — Corrección del rerun de Vala / Vala rerun fix
@@ -247,16 +253,17 @@ El scaffold sustituye solo esa pareja reconocida, con el helper original y
 sin otros archivos o enlaces en `lib/` y `test/`, por un test sentinel que
 falla hasta escribir la suite. Conserva variantes y rechaza rutas simbólicas.
 En un proyecto aislado, `glot test` rechazó el sentinel con código 4.
-El runner general queda pendiente: `mix test` dio éxito con cero casos y
-con todos omitidos.
+La brecha del runner se resolvió en la sección de validación ExUnit anterior:
+ahora rechaza suites vacías y suites sin casos aprobados.
 
 **EN:** Mix 1.20.4 generated a `hello/0` source and two example cases.
 Scaffold replaces only that recognized pair, with the original helper and
 no other files or links in `lib/` and `test/`, with a failing sentinel until
 the suite is written. Other variants are preserved and symlinked paths are
 rejected. In an isolated project, `glot test` rejected the sentinel with
-exit code 4. General runner protection remains pending: `mix test` succeeded
-with zero cases and with all cases skipped.
+exit code 4. General runner protection was resolved in the preceding ExUnit
+validation entry: empty suites and suites without passing cases are now
+rejected.
 
 ```text
 mix test (generated sample): 2 passed (1 doctest, 1 test)
@@ -627,16 +634,16 @@ creates a missing `.gitignore`. In an isolated lab, Criterion 2.4.1 ran the
 empty runner and returned failure for an intentionally failing test.
 
 **ES:** D crea `source/{module}.d` y `test/`, y configura la inclusión de
-`test/` en el manifiesto generado reconocido. DUB 1.41.0 ejecutó el runner
-vacío y detectó un test fallido en un laboratorio aislado; el build normal
-no incluye ese test. Los manifiestos propios se conservan para revisión.
-La base homologada D también necesita revisar su inclusión de tests.
+`test/` en manifiestos reconocidos. DUB 1.41.0 confirmó que el build normal
+no incluye esos tests. La base homologada, cuyo manifiesto omite `test/`, se
+valida ahora con `d_test.sh` en una copia temporal. Los manifiestos propios se
+conservan y requieren adaptación explícita si omiten la suite.
 
-**EN:** D creates `source/{module}.d` and `test/`, configuring `test/` in the
-recognized generated manifest. DUB 1.41.0 ran the empty runner and detected
-an intentionally failing test in an isolated lab; normal builds exclude it.
-Authored manifests are preserved for review. The homologated D base also
-needs its test inclusion reviewed.
+**EN:** D creates `source/{module}.d` and `test/`, configuring `test/` in
+recognized manifests. DUB 1.41.0 confirmed that normal builds exclude these
+tests. The homologated base, whose manifest omits `test/`, is now validated
+with `d_test.sh` in a temporary copy. Authored manifests are preserved and
+require explicit adaptation if they omit the suite.
 
 **ES:** Forth crea una fuente vacía, un framework y un runner que anuncia la
 ausencia de tests, sin sobrescribir archivos propios. Aunque el sentinel de
@@ -700,11 +707,13 @@ returned failure for an intentionally failing assertion.
 
 **ES:** Prolog preserva fuentes y crea, si falta, una fuente vacía compatible
 con `consult/1` y patrones para QLF. SWI-Prolog 10.0.2 la consultó sin errores;
-el runner y la selección de varias suites siguen pendientes.
+esa comprobación inicial no ejecutó suites; la selección múltiple y la
+validación del resultado se resolvieron en el seguimiento documentado abajo.
 
 **EN:** Prolog preserves existing sources and creates a missing empty source
 compatible with `consult/1` plus QLF ignore patterns. SWI-Prolog 10.0.2
-consulted it without errors; runner and multiple-suite selection remain pending.
+consulted it without errors; that initial check did not run suites. Multiple
+suite selection and result validation were resolved in the follow-up below.
 
 **ES:** El comando Prolog ahora ejecuta todas las suites `*_test.pl` y
 `*_tests.pl`, informa scaffold vacío y falla cuando no se ejecuta ningún caso,
@@ -835,11 +844,13 @@ solo no garantiza que una suite existente contenga casos.
 **EN:** The Haskell selector rejects packages without declared suites; alone,
 it does not guarantee that an existing suite contains cases.
 
-**ES:** Los encargos de scaffold y suite advierten de la selección limitada y
-del código de salida poco fiable de ooRexxUnit; el runner sigue pendiente.
+**ES:** La investigación inicial encontró selección ambigua y códigos de
+salida poco fiables en ooRexxUnit. El runner integrado `rexx_test.sh` ejecuta
+cada suite una vez, valida los contadores e impide esos falsos verdes.
 
-**EN:** Scaffold and suite requests warn about limited selection and unreliable
-ooRexxUnit exit codes; the runner remains pending.
+**EN:** Initial investigation found ambiguous selection and unreliable
+ooRexxUnit exit codes. The integrated `rexx_test.sh` runs each suite once,
+validates counters and prevents those false greens.
 
 **ES:** Ballerina aísla el informe JSON de cada ejecución para no aceptar
 resultados antiguos y rechaza cero casos y fallos; el workspace probado agrega

@@ -442,6 +442,7 @@ EOF
     cp -- "$TESTS_DIR/../data/purescript_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/typescript_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/csharp_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/d_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/common_lisp_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/cpp_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/go_test_runner.go" "$SANDBOX/scripts/data/"
@@ -1010,8 +1011,8 @@ glot_run -n test scheme algorithms/naive_sort
 assert_contains 'test -n: recoge suites Guile' './*_guile.scm' "$out"
 
 glot_run -n test vala algorithms/naive_sort
-assert_contains 'test -n: {suite} dentro de una ruta' 'test/naive_sort_tests.vala' "$out"
-assert_contains 'test -n: {module} en el binario' '/tmp/naive_sort-tests' "$out"
+assert_contains 'test -n: usa el runner Vala' 'scripts/data/vala_test.sh' "$out"
+assert_contains 'test -n: conserva el módulo objetivo' 'vala/core/algorithms/naive_sort' "$out"
 
 VALA_SCAFFOLD="$SANDBOX/vala/core/algorithms/naive_sort"
 mkdir -p -- "$VALA_SCAFFOLD"
@@ -3305,9 +3306,9 @@ assert_eq 'scaffold PureScript: conserva fuente' 'author code' "$(cat "$PSB/src/
 assert_eq 'scaffold PureScript: crea módulo idiomático' 'module NaiveSort where' "$(cat "$PSB/src/NaiveSort.purs")"
 assert_eq 'scaffold PureScript: crea runner vacío' '0' \
     "$(cmp -s "$PSB/test/Test/Main.purs" "$TESTS_DIR/../data/scaffold_templates/purescript.runner.purs"; echo $?)"
-assert_contains 'scaffold PureScript: avisa falso verde' 'runner vacío puede devolver éxito' "$err"
+assert_contains 'scaffold PureScript: avisa sobre suite vacía' 'al menos un caso aprobado' "$err"
 assert_contains 'scaffold PureScript: instrucción manual test-unit' 'spago install --test-deps test-unit' "$err"
-assert_contains 'scaffold PureScript: avisa warnings de dependencia' '15 warnings de dependencia' "$err"
+assert_contains 'scaffold PureScript: configura warnings de dependencia' 'censorLibraryWarnings: all' "$err"
 assert_contains 'scaffold PureScript: anuncia análisis' 'glot prompt scaffold purescript algorithms/naive_sort' "$err"
 PS_NATIVE="$SANDBOX/purescript/core/algorithms/data_structures_basics"
 mkdir -p "$PS_NATIVE/src" "$PS_NATIVE/test/Test"
@@ -4194,13 +4195,14 @@ glot_run_sandbox -n scaffold raku algorithms/naive_sort
 assert_eq 'scaffold Raku dry-run: código' '0' "$rc_last"
 assert_eq 'scaffold Raku dry-run: no crea archivos' '0' "$(find "$RK_DRY" -mindepth 1 | wc -l | tr -d ' ')"
 
-# Rexx: preservar la fuente y avisar de los límites del runner.
+# Rexx: preservar la fuente y usar el runner que selecciona todas las suites.
 RX="$SANDBOX/rexx/core/algorithms/data_structures_basics"
 mkdir -p -- "$RX"
 glot_run_sandbox scaffold rexx algorithms/data_structures_basics
 assert_eq 'scaffold Rexx: código' '0' "$rc_last"
 assert_eq 'scaffold Rexx: fuente vacía' 'yes' "$([[ -f "$RX/src/data_structures_basics.rexx" && ! -s "$RX/src/data_structures_basics.rexx" ]] && echo yes || echo no)"
-assert_contains 'scaffold Rexx: avisa del runner pendiente' 'runner ooRexxUnit' "$err"
+assert_eq 'scaffold Rexx: no avisa de runner pendiente' 'no' \
+    "$([[ "$err" == *'runner ooRexxUnit'* ]] && echo yes || echo no)"
 printf 'author source\n' >"$RX/src/data_structures_basics.rexx"
 glot_run_sandbox scaffold rexx algorithms/data_structures_basics
 assert_eq 'scaffold Rexx repetido: código' '0' "$rc_last"
@@ -4221,7 +4223,7 @@ glot_run_sandbox -n scaffold rexx algorithms/naive_sort
 assert_eq 'scaffold Rexx dry-run: código' '0' "$rc_last"
 assert_eq 'scaffold Rexx dry-run: no crea archivos' '0' "$(find "$RX_DRY" -mindepth 1 | wc -l | tr -d ' ')"
 RX_RUN="$SANDBOX/rexx/core/foundations/unit_test/calculator"
-mkdir -p "$RX_RUN/test"
+mkdir -p "$RX_RUN/test" "$RX_RUN/bin"
 cp -- "$DATA_DIR/rexx_test.sh" "$RX_RUN/rexx_test.sh"
 rx_rc=0
 (
@@ -4229,6 +4231,51 @@ rx_rc=0
     bash ./rexx_test.sh
 ) >/dev/null 2>&1 || rx_rc=$?
 assert_eq 'test Rexx sin suites: rechaza' '1' "$rx_rc"
+cat >"$RX_RUN/bin/rexx" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "$(basename -- "$1")" >>"$REXX_FAKE_LOG"
+case "$REXX_FAKE_MODE" in
+    pass)
+        printf 'nr of test runs: 1\nnr of successful assertions: 2\nnr of failures: 0\nnr of errors: 0\n'
+        ;;
+    fail)
+        printf 'nr of test runs: 1\nnr of successful assertions: 0\nnr of failures: 1\nnr of errors: 0\n'
+        ;;
+    native-fail)
+        printf 'nr of test runs: 1\nnr of successful assertions: 2\nnr of failures: 0\nnr of errors: 0\n'
+        exit 7
+        ;;
+    incomplete)
+        printf 'ooRexxUnit did not finish\n'
+        ;;
+    *) exit 2 ;;
+esac
+EOF
+chmod +x -- "$RX_RUN/bin/rexx"
+touch -- "$RX_RUN/test/one.rexx" "$RX_RUN/test/two.rexx"
+rx_runner_run() {
+    local rc=0
+    out="$(cd -- "$RX_RUN" && REXX_FAKE_LOG="$RX_RUN/run.log" \
+        REXX_FAKE_MODE="$1" PATH="$RX_RUN/bin:$PATH" \
+        bash ./rexx_test.sh 2>"$WORK_DIR/rexx-runner.err")" || rc=$?
+    err="$(cat -- "$WORK_DIR/rexx-runner.err")"
+    rc_last="$rc"
+}
+rx_runner_run pass
+assert_eq 'test Rexx: ejecuta múltiples suites' '0' "$rc_last"
+assert_eq 'test Rexx: ejecuta cada suite una vez' "$(printf 'one.rexx\ntwo.rexx')" \
+    "$(cat -- "$RX_RUN/run.log")"
+rm -- "$RX_RUN/run.log"
+rx_runner_run fail
+assert_eq 'test Rexx: rechaza contador de fallos con rc nativo cero' '1' "$rc_last"
+assert_contains 'test Rexx: informa aserción fallida' 'Rexx test failures or errors' "$err"
+rm -- "$RX_RUN/run.log"
+rx_runner_run native-fail
+assert_eq 'test Rexx: propaga fallo del proceso nativo' '7' "$rc_last"
+rm -- "$RX_RUN/run.log"
+rx_runner_run incomplete
+assert_eq 'test Rexx: rechaza informe incompleto' '1' "$rc_last"
 
 # Scala: build homologado y conservación de archivos existentes.
 SCALA="$SANDBOX/scala/core/algorithms/data_structures_basics"
@@ -4728,6 +4775,96 @@ forth_runner_run
 assert_eq 'test Forth: rechaza runner enlazado' '1' "$rc_last"
 rm -- "$FORTH_RUN/test/run-tests.forth"
 mv -- "$FORTH_RUN/run-tests-original.forth" "$FORTH_RUN/test/run-tests.forth"
+
+D_RUN="$WORK_DIR/d-runner"
+mkdir -p -- "$D_RUN/bin" "$D_RUN/data/scaffold_templates" \
+    "$D_RUN/d_runner/source" "$D_RUN/d_runner/test"
+cp -- "$DATA_DIR/d_test.sh" "$DATA_DIR/d_scaffold.sh" "$D_RUN/data/"
+cp -- "$DATA_DIR/scaffold_templates/d.unittest.sdl" "$D_RUN/data/scaffold_templates/"
+cat >"$D_RUN/bin/dub" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+case "$1" in
+    describe)
+        printf '%s\n' "$PWD/source/d_runner.d"
+        if grep -Fq 'sourcePaths "source" "test"' dub.sdl; then
+            printf '%s\n' "$PWD/test/d_runner_test.d"
+        fi
+        ;;
+    test)
+        printf '%s\n' "$PWD" >"$DUB_FAKE_LOG"
+        cat -- "$DUB_FAKE_OUTPUT"
+        exit "${DUB_FAKE_RC:-0}"
+        ;;
+    *) exit 2 ;;
+esac
+EOF
+chmod +x -- "$D_RUN/bin/dub"
+cat >"$D_RUN/d_runner/dub.sdl" <<'EOF'
+name "d_runner"
+description "Basic linked data structures."
+authors "test"
+copyright "Copyright 2026, test"
+license "proprietary"
+
+targetType "library"
+EOF
+printf 'module d_runner;\n' >"$D_RUN/d_runner/source/d_runner.d"
+printf 'module d_runner_test;\nunittest { assert(1); }\n' >"$D_RUN/d_runner/test/d_runner_test.d"
+D_RUN_MANIFEST="$(cat -- "$D_RUN/d_runner/dub.sdl")"
+D_FAKE_OUTPUT="$D_RUN/output"
+D_FAKE_LOG="$D_RUN/test-cwd"
+printf 'All unit tests have been run successfully.\n' >"$D_FAKE_OUTPUT"
+d_runner_run() {
+    local rc=0
+    out="$(cd -- "$D_RUN/d_runner" && DUB_FAKE_LOG="$D_FAKE_LOG" \
+        DUB_FAKE_OUTPUT="$D_FAKE_OUTPUT" DUB_FAKE_RC="${1:-0}" \
+        PATH="$D_RUN/bin:$PATH" bash "$D_RUN/data/d_test.sh" \
+        2>"$WORK_DIR/d-runner.err")" || rc=$?
+    err="$(cat -- "$WORK_DIR/d-runner.err")"
+    rc_last="$rc"
+}
+d_runner_run
+assert_eq 'test D: ejecuta suite omitida en copia temporal' '0' "$rc_last"
+assert_contains 'test D: anuncia configuración temporal' 'copia temporal' "$out"
+assert_eq 'test D: no modifica manifiesto original' "$D_RUN_MANIFEST" \
+    "$(cat -- "$D_RUN/d_runner/dub.sdl")"
+assert_eq 'test D: ejecuta fuera del módulo original' 'yes' \
+    "$([[ "$(cat -- "$D_FAKE_LOG")" != "$D_RUN/d_runner" ]] && echo yes || echo no)"
+d_runner_run 7
+assert_eq 'test D: propaga fallo nativo' '7' "$rc_last"
+printf 'module d_runner_test;\n' >"$D_RUN/d_runner/test/d_runner_test.d"
+rm -f -- "$D_FAKE_LOG"
+d_runner_run
+assert_eq 'test D: rechaza suite sin bloques unittest' '1' "$rc_last"
+assert_eq 'test D: no ejecuta suite vacía' 'no' "$([[ -e "$D_FAKE_LOG" ]] && echo yes || echo no)"
+printf 'module d_runner_test;\nunittest { assert(1); }\n' >"$D_RUN/d_runner/test/d_runner_test.d"
+mv -- "$D_RUN/d_runner/test/d_runner_test.d" "$D_RUN/d_runner/d_runner_test.d"
+rm -f -- "$D_FAKE_LOG"
+d_runner_run
+assert_eq 'test D: rechaza directorio test sin fuentes' '1' "$rc_last"
+assert_contains 'test D: diagnostica fuentes ausentes' 'no D test sources' "$err"
+assert_eq 'test D: no ejecuta sin fuentes' 'no' "$([[ -e "$D_FAKE_LOG" ]] && echo yes || echo no)"
+mv -- "$D_RUN/d_runner/d_runner_test.d" "$D_RUN/d_runner/test/d_runner_test.d"
+cat >>"$D_RUN/d_runner/dub.sdl" <<'EOF'
+
+configuration "unittest" {
+    targetType "library"
+    sourcePaths "source" "test"
+}
+EOF
+d_runner_run
+assert_eq 'test D: conserva ejecución nativa ya configurada' '0' "$rc_last"
+assert_eq 'test D: configuración existente ejecuta en el módulo' "$D_RUN/d_runner" \
+    "$(cat -- "$D_FAKE_LOG")"
+printf 'custom manifest\n' >"$D_RUN/d_runner/dub.sdl"
+rm -f -- "$D_FAKE_LOG"
+d_runner_run
+assert_eq 'test D: rechaza manifiesto omitido no reconocido' '1' "$rc_last"
+assert_contains 'test D: explica adaptación de manifiesto propio' \
+    'adapta un manifiesto compatible' "$err"
+assert_eq 'test D: no ejecuta test omitido por manifiesto propio' 'no' \
+    "$([[ -e "$D_FAKE_LOG" ]] && echo yes || echo no)"
 
 RUSTB="$SANDBOX/rust/core/algorithms/naive_sort"
 mkdir -p -- "$RUSTB/src"

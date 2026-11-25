@@ -8,7 +8,7 @@ common-lisp	tool	ros run --load run-tests.lisp --eval '(uiop:quit)'	-
 cpp	manual	bazelisk test //...	-
 crystal	tool	bash {root}/scripts/data/crystal_test.sh	crystal tool format --check src
 csharp	tool	dotnet test {Module}.slnx	-
-d	tool	dub test	-
+d	tool	bash {root}/scripts/data/d_test.sh	-
 dart	tool	bash {root}/scripts/data/dart_test.sh	dart analyze
 elixir	tool	bash {root}/scripts/data/elixir_test.sh	mix format --check-formatted
 elm	tool	elm-test	-
