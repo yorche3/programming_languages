@@ -511,12 +511,18 @@ al menos un caso aprobado.
 **EN:** V can succeed with zero cases; `v_test.sh` requires a summary containing
 at least one passing case.
 
-**ES:** Tcl crea una fuente de paquete, su índice y el ignore si faltan,
-preservando archivos previos y rechazando enlaces. Los archivos previos
-necesitan revisión.
+**ES:** `tcl_scaffold.sh` crea una fuente de paquete, su índice y el ignore
+si faltan, preserva archivos previos y rechaza enlaces. Deriva el nombre del
+paquete de la carpeta efectiva, no del id canónico: por ejemplo,
+`unit_test/calculator` produce `calculator.tcl` y `package provide calculator`.
+Los archivos previos vacíos o incompatibles requieren revisión.
 
-**EN:** Tcl creates a missing package source, index and ignore file, preserving
-existing files and rejecting symlinks. Pre-existing files need review.
+**EN:** `tcl_scaffold.sh` creates a missing package source, index and ignore
+file, preserves existing files and rejects symlinks. It derives the package
+name from the effective directory rather than the canonical id; for example,
+`unit_test/calculator` produces `calculator.tcl` and
+`package provide calculator`. Pre-existing empty or incompatible files require
+review.
 
 **ES:** Forth crea una fuente vacía, un framework y un runner que anuncia que
 no hay tests; conserva archivos existentes. La suite conecta los grupos y el

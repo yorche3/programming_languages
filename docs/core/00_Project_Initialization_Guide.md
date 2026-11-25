@@ -1122,27 +1122,22 @@ fi
 
 ### Tcl — src/ + test/
 
-**ES:** Crear la fuente, el índice de paquete y el ignore solo si faltan;
-conservar archivos existentes y rechazar enlaces simbólicos en estas rutas.
-Revisar los archivos previos que estén vacíos.
+**ES:** Ejecutar `bash {root}/scripts/data/tcl_scaffold.sh` desde la carpeta
+efectiva del módulo. Crea la fuente, el índice de paquete y el ignore solo si
+faltan; conserva archivos existentes y rechaza enlaces simbólicos. El nombre
+del paquete sale de la carpeta efectiva (por ejemplo, `unit_test/calculator`
+usa `calculator`) y el namespace convierte sus segmentos `snake_case` a
+`PascalCase`. Revisar los archivos previos vacíos o incompatibles.
 
-**EN:** Create the source, package index and ignore file only when missing;
-preserve existing files and reject symlinks at these paths. Review any
-pre-existing empty files.
+**EN:** Run `bash {root}/scripts/data/tcl_scaffold.sh` from the effective
+module directory. It creates the source, package index and ignore file only
+when missing, preserves existing files and rejects symlinks. The package name
+comes from the effective directory (for example, `unit_test/calculator` uses
+`calculator`) and the namespace converts its `snake_case` segments to
+`PascalCase`. Review pre-existing empty or incompatible files.
 
 ```bash
-if [[ -L src || -L test || -L src/{module}.tcl || -L src/pkgIndex.tcl ||
-      -L .gitignore || ( -e src/{module}.tcl && ! -f src/{module}.tcl ) ||
-      ( -e src/pkgIndex.tcl && ! -f src/pkgIndex.tcl ) ||
-      ( -e .gitignore && ! -f .gitignore ) ]]; then
-  printf 'scaffold: ruta de Tcl no segura / unsafe Tcl path\n' >&2
-  false
-else
-  mkdir -p src test &&
-    { test -e src/{module}.tcl || (set -C; printf 'namespace eval {Module} {}\n\npackage provide {module} 1.0\n' > src/{module}.tcl); } &&
-    { test -e src/pkgIndex.tcl || (set -C; printf '%s\n' 'package ifneeded {module} 1.0 [list source [file join $dir {module}.tcl]]' > src/pkgIndex.tcl); } &&
-    { test -e .gitignore || (set -C; printf '*.log\n' > .gitignore); }
-fi
+bash {root}/scripts/data/tcl_scaffold.sh
 ```
 
 ```text

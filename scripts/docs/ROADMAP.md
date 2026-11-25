@@ -639,15 +639,24 @@ anterior rechazaba las dos suites de `numbers` como ambiguas y Tcltest 2.5.11
 devolvió 0 ante una aserción fallida. El comando en desarrollo ejecuta todas
 las suites `.test` y comprueba los contadores en `cleanupTests`; rechaza
 fallos, suites sin casos efectivos, casos sin finalizar y salidas anticipadas.
-Los archivos vacíos de scaffolds anteriores requieren revisión.
+La revisión del scaffold encontró que el id canónico `unit_test` generaba
+`unit_test.tcl` en la carpeta anidada `unit_test/calculator`. El helper ahora
+deriva paquete y namespace del último segmento (`calculator`), conserva los
+archivos existentes y pasa el test de carga. Las cinco bases de paquete
+homologadas no tienen fuentes ni índices vacíos; los archivos previos vacíos
+siguen requiriendo revisión antes de conservarlos.
 
 **EN — Tcl (2026-11-22):** scaffold creates a loadable package and index when
 missing, preserves existing files and announces their review. The previous
 selector rejected the two `numbers` suites as ambiguous, and Tcltest 2.5.11
 returned 0 for a failing assertion. The development command runs all `.test`
 suites and checks the counters at `cleanupTests`; it rejects failures, suites
-without effective cases, unfinished cases and early exits. Empty files from
-older scaffolds still need review.
+without effective cases, unfinished cases and early exits. The scaffold review
+found that canonical id `unit_test` produced `unit_test.tcl` in the nested
+`unit_test/calculator` directory. The helper now derives the package and
+namespace from the leaf directory (`calculator`), preserves existing files and
+passes the package-load check. The five homologated package bases contain no
+empty sources or indexes; any pre-existing empty files still require review.
 
 **ES — Scheme (2026-11-22):** el scaffold crea un módulo Guile cargable,
 preserva los archivos existentes y excluye logs SRFI-64 si falta el ignore.

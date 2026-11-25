@@ -438,6 +438,7 @@ EOF
     cp -- "$TESTS_DIR/../data/v_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/ballerina_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/rexx_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/tcl_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/swift_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/purescript_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/typescript_test.sh" "$SANDBOX/scripts/data/"
@@ -4497,6 +4498,22 @@ ln -s "$TC/src/data_structures_basics.tcl" "$TC/.gitignore"
 glot_run_sandbox scaffold tcl-tk algorithms/data_structures_basics
 assert_eq 'scaffold Tcl ignore symlink: código' '4' "$rc_last"
 assert_eq 'scaffold Tcl ignore symlink: conserva destino' 'author source' "$(cat -- "$TC/src/data_structures_basics.tcl")"
+TC_CALC="$SANDBOX/tcl-tk/core/foundations/unit_test/calculator"
+mkdir -p -- "$TC_CALC"
+glot_run_sandbox scaffold tcl-tk foundations/unit_test
+assert_eq 'scaffold Tcl anidado: código' '0' "$rc_last"
+assert_contains 'scaffold Tcl anidado: fuente por carpeta' \
+    'package provide calculator 1.0' "$(cat -- "$TC_CALC/src/calculator.tcl")"
+assert_contains 'scaffold Tcl anidado: índice por carpeta' \
+    'package ifneeded calculator 1.0' "$(cat -- "$TC_CALC/src/pkgIndex.tcl")"
+assert_eq 'scaffold Tcl anidado: no crea fuente con id canónico' 'no' \
+    "$([[ -e "$TC_CALC/src/unit_test.tcl" ]] && echo yes || echo no)"
+if command -v tclsh9.0 >/dev/null 2>&1; then
+    tcl_rc=0
+    tcl_out="$(cd "$TC_CALC" && printf 'lappend auto_path [file normalize src]\nputs [package require calculator 1.0]\nputs [namespace exists ::Calculator]\n' | tclsh9.0 2>&1)" || tcl_rc=$?
+    assert_eq 'scaffold Tcl anidado: paquete cargable' '0' "$tcl_rc"
+    assert_eq 'scaffold Tcl anidado: versión y namespace' "$(printf '1.0\n1')" "$tcl_out"
+fi
 TC_DRY="$SANDBOX/tcl-tk/core/algorithms/naive_sort"
 mkdir -p -- "$TC_DRY"
 glot_run_sandbox -n scaffold tcl-tk algorithms/naive_sort

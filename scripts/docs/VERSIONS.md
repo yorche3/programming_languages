@@ -775,23 +775,30 @@ anticipadas y fallos; se verificaron las tres suites de `numbers`.
 It rejects empty runs, incomplete groups, early exits and failures; verified
 with all three `numbers` suites.
 
-**ES:** Tcl crea una fuente de paquete y su índice funcionales si faltan,
-conserva archivos existentes y anuncia la revisión pendiente del runner y
-de scaffolds anteriores. Rexx cargó el cuerpo de la suite al crear un
-`.Package`, por lo que volver a ejecutar sus clases duplicaría las pruebas.
+**ES:** El helper Tcl crea una fuente de paquete y su índice cuando faltan,
+conserva archivos existentes y rechaza enlaces simbólicos. Deriva paquete y
+namespace de la carpeta efectiva: `unit_test/calculator` usa `calculator`.
+Se verificaron la generación y carga del paquete anidado, y que repetir el
+scaffold no altere las cinco bases homologadas. Rexx cargó el cuerpo de la
+suite al crear un `.Package`, por lo que volver a ejecutar sus clases
+duplicaría las pruebas.
 
-**EN:** Tcl creates a working package source and index if missing, preserves
-existing files and announces pending runner and old-scaffold review. Rexx
-executed the suite body when creating a `.Package`, so running its classes
-again would duplicate tests.
+**EN:** The Tcl helper creates a package source and index when missing,
+preserves existing files and rejects symlinks. It derives the package and
+namespace from the effective directory: `unit_test/calculator` uses
+`calculator`. Nested package generation and loading were verified, as was
+preservation of the five homologated bases on scaffold rerun. Rexx executed
+the suite body when creating a `.Package`, so running its classes again would
+duplicate tests.
 
 **ES:** El runner Tcl ejecuta todas las suites `.test` y comprueba los
 contadores de Tcltest para detectar fallos y ejecuciones vacías o incompletas.
-Se verificaron `numbers` y `data_structures_basics`.
+Se verificaron las cinco bases: 21, 19, 23, 22 y 5 pruebas aprobadas,
+respectivamente.
 
 **EN:** The Tcl runner executes all `.test` suites and checks Tcltest counters
-for failures and empty or incomplete runs. Verified against `numbers` and
-`data_structures_basics`.
+for failures and empty or incomplete runs. All five bases were verified:
+21, 19, 23, 22 and 5 tests passed, respectively.
 
 **ES:** `new` y `scaffold` bloquean también un `.git` anidado en formato
 gitfile, sin modificarlo. Git preexistente queda protegido por el fix cerrado.
