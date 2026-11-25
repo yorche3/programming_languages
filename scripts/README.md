@@ -4,17 +4,18 @@
 
 **EN:** `glot` turns the per-module work cycle —**locate, create, run, delegate, close and publish**— into reproducible commands, and leaves the evidence in the repository. It is **monorepo tooling**: it is not a roadmap module, it touches neither `.gitmodules` nor the `X/50` counters in [`docs/ROADMAP.md`](../docs/ROADMAP.md).
 
-Versión de desarrollo / Development version: **v2.1.0-dev** en [`glot.sh`](glot.sh).
-Última versión verificada / Last verified release: **v2.0.3** en
-[`versions/glot_2.0.3.sh`](versions/glot_2.0.3.sh).
+Versión actual / Current version: **v2.1.0** en [`glot.sh`](glot.sh).
+Última versión cerrada / Last closed version: **v2.1.0** en
+[`versions/glot_2.1.0.sh`](versions/glot_2.1.0.sh); límites de verificación /
+verification limitations: [`docs/VERSIONS.md`](docs/VERSIONS.md).
 
-**ES:** En desarrollo, `new` retira el `.git/` creado durante la inicialización
+**ES:** `new` retira el `.git/` creado durante la inicialización
 de un módulo vacío solo si sus metadatos pasan las comprobaciones de seguridad.
 Un Git anidado preexistente se conserva y bloquea `new`/`scaffold` con un
 diagnóstico: revísalo antes de decidir qué hacer. Desde el Git anidado, glot
 detecta el superproyecto del submódulo para consultar el mismo estado.
 
-**EN:** In development, `new` removes a module-local `.git/` created during
+**EN:** `new` removes a module-local `.git/` created during
 initialization of an empty module only after safety checks. Pre-existing
 nested Git is preserved and blocks `new`/`scaffold` with a diagnostic; inspect
 it before deciding what to do. State lookup still resolves the submodule's
@@ -106,7 +107,7 @@ source <(./scripts/glot.sh completion bash)   # completado sin instalar nada
 ```text
 scripts/
 ├── README.md                 # Este archivo: qué es glot y mapa de la documentación
-├── glot.sh                  # Desarrollo / development (v2.1.0-dev)
+├── glot.sh                  # Versión actual / current version (v2.1.0)
 ├── completions/              # Autocompletado por shell (se imprime, o lo deja `install`)
 │   ├── glot.bash
 │   └── glot.zsh

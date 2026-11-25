@@ -18,8 +18,9 @@ The v2.0.2 shared delegation policy retains `data_structures_basics` →
 `numbers` priority, with topic- and language-aware grouping and unchanged models.
 Verification is recorded in [`VERSIONS.md`](VERSIONS.md).
 
-**ES:** El cierre de **v2.1.0** está preparado, pero sigue en curso hasta
-comprobar la instalación final. Su alcance acordado incluye
+**ES:** **v2.1.0** está cerrada con las limitaciones de verificación indicadas
+abajo. El autor instaló la copia final y `doctor` confirmó `install_stale: no`.
+Su alcance acordado incluye
 `--delegate antigravity|copilot|open-router`, configuración BYOK por ruta,
 overrides autorizados por encargo y revisión del scaffold de los 50 lenguajes.
 El script integrado se identifica como **2.1.0**. Los resultados y límites de
@@ -31,8 +32,9 @@ sincronización general de helpers de build queda para una versión posterior.
 Los casos medidos y pendientes se registran en [`VERSIONS.md`](VERSIONS.md) y aquí.
 v2.0.3 quedó archivada como snapshot exacto antes de editar código.
 
-**EN:** **v2.1.0 closure is prepared but remains in progress** until the final
-installation is checked. Its agreed scope includes three
+**EN:** **v2.1.0 is closed** with the verification limitations noted below.
+The author installed the final copy and `doctor` confirmed `install_stale: no`.
+Its agreed scope includes three
 explicit delegate routes, route-specific BYOK configuration, authorized
 per-request overrides and a 50-language scaffold review. The integrated
 script identifies as **2.1.0**. Scaffold and runner results and limitations
@@ -43,7 +45,7 @@ build-helper synchronization belongs to a later version. Results are recorded in
 [`VERSIONS.md`](VERSIONS.md) and this roadmap.
 v2.0.3 was archived before code edits.
 
-**ES:** La pasada en curso corrigió los esqueletos Java, JavaScript, PHP, Ruby,
+**ES:** La revisión corrigió los esqueletos Java, JavaScript, PHP, Ruby,
 ReScript y TypeScript: POM/clase Maven ejecutables, configuración npm/Jest,
 configuración PHPUnit/Composer, declaración de RSpec y configuraciones de
 ReScript/Jest y TypeScript/Jest. Julia evita el falso verde con un runner vacío
@@ -53,7 +55,7 @@ casos aprobados. LuaRocks `init` no crea la configuración `.busted`; el
 scaffold ahora la crea sin reemplazar archivos propios.
 Los resultados y límites de los demás lenguajes están registrados en el log.
 
-**EN:** The current pass corrected the Java, JavaScript, PHP, Ruby, ReScript and
+**EN:** The review corrected the Java, JavaScript, PHP, Ruby, ReScript and
 TypeScript skeletons: a buildable Maven POM/class, npm/Jest configuration,
 Composer/PHPUnit configuration, RSpec declaration, and ReScript/Jest and
 TypeScript/Jest configuration. Julia now prevents a false green from an empty
@@ -97,7 +99,7 @@ templates; no real delegate is invoked.
 ### Alcance acordado de v2.1.0 / Agreed v2.1.0 scope
 
 **ES:** El documento temporal de preparación fue retirado por el autor; las
-decisiones permanecen aquí. No cerrar la versión hasta comprobar:
+decisiones permanecen aquí. El cierre conserva las limitaciones indicadas arriba:
 
 - `--delegate antigravity|copilot|open-router`, sin `--provider`; OpenRouter
   usa Copilot CLI BYOK, no otro agente.

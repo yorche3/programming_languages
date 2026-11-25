@@ -44,6 +44,33 @@ Sin pendientes de módulos académicos conocidos a 2026-11-24.
 <!-- Las entradas cerradas se conservan debajo con su fecha y evidencia. -->
 
 ```text
+Fecha / Date: 2026-11-25
+Fase / Phase: tooling release
+Módulo(s) / Module(s): glot 2.1.0
+Lenguaje(s) / Language(s): 50 submódulos catalogados; comprobaciones nativas parciales
+Código verificado / Code verified: sí, con límites / yes, with limitations
+Tests y comandos / Tests and commands:
+- `bash docs/tests/docs_check.sh` -> 32 passed, 0 failed
+- `git diff --check` -> passed
+- `cmp scripts/glot.sh scripts/versions/glot_2.1.0.sh` -> identical
+- `./scripts/glot.sh doctor` -> version 2.1.0, install_stale: no,
+  install_copy: ok, install_source_state: ok, install_data: ok
+- C++ runner: 8 isolated regressions passed; isolated glot test returned
+  0/4/4/4 for pass/empty/skipped-only/native failure.
+README(s) verificado(s) / README(s) verified: yes, tooling documentation updated
+Cambio en ROADMAP.md / ROADMAP.md change: academic roadmap unchanged;
+  scripts/docs/ROADMAP.md: glot 2.1.0 closure in progress -> closed with limitations
+Observaciones / Notes: El autor instaló la copia. No se ejecutó el harness
+completo; la vía sin `use` ni `ask` se planificó para v2.1.1. El target C++
+homologado no llegó a tests en el intento offline por falta del registro de
+Bazel. No se modificaron submódulos ni contadores académicos.
+/ The author installed the copy. The full harness was not run; a path without
+`use` or `ask` is planned for v2.1.1. The homologated C++ target did not reach
+tests offline because the Bazel registry was unavailable. No submodules or
+academic counters were changed.
+```
+
+```text
 Fecha / Date: 2026-11-24
 Fase / Phase: tooling release
 Módulo(s) / Module(s): glot 2.1.0

@@ -8,6 +8,13 @@ y el versionado sigue [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Cierre de `glot` v2.1.0 con rutas BYOK, overrides por categoría y revisión
+  de scaffolds y runners; el harness completo y el target C++ homologado
+  permanecen sin verificar. La verificación aislada del harness queda
+  planificada para v2.1.1.
+  / `glot` v2.1.0 closed with BYOK routes, category overrides and scaffold
+  and runner review; the full harness and homologated C++ target remain
+  unverified. Isolated harness verification is planned for v2.1.1.
 - Nueva carpeta `scripts/` para las herramientas del monorepo, con `glot`: un CLI
   que crece por versiones siguiendo las especificaciones de los lenguajes
   (v0.1.0 `Hello World`, v0.2.0 equivalente a `hellouser`, v0.3.0 contrato y
