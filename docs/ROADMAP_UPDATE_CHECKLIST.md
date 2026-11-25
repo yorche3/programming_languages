@@ -63,11 +63,16 @@ Cambio en ROADMAP.md / ROADMAP.md change: academic roadmap unchanged;
 Observaciones / Notes: El autor instaló la copia. No se ejecutó el harness
 completo; la vía sin `use` ni `ask` se planificó para v2.1.1. El target C++
 homologado no llegó a tests en el intento offline por falta del registro de
-Bazel. No se modificaron submódulos ni contadores académicos.
+Bazel. La rama integrada incluye el puntero de Julia al commit `0b5b1b42`,
+integrado en su `main` local; su referencia `origin/main` conocida queda un
+commit detrás. Publicar Julia antes del monorepo. Los contadores académicos
+no cambiaron.
 / The author installed the copy. The full harness was not run; a path without
 `use` or `ask` is planned for v2.1.1. The homologated C++ target did not reach
-tests offline because the Bazel registry was unavailable. No submodules or
-academic counters were changed.
+tests offline because the Bazel registry was unavailable. The integrated branch
+includes the Julia pointer to commit `0b5b1b42`, integrated into its local
+`main`; its known `origin/main` reference is one commit behind. Publish Julia
+before the monorepo. Academic counters did not change.
 ```
 
 ```text
