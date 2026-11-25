@@ -83,7 +83,7 @@ julia	scaffold	2	module	run	bash {root}/scripts/data/julia_scaffold.sh {module} 
 kotlin	new	1	module	run	gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project	-	-	-
 kotlin	scaffold	1	module	run	bash {root}/scripts/data/gradle_scaffold.sh kotlin {module}	-	-	revisar muestras Kotlin conservadas; Gradle puede devolver éxito sin casos; solo retirar pareja exacta sin otros archivos en lib/src
 lua	new	1	module	run	luarocks init	-	-	-
-lua	scaffold	1	module	run	mkdir -p src test && touch .gitignore	-	-	-
+lua	scaffold	1	module	run	bash "{root}/scripts/data/lua_scaffold.sh" "{root}/scripts/data/scaffold_templates/lua.busted"	-	-	crea .busted para descubrir suites en test/ solo si falta; conserva configuración y archivos existentes
 nim	new	1	module	run	nimble init -y	-	-	-
 nim	scaffold	1	module	run	bash {root}/scripts/data/nim_scaffold.sh {module}	-	-	retirar solo las muestras Nim verificadas y conservar archivos propios
 ocaml	new	1	phase	run	dune init proj {module}	-	-	-

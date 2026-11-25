@@ -44,7 +44,8 @@ configuración PHPUnit/Composer, declaración de RSpec y configuraciones de
 ReScript/Jest y TypeScript/Jest. Julia evita el falso verde con un runner vacío
 y ya configura el entrypoint estándar de `Pkg.test()`;
 C++ genera configuración Bazel funcional, y PHPUnit y el runner R fallan sin
-casos aprobados.
+casos aprobados. LuaRocks `init` no crea la configuración `.busted`; el
+scaffold ahora la crea sin reemplazar archivos propios.
 La cobertura de los demás lenguajes sigue abierta.
 
 **EN:** The current pass corrected the Java, JavaScript, PHP, Ruby, ReScript and
@@ -52,8 +53,9 @@ TypeScript skeletons: a buildable Maven POM/class, npm/Jest configuration,
 Composer/PHPUnit configuration, RSpec declaration, and ReScript/Jest and
 TypeScript/Jest configuration. Julia now prevents a false green from an empty
 runner; C++ generates functional Bazel configuration and PHPUnit fails on an
-empty suite; the R runner also fails when no test cases pass. Coverage of the
-remaining languages is still open.
+empty suite; the R runner also fails when no test cases pass. LuaRocks `init`
+does not create `.busted`; scaffold now adds it without replacing authored
+files. Coverage of the remaining languages is still open.
 
 ---
 

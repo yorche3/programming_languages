@@ -411,6 +411,9 @@ sandbox_make() {
 [submodule "kotlin"]
         path = kotlin
         url = ../remote/kotlin.git
+[submodule "lua"]
+        path = lua
+        url = ../remote/lua.git
 [submodule "nim"]
         path = nim
         url = ../remote/nim.git
@@ -425,10 +428,12 @@ EOF
     git -C "$SANDBOX" init -q
     mkdir -p -- "$SANDBOX/assembly/core/algorithms" "$SANDBOX/c/core/algorithms" \
         "$SANDBOX/cobol/core/algorithms" "$SANDBOX/grain/core/algorithms" \
+        "$SANDBOX/lua/core/algorithms" \
         "$SANDBOX/r/core/algorithms" "$SANDBOX/haxe/core/algorithms" \
         "$SANDBOX/scripts/data"
     cp -R -- "$TESTS_DIR/../data/scaffold_templates" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/gradle_scaffold.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/lua_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/haskell_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/haskell_sync.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/haskell_test.sh" "$SANDBOX/scripts/data/"
@@ -4340,6 +4345,31 @@ ln -s "$WORK_DIR/scala-project-target" "$SCALA_LINK/project"
 glot_run_sandbox scaffold scala algorithms/naive_sort
 assert_eq 'scaffold Scala proyecto symlink: código' '4' "$rc_last"
 assert_eq 'scaffold Scala proyecto symlink: no crea archivos' '0' "$(find "$WORK_DIR/scala-project-target" -mindepth 1 | wc -l | tr -d ' ')"
+
+# LuaRocks does not create Busted's project configuration; scaffold adds it safely.
+LU="$SANDBOX/lua/core/algorithms/naive_sort"
+mkdir -p -- "$LU"
+glot_run_sandbox -n scaffold lua algorithms/naive_sort
+assert_eq 'scaffold Lua dry-run: código' '0' "$rc_last"
+assert_eq 'scaffold Lua dry-run: no crea archivos' '0' "$(find "$LU" -mindepth 1 | wc -l | tr -d ' ')"
+glot_run_sandbox scaffold lua algorithms/naive_sort
+assert_eq 'scaffold Lua: código' '0' "$rc_last"
+assert_eq 'scaffold Lua: configura descubrimiento Busted' \
+    "$(cat -- "$DATA_DIR/scaffold_templates/lua.busted")" "$(cat -- "$LU/.busted")"
+assert_eq 'scaffold Lua: crea layout' 'yes' "$([[ -d "$LU/src" && -d "$LU/test" ]] && echo yes || echo no)"
+assert_eq 'scaffold Lua: crea ignore vacío si falta' 'yes' "$([[ -f "$LU/.gitignore" && ! -s "$LU/.gitignore" ]] && echo yes || echo no)"
+printf 'author config\n' >"$LU/.busted"
+printf 'author ignore\n' >"$LU/.gitignore"
+glot_run_sandbox scaffold lua algorithms/naive_sort
+assert_eq 'scaffold Lua repetido: código' '0' "$rc_last"
+assert_eq 'scaffold Lua repetido: conserva Busted' 'author config' "$(cat -- "$LU/.busted")"
+assert_eq 'scaffold Lua repetido: conserva ignore' 'author ignore' "$(cat -- "$LU/.gitignore")"
+printf 'author target\n' >"$WORK_DIR/lua-busted-target"
+rm -- "$LU/.busted"
+ln -s "$WORK_DIR/lua-busted-target" "$LU/.busted"
+glot_run_sandbox scaffold lua algorithms/naive_sort
+assert_eq 'scaffold Lua symlink: código' '4' "$rc_last"
+assert_eq 'scaffold Lua symlink: conserva destino' 'author target' "$(cat -- "$WORK_DIR/lua-busted-target")"
 
 # Scheme: módulo Guile seguro y comprobación del runner.
 SC="$SANDBOX/scheme/core/algorithms/data_structures_basics"

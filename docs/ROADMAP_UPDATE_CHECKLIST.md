@@ -60,7 +60,10 @@ Tests y comandos / Tests and commands:
 - snapshot `scripts/versions/glot_2.1.0.sh` vs `scripts/glot.sh` -> exact match
 README(s) verificado(s) / README(s) verified: yes, tooling documentation synchronized
 Cambio en ROADMAP.md / ROADMAP.md change: glot 2.1.0 -> closed; native pending work remains explicitly recorded
-Observaciones / Notes: No se ejecutó el harness completo porque contiene verbos prohibidos. No se modificaron submódulos ni se hicieron commit/push.
+Observaciones / Notes: La comprobación inicial no ejecutó el harness completo
+porque incluye operaciones de Git en su sandbox; los seguimientos posteriores
+registran las ejecuciones focalizadas y el resultado del harness. No se
+modificaron submódulos; los commits mencionados son locales y no hubo push.
 Corrección de estado / Status correction: la afirmación previa de cierre de
 v2.1.0 fue prematura; la versión vuelve a figurar en curso hasta cerrar los
 seguimientos de scaffold y runner de su alcance. La sincronización general de
@@ -88,12 +91,23 @@ Seguimiento / Follow-up (2026-11-24):
   11 aserciones aprobadas por suite); `data_structures_basics` pasó 23 runs y
   106 aserciones. El harness también cubre suites múltiples, contadores
   fallidos con código nativo 0, informes incompletos y errores nativos.
-- Harness global (antes de actualizar expectativas): 2195 pruebas pasaron y 5
-  fallaron; cuatro expectativas de Vala/PureScript ya no reflejaban el comando
-  actual o las instrucciones vigentes, y la quinta es el conteo de 37
-  snapshots frente a 36 versiones cerradas mientras 2.1.0 sigue abierta.
-  Las cuatro expectativas se actualizaron y se verificaron de forma focalizada;
-  la puerta del snapshot se resolverá al cerrar la versión.
+- Tcl: el paquete anidado `unit_test/calculator` ahora deriva el nombre
+  `calculator` de la carpeta efectiva. En un laboratorio aislado, el paquete
+  recién generado cargó como `calculator`/`Calculator`; los reruns preservaron
+  las cinco bases y sus suites pasaron con 21, 19, 23, 22 y 5 casos. El helper,
+  regresión, guía y notas se guardaron en el commit local `e98c02b8`.
+- Lua: LuaRocks 3.13.0 no genera `.busted`. `lua_scaffold.sh` crea la
+  configuración de descubrimiento y los directorios solo si faltan; en un
+  sandbox se verificaron dry-run, creación tras `luarocks init`, Busted
+  descubriendo una prueba, rerun, preservación y rechazo de symlink. Las cinco
+  bases pasaron en copias aisladas: 3, 4, 23, 10 y 5 pruebas; Busted 2.3.0
+  rechazó el caso sin archivos.
+- Harness global más reciente: 2205 pruebas pasaron y 1 falló en la puerta
+  del archivo, porque hay 37 snapshots y 36 versiones cerradas mientras
+  2.1.0 sigue abierta. No se cambiará esa puerta ni se reemplazará el snapshot
+  actual hasta el cierre final.
+- `bash docs/tests/docs_check.sh` -> 32 passed, 0 failed; `bash -n` y
+  `git diff --check` -> passed. No se modificaron submódulos ni se hizo push.
 ```
 
 ```text
