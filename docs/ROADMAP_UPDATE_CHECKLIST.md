@@ -79,7 +79,8 @@ Seguimiento / Follow-up (2026-11-24):
 - D: en copia aislada, el `dub test` original omitió un sentinel fallido y
   devolvió 0; `glot scaffold` añadió la configuración `unittest` segura al
   manifiesto homologado, el rerun no duplicó configuración y el sentinel
-  fallido devolvió código distinto de cero. El submódulo no se modificó.
+  fallido devolvió código distinto de cero. El reconocimiento también tolera
+  la línea vacía real del manifiesto. El submódulo no se modificó.
 ```
 
 ```text

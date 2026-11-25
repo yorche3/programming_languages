@@ -84,18 +84,18 @@ Rust focused assertions: 10 passed, 0 failed
 **ES:** `dub describe --data=source-files` no demostraba que `dub test`
 incluyera `test/`: en una copia de la base homologada, un sentinel fallido
 devolvía éxito antes de configurar el manifiesto. El scaffold reconoce ahora
-el manifiesto generado y el layout simple de biblioteca homologado; configura
-`test/` solo en `unittest`, preserva manifiestos no reconocidos y es idempotente.
-En un root aislado el sentinel pasó de falso verde a fallo detectado. El
-submódulo no se modificó.
+el manifiesto generado y el layout simple de biblioteca homologado, incluidas
+líneas vacías; configura `test/` solo en `unittest`, preserva manifiestos no
+reconocidos y es idempotente. En un root aislado el sentinel pasó de falso
+verde a fallo detectado. El submódulo no se modificó.
 
 **EN:** `dub describe --data=source-files` did not prove that `dub test`
 included `test/`: in a copied homologated base, a failing sentinel returned
 success before the manifest was configured. Scaffold now recognizes both the
-generated manifest and the homologated simple-library layout; it configures
-`test/` only for `unittest`, preserves unrecognized manifests and is
-idempotent. In an isolated root the sentinel changed from false green to a
-detected failure. The submodule was not modified.
+generated manifest and the homologated simple-library layout, including blank
+lines; it configures `test/` only for `unittest`, preserves unrecognized
+manifests and is idempotent. In an isolated root the sentinel changed from
+false green to a detected failure. The submodule was not modified.
 
 ```text
 D scaffold: generated and homologated manifests configured; custom manifest preserved

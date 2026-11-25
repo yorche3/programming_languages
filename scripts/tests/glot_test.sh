@@ -2848,7 +2848,7 @@ if command -v dub >/dev/null 2>&1 && command -v dmd >/dev/null 2>&1; then
         "$(cat "$SANDBOX/d/core/algorithms/data_structures_basics/dub.sdl")"
 
     D_BASE="$SANDBOX/d/core/algorithms/data_structures_basics"
-    printf 'name "data_structures_basics"\ndescription "Basic linked data structures."\nauthors "test"\ncopyright "Copyright 2026, test"\nlicense "proprietary"\ntargetType "library"\n' \
+    printf 'name "data_structures_basics"\ndescription "Basic linked data structures."\nauthors "test"\ncopyright "Copyright 2026, test"\nlicense "proprietary"\n\ntargetType "library"\n' \
         >"$D_BASE/dub.sdl"
     printf 'module data_structures_basics;\n' >"$D_BASE/source/data_structures_basics.d"
     mkdir -p "$D_BASE/test"

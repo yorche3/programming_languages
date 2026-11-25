@@ -14,12 +14,14 @@ module="$1"
 templates="$(cd -- "$(dirname -- "$0")" && pwd -P)/scaffold_templates"
 result=0
 awk -v module="$module" '
-    NR == 1 { ok = ($0 == "name \"" module "\""); next }
-    NR == 2 { ok = ok && ($0 == "description \"A minimal D application.\""); next }
-    NR == 3 { ok = ok && ($0 ~ /^authors "[^"]*"$/); next }
-    NR == 4 { ok = ok && ($0 == "license \"proprietary\""); next }
+    NF == 0 { next }
+    { n++ }
+    n == 1 { ok = ($0 == "name \"" module "\""); next }
+    n == 2 { ok = ok && ($0 == "description \"A minimal D application.\""); next }
+    n == 3 { ok = ok && ($0 ~ /^authors "[^"]*"$/); next }
+    n == 4 { ok = ok && ($0 == "license \"proprietary\""); next }
     { ok = 0 }
-    END { exit !(NR == 4 && ok) }
+    END { exit !(n == 4 && ok) }
 ' dub.sdl || result=$?
 
 if [[ "$result" == 0 ]]; then
@@ -27,14 +29,16 @@ if [[ "$result" == 0 ]]; then
 elif [[ "$result" == 1 ]]; then
     result=0
     awk -v module="$module" '
-        NR == 1 { ok = ($0 == "name \"" module "\""); next }
-        NR == 2 { ok = ok && ($0 ~ /^description "[^"]*"$/); next }
-        NR == 3 { ok = ok && ($0 ~ /^authors "[^"]*"$/); next }
-        NR == 4 { ok = ok && ($0 ~ /^copyright "[^"]*"$/); next }
-        NR == 5 { ok = ok && ($0 == "license \"proprietary\""); next }
-        NR == 6 { ok = ok && ($0 == "targetType \"library\""); next }
+        NF == 0 { next }
+        { n++ }
+        n == 1 { ok = ($0 == "name \"" module "\""); next }
+        n == 2 { ok = ok && ($0 ~ /^description "[^"]*"$/); next }
+        n == 3 { ok = ok && ($0 ~ /^authors "[^"]*"$/); next }
+        n == 4 { ok = ok && ($0 ~ /^copyright "[^"]*"$/); next }
+        n == 5 { ok = ok && ($0 == "license \"proprietary\""); next }
+        n == 6 { ok = ok && ($0 == "targetType \"library\""); next }
         { ok = 0 }
-        END { exit !(NR == 6 && ok) }
+        END { exit !(n == 6 && ok) }
     ' dub.sdl || result=$?
     if [[ "$result" == 0 ]]; then
         append="$templates/d.unittest.sdl"

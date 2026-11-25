@@ -203,17 +203,19 @@ configuration, rerun, authored content, symlinks and native empty/failing runs.
 **ES — D (2026-11-24):** `dub describe --data=source-files` no basta para
 probar qué tests ejecuta DUB: la base homologada listaba solo `source/`, y
 `dub test` devolvía 0 incluso con una aserción fallida en `test/`. El scaffold
-ahora reconoce también el manifiesto simple de biblioteca homologado y añade
-`test/` solo a `unittest`; una copia pasó de falso verde a fallo detectado,
+ahora reconoce también el manifiesto simple de biblioteca homologado, incluso
+con líneas vacías, y añade `test/` solo a `unittest`; una copia pasó de falso
+verde a fallo detectado,
 con rerun idempotente. No se modificó el submódulo. Los manifiestos D no
 reconocidos conservan el contenido y requieren revisión explícita.
 
 **EN — D (2026-11-24):** `dub describe --data=source-files` alone does not
 prove which tests DUB executes: the homologated base listed only `source/`,
 and `dub test` returned 0 even with a failing assertion under `test/`.
-Scaffold now also recognizes the homologated simple library manifest and adds
-`test/` only to `unittest`; an isolated copy changed from false green to a
-detected failure, with an idempotent rerun. The submodule was not modified.
+Scaffold now also recognizes the homologated simple library manifest,
+including blank lines, and adds `test/` only to `unittest`; an isolated copy
+changed from false green to a detected failure, with an idempotent rerun. The
+submodule was not modified.
 Unrecognized D manifests remain preserved and require explicit review.
 
 **ES — Julia (2026-11-24):** la salida real de `Pkg.generate` trae una muestra
