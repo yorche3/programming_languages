@@ -96,8 +96,9 @@ Seguimiento / Follow-up (2026-11-24):
   recién generado cargó como `calculator`/`Calculator`; los reruns preservaron
   las cinco bases y sus suites pasaron con 21, 19, 23, 22 y 5 casos. El helper,
   regresión, guía y notas se guardaron en el commit local `e98c02b8`.
-- Lua: LuaRocks 3.13.0 no genera `.busted`. `lua_scaffold.sh` crea la
-  configuración de descubrimiento y los directorios solo si faltan; en un
+- Lua: LuaRocks 3.13.0 genera `{module}-dev-1.rockspec` con versión
+  `dev-1`, pero no `.busted`. `lua_scaffold.sh` crea la configuración de
+  descubrimiento y los directorios solo si faltan; en un
   sandbox se verificaron dry-run, creación tras `luarocks init`, Busted
   descubriendo una prueba, rerun, preservación y rechazo de symlink. Las cinco
   bases pasaron en copias aisladas: 3, 4, 23, 10 y 5 pruebas; Busted 2.3.0

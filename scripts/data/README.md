@@ -422,13 +422,15 @@ ambiguous or incomplete reports, zero cases or failures.
 
 **ES:** `lua_scaffold.sh` crea `src/`, `test/` y la configuración `.busted`
 solo si faltan; esta dirige Busted a `test/` y conserva la configuración y el
-`.gitignore` existentes. LuaRocks 3.13.0 no genera `.busted`; Busted 2.3.0
-rechaza una ejecución sin archivos de prueba.
+`.gitignore` existentes. LuaRocks 3.13.0 crea `{module}-dev-1.rockspec`
+(`version = "dev-1"`) pero no genera `.busted`; Busted 2.3.0 rechaza una
+ejecución sin archivos de prueba.
 
 **EN:** `lua_scaffold.sh` creates `src/`, `test/` and `.busted` only when
 missing. The config points Busted to `test/` and preserves existing config and
-`.gitignore`. LuaRocks 3.13.0 does not generate `.busted`; Busted 2.3.0 rejects
-a run with no test files.
+`.gitignore`. LuaRocks 3.13.0 creates `{module}-dev-1.rockspec`
+(`version = "dev-1"`) but does not generate `.busted`; Busted 2.3.0 rejects a
+run with no test files.
 
 **ES:** Groovy y Kotlin usan `gradle_scaffold.sh`: retira solo la pareja exacta
 de ejemplos Gradle 9.6.1 cuando no hay otros archivos o enlaces en `lib/src`.

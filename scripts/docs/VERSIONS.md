@@ -803,12 +803,14 @@ for failures and empty or incomplete runs. All five bases were verified:
 **ES:** LuaRocks 3.13.0 `init` no crea `.busted`, requerido para descubrir
 las suites homologadas bajo `test/`. `lua_scaffold.sh` ahora añade esa
 configuración solo si falta, preserva archivos propios y rechaza rutas
-simbólicas. En una copia temporal, Busted 2.3.0 encontró los tests de `numbers`
-(10 éxitos); sin archivos de prueba devolvió error.
+simbólicas. El generador crea `{module}-dev-1.rockspec`, coherente con
+`version = "dev-1"`. En una copia temporal, Busted 2.3.0 encontró los tests de
+`numbers` (10 éxitos); sin archivos de prueba devolvió error.
 
 **EN:** LuaRocks 3.13.0 `init` does not create `.busted`, which is required to
 discover the homologated suites under `test/`. `lua_scaffold.sh` now adds the
 config only when missing, preserves authored files and rejects symlink paths.
+The generator creates `{module}-dev-1.rockspec`, matching `version = "dev-1"`.
 In a temporary copy, Busted 2.3.0 found `numbers` tests (10 successes); it
 returned an error when no test files were present.
 
