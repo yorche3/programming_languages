@@ -87,47 +87,47 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 
 | Lenguaje / Language | Comando de inicialización / Initialisation command | Manifiesto / archivos clave | Pruebas / Tests |
 |---|---|---|---|
-| **ada** | ⛓️ ✅ `alr init --lib --in-place {module}` | `alire.toml`, `{module}.gpr`, `config/`, `tests/` | ✅ `alr -C tests run` |
-| **assembly** | ✍️ `mkdir -p src test` + `Makefile` | `Makefile` | ✅ `make run` |
+| **ada** | ⛓️ ✅ `alr init --lib --in-place {module}` | `alire.toml`, `{module}.gpr`, `config/`, `tests/` | ✅ `bash {root}/scripts/data/ada_test.sh` |
+| **assembly** | ✍️ `mkdir -p src test` + `Makefile` | `Makefile` | ✅ `bash {root}/scripts/data/assembly_test.sh` |
 | **ballerina** | ⛓️ 🔧 `bal new {module}` → adecuaciones de biblioteca / library adaptations | `Ballerina.toml`, `{module}.bal`, `tests/lib_test.bal` | ✅ `bash {root}/scripts/data/ballerina_test.sh` |
-| **c** | ✍️ `mkdir -p include src test` + `Makefile` | `include/{module}.h`, `Makefile` | ✅ `make test` |
-| **clojure** | ⛓️ 🔧 `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib` | `deps.edn`, `build.clj`, `src/{module}/` | ✅ `clojure -T:build test` |
-| **cobol** | ✍️ `mkdir -p src/copybooks src/lib test` | `Makefile`, `run_tests` | ✅ `make test` |
-| **common-lisp** | ⛓️ 🔧 `cl-project:make-project` vía `ros` + quicklisp | `{module}.asd`, `src/{module}.lisp` y `tests/{module}-test.lisp` (con guion), `run-tests.lisp` | ✅ `ros run --load run-tests.lisp --eval '(uiop:quit)'` |
-| **cpp** | ✍️ `mkdir -p {module}` | `BUILD`, `MODULE.bazel`, `.bazelversion` | ✅ `bazelisk test //...` |
+| **c** | ✍️ `mkdir -p include src test` + `Makefile` | `include/{module}.h`, `Makefile` | ✅ `bash {root}/scripts/data/c_test.sh` |
+| **clojure** | ⛓️ 🔧 `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib` | `deps.edn`, `build.clj`, `src/{module}/` | ✅ `bash {root}/scripts/data/clojure_test.sh` |
+| **cobol** | ✍️ `mkdir -p src/copybooks src/lib test` | `Makefile`, `run_tests` | ✅ `bash {root}/scripts/data/cobol_test.sh` |
+| **common-lisp** | ⛓️ 🔧 `cl-project:make-project` vía `ros` + quicklisp | `{module}.asd`, `src/{module}.lisp` y `tests/{module}-test.lisp` (con guion), `run-tests.lisp` | ✅ `bash {root}/scripts/data/common_lisp_test.sh` |
+| **cpp** | ✍️ `mkdir -p {module}` | `BUILD`, `MODULE.bazel`, `.bazelversion` | ✅ `bash {root}/scripts/data/cpp_test.sh` |
 | **crystal** | 🔧 `crystal init lib {module}` | `shard.yml` | ✅ `bash {root}/scripts/data/crystal_test.sh` |
-| **csharp** | ⛓️ ✅ `dotnet new sln -n {Module}` | `{Module}.slnx`, `src/{Module}/{Module}.csproj`, `test/{Module}.Tests/` | ✅ `dotnet test {Module}.slnx` |
+| **csharp** | ⛓️ ✅ `dotnet new sln -n {Module}` | `{Module}.slnx`, `src/{Module}/{Module}.csproj`, `test/{Module}.Tests/` | ✅ `bash {root}/scripts/data/dotnet_test.sh` |
 | **d** | ✅ `dub init {module} --format=sdl` | `dub.sdl` | ✅ `bash {root}/scripts/data/d_test.sh` |
 | **dart** | ✅ `dart create -t package {module}` | `pubspec.yaml`, `analysis_options.yaml` | ✅ `bash {root}/scripts/data/dart_test.sh` |
 | **elixir** | 🔧 `mix new {module} --module {Module}` | `mix.exs` | ✅ `bash {root}/scripts/data/elixir_test.sh` |
 | **elm** | ⛓️ 🔧 `elm init` | `elm.json`, `src/`, `tests/`, `.gitignore` | ✅ `elm-test` |
 | **erlang** | ⛓️ ✅ `rebar3 new lib {module}` | `rebar.config`, `src/{module}.app.src` | ✅ `bash {root}/scripts/data/erlang_test.sh` |
 | **forth** | ✍️ `mkdir -p src test` | — (runner casero `test.forth`) | ✅ `bash {root}/scripts/data/forth_test.sh` |
-| **fsharp** | ⛓️ 🔧 `dotnet new sln -n {Module}` (después `classlib -lang F#` y `xunit`; el layout homologado es plano) | `{Module}.slnx`, `src/{Module}.fsproj`, `test/{Module}.Tests.fsproj` | ✅ `dotnet test` |
+| **fsharp** | ⛓️ 🔧 `dotnet new sln -n {Module}` (después `classlib -lang F#` y `xunit`; el layout homologado es plano) | `{Module}.slnx`, `src/{Module}.fsproj`, `test/{Module}.Tests.fsproj` | ✅ `bash {root}/scripts/data/dotnet_test.sh` |
 | **gleam** | ⛓️ ✅ `gleam new {module}` | `gleam.toml`, `manifest.toml` | ✅ `bash {root}/scripts/data/gleam_test.sh` |
 | **go** | ✅ `go mod init example.com/{module}` | `go.mod` | ✅ `go run {root}/scripts/data/go_test_runner.go` |
-| **grain** | ✍️ `mkdir -p src tests` + `Makefile` | `Makefile` | ✅ `make test` |
+| **grain** | ✍️ `mkdir -p src tests` + `Makefile` | `Makefile` | ✅ `bash {root}/scripts/data/grain_test.sh` |
 | **groovy** | ⛓️ ✅ `gradle init --type groovy-library --dsl groovy --use-defaults` | `settings.gradle`, `lib/build.gradle`, `gradle/` | ✅ `bash {root}/scripts/data/gradle_test.sh` |
 | **haskell** | 🔧 `cabal init --lib --tests` | `{module}.cabal`, `lib/`, `test/Main.hs` | ✅ `bash {root}/scripts/data/haskell_test.sh` |
 | **haxe** | ⛓️ ✅ `mkdir -p src test` → `haxelib install utest` → `bash {root}/scripts/data/haxe_scaffold.sh {module} {Module}` | `build.hxml`, `RunTests.hx`, `src/`, `test/` | ✅ `haxe build.hxml` |
-| **java** | ✍️ `mkdir -p src/main/java/{module} src/test/java/{module}` + generar `pom.xml` Maven/JUnit | `pom.xml`, `src/main/java/{module}/{Module}.java` | ✅ `mvn test` |
+| **java** | ✍️ `mkdir -p src/main/java/{module} src/test/java/{module}` + generar `pom.xml` Maven/JUnit | `pom.xml`, `src/main/java/{module}/{Module}.java` | ✅ `bash {root}/scripts/data/java_test.sh` |
 | **javascript** | ⛓️ 🔧 `npm init -y` → `bash {root}/scripts/data/javascript_scaffold.sh {module}` | `package.json`, `jest.config.js`, `.gitignore`, `src/`, `test/` | ✅ `bash {root}/scripts/data/typescript_test.sh` |
 | **julia** | ⛓️ 🔧 `julia -e 'using Pkg; Pkg.generate("{module}")'` → `glot scaffold julia {phase}/{module}` | `Project.toml`, `src/{Module}.jl`, `test/run_tests.jl`, `test/runtests.jl` | ✅ `julia --project=. test/run_tests.jl` |
 | **kotlin** | ⛓️ ✅ `gradle init --type kotlin-library --dsl kotlin --use-defaults --no-split-project` | `build.gradle.kts`, `settings.gradle.kts` | ✅ `bash {root}/scripts/data/gradle_test.sh` |
-| **lua** | ⛓️ 🔧 `luarocks init` → `glot scaffold lua {phase}/{module}` | `{module}-dev-1.rockspec`, `.busted`, `src/`, `test/` | ✅ `busted` |
+| **lua** | ⛓️ 🔧 `luarocks init` → `glot scaffold lua {phase}/{module}` | `{module}-dev-1.rockspec`, `.busted`, `src/`, `test/` | ✅ `bash {root}/scripts/data/lua_test.sh` |
 | **nim** | ⛓️ ✅ `nimble init` (tipo library; `nimble init -y`) | `{module}.nimble`, `src/{module}.nim`, `test/config.nims` | ✅ `bash {root}/scripts/data/nim_test.sh` |
 | **ocaml** | ⛓️ ✅ `dune init proj {module}` (crea la carpeta del módulo) | `dune-project`, `lib/dune`, `test/dune` | ✅ `bash {root}/scripts/data/ocaml_test.sh` |
 | **perl** | ✍️ `mkdir -p lib test` | — | ✅ TAP::Harness (comando abajo / command below) |
 | **php** | ✍️ `bash {root}/scripts/data/php_scaffold.sh {module} {Module}` | `composer.json`, `phpunit.xml`, `.gitignore`, `src/{Module}.php` | ✅ `composer test` |
 | **prolog** | ✍️ `mkdir -p src test` | — | ✅ SWI-Prolog + PlUnit (comando abajo / command below) |
 | **purescript** | 🔧 `spago init` | `spago.yaml` | ✅ `bash {root}/scripts/data/purescript_test.sh` |
-| **python** | ⛓️ ✅ `uv init --lib .` | `pyproject.toml`, `src/{module}/`, `conftest.py`, `tests/` | ✅ `pytest` |
+| **python** | ⛓️ ✅ `uv init --lib .` | `pyproject.toml`, `src/{module}/`, `conftest.py`, `tests/` | ✅ `bash {root}/scripts/data/python_test.sh` |
 | **r** | ✅ `mkdir -p R tests/testthat` + `Makefile` | `Makefile` | ✅ `make test` |
-| **racket** | ⛓️ 🔧 `raco new library {module}` | `info.rkt`, `{module}.rkt` (con guiones), `tests/`, `Makefile`; conservar auxiliares generados | ✅ `raco test -x .` |
+| **racket** | ⛓️ 🔧 `raco new library {module}` | `info.rkt`, `{module}.rkt` (con guiones), `tests/`, `Makefile`; conservar auxiliares generados | ✅ `bash {root}/scripts/data/racket_test.sh` |
 | **raku** | ✅ `mkdir -p lib t` | — | ✅ TAP + Path::Finder (comando abajo / command below) |
 | **rescript** | ⛓️ ✅ `bash {root}/scripts/data/rescript_scaffold.sh {module}` | `rescript.json`, `package.json`, `jest.config.js`, `babel.config.js` | ✅ `npm test` |
 | **rexx** | ✅ `mkdir -p src test` | — | ✅ `bash {root}/scripts/data/rexx_test.sh` |
-| **ruby** | ⛓️ ✅ `bash {root}/scripts/data/ruby_scaffold.sh {module}` | `Gemfile`, `.rspec` | ✅ `bundle exec rspec` |
+| **ruby** | ⛓️ ✅ `bash {root}/scripts/data/ruby_scaffold.sh {module}` | `Gemfile`, `.rspec` | ✅ `bash {root}/scripts/data/ruby_test.sh` |
 | **rust** | ⛓️ ✅ `cargo init --lib` | `Cargo.toml` | ✅ `bash {root}/scripts/data/rust_test.sh` |
 | **scala** | ✅ `mkdir -p src/main/scala src/test/scala project` + build sbt (el runner instalado, sbt 2.0.8, ya no trae `sbt new`) | `build.sbt`, `project/build.properties` | ✅ sbt + ScalaTest (comando abajo / command below) |
 | **scheme** | ✍️ `mkdir -p src test` | — | ✅ Guile + SRFI-64 (comando abajo / command below) |
@@ -136,7 +136,7 @@ The Manifiesto column paths are relative to the module folder. The ⛓️ mark f
 | **typescript** | ⛓️ 🔧 `npm init -y` → `bash {root}/scripts/data/typescript_scaffold.sh {module}` | `package.json`, `tsconfig.json`, `jest.config.cjs`, `.gitignore`, `src/`, `test/` | ✅ `bash {root}/scripts/data/typescript_test.sh` |
 | **v** | ⛓️ ✅ `v init --lib` (no interactivo; quitar el `.git` anidado y fijar la versión) | `v.mod`, `{module}.v`, `test/` | ✅ `bash {root}/scripts/data/v_test.sh` |
 | **vala** | ⛓️ 🔧 `meson init --language vala --type library --name {module}` → `bash {root}/scripts/data/vala_scaffold.sh {module}` | `meson.build`, `src/`, `test/` | ✅ `bash {root}/scripts/data/vala_test.sh` |
-| **zig** | ✅ `zig init` | `build.zig`, `build.zig.zon`, `src/main.zig`, `src/root.zig`; `.gitignore` añadido por scaffold | ✅ `zig build test` |
+| **zig** | ✅ `zig init` | `build.zig`, `build.zig.zon`, `src/main.zig`, `src/root.zig`; `.gitignore` añadido por scaffold | ✅ `bash {root}/scripts/data/zig_test.sh` |
 
 ## 🔗 Secuencias de varios pasos / Multi-step sequences
 
@@ -166,7 +166,7 @@ not the test suite.
 | **ballerina** | `bal new {module}` → renombrado protegido `main.bal` a `{module}.bal` → retirar solo el ejemplo verificado → crear `tests/lib_test.bal` vacío si falta | El generador no crea `tests/`; revisar únicamente contenido de ejemplo desconocido y patrones de `.gitignore` |
 | **clojure** | `clojure -Sdeps '{:deps {io.github.seancorfield/deps-new …}}' -Tnew create :template lib :name {module} :target-dir {module}` | Sustituir el test de plantilla |
 | **common-lisp** | `ros -e '(ql:quickload :cl-project)' -e '(cl-project:make-project #p"{module}" :depends-on nil)'` → `glot scaffold common-lisp {phase}/{module}` | `scaffold` renombra los archivos solo si el destino no existe; ante conflicto conserva ambos. Adaptar el `.asd` a los nombres, `defsystem/test-op`, `uiop:symbol-call`, paquete con guion y FiveAM |
-| **cpp** | `bash {root}/scripts/data/cpp_scaffold.sh {module}` | Crea targets de biblioteca y Google Test, fija Bazel y conserva archivos propios; el paso de contrato crea las fuentes y suites referenciadas |
+| **cpp** | `bash {root}/scripts/data/cpp_scaffold.sh {module}` | Crea targets de biblioteca y Google Test, fija Bazel y conserva archivos propios; `glot test` valida la salida completa de Google Test y exige casos aprobados |
 | **crystal** | `crystal init lib {module}` → comprobar `shard.yml` y `spec/` | Conservar `src/`, `spec/spec_helper.cr` y `spec/`; el test generado falla hasta sustituirse por la suite. `glot test` valida el informe JUnit y exige casos aprobados; no añadir `test/` ni borrar el gitfile |
 | **csharp** | `dotnet new sln` → `dotnet new classlib` → `dotnet new xunit` → `dotnet sln add` → `dotnet add test/{Module}.Tests/{Module}.Tests.csproj reference src/{Module}/{Module}.csproj` → retirar solo `Class1.cs` y `UnitTest1.cs` sin cambios, y crear `.gitignore` con patrones .NET si falta | Conservar cualquier modificación hecha a los ejemplos de `dotnet new` |
 | **dart** | `dart create --no-pub -t package {module}` → `glot scaffold dart {phase}/{module}` | Conserva `lib/`, `lib/src/`, `test/`, `example/` y la configuración del paquete. Sustituye `Awesome` en la fuente, el test y el ejemplo por el contrato; el test generado es una muestra, no la suite homologada. `glot test` requiere casos aprobados y rechaza suites vacías o solo omitidas |
@@ -183,12 +183,12 @@ not the test suite.
 | **javascript** | `npm init -y` → `bash {root}/scripts/data/javascript_scaffold.sh {module}` → `npm install` | Completa el script `test`, Jest, el punto de entrada y la configuración según CommonJS/ESM; conserva la configuración propia y no instala dependencias |
 | **julia** | `julia -e 'using Pkg; Pkg.generate("{module}")'` → `glot scaffold julia {phase}/{module}` | El scaffold adapta la muestra exacta y el `Project.toml` generado reconocido, crea runners sentinel para glot y `Pkg.test()` y conserva variantes propias; conectar la suite y revisar configuraciones no reconocidas |
 | **kotlin** | `gradle init --type kotlin-library --dsl kotlin --project-name {module} --package {module} --use-defaults --no-split-project` → retirar solo la pareja de muestras verificada, si no hay otros archivos en `lib/src` | Conservar muestras distintas o con otros archivos y revisar; Gradle puede devolver éxito sin casos |
-| **lua** | `luarocks init` → `glot scaffold lua {phase}/{module}` | LuaRocks 3.13.0 crea `{module}-dev-1.rockspec` con `version = "dev-1"`; el nombre y la versión se conservan juntos. No crea `.busted`, así que scaffold añade el descubrimiento de `test/` solo si falta y conserva configuración propia. Busted 2.3.0 rechaza una suite sin archivos |
+| **lua** | `luarocks init` → `glot scaffold lua {phase}/{module}` | LuaRocks 3.13.0 crea `{module}-dev-1.rockspec` con `version = "dev-1"`; el nombre y la versión se conservan juntos. No crea `.busted`, así que scaffold añade el descubrimiento de `test/` solo si falta y conserva configuración propia. Busted 2.3.0 rechaza suites sin archivos; `glot test` además exige tests aprobados y rechaza suites vacías o solo pendientes |
 | **nim** | `nimble init -y` → retirar solo muestras exactas → task `test` idempotente | Conservar fuentes propias y añadir o conservar la suite; ejecutar los archivos de `tests/` directamente y rechazar ausencia o cero casos |
 | **ocaml** | `dune init proj {module}` → `glot scaffold ocaml {phase}/{module}` | Conserva `lib/` y `test/`. Para la plantilla exacta de Dune 3.24 sin otros archivos en `test/`, configura Alcotest y crea un sentinel fallido; conservar y revisar variantes. `glot test` exige un resumen Alcotest por acción `runtest` reconocida; una acción compuesta o dependencia sin etiqueta puede ocultar un ejecutable silencioso |
 | **python** | `uv init --lib .` | Borrar el `.git` que crea `uv`, añadir `conftest.py` y `tests/` con configuración de pytest, y declarar pytest (`uv add --dev pytest --no-sync`) |
 | **purescript** | `spago init` → `glot scaffold purescript {phase}/{module}` → `spago install --test-deps test-unit` (manual, si se elige ese framework) | Para dejar fuera del gate los warnings conocidos de dependencias, configura `workspace.buildOpts.censorLibraryWarnings: all`; `--strict` sigue rechazando warnings del proyecto. Spago 1.0.4/test-unit 17.0.0 comprobado en copia aislada: 0 warnings, 0 errores y casos ejecutados. `purescript_test.sh` rechaza warnings, resumen ausente y runner sin casos |
-| **racket** | `raco new library {module}` → render portátil (`mv` + `sed -i`, con el código renombrado a `{module}.rkt` con guiones) | Conservar también los archivos auxiliares generados; las suites requieren la librería por ruta relativa (`"../../{module}-lib/{module}.rkt"`, con guiones) y el runner es `raco test -x .`, sin enlazar paquetes |
+| **racket** | `raco new library {module}` → render portátil (`mv` + `sed -i`, con el código renombrado a `{module}.rkt` con guiones) | Conservar también los archivos auxiliares generados; las suites requieren la librería por ruta relativa (`"../../{module}-lib/{module}.rkt"`, con guiones). `racket_test.sh` ejecuta `raco test -x .` y exige un resumen de tests aprobado, sin enlazar paquetes |
 | **rescript** | `bash {root}/scripts/data/rescript_scaffold.sh {module}` → `npm install` | Crea solo los archivos que faltan; conserva `package.json` propio y configura ReScript/Jest |
 | **ruby** | `bash {root}/scripts/data/ruby_scaffold.sh {module}` → `bundle install` | Crea Gemfile con RSpec y `.rspec`; conserva ambos archivos si ya existen |
 | **rust** | `cargo init --lib` → `glot scaffold rust {phase}/{module}` | Conserva `src/lib.rs` y crea `tests/`; vacía solo la muestra exacta sin otros fuentes o tests. Revisar variantes conservadas. `glot test` exige al menos un caso aprobado y un resumen reconocido por target |
@@ -250,22 +250,30 @@ mkdir -p src test
 **ES:** El scaffold incluye un runner NASM mínimo que informa que todavía no
 hay tests; la suite debe conectar sus grupos y propagar los fallos. Si falta
 `.gitignore`, se crea con exclusiones para `obj/` y el ejecutable del runner;
-uno existente se conserva y debe verificarse.
+uno existente se conserva y debe verificarse. `assembly_test.sh` valida el
+resumen nativo y rechaza el runner de scaffold sin casos, aunque `make run`
+devuelva 0.
 
 **EN:** Scaffold includes a minimal NASM runner reporting that no tests are
 configured; the suite must connect its groups and propagate failures. A missing
 `.gitignore` is created with patterns for `obj/` and the runner executable;
-an existing one is preserved and must be checked.
+an existing one is preserved and must be checked. `assembly_test.sh` validates
+the native summary and rejects the testless scaffold runner even when
+`make run` returns 0.
 
 ### C — Criterion + Makefile
 
-**ES:** Criterion aporta el runner de `make test`: sin casos arranca y comunica
-que ejecutó cero. El scaffold conserva fuentes y manifiestos existentes; si
-falta `.gitignore`, lo crea con `bin/` y `obj/`.
+**ES:** Criterion 2.4.1 devuelve código 0 aunque `make test` ejecute cero casos.
+`c_test.sh` valida un único resumen, contadores coherentes y al menos un caso
+aprobado; rechaza suites vacías, fallidas, inconsistentes o sin resumen y
+propaga fallos nativos. El scaffold conserva fuentes y manifiestos existentes;
+si falta `.gitignore`, lo crea con `bin/` y `obj/`.
 
-**EN:** Criterion supplies the `make test` runner: without test cases it starts
-and reports zero tests. Scaffold preserves existing sources and build files and
-creates a missing `.gitignore` for `bin/` and `obj/`.
+**EN:** Criterion 2.4.1 returns exit code 0 even when `make test` runs zero
+cases. `c_test.sh` validates a unique summary, consistent counters and at least
+one passing case; it rejects empty, failing, inconsistent or missing summaries
+and propagates native failures. Scaffold preserves existing sources and build
+files and creates a missing `.gitignore` for `bin/` and `obj/`.
 
 ### Ballerina — biblioteca en la raíz y tests/
 
@@ -381,11 +389,15 @@ mkdir -p src/copybooks src/lib test
 Makefile enlaza primero `RUN-TESTS.cbl` y exige su presencia incluso si ya
 existe el ejecutable. La suite conecta los grupos y propaga sus fallos;
 `.gitignore` excluye el ejecutable y los artefactos generados si faltaba.
+`make test` puede devolver 0 sin ejecutar casos; `cobol_test.sh` valida cada
+resumen y exige casos aprobados con contadores coherentes.
 
 **EN:** Scaffold creates a minimal compilable source and runner. The Makefile
 links `RUN-TESTS.cbl` first and requires it even when the executable already
-exists. The suite connects its groups and propagates failures; a missing
-`.gitignore` is created to exclude the executable and build artifacts.
+exists. The suite connects its groups and propagates failures. `make test` can
+return 0 without running cases; `cobol_test.sh` validates every summary and
+requires passing cases with consistent counters. A missing `.gitignore` is
+created to exclude the executable and build artifacts.
 
 ### Common Lisp — ASDF + src/ + tests/
 

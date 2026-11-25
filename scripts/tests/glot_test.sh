@@ -466,6 +466,16 @@ EOF
     cp -- "$TESTS_DIR/../data/vala_test.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/rust_scaffold.sh" "$SANDBOX/scripts/data/"
     cp -- "$TESTS_DIR/../data/rust_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/ada_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/dotnet_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/python_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/lua_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/racket_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/ruby_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/clojure_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/common_lisp_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/zig_test.sh" "$SANDBOX/scripts/data/"
+    cp -- "$TESTS_DIR/../data/java_test.sh" "$SANDBOX/scripts/data/"
     cp -R -- "$TESTS_DIR/../data/scaffold_templates/vala.source.vala" \
         "$SANDBOX/scripts/data/scaffold_templates/vala.source.vala"
     cp -R -- "$TESTS_DIR/../data/scaffold_templates/vala.test.vala" \
@@ -1627,7 +1637,11 @@ assert_eq 'test OCaml: rechaza resúmenes dobles y acción silenciosa' '1' "$rc_
 printf 'incomplete output\n' >"$OCAML_OUTPUT"
 ocaml_runner_run
 assert_eq 'test OCaml: rechaza resumen ausente' '1' "$rc_last"
-assert_contains 'test OCaml: informa resumen ausente' 'missing or empty Alcotest summary' "$err"
+assert_contains 'test OCaml: informa resumen ausente' 'missing/empty Alcotest summary' "$err"
+printf '   ocamlopt test/.pass.eobjs/byte/dune__exe.{cmi,cmo,cmt}\n   silent test/silent.stamp\n   test_pass alias test/runtest-test_pass\nTest Successful in 0.001s. 1 test run.\n' >"$OCAML_OUTPUT"
+ocaml_runner_run
+assert_eq 'test OCaml: rechaza regla silenciosa sin alias runtest' '1' "$rc_last"
+assert_contains 'test OCaml: identifica acción Dune no reconocida' 'unrecognized Dune action' "$err"
 ocaml_runner_run 7
 assert_eq 'test OCaml: propaga fallo del proceso' '7' "$rc_last"
 
@@ -3000,7 +3014,61 @@ assert_contains 'scaffold Grain: usa control de estado' 'TestStatus.finish(true)
 assert_eq 'scaffold Grain: excluye artefactos' '3' \
     "$(git -C "$GRB" check-ignore target/module.gro tests/run_tests.wasm src/module.gro | wc -l | tr -d ' ')"
 assert_contains 'scaffold Grain: anuncia trabajo pendiente' 'glot prompt scaffold grain algorithms/data_structures_basics' "$err"
+GRAIN_FAKE_BIN="$WORK_DIR/grain-fake-bin"
+GRAIN_FAKE_OUTPUT="$WORK_DIR/grain-fake-output"
+mkdir -p -- "$GRAIN_FAKE_BIN"
+cat >"$GRAIN_FAKE_BIN/make" <<'EOF'
+#!/usr/bin/env bash
+cat -- "$GRAIN_FAKE_OUTPUT"
+exit "${GRAIN_FAKE_STATUS:-0}"
+EOF
+chmod +x -- "$GRAIN_FAKE_BIN/make"
+grain_runner_run() {
+    local status="${1:-0}"
+    local rc=0
+    GRAIN_FAKE_OUTPUT="$GRAIN_FAKE_OUTPUT" GRAIN_FAKE_STATUS="$status" \
+        PATH="$GRAIN_FAKE_BIN:$PATH" \
+        bash "$REPO/scripts/data/grain_test.sh" \
+        >"$WORK_DIR/grain-runner.out" 2>"$WORK_DIR/grain-runner.err" || rc=$?
+    out="$(cat -- "$WORK_DIR/grain-runner.out")"
+    err="$(cat -- "$WORK_DIR/grain-runner.err")"
+    rc_last="$rc"
+}
+printf 'Tests: 21 passed, 0 failed, 21 total\n' >"$GRAIN_FAKE_OUTPUT"
+grain_runner_run
+assert_eq 'test Grain: acepta resumen Tests' '0' "$rc_last"
+printf 'Cases: 51 passed, 0 failed, 51 total\n' >"$GRAIN_FAKE_OUTPUT"
+grain_runner_run
+assert_eq 'test Grain: acepta resumen Cases' '0' "$rc_last"
+printf 'Tests: 0 passed, 0 failed, 0 total\n' >"$GRAIN_FAKE_OUTPUT"
+grain_runner_run
+assert_eq 'test Grain: rechaza suite vacía' '1' "$rc_last"
+printf 'Cases: 2 passed, 1 failed, 3 total\n' >"$GRAIN_FAKE_OUTPUT"
+grain_runner_run
+assert_eq 'test Grain: rechaza casos fallidos' '1' "$rc_last"
+printf 'Tests: 2 passed, 0 failed, 3 total\n' >"$GRAIN_FAKE_OUTPUT"
+grain_runner_run
+assert_eq 'test Grain: rechaza contadores inconsistentes' '1' "$rc_last"
+printf 'Tests: 1 passed, 0 failed, 1 total\nCases: 1 passed, 0 failed, 1 total\n' >"$GRAIN_FAKE_OUTPUT"
+grain_runner_run
+assert_eq 'test Grain: rechaza resúmenes ambiguos' '1' "$rc_last"
+printf 'Test addition(2, 3) = 5 PASSED.\n' >"$GRAIN_FAKE_OUTPUT"
+grain_runner_run
+assert_eq 'test Grain: acepta resultados individuales aprobados' '0' "$rc_last"
+printf 'Test addition(2, 3) FAILED: expected 5, got 4\n' >"$GRAIN_FAKE_OUTPUT"
+grain_runner_run
+assert_eq 'test Grain: rechaza resultados individuales fallidos' '1' "$rc_last"
+printf 'Scaffold: no tests configured\n' >"$GRAIN_FAKE_OUTPUT"
+grain_runner_run
+assert_eq 'test Grain: rechaza runner sin resultados' '1' "$rc_last"
+assert_contains 'test Grain: informa resultados ausentes' 'missing, empty, or failed Grain results' "$err"
+printf 'Tests: 1 passed, 0 failed, 1 total\n' >"$GRAIN_FAKE_OUTPUT"
+grain_runner_run 7
+assert_eq 'test Grain: propaga fallo del proceso' '7' "$rc_last"
 if command -v grain >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
+    grain_rc=0
+    grain_out="$(cd -- "$GRB" && bash "$REPO/scripts/data/grain_test.sh" 2>&1)" || grain_rc=$?
+    assert_eq 'test Grain: rechaza scaffold sin pruebas' '1' "$grain_rc"
     grain_rc=0
     grain_out="$(make -s -C "$GRB" test 2>&1)" || grain_rc=$?
     assert_eq 'scaffold Grain: runner arranca' '0' "$grain_rc"
@@ -3896,6 +3964,804 @@ gr_rc=0
 assert_eq 'test Gradle XML ilegible: rechaza' '1' "$gr_rc"
 assert_contains 'test Gradle XML ilegible: diagnóstico' 'unreadable Gradle XML report' \
     "$(cat -- "$WORK_DIR/gradle-corrupt.err")"
+
+# Java: require fresh Surefire reports with at least one passing case.
+JAVA_FAKE="$WORK_DIR/java-fake"
+mkdir -p "$JAVA_FAKE/bin"
+cat >"$JAVA_FAKE/bin/mvn" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$*" == "clean test" ]] || exit 87
+rm -rf -- target
+case "${JAVA_FAKE_MODE:-pass}" in
+    pass)
+        mkdir -p target/surefire-reports
+        printf '<testsuite tests="3" failures="0" errors="0" skipped="0"></testsuite>\n' \
+            >target/surefire-reports/TEST-pass.xml ;;
+    failing)
+        mkdir -p target/surefire-reports
+        printf '<testsuite tests="2" failures="1" errors="0" skipped="0"></testsuite>\n' \
+            >target/surefire-reports/TEST-fail.xml ;;
+    skipped)
+        mkdir -p target/surefire-reports
+        printf '<testsuite tests="1" failures="0" errors="0" skipped="1"></testsuite>\n' \
+            >target/surefire-reports/TEST-skipped.xml ;;
+    malformed)
+        mkdir -p target/surefire-reports
+        printf '<testsuite' >target/surefire-reports/TEST-malformed.xml ;;
+    empty) ;;
+    process-failure) exit 7 ;;
+    *) exit 88 ;;
+esac
+printf 'BUILD SUCCESS\n'
+EOF
+chmod +x "$JAVA_FAKE/bin/mvn"
+JAVA_RUN="$WORK_DIR/java-run"
+mkdir -p "$JAVA_RUN/target/surefire-reports"
+printf '<testsuite tests="1" failures="0" errors="0" skipped="0"></testsuite>\n' \
+    >"$JAVA_RUN/target/surefire-reports/TEST-stale.xml"
+java_rc=0
+(cd "$JAVA_RUN" && JAVA_FAKE_MODE=pass PATH="$JAVA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/java_test.sh") >/dev/null 2>&1 || java_rc=$?
+assert_eq 'test Java: acepta informe fresco con casos aprobados' '0' "$java_rc"
+java_rc=0
+(cd "$JAVA_RUN" && JAVA_FAKE_MODE=empty PATH="$JAVA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/java_test.sh") >/dev/null 2>&1 || java_rc=$?
+assert_eq 'test Java: rechaza informes ausentes aunque hubiera uno antiguo' '1' "$java_rc"
+java_rc=0
+(cd "$JAVA_RUN" && JAVA_FAKE_MODE=failing PATH="$JAVA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/java_test.sh") >/dev/null 2>&1 || java_rc=$?
+assert_eq 'test Java: rechaza fallos reflejados en Surefire' '1' "$java_rc"
+java_rc=0
+(cd "$JAVA_RUN" && JAVA_FAKE_MODE=skipped PATH="$JAVA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/java_test.sh") >/dev/null 2>&1 || java_rc=$?
+assert_eq 'test Java: rechaza suite solo omitida' '1' "$java_rc"
+java_rc=0
+(cd "$JAVA_RUN" && JAVA_FAKE_MODE=malformed PATH="$JAVA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/java_test.sh") > /dev/null 2>"$WORK_DIR/java-malformed.err" || java_rc=$?
+assert_eq 'test Java: rechaza XML ilegible' '1' "$java_rc"
+assert_contains 'test Java XML ilegible: diagnóstico' 'unreadable Surefire XML report' \
+    "$(cat -- "$WORK_DIR/java-malformed.err")"
+java_rc=0
+(cd "$JAVA_RUN" && JAVA_FAKE_MODE=process-failure PATH="$JAVA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/java_test.sh") >/dev/null 2>&1 || java_rc=$?
+assert_eq 'test Java: propaga fallo Maven' '7' "$java_rc"
+
+# Ada: require a complete passing AUnit summary from Alire.
+ADA_FAKE="$WORK_DIR/ada-fake"
+mkdir -p "$ADA_FAKE/bin"
+cat >"$ADA_FAKE/bin/alr" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$*" == "-C tests run" ]] || exit 87
+case "${ADA_FAKE_MODE:-pass}" in
+    pass)
+        cat <<'OUT'
+OK Bubble_Sort
+OK Insertion_Sort
+OK Selection_Sort
+
+Total Tests Run:   3
+Successful Tests:  3
+Failed Assertions: 0
+Unexpected Errors: 0
+OUT
+        ;;
+    empty)
+        printf '%s\n' 'Success: Build finished successfully.'
+        ;;
+    zero)
+        printf '%s\n' 'Total Tests Run: 0' 'Successful Tests: 0' \
+            'Failed Assertions: 0' 'Unexpected Errors: 0'
+        ;;
+    failing)
+        printf '%s\n' 'Total Tests Run: 3' 'Successful Tests: 2' \
+            'Failed Assertions: 1' 'Unexpected Errors: 0'
+        ;;
+    duplicate)
+        printf '%s\n' 'Total Tests Run: 1' 'Successful Tests: 1' \
+            'Failed Assertions: 0' 'Unexpected Errors: 0' 'Total Tests Run: 1'
+        ;;
+    process-failure)
+        printf '%s\n' 'Alire failed'
+        exit 9
+        ;;
+    *) exit 88 ;;
+esac
+EOF
+chmod +x "$ADA_FAKE/bin/alr"
+ADA_RUN="$WORK_DIR/ada-run"
+mkdir -p "$ADA_RUN"
+ada_rc=0
+(cd "$ADA_RUN" && ADA_FAKE_MODE=pass PATH="$ADA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/ada_test.sh") >/dev/null 2>&1 || ada_rc=$?
+assert_eq 'test Ada: acepta resumen AUnit aprobado' '0' "$ada_rc"
+ada_rc=0
+(cd "$ADA_RUN" && ADA_FAKE_MODE=empty PATH="$ADA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/ada_test.sh") >/dev/null 2>&1 || ada_rc=$?
+assert_eq 'test Ada: rechaza salida sin resumen' '1' "$ada_rc"
+ada_rc=0
+(cd "$ADA_RUN" && ADA_FAKE_MODE=zero PATH="$ADA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/ada_test.sh") >/dev/null 2>&1 || ada_rc=$?
+assert_eq 'test Ada: rechaza resumen con cero casos' '1' "$ada_rc"
+ada_rc=0
+(cd "$ADA_RUN" && ADA_FAKE_MODE=failing PATH="$ADA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/ada_test.sh") >/dev/null 2>&1 || ada_rc=$?
+assert_eq 'test Ada: rechaza aserciones fallidas' '1' "$ada_rc"
+ada_rc=0
+(cd "$ADA_RUN" && ADA_FAKE_MODE=duplicate PATH="$ADA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/ada_test.sh") >/dev/null 2>&1 || ada_rc=$?
+assert_eq 'test Ada: rechaza resúmenes duplicados' '1' "$ada_rc"
+ada_rc=0
+(cd "$ADA_RUN" && ADA_FAKE_MODE=process-failure PATH="$ADA_FAKE/bin:$PATH" \
+    bash "$DATA_DIR/ada_test.sh") >/dev/null 2>&1 || ada_rc=$?
+assert_eq 'test Ada: propaga fallo de Alire' '9' "$ada_rc"
+
+# .NET: require fresh VSTest TRX reports with passing cases.
+DOTNET_FAKE="$WORK_DIR/dotnet-fake"
+mkdir -p "$DOTNET_FAKE/bin"
+cat >"$DOTNET_FAKE/bin/dotnet" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "${1:-}" == test ]] || exit 87
+shift
+results=''
+while (($#)); do
+    case "$1" in
+        --results-directory)
+            results="${2:-}"
+            shift 2 ;;
+        --logger)
+            [[ "${2:-}" == 'trx;LogFileName=glot-tests.trx' ]] || exit 88
+            shift 2 ;;
+        *) exit 89 ;;
+    esac
+done
+[[ -n "$results" ]]
+case "${DOTNET_FAKE_MODE:-pass}" in
+    pass)
+        mkdir -p "$results"
+        cat >"$results/glot-tests.trx" <<'XML'
+<TestRun xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <ResultSummary outcome="Completed">
+    <Counters total="3" executed="3" passed="3" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" inProgress="0" pending="0" />
+  </ResultSummary>
+</TestRun>
+XML
+        ;;
+    mixed)
+        mkdir -p "$results"
+        printf '%s\n' '<TestRun><ResultSummary outcome="Completed"><Counters total="2" executed="1" passed="1" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="1" disconnected="0" inProgress="0" pending="0" /></ResultSummary></TestRun>' \
+            >"$results/glot-tests.trx"
+        ;;
+    empty)
+        mkdir -p "$results"
+        printf '%s\n' '<TestRun><ResultSummary outcome="Completed"><Counters total="0" executed="0" passed="0" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" inProgress="0" pending="0" /></ResultSummary></TestRun>' \
+            >"$results/glot-tests.trx"
+        ;;
+    failing)
+        mkdir -p "$results"
+        printf '%s\n' '<TestRun><ResultSummary outcome="Failed"><Counters total="2" executed="2" passed="1" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" inProgress="0" pending="0" /></ResultSummary></TestRun>' \
+            >"$results/glot-tests.trx"
+        ;;
+    skipped-only)
+        mkdir -p "$results"
+        printf '%s\n' '<TestRun><ResultSummary outcome="Completed"><Counters total="1" executed="0" passed="0" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="1" disconnected="0" inProgress="0" pending="0" /></ResultSummary></TestRun>' \
+            >"$results/glot-tests.trx"
+        ;;
+    inconsistent)
+        mkdir -p "$results"
+        printf '%s\n' '<TestRun><ResultSummary outcome="Completed"><Counters total="3" executed="1" passed="1" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" inProgress="0" pending="0" /></ResultSummary></TestRun>' \
+            >"$results/glot-tests.trx"
+        ;;
+    malformed)
+        mkdir -p "$results"
+        printf '<TestRun' >"$results/glot-tests.trx"
+        ;;
+    missing) ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$DOTNET_FAKE/bin/dotnet"
+DOTNET_RUN="$WORK_DIR/dotnet-run"
+mkdir -p "$DOTNET_RUN"
+for entry in pass:0 mixed:0 empty:1 failing:1 skipped-only:1 inconsistent:1 malformed:1 missing:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    dotnet_rc=0
+    (
+        cd "$DOTNET_RUN"
+        DOTNET_FAKE_MODE="$mode" PATH="$DOTNET_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/dotnet_test.sh"
+    ) >/dev/null 2>&1 || dotnet_rc=$?
+    assert_eq "test .NET: TRX $mode" "$expected" "$dotnet_rc"
+done
+
+# Python: require a fresh JUnit report with passing pytest cases.
+PYTHON_FAKE="$WORK_DIR/python-fake"
+mkdir -p "$PYTHON_FAKE/bin"
+cat >"$PYTHON_FAKE/bin/pytest" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+report=''
+for arg in "$@"; do
+    case "$arg" in
+        --junitxml=*) report="${arg#--junitxml=}" ;;
+        *) exit 87 ;;
+    esac
+done
+[[ -n "$report" ]]
+case "${PYTEST_FAKE_MODE:-pass}" in
+    pass)
+        cat >"$report" <<'XML'
+<testsuites tests="3" errors="0" failures="0" skipped="1">
+  <testsuite name="pytest" tests="3" errors="0" failures="0" skipped="1">
+    <testcase classname="sample" name="passes" />
+    <testcase classname="sample" name="passes_too" />
+    <testcase classname="sample" name="skipped"><skipped /></testcase>
+  </testsuite>
+</testsuites>
+XML
+        ;;
+    empty)
+        printf '%s\n' '<testsuites><testsuite name="pytest" tests="0" errors="0" failures="0" skipped="0" /></testsuites>' \
+            >"$report"
+        ;;
+    failing)
+        printf '%s\n' '<testsuites><testsuite name="pytest" tests="1" errors="0" failures="1" skipped="0"><testcase name="fails"><failure /></testcase></testsuite></testsuites>' \
+            >"$report"
+        ;;
+    skipped-only)
+        printf '%s\n' '<testsuites><testsuite name="pytest" tests="1" errors="0" failures="0" skipped="1"><testcase name="skipped"><skipped /></testcase></testsuite></testsuites>' \
+            >"$report"
+        ;;
+    inconsistent)
+        printf '%s\n' '<testsuites><testsuite name="pytest" tests="2" errors="0" failures="0" skipped="0"><testcase name="passes" /></testsuite></testsuites>' \
+            >"$report"
+        ;;
+    malformed)
+        printf '<testsuites' >"$report"
+        ;;
+    missing) ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$PYTHON_FAKE/bin/pytest"
+PYTHON_RUN="$WORK_DIR/python-run"
+mkdir -p "$PYTHON_RUN"
+for entry in pass:0 empty:1 failing:1 skipped-only:1 inconsistent:1 malformed:1 missing:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    python_rc=0
+    (
+        cd "$PYTHON_RUN"
+        PYTEST_FAKE_MODE="$mode" PATH="$PYTHON_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/python_test.sh"
+    ) >/dev/null 2>&1 || python_rc=$?
+    assert_eq "test Python: JUnit $mode" "$expected" "$python_rc"
+done
+
+# Ruby: require a fresh RSpec JSON report with passing examples.
+RUBY_FAKE="$WORK_DIR/ruby-fake"
+mkdir -p "$RUBY_FAKE/bin"
+cat >"$RUBY_FAKE/bin/bundle" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 6 && "$1" == exec && "$2" == rspec && "$3" == --format && "$4" == json && "$5" == --out ]] || exit 87
+report="$6"
+case "${RSPEC_FAKE_MODE:-pass}" in
+    pass)
+        cat >"$report" <<'JSON'
+{"summary":{"example_count":3,"failure_count":0,"pending_count":1,"errors_outside_of_examples_count":0},"examples":[{"status":"passed"},{"status":"passed"},{"status":"pending"}]}
+JSON
+        ;;
+    empty)
+        printf '%s\n' '{"summary":{"example_count":0,"failure_count":0,"pending_count":0,"errors_outside_of_examples_count":0},"examples":[]}' >"$report"
+        ;;
+    failing)
+        printf '%s\n' '{"summary":{"example_count":1,"failure_count":1,"pending_count":0,"errors_outside_of_examples_count":0},"examples":[{"status":"failed"}]}' >"$report"
+        ;;
+    pending-only)
+        printf '%s\n' '{"summary":{"example_count":1,"failure_count":0,"pending_count":1,"errors_outside_of_examples_count":0},"examples":[{"status":"pending"}]}' >"$report"
+        ;;
+    inconsistent)
+        printf '%s\n' '{"summary":{"example_count":2,"failure_count":0,"pending_count":0,"errors_outside_of_examples_count":0},"examples":[{"status":"passed"}]}' >"$report"
+        ;;
+    malformed)
+        printf '{"summary":' >"$report"
+        ;;
+    missing) ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$RUBY_FAKE/bin/bundle"
+RUBY_RUN="$WORK_DIR/ruby-run"
+mkdir -p "$RUBY_RUN"
+for entry in pass:0 empty:1 failing:1 pending-only:1 inconsistent:1 malformed:1 missing:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    ruby_rc=0
+    (
+        cd "$RUBY_RUN"
+        RSPEC_FAKE_MODE="$mode" PATH="$RUBY_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/ruby_test.sh"
+    ) >/dev/null 2>&1 || ruby_rc=$?
+    assert_eq "test Ruby: JSON $mode" "$expected" "$ruby_rc"
+done
+
+# Lua: require a unique Busted summary with passing tests.
+LUA_FAKE="$WORK_DIR/lua-fake"
+mkdir -p "$LUA_FAKE/bin"
+cat >"$LUA_FAKE/bin/busted" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 0 ]] || exit 87
+case "${BUSTED_FAKE_MODE:-pass}" in
+    pass)
+        printf '%s\n' '2 successes / 0 failures / 0 errors / 1 pending : 0.001 seconds'
+        ;;
+    empty)
+        printf '%s\n' '0 successes / 0 failures / 0 errors / 0 pending : 0.001 seconds'
+        ;;
+    failing)
+        printf '%s\n' '1 success / 1 failure / 0 errors / 0 pending : 0.001 seconds'
+        ;;
+    pending-only)
+        printf '%s\n' '0 successes / 0 failures / 0 errors / 1 pending : 0.001 seconds'
+        ;;
+    malformed)
+        printf '%s\n' 'Busted completed but emitted no recognized summary'
+        ;;
+    missing) ;;
+    ambiguous)
+        printf '%s\n' '1 success / 0 failures / 0 errors / 0 pending : 0.001 seconds'
+        printf '%s\n' '1 success / 0 failures / 0 errors / 0 pending : 0.001 seconds'
+        ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$LUA_FAKE/bin/busted"
+LUA_RUN="$WORK_DIR/lua-run"
+mkdir -p "$LUA_RUN"
+for entry in pass:0 empty:1 failing:1 pending-only:1 malformed:1 missing:1 ambiguous:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    lua_rc=0
+    (
+        cd "$LUA_RUN"
+        BUSTED_FAKE_MODE="$mode" PATH="$LUA_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/lua_test.sh"
+    ) >/dev/null 2>&1 || lua_rc=$?
+    assert_eq "test Lua: summary $mode" "$expected" "$lua_rc"
+done
+
+# Racket: require a unique RackUnit summary with passing tests.
+RACKET_FAKE="$WORK_DIR/racket-fake"
+mkdir -p "$RACKET_FAKE/bin"
+cat >"$RACKET_FAKE/bin/raco" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 3 && "$1" == test && "$2" == -x && "$3" == . ]] || exit 87
+case "${RACO_FAKE_MODE:-pass}" in
+    pass)
+        printf '%s\n' 'raco test: (submod (file "./test.rkt") test)' '24 tests passed'
+        ;;
+    singular)
+        printf '%s\n' '1 test passed'
+        ;;
+    empty) ;;
+    zero)
+        printf '%s\n' '0 tests passed'
+        ;;
+    malformed)
+        printf '%s\n' 'raco test completed'
+        ;;
+    ambiguous)
+        printf '%s\n' '1 test passed' '1 test passed'
+        ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$RACKET_FAKE/bin/raco"
+RACKET_RUN="$WORK_DIR/racket-run"
+mkdir -p "$RACKET_RUN"
+for entry in pass:0 singular:0 empty:1 zero:1 malformed:1 ambiguous:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    racket_rc=0
+    (
+        cd "$RACKET_RUN"
+        RACO_FAKE_MODE="$mode" PATH="$RACKET_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/racket_test.sh"
+    ) >/dev/null 2>&1 || racket_rc=$?
+    assert_eq "test Racket: summary $mode" "$expected" "$racket_rc"
+done
+
+# Clojure: require one Cognitect summary with at least one test and no failures.
+CLOJURE_FAKE="$WORK_DIR/clojure-fake"
+mkdir -p "$CLOJURE_FAKE/bin"
+cat >"$CLOJURE_FAKE/bin/clojure" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 2 && "$1" == -T:build && "$2" == test ]] || exit 87
+case "${CLOJURE_FAKE_MODE:-pass}" in
+    pass)
+        printf '%s\n' 'Running tests in #{"test"}' 'Testing sample-test' \
+            'Ran 2 tests containing 3 assertions.' '0 failures, 0 errors.'
+        ;;
+    empty)
+        printf '%s\n' 'Running tests in #{"test"}' 'Testing user' \
+            'Ran 0 tests containing 0 assertions.' '0 failures, 0 errors.'
+        ;;
+    failing)
+        printf '%s\n' 'Ran 1 test containing 1 assertion.' '1 failure, 0 errors.'
+        ;;
+    missing)
+        printf '%s\n' 'Clojure completed without a recognized summary'
+        ;;
+    malformed)
+        printf '%s\n' 'Ran 1 test containing 1 assertion.' 'summary unavailable'
+        ;;
+    ambiguous)
+        printf '%s\n' 'Ran 1 test containing 1 assertion.' '0 failures, 0 errors.' \
+            'Ran 1 test containing 1 assertion.' '0 failures, 0 errors.'
+        ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$CLOJURE_FAKE/bin/clojure"
+CLOJURE_RUN="$WORK_DIR/clojure-run"
+mkdir -p "$CLOJURE_RUN"
+for entry in pass:0 empty:1 failing:1 missing:1 malformed:1 ambiguous:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    clojure_rc=0
+    (
+        cd "$CLOJURE_RUN"
+        CLOJURE_FAKE_MODE="$mode" PATH="$CLOJURE_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/clojure_test.sh"
+    ) >/dev/null 2>&1 || clojure_rc=$?
+    assert_eq "test Clojure: summary $mode" "$expected" "$clojure_rc"
+done
+
+# Common Lisp: require a consistent FiveAM summary with passing checks.
+COMMON_LISP_FAKE="$WORK_DIR/common-lisp-fake"
+mkdir -p "$COMMON_LISP_FAKE/bin"
+cat >"$COMMON_LISP_FAKE/bin/ros" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 5 && "$1" == run && "$2" == --load && "$3" == run-tests.lisp && "$4" == --eval && "$5" == '(uiop:quit)' ]] || exit 87
+case "${COMMON_LISP_FAKE_MODE:-pass}" in
+    pass)
+        printf '%s\n' 'Did 2 checks.' '    Pass: 2 (100%)' '    Skip: 0 ( 0%)' '    Fail: 0 ( 0%)'
+        ;;
+    mixed)
+        printf '%s\n' 'Did 2 checks.' '    Pass: 1 ( 50%)' '    Skip: 1 ( 50%)' '    Fail: 0 ( 0%)'
+        ;;
+    multi)
+        printf '%s\n' 'Did 1 check.' '    Pass: 1 (100%)' '    Skip: 0 ( 0%)' '    Fail: 0 ( 0%)' \
+            'Did 2 checks.' '    Pass: 2 (100%)' '    Skip: 0 ( 0%)' '    Fail: 0 ( 0%)'
+        ;;
+    empty)
+        printf '%s\n' "Didn't run anything...huh?"
+        ;;
+    failing)
+        printf '%s\n' 'Did 1 check.' '    Pass: 0 ( 0%)' '    Skip: 0 ( 0%)' '    Fail: 1 (100%)'
+        ;;
+    skipped-only)
+        printf '%s\n' 'Did 1 check.' '    Pass: 0 ( 0%)' '    Skip: 1 (100%)' '    Fail: 0 ( 0%)'
+        ;;
+    inconsistent)
+        printf '%s\n' 'Did 2 checks.' '    Pass: 1 (100%)' '    Skip: 0 ( 0%)' '    Fail: 0 ( 0%)'
+        ;;
+    missing)
+        printf '%s\n' 'FiveAM completed without a recognized summary'
+        ;;
+    malformed)
+        printf '%s\n' 'Did many checks.' 'Pass: invalid' 'Skip: invalid' 'Fail: invalid'
+        ;;
+    ambiguous)
+        printf '%s\n' 'Did 1 check.' 'Pass: 1 (100%)' 'Skip: 0 (0%)' 'Fail: 0 (0%)' 'Pass: 1 (100%)'
+        ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$COMMON_LISP_FAKE/bin/ros"
+COMMON_LISP_RUN="$WORK_DIR/common-lisp-run"
+mkdir -p "$COMMON_LISP_RUN"
+for entry in pass:0 mixed:0 multi:0 empty:1 failing:1 skipped-only:1 inconsistent:1 missing:1 malformed:1 ambiguous:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    common_lisp_rc=0
+    (
+        cd "$COMMON_LISP_RUN"
+        COMMON_LISP_FAKE_MODE="$mode" PATH="$COMMON_LISP_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/common_lisp_test.sh"
+    ) >/dev/null 2>&1 || common_lisp_rc=$?
+    assert_eq "test Common Lisp: FiveAM $mode" "$expected" "$common_lisp_rc"
+done
+
+# Zig: require a complete build summary and at least one passing test.
+ZIG_FAKE="$WORK_DIR/zig-fake"
+mkdir -p "$ZIG_FAKE/bin"
+cat >"$ZIG_FAKE/bin/zig" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 4 && "$1" == build && "$2" == test && "$3" == --summary && "$4" == all ]] || exit 87
+case "${ZIG_FAKE_MODE:-pass}" in
+    pass)
+        printf '%s\n' 'Build Summary: 3/3 steps succeeded; 2/2 tests passed' \
+            'test success' '+- run test 2 pass (2 total)'
+        ;;
+    empty)
+        printf '%s\n' 'Build Summary: 3/3 steps succeeded' 'test success'
+        ;;
+    incomplete)
+        printf '%s\n' 'Build Summary: 3/3 steps succeeded; 1/2 tests passed'
+        ;;
+    missing)
+        printf '%s\n' 'Build completed without a recognized summary'
+        ;;
+    malformed)
+        printf '%s\n' 'Build Summary: test result unavailable'
+        ;;
+    ambiguous)
+        printf '%s\n' 'Build Summary: 3/3 steps succeeded; 1/1 tests passed' \
+            'Build Summary: 3/3 steps succeeded; 1/1 tests passed'
+        ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$ZIG_FAKE/bin/zig"
+ZIG_RUN="$WORK_DIR/zig-run"
+mkdir -p "$ZIG_RUN"
+for entry in pass:0 empty:1 incomplete:1 missing:1 malformed:1 ambiguous:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    zig_rc=0
+    (
+        cd "$ZIG_RUN"
+        ZIG_FAKE_MODE="$mode" PATH="$ZIG_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/zig_test.sh"
+    ) >/dev/null 2>&1 || zig_rc=$?
+    assert_eq "test Zig: summary $mode" "$expected" "$zig_rc"
+done
+
+# Assembly: require a complete passing counter summary from make run.
+ASSEMBLY_FAKE="$WORK_DIR/assembly-fake"
+mkdir -p "$ASSEMBLY_FAKE/bin"
+cat >"$ASSEMBLY_FAKE/bin/make" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 1 && "$1" == run ]] || exit 87
+case "${ASSEMBLY_FAKE_MODE:-pass}" in
+    pass)
+        printf '%s\n' 'tests runned 3' 'passed 3' 'failed 0'
+        ;;
+    empty)
+        printf '%s\n' 'Scaffold: no tests configured'
+        ;;
+    zero)
+        printf '%s\n' 'tests run 0' 'passed 0' 'failed 0'
+        ;;
+    failing)
+        printf '%s\n' 'tests run 2' 'passed 1' 'failed 1'
+        ;;
+    inconsistent)
+        printf '%s\n' 'tests run 2' 'passed 1' 'failed 0'
+        ;;
+    missing)
+        printf '%s\n' 'Assembly completed without a recognized summary'
+        ;;
+    ambiguous)
+        printf '%s\n' 'tests run 1' 'tests run 1' 'passed 1' 'failed 0'
+        ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$ASSEMBLY_FAKE/bin/make"
+ASSEMBLY_RUN="$WORK_DIR/assembly-run"
+mkdir -p "$ASSEMBLY_RUN"
+for entry in pass:0 empty:1 zero:1 failing:1 inconsistent:1 missing:1 ambiguous:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    assembly_rc=0
+    (
+        cd "$ASSEMBLY_RUN"
+        ASSEMBLY_FAKE_MODE="$mode" PATH="$ASSEMBLY_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/assembly_test.sh"
+    ) >/dev/null 2>&1 || assembly_rc=$?
+    assert_eq "test Assembly: summary $mode" "$expected" "$assembly_rc"
+done
+
+# C: require one coherent Criterion summary with at least one passing case.
+C_FAKE="$WORK_DIR/c-fake"
+mkdir -p "$C_FAKE/bin"
+cat >"$C_FAKE/bin/make" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 1 && "$1" == test ]] || exit 87
+case "${C_FAKE_MODE:-pass}" in
+    pass)
+        printf '%s\n' '[====] Synthesis: Tested: 3 | Passing: 3 | Failing: 0 | Crashing: 0'
+        ;;
+    empty)
+        printf '%s\n' '[====] Synthesis: Tested: 0 | Passing: 0 | Failing: 0 | Crashing: 0'
+        ;;
+    zero)
+        printf '%s\n' '[====] Synthesis: Tested: 2 | Passing: 0 | Failing: 0 | Crashing: 0'
+        ;;
+    failing)
+        printf '%s\n' '[====] Synthesis: Tested: 1 | Passing: 0 | Failing: 1 | Crashing: 0'
+        ;;
+    inconsistent)
+        printf '%s\n' '[====] Synthesis: Tested: 2 | Passing: 1 | Failing: 0 | Crashing: 0'
+        ;;
+    missing)
+        printf '%s\n' 'Criterion completed without a recognized summary'
+        ;;
+    ambiguous)
+        printf '%s\n' '[====] Synthesis: Tested: 1 | Passing: 1 | Failing: 0 | Crashing: 0' \
+            '[====] Synthesis: Tested: 1 | Passing: 1 | Failing: 0 | Crashing: 0'
+        ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$C_FAKE/bin/make"
+C_RUN="$WORK_DIR/c-run"
+mkdir -p "$C_RUN"
+for entry in pass:0 empty:1 zero:1 failing:1 inconsistent:1 missing:1 ambiguous:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    c_rc=0
+    (
+        cd "$C_RUN"
+        C_FAKE_MODE="$mode" PATH="$C_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/c_test.sh"
+    ) >/dev/null 2>&1 || c_rc=$?
+    assert_eq "test C: Criterion $mode" "$expected" "$c_rc"
+done
+
+# C++: Bazel can pass a test target whose Google Test binary ran zero cases.
+CPP_FAKE="$WORK_DIR/cpp-fake"
+mkdir -p "$CPP_FAKE/bin"
+cat >"$CPP_FAKE/bin/bazelisk" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 3 && "$1" == test && "$2" == --test_output=all && "$3" == //... ]] || exit 87
+case "${CPP_FAKE_MODE:-pass}" in
+    pass)
+        printf '%s\n' \
+            '[==========] Running 2 tests from 1 test suite.' \
+            '[==========] 2 tests from 1 test suite ran. (0 ms total)' \
+            '[  PASSED  ] 2 tests.'
+        ;;
+    multi)
+        printf '%s\n' \
+            '[==========] Running 1 test from 1 test suite.' \
+            '[==========] 1 test from 1 test suite ran. (0 ms total)' \
+            '[  PASSED  ] 1 test.' \
+            '[==========] Running 2 tests from 1 test suite.' \
+            '[==========] 2 tests from 1 test suite ran. (0 ms total)' \
+            '[  PASSED  ] 2 tests.'
+        ;;
+    empty)
+        printf '%s\n' \
+            '[==========] Running 0 tests from 0 test suites.' \
+            '[==========] 0 tests from 0 test suites ran. (0 ms total)' \
+            '[  PASSED  ] 0 tests.'
+        ;;
+    skipped)
+        printf '%s\n' \
+            '[==========] Running 1 test from 1 test suite.' \
+            '[==========] 1 test from 1 test suite ran. (0 ms total)' \
+            '[  PASSED  ] 0 tests.' \
+            '[  SKIPPED ] 1 test, listed below:'
+        ;;
+    failing)
+        printf '%s\n' \
+            '[==========] Running 1 test from 1 test suite.' \
+            '[==========] 1 test from 1 test suite ran. (0 ms total)' \
+            '[  PASSED  ] 0 tests.' \
+            '[  FAILED  ] 1 test, listed below:'
+        ;;
+    inconsistent)
+        printf '%s\n' \
+            '[==========] Running 2 tests from 1 test suite.' \
+            '[==========] 1 test from 1 test suite ran. (0 ms total)' \
+            '[  PASSED  ] 1 test.'
+        ;;
+    missing)
+        printf '%s\n' 'Google Test completed without a recognized summary'
+        ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$CPP_FAKE/bin/bazelisk"
+CPP_RUN="$WORK_DIR/cpp-run"
+mkdir -p "$CPP_RUN"
+for entry in pass:0 multi:0 empty:1 skipped:1 failing:1 inconsistent:1 missing:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    cpp_rc=0
+    (
+        cd "$CPP_RUN"
+        CPP_FAKE_MODE="$mode" PATH="$CPP_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/cpp_test.sh"
+    ) >/dev/null 2>&1 || cpp_rc=$?
+    assert_eq "test C++: Google Test $mode" "$expected" "$cpp_rc"
+done
+
+# COBOL: require complete, non-empty summaries; some modules report several.
+COBOL_FAKE="$WORK_DIR/cobol-fake"
+mkdir -p "$COBOL_FAKE/bin"
+cat >"$COBOL_FAKE/bin/make" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$#" == 1 && "$1" == test ]] || exit 87
+case "${COBOL_FAKE_MODE:-pass}" in
+    pass)
+        printf '%s\n' 'SUMMARY:' '  Total:    003' '  Passed:   003' '  Failed:   000'
+        ;;
+    multi)
+        printf '%s\n' 'SUMMARY:' '  Total: 003' '  Passed: 003' '  Failed: 000' \
+            'SUMMARY:' '  Total: 004' '  Passed: 004' '  Failed: 000'
+        ;;
+    reset)
+        printf '%s\n' 'SUMMARY:' '  Total: 003' '  Passed: 003' '  Failed: 000' \
+            'SUMMARY:' '  Total: 002' '  Passed: 002' '  Failed: 000'
+        ;;
+    empty)
+        printf '%s\n' 'Scaffold: no tests configured'
+        ;;
+    zero)
+        printf '%s\n' 'SUMMARY:' '  Total: 000' '  Passed: 000' '  Failed: 000'
+        ;;
+    failing)
+        printf '%s\n' 'SUMMARY:' '  Total: 002' '  Passed: 001' '  Failed: 001'
+        ;;
+    inconsistent)
+        printf '%s\n' 'SUMMARY:' '  Total: 002' '  Passed: 001' '  Failed: 000'
+        ;;
+    missing)
+        printf '%s\n' 'COBOL completed without a recognized summary'
+        ;;
+    malformed)
+        printf '%s\n' 'SUMMARY:' '  Total: invalid' '  Passed: 001' '  Failed: 000'
+        ;;
+    partial)
+        printf '%s\n' 'SUMMARY:' '  Total: 001' '  Passed: 001' '  Failed: 000' \
+            'SUMMARY:' '  Total: 001'
+        ;;
+    process-failure) exit 9 ;;
+    *) exit 90 ;;
+esac
+EOF
+chmod +x "$COBOL_FAKE/bin/make"
+COBOL_RUN="$WORK_DIR/cobol-run"
+mkdir -p "$COBOL_RUN"
+for entry in pass:0 multi:0 reset:1 empty:1 zero:1 failing:1 inconsistent:1 missing:1 malformed:1 partial:1 process-failure:9; do
+    mode="${entry%%:*}"
+    expected="${entry##*:}"
+    cobol_rc=0
+    (
+        cd "$COBOL_RUN"
+        COBOL_FAKE_MODE="$mode" PATH="$COBOL_FAKE/bin:$PATH" \
+            bash "$DATA_DIR/cobol_test.sh"
+    ) >/dev/null 2>&1 || cobol_rc=$?
+    assert_eq "test COBOL: summary $mode" "$expected" "$cobol_rc"
+done
 
 # Nim: retirar solo muestras exactas y no duplicar la task.
 NM="$SANDBOX/nim/core/algorithms/naive_sort"

@@ -70,7 +70,7 @@ seguimientos de scaffold y runner de su alcance. La sincronización general de
 helpers de build permanece en los criterios de la siguiente versión. Snapshot
 e instalación se verificarán después de completar los cambios de v2.1.0.
 
-Seguimiento / Follow-up (2026-11-24):
+Seguimiento / Follow-up (2026-11-24–25):
 - PureScript: el runner ahora interpreta el resumen real de Spago
   `Warnings 0 0/15 0/15`, sin aceptar warnings visibles ni totales
   inconsistentes. El proyecto aislado ejecutó 5/5 casos con `censorLibraryWarnings: all`;
@@ -103,10 +103,145 @@ Seguimiento / Follow-up (2026-11-24):
   descubriendo una prueba, rerun, preservación y rechazo de symlink. Las cinco
   bases pasaron en copias aisladas: 3, 4, 23, 10 y 5 pruebas; Busted 2.3.0
   rechazó el caso sin archivos.
+- OCaml: `ocaml_test.sh` ahora rechaza acciones Dune no reconocidas en salida
+  corta, manteniendo permitidos los comandos de compilación conocidos. Con
+  Dune 3.24.2, la regla real `silent test/silent.stamp` junto a un test
+  Alcotest aprobado devolvió 1 en el runner; una prueba sintética confirmó
+  que la salida de compilación normal y suites aprobadas pasan, y que también
+  se propagan errores nativos. Las cinco referencias pasaron en copias
+  aisladas: 3, 4, 24, 15 y 5 casos (51 en total).
+- Grain: `make test` podía terminar con código 0 aunque el framework informara
+  aserciones fallidas. `grain_test.sh` ahora valida los resúmenes `Tests:` y
+  `Cases:` o el formato individual de Calculator, exige resultados aprobados y
+  rechaza vacío, inconsistencia, fallos y ausencia de resultados. La regresión
+  cubre ambos resúmenes, el formato individual, casos vacíos/fallidos y la
+  propagación de errores nativos. Las cinco referencias pasaron en copias
+  aisladas: 21, 51, 102, 33 y 5 casos (212 en total); el submódulo no se tocó.
+- Ballerina: en un repositorio temporal, `bal new naive_sort` generó `main.bal`
+  y no creó `tests/`; después `glot scaffold ballerina algorithms/naive_sort`
+  dejó `naive_sort.bal`, retiró `main.bal` y creó `tests/lib_test.bal`. La
+  secuencia real coincide con la guía y el submódulo permaneció intacto.
+- Crystal: Crystal 1.20.2 `crystal init lib probe_module` generó el layout
+  `src/` + `spec/`, `spec/spec_helper.cr`, `shard.yml` y un spec de muestra que
+  falla (`false.should eq(true)`). `glot -n scaffold` solo comprueba `spec/` y
+  `shard.yml`, como corresponde; no falta un paso de renombrado o creación de
+  directorios. La prueba temporal confirmó 1 fallo; el submódulo no se tocó.
+- Rust: Cargo 1.98.1 ejecutó con código 0 un test personalizado `harness = false`
+  que imprimía su propio “1 passed” sin resumen `libtest`; `rust_test.sh` lo
+  rechazó con código 1. La documentación ahora delimita que ese formato no se
+  admite y que los demás formatos/versiones siguen pendientes de verificación.
+- Java: Maven 3.9.13 devolvió `BUILD SUCCESS` y código 0 con una suite vacía.
+  `java_test.sh` ejecuta `mvn clean test` y rechaza informes Surefire ausentes,
+  ilegibles, fallidos o sin casos aprobados. Las cinco referencias pasaron en
+  copias limpias: 3, 23, 23, 10 y 5 casos (64); la validación aislada cubrió
+  éxito, vacío, fallos, solo omitidos, XML ilegible y propagación del fallo Maven.
+- Ada: Alire 2.1.0 generó un `tests.adb` que solo contiene `null`; `alr -C tests
+  run` compiló y devolvió 0 sin ejecutar casos ni emitir resumen. `ada_test.sh`
+  exige el resumen AUnit completo y todos los casos aprobados. Pruebas aisladas
+  cubren resumen aprobado, ausente, cero, fallido, duplicado y error de Alire.
+  El toolchain elegido automáticamente se instaló solo bajo HOME temporal,
+  eliminado al terminar; no se modificó el submódulo Ada.
+- C# y F#: .NET SDK 10.0.115 devolvió 0 para las suites vacías y generó TRX con
+  `total="0"`. `dotnet_test.sh` exige resultado VSTest `Completed`, contadores
+  consistentes y casos aprobados. Las cinco referencias de C# pasaron en copias
+  aisladas sin restauración: 3, 3, 4, 10 y 5 tests VSTest (25); las cinco de F#
+  también pasaron: 3, 24, 23, 15 y 5 tests VSTest (70). Nueve regresiones cubren
+  pass, mezcla con omitidos, vacío, fallo, solo omitidos, contadores
+  inconsistentes, informe ilegible o ausente y error nativo. La copia C# de
+  `data_structures_basics` mostró el warning CS8602 en
+  `src/DataStructuresBasics/Queue.cs:57`; no se modificó. `glot -n test` para
+  naive_sort F# y calculator C# resuelve ambos al helper compartido. Los
+  submódulos C# y F# permanecen intactos.
+- Assembly: el runner generado anunciaba `Scaffold: no tests configured` y
+  `make run` devolvía 0. `assembly_test.sh` valida los tres contadores y exige
+  casos aprobados; ocho regresiones cubren verde, vacío, fallo, contadores
+  incoherentes, resúmenes ausentes/ambiguos y fallo nativo. Las tres referencias
+  pasaron en copias aisladas; el submódulo Assembly permanece intacto.
+- C: Criterion 2.4.1 devolvió 0 con `Tested: 0` en una copia temporal.
+  `c_test.sh` valida el resumen y exige casos aprobados; ocho regresiones
+  cubren resultado válido, vacío, cero, fallo con código nativo 0,
+  inconsistencias, ausencia/duplicación del resumen y error nativo. Las tres
+  referencias pasaron en copias aisladas: 3, 153 y 4 casos (160 en total); el
+  submódulo C permanece intacto.
+- COBOL: GnuCOBOL 3.2.0 devolvió 0 con un programa de prueba vacío y sin
+  resumen. `cobol_test.sh` exige uno o más resúmenes completos, no vacíos y
+  coherentes; once regresiones cubren secuencia acumulativa válida, contadores
+  regresivos, suites vacías/fallidas, informes incompletos y error nativo. Las
+  tres referencias pasaron en copias aisladas: 78, 49 y 208 casos (335 en
+  total); los contadores de `naive_sort` son acumulativos, no sumados entre sus
+  tres resúmenes. El submódulo permanece intacto.
+- C++: Google Test puede ejecutar cero casos mientras Bazel informa
+  `1 test passes`. `cpp_test.sh` ejecuta Bazel con `--test_output=all`, valida
+  los resúmenes de Google Test y exige casos aprobados. En un módulo mínimo real
+  con GoogleTest 1.15.2 y Bazelisk 7.1.1, rechazó suites vacías incluso desde
+  caché y aceptó una suite aprobada y otra con casos aprobados y omitidos;
+  las ocho regresiones cubren también fallos, ausencia e incoherencia del
+  resumen y error nativo. El target homologado no pudo volver a ejecutarse en
+  este entorno: Bazel 7.1.1 falla al resolver `host_platform`; 7.4.1 y 7.6.1
+  fallan después en `bazel_tools`, y 9.3.3 resuelve una versión incompatible
+  de GoogleTest. No se modificó el submódulo C++.
+- Python: pytest 7.4.4 devolvió 0 para una suite solo omitida; el informe JUnit
+  registró `tests=1`, `skipped=1`. `python_test.sh` exige al menos un aprobado
+  y contadores JUnit coherentes. Las cinco referencias pasaron en copias
+  aisladas: 3, 23, 4, 10 y 5 (45 tests); ocho regresiones cubren aprobado,
+  vacío, fallo, solo omitidos, contadores inconsistentes, XML ilegible/ausente
+  y error nativo. `glot -n test python foundations/numbers` resuelve al helper;
+  no se modificó el submódulo Python.
+- Ruby: RSpec 3.13 devolvió 0 con cero ejemplos y también con una suite
+  totalmente pendiente. `ruby_test.sh` valida el JSON nativo y exige ejemplos
+  aprobados. Las cinco referencias pasaron en copias: 3, 23, 4, 10 y 5 (45);
+  ocho regresiones pasaron, y el helper real rechazó suites vacías y solo
+  pendientes. `glot -n test ruby algorithms/naive_sort` resuelve al helper;
+  no se modificó el submódulo Ruby.
+- Lua: Busted 2.3.0 devolvió 0 con `0 successes / 0 failures / 0 errors / 1
+  pending`. `lua_test.sh` valida el resumen único y exige un caso aprobado.
+  Las cinco referencias pasaron en copias aisladas: 3, 23, 4, 10 y 5 (45);
+  ocho regresiones pasaron y el helper real rechazó el caso solo pendiente.
+  `glot -n test lua foundations/numbers` resuelve al helper; no se modificó
+  el submódulo Lua.
+- Racket: Racket 9.1 devolvió 0 sin resumen en una copia sin su módulo de test.
+  `racket_test.sh` exige exactamente un resumen RackUnit con tests aprobados.
+  Las cinco referencias pasaron en copias aisladas: 24, 158, 53, 33 y 5
+  (273 tests); siete regresiones pasaron y el helper real rechazó el caso sin
+  suite. `glot -n test racket algorithms/naive_sort` resuelve al helper; no se
+  modificó el submódulo Racket.
+- Clojure: Clojure CLI 1.12.5.1654 y Cognitect devolvieron 0 con una copia sin
+  tests (`Ran 0 tests containing 0 assertions`). `clojure_test.sh` exige un
+  resumen único con tests ejecutados y propaga fallos nativos; el helper rechazó
+  la suite vacía con código 1. Las cinco referencias pasaron en copias aisladas:
+  naive_sort (6 tests/48 assertions), data_structures_basics (4/46),
+  data_structures_advanced (19/159), numbers (15/33) y calculator (5/5),
+  49 tests y 291 assertions. Siete regresiones cubren resultados aprobados,
+  vacíos, fallidos, ausentes, malformados, ambiguos y error nativo.
+  `glot -n test clojure algorithms/naive_sort` resuelve al helper; el submódulo
+  permanece intacto.
+- Common Lisp: Roswell 19.08.10.101/FiveAM devolvió 0 tanto sin checks como
+  con un check fallido. `common_lisp_test.sh` valida y agrega sus resúmenes,
+  exige contadores consistentes y al menos un check aprobado, y propagó ambos
+  casos con código 1. Las cinco referencias pasaron en copias aisladas:
+  naive_sort (24), data_structures_basics (15), data_structures_advanced (23),
+  numbers (33) y calculator (5), 100 checks. Once regresiones pasaron;
+  `glot -n test common-lisp algorithms/naive_sort` resuelve al helper y el
+  submódulo permanece intacto.
+- Zig: Zig 0.17.1 devolvió 0 y ninguna salida con el archivo de suite vacío.
+  `zig_test.sh` solicita el resumen completo y rechaza targets vacíos o sin
+  todos los pasos y tests aprobados. Las cinco referencias pasaron en copias
+  aisladas: naive_sort (3), data_structures_basics (5),
+  data_structures_advanced (23), numbers (10) y calculator (5), 46 tests.
+  Siete regresiones pasaron; `glot -n test zig algorithms/naive_sort` resuelve
+  al helper y el submódulo permanece intacto.
+- Elm: `elm-test` 0.19.1-revision17 pasó 21 tests en `naive_sort`; en una copia
+  sin archivos `.elm` en `tests/`, el comando nativo devuelve 1. No hace falta
+  wrapper; el submódulo no se modificó.
 - Harness global más reciente: 2205 pruebas pasaron y 1 falló en la puerta
   del archivo, porque hay 37 snapshots y 36 versiones cerradas mientras
   2.1.0 sigue abierta. No se cambiará esa puerta ni se reemplazará el snapshot
   actual hasta el cierre final.
+- El intento actual de `bash scripts/tests/glot_test.sh` se detuvo durante la
+  preparación del sandbox: Git rechazó el bare repo temporal por
+  `safe.bareRepository=explicit`. No se reintentó el harness completo porque
+  contiene llamadas a `git push`, prohibidas por las instrucciones del repo;
+  las regresiones del runner Java se ejecutaron de forma aislada y no hubo push.
 - `bash docs/tests/docs_check.sh` -> 32 passed, 0 failed; `bash -n` y
   `git diff --check` -> passed. No se modificaron submódulos ni se hizo push.
 ```

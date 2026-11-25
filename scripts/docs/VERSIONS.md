@@ -56,27 +56,376 @@ a next-version criterion.
 
 ---
 
+## 2.1.0 — Runner de C# y F# / C# and F# test runner
+
+**ES:** Con .NET SDK 10.0.115, `dotnet test --no-restore` devolvió código 0
+para una suite vacía tanto en C# como en F#, generando TRX con `total="0"`.
+Los proyectos homologados usan VSTest (`Microsoft.NET.Test.Sdk` 17.14.1 y
+xUnit 2.9.3), no MTP. `dotnet_test.sh` ejecuta el runner nativo con un directorio
+TRX temporal y requiere resumen `Completed`, contadores coherentes y al menos un
+caso aprobado; rechaza informes ausentes, inválidos, fallidos, vacíos o solo
+omitidos. Las cinco referencias de C# pasaron en copias aisladas sin restaurar
+paquetes: naive_sort (3), data_structures_advanced (3), data_structures_basics
+(4), numbers (10) y calculator (5), 25 tests detectados por VSTest. Las cinco
+de F# también pasaron:
+naive_sort (3), data_structures_advanced (24), data_structures_basics (23),
+numbers (15) y calculator (5), 70 tests detectados por VSTest. Otras versiones
+y configuraciones no están verificadas.
+
+**EN:** With .NET SDK 10.0.115, `dotnet test --no-restore` returned exit code 0
+for an empty suite in both C# and F#, generating TRX with `total="0"`. The
+homologated projects use VSTest (`Microsoft.NET.Test.Sdk` 17.14.1 and xUnit
+2.9.3), not MTP. `dotnet_test.sh` runs the native test command with a temporary
+TRX directory and requires a `Completed` summary, consistent counters, and at
+least one passing case; it rejects missing, invalid, failing, empty, or
+skipped-only reports. All five C# references passed in isolated copies without
+restoring packages: naive_sort (3), data_structures_advanced (3),
+data_structures_basics (4), numbers (10), and calculator (5), 25 tests
+reported by VSTest. All five F# references also passed: naive_sort (3),
+data_structures_advanced (24), data_structures_basics (23), numbers (15), and
+calculator (5), 70 tests reported by VSTest. Other versions/configurations
+remain unverified.
+
+```text
+C# and F# empty suites: dotnet test --no-restore -> exit 0, TRX total=0
+C# references: 25 VSTest tests passed; F# references: 70 VSTest tests passed
+.NET runner regressions: 9 passed (pass, mixed skip/pass, empty, failing, skipped-only, inconsistent, malformed, missing, native failure)
+```
+
+## 2.1.0 — Runner Python / Python test runner
+
+**ES:** Pytest 7.4.4 devolvió código 0 para una suite compuesta únicamente
+por un test omitido; el informe JUnit lo registró como `tests="1"` y
+`skipped="1"`. `python_test.sh` ahora ejecuta pytest con un informe temporal,
+valida que sus contadores coincidan con los casos XML y exige al menos un test
+aprobado. Rechaza informes ausentes, ilegibles o inconsistentes, suites vacías,
+solo omitidas y fallidas. Las cinco referencias pasaron en copias aisladas:
+naive_sort (3), data_structures_advanced (23), data_structures_basics (4),
+numbers (10) y calculator (5), 45 tests. La regresión focalizada pasó 8 casos.
+Solo se verificó pytest 7.4.4; otros plugins/reporters no se certifican.
+
+**EN:** Pytest 7.4.4 returned exit code 0 for a suite containing only one
+skipped test; its JUnit report recorded `tests="1"` and `skipped="1"`.
+`python_test.sh` now runs pytest with a temporary report, validates that its
+counters match the XML testcases, and requires at least one passing test. It
+rejects missing, unreadable or inconsistent reports, empty and skipped-only
+suites, and failures. All five references passed in isolated copies: naive_sort
+(3), data_structures_advanced (23), data_structures_basics (4), numbers (10),
+and calculator (5), 45 tests. The focused regression passed 8 cases. Only
+pytest 7.4.4 was verified; other plugins/reporters are not certified.
+
+```text
+pytest 7.4.4 skipped-only suite: exit 0, JUnit tests=1 skipped=1
+Python references: 45 passed across five isolated copies
+Python runner regressions: 8 passed (passing, empty, failing, skipped-only, inconsistent, malformed, missing, native failure)
+```
+
+## 2.1.0 — Runner Ruby / Ruby test runner
+
+**ES:** RSpec 3.13 devolvió código 0 sin ejemplos; también acepta como
+pendiente un ejemplo cuyo cuerpo falla, y devuelve 0 si toda la suite está
+pendiente. `ruby_test.sh` solicita el informe JSON nativo, valida los
+contadores y estados de cada ejemplo, y exige al menos uno aprobado. Rechaza
+ejecuciones vacías, solo pendientes, fallidas, incompletas o inconsistentes.
+Las cinco referencias pasaron en copias aisladas: naive_sort (3),
+data_structures_advanced (23), data_structures_basics (4), numbers (10) y
+calculator (5), 45 ejemplos. La regresión focalizada pasó 8 casos; el helper
+real rechazó suites vacías y solo pendientes. Se verificó RSpec 3.13 con Ruby
+3.4.3; otras versiones no se certifican.
+
+**EN:** RSpec 3.13 returned exit code 0 with no examples; it also treats an
+example whose body fails as pending when marked pending, returning 0 if the
+entire suite is pending. `ruby_test.sh` requests the native JSON report,
+validates its counters and each example status, and requires at least one
+passing example. It rejects empty, pending-only, failing, incomplete, or
+inconsistent runs. All five references passed in isolated copies: naive_sort
+(3), data_structures_advanced (23), data_structures_basics (4), numbers (10),
+and calculator (5), 45 examples. The focused regression passed 8 cases; the
+real helper rejected empty and pending-only suites. Ruby 3.4.3 and RSpec 3.13
+were verified; other versions are not certified.
+
+```text
+RSpec 3.13 empty suite: exit 0, 0 examples
+Ruby references: 45 passed across five isolated copies
+Ruby runner regressions: 8 passed (pass with pending, empty, failing, pending-only, inconsistent, malformed, missing, native failure)
+```
+
+## 2.1.0 — Runner Lua / Lua test runner
+
+**ES:** Busted 2.3.0 devolvió código 0 para un test `pending()`; la salida
+informó `0 successes / 0 failures / 0 errors / 1 pending`. `lua_test.sh` valida
+el único resumen nativo y exige al menos un éxito; admite pendientes mezclados
+con éxitos y rechaza suites vacías, solo pendientes, fallidas o con resumen
+ausente/ambiguo. Las cinco referencias pasaron en copias aisladas: naive_sort
+(3), data_structures_advanced (23), data_structures_basics (4), numbers (10) y
+calculator (5), 45 tests. La regresión focalizada pasó 8 casos y el helper real
+rechazó una suite solo pendiente. Se verificó Lua 5.5.1/Busted 2.3.0; otras
+versiones y reporters no están certificados.
+
+**EN:** Busted 2.3.0 returned exit code 0 for a `pending()` test; its output
+reported `0 successes / 0 failures / 0 errors / 1 pending`. `lua_test.sh`
+validates the unique native summary and requires at least one success; it
+allows pending tests alongside successes and rejects empty, pending-only,
+failing, or missing/ambiguous summaries. All five references passed in isolated
+copies: naive_sort (3), data_structures_advanced (23), data_structures_basics
+(4), numbers (10), and calculator (5), 45 tests. The focused regression passed
+8 cases and the real helper rejected a pending-only suite. Lua 5.5.1/Busted
+2.3.0 were verified; other versions and reporters are not certified.
+
+```text
+Busted 2.3.0 pending-only suite: exit 0, 0 successes, 1 pending
+Lua references: 45 passed across five isolated copies
+Lua runner regressions: 8 passed (pass with pending, empty, failing, pending-only, malformed, missing, ambiguous, native failure)
+```
+
+## 2.1.0 — Runner Racket / Racket test runner
+
+**ES:** Racket 9.1 devolvió código 0 y no imprimió resumen al ejecutar
+`raco test -x .` en una copia donde se retiró la única suite. `racket_test.sh`
+valida que exista exactamente un resumen RackUnit (`N tests passed`) y exige
+`N > 0`; así rechaza el módulo sin tests y resúmenes ausentes, ambiguos o con
+cero casos. Las cinco referencias pasaron en copias aisladas: naive_sort (24),
+data_structures_advanced (158), data_structures_basics (53), numbers (33) y
+calculator (5), 273 tests. La regresión focalizada pasó 7 casos. Otros formatos
+de reporter y versiones no están certificados.
+
+**EN:** Racket 9.1 returned exit code 0 and printed no summary when
+`raco test -x .` ran in a copy with its only suite removed. `racket_test.sh`
+requires exactly one RackUnit summary (`N tests passed`) with `N > 0`, rejecting
+modules without tests and missing, ambiguous, or zero-test summaries. All five
+references passed in isolated copies: naive_sort (24), data_structures_advanced
+(158), data_structures_basics (53), numbers (33), and calculator (5), 273 tests.
+The focused regression passed 7 cases. Other reporter formats and versions
+remain uncertified.
+
+```text
+Racket testless module: raco test -x . -> exit 0, no summary
+Racket references: 273 tests passed across five isolated copies
+Racket runner regressions: 7 passed (pass, singular summary, empty, zero, malformed, ambiguous, native failure)
+```
+
+## 2.1.0 — Runner Clojure / Clojure test runner
+
+**ES:** Clojure CLI 1.12.5.1654 y `cognitect.test-runner` devolvieron código 0
+con una copia sin archivos de prueba: `Ran 0 tests containing 0 assertions.`
+`clojure_test.sh` valida exactamente un resumen y exige al menos un test y
+cero fallos/errores; propaga el código del proceso nativo. Las cinco referencias
+se ejecutaron en copias aisladas y pasaron. Solo se verificó el formato
+predeterminado de Cognitect con esta versión de CLI.
+
+**EN:** Clojure CLI 1.12.5.1654 and `cognitect.test-runner` returned exit code 0
+in a copy with no test files: `Ran 0 tests containing 0 assertions.`
+`clojure_test.sh` requires exactly one summary, at least one test, and zero
+failures/errors; it propagates the native process exit code. All five references
+passed in isolated copies. Only Cognitect's default output format with this CLI
+version was verified.
+
+```text
+Clojure testless module: clojure -T:build test -> exit 0, 0 tests
+Clojure references: 49 tests, 291 assertions, 0 failures/errors (five copies)
+Clojure runner regressions: 7 passed (pass, empty, failing summary, missing, malformed, ambiguous, native failure)
+```
+
+## 2.1.0 — Runner Common Lisp / Common Lisp test runner
+
+**ES:** Roswell 19.08.10.101 y FiveAM devolvieron código 0 tanto con una suite
+sin checks (`Didn't run anything...huh?`) como con un check fallido. El helper
+`common_lisp_test.sh` valida y agrega los resúmenes `Did/Pass/Skip/Fail`, exige
+contadores coherentes y al menos un check aprobado, y propaga fallos del proceso.
+Las cinco referencias pasaron en copias aisladas, incluyendo tres suites de
+Numbers (100 checks en total). Otros formatos de reporter no están verificados.
+
+**EN:** Roswell 19.08.10.101 and FiveAM returned exit code 0 for both a suite
+with no checks (`Didn't run anything...huh?`) and a failed check. The
+`common_lisp_test.sh` helper validates and aggregates `Did/Pass/Skip/Fail`
+summaries, requires consistent counters and at least one passing check, and
+propagates process failures. All five references passed in isolated copies,
+including three Numbers suites (100 checks total). Other reporter formats
+remain unverified.
+
+```text
+Common Lisp native: empty suite and a failing check both exited 0
+Common Lisp references: 100 checks passed across five isolated copies
+Common Lisp runner regressions: 11 passed (pass, mixed, multiple summaries, empty, failing, skipped-only, inconsistent, missing, malformed, ambiguous, native failure)
+```
+
+## 2.1.0 — Runner Elm / Elm test runner
+
+**ES:** Con `elm-test` 0.19.1-revision17, la suite `naive_sort` pasó los 21
+tests. En una copia temporal sin archivos `.elm` bajo `tests/`, el comando
+nativo `elm-test` terminó con código 1 e indicó que no encontró archivos de
+prueba. No se requiere wrapper para este caso límite. Solo se verificó el
+reporter predeterminado de esta versión.
+
+**EN:** With `elm-test` 0.19.1-revision17, the `naive_sort` suite passed all 21
+tests. In a temporary copy with no `.elm` files under `tests/`, native
+`elm-test` exited 1 and reported that it found no test files. No wrapper is
+needed for this edge case. Only this version's default reporter was verified.
+
+```text
+Elm naive_sort: 21 passed, 0 failed
+Elm testless project: elm-test -> exit 1, no .elm files found
+```
+
+## 2.1.0 — Runner Ada / Ada test runner
+
+**ES:** Alire 2.1.0 generó `tests/src/tests.adb` con solo `null`; ejecutar
+`alr -C tests run` lo compiló y devolvió código 0 sin ejecutar casos ni emitir
+resumen. `ada_test.sh` valida el resumen de AUnit (`Total Tests Run`,
+`Successful Tests`, `Failed Assertions`, `Unexpected Errors`), exige que todos
+los casos se aprueben y rechaza resúmenes ausentes, duplicados o vacíos. La
+prueba del scaffold seleccionó `gprbuild 26.0.1` y `gnat_native 16.1.0` en un
+HOME temporal; ese directorio se eliminó al terminar. Otros toolchains y
+formatos de salida no están verificados.
+
+**EN:** Alire 2.1.0 generated `tests/src/tests.adb` containing only `null`;
+`alr -C tests run` compiled it and returned exit code 0 without running cases
+or emitting a summary. `ada_test.sh` validates AUnit's summary (`Total Tests
+Run`, `Successful Tests`, `Failed Assertions`, `Unexpected Errors`), requires
+all cases to pass, and rejects missing, duplicate or empty summaries. The
+scaffold probe selected `gprbuild 26.0.1` and `gnat_native 16.1.0` in a
+temporary HOME; that directory was removed afterward. Other toolchains and
+output formats remain unverified.
+
+```text
+Ada generated empty runner: alr -C tests run -> exit 0, no AUnit summary
+Ada focused runner checks: passing, no summary, zero, failing, duplicate, native failure
+```
+
+## 2.1.0 — Runner Java / Java runner
+
+**ES:** Maven 3.9.13 devuelve `BUILD SUCCESS` y código 0 cuando, después de
+limpiar, no encuentra pruebas (`No tests to run`). `java_test.sh` ejecuta
+`mvn clean test` y exige informes Surefire frescos, legibles, sin fallos y con
+al menos un caso aprobado. Las cinco referencias pasaron en copias limpias:
+naive_sort (3), data_structures_advanced (23), data_structures_basics (23),
+numbers (10) y calculator (5), 64 casos en total. Otras versiones y
+configuraciones Maven/Surefire quedan sin verificar.
+
+**EN:** Maven 3.9.13 returns `BUILD SUCCESS` and exit code 0 when a clean build
+finds no tests (`No tests to run`). `java_test.sh` runs `mvn clean test` and
+requires fresh, readable Surefire reports, no failures, and at least one passing
+case. All five references passed in clean copies: naive_sort (3),
+data_structures_advanced (23), data_structures_basics (23), numbers (10), and
+calculator (5), 64 cases total. Other Maven/Surefire versions and configurations
+remain unverified.
+
+```text
+Java empty suite: mvn -o clean test -> BUILD SUCCESS, No tests to run, exit 0
+Java references: 64 cases passed across five clean isolated copies
+Java runner regressions: pass, empty, failing, skipped-only, malformed XML, Maven failure
+```
+
 ## 2.1.0 — Scaffold y runner Rust / Rust scaffold and runner
 
 **ES:** Cargo 1.98.1 devuelve éxito para su ejemplo generado, cero casos o
 solo casos omitidos. El scaffold conserva el punto de entrada y retira solo
 la muestra exacta sin otros fuentes ni tests. El runner comprueba el resumen
 `libtest` de cada target y exige al menos un caso aprobado; acepta omitidos
-junto a aprobados y rechaza targets silenciosos. Otros formatos quedan sin
-verificar.
+junto a aprobados y rechaza targets silenciosos. Un test personalizado
+`harness = false` que imprimió un resultado propio y salió con código 0 fue
+rechazado por no producir un resumen `libtest`; otros formatos y versiones
+siguen sin verificar.
 
 **EN:** Cargo 1.98.1 succeeds for its generated example, zero cases or only
 ignored cases. Scaffold preserves the entry point and removes only the exact
 sample without other sources or tests. The runner checks each target's
 `libtest` summary and requires at least one passing case; ignored cases may
-accompany passing cases, while silent targets are rejected. Other formats
+accompany passing cases, while silent targets are rejected. A custom
+`harness = false` test that printed its own result and exited 0 was rejected
+because it did not produce a `libtest` summary; other formats and versions
 remain unverified.
 
 ```text
 Rust native: empty, ignored-only and silent harness rejected; mixed passed
 Rust references: data_structures_basics 22, numbers 10 cases
 glot Rust: dry-run preserved sample; empty rejected; passing test accepted
+Rust custom harness=false probe: Cargo 0; rust_test.sh 1
 Rust focused assertions: 10 passed, 0 failed
+```
+
+## 2.1.0 — Runner Zig / Zig test runner
+
+**ES:** Zig 0.17.1 devolvió código 0 y ninguna salida con un archivo de suite
+sin bloques `test`. `zig_test.sh` solicita `--summary all`, exige un único
+resumen con todos los pasos completados y al menos un test aprobado; rechaza
+resúmenes ausentes, ambiguos, vacíos o incompletos y propaga fallos nativos.
+Las cinco referencias pasaron en copias aisladas. Solo se verificó el formato
+de resumen de Zig 0.17.1.
+
+**EN:** Zig 0.17.1 returned exit code 0 with no output for a suite file
+containing no `test` blocks. `zig_test.sh` requests `--summary all` and requires
+one summary with every build step complete and at least one passing test; it
+rejects missing, ambiguous, empty or incomplete summaries and propagates native
+failures. All five references passed in isolated copies. Only Zig 0.17.1's
+summary format was verified.
+
+```text
+Zig testless target: zig build test -> exit 0, no output
+Zig references: 46 tests passed across five isolated copies
+Zig runner regressions: 7 passed (pass, empty, incomplete, missing, malformed, ambiguous, native failure)
+```
+
+## 2.1.0 — Runner Assembly / Assembly test runner
+
+**ES:** El runner del scaffold imprime `Scaffold: no tests configured` y
+`make run` devuelve 0. `assembly_test.sh` valida un resumen único, contadores
+coherentes y al menos un caso aprobado; propaga los fallos nativos. Las tres
+referencias pasaron en copias aisladas con NASM 2.16.01.
+
+**EN:** The scaffold runner prints `Scaffold: no tests configured` while
+`make run` returns 0. `assembly_test.sh` validates a unique summary, consistent
+counters and at least one passing case; native failures are propagated. All
+three references passed in isolated copies with NASM 2.16.01.
+
+```text
+Assembly scaffold: make run -> exit 0, no test summary
+Assembly references: all three isolated copies passed
+Assembly runner regressions: 8 passed (pass, empty, zero, failing, inconsistent, missing, ambiguous, native failure)
+```
+
+## 2.1.0 — Runner C / C test runner
+
+**ES:** Criterion 2.4.1 ejecutó `make test` con una suite sin casos, imprimió
+`Tested: 0` y devolvió código 0. `c_test.sh` exige un único resumen Criterion,
+contadores que sumen correctamente y al menos un caso aprobado; también
+propaga el código de fallo nativo. Las tres referencias C pasaron en copias
+aisladas. Solo se verificó este formato de resumen de Criterion.
+
+**EN:** Criterion 2.4.1 ran `make test` with an empty suite, printed
+`Tested: 0`, and returned exit code 0. `c_test.sh` requires a unique Criterion
+summary, consistent counters and at least one passing case; it also propagates
+native failures. All three C references passed in isolated copies. Only this
+Criterion summary format was verified.
+
+```text
+C native empty suite: make test -> Tested: 0, exit 0
+C references: 160 passing cases across three isolated copies
+C runner regressions: 8 passed (pass, empty, zero, failing, inconsistent, missing, ambiguous, native failure)
+```
+
+## 2.1.0 — Runner COBOL / COBOL test runner
+
+**ES:** GnuCOBOL 3.2.0 devolvió código 0 al ejecutar un programa de pruebas
+vacío y no emitió resumen. `cobol_test.sh` exige resúmenes `SUMMARY` completos,
+coherentes y con casos aprobados; valida la secuencia acumulativa de tres
+bloques que emite `naive_sort` sin sumar dos veces los mismos casos y propaga
+fallos nativos. Las tres referencias pasaron en copias
+aisladas: naive_sort (78), data_structures_basics (49) y
+data_structures_advanced (208), 335 checks en total.
+
+**EN:** GnuCOBOL 3.2.0 returned exit code 0 when running an empty test program
+and emitted no summary. `cobol_test.sh` requires complete, consistent
+`SUMMARY` blocks with passing cases; it validates the cumulative sequence of
+three blocks emitted by `naive_sort` without double-counting, and propagates
+native failures. All three references passed in
+isolated copies: naive_sort (78), data_structures_basics (49), and
+data_structures_advanced (208), 335 checks total.
+
+```text
+COBOL native empty program: make test -> exit 0, no summary
+COBOL references: 335 checks passed across three isolated copies
+COBOL runner regressions: 11 passed (pass, cumulative summaries, reset counters, scaffold/empty, zero, failing, inconsistent, missing, malformed, partial, native failure)
 ```
 
 ## 2.1.0 — Corrección del scaffold D / D scaffold fix
@@ -161,24 +510,25 @@ Haskell native workspace (offline): current package only, shared build preserved
 
 **ES:** La plantilla exacta de Dune 3.24 se adapta a Alcotest con un sentinel
 fallido; se conservan variantes y archivos propios. El runner fuerza Dune y
-exige un resumen Alcotest no vacío por acción `runtest` en salida corta. Con
-Dune 3.24.2 rechazó una acción silenciosa junto a una suite aprobada y aceptó
-dos suites aprobadas. Una acción personalizada con varios programas o una
-dependencia sin etiqueta `runtest` aún puede ocultar un ejecutable silencioso;
-revisar estos casos y otras versiones.
+exige un resumen Alcotest no vacío por acción `runtest` en salida corta y
+rechaza acciones Dune no reconocidas, salvo comandos de compilación conocidos.
+Con Dune 3.24.2 rechazó una regla silenciosa (`silent test/silent.stamp`)
+junto a una suite aprobada; también aceptó las cinco suites de referencia
+OCaml (51 casos en total). La cobertura de otras versiones de Dune sigue
+pendiente.
 
 **EN:** The exact Dune 3.24 template is adapted to Alcotest with a failing
 sentinel; authored files and variants are preserved. The runner forces Dune
 and requires one nonempty Alcotest summary per `runtest` action in short
-output. With Dune 3.24.2 it rejected a silent action alongside a passing suite
-and accepted two passing suites. A custom action running multiple programs or
-a dependency without a `runtest` label can still hide a silent executable;
-review those cases and other versions.
+output, while rejecting unrecognized Dune actions apart from known compiler
+commands. With Dune 3.24.2 it rejected a silent rule (`silent
+test/silent.stamp`) alongside a passing suite; all five OCaml reference suites
+also passed (51 cases total). Other Dune versions remain unverified.
 
 ```text
 OCaml scaffold and runner focused assertions: 21 passed, 0 failed
-OCaml references: 3, 4 and 15 cases, 0 failures
-OCaml runner: silent action rejected; two passing actions accepted
+OCaml references: five suites, 51 cases, 0 failures
+OCaml runner: silent rule rejected; compiler output and passing suites accepted
 ```
 
 ## 2.1.0-dev — runner Crystal / Crystal runner
@@ -283,8 +633,13 @@ C++ reemplaza los archivos Bazel vacíos por `MODULE.bazel`, `WORKSPACE` y
 targets de biblioteca/Google Test basados en la base homologada; fija Bazel
 7.1.1 y conserva configuraciones existentes. En una copia aislada, Bazelisk
 compiló y ejecutó la suite C++ homologada. El harness comprueba generación,
-rerun, contenido propio y rechazo de `BUILD` simbólico. La revisión de los
-demás scaffolds sigue abierta.
+rerun, contenido propio y rechazo de `BUILD` simbólico. El nuevo
+`cpp_test.sh` evita el falso verde de Bazel cuando Google Test ejecuta cero
+casos: la salida detallada exige resúmenes coherentes y al menos un aprobado.
+Un módulo mínimo real confirmó que rechaza la suite vacía también desde caché,
+y acepta suites aprobadas y aprobadas con casos omitidos. El target homologado
+no se pudo volver a ejecutar en el entorno actual por errores de resolución en
+Bazel; no se modificó el submódulo.
 
 **EN:** PHPUnit 13.3.4 previously returned zero without running tests in the
 PHP scaffold. Its template now sets `failOnEmptyTestSuite`; a real smoke test
@@ -294,8 +649,13 @@ C++ replaces empty Bazel files with `MODULE.bazel`, `WORKSPACE` and
 library/Google Test targets based on the homologated project, pins Bazel
 7.1.1 and preserves existing configuration. Bazelisk built and ran the
 homologated C++ suite in an isolated copy. The harness covers generation,
-reruns, authored content and rejection of a symlinked `BUILD`. The remaining
-scaffold review is still open.
+reruns, authored content and rejection of a symlinked `BUILD`. The new
+`cpp_test.sh` prevents Bazel's false green when Google Test runs zero cases:
+full output is required, summary counts must be coherent and at least one case
+must pass. A real minimal module confirmed it rejects an empty suite even from
+cache and accepts passing suites, including a mix with skipped cases. The
+homologated target could not be rerun in the current environment because of
+Bazel repository-resolution errors; the submodule was not modified.
 
 ```text
 bazelisk test //... --noshow_progress --color=no: 1 test passed
@@ -305,6 +665,43 @@ bash -n scripts/data/cpp_scaffold.sh
 bash -n scripts/tests/glot_test.sh
 git diff --check
 ```
+
+**ES:** El control mínimo `cc_test` con GoogleTest 1.15.2 pasa con Bazelisk
+7.1.1, pero el target real no llega a ejecutar su suite vacía. Con el archivo
+de test referenciado presente y vacío, sin lockfile y `--lockfile_mode=off`,
+falla al cargar `platforms/host` porque `host_platform` no es visible. Un
+override temporal a `platforms@0.0.8` y declarar `platforms` directamente
+produjeron el mismo error. Importar explícitamente la extensión
+`host_platform` lo supera, pero falla después al cargar `bazel_tools`.
+Bazel 7.4.1 y 7.6.1 sin lockfile también fallan en
+`bazel_tools/src/conditions` al resolver `//tools/windows:windows_config.bzl`.
+Bazel 9.3.3 sin lockfile resolvió GoogleTest 1.17.0 en lugar de la versión
+declarada y falló al cargar reglas retiradas de Bazel, por lo que tampoco es
+compatible. Los intentos previos con el lockfile también fallaron antes de
+ejecutar pruebas: 7.1.1 no resolvió `host_platform`, y 9.3.3 llegó a un error
+en `bazel_tools`; actualizar el lock con 7.1.1 quedó detenido en `platforms`.
+El comportamiento vacío se verificó en el módulo mínimo y quedó protegido
+por `cpp_test.sh`. No se confirmó una solución compatible para volver a
+ejecutar el target homologado en este entorno; el submódulo no se modificó.
+
+**EN:** A minimal `cc_test` control using GoogleTest 1.15.2 passes with
+Bazelisk 7.1.1, but the actual target does not reach its empty suite. With the
+referenced test file present and empty, the lockfile removed, and
+`--lockfile_mode=off`, loading `platforms/host` fails because `host_platform`
+is not visible. A temporary override to `platforms@0.0.8` and declaring
+`platforms` directly produced the same error. Explicitly importing the
+`host_platform` extension passes that error but then fails loading
+`bazel_tools`. Bazel 7.4.1 and 7.6.1 without a lockfile also fail in
+`bazel_tools/src/conditions` while resolving
+`//tools/windows:windows_config.bzl`. Bazel 9.3.3 without a lockfile resolved
+GoogleTest 1.17.0 instead of the declared version and failed while loading
+removed Bazel rules, so it is not compatible either. Earlier attempts with the
+checked-in lockfile also failed before tests ran: 7.1.1 could not resolve
+`host_platform`; 9.3.3 advanced to a `bazel_tools` error. Updating the
+lockfile with 7.1.1 stalled at `platforms`. The empty-suite behavior was
+verified in the minimal module and is now guarded by `cpp_test.sh`. No
+compatible fix was confirmed to rerun the homologated target in this
+environment; the submodule was not modified.
 
 ## 2.1.0-dev — 2026-11-23 (revisión de Vala / Vala review)
 
@@ -543,6 +940,29 @@ docs checks: 32 passed, 0 failed
 git diff --check
 ```
 
+## 2.1.0-dev — 2026-11-25 (revisión del scaffold Crystal / Crystal scaffold review)
+
+**ES:** Crystal 1.20.2 `crystal init lib probe_module` generó el layout
+`src/` + `spec/`, `spec/spec_helper.cr`, `shard.yml` y un spec de muestra con
+un sentinel que falla. `glot scaffold` conserva esas convenciones y solo
+comprueba `spec/` y `shard.yml`; no hace falta añadir pasos de renombrado o
+creación de directorios. La ejecución temporal confirmó que el ejemplo falla
+con 1 caso; el `.git` generado quedó confinado al directorio temporal.
+
+**EN:** Crystal 1.20.2 `crystal init lib probe_module` generated the `src/` +
+`spec/` layout, `spec/spec_helper.cr`, `shard.yml` and a sample spec containing
+a failing sentinel. `glot scaffold` preserves those conventions and only
+checks `spec/` and `shard.yml`; no rename or directory-creation steps are
+needed. The temporary run confirmed the sample fails with one case; the
+generated `.git` remained confined to the temporary directory.
+
+```text
+crystal init lib probe_module: src/, spec/, spec_helper.cr, shard.yml, .git
+crystal spec: 1 example, 1 failure, exit 1
+glot -n scaffold crystal algorithms/naive_sort: test -d spec && test -f shard.yml
+Crystal scaffold: submodule unchanged
+```
+
 ---
 
 ## 2.1.0-dev — 2026-11-22 (fix de scaffold en curso / scaffold fix in progress)
@@ -679,23 +1099,30 @@ an earlier executable exists.
 
 **ES:** Grain crea fuente y runner mínimos, Makefile y `.gitignore` sin
 sobrescribir archivos. Grain 0.7.2 compiló el runner e informó el fallo de una
-fuente inválida. El framework sigue pendiente: una prueba negativa de la base
-homologada reportó el fallo pero devolvió código 0.
+fuente inválida. Los Makefiles de las referencias no siempre propagan los
+fallos de aserción; `grain_test.sh` valida los resúmenes `Tests:`/`Cases:` o
+los resultados individuales del módulo Calculator, y rechaza suites vacías,
+fallidas o ambiguas. Las cinco referencias pasaron en copias aisladas: 21, 51,
+102, 33 y 5 casos (212 en total). Otras versiones y formatos siguen sin
+verificar.
 
 **EN:** Grain creates a minimal source, runner, Makefile and `.gitignore`
 without overwriting files. Grain 0.7.2 compiled the runner and rejected an
-invalid source. The framework remains pending: a negative test of the
-homologated base reported failure but returned exit code 0.
+invalid source. Reference Makefiles do not always propagate assertion
+failures; `grain_test.sh` validates `Tests:`/`Cases:` summaries or Calculator's
+individual results, rejecting empty, failed or ambiguous suites. All five
+references passed in isolated copies: 21, 51, 102, 33 and 5 cases (212 total).
+Other versions and formats remain unverified.
 
 **ES:** Grain incorpora `TestStatus.finish` y actualiza solo el runner vacío
-anterior reconocido. Con el framework de la base, una prueba verde devolvió
-0 y una fallida devolvió 1. La suite debe conectar el resultado; los módulos
-existentes y la adaptación del framework siguen pendientes.
+anterior reconocido. Con el framework de scaffold, una prueba verde devolvió
+0 y una fallida devolvió 1. Para las suites existentes, la puerta de `glot
+test` comprueba además los resultados que sus Makefiles no propagan.
 
 **EN:** Grain now provides `TestStatus.finish` and upgrades only the
-recognized previous empty runner. With the base framework, a passing test
-returned 0 and a failing one returned 1. The suite must connect the result;
-existing modules and framework adaptation remain pending.
+recognized previous empty runner. With the scaffold framework, a passing test
+returned 0 and a failing one returned 1. For existing suites, the `glot test`
+gate also checks results that their Makefiles do not propagate.
 
 **ES:** R prepara un paquete mínimo con `testthat` sin reemplazar archivos
 existentes. En un laboratorio aislado, testthat 3.2.1 arrancó con cero casos

@@ -1,44 +1,44 @@
-ada	tool	alr -C tests run	-
-assembly	manual	make run	-
+ada	tool	bash {root}/scripts/data/ada_test.sh	-
+assembly	manual	bash {root}/scripts/data/assembly_test.sh	-
 ballerina	tool	bash {root}/scripts/data/ballerina_test.sh	-
-c	manual	make test	-
-clojure	tool	clojure -T:build test	-
-cobol	manual	make test	-
-common-lisp	tool	ros run --load run-tests.lisp --eval '(uiop:quit)'	-
-cpp	manual	bazelisk test //...	-
+c	manual	bash {root}/scripts/data/c_test.sh	-
+clojure	tool	bash {root}/scripts/data/clojure_test.sh	-
+cobol	manual	bash {root}/scripts/data/cobol_test.sh	-
+common-lisp	tool	bash {root}/scripts/data/common_lisp_test.sh	-
+cpp	manual	bash {root}/scripts/data/cpp_test.sh	-
 crystal	tool	bash {root}/scripts/data/crystal_test.sh	crystal tool format --check src
-csharp	tool	dotnet test {Module}.slnx	-
+csharp	tool	bash {root}/scripts/data/dotnet_test.sh	-
 d	tool	bash {root}/scripts/data/d_test.sh	-
 dart	tool	bash {root}/scripts/data/dart_test.sh	dart analyze
 elixir	tool	bash {root}/scripts/data/elixir_test.sh	mix format --check-formatted
 elm	tool	elm-test	-
 erlang	tool	bash {root}/scripts/data/erlang_test.sh	-
 forth	manual	bash {root}/scripts/data/forth_test.sh	-
-fsharp	tool	dotnet test	-
+fsharp	tool	bash {root}/scripts/data/dotnet_test.sh	-
 gleam	tool	bash {root}/scripts/data/gleam_test.sh	-
 go	tool	go run {root}/scripts/data/go_test_runner.go	test -z "$(gofmt -l src)"
-grain	manual	make test	-
+grain	manual	bash {root}/scripts/data/grain_test.sh	-
 groovy	tool	bash {root}/scripts/data/gradle_test.sh	-
 haskell	tool	bash {root}/scripts/data/haskell_test.sh	-
 haxe	manual	haxe build.hxml	-
-java	manual	mvn test	-
+java	manual	bash {root}/scripts/data/java_test.sh	-
 javascript	tool	bash {root}/scripts/data/typescript_test.sh	-
 julia	tool	julia --project=. test/run_tests.jl	julia --project=. -e 'for f in filter(x->endswith(x,".jl"), readdir("src")); Meta.parse(read("src/$f", String)); end'
 kotlin	tool	bash {root}/scripts/data/gradle_test.sh	-
-lua	tool	busted	-
+lua	tool	bash {root}/scripts/data/lua_test.sh	-
 nim	tool	bash {root}/scripts/data/nim_test.sh	nim check src/{module}.nim
 ocaml	tool	bash {root}/scripts/data/ocaml_test.sh	-
 perl	manual	perl -MApp::Prove::State -MTAP::Harness::Env -e 'my $s = App::Prove::State->new({extensions => [".pl"]}); my @tests = $s->get_tests(0, "test/"); @tests or die "No Perl test files configured in test/\n"; my $result = TAP::Harness::Env->create({})->runtests(@tests); exit 1 if $result->has_errors; die "No Perl test cases executed\n" unless $result->total > $result->skipped;'	find lib -type f -name '*.p[lm]' -print0 | xargs -0 -r -n1 perl -Ilib -c
 php	tool	composer test	php -l src/{Module}.php
 prolog	manual	cd test && swipl -q --on-error=status -g "use_module(library(plunit)), expand_file_name('*_test.pl', A), expand_file_name('*_tests.pl', B), append(A, B, Fs), (Fs = [] -> (expand_file_name('*.pl', Other), (Other = [] -> (consult('../src/{module}.pl'), writeln('Scaffold: no tests configured')); (format(user_error, 'No recognized Prolog test files~n', []), fail))); (maplist(consult, Fs), run_tests(all, [summary(S)]), get_dict(passed, S, P), get_dict(failed, S, F), get_dict(timeout, S, T), get_dict(blocked, S, BCount), format('Prolog tests: ~d passed, ~d failed, ~d timed out, ~d blocked~n', [P, F, T, BCount]), (P > 0, F =:= 0, T =:= 0 -> true; (P =:= 0, F =:= 0, T =:= 0 -> (format(user_error, 'No Prolog test cases executed~n', []), fail); fail)))), halt" -t 'halt(1)'	-
 purescript	tool	bash {root}/scripts/data/purescript_test.sh	-
-python	tool	pytest	python3 -m compileall -q src
+python	tool	bash {root}/scripts/data/python_test.sh	python3 -m compileall -q src
 r	manual	make test	Rscript -e 'invisible(lapply(list.files("R", full.names=TRUE), parse))'
-racket	tool	raco test -x .	-
+racket	tool	bash {root}/scripts/data/racket_test.sh	-
 raku	manual	raku -e 'use TAP:ver<0.3.4+>; use Path::Finder:ver<0.4.4+>; my @sources = find("t/", :and[ :or[ { :depth(0) }, { :ext(any(<t rakutest t6>)), :skip-hidden } ], :file ]).sort; @sources.elems or die "No Raku test files configured in t/\n"; my $result = TAP::Harness.new.run(@sources, :cwd($*CWD), :include-dirs[$*CWD.add("lib")]).result; if $result.bailout.defined { note $result.bailout.message; exit 1 }; exit 1 if $result.has-errors; die "Raku test execution incomplete\n" unless $result.result-count == @sources.elems; die "No Raku test cases executed\n" unless [+] $result.results.map({ .tests-run - .skipped });'	-
 rescript	manual	npm test	-
 rexx	manual	bash {root}/scripts/data/rexx_test.sh	-
-ruby	manual	bundle exec rspec	ruby -c src/{module}.rb
+ruby	manual	bash {root}/scripts/data/ruby_test.sh	ruby -c src/{module}.rb
 rust	tool	bash {root}/scripts/data/rust_test.sh	cargo fmt --check
 scala	manual	sbt -batch -no-colors 'set Test / test := { (Test / test).value; val result = (Test / executeTests).value; if (result.overall != sbt.protocol.testing.TestResult.Passed) throw new MessageOnlyException("Scala tests failed"); if (result.events.values.map(_.passedCount).sum == 0) throw new MessageOnlyException("No Scala test cases passed") }' test	-
 scheme	manual	cd test && { found=0; failed=0; for suite in ./*_guile.scm; do [ -f "$suite" ] || continue; found=1; guile --no-auto-compile -c '(use-modules (srfi srfi-64)) (define runner (test-runner-simple)) (define bad-group #f) (define old-count (test-runner-on-bad-count runner)) (define old-name (test-runner-on-bad-end-name runner)) (test-runner-on-bad-count! runner (lambda args (set! bad-group #t) (apply old-count args))) (test-runner-on-bad-end-name! runner (lambda args (set! bad-group #t) (apply old-name args))) (test-runner-current runner) (catch (quote quit) (lambda () (load (canonicalize-path (cadr (command-line))))) (lambda (key . args) (error "Scheme suite exited before validation" args))) (when (or bad-group (not (null? (test-runner-group-stack runner)))) (error "Scheme test group mismatch")) (when (= 0 (+ (test-runner-pass-count runner) (test-runner-fail-count runner) (test-runner-xfail-count runner) (test-runner-xpass-count runner))) (error "No Scheme test cases executed")) (exit (= 0 (test-runner-fail-count runner) (test-runner-xpass-count runner)))' "$suite" || failed=1; done; if [ "$found" -eq 0 ]; then printf 'No Scheme test files configured in test/\n' >&2; false; else [ "$failed" -eq 0 ]; fi; }	-
@@ -47,4 +47,4 @@ tcl-tk	manual	cd test && { found=0; failed=0; for suite in ./*.test; do [ -f "$s
 typescript	tool	bash {root}/scripts/data/typescript_test.sh	-
 v	tool	bash {root}/scripts/data/v_test.sh	v fmt -verify src
 vala	tool	bash {root}/scripts/data/vala_test.sh	-
-zig	tool	zig build test	zig fmt --check src
+zig	tool	bash {root}/scripts/data/zig_test.sh	zig fmt --check src

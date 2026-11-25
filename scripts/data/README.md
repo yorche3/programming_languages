@@ -94,9 +94,43 @@ Scheme ejecuta cada suite `*_guile.scm` y comprueba su runner SRFI-64.
 Tcl ejecuta cada suite `.test` y comprueba los contadores de Tcltest al limpiar.
 Scala conserva la tarea e informe nativos de sbt y comprueba sus resultados
 estructurados; rechaza las ejecuciones sin casos aprobados.
+Assembly ejecuta `make run` y valida el resumen de contadores; rechaza el runner
+de scaffold que solo anuncia que no hay tests.
+C++ ejecuta Bazel con la salida completa de Google Test; valida los contadores
+y rechaza el falso verde de un target aprobado con cero casos.
+Ada ejecuta `alr -C tests run` y valida el resumen textual de AUnit; rechaza
+resúmenes ausentes, duplicados, inconsistentes, fallidos o sin casos.
+Clojure ejecuta `clojure -T:build test` y exige un único resumen de Cognitect,
+al menos un test y cero fallos o errores; rechaza suites vacías y resúmenes
+ausentes o ambiguos.
+COBOL ejecuta `make test` y valida cada resumen `SUMMARY`; rechaza ejecuciones
+sin casos, con contadores inconsistentes o con fallos.
+Common Lisp valida y agrega los resúmenes FiveAM de `run-tests.lisp`: los
+contadores deben coincidir, incluir checks ejecutados y tener aprobados;
+rechaza suites vacías, solo omitidas, fallidas o con resúmenes inconsistentes.
+Elm conserva el comando nativo `elm-test`: la versión 0.19.1 comprobada
+devuelve error si `tests/` no contiene archivos Elm; no necesita wrapper para
+rechazar esa suite vacía.
+Zig ejecuta `zig build test --summary all` y exige que todos los pasos y al
+menos un test aparezcan aprobados en el resumen; rechaza targets vacíos,
+incompletos o sin un resumen único.
+C# y F# comparten `dotnet_test.sh`: ejecuta `dotnet test` con informes TRX
+temporales y exige casos aprobados y contadores consistentes; rechaza informes
+vacíos, inválidos, fallidos o solo omitidos.
+Java ejecuta `mvn clean test` y valida informes Surefire nuevos, legibles, sin
+fallos y con casos aprobados.
+Python ejecuta pytest con un informe JUnit temporal y exige al menos un test
+aprobado; rechaza suites vacías, resultados inconsistentes y suites solo omitidas.
+Ruby ejecuta RSpec con JSON temporal y exige ejemplos aprobados; rechaza
+ejecuciones vacías, solo pendientes, fallidas o con resúmenes inconsistentes.
+Lua valida el resumen de Busted y requiere casos aprobados; acepta pendientes
+junto con aprobados y rechaza suites vacías o solo pendientes.
+Racket ejecuta `raco test -x .` y exige el resumen RackUnit con tests aprobados;
+rechaza ejecuciones sin tests o sin un resumen único.
 Rust valida el resumen `libtest` de cada target Cargo y exige al menos un caso
 aprobado; admite casos omitidos junto a aprobados, pero rechaza targets sin
-resumen. Otros formatos requieren revisión.
+resumen. Un test personalizado `harness = false` se probó y se rechaza si no
+emite el resumen `libtest`; otros formatos y versiones requieren revisión.
 Haskell selecciona las suites del paquete actual y comprueba el resumen Hspec
 de cada una: rechaza resultados ausentes, vacíos o pendientes. Convierte en
 error `missing-home-modules` para detectar módulos locales importados pero no
@@ -122,9 +156,44 @@ Scheme runs every `*_guile.scm` suite and checks its SRFI-64 runner.
 Tcl runs every `.test` suite and checks Tcltest counters at cleanup.
 Scala retains sbt's native task and report and checks structured results;
 it rejects runs without passing cases.
+Assembly runs `make run` and validates its counter summary; the scaffold runner
+that only announces there are no tests is rejected.
+C++ runs Bazel with full Google Test output, validates the counters and rejects
+the false green where Bazel passes a test target with zero test cases.
+Ada runs `alr -C tests run` and validates AUnit's text summary, rejecting
+missing, duplicate, inconsistent, failing, or zero-test results.
+Clojure runs `clojure -T:build test` and requires exactly one Cognitect test
+summary with at least one test and no failures or errors; empty runs and missing
+or ambiguous summaries are rejected.
+COBOL runs `make test` and validates every `SUMMARY` block, rejecting runs
+without cases, inconsistent counters or failures.
+Common Lisp validates and aggregates FiveAM summaries from `run-tests.lisp`:
+counters must match, include executed checks and contain passes; empty,
+skipped-only, failing or inconsistent results are rejected.
+Elm keeps the native `elm-test` command: the checked 0.19.1 version exits with
+an error when `tests/` contains no Elm files, so no wrapper is needed to reject
+that empty suite.
+Zig runs `zig build test --summary all` and requires every build step and at
+least one test to appear as passed in the summary; empty or incomplete targets
+and missing or ambiguous summaries are rejected.
+C# and F# share `dotnet_test.sh`: it runs `dotnet test` with temporary TRX
+reports and requires passing cases and consistent counters; empty, invalid,
+failing, or skipped-only results are rejected.
+Java runs `mvn clean test` and validates the fresh Surefire XML reports,
+rejecting missing, malformed, failing, or zero-passing results.
+Python runs pytest with a temporary JUnit report and requires at least one
+passing test; empty, inconsistent, and skipped-only suites are rejected.
+Ruby runs RSpec with temporary JSON output and requires passing examples;
+empty, pending-only, failing, or inconsistent runs are rejected.
+Lua validates Busted's summary and requires passing cases; it accepts pending
+cases alongside passes and rejects empty or pending-only suites.
+Racket runs `raco test -x .` and requires a RackUnit summary with passing tests;
+runs without tests or a unique summary are rejected.
 Rust validates each Cargo target's `libtest` summary and requires at least one
 passing case; ignored cases may accompany passing cases, but targets without a
-summary are rejected. Other formats require review.
+summary are rejected. A custom `harness = false` test was verified to be
+rejected when it does not emit a `libtest` summary; other formats and versions
+require review.
 Haskell selects the current package's test suites and checks each Hspec summary,
 rejecting missing, empty or pending results. It promotes `missing-home-modules`
 to an error to detect imported local modules missing from compiled targets.
@@ -165,19 +234,23 @@ language-specific patterns and verifies an artifact with `git check-ignore`.
 
 **ES:** Assembly crea una fuente NASM mínima y un runner que anuncia que no
 hay tests; también crea `.gitignore` con patrones si falta el archivo. Los
-archivos existentes se conservan; el paso de suite conecta los grupos al runner.
+archivos existentes se conservan. `assembly_test.sh` exige un resumen con
+casos aprobados y rechaza el runner vacío.
 
 **EN:** Assembly creates a minimal NASM source and a runner announcing that
 there are no tests, plus an ignore file when absent. Existing content is preserved;
-the suite step connects its groups to the runner.
+`assembly_test.sh` requires a summary with passing cases and rejects the empty
+runner.
 
 **ES:** C preserva cabecera, fuente y Makefile existentes; si falta
-`.gitignore`, incluye `bin/` y `obj/`. Criterion aporta el runner incluso
-sin casos; la suite añade las pruebas, sin crear otro `main`.
+`.gitignore`, incluye `bin/` y `obj/`. Criterion devuelve éxito incluso sin
+casos; `c_test.sh` valida su resumen y exige al menos una prueba aprobada. La
+suite añade las pruebas, sin crear otro `main`.
 
 **EN:** C preserves existing headers, sources and Makefiles, and creates a
 missing `.gitignore` for `bin/` and `obj/`. Criterion supplies the runner
-even without cases; the suite adds tests without creating another `main`.
+even without cases. `c_test.sh` validates its summary and rejects zero-test
+runs; the suite adds tests without creating another `main`.
 
 **ES:** D crea `source/{module}.d` y `test/`, y un `.gitignore` si falta.
 Solo retira el `app.d` idéntico a la muestra verificada y configura `test/`
@@ -229,6 +302,14 @@ y rechaza rutas simbólicas o de tipo inesperado.
 **EN:** `java_scaffold.sh` creates the source package, a valid Maven POM with
 JUnit 5/Surefire, and a `target/` ignore file; it writes only missing files and
 rejects symlinks or unexpected path types.
+
+**ES:** `java_test.sh` ejecuta `mvn clean test` y valida los informes XML
+Surefire recién generados; rechaza informes ausentes o ilegibles, fallos y
+ejecuciones sin casos aprobados.
+
+**EN:** `java_test.sh` runs `mvn clean test` and validates freshly generated
+Surefire XML reports; it rejects missing or unreadable reports, failures, and
+runs with no passing cases.
 
 **ES:** Elm `init` crea `elm.json` y `src/`, pero no prepara el runner ni los
 tests. El scaffold valida el manifiesto, asegura `src/` y `tests/`, y crea el
@@ -289,22 +370,20 @@ Pending examples are accepted when some examples pass.
 configura Alcotest y añade un sentinel fallido solo para la plantilla exacta
 de Dune 3.24 sin otros archivos en `test/`; conserva variantes y archivos
 propios. `ocaml_test.sh` fuerza `dune runtest`, ejecuta las acciones en serie
-y exige un resumen Alcotest no vacío por acción `runtest` reconocida en la
-salida corta de Dune 3.24.2. Rechaza acciones `runtest` etiquetadas que sean
-silenciosas y ejecuciones sin etiquetas reconocidas. Una acción personalizada
-que ejecuta varios programas, o un programa ejecutado como dependencia sin
-etiqueta `runtest`, puede quedar oculto: revisar esas acciones y otras
-versiones de Dune.
+y exige un resumen Alcotest no vacío por acción `runtest` en la salida corta.
+También rechaza acciones no reconocidas bajo `test/` y alias que no sean de
+`runtest`, excepto los comandos de compilación conocidos. Con Dune 3.24.2 se
+verificó el rechazo de una regla silenciosa junto a una suite aprobada; otras
+versiones de Dune siguen sin verificar.
 
 **EN:** OCaml keeps the Dune-generated layout. `ocaml_scaffold.sh` configures
 Alcotest and adds a failing sentinel only for the exact Dune 3.24 template
 without other files in `test/`; authored files and variants are preserved.
 `ocaml_test.sh` forces `dune runtest`, runs actions sequentially and requires
-one nonempty Alcotest summary per `runtest` action recognized in Dune 3.24.2's
-short output. Labeled silent `runtest` actions and runs without recognized
-labels are rejected. A custom action running multiple programs, or a program
-run as a dependency without a `runtest` label, can still be hidden: review
-such actions and other Dune versions.
+one nonempty Alcotest summary per `runtest` action in short output. It also
+rejects unrecognized actions under `test/` and aliases other than `runtest`,
+apart from known compiler commands. With Dune 3.24.2 it rejected a silent rule
+alongside a passing suite; other Dune versions remain unverified.
 
 **ES:** Vala conserva el layout Meson homologado. `vala_scaffold.sh` mueve
 solo las muestras exactas de Meson 1.3.2 a `src/` y `test/`, actualiza las
@@ -546,22 +625,30 @@ groups, and the framework returns a nonzero code for failed assertions.
 
 **ES:** COBOL crea fuente, runner, Makefile y `.gitignore` cuando faltan. El
 Makefile enlaza el runner antes de los helpers y comprueba su presencia incluso
-si ya existe el ejecutable. La suite conecta los grupos y propaga fallos.
+si ya existe el ejecutable. `cobol_test.sh` exige resúmenes no vacíos con
+contadores coherentes. La suite conecta los grupos y propaga fallos.
 
 **EN:** COBOL creates a missing source, runner, Makefile and `.gitignore`.
 The Makefile links the runner before helpers and checks that it exists even
-when the executable is already present. The suite connects groups and
-propagates failures.
+when the executable is already present. `cobol_test.sh` requires non-empty
+summaries with consistent counters. The suite connects groups and propagates
+failures.
 
 **ES:** Grain crea fuente, runner y `test_status.gr`, Makefile y `.gitignore`
 si faltan. La suite conecta los grupos y pasa el resultado del framework a
 `TestStatus.finish`; el framework se adapta al dominio. Se preserva el
 contenido propio y solo se actualiza el runner vacío anterior reconocido.
+`glot test` también valida los resúmenes existentes `Tests:`/`Cases:` o las
+líneas individuales `Test ... PASSED/FAILED`; rechaza resultados vacíos,
+inconsistentes o fallidos aunque `make test` termine con éxito.
 
 **EN:** Grain creates a missing source, runner, `test_status.gr`, Makefile and
 `.gitignore`. The suite connects groups and passes the framework result to
 `TestStatus.finish`; the framework is adapted to the domain. Authored content
 is preserved and only the recognized previous empty runner is upgraded.
+`glot test` also validates existing `Tests:`/`Cases:` summaries or individual
+`Test ... PASSED/FAILED` lines, rejecting empty, inconsistent or failing
+results even if `make test` exits successfully.
 
 **ES:** R crea, si faltan, los metadatos iniciales, fuente, NAMESPACE,
 runner, test vacío, Makefile y `.gitignore`. Conserva contenido propio;
