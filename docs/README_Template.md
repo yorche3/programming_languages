@@ -131,6 +131,28 @@ incluyas dependencias ni capacidades que no hayas verificado.
 
 **EN:** One row per contract operation. When the module has several approaches to the same algorithm (recursive, accumulator, iterative), the notes column is where each one is named.
 
+**ES:** La tabla no sustituye la explicación. En Core, desarrolla para cada
+algoritmo o ADT la idea que representa, por qué sus pasos son necesarios,
+qué invariante mantienen, por qué termina y de dónde sale el coste.
+Incluye un ejemplo pequeño razonado que conecte esa teoría con la
+implementación real. Explica el propósito de la estructura y sus operaciones,
+no solo nombres técnicos: por ejemplo, FIFO atiende por llegada y un heap
+por prioridad. Usa el fundamento de la especificación como referencia, sin
+copiarlo entero ni ampliar el contrato. En módulos matemáticos, declara
+las convenciones del dominio cuando importen, como si los naturales incluyen
+cero; no presentes una convención como la única definición.
+
+**EN:** The table does not replace explanation. In Core, develop each
+algorithm or ADT's underlying idea, why its steps are needed, which invariant
+they maintain, why it terminates, and how its cost follows.
+Include a small worked example connecting theory to the actual implementation.
+Explain the structure's purpose and operations, not merely technical names:
+FIFO serves by arrival, while a heap serves by priority.
+Refer to the specification's foundation without copying it in full or
+expanding the contract. In mathematical modules, state relevant domain
+conventions, such as whether naturals include zero; do not present a convention
+as the only definition.
+
 ## 🧩 Decisiones de diseño / Design decisions
 
 | Decisión / Decision | Alternativa considerada / Alternative | Razón / Reason |

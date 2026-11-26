@@ -50,7 +50,7 @@ specifications live here.
 
 - [Guía de inicialización / Project initialization guide](core/00_Project_Initialization_Guide.md)
 - Guías de implementación por familia / Family implementation guides:
-  [04 Numbers](implementations/04_Numbers.md) · [05 Naive Sort](implementations/05_Naive_Sort.md) · [06 Data Structures Basics](implementations/06_Data_Structures_Basics.md) · [07 Data Structures Advanced](implementations/07_Data_Structures_Advanced.md)
+  [04 Numbers](implementations/04_Numbers.md) · [05 Naive Sort](implementations/05_Naive_Sort.md) · [06 Data Structures Basics](implementations/06_Data_Structures_Basics.md) · [07 Data Structures Advanced](implementations/07_Data_Structures_Advanced.md) · [08 Efficient Sort](implementations/08_Efficient_Sort.md)
 - [Niveles de idiomaticidad / Idiomaticity levels](ruleset/IDIOMATICITY_LEVELS.md)
 - [Política de desviaciones / Deviation policy](ruleset/DEVIATION_POLICY.md)
 - [Registro de cierres / Closure record](ROADMAP_UPDATE_CHECKLIST.md)
