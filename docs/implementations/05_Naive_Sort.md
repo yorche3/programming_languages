@@ -4,8 +4,8 @@ title: Guía 05 — Naive Sort
 nav_exclude: true
 ---
 
-# 05 — Naive Sort: cómo se implementa en cada familia
-# 05 — Naive Sort: how it is implemented in each family
+# 05 — Naive Sort: implementación por familias y alternativas
+# 05 — Naive Sort: family implementations and alternatives
 
 > **ES:** Guía de implementación del módulo. Explica **cómo** y **por qué** los tres ordenamientos elementales se escriben de forma distinta en cada familia de lenguajes. **No añade requisitos**: los criterios están en [`05_Naive_Sort.md`](../core/algorithms/05_Naive_Sort.md) y, si esta guía y la especificación discrepan, manda la especificación.
 >
@@ -13,7 +13,7 @@ nav_exclude: true
 
 ---
 
-## 1. La solución canónica, en llano / The canonical solution, in plain words
+## 1. Qué se conserva y qué cambia / What stays and what changes
 
 **ES:** El módulo pide **tres algoritmos** —selección, burbuja e inserción— sobre la **misma secuencia de enteros**, y la diferencia entre ellos no es el resultado (los tres ordenan) sino **qué se mueve y cuándo**:
 
@@ -27,9 +27,7 @@ nav_exclude: true
 
 **What the specification actually fixes:** the three algorithms, the 7 cases, **step-by-step** comparison (no library sort and no library selection, author's decision of 2026-10-17), bubble's early exit, the failure indicator with no exceptions and no `Option`/`Result`, the empty sequence returned as is, the representation declared in the README, the $O(n^2)$ ceiling and the source/test split. **What is just form:** in-place versus returned copy, one file or three, and how the early exit is expressed.
 
----
-
-## 2. Los ejes que cambian en este módulo / The axes that change here
+### Los ejes que cambian aquí / The axes that change here
 
 | Eje / Axis | Pregunta / Question | Si sí / If yes | Si no / If no |
 |---|---|---|---|
@@ -43,21 +41,21 @@ nav_exclude: true
 
 ---
 
-## 3. Las familias: cómo definen el recorrido / The families: how they define traversal
+## 2. Familias: decisiones concretas / Families: concrete decisions
 
 **ES:** Lo que separa a las familias no es el resultado —las tres ordenan— sino **cómo se define recorrer una secuencia** y **qué se puede tocar** al hacerlo. Ahí está el cambio real: dónde vive el «apuntador», si existe el acceso por índice y qué se hace cuando no hay nada que devolver.
 **EN:** What separates the families is not the result — all three sort — but **how traversal is defined** and **what may be touched** while doing it. That is the real change: where the “pointer” lives, whether indexed access exists, and what happens when there is nothing to return.
 
 | Familia / Family | Cómo define el recorrido / How it defines traversal | Qué puede mutar / What it may mutate | Cómo trata la ausencia / How it handles absence | Variante / Variant |
 |---|---|---|---|---|
-| **F1** OO con null | Contenedor indexable: se avanza con índices enteros y la longitud es del propio contenedor | La secuencia recibida | Un valor nulo del mismo tipo | 4.1 |
-| **F2** Scripting dinámico | Igual que F1, pero sin tipos: el índice es un entero por convención, no por contrato | La secuencia recibida | Un valor «sin valor» | 4.1, con el contrato sostenido por la suite |
-| **F3** C-lineage | Array y longitud explícita: el recorrido es aritmética de índices y el final se reconoce por la longitud | Memoria propia | Puntero nulo o centinela del dominio | 4.1 |
-| **F4** Sistemas modernos | Vista o slice con longitud: se indexa, pero una vista no es una copia | El buffer o la vista, según el tipo | Ausencia tipada o par «valor + bandera» | 4.1; el coste de la vista no es el de la copia |
-| **F5** Funcional ML/Haskell | La secuencia es una lista: sólo se descompone en cabeza y cola, y cada paso se decide por casos | Nada | La secuencia no admite ausencia: se declara | 4.3 |
-| **F6** Lisp | Un término (lista o par): recorrido recursivo con funciones de apoyo para localizar y extraer | Sólo si el lenguaje ofrece celdas mutables | Lista vacía, falso o nulo | 4.3, con helpers propios |
-| **F7** BEAM | Lista inmutable y recursión de cola: el estado del recorrido viaja en argumentos | Nada | Un valor ausente del dominio | 4.3; la pasada devuelve el corte |
-| **F8** Multi-paradigma | Depende del tipo elegido: indexable mutable o colección inmutable | Según el tipo | Según el tipo | 4.1 o 4.3; el README declara cuál |
+| **F1** OO con null | Contenedor indexable: se avanza con índices enteros y la longitud es del propio contenedor | La secuencia recibida | Un valor nulo del mismo tipo | 3 |
+| **F2** Scripting dinámico | Igual que F1, pero sin tipos: el índice es un entero por convención, no por contrato | La secuencia recibida | Un valor «sin valor» | 3, con el contrato sostenido por la suite |
+| **F3** C-lineage | Array y longitud explícita: el recorrido es aritmética de índices y el final se reconoce por la longitud | Memoria propia | Puntero nulo o centinela del dominio | 3 |
+| **F4** Sistemas modernos | Vista o slice con longitud: se indexa, pero una vista no es una copia | El buffer o la vista, según el tipo | Ausencia tipada o par «valor + bandera» | 3; el coste de la vista no es el de la copia |
+| **F5** Funcional ML/Haskell | La secuencia es una lista: sólo se descompone en cabeza y cola, y cada paso se decide por casos | Nada | La secuencia no admite ausencia: se declara | 5 |
+| **F6** Lisp | Un término (lista o par): recorrido recursivo con funciones de apoyo para localizar y extraer | Sólo si el lenguaje ofrece celdas mutables | Lista vacía, falso o nulo | 5, con helpers propios |
+| **F7** BEAM | Lista inmutable y recursión de cola: el estado del recorrido viaja en argumentos | Nada | Un valor ausente del dominio | 5; la pasada devuelve el corte |
+| **F8** Multi-paradigma | Depende del tipo elegido: indexable mutable o colección inmutable | Según el tipo | Según el tipo | 3 o 5; el README declara cuál |
 | **F9** Lógico | No hay recorrido imperativo: el orden se expresa como relación y el motor unifica | Nada | Fallo de unificación | Variante relacional, declarada en el README |
 
 **ES:** De ahí salen las dos únicas cosas que cambian de verdad en el código: **el apuntador** (un índice, un cursor o la propia recursión) y **qué se devuelve** (la misma secuencia o una nueva). Las tres variantes de pseudocódigo recogen justo eso.
@@ -65,9 +63,7 @@ nav_exclude: true
 
 ---
 
-## 4. Las variaciones, en pseudocódigo / The variations, in pseudocode
-
-### 4.1 La variante del módulo: secuencia indexable / The module's variant: indexable sequence
+## 3. La variante del módulo: secuencia indexable / The module's variant: indexable sequence
 
 **ES:** Es la de la especificación, repetida aquí para poder compararla. Todo lo que hace falta para recorrer está en dos enteros y en el operador de índice: el apuntador es `i`/`j` y se devuelve **la misma** secuencia.
 **EN:** This is the specification's own, repeated here so it can be compared. Everything needed to traverse lives in two integers and the index operator: the pointer is `i`/`j` and **the same** sequence is returned.
@@ -114,7 +110,7 @@ insertion_sort(arr)
 **ES:** El corte es la bandera `swapped`. Y el mínimo se busca con un bucle (`for j`), no con una función: por eso este pseudocódigo hace visible el conteo de comparaciones.
 **EN:** The early exit is the `swapped` flag, and the minimum is found with a loop (`for j`), not a function — which is why this pseudocode makes the comparison count visible.
 
-### 4.2 Variante del apuntador: no se indexa, pero sí se muta / Pointer variant: no indexing, but mutation allowed
+## 4. Variante del apuntador: no se indexa, pero sí se muta / Pointer variant: no indexing, but mutation allowed
 
 **ES:** Cuando la secuencia es una estructura enlazada, `arr[j]` no existe: el recorrido avanza con un cursor y la posición se recuerda guardando el cursor, no un índice. El algoritmo no cambia; cambia que cada paso pide `siguiente(cursor)`.
 **EN:** When the sequence is a linked structure, `arr[j]` does not exist: traversal advances a cursor and position is remembered by keeping the cursor, not an index. The algorithm does not change; what changes is that each step asks for `siguiente(cursor)`.
@@ -147,13 +143,13 @@ bubble_sort(seq)
     return seq
 ```
 
-**ES:** Dos detalles que 4.1 no muestra: `primero`/`siguiente`/`fin` son **funciones de apoyo** que hay que tener o escribir, y `min`/`max` de la biblioteca no sirven aunque existan, porque hacen falta **posiciones**, no valores. La inserción, en cambio, deja de desplazar elementos y pasa a re-enlazar: su forma práctica es la de 4.3.
-**EN:** Two details 4.1 does not show: `primero`/`siguiente`/`fin` are **helper functions** you must have or write, and the library's `min`/`max` do not help even when they exist, because **positions** are needed, not values. Insertion, on the other hand, stops shifting elements and starts re-linking: its practical shape is 4.3's.
+**ES:** Dos detalles que la variante 3 no muestra: `primero`/`siguiente`/`fin` son **funciones de apoyo** que hay que tener o escribir, y `min`/`max` de la biblioteca no sirven aunque existan, porque hacen falta **posiciones**, no valores. La inserción, en cambio, deja de desplazar elementos y pasa a re-enlazar: su forma práctica es la de la variante 5.
+**EN:** Two details the variant 3 does not show: `primero`/`siguiente`/`fin` are **helper functions** you must have or write, and the library's `min`/`max` do not help even when they exist, because **positions** are needed, not values. Insertion, on the other hand, stops shifting elements and starts re-linking: its practical shape is variant 5's.
 
-### 4.3 La variante por casos: no se muta nada / The clause-based variant: nothing is mutated
+## 5. La variante por casos: no se muta nada / The clause-based variant: nothing is mutated
 
-**ES:** Es la forma de las familias que no pueden mutar. Ya no hay apuntador: el recorrido **es** la descomposición en cabeza y cola, y cada algoritmo se escribe como casos. Lo que en 4.1 era una bandera, aquí es un valor que la pasada devuelve; lo que era un índice, aquí es la posición del elemento dentro de la lista.
-**EN:** This is the form used by families that cannot mutate. There is no pointer any more: traversal **is** the head/tail decomposition, and each algorithm is written as clauses. What was a flag in 4.1 is a value the pass returns; what was an index is the element's position in the list.
+**ES:** Es la forma de las familias que no pueden mutar. Ya no hay apuntador: el recorrido **es** la descomposición en cabeza y cola, y cada algoritmo se escribe como casos. Lo que en la variante 3 era una bandera, aquí es un valor que la pasada devuelve; lo que era un índice, aquí es la posición del elemento dentro de la lista.
+**EN:** This is the form used by families that cannot mutate. There is no pointer any more: traversal **is** the head/tail decomposition, and each algorithm is written as clauses. What was a flag in variant 3 is a value the pass returns; what was an index is the element's position in the list.
 
 ```pseudocode
 # selección: se extrae el mínimo y se ordena el resto
@@ -191,25 +187,25 @@ insertar(x, y::t) = if x <= y then x :: y :: t
 
 ---
 
-## 5. Consecuencias, leídas desde el pseudocódigo / Consequences, read from the pseudocode
+## 6. Consecuencias, leídas desde el pseudocódigo / Consequences, read from the pseudocode
 
 **ES:** El techo $O(n^2)$ lo fija la especificación y no cambia entre variantes. Lo que cambia es **qué se gasta** para conseguirlo, y se ve en el propio pseudocódigo:
 
-- **4.1 — memoria $O(1)$ y comparaciones a la vista.** Las variables son `i`, `j`, `min_idx`, `swapped` y `key`: un puñado de enteros y un booleano, siempre los mismos. Las comparaciones son bucles visibles, que es justo lo que el módulo quiere que se cuente.
-- **4.2 — mismas comparaciones, otro coste de recorrido.** Dos cursores en vez de dos índices y ninguna variable más, así que sigue siendo $O(1)$; pero se pierde el acceso aleatorio: llegar al elemento `n` cuesta `n` pasos, y la inserción deja de desplazar y re-enlaza. La complejidad no cambia; el trabajo por paso, sí.
-- **4.3 — memoria $O(n)$ por llamada.** Cada paso construye una lista nueva: la selección asigna una por elemento, la burbuja una por pasada y la inserción reconstruye la cola por elemento ($O(n^2)$ asignaciones). Las comparaciones son las mismas; lo que se gasta es memoria. El corte temprano tampoco desaparece: pasa a ser el valor que devuelve la pasada, y por eso la recursión puede parar.
-- **Corte temprano, en las tres.** Es el único punto donde el tiempo depende del orden de la entrada: sobre la secuencia ya ordenada la burbuja hace **una** pasada, y sin el corte haría todas. En 4.3 eso sólo funciona si la recursión es de cola; si no lo es, la pila crece además de asignar.
+- **3 — memoria $O(1)$ y comparaciones a la vista.** Las variables son `i`, `j`, `min_idx`, `swapped` y `key`: un puñado de enteros y un booleano, siempre los mismos. Las comparaciones son bucles visibles, que es justo lo que el módulo quiere que se cuente.
+- **4 — mismas comparaciones, otro coste de recorrido.** Dos cursores en vez de dos índices y ninguna variable más, así que sigue siendo $O(1)$; pero se pierde el acceso aleatorio: llegar al elemento `n` cuesta `n` pasos, y la inserción deja de desplazar y re-enlaza. La complejidad no cambia; el trabajo por paso, sí.
+- **5 — memoria $O(n)$ por llamada.** Cada paso construye una lista nueva: la selección asigna una por elemento, la burbuja una por pasada y la inserción reconstruye la cola por elemento ($O(n^2)$ asignaciones). Las comparaciones son las mismas; lo que se gasta es memoria. El corte temprano tampoco desaparece: pasa a ser el valor que devuelve la pasada, y por eso la recursión puede parar.
+- **Corte temprano, en las tres.** Es el único punto donde el tiempo depende del orden de la entrada: sobre la secuencia ya ordenada la burbuja hace **una** pasada, y sin el corte haría todas. En 5 eso sólo funciona si la recursión es de cola; si no lo es, la pila crece además de asignar.
 
 **Coste de expresión medido** (líneas de la fuente del módulo por lenguaje, 2026-10-17): de **73** en `ruby` y **119** en `erlang` a **375** en `clojure`, **447** en `cobol` y **751** en `assembly`. Los tres algoritmos y sus 7 casos son los mismos en los 50.
 
-**EN:** The $O(n^2)$ ceiling is fixed by the specification and does not change across variants; what changes is **what you spend** to get there, and it shows in the pseudocode itself. 4.1 keeps $O(1)$ state with the comparisons as visible loops; 4.2 makes the same comparisons with two cursors but loses random access (reaching element `n` costs `n` steps) and turns insertion's shift into a re-link; 4.3 allocates a new list per step — one per element for selection, one per pass for bubble, and a rebuilt tail per element for insertion ($O(n^2)$ allocations) — with the same comparisons but $O(n)$ memory per call. The early exit never disappears; in 4.3 it becomes the value the pass returns, which is what lets the recursion stop (and needs a tail call to keep the stack constant). Measured expression cost: 73 lines in Ruby to 751 in Assembly.
+**EN:** The $O(n^2)$ ceiling is fixed by the specification and does not change across variants; what changes is **what you spend** to get there, and it shows in the pseudocode itself. 3 keeps $O(1)$ state with the comparisons as visible loops; 4 makes the same comparisons with two cursors but loses random access (reaching element `n` costs `n` steps) and turns insertion's shift into a re-link; 5 allocates a new list per step — one per element for selection, one per pass for bubble, and a rebuilt tail per element for insertion ($O(n^2)$ allocations) — with the same comparisons but $O(n)$ memory per call. The early exit never disappears; in 5 it becomes the value the pass returns, which is what lets the recursion stop (and needs a tail call to keep the stack constant). Measured expression cost: 73 lines in Ruby to 751 in Assembly.
 
 ---
 
-## 6. Trampas para quien llega nuevo / Traps for newcomers
+## 7. Trampas para quien llega nuevo / Traps for newcomers
 
 - **`min`/`max` de la biblioteca no valen para el paso interno.** La especificación pide comparaciones **paso a paso**; usar el mínimo del sistema esconde justo el conteo que el módulo quiere enseñar. La regla se ancla a esa frase del enunciado, no a un criterio aparte.
-- **La bandera de corte tiene tres formas legítimas**: una variable (`swapped`, en 4.1 y 4.2), una pasada que devuelve la lista y si cambió (4.3) o una pasada recursiva (4.3). Lo que no vale es una burbuja que nunca mira si la pasada intercambió algo.
+- **La bandera de corte tiene tres formas legítimas**: una variable (`swapped`, en las variantes 3 y 4), una pasada que devuelve la lista y si cambió (variante 5) o una pasada recursiva (variante 5). Lo que no vale es una burbuja que nunca mira si la pasada intercambió algo.
 - **Los 7 casos van sobre una copia del fixture cuando la función ordena in-place.** Si no, el segundo algoritmo recibe una secuencia ya ordenada y el caso no prueba nada.
 - **`-1` no es una secuencia.** En este módulo el indicador representable es un valor ausente (`null`, `nil`, `undef`, `()`, `nothing`); las familias cuyo tipo no lo admite lo **declaran** en su README y no es un defecto.
 - **En la variante por casos la inserción no es un bucle.** `insertar(h, insertion_sort(t))` ordena la cola y luego inserta la cabeza: no es una versión «rara», es el mismo algoritmo leído al revés.
@@ -218,11 +214,48 @@ insertar(x, y::t) = if x <= y then x :: y :: t
 
 ---
 
-## 7. Dónde seguir / Where next
+## 8. Cómo validar y explicar la elección / Validating and explaining a choice
 
-| Capa / Layer | Documento / Document |
-|---|---|
-| Qué se exige / What is required | [`05_Naive_Sort.md`](../core/algorithms/05_Naive_Sort.md) |
-| Las familias en general / Families in general | [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md) |
-| Qué obliga tu lenguaje / What your language mandates | [`idioms/{lang}.md`](../ruleset/idioms/) |
-| Qué se verificó en los 50 / What was verified across the 50 | [`05_Audited_Naive_Sort.md`](../audits/05_Audited_Naive_Sort.md) |
+**ES:** La suite toma los 7 casos de la especificación. Como los tres algoritmos
+ordenan in-place, cada caso se ejecuta sobre una **copia del fixture**: si no, el
+segundo algoritmo recibe una secuencia ya ordenada y el caso no prueba nada.
+Añade la comprobación que el caso pide —el corte temprano con una secuencia ya
+ordenada y el indicador cuando la entrada no es representable—, no una
+comparación de formas internas distintas a la variante elegida.
+
+**EN:** The suite takes the specification's 7 cases. Because all three algorithms
+sort in-place, each case runs on a **copy of the fixture**: otherwise the second
+algorithm receives an already sorted sequence and the case proves nothing. Add
+the check the case asks for —the early exit on an already sorted sequence and the
+indicator when the input is not representable—, not a comparison against
+internal shapes other than the chosen variant.
+
+**ES:** En el README deja claro:
+
+1. Qué representación de secuencia existe (array, lista, slice o `int[]`) y por qué.
+2. Si se ordena in-place o se devuelve una copia, y qué cuesta cada una.
+3. Cómo se expresa el corte temprano y qué caso lo prueba.
+4. Qué indicador de fallo usa el tipo de retorno y qué pasa con la secuencia vacía.
+5. Que las comparaciones son paso a paso, sin `sort`, `min` ni `max` de biblioteca.
+6. Si los tres algoritmos viven en un archivo o en tres.
+
+**EN:** State in the README:
+
+1. Which sequence representation exists (array, list, slice or `int[]`) and why.
+2. Whether it sorts in-place or returns a copy, and what each costs.
+3. How the early exit is expressed and which case tests it.
+4. Which failure indicator the return type uses and what happens with the empty sequence.
+5. That comparisons are step by step, with no library `sort`, `min` or `max`.
+6. Whether the three algorithms live in one file or three.
+
+**ES:** Las fuentes y el contexto: qué se exige, en
+[`05_Naive_Sort.md`](../core/algorithms/05_Naive_Sort.md); el marco de familias,
+en [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md); lo que obliga tu
+lenguaje, en [`idioms/{lang}.md`](../ruleset/idioms/); y lo verificado en los 50,
+en [`05_Audited_Naive_Sort.md`](../audits/05_Audited_Naive_Sort.md).
+
+**EN:** Sources and context: what is required in
+[`05_Naive_Sort.md`](../core/algorithms/05_Naive_Sort.md); the family framework
+in [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md); what your language
+mandates in [`idioms/{lang}.md`](../ruleset/idioms/); and what was verified
+across the 50 in [`05_Audited_Naive_Sort.md`](../audits/05_Audited_Naive_Sort.md).

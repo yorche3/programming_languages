@@ -4,8 +4,8 @@ title: Guía 07 — Data Structures Advanced
 nav_exclude: true
 ---
 
-# 07 — Data Structures Advanced: cómo se implementa en cada familia
-# 07 — Data Structures Advanced: how it is implemented in each family
+# 07 — Data Structures Advanced: implementación por familias y alternativas
+# 07 — Data Structures Advanced: family implementations and alternatives
 
 > **ES:** Guía de implementación del módulo. Explica **cómo** y **por qué** el mismo contrato se escribe de forma distinta en cada familia de lenguajes. **No añade requisitos**: los criterios están en [`07_Data_Structures_Advanced.md`](../core/algorithms/07_Data_Structures_Advanced.md) y, si esta guía y la especificación discrepan, manda la especificación.
 >
@@ -17,7 +17,7 @@ nav_exclude: true
 
 ---
 
-## 1. La solución canónica, en llano / The canonical solution, in plain words
+## 1. Qué se conserva y qué cambia / What stays and what changes
 
 **ES:** El módulo tiene tres piezas y una regla que las une:
 
@@ -48,9 +48,7 @@ Sorted neighbours are a module policy, not the definition of a graph. A library
 collection stores neighbours only, never replaces the ADT. **What is form:**
 inherited or embedded value, mutated or rebuilt links and absence representation.
 
----
-
-## 2. Los ejes que cambian en este módulo / The axes that change here
+### Los ejes que cambian aquí / The axes that change here
 
 | Eje / Axis | Pregunta / Question | Si sí / If yes | Si no / If no |
 |---|---|---|---|
@@ -82,7 +80,7 @@ persistent records adapt links, not delegate the algorithm to a collection.
 
 ---
 
-## 3. Las familias: cómo definen la base y los enlaces / The families: how they define the base and the links
+## 2. Familias: decisiones concretas / Families: concrete decisions
 
 | Familia / Family | Cómo define la base `Node(value)` / How it defines the base | Qué puede mutar / What it may mutate | Ausencia del enlace / Link absence | Forma / Form |
 |---|---|---|---|---|
@@ -140,9 +138,7 @@ negative answer is thus never confused with a missing link or an empty list.
 
 ---
 
-## 4. Las variaciones, en pseudocódigo / The variations, in pseudocode
-
-### 4.1 A1: base con herencia / A1: base with inheritance
+## 3. A1: base con herencia / A1: base with inheritance
 
 **ES:** El valor se declara una vez en la base y los hijos **añaden** sus enlaces. Las validaciones viven en el hijo: la base no tiene nada que validar.
 **EN:** The value is declared once in the base and the children **add** their links. Validations live in the child: the base has nothing to validate.
@@ -183,7 +179,7 @@ insert(root, value)              # ABB: baja por la invariante y enlaza
     value == root.value     -> root            # duplicado: no crea nodo
 ```
 
-### 4.2 A2: valor embebido, sin tipo base / A2: embedded value, no base type
+## 4. A2: valor embebido, sin tipo base / A2: embedded value, no base type
 
 **ES:** Donde no hay herencia, el valor es **un campo más** del nodo hijo. El contrato no cambia: `init(value)` sigue fijando el valor y la ausencia de enlaces, y las validaciones siguen en el hijo.
 **EN:** Where there is no inheritance, the value is **just another field** of the child node. The contract does not change: `init(value)` still sets the value and the absent links, and validations stay in the child.
@@ -206,10 +202,10 @@ type GraphNode
     next_vertex = absent
 ```
 
-**ES:** La diferencia con 4.1 se ve en una línea: en A1 el hijo **no repite** `value`; en A2 lo declara. El resto —invariante, vértices, vecinos, indicadores— es idéntico.
-**EN:** The difference from 4.1 shows in one line: in A1 the child **does not repeat** `value`; in A2 it declares it. Everything else — invariant, vertices, neighbours, indicators — is identical.
+**ES:** La diferencia con la forma 3 se ve en una línea: en A1 el hijo **no repite** `value`; en A2 lo declara. El resto —invariante, vértices, vecinos, indicadores— es idéntico.
+**EN:** The difference from form 3 shows in one line: in A1 the child **does not repeat** `value`; in A2 it declares it. Everything else — invariant, vertices, neighbours, indicators — is identical.
 
-### 4.3 A3: enlaces que no se mutan, el árbol se reconstruye / A3: links that are not mutated, the tree is rebuilt
+## 5. A3: enlaces que no se mutan, el árbol se reconstruye / A3: links that are not mutated, the tree is rebuilt
 
 **ES:** Si los enlaces son inmutables, `insert` no escribe: **devuelve** un árbol nuevo con el camino reconstruido. `contains` sigue bajando por la invariante y no cambia.
 **EN:** If the links are immutable, `insert` does not write: it **returns** a new tree with the path rebuilt. `contains` still descends along the invariant and does not change.
@@ -237,7 +233,7 @@ value; no capacity check exists. An immutable graph returns the rebuilt registry
 with its counts: `add_vertex` preserves adjacency, and a missing-endpoint edge
 fails without changing the original value.
 
-### 4.4 A2 + A3 en la familia lógica: el árbol como relación / A2 + A3 in the logical family: the tree as a relation
+## 6. A2 + A3 en la familia lógica: el árbol como relación / A2 + A3 in the logical family: the tree as a relation
 
 **ES:** Donde no hay estructuras ni campos, el nodo es un **término** y el enlace es un argumento: la invariante vive en las cláusulas, no en un campo. La ausencia de hijo es `empty`; un duplicado no crea término nuevo, igual que en A1.
 **EN:** Where there are no structures or fields, the node is a **term** and the link is an argument: the invariant lives in the clauses, not in a field. A missing child is `empty`; a duplicate creates no new term, just as in A1.
@@ -273,7 +269,7 @@ in the README.
 
 ---
 
-## 5. Consecuencias, leídas desde el pseudocódigo / Consequences, read from the pseudocode
+## 7. Consecuencias, leídas desde el pseudocódigo / Consequences, read from the pseudocode
 
 **ES:** El coste se lee del propio pseudocódigo:
 
@@ -286,7 +282,7 @@ in the README.
 - **La memoria crece con los datos.** ABB `O(n)`; grafo `O(V + E)`. Una copia
   de vecinos añade `O(d(u))`. Un presupuesto físico del lenguaje se documenta
   sin convertirlo en capacidad del contrato ni prueba artificial de «lleno».
-- **La inmutabilidad se paga en asignaciones.** En 4.3, insertar reconstruye `h` nodos: mismo `O(h)` en comparaciones, pero `O(h)` asignaciones por inserción.
+- **La inmutabilidad se paga en asignaciones.** En 5, insertar reconstruye `h` nodos: mismo `O(h)` en comparaciones, pero `O(h)` asignaciones por inserción.
 
 **EN:** Cost follows the pseudocode: the BST pays height (`O(h)`, worst-case
 `O(n)` without balancing). Graph vertex lookup costs `O(V)`, plus `O(d(u))`
@@ -294,7 +290,7 @@ for adjacency; adding a vertex is `O(V)`, and edge insertion/query and neighbour
 copy are `O(V + d(u))`. Empty initialisation and count reads are `O(1)`. Storage
 is `O(n)` for BST, `O(V + E)` for graph and an extra `O(d(u))` for neighbour
 copies. Document physical memory budgets without turning them into contractual
-capacity or full-state tests. Form 4.3 adds `O(h)` allocations per tree insertion.
+capacity or full-state tests. Form 5 adds `O(h)` allocations per tree insertion.
 
 **ES:** `get_neighbors` puede devolver el valor inmutable existente sin copiarlo:
 se exige aislamiento observable, no identidad física distinta. En mutables se
@@ -310,7 +306,7 @@ without invalidating the declared upper bound.
 
 ---
 
-## 6. Trampas para quien llega nuevo / Traps for newcomers
+## 8. Trampas para quien llega nuevo / Traps for newcomers
 
 - **La base no valida.** Si `Node` empieza a comprobar enlaces o a devolver indicadores, el contrato se ha movido al sitio equivocado: cada hijo valida lo suyo.
 - **El `Node` del 07 no es el del 06.** Uno es `value + next` y pertenece a otro contrato; aquí la base tiene **solo** el valor y no se importa nada del módulo anterior.
@@ -337,11 +333,50 @@ without invalidating the declared upper bound.
 
 ---
 
-## 7. Dónde seguir / Where next
+## 9. Cómo validar y explicar la elección / Validating and explaining a choice
 
-| Capa / Layer | Documento / Document |
-|---|---|
-| Qué se exige / What is required | [`07_Data_Structures_Advanced.md`](../core/algorithms/07_Data_Structures_Advanced.md) |
-| Las familias en general / Families in general | [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md) |
-| Qué obliga tu lenguaje / What your language mandates | [`idioms/{lang}.md`](../ruleset/idioms/) |
-| Qué se verificó en los 50 / What was verified across the 50 | [`07_Audited_Data_Structures_Advanced.md`](../audits/07_Audited_Data_Structures_Advanced.md) |
+**ES:** La suite toma los casos de la especificación. Añade la comprobación
+estructural de la forma elegida, no la de otra: en A1/A2 el nodo hijo declara o
+hereda el valor según se haya elegido, y en A3 cada inserción devuelve un árbol
+nuevo. Comprueba que un duplicado no crece `size`, que los vecinos salen
+ordenados y sin duplicados, que `vertex_count` y `edge_count` son independientes,
+que una arista con extremo inexistente falla sin crearlo y que un resultado
+guardado de `get_neighbors` no cambia con inserciones posteriores.
+
+**EN:** The suite takes the specification's cases. Add the chosen form's
+structural check, not another's: in A1/A2 the child declares or inherits the
+value as chosen, and in A3 every insertion returns a new tree. Check that a
+duplicate does not grow `size`, that neighbours come sorted and unique, that
+`vertex_count` and `edge_count` are independent, that an edge with a missing
+endpoint fails without creating it, and that a saved `get_neighbors` result is
+unchanged by later insertions.
+
+**ES:** En el README deja claro:
+
+1. Qué base existe (A1 con herencia o A2 con valor embebido) y qué `Node` propio hay.
+2. Quién escribe los enlaces: la estructura (mutable) o el valor devuelto (reconstruido).
+3. Que el registro de vértices y la adyacencia son manuales, sin `Map`, `Dict`, `HashMap`, `Set` ni equivalentes.
+4. Qué representación usa la ausencia de enlace y qué indicador distingue «vértice inexistente» de «sin vecinos».
+5. Que el ABB no se balancea, cómo degenera y qué coste real tiene el grafo.
+
+**EN:** State in the README:
+
+1. Which base exists (A1 with inheritance or A2 with an embedded value) and which own `Node` there is.
+2. Who writes the links: the structure (mutable) or the returned value (rebuilt).
+3. That the vertex registry and adjacency are manual, with no `Map`, `Dict`, `HashMap`, `Set` or equivalents.
+4. Which representation link absence uses and which indicator separates “missing vertex” from “no neighbours”.
+5. That the BST is not balanced, how it degenerates and what the graph really costs.
+
+**ES:** Las fuentes y el contexto: qué se exige, en
+[`07_Data_Structures_Advanced.md`](../core/algorithms/07_Data_Structures_Advanced.md);
+el marco de familias, en [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md);
+lo que obliga tu lenguaje, en [`idioms/{lang}.md`](../ruleset/idioms/); y lo
+verificado en los 50, en
+[`07_Audited_Data_Structures_Advanced.md`](../audits/07_Audited_Data_Structures_Advanced.md).
+
+**EN:** Sources and context: what is required in
+[`07_Data_Structures_Advanced.md`](../core/algorithms/07_Data_Structures_Advanced.md);
+the family framework in [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md);
+what your language mandates in [`idioms/{lang}.md`](../ruleset/idioms/); and what
+was verified across the 50 in
+[`07_Audited_Data_Structures_Advanced.md`](../audits/07_Audited_Data_Structures_Advanced.md).

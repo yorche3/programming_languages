@@ -4,8 +4,8 @@ title: Guía 06 — Data Structures Basics
 nav_exclude: true
 ---
 
-# 06 — Data Structures Basics: cómo se implementa en cada familia
-# 06 — Data Structures Basics: how it is implemented in each family
+# 06 — Data Structures Basics: implementación por familias y alternativas
+# 06 — Data Structures Basics: family implementations and alternatives
 
 > **ES:** Guía de implementación del módulo. Explica **cómo** y **por qué** el mismo `Node` produce una lista, una pila y una cola en cada familia de lenguajes. **No añade requisitos**: los criterios están en [`06_Data_Structures_Basics.md`](../core/algorithms/06_Data_Structures_Basics.md) y, si esta guía y la especificación discrepan, manda la especificación.
 >
@@ -13,7 +13,7 @@ nav_exclude: true
 
 ---
 
-## 1. La solución canónica, en llano / The canonical solution, in plain words
+## 1. Qué se conserva y qué cambia / What stays and what changes
 
 **ES:** El módulo no pide cuatro estructuras: pide **un tipo de celda** —`Node`, con un valor y un enlace— y **tres formas de nombrar sus extremos**. La lista guarda `head` y `tail`, la pila guarda `top`, la cola guarda `front` y `rear`; las tres llevan además un contador. Eso es todo el estado: los punteros son lo que distingue una estructura de otra, y el contador es lo que hace `size` y `is_empty` gratuitos.
 
@@ -27,9 +27,7 @@ nav_exclude: true
 
 **What the specification actually fixes:** the single shared `Node`, `init` before any query, link absence in the native representation, one failure indicator per return type declared in the README, `delete` in $O(n)$ and everything else in $O(1)$, the cases as **successive steps on the same instance**, and stacks and queues that **do not delegate** to the list or to a library collection. **What is just form:** whether the cell is mutated or rebuilt, whether `init` is a constructor returning the value or a procedure filling it, and how the types are named when there is a lexical conflict.
 
----
-
-## 2. Los ejes que cambian en este módulo / The axes that change here
+### Los ejes que cambian aquí / The axes that change here
 
 | Eje / Axis | Pregunta / Question | Si sí / If yes | Si no / If no |
 |---|---|---|---|
@@ -44,18 +42,18 @@ nav_exclude: true
 
 ---
 
-## 3. Las familias: cómo definen la celda y sus extremos / The families: how they define the cell and its ends
+## 2. Familias: decisiones concretas / Families: concrete decisions
 
 | Familia / Family | Cómo define la celda / How it defines the cell | Qué puede mutar / What it may mutate | Ausencia del enlace / Link absence | Variante / Variant |
 |---|---|---|---|---|
-| **F1** OO con null | Una clase con campos; el enlace es una referencia | Los campos de la instancia | Referencia nula | 4.1 |
-| **F2** Scripting dinámico | Un objeto o registro sin tipos declarados | Los campos del objeto | Valor nulo del lenguaje | 4.1 |
-| **F3** C-lineage | Un registro y un puntero al mismo registro | El registro y el puntero | Puntero nulo | 4.2 |
-| **F4** Sistemas modernos | Registro con el enlace como referencia u opción del lenguaje | El registro, si el tipo lo permite | Ausencia tipada del propio lenguaje | 4.2 |
-| **F5** Funcional ML/Haskell | Un tipo algebraico o registro inmutable | Nada: se devuelve un valor nuevo | La opción nativa del lenguaje, solo en el enlace | 4.3 |
-| **F6** Lisp | Un registro o un par | Nada, salvo celdas mutables explícitas | Lista vacía, falso o nulo | 4.3 |
-| **F7** BEAM | Un registro o mapa | Nada: se devuelve un valor nuevo | Valor ausente del dominio | 4.3 |
-| **F8** Multi-paradigma | Depende del tipo elegido | Según el tipo | Según el tipo | 4.1 o 4.3, declarada en el README |
+| **F1** OO con null | Una clase con campos; el enlace es una referencia | Los campos de la instancia | Referencia nula | 3 |
+| **F2** Scripting dinámico | Un objeto o registro sin tipos declarados | Los campos del objeto | Valor nulo del lenguaje | 3 |
+| **F3** C-lineage | Un registro y un puntero al mismo registro | El registro y el puntero | Puntero nulo | 4 |
+| **F4** Sistemas modernos | Registro con el enlace como referencia u opción del lenguaje | El registro, si el tipo lo permite | Ausencia tipada del propio lenguaje | 4 |
+| **F5** Funcional ML/Haskell | Un tipo algebraico o registro inmutable | Nada: se devuelve un valor nuevo | La opción nativa del lenguaje, solo en el enlace | 5 |
+| **F6** Lisp | Un registro o un par | Nada, salvo celdas mutables explícitas | Lista vacía, falso o nulo | 5 |
+| **F7** BEAM | Un registro o mapa | Nada: se devuelve un valor nuevo | Valor ausente del dominio | 5 |
+| **F8** Multi-paradigma | Depende del tipo elegido | Según el tipo | Según el tipo | 3 o 5, declarada en el README |
 | **F9** Lógico | Un término con el valor y el enlace como argumentos | Nada | Fallo de unificación | Variante relacional, declarada en el README |
 
 **ES:** Ninguna familia cambia **qué** se guarda: siempre un valor, un enlace y los punteros de la estructura. Lo que cambia es si el enlace se escribe o se devuelve, y por tanto si los extremos cuestan $O(1)$ o $O(n)$.
@@ -63,9 +61,7 @@ nav_exclude: true
 
 ---
 
-## 4. Las variaciones, en pseudocódigo / The variations, in pseudocode
-
-### 4.1 La variante del módulo: celda mutable con punteros / The module's variant: mutable cell with pointers
+## 3. La variante del módulo: celda mutable con punteros / The module's variant: mutable cell with pointers
 
 **ES:** Es la de la especificación, resumida en las operaciones que deciden la forma. El estado de cada estructura son sus punteros y el contador; los enlaces se reasignan.
 **EN:** This is the specification's own, reduced to the operations that decide the shape. Each structure's state is its pointers and the counter; links are reassigned.
@@ -112,7 +108,7 @@ Queue: front, rear, count
 **ES:** Los dos `if ... is absent` de `insert_tail` y `enqueue` son el caso «estructura vacía», y el `rear = absent` de `dequeue` es el que evita que el siguiente `enqueue` escriba sobre un nodo que ya no está en la cola. Sin esas tres guardas la estructura funciona hasta que deja de hacerlo.
 **EN:** The two `if ... is absent` checks in `insert_tail` and `enqueue` are the empty-single case, and `rear = absent` in `dequeue` is what stops the next `enqueue` from writing through a node that has left the queue. Without those three guards the structure works until it stops working.
 
-### 4.2 La de la celda preasignada: `init` como procedimiento / Pre-allocated cell: `init` as a procedure
+## 4. La de la celda preasignada: `init` como procedimiento / Pre-allocated cell: `init` as a procedure
 
 **ES:** Cuando el lenguaje no tiene constructores que devuelvan valores, la instancia se **declara** y `init` la rellena. El enlace es un puntero nulo y la ausencia, ese mismo valor.
 **EN:** When the language has no constructors that return values, the instance is **declared** and `init` fills it. The link is a null pointer and absence is that same value.
@@ -132,10 +128,10 @@ procedure insert_tail(lb: in out LinkedList; value: int)
     lb.tail = node; lb.count += 1
 ```
 
-**ES:** La diferencia con 4.1 no está en el algoritmo sino en quién posee el valor: aquí toda operación recibe `in out` la estructura y la muta, y la ausencia del enlace se comprueba con `== null`, no con un tipo opcional.
-**EN:** The difference from 4.1 is not in the algorithm but in who owns the value: here every operation takes the structure as `in out` and mutates it, and link absence is checked with `== null`, not with an optional type.
+**ES:** La diferencia con la variante 3 no está en el algoritmo sino en quién posee el valor: aquí toda operación recibe `in out` la estructura y la muta, y la ausencia del enlace se comprueba con `== null`, no con un tipo opcional.
+**EN:** The difference from variant 3 is not in the algorithm but in who owns the value: here every operation takes the structure as `in out` and mutates it, and link absence is checked with `== null`, not with an optional type.
 
-### 4.3 La variante por casos: la celda no se muta / The clause-based variant: the cell is not mutated
+## 5. La variante por casos: la celda no se muta / The clause-based variant: the cell is not mutated
 
 **ES:** Si el nodo es inmutable, `set_next` **devuelve un nodo nuevo** y toda operación devuelve también la estructura nueva. Los extremos siguen existiendo, pero el último enlace ya no se puede escribir: se reconstruye el camino, y por eso `insert_tail` y `enqueue` pasan a $O(n)$.
 **EN:** If the node is immutable, `set_next` **returns a new node** and every operation also returns the new structure. The ends still exist, but the last link can no longer be written: the path is rebuilt, which is why `insert_tail` and `enqueue` drop to $O(n)$.
@@ -166,22 +162,22 @@ pop(s)       -> s.top == absent ? (failure, s)
 
 ---
 
-## 5. Consecuencias, leídas desde el pseudocódigo / Consequences, read from the pseudocode
+## 6. Consecuencias, leídas desde el pseudocódigo / Consequences, read from the pseudocode
 
 **ES:** El coste de cada operación se lee directamente del código, no de una tabla aparte:
 
-- **4.1 y 4.2 — todo $O(1)$ salvo `delete`.** `insert_head`, `insert_tail`, `push`, `enqueue`, `pop`, `dequeue`, `peek`, `size`, `is_empty` y `get_head` tocan punteros y un contador. `delete` recorre con `previous`/`current` y es $O(n)$, como fija la especificación. La memoria es un nodo por elemento, sin capacidad reservada.
-- **4.2 — el coste oculto es la reserva.** Cada inserción pide memoria nueva; en un lenguaje con gestión manual, ese `allocate` es también parte del coste y de la responsabilidad de liberar.
-- **4.3 — los extremos cuestan $O(n)$.** `insert_tail` y `enqueue` reconstruyen el camino hasta el último nodo, y cada reconstrucción asigna $O(n)$ nodos. Las lecturas de extremos (`get_head`, `peek`, `pop`, `dequeue`) siguen en $O(1)$ porque están en la cabeza, `top` o `front`; `size` e `is_empty` también, porque el contador viaja en el valor devuelto. `delete` es $O(n)$ en todas las variantes.
-- **El contador no es decoración.** Sin él, `size` sería un recorrido y `is_empty` una comparación con la ausencia; con él, ambos son una lectura. En 4.3 es lo único que evita convertir tres operaciones en $O(n)$.
+- **3 y 4 — todo $O(1)$ salvo `delete`.** `insert_head`, `insert_tail`, `push`, `enqueue`, `pop`, `dequeue`, `peek`, `size`, `is_empty` y `get_head` tocan punteros y un contador. `delete` recorre con `previous`/`current` y es $O(n)$, como fija la especificación. La memoria es un nodo por elemento, sin capacidad reservada.
+- **4 — el coste oculto es la reserva.** Cada inserción pide memoria nueva; en un lenguaje con gestión manual, ese `allocate` es también parte del coste y de la responsabilidad de liberar.
+- **5 — los extremos cuestan $O(n)$.** `insert_tail` y `enqueue` reconstruyen el camino hasta el último nodo, y cada reconstrucción asigna $O(n)$ nodos. Las lecturas de extremos (`get_head`, `peek`, `pop`, `dequeue`) siguen en $O(1)$ porque están en la cabeza, `top` o `front`; `size` e `is_empty` también, porque el contador viaja en el valor devuelto. `delete` es $O(n)$ en todas las variantes.
+- **El contador no es decoración.** Sin él, `size` sería un recorrido y `is_empty` una comparación con la ausencia; con él, ambos son una lectura. En 5 es lo único que evita convertir tres operaciones en $O(n)$.
 
 **Coste de expresión medido** (líneas de la fuente del módulo por lenguaje, 2026-10-17): de **94** en `ada` a **371** en `clojure`, **844** en `rust`, **893** en `cobol` y **1167** en `assembly`. Cuatro estructuras, el mismo `Node` y los mismos casos.
 
-**EN:** The cost of each operation reads straight off the code: in 4.1 and 4.2 everything is $O(1)$ except `delete` ($O(n)$ by specification), with one node per element and no reserved capacity; 4.2 adds the allocation cost; in 4.3 the ends cost $O(n)$ because the path to the last node is rebuilt with $O(n)$ allocations, while head reads, `size` and `is_empty` stay $O(1)$ thanks to the counter, and `delete` remains $O(n)$ everywhere. Measured expression cost: 94 lines in Ada to 1167 in Assembly.
+**EN:** The cost of each operation reads straight off the code: in 3 and 4 everything is $O(1)$ except `delete` ($O(n)$ by specification), with one node per element and no reserved capacity; 4 adds the allocation cost; in 5 the ends cost $O(n)$ because the path to the last node is rebuilt with $O(n)$ allocations, while head reads, `size` and `is_empty` stay $O(1)$ thanks to the counter, and `delete` remains $O(n)$ everywhere. Measured expression cost: 94 lines in Ada to 1167 in Assembly.
 
 ---
 
-## 6. Trampas para quien llega nuevo / Traps for newcomers
+## 7. Trampas para quien llega nuevo / Traps for newcomers
 
 - **Compartir el `Node` no es envolver la lista.** `Stack` y `Queue` usan el mismo tipo de celda, pero llevan sus propios punteros y su propio contador; si `push` acaba llamando a `insert_head`, el módulo ya no implementa tres ADT.
 - **`init` no es opcional.** La instancia se declara sin valores definidos y solo `init` la deja usable; consultar `is_empty` antes es un caso fuera de contrato, no un fallo que haya que tolerar.
@@ -195,11 +191,48 @@ pop(s)       -> s.top == absent ? (failure, s)
 
 ---
 
-## 7. Dónde seguir / Where next
+## 8. Cómo validar y explicar la elección / Validating and explaining a choice
 
-| Capa / Layer | Documento / Document |
-|---|---|
-| Qué se exige / What is required | [`06_Data_Structures_Basics.md`](../core/algorithms/06_Data_Structures_Basics.md) |
-| Las familias en general / Families in general | [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md) |
-| Qué obliga tu lenguaje / What your language mandates | [`idioms/{lang}.md`](../ruleset/idioms/) |
-| Qué se verificó en los 50 / What was verified across the 50 | [`06_Audited_Data_Structures_Basics.md`](../audits/06_Audited_Data_Structures_Basics.md) |
+**ES:** La suite sigue los casos de la especificación como **pasos sucesivos
+sobre la misma instancia**, así que el orden de ejecución importa: no reinicies
+la estructura entre pasos ni los conviertas en casos independientes. Comprueba lo
+que el caso pide —contador tras cada operación, `is_empty` después de `init`,
+`delete` del único elemento y el indicador de la estructura vacía— y no la forma
+interna de un nodo concreto.
+
+**EN:** The suite follows the specification's cases as **successive steps on the
+same instance**, so execution order matters: do not reset the structure between
+steps or turn them into independent cases. Check what the case asks for —the
+counter after each operation, `is_empty` after `init`, `delete` of the only
+element and the empty-structure indicator— not the internal shape of a particular
+node.
+
+**ES:** En el README deja claro:
+
+1. Qué `Node` propio existe y qué punteros guarda cada estructura.
+2. Si la celda es mutable o se reconstruye, y qué operaciones bajan a $O(n)$ por ello.
+3. Si `init` es constructor que devuelve el valor o procedimiento `in out`.
+4. Qué representación usa la ausencia del enlace y qué indicador devuelve cada operación con fallo.
+5. Que pila y cola no delegan en la lista ni en una colección de biblioteca.
+
+**EN:** State in the README:
+
+1. Which own `Node` exists and which pointers each structure keeps.
+2. Whether the cell is mutable or rebuilt, and which operations drop to $O(n)$ because of it.
+3. Whether `init` is a constructor returning the value or an `in out` procedure.
+4. Which representation link absence uses and which indicator each fallible operation returns.
+5. That stack and queue do not delegate to the list or to a library collection.
+
+**ES:** Las fuentes y el contexto: qué se exige, en
+[`06_Data_Structures_Basics.md`](../core/algorithms/06_Data_Structures_Basics.md);
+el marco de familias, en [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md);
+lo que obliga tu lenguaje, en [`idioms/{lang}.md`](../ruleset/idioms/); y lo
+verificado en los 50, en
+[`06_Audited_Data_Structures_Basics.md`](../audits/06_Audited_Data_Structures_Basics.md).
+
+**EN:** Sources and context: what is required in
+[`06_Data_Structures_Basics.md`](../core/algorithms/06_Data_Structures_Basics.md);
+the family framework in [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md);
+what your language mandates in [`idioms/{lang}.md`](../ruleset/idioms/); and what
+was verified across the 50 in
+[`06_Audited_Data_Structures_Basics.md`](../audits/06_Audited_Data_Structures_Basics.md).

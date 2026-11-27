@@ -4,8 +4,8 @@ title: Guía 04 — Numbers
 nav_exclude: true
 ---
 
-# 04 — Numbers: cómo se implementa en cada familia
-# 04 — Numbers: how it is implemented in each family
+# 04 — Numbers: implementación por familias y alternativas
+# 04 — Numbers: family implementations and alternatives
 
 > **ES:** Guía de implementación del módulo. Explica **cómo** y **por qué** el pseudocódigo de la especificación se escribe de forma distinta en cada familia de lenguajes. **No añade requisitos**: los criterios están en [`04_Numbers.md`](../core/foundations/04_Numbers.md) y, si esta guía y la especificación discrepan, manda la especificación.
 >
@@ -13,7 +13,7 @@ nav_exclude: true
 
 ---
 
-## 1. La solución canónica, en llano / The canonical solution, in plain words
+## 1. Qué se conserva y qué cambia / What stays and what changes
 
 **ES:** El módulo pide **cinco algoritmos** —suma de los primeros `n`, factorial, Fibonacci, MCD y MCM— resueltos **tres veces**, con el mismo resultado y distinto reparto del trabajo:
 
@@ -27,9 +27,7 @@ nav_exclude: true
 
 **What the specification actually fixes:** the five algorithms, the 11 cases per variant, the source/test split, standard library only and the complexity ceiling. **What is just form:** how many of the three variants your language can test. The language decides that, not the module.
 
----
-
-## 2. Los ejes que cambian en este módulo / The axes that change here
+### Los ejes que cambian aquí / The axes that change here
 
 | Eje / Axis | Pregunta / Question | Si sí / If yes | Si no / If no |
 |---|---|---|---|
@@ -42,7 +40,7 @@ nav_exclude: true
 
 ---
 
-## 3. Las variantes, familia a familia / The variants, family by family
+## 2. Familias: decisiones concretas / Families: concrete decisions
 
 **ES:** El mismo caso —`sum_of_first_n(3) = 6`— escrito en el código real del repo:
 **EN:** The same case —`sum_of_first_n(3) = 6`— written in the repo's real code:
@@ -60,7 +58,7 @@ nav_exclude: true
 
 ---
 
-## 4. Consecuencias: coste, pila y memoria / Consequences: cost, stack and memory
+## 3. Consecuencias: coste, pila y memoria / Consequences: cost, stack and memory
 
 **ES:** La complejidad algorítmica ya la fija la especificación ($O(n)$ en las sumatorias y el factorial, $O(\log n)$ en el MCD) y `fibonacci_rec` es $O(2^n)$ **por diseño educativo**. Lo que distingue a los tres enfoques no es el tiempo, es **la memoria**:
 
@@ -74,7 +72,7 @@ nav_exclude: true
 
 ---
 
-## 5. Trampas para quien llega nuevo / Traps for newcomers
+## 4. Trampas para quien llega nuevo / Traps for newcomers
 
 - **`_acc` sin TCO no compra nada.** Si tu lenguaje no garantiza la optimización, la variante con acumulador no es «la rápida»: es un puente hacia `_ite`. No le escribas suite; la especificación lo pide así.
 - **En Haskell el `_ite` no es un bucle.** `foldl'` y `until` son la forma idiomática de recorrer de forma iterativa; el módulo acepta combinadores usados explícitamente como iteración.
@@ -85,11 +83,42 @@ nav_exclude: true
 
 ---
 
-## 6. Dónde seguir / Where next
+## 5. Cómo validar y explicar la elección / Validating and explaining a choice
 
-| Capa / Layer | Documento / Document |
-|---|---|
-| Qué se exige / What is required | [`04_Numbers.md`](../core/foundations/04_Numbers.md) |
-| Las familias en general / Families in general | [`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md) |
-| Qué obliga tu lenguaje / What your language mandates | [`idioms/{lang}.md`](../ruleset/idioms/) |
-| Qué se verificó en los 50 / What was verified across the 50 | [`04_Audited_Numbers.md`](../audits/04_Audited_Numbers.md) |
+**ES:** La suite sale de la especificación: los 11 casos de cada variante que tu
+lenguaje pueda probar. No añadas una suite para `_acc` sin TCO ni casos de una
+variante que el lenguaje no puede escribir; la combinación (33, 22 o 11) se
+declara en el README y se justifica con la garantía del runtime, no con el
+compilador instalado.
+
+**EN:** The suite comes from the specification: the 11 cases of each variant your
+language can test. Do not add a suite for `_acc` without TCO or cases of a
+variant the language cannot write; the combination (33, 22 or 11) is declared in
+the README and justified by the runtime's guarantee, not by the installed
+compiler.
+
+**ES:** En el README deja claro:
+
+1. Qué variantes existen en el lenguaje y cuáles llevan suite.
+2. Por qué `_acc` es bucle o puente didáctico, con la garantía de TCO citada.
+3. Qué algoritmo es recursivo y cuál iterativo, y qué caso prueba cada uno.
+4. Qué coste de memoria tiene cada variante, no solo el de tiempo.
+
+**EN:** State in the README:
+
+1. Which variants exist in the language and which carry a suite.
+2. Why `_acc` is a loop or a didactic bridge, citing the TCO guarantee.
+3. Which algorithm is recursive and which iterative, and which case tests each.
+4. What memory cost each variant has, not just time.
+
+**ES:** Las fuentes y el contexto: qué se exige, en
+[`04_Numbers.md`](../core/foundations/04_Numbers.md); el marco de familias, en
+[`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md); lo que obliga tu
+lenguaje, en [`idioms/{lang}.md`](../ruleset/idioms/); y lo verificado en los 50,
+en [`04_Audited_Numbers.md`](../audits/04_Audited_Numbers.md).
+
+**EN:** Sources and context: what is required in
+[`04_Numbers.md`](../core/foundations/04_Numbers.md); the family framework in
+[`PARADIGM_FAMILIES.md`](../ruleset/PARADIGM_FAMILIES.md); what your language
+mandates in [`idioms/{lang}.md`](../ruleset/idioms/); and what was verified
+across the 50 in [`04_Audited_Numbers.md`](../audits/04_Audited_Numbers.md).
