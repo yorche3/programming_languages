@@ -3,7 +3,7 @@ name: implement
 step: 5
 profile: deep
 description: Implementa el módulo en src/ siguiendo la especificación y deja la suite en verde
-sources: AGENTS.md, docs/AGENT_ROLES.md
+sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md, docs/ruleset/DEVIATION_POLICY.md
 mode: agent
 ---
 
@@ -62,9 +62,12 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 ### 2. Implementación
 
 - Escribe el código **solo** en el directorio de fuentes del módulo (`src/`, `lib/`, `source/`…).
-- Respeta el pseudocódigo: las comparaciones, los intercambios y la **complejidad prometida**
-  son parte del contrato.
-- No importes bibliotecas de ordenamiento ni helpers que hagan el trabajo por ti.
+- Respeta el pseudocódigo, la estructura propia pedida (por ejemplo `Node` propio o heap plano
+  optimizado para el lenguaje) y las comparaciones, intercambios y **complejidad prometida**,
+  que son parte del contrato. Consulta también la guía de implementación que enlace `{spec}`,
+  si existe, y no simules escrituras `O(1)` sobre estructuras lineales.
+- No importes bibliotecas de ordenamiento ni estructuras balanceadas/auxiliares que hagan el
+  trabajo objetivo por ti.
 - No toques la suite, ni el manifiesto, ni el `.gitignore`.
 
 ### 3. Verificación
@@ -93,7 +96,8 @@ roadmap: eso son los encargos `docs-module` y `docs-language`. **No** ejecutes `
 - **No** dejes código comentado, `TODO` ni *stubs* que devuelvan un valor fijo.
 - **No** añadas dependencias nuevas sin autorización explícita.
 - Si una divergencia idiomática es inevitable (devolver copia en vez de *in-place*, `Option`/
-  `Result`, tipo anulable), documéntala en el reporte: la acepta el autor, no tú.
+  `Maybe` por restricción del lenguaje para comparar `absent`, tipo anulable, coste de
+  reconstrucción persistente), documéntala en el reporte: la acepta el autor, no tú.
 - Las salidas que reportes tienen que ser **reales**, copiadas del terminal.
 
 ## Definition of Done

@@ -115,15 +115,23 @@ author before changing the affected artefact.
 **ES:** **Tratamiento:** permitida si respeta contrato, fase y tipo de retorno.
 Por ejemplo, un centinela `-1` representable y exigido por el contrato no es un
 defecto por existir Option/Maybe en el lenguaje. Los opcionales internos para
-enlaces no obligan a envolver los resultados públicos. Omitir un caso solo es
-válido bajo la cláusula de adaptación de la especificación y con su justificación;
-si no está autorizado, se solicita decisión al autor.
+enlaces no obligan a envolver los resultados públicos. Cuando el lenguaje no
+tiene otro modo de comparar o distinguir `absent` de una entrada/salida válida
+(como `[]`), se admite `Option`/`Maybe` o representación etiquetada **por
+restricción del lenguaje** y se documenta como adaptación (no por preferencia
+antes de Fase 4). Omitir un caso solo es válido bajo la cláusula de adaptación
+de la especificación y con su justificación; si no está autorizado, se solicita
+decisión al autor.
 
 **EN:** **Treatment:** allowed when consistent with contract, phase and return
 type. A representable `-1` sentinel required by the contract is not a defect
 merely because Option/Maybe exists. Internal optional links do not require wrapped
-public results. Omit a case only under the specification's adaptation clause,
-with justification; otherwise request an author decision.
+public results. When the language has no other way to compare or distinguish
+`absent` from a valid/empty value (such as `[]`), `Option`/`Maybe` or a tagged
+representation is allowed **by language restriction** and documented as an
+adaptation (never by style before Phase 4). Omit a case only under the
+specification's adaptation clause, with justification; otherwise request an
+author decision.
 
 ### C3 — Desviación de construcción / Construction deviation
 

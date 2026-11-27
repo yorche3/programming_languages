@@ -127,9 +127,9 @@ incluyas dependencias ni capacidades que no hayas verificado.
 |---|---|---|---|
 | `{funcion_u_operacion}` | `{tipo_entrada → tipo_salida}` | `{O(...)}` | `{particularidad}` |
 
-**ES:** Una fila por operación del contrato. Cuando el módulo tenga varios enfoques del mismo algoritmo (recursivo, con acumulador, iterativo), la columna de notas es donde se dice cuál es cuál.
+**ES:** Una fila por operación del contrato. Cuando el módulo tenga varios enfoques del mismo algoritmo (recursivo, con acumulador, iterativo) o mezcle mutabilidad/propiedad (in-place frente a copia o nueva secuencia) y costes de almacenamiento (por ejemplo, heap plano frente a reconstrucción persistente), la columna de notas es donde se declara cada caso.
 
-**EN:** One row per contract operation. When the module has several approaches to the same algorithm (recursive, accumulator, iterative), the notes column is where each one is named.
+**EN:** One row per contract operation. When the module has several approaches to the same algorithm (recursive, accumulator, iterative) or mixes mutability/ownership (in-place versus copy or new sequence) and storage costs (e.g. flat heap versus persistent rebuilding), the notes column is where each case is stated.
 
 **ES:** La tabla no sustituye la explicación. En Core, desarrolla para cada
 algoritmo o ADT la idea que representa, por qué sus pasos son necesarios,
@@ -179,9 +179,9 @@ as the only definition.
 |---|---|---|---|
 | `{operacion}` | `{entrada nula, vacío, límite…}` | `{null, nil, None, -1, #f, no representable…}` | `{valor devuelto}` |
 
-**ES:** Una fila por operación del contrato y una fila para el caso nulo o inválido. Si el indicador **no es representable** (el tipo no admite `null`/`nil` y la fase prohíbe `Option`/`Maybe`/`Result`), se escribe `No representable` en la columna de indicador y se explica en adaptaciones qué caso se omite y por qué. No se inventan centinelas que el lenguaje no pueda devolver.
+**ES:** Una fila por operación del contrato y una fila para el caso nulo o ausente (`absent`). Aunque las fases previas a la Fase 4 no adoptan `Option`/`Maybe`/`Result` por preferencia, **cuando el lenguaje lo exige por restricción propia para poder comparar o distinguir `absent` de una entrada o salida válida** (como `[]`), se documenta aquí ese uso (o representación etiquetada) y su justificación en _Adaptaciones idiomáticas_. Si el indicador **no es representable** sin envoltorio no autorizado, se escribe `No representable` en la columna de indicador y se explica en adaptaciones qué caso se omite y por qué. No se inventan centinelas que colisionen con resultados válidos.
 
-**EN:** One row per contract operation plus one row for the null or invalid input. When the indicator is **not representable** (the type admits no `null`/`nil` and the phase forbids `Option`/`Maybe`/`Result`), write `Not representable` in the indicator column and explain under adaptations which case is omitted and why. Never invent sentinels the language cannot return.
+**EN:** One row per contract operation plus one row for the null or `absent` input. Although phases before Phase 4 do not adopt `Option`/`Maybe`/`Result` by preference, **when the language requires it by its own restriction to compare or distinguish `absent` from valid/empty values** (such as `[]`), document that usage (or tagged representation) here and justify it under _Idiomatic adaptations_. When the indicator is **not representable** without an unauthorized wrapper, write `Not representable` in the indicator column and explain under adaptations which case is omitted and why. Never invent sentinels that collide with valid results.
 
 ## ✅ Cobertura de pruebas / Test coverage
 
@@ -221,10 +221,19 @@ without requiring equal counts.
 
 ## 📝 Notas de implementación / Implementation Notes
 
-Documenta aquí las particularidades verificadas del lenguaje: recursión,
-iteración, TCO, manejo de errores, tipos de retorno, memoria y organización de
-tests. Si el lenguaje no garantiza TCO, explica el papel educativo de la
-versión con acumulador y qué tests cubren su comportamiento.
+**ES:** Documenta aquí las particularidades verificadas del lenguaje: recursión,
+iteración, TCO, manejo de errores, tipos de retorno, propiedad y copias de
+contenedores, gestión/liberación de memoria, helpers internos o públicos de
+inspección (cuando la especificación los autorice) y organización de tests. Si
+el lenguaje no garantiza TCO en módulos recursivos, explica el papel educativo de
+la versión con acumulador y qué tests cubren su comportamiento.
+
+**EN:** Document verified language specifics here: recursion, iteration, TCO,
+error handling, return types, container ownership and copying, memory
+management/release, internal or public inspection helpers (when authorized by
+the specification), and test organization. Where the language does not guarantee
+TCO in recursive modules, explain the accumulator version's educational role
+and which tests cover its behaviour.
 
 **ES:** Este proyecto también está implementado en otros lenguajes. Explora el
 repositorio principal para consultar las demás versiones.
@@ -234,21 +243,24 @@ repository to see the other versions.
 
 ## 🔍 Checklist de validación / Validation checklist
 
-- [ ] La suite nativa se ejecutó y su salida real está copiada en este README.
-- [ ] Cada caso de la especificación tiene su fila en _Cobertura de pruebas_ (o `Omitido` con razón).
-- [ ] Cada desviación del pseudocódigo o de la ubicación esperada está en _Adaptaciones idiomáticas_.
-- [ ] Cada operación con fallo posible está en _Indicadores de fallo_.
-- [ ] No hay rutas absolutas del autor, credenciales ni salidas inventadas.
-- [ ] Los enlaces relativos resuelven dentro del repositorio y el documento es bilingüe.
-- [ ] Ninguna sección repite lo que ya dice la especificación.
+- [ ] **ES:** La suite nativa se ejecutó y su salida real está copiada en este README. / **EN:** The native suite ran and its real output is copied in this README.
+- [ ] **ES:** _Algoritmos y operaciones_ incluye explicación teórica (idea, invariantes, terminación, coste) y ejemplo razonado cuando el módulo pertenece a Core. / **EN:** _Algorithms & Operations_ includes theoretical explanation (idea, invariants, termination, cost) and a worked example for Core modules.
+- [ ] **ES:** Cada caso de la especificación tiene su fila en _Cobertura de pruebas_ (o `Omitido` con razón). / **EN:** Every specification case has its row in _Test coverage_ (or `Omitted` with a reason).
+- [ ] **ES:** Cada desviación del pseudocódigo, representación (incluyendo `Option`/`Maybe` por restricción para `absent`) o ubicación esperada está en _Adaptaciones idiomáticas_. / **EN:** Every deviation from pseudocode, representation (including `Option`/`Maybe` by restriction for `absent`), or expected location is in _Idiomatic adaptations_.
+- [ ] **ES:** Cada operación con fallo posible y coste real/mutabilidad está en _Indicadores de fallo_ y _Algoritmos y operaciones_. / **EN:** Every fallible operation and actual cost/mutability is in _Failure indicators_ and _Algorithms & Operations_.
+- [ ] **ES:** No hay rutas absolutas del autor, credenciales ni salidas inventadas. / **EN:** No author absolute paths, credentials, or invented outputs.
+- [ ] **ES:** Los enlaces relativos resuelven dentro del repositorio y el documento es bilingüe. / **EN:** Relative links resolve inside the repository and the document is bilingual.
+- [ ] **ES:** Ninguna sección repite en bloque lo que ya dice la especificación. / **EN:** No section copies the specification verbatim.
 
-**EN:** The full list, per artefact, lives in [`WORKFLOW.md`](WORKFLOW.md); these seven points are the minimum for the module README.
+**ES:** La lista completa, por artefacto, vive en [`WORKFLOW.md`](WORKFLOW.md); estos puntos son el mínimo para el README del módulo.
+**EN:** The full list, per artefact, lives in [`WORKFLOW.md`](WORKFLOW.md); these points are the minimum for the module README.
 
 ## 📚 Referencias / References
 
 | Tipo / Kind | Referencia / Reference |
 |---|---|
 | Especificación / Specification | [`{NN}_{Modulo}.md`]({ruta relativa a docs/core}) |
+| Guía por familias (si existe) / Family guide (if present) | [`{NN}_{Modulo}.md`]({ruta relativa a docs/implementations}) |
 | Primera base del lenguaje / First language reference | `data_structures_basics` — `{enlace relativo a la base consultada}` |
 | Segunda base del lenguaje / Second language reference | `numbers` — `{enlace relativo a la base consultada}` |
 | Guía de inicialización / Initialisation guide | [`core/00_Project_Initialization_Guide.md`](core/00_Project_Initialization_Guide.md) |

@@ -22,6 +22,14 @@ grand_parent: Core
 
 ---
 
+## 🧭 Cómo leer este módulo / How to read this module
+
+> **ES:** Esta página fija **qué** se exige (fundamento teórico, contrato, pseudocódigo, invariantes, casos y criterios). Para el **cómo** y el **porqué** en cada familia de lenguajes (heap plano y almacenamiento persistente, Lomuto, merge bottom-up, LLRB persistente, Okasaki, rojo-negro convencional y Prolog), consulta la guía del módulo: [`implementations/08_Efficient_Sort.md`](../../implementations/08_Efficient_Sort.md). El registro de auditoría (`08_Audited_Efficient_Sort.md`) se añadirá al cerrar los 50 lenguajes.
+>
+> **EN:** This page fixes **what** is required (theoretical foundation, contract, pseudocode, invariants, cases, and criteria). For the **how** and the **why** across each language family (flat heap and persistent storage, Lomuto, bottom-up merge, persistent LLRB, Okasaki, conventional red-black, and Prolog), see the module guide: [`implementations/08_Efficient_Sort.md`](../../implementations/08_Efficient_Sort.md). The audit record (`08_Audited_Efficient_Sort.md`) will be added once all 50 languages close.
+
+---
+
 ## 🧠 Fundamento teórico / Theoretical foundation
 
 ### De colocar uno a organizar el problema / From placing one item to organizing the problem
@@ -317,9 +325,14 @@ topic. Explain their role and costs in the README.
 
 **ES:**
 
-- La referencia de quick y heap usa una secuencia plana mutable con acceso e
+- La referencia de quick y heap usa un **heap plano** / secuencia plana mutable con acceso e
   intercambio `O(1)`, ordena **in-place** y devuelve la misma secuencia.
   Ser indexable no demuestra acceso `O(1)`.
+- En **heap**, respeta la definición teórica del montículo binario y **prefiere un
+  heap plano** donde el acceso y las actualizaciones se optimicen según las
+  características reales del lenguaje (array/buffer mutable `O(1)` en V1, o el
+  almacenamiento plano persistente / buffer local de mejor coste verificable en
+  V2/V4).
 - Merge y rojo-negro devuelven una secuencia nueva sin modificar la entrada,
   incluso para cero o un elemento. Una copia del contenedor basta: los valores
   son enteros, no objetos que deban clonarse.
@@ -327,16 +340,21 @@ topic. Explain their role and costs in the README.
   de mejor coste verificable para acceso y reconstrucción. Puede usarse un
   buffer mutable local si el lenguaje y su variante lo permiten. Declara las
   conversiones, copias, estructura persistente y coste real, incluida cualquier
-  diferencia respecto de las cotas de referencia; no simules escrituras `O(1)`.
+  diferencia respecto de las cotas de referencia; no simules escrituras `O(1)`
+  ni degrades el heap a una lista enlazada indexada por recorrido (`O(n² log n)`).
   Compartir valores realmente inmutables, incluido el vacío, es seguro: no se
   exige identidad física distinta donde no sea observable. Documenta el
   almacenamiento compartido; no fuerces una copia profunda innecesaria.
 - `absent` es ausencia conceptual, según
   [`PSEUDOCODE_CONVENTION.md`](../../ruleset/PSEUDOCODE_CONVENTION.md), no la cadena
   `"absent"` ni `-1`. Éxito devuelve la colección, no `1/0/true/false`.
-  Si la ausencia nativa coincide con una colección vacía, usa una representación
-  etiquetada u opcional que distinga `absent` de `present([])`. Un falso nativo
-  puede representar ausencia, pero no un estado booleano de éxito.
+  Aunque en Fase 1 no se introducen `Option`/`Maybe`/`Result` por preferencia ni
+  estilo (quedan reservados para la Fase 4), **cuando un lenguaje no puede
+  comparar ni distinguir `absent` de una entrada/salida válida (como `[]`) por
+  restricción propia del lenguaje**, sí se autoriza usar `Option`/`Maybe` o una
+  representación etiquetada que distinga `absent` de `present([])`, declarándolo
+  en _Adaptaciones idiomáticas_ e _Indicadores de fallo_. Un falso nativo puede
+  representar ausencia, pero no un estado booleano de éxito.
 - Valida ausencia antes de leer tamaño o contenido. Los enteros representables
   por el tipo son el dominio; no se pide validación exhaustiva de objetos de
   otros tipos. Usa `<`, `>` e igualdad, no resta de claves que pueda desbordar.
@@ -344,9 +362,13 @@ topic. Explain their role and costs in the README.
 
 **EN:**
 
-- Reference quick and heap use flat mutable storage with `O(1)` access and
+- Reference quick and heap use a **flat heap** / flat mutable storage with `O(1)` access and
   swapping, sort **in-place**, and return that same sequence.
   Indexability alone does not prove `O(1)` access.
+- For **heap**, retain the theoretical binary-heap definition and **prefer a
+  flat heap** where access and updates are optimized according to each language's
+  real characteristics (`O(1)` mutable array/buffer in V1, or the best-cost
+  verified persistent flat storage / local buffer in V2/V4).
 - Merge and red-black sorting return new sequences without modifying input,
   including zero or one element. Copying the container suffices: values are
   integers, not objects requiring cloning.
@@ -354,14 +376,19 @@ topic. Explain their role and costs in the README.
   the best verified access and reconstruction costs. A local mutable buffer is
   allowed if the language and its variant permit it. Declare conversions,
   copies, persistence, and actual costs, including differences from reference
-  bounds; do not pretend updates cost `O(1)`.
+  bounds; do not pretend updates cost `O(1)` or degrade the heap to a
+  traversal-indexed linked list (`O(n² log n)`).
   Sharing truly immutable values, including empty values, is safe: distinct
   physical identity is not required where unobservable. Document shared storage
   rather than forcing unnecessary deep copies.
 - `absent` is conceptual absence, following the convention linked above, not
   the string `"absent"` or `-1`. Success returns the collection, not
-  `1/0/true/false`. If native absence coincides with an empty collection, use a
-  tagged or optional representation distinguishing `absent` from `present([])`.
+  `1/0/true/false`. Although Phase 1 does not introduce `Option`/`Maybe`/`Result`
+  by preference or style (reserved for Phase 4), **when a language cannot
+  otherwise compare or distinguish `absent` from valid/empty values (such as
+  `[]`) due to a language restriction**, using `Option`/`Maybe` or a tagged
+  representation distinguishing `absent` from `present([])` is explicitly allowed
+  and must be declared under _Idiomatic adaptations_ and _Failure indicators_.
   Native false may encode absence, but not a boolean success status.
 - Check absence before reading size or contents. Integers representable by the
   type are the domain; exhaustive validation of other object types is not
@@ -369,14 +396,14 @@ topic. Explain their role and costs in the README.
   subtraction. Do not use truthiness to distinguish absence, empty, zero,
   and negative values.
 
-### Algoritmos esperados
+### Algoritmos esperados / Expected algorithms
 
-| Algoritmo | Estrategia | Complejidad temporal | Memoria auxiliar |
-|-----------|------------|---------------------|:----------------:|
-| `quick_sort(arr)` | Hoare, pivote central; recursión sobre partición menor / Hoare, middle pivot; recurse on smaller partition | $O(n \log n)$ promedio / average, $O(n^2)$ peor / worst | $O(\log n)$ peor (pila) / worst (stack) |
-| `merge_sort(arr)` | División recursiva a la mitad y fusión ordenada de sub-secuencias | $O(n \log n)$ en todos los casos | $O(n)$ (secuencia auxiliar de fusión) |
-| `heap_sort(arr)` | Max-heap in-place y extracción sucesiva / Max-heap and successive extraction | $O(n \log n)$ peor / worst | $O(1)$ con `sift_down` iterativo / with iterative `sift_down` |
-| `red_black_tree_sort(arr)` | Insertar en LLRB con contador, recorrer in-order / Insert into counted LLRB, traverse in-order | $O(n \log n)$ peor / worst | $O(n)$ árbol y salida / tree and output |
+| Algoritmo / Algorithm | Estrategia / Strategy | Complejidad temporal / Time | Memoria auxiliar / Auxiliary space | Mutación y propiedad / Mutation & ownership | Fallo / Failure |
+|-----------|------------|---------------------|:----------------:|---|---|
+| `quick_sort(arr)` | Hoare, pivote central; recursión sobre partición menor / Hoare, middle pivot; recurse on smaller partition | $O(n \log n)$ promedio / average, $O(n^2)$ peor / worst | $O(\log n)$ peor (pila) / worst (stack) | In-place (V1); nueva secuencia en V2/V4 / In-place (V1); new sequence in V2/V4 | `absent` (o `Option`/`Maybe` por restricción) / `absent` (or `Option`/`Maybe` by restriction) |
+| `merge_sort(arr)` | División recursiva a la mitad y fusión ordenada de sub-secuencias / Recursive halving and ordered merge of sub-sequences | $O(n \log n)$ en todos los casos / in all cases | $O(n)$ (secuencia auxiliar de fusión / merge buffer) | Nueva secuencia, preserva entrada / New sequence, preserves input | `absent` (o `Option`/`Maybe` por restricción) / `absent` (or `Option`/`Maybe` by restriction) |
+| `heap_sort(arr)` | Max-heap plano con `sift_down` y extracción sucesiva / Flat max-heap with `sift_down` and successive extraction | $O(n \log n)$ peor / worst | $O(1)$ con `sift_down` iterativo en array mutable / with iterative `sift_down` on mutable array | In-place (V1); nueva secuencia en V2/V4 / In-place (V1); new sequence in V2/V4 | `absent` (o `Option`/`Maybe` por restricción) / `absent` (or `Option`/`Maybe` by restriction) |
+| `red_black_tree_sort(arr)` | Insertar en LLRB con contador, recorrer in-order / Insert into counted LLRB, traverse in-order | $O(n \log n)$ peor / worst | $O(n)$ árbol y salida / tree and output | Nueva secuencia, preserva entrada / New sequence, preserves input | `absent` (o `Option`/`Maybe` por restricción) / `absent` (or `Option`/`Maybe` by restriction) |
 
 **ES:** Las cotas son de referencia, con comparaciones y operaciones de
 almacenamiento de coste constante. Cuenta la memoria máxima viva, pila y
@@ -827,18 +854,20 @@ heap restoration.
       **EN:** All four algorithms are implemented manually, without delegating sorting or the balanced tree to libraries; all duplicates are preserved.
 - [ ] **ES:** Se define el Node propio con clave, contador, color e hijos; el README explica su representación y no supone nodos de biblioteca.
       **EN:** An own Node defines key, count, color, and children; the README explains its representation without assuming library nodes.
-- [ ] **ES:** `heap_sort` implementa el montículo binario mediante una **secuencia indexable plana** con procedimiento explícito de `sift_down` (este procedimiento es la base de la cola de prioridad de Dijkstra).
-      **EN:** `heap_sort` implements the binary heap through a **flat indexable sequence** with an explicit `sift_down` procedure (this procedure is the basis for Dijkstra's priority queue).
-- [ ] **ES:** `red_black_tree_sort` usa LLRB como referencia o una alternativa documentada sin mezclar reglas, conserva contadores y emite por in-order; los helpers públicos de inspección son extras permitidos.
-      **EN:** `red_black_tree_sort` uses reference LLRB or a documented alternative without mixing rules, preserves counts, and emits in-order; public inspection helpers are allowed extras.
+- [ ] **ES:** `heap_sort` implementa el montículo binario siguiendo su definición teórica y **prefiriendo un heap plano** con acceso optimizado según las características del lenguaje y procedimiento explícito de `sift_down` (base de la cola de prioridad de Dijkstra), evitando degradaciones `O(n² log n)`.
+      **EN:** `heap_sort` implements the binary heap following its theoretical definition and **preferring a flat heap** with access optimized for the language's characteristics and an explicit `sift_down` procedure (basis for Dijkstra's priority queue), avoiding `O(n² log n)` degradations.
+- [ ] **ES:** `red_black_tree_sort` usa LLRB como referencia o una alternativa documentada sin mezclar reglas, conserva contadores y emite por in-order; los helpers públicos o internos de inspección son extras permitidos.
+      **EN:** `red_black_tree_sort` uses reference LLRB or a documented alternative without mixing rules, preserves counts, and emits in-order; public or internal inspection helpers are allowed extras.
 - [ ] **ES:** Se verifican resultados, multiplicidad e invariantes con la suite, y la complejidad real con revisión de código.
       **EN:** The suite checks results, multiplicity and invariants; code review checks real complexity.
-- [ ] **ES:** La entrada ausente devuelve `absent` sin excepciones de validación, distinguible de una salida vacía presente; no hay códigos numéricos ni booleanos de éxito.
-      **EN:** Absent input returns `absent` without validation exceptions, distinguishable from present empty output; no numeric or boolean success codes.
+- [ ] **ES:** La entrada ausente devuelve `absent` sin excepciones de validación, distinguible de una salida vacía presente; no hay códigos numéricos ni booleanos de éxito. Si el lenguaje lo exige por restricción propia para comparar `absent`, se permite `Option`/`Maybe` o representación etiquetada declarándolo en el README.
+      **EN:** Absent input returns `absent` without validation exceptions, distinguishable from present empty output; no numeric or boolean success codes. Where language restrictions require it to compare `absent`, `Option`/`Maybe` or a tagged representation is allowed and declared in the README.
 - [ ] **ES:** Quick/heap prefieren in-place; merge/rojo-negro preservan la entrada. Se verifican propiedad, copias y adaptaciones, y se documentan costes reales de acceso, reconstrucción, memoria y salida.
       **EN:** Quick/heap prefer in-place; merge/red-black preserve input. Ownership, copying, and adaptations are verified, and actual access, reconstruction, memory, and output costs are documented.
 - [ ] **ES:** El proyecto separa el código fuente (`src/`) de las pruebas (`test/`).  
       **EN:** The project separates source code (`src/`) from tests (`test/`).
+- [ ] **ES:** El README de Nivel 3 sigue [`README_Template.md`](../../README_Template.md) (incluidos fundamento teórico por algoritmo y ejemplo razonado) y coincide con el acta de evidencia en `docs/evidence/algorithms/efficient_sort/{language}.md`.
+      **EN:** The Level 3 README follows [`README_Template.md`](../../README_Template.md) (including per-algorithm theoretical explanation and worked example) and matches the evidence record under `docs/evidence/algorithms/efficient_sort/{language}.md`.
 
 ---
 

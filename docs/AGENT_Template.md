@@ -135,15 +135,24 @@ without inventing a replacement.
 
 **ES:** Una representación no define todos los ADT: preferir arrays en un
 módulo de secuencias u ordenamiento no impone arrays, índices consecutivos ni
-capacidad máxima a listas enlazadas, árboles o grafos. Solo se validan límites
-que pertenezcan al contrato actual. Un límite físico del entorno se documenta
-como tal; no se presenta como propiedad intrínseca de la estructura.
+capacidad máxima a listas enlazadas, árboles o grafos. Cuando el algoritmo
+necesita acceso posicional para sostener su cota (como un **heap plano** en
+`heap_sort`), se prefiere la representación plana optimizada según las
+características reales del lenguaje (array mutable `O(1)` o estructura plana
+persistente/buffer local de mejor coste verificable, nunca una lista enlazada
+indexada en `O(n)` por acceso). Solo se validan límites que pertenezcan al
+contrato actual. Un límite físico del entorno se documenta como tal; no se
+presenta como propiedad intrínseca de la estructura.
 
 **EN:** One representation does not define every ADT: preferring arrays in a
 sequence or sorting module does not impose arrays, consecutive indices or
-maximum capacity on linked lists, trees or graphs. Validate only limits belonging
-to the current contract. Document physical environment limits as such, not as
-intrinsic structure properties.
+maximum capacity on linked lists, trees or graphs. When an algorithm requires
+positional access to sustain its bound (such as a **flat heap** in `heap_sort`),
+prefer a flat representation optimized for the language's real characteristics
+(`O(1)` mutable array or the best-cost verified persistent flat storage/local
+buffer, never an `O(n)`-per-access traversal-indexed linked list). Validate only
+limits belonging to the current contract. Document physical environment limits as
+such, not as intrinsic structure properties.
 
 **ES:** Al redactar o revisar una especificación, distingue comportamiento
 observable de intención educativa: indica qué algoritmo o representación debe
@@ -252,7 +261,7 @@ plantillas paralelas con nombres distintos.
 
 1. **El contrato manda.** La adaptación cambia la **forma**, nunca el resultado observable: mismos casos, mismo orden, misma complejidad prometida. Si cambia el resultado, es un defecto y se reporta.
 2. **Sin atajos de biblioteca.** En Fase 1 están prohibidas las rutinas de ordenamiento, búsqueda o **selección** (`sort`, `min`, `max`…) de la biblioteca estándar para el paso interno del algoritmo.
-3. **Mecanismos según la fase.** En Fase 1, el contrato se declara con un indicador compatible con el tipo de retorno (`null`, `nil`, `None`, `#f`, `-1`, `nothing` cuando sea representable). No se añaden `Option`/`Maybe`/`Result` ni excepciones por preferencia idiomática; se introducen según la tabla de evolución por fase. La restricción no prohíbe los opcionales nativos permitidos ni los enlaces opcionales internos de una estructura.
+3. **Mecanismos según la fase.** En Fase 1, el contrato se declara con un indicador compatible con el tipo de retorno (`null`, `nil`, `None`, `#f`, `-1`, `nothing` cuando sea representable). No se añaden `Option`/`Maybe`/`Result` ni excepciones por preferencia idiomática; se introducen según la tabla de evolución por fase. La restricción no prohíbe los opcionales nativos permitidos ni los enlaces opcionales internos de una estructura, **ni el uso de `Option`/`Maybe` (o una representación etiquetada `present`/`absent`) por restricción del lenguaje cuando no exista otro medio de comparar o distinguir `absent` de una entrada/salida válida (como `[]`)**, caso que debe declararse en _Adaptaciones idiomáticas_ e _Indicadores de fallo_.
 4. **Una fila por desviación**, con qué dice la especificación, qué hace el código y por qué.
 5. **Los tests también se adaptan y se declaran.** Si un caso no es representable, se **omite** y se dice en _Cobertura de pruebas_; no se sustituye por otro caso ni se inventa un centinela imposible.
 6. **Nunca se silencia.** Una línea del pseudocódigo que no se puede seguir se cita en la justificación, tal cual; no se esconde en un comentario del código.
@@ -267,7 +276,7 @@ plantillas paralelas con nombres distintos.
 |---|---|---|
 | Sin mutación razonable | Haskell, Elm, Erlang, Gleam, PureScript, Scheme, Clojure, Common Lisp, Prolog, F# | Devolver una colección **nueva** o recurrir sobre listas, con la misma complejidad prometida |
 | Sin índices enteros ni bucles | Prolog, Haskell, Erlang, Scheme, Common Lisp, Forth | Recursión sobre lista (con acumulador cuando no haya TCO) y cabeza/cola |
-| Sin `null`/`nil` en un tipo de valor | Haskell, Elm, Erlang, Gleam, Rust, Swift, V, Vala, Zig, C++, OCaml, PureScript, Tcl/Tk… | El caso de entrada nula no representable se omite solo según la cláusula de adaptación; los demás fallos conservan el indicador del contrato si el tipo lo admite. No se introduce `Option`/`Maybe` antes de su fase |
+| Sin `null`/`nil` en un tipo de valor | Haskell, Elm, Erlang, Gleam, Rust, Swift, V, Vala, Zig, C++, OCaml, PureScript, Tcl/Tk… | Si el lenguaje no puede distinguir/comparar `absent` frente a valores válidos sin envoltorio y la especificación lo exige, se autoriza `Option`/`Maybe` (o representación etiquetada) **por restricción del lenguaje** y se declara. En los módulos donde la especificación permita omitirlo por no ser representable, se omite y se documenta. Nunca se introduce `Option`/`Maybe` por mera preferencia antes de su fase |
 | Opcional nativo disponible | C#, F#, Ballerina, Kotlin, Nim, Crystal, TypeScript | Usar el opcional del lenguaje como indicador, sin envoltorios añadidos |
 | Capacidad fija y overflow | C, Ada, Assembly, COBOL, Forth | Presupuesto de memoria declarado; el overflow es un caso probado, no un accidente |
 | Centinela `-1` y tipos de índice | lenguajes con índices sin signo o basados en 1 | El indicador nativo del lenguaje y su fila en la tabla de adaptaciones |

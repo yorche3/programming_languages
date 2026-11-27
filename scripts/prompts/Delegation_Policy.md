@@ -63,12 +63,18 @@ for the required aspect; otherwise report the blocker. Do not invent a replaceme
 **ES:** Distingue unidad conceptual, variante de implementación, grupo lógico de
 pruebas, archivo físico y runner. Una estructura con varias operaciones no son
 varias implementaciones; casos válidos e inválidos no exigen suites separadas.
-Identifica las unidades y variantes que realmente pide la especificación.
+Identifica las unidades y variantes que realmente pide la especificación; si
+`{spec}` define nodos internos propios o autoriza helpers educativos de
+inspección de invariantes para la suite, respétalos según el contrato sin
+convertirlos en una API pública no solicitada.
 
 **EN:** Distinguish conceptual unit, implementation variant, logical test group,
 physical file and runner. Multiple operations on one structure are not multiple
 implementations; valid and invalid cases do not require separate suites.
-Identify the units and variants actually required by the specification.
+Identify the units and variants actually required by the specification; if
+`{spec}` defines own internal nodes or authorizes educational invariant-inspection
+helpers for the suite, follow the contract without turning them into an
+unrequested public API.
 
 **ES:** Agrupa por operación, invariante o escenario. Asigna cada caso a su
 contrato y a las variantes aplicables: solo variantes del **mismo contrato**

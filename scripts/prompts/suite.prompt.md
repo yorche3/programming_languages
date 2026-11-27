@@ -83,11 +83,15 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 - Localiza en `{spec}` el encabezado que contenga **«Casos de prueba»** o **«Test Cases»**.
 - Toma **la tabla tal cual: una fila, un caso**. El número de casos es el que tenga la tabla:
   no añadas los que te parezcan que faltan ni quites los que te parezcan redundantes.
-- Lee también las notas que acompañan a la tabla (caso nulo o inválido, indicador de fallo,
-  aclaraciones de paradigma): son parte del contrato, no adornos.
-- Mapea cada caso o escenario a su **operación y contrato**, y a las variantes
-  aplicables. Solo implementaciones alternativas del mismo contrato comparten
-  todos sus casos; no cruces casos de árbol con operaciones de grafo, por ejemplo.
+- Lee también las notas que acompañan a la tabla (caso nulo o ausente, indicador de fallo,
+  comprobaciones de invariantes estructurales, propiedad/aislamiento de contenedores,
+  aclaraciones de paradigma y guía de implementación enlazada por `{spec}`): son parte
+  del contrato, no adornos.
+- Mapea cada caso, escenario o verificación de invariantes a su **operación y contrato**,
+  y a las variantes aplicables. Solo implementaciones alternativas del mismo contrato
+  comparten todos sus casos; no cruces casos de árbol con operaciones de grafo, por ejemplo.
+  Si `{spec}` autoriza helpers de inspección para verificar invariantes internas, úsalos
+  en un grupo separado sin asumir una API pública no exigida.
 - Declara `unidad/variante → casos aplicables → grupo lógico → archivo/suite →
   runner`, con referencia y motivo. Conserva los pasos de cada escenario y permite
   varios grupos en una suite o suites separadas según el framework.
@@ -227,12 +231,15 @@ eso corresponde a otra delegación.
 - La suite tiene que **poder fallar**: si al romper a propósito una comparación del código bajo
   prueba no falla nada, no estás probando lo que crees (paso 6).
 
-### Caso nulo
+### Caso nulo o ausente (`absent`)
 
-- **Si la especificación exige un caso nulo y el tipo lo admite** → verifica el
-  indicador de fallo del contrato. No añadas el caso por costumbre ni introduzcas
-  excepciones o envoltorios que la fase no permita.
-- **Si el tipo no admite nulos** → omite el caso y documenta en una línea por qué.
+- **Si la especificación exige un caso nulo o `absent` y el tipo lo admite** → verifica el
+  indicador de fallo del contrato. Si el lenguaje exige `Option`/`Maybe` o una representación
+  etiquetada **por restricción propia** para distinguir `absent` de una colección vacía o
+  válida, usa esa representación y declárala en una línea. No añadas el caso por costumbre ni
+  introduzcas excepciones o envoltorios por preferencia antes de su fase.
+- **Si el tipo no admite nulos ni ausencia representable según la cláusula de adaptación** → omite
+  el caso y documenta en una línea por qué.
 
 ### Patrón obligatorio
 

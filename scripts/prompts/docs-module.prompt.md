@@ -61,12 +61,13 @@ divergencia en una de estas dos categorías:
 
 | Categoría | Criterio | Acción |
 |-----------|----------|--------|
-| **Idiomática y aceptable** | El lenguaje lo exige o lo favorece (funcional vs imperativo, *in-place* vs copia, `Option`/`Result`, nulabilidad, TCO, naming) y el comportamiento observable coincide con el contrato | Aceptar y documentarla en el README |
-| **Defecto** | Cambia el comportamiento observable, incumple un criterio de aceptación o degrada la complejidad prometida | Reportar como bloqueo |
+| **Idiomática y aceptable** | El lenguaje lo exige o lo favorece (funcional vs imperativo, *in-place* vs copia, `Option`/`Maybe` por restricción para comparar `absent`, nulabilidad, TCO, naming, heap plano persistente) y el comportamiento observable coincide con el contrato | Aceptar y documentarla en el README |
+| **Defecto** | Cambia el comportamiento observable, incumple un criterio de aceptación, delega el algoritmo objetivo en biblioteca o degrada la complejidad prometida | Reportar como bloqueo |
 
 Ejemplos reales de divergencias **idiomáticas**: devolver una copia en lugar de ordenar
 *in-place* (Clojure, Common Lisp), `int[]?` en C# por los *nullable reference types*, `null`
-como indicador de fallo en lenguajes con slices anulables.
+como indicador de fallo en lenguajes con slices anulables, o `Option`/`Maybe` por restricción
+del lenguaje cuando vacío coincide con ausencia.
 
 ### 3. COMPUERTA — ¿hay algo que mitigar?
 
@@ -91,11 +92,16 @@ de `docs/AGENT_Template.md` y `AGENTS.md`:
 - Secciones: **todas las secciones obligatorias de `docs/README_Template.md`**, en su orden y
   con sus encabezados bilingües. La plantilla es la fuente: no copies aquí la lista de
   secciones, que se queda atrás en cuanto la plantilla crece.
+- En módulos de Core, desarrolla la explicación teórica y el ejemplo pequeño razonado en la
+  tabla y prosa de operaciones (idea, pasos, invariante, terminación, coste real y mutabilidad/
+  propiedad), tomando el fundamento de `{spec}` (y la guía de implementación enlazada, si
+  existe) como referencia sin copiarlo entero.
 - **Salidas reales** de compilación y pruebas: no inventes ni edites la salida.
 - Incluye una **nota de desviación** respecto a la ubicación esperada por la especificación
   (`src/` → `lib/`, `source/`, ausencia de `run_tests`, *naming* idiomático, etc.) con el motivo.
-- En «Notas de implementación», documenta las divergencias idiomáticas aceptadas en el paso 2
-  y el manejo del caso nulo.
+- Documenta las divergencias idiomáticas aceptadas en el paso 2, el manejo del caso `absent`/nulo
+  (incluido `Option`/`Maybe` si fue necesario por restricción del lenguaje) y las
+  particularidades de memoria, propiedad, recursión y pruebas en «Notas de implementación».
 
 ### 6. Cierre
 

@@ -40,14 +40,22 @@ distinct from V1/V2/V4, which describe how state is expressed.
 
 **ES:** `absent` y `present(values)` son conceptos de la
 [convención](../ruleset/PSEUDOCODE_CONVENTION.md). Usa la ausencia nativa si
-no colisiona; si el vacío nativo también significa ausencia, etiqueta la salida.
+no colisiona; si el vacío nativo también significa ausencia o el lenguaje no
+permite comparar `absent` frente a una colección válida sin envoltorio, se admite
+`Option`/`Maybe` o una salida etiquetada **por restricción del lenguaje**
+(declarada en adaptaciones e indicadores de fallo), aun cuando la Fase 1 no los
+adopte por estilo.
 No pruebes éxito por truthiness ni uses `-1` como fallo. En lenguajes con
 memoria manual, un buffer vacío válido necesita una representación distinta
 de la ausencia, aunque no reserve un bloque de elementos.
 
 **EN:** `absent` and `present(values)` follow the
 [convention](../ruleset/PSEUDOCODE_CONVENTION.md). Use native absence when
-unambiguous; tag output if native empty values also mean absence.
+unambiguous; if native empty values also mean absence or the language cannot
+compare `absent` against a valid collection without a wrapper, `Option`/`Maybe`
+or tagged output is allowed **by language restriction** (declared under
+adaptations and failure indicators), even though Phase 1 does not adopt them by
+style.
 Do not test success by truthiness or use `-1` as failure. With manual memory,
 a valid empty buffer needs a representation distinct from absence even if
 no element block is allocated.
@@ -425,15 +433,21 @@ merely an index. A swap rebuilding O(n) elements is not O(1); O(log n)
 updates must be counted at every descent. Neither traversal-indexed lists
 nor whole-tuple copies justify mutable-array bounds.
 
-**ES:** Escoge el backend permitido con mejor coste verificable, contando
-conversión, lectura y actualización. No cambies silenciosamente a otro tipo
-de heap enlazado ni a un ADT de biblioteca. La adaptación documenta su
-coste real; la invariancia de prefijo heap y sufijo ordenado permanece.
+**ES:** Escoge el almacenamiento plano permitido con mejor coste verificable,
+contando conversión, lectura y actualización: el heap debe conservar su forma
+teórica y **preferir un heap plano** optimizado según las características del
+lenguaje (buffer mutable local cuando la variante lo permita, o vector/array
+persistente `O(log n)` / `O(log₃₂ n)`). No cambies silenciosamente a otro tipo
+de heap enlazado ni a un ADT de biblioteca. La adaptación documenta su coste
+real; la invariancia de prefijo heap y sufijo ordenado permanece.
 
-**EN:** Choose the allowed backend with the best verified costs, counting
-conversion, reads, and updates. Do not silently replace the flat heap with
-another linked heap type or a library ADT. Document actual adaptation costs;
-the heap-prefix/sorted-suffix invariant remains.
+**EN:** Choose the allowed flat storage with the best verified costs, counting
+conversion, reads, and updates: the heap must preserve its theoretical shape
+and **prefer a flat heap** optimized for the language's characteristics (a local
+mutable buffer when the variant allows it, or an `O(log n)` / `O(log₃₂ n)`
+persistent vector/array). Do not silently replace the flat heap with another
+linked heap type or a library ADT. Document actual adaptation costs; the
+heap-prefix/sorted-suffix invariant remains.
 
 ## 6. Rojo-negro: tres reparaciones separadas / Three separate red-black repairs
 

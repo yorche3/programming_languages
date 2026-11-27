@@ -45,7 +45,10 @@ fija las bases por prioridad y la agrupación por tema e idioma para este rol.
    aparte (en Ada `src/*.ads`), en una cabecera (en C `include/*.h`) o dentro del propio módulo.
 3. **`docs/AGENT_Template.md`** — reglas de la adaptación: el contrato se declara con el
    **indicador natural** del lenguaje (`null`, `nil`, `None`, `#f`, `-1`, `nothing`), sin
-   envoltorios de error y sin atajos de biblioteca.
+   envoltorios de error por preferencia y sin atajos de biblioteca. Cuando el lenguaje no
+   pueda comparar o distinguir `absent` de una entrada/salida válida sin envoltorio,
+   se admite `Option`/`Maybe` (o representación etiquetada) **por restricción del lenguaje**,
+   declarándolo.
 4. **`scripts/data/languages.tsv`** y **`docs/core/00_Project_Initialization_Guide.md`** — para
    `{lang}`: layout, ubicación del código y comando nativo de compilación y de pruebas.
 5. **`AGENTS.md`** — límites de actuación y flujo de cierre.
@@ -98,7 +101,7 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 |----------|---------------|
 | **Tipo nuevo del dominio** | De la especificación, con el nombre y la forma que use el lenguaje (estructura, `record`, tupla, clase, `typedef`, *struct*, tabla) |
 | **Firmas de las funciones expuestas** | Una por cada función de la especificación, en el orden en que aparecen; con los tipos del lenguaje |
-| **Indicador natural de fallo** | El de la casa para ese lenguaje (`null`, `nil`, `None`, `#f`, `-1`, `nothing`); **no** se introduce `Option`/`Maybe`/`Result` ni excepciones antes de su fase |
+| **Indicador natural de fallo** | El de la casa para ese lenguaje (`null`, `nil`, `None`, `#f`, `-1`, `nothing` o `absent` según `{spec}`); **no** se introduce `Option`/`Maybe`/`Result` por preferencia ni excepciones antes de su fase, salvo `Option`/`Maybe` (o representación etiquetada) **por restricción del lenguaje** cuando sea necesario para distinguir `absent` de valores válidos o vacíos |
 | **Ubicación** | La que use el módulo homologado: archivo de contrato aparte, cabecera o el propio módulo |
 
 **Regla de conservación:** lo que el esqueleto ya declara y encaja se respeta: el contrato se
@@ -127,13 +130,13 @@ operación declarada**, con la forma que el lenguaje exija:
 
 Reglas del esqueleto:
 
-- **Uno por operación declarada**, en el orden de la especificación, sin funciones de más.
+- **Uno por operación declarada**, en el orden de la especificación, sin funciones de más (salvo los helpers internos o de inspección de invariantes que `{spec}` autorice explícitamente como extras educativos).
 - Devuelve el **indicador natural** (o deja el valor por defecto del tipo): **nada** del
   algoritmo. Un esqueleto que resolviera el caso sería implementación, y el paso 5 se queda sin
   qué hacer.
 - Si el lenguaje no admite un cuerpo vacío (una función que promete un valor debe devolver
   algo), el retorno del indicador **es** el esqueleto: no es una implementación.
-- No se añade estado interno, campos ni ayudas que el contrato no declare.
+- No se añade estado interno, campos ni ayudas que el contrato o `{spec}` no declaren o autoricen.
 
 ### 4. Adaptar solo lo que el lenguaje no soporta
 
@@ -174,8 +177,8 @@ eso corresponde a otra delegación.
 
 - Escribir pruebas unitarias: son del encargo `suite` (paso 4c).
 - Implementar el algoritmo: es el paso 5. Un esqueleto **no** resuelve ningún caso.
-- Añadir `Option`/`Maybe`/`Result`, excepciones u otros envoltorios de error antes de su fase.
-- Añadir funciones que la especificación no expone ni campos que nadie usa.
+- Añadir `Option`/`Maybe`/`Result` por mera preferencia, excepciones u otros envoltorios de error antes de su fase (salvo `Option`/`Maybe` o representación etiquetada por restricción del lenguaje para comparar `absent`).
+- Añadir funciones que `{spec}` no exponga ni autorice (como extras educativos de inspección) ni campos que nadie usa.
 - Modificar la especificación, el roadmap ni `scripts/data/`.
 - Generar documentación, READMEs ni índices.
 - Introducir dependencias externas no estándar del lenguaje.
@@ -187,9 +190,9 @@ eso corresponde a otra delegación.
 
 - [ ] Variables resueltas y confirmadas con evidencia del repositorio.
 - [ ] Tipo nuevo del dominio declarado, con el nombre y la ubicación del lenguaje.
-- [ ] Una firma por cada función expuesta en `{spec}`, sin funciones de más.
+- [ ] Una firma por cada función expuesta en `{spec}`, sin funciones de más (salvo helpers autorizados explícitamente por `{spec}`).
 - [ ] El esqueleto de **cada** operación declarada, con el retorno del indicador natural.
-- [ ] Indicador natural de fallo declarado, sin envoltorios de error.
+- [ ] Indicador natural de fallo declarado, sin envoltorios de error por preferencia (solo `Option`/`Maybe` o representación etiquetada por restricción del lenguaje para comparar `absent`).
 - [ ] El contrato con sus esqueletos **compila y enlaza**, con la salida real pegada sin editar.
 - [ ] Adaptaciones y decisiones de ubicación declaradas en una línea cada una.
 - [ ] Nada de la suite, del algoritmo ni de la documentación modificado.
