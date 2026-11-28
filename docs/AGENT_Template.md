@@ -98,22 +98,59 @@ agent only covers the ones presented to it as a request.
 ### Autoridad, bases y conflictos / Authority, references and conflicts
 
 **ES:** Las instrucciones de actuación delimitan qué puede hacer el agente.
-Dentro de ese alcance, la especificación fija operaciones, casos, resultados,
-invariantes y complejidad; las reglas de fase fijan los mecanismos educativos
-permitidos. Las capacidades verificadas del lenguaje determinan cómo expresarlos,
-no autorizan cambiar el contrato. Si la especificación y la fase se contradicen,
-o el lenguaje no puede cumplirlas, se bloquea el artefacto afectado y se consulta
-al autor antes de cambiarlo. Una convención preferida no es una imposibilidad.
-Las desviaciones se tramitan mediante
-[`ruleset/DEVIATION_POLICY.md`](ruleset/DEVIATION_POLICY.md).
+Dentro de ese alcance, rige una **única jerarquía normativa de precedencia**
+cuando dos documentos parecen discrepar:
 
-**EN:** Acting instructions limit what the agent may do. Within that scope, the
-specification defines operations, cases, results, invariants and complexity;
-phase rules define the educational mechanisms allowed. Verified language
-capabilities determine their expression, not permission to change the contract.
-If specification and phase conflict, or the language cannot satisfy them, block
-the affected artefact and consult the author before changing it. A preferred
-convention is not an impossibility. Use the deviation policy linked above.
+1. **`AGENTS.md`, `CONTRIBUTING.md`, `WORKFLOW.md` y `ROADMAP.md`** — límites de
+   actuación, ramas, flujo de sprint y criterios de cierre.
+2. **La especificación del módulo (`docs/core/{fase}/{NN}_{Modulo}.md`)** —
+   **manda siempre en el qué**: contrato, operaciones, dominio de valores,
+   ausencia/fallo observable, invariantes, casos de prueba y complejidad.
+3. **Reglas de fase (`AGENT_Template.md` / `ROADMAP.md`)** — mecanismos
+   educativos permitidos por fase (en Fase 1 sin excepciones y sin
+   `Option`/`Maybe` por estilo, salvo por restricción del lenguaje para comparar
+   `absent`).
+4. **Capacidades verificadas del lenguaje y política de desviaciones**
+   ([`ruleset/DEVIATION_POLICY.md`](ruleset/DEVIATION_POLICY.md),
+   [`ruleset/IDIOMATICITY_LEVELS.md`](ruleset/IDIOMATICITY_LEVELS.md),
+   `canonical_names.tsv` y `language_characteristics.tsv`) — determinan cómo se
+   expresa el contrato y cómo se clasifican las desviaciones; una convención
+   preferida no es una imposibilidad.
+5. **Guías de implementación (`docs/implementations/`) y `PARADIGM_FAMILIES.md`** —
+   orientación operativa por familias; **no añaden requisitos** ni prevalecen
+   sobre la especificación o las capacidades reales del lenguaje.
+6. **Bases homologadas del mismo lenguaje** (`data_structures_basics`, luego
+   `numbers`) — son **referencias de forma** (layout, naming, framework de
+   pruebas, runner), **no moldes** ni autoridad sobre dominio, nulabilidad o
+   requisitos propios de una especificación distinta.
+7. **El autor como Tech Lead** — decide cualquier conflicto real o excepción no
+   resuelta antes de modificar el artefacto bloqueado.
+
+**EN:** Acting instructions limit what the agent may do. Within that scope, a
+**single normative precedence hierarchy** governs whenever two documents seem
+to conflict:
+
+1. **`AGENTS.md`, `CONTRIBUTING.md`, `WORKFLOW.md`, and `ROADMAP.md`** — acting
+   limits, branching, sprint flow, and closure criteria.
+2. **The module specification (`docs/core/{phase}/{NN}_{Module}.md`)** — **always
+   governs the what**: contract, operations, value domain, observable
+   absence/failure, invariants, test cases, and complexity.
+3. **Phase rules (`AGENT_Template.md` / `ROADMAP.md`)** — educational
+   mechanisms allowed per phase (Phase 1 forbids exceptions and stylistic
+   `Option`/`Maybe`, except when required by language restriction to compare
+   `absent`).
+4. **Verified language capabilities and deviation policy** — determine how the
+   contract is expressed and how deviations are classified; a preferred
+   convention is not an impossibility.
+5. **Implementation guides (`docs/implementations/`) and `PARADIGM_FAMILIES.md`**
+   — operational family guidance; they **add no requirements** and never
+   override the specification or verified language capabilities.
+6. **Same-language homologated references** (`data_structures_basics`, then
+   `numbers`) — **form references** (layout, naming, test framework, runner),
+   **never moulds** or authority over value domain, nullability, or new
+   specification requirements.
+7. **The author as Tech Lead** — resolves any real conflict or exception before
+   changing the blocked artefact.
 
 **ES:** Para la forma, las bases del mismo lenguaje son, en orden persistente:
 `{lenguaje}/core/algorithms/data_structures_basics/` y

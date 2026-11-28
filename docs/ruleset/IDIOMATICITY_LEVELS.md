@@ -47,7 +47,7 @@ nav_exclude: true
 | 4 | Acceso vía propiedad/getter idiomático (no `get_X()` cuando el lenguaje usa `x`) | Inspección de API pública |
 | 5 | Constructor no devuelve valor inapropiado (no `nil`, no `undefined`, no `null`) | Test de instanciación |
 | 6 | Sin `unsafe`, `@Suppress`, `#[allow]`, `unwrap`, `!!` en código de producción | Grep de tokens |
-| 7 | Campos privados de acuerdo al contrato (representación oculta) | Inspección de visibilidad |
+| 7 | Campos privados de acuerdo al contrato (representación oculta; los helpers de inspección/paso autorizados por `{spec}` para probar invariantes no penalizan) | Inspección de visibilidad |
 | 8 | Complejidad declarada en README, incluso si difiere de la spec | Lectura del README |
 | 9 | Errores idiomáticos (sin excepciones si el lenguaje no las usa) | Inspección del flujo de fallo |
 | 10 | Cero desviaciones sin documentar | Comparación con `PSEUDOCODE_CONVENTION.md` |
@@ -85,9 +85,9 @@ nav_exclude: true
 | 11 | Nombres canónicos mapeados | ⚠️ permitido 1 faltante |
 | 12 | Pruebas en verde | ✅ obligatorio |
 
-**ES:** La frontera con `idiomatic` es: existe **al menos una desviación documentada** (de nombre o mapeo) pero **ninguna estructural**.
+**ES:** La frontera con `idiomatic` es: existe **al menos una desviación documentada** de severidad 🟡 o superior (nombre no idiomático o mapeo pendiente, nunca una desviación C1 🟢 `informational` del idioma) pero **ninguna estructural**.
 
-**EN:** The boundary with `idiomatic` is: there is **at least one documented deviation** (name or mapping) but **none structural**.
+**EN:** The boundary with `idiomatic` is: there is **at least one documented deviation** of severity 🟡 or higher (non-idiomatic name or pending mapping, never a 🟢 `informational` idiomatic C1 naming translation) but **none structural**.
 
 **Ejemplos esperados / Expected examples:** Kotlin con `getValue()` en vez de `value` (documentado). Ruby con `delete` (paridad con la spec) en vez de `remove` (documentado). TypeScript con `snake_case` en un módulo (documentado). Go con `Size()` en vez de `Len()` (documentado).
 

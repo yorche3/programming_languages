@@ -50,18 +50,23 @@ impose that representation or a maximum capacity on linked structures.
 ---
 
 **ES:** En 08, las colecciones de biblioteca son almacenamiento auxiliar:
-los cuatro ordenamientos y el árbol balanceado siguen siendo manuales.
-El contrato devuelve colección o `absent`, con vacío presente distinguible;
-esto no cambia los indicadores de los módulos anteriores. Los helpers públicos
-de inspección son extras educativos permitidos, no una API de árbol obligatoria.
+los cuatro ordenamientos, el heap plano y el árbol balanceado siguen siendo
+manuales. El contrato devuelve colección o `absent`, con vacío presente
+distinguible (y `Option`/`Maybe` solo por restricción del lenguaje para
+comparar `absent`); esto no cambia los indicadores de los módulos anteriores.
+Cuando `test/` no accede a privados (Vía B), el contrato declara los helpers
+mínimos de paso e inspección de invariantes exigidos por la especificación sin
+penalizar encapsulación (C6).
 La [guía 08 por familias](../../implementations/08_Efficient_Sort.md) desarrolla
 los nodos y las variantes, mientras la especificación explica su fundamento.
 
-**EN:** In 08, library collections provide auxiliary storage: all four sorts
-and the balanced tree remain manual. Its contract returns a collection or
-`absent`, distinguishable from present empty output; this does not change
-earlier modules' indicators. Public inspection helpers are allowed educational
-extras, not a required tree API.
+**EN:** In 08, library collections provide auxiliary storage: all four sorts,
+the flat heap, and the balanced tree remain manual. Its contract returns a
+collection or `absent`, distinguishable from present empty output (allowing
+`Option`/`Maybe` only by language restriction to compare `absent`); this does
+not change earlier modules' indicators. When `test/` lacks private access
+(Path B), the contract declares the minimal step and invariant-inspection
+helpers required by the specification without penalizing encapsulation (C6).
 The [08 family guide](../../implementations/08_Efficient_Sort.md) develops nodes
 and variants, while the specification explains their foundation.
 

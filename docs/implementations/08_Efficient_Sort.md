@@ -76,7 +76,7 @@ memory alike.
 
 | Grupo / Group | Lenguajes / Languages | Nodo propio / Own node | Camino y alternativas / Path and alternatives |
 |---|---|---|---|
-| F1 — V1 OO | ada, ballerina, crystal, csharp, dart, groovy, haxe, java, javascript, kotlin, raku, rexx, scala, swift, typescript, vala | Clase o registro con hijos opcionales; sin padre para LLRB / Class or record with optional children; no parent for LLRB | Buffer mutable: Hoare o Lomuto; merge top-down o bottom-up; max-heap iterativo; LLRB mutable. Declarar copia al escribir si existe / Mutable buffer: Hoare or Lomuto; top-down or bottom-up merge; iterative max-heap; mutable LLRB. Declare copy-on-write when present |
+| F1 — V1 OO | ada (etiqueta TSV; ver nota debajo), ballerina, crystal, csharp, dart, groovy, haxe, java, javascript, kotlin, raku, rexx, scala, swift, typescript, vala | Clase o registro con hijos opcionales; sin padre para LLRB (en Ada, paquete `private` con registro y `access` anulable) / Class or record with optional children; no parent for LLRB (in Ada, `private` package with record and nullable `access`) | Buffer mutable: Hoare o Lomuto; merge top-down o bottom-up; max-heap iterativo; LLRB mutable. En Ada, memoria manual con `Free`/`Unchecked_Deallocation` y tipos `access`; declarar copia al escribir si existe / Mutable buffer: Hoare or Lomuto; top-down or bottom-up merge; iterative max-heap; mutable LLRB. In Ada, manual memory with `Free`/`Unchecked_Deallocation` and `access` types; declare copy-on-write when present |
 | F2 — V1 dinámico / dynamic | common-lisp, lua, perl, php, python, r, ruby, tcl-tk | Tipo/registro propio; comprobar semántica de referencia / Own type/record; check reference semantics | Mismos algoritmos sobre almacenamiento verificado. Una lista o diccionario usado como registro no garantiza mutación compartida / Same algorithms over verified storage. A list or dictionary used as a record does not guarantee shared mutation |
 | F3 — V1 sistemas / systems | assembly, c, cobol, d, forth | Registro propio, direcciones/enlaces y liberación cuando corresponda / Own record, addresses/links, and release where needed | Array y longitud; LLRB sin padre o convencional con padre. Merge bottom-up evita pila recursiva; no ocultar buffers ni asignaciones / Array and length; parentless LLRB or parent-linked conventional tree. Bottom-up merge avoids recursive stack; expose buffers and allocation |
 | F4 — V1 sistemas modernos / modern systems | cpp, go, julia, nim, rust, v, zig | Registro propio con propiedad de hijos explícita / Own record with explicit child ownership | Buffer/slice; una vista no es copia. LLRB sin ciclos facilita mover propiedad de subárboles; el convencional necesita justificar enlaces al padre / Buffer/slice; a view is not a copy. Acyclic LLRB simplifies subtree ownership moves; conventional parent links need justification |
@@ -724,19 +724,38 @@ replacing those operations.
 
 ## 8. Cómo validar y explicar la elección / Validating and explaining a choice
 
-**ES:** La suite toma los casos de la especificación. Añade la comprobación
-estructural correspondiente a la variante, no la forma exacta de otro árbol:
-LLRB sin enlaces derechos rojos; convencional y Okasaki con las invariantes
-comunes; padres coherentes solo donde existen. Un snapshot o iterador de
-inspección necesita estructura, colores y contadores, no solo enteros ordenados.
+**ES:** La suite toma los casos de la especificación y verifica las invariantes
+mediante **Vía A** (pruebas internas con acceso a privados) o **Vía B** (helpers
+mínimos de paso e inspección declarados en `4b`, sin contar como desviación C6):
+- **Heap:** `heap_build` + `sift_down` (o paso equivalente) sobre copia en
+  `test/` para comprobar `padre >= hijos`, `prefijo <= sufijo` y sufijo ordenado
+  tras construir y tras cada extracción.
+- **Rojo-negro:** `rb_empty`/`rb_insert`/`rb_to_sequence` (y `rb_free` en
+  memoria manual) más inspectores de solo lectura o snapshot estructural
+  (`key`, `count`, `is_red`, `left`, `right`, `is_nil`) para que **`test/`**
+  verifique orden ABB, raíz negra, sin rojo-rojo, igual altura negra y suma de
+  contadores tras cada inserción. Añade la comprobación estructural
+  correspondiente a la variante, no la forma exacta de otro árbol: LLRB sin
+  enlaces derechos rojos; convencional y Okasaki con las invariantes comunes;
+  padres coherentes solo donde existen. Un snapshot o iterador de inspección
+  necesita estructura, colores y contadores, no solo enteros ordenados.
 Helpers públicos inválidos devuelven `absent` antes de mutar.
 
-**EN:** Tests use the specification's cases. Add the chosen variant's structural
-checks, not another tree's exact shape: no red right links for LLRB, common
-invariants for conventional and Okasaki, and parent consistency only where
-parents exist. Inspection snapshots or iterators need structure, colors, and
-counts, not just sorted integers. Invalid public helpers return `absent`
-before mutation.
+**EN:** Tests use the specification's cases and verify invariants through
+**Path A** (internal tests with private access) or **Path B** (minimal step and
+inspection helpers declared in `4b`, not counting as a C6 deviation):
+- **Heap:** `heap_build` + `sift_down` (or equivalent step) on a copy in `test/`
+  to verify `parent >= children`, `prefix <= suffix`, and sorted suffix after
+  building and after each extraction.
+- **Red-black:** `rb_empty`/`rb_insert`/`rb_to_sequence` (and `rb_free` under
+  manual memory) plus read-only inspectors or a structural snapshot (`key`,
+  `count`, `is_red`, `left`, `right`, `is_nil`) so **`test/`** checks BST order,
+  black root, no red-red links, equal black height, and count sums after every
+  insertion. Add the chosen variant's structural checks, not another tree's
+  exact shape: no red right links for LLRB, common invariants for conventional
+  and Okasaki, and parent consistency only where parents exist. Inspection
+  snapshots or iterators need structure, colors, and counts, not just sorted
+  integers. Invalid public helpers return `absent` before mutation.
 
 **ES:** En el README deja claro:
 1. Qué Node propio y qué almacenamiento de secuencia existen.

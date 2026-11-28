@@ -290,16 +290,19 @@ such as exploiting digits or ranges, not a contradiction of this bound.
 | Crear `efficient_sort` con `quick_sort(arr)`, `merge_sort(arr)`, `heap_sort(arr)` y `red_black_tree_sort(arr)`. Cada función recibe una **secuencia de enteros**, incluidos negativos y cero, y devuelve sus valores en orden ascendente, conservando todas las repeticiones. Una entrada ausente devuelve `absent`, nunca un código numérico de éxito/fallo. Una vacía devuelve una secuencia vacía presente. El README declara representación, mutación y propiedad de la salida. Sin excepciones para validar las entradas. | Create `efficient_sort` with `quick_sort(arr)`, `merge_sort(arr)`, `heap_sort(arr)`, and `red_black_tree_sort(arr)`. Each function receives an **integer sequence**, including negatives and zero, and returns its values in ascending order, preserving every duplicate. Absent input returns `absent`, never a numeric success/failure code. Empty input returns a present empty sequence. The README declares representation, mutation, and output ownership. No exceptions for input validation. |
 
 **ES:** El árbol rojo-negro es una estructura interna para ordenar: no se pide
-una API pública de búsqueda o eliminación. Se permiten helpers públicos de
-inspección y construcción como extras educativos, con pruebas separadas.
-El árbol del módulo 07 introduce
+una API pública general de búsqueda o eliminación. Cuando la suite (`test/`)
+viva separada y no pueda acceder a privados (Vía B), se declaran los helpers
+mínimos de paso e inspección definidos abajo para verificar las invariantes sin
+penalizar encapsulación (C6). El árbol del módulo 07 introduce
 inserción y búsqueda ABB, pero no es un rojo-negro ni preserva duplicados; no se
 importa ni se asume que ya esté balanceado. El heap de `heap_sort` no es un
 árbol rojo-negro: su invariante solo ordena cada padre respecto de sus hijos.
 
-**EN:** The red-black tree is an internal structure for sorting: no public
-search or deletion API is required. Public inspection and construction helpers
-are allowed as educational extras, with separate tests. Module 07 introduces BST insertion and
+**EN:** The red-black tree is an internal structure for sorting: no general
+public search or deletion API is required. When the test suite (`test/`) lives
+separately without private access (Path B), the minimal step and inspection
+helpers defined below are declared so invariants can be verified without
+penalizing encapsulation (C6). Module 07 introduces BST insertion and
 search, but it is not a red-black tree and does not preserve duplicates; do not
 import it or assume it is balanced. The heap in `heap_sort` is not a red-black
 tree: its invariant orders each parent only with respect to its children.
@@ -748,6 +751,80 @@ success. Persistent versions rebuild the path and return the new root.
 Emission must cost `O(n)`: amortized `O(1)` append, preallocated output, or an
 equivalent linear construction, not repeated whole-list concatenation.
 
+#### Helpers de verificación de invariantes (superficie de prueba) / Invariant verification helpers (test surface)
+
+**ES:** La API pública de dominio sigue siendo únicamente `quick_sort`,
+`merge_sort`, `heap_sort` y `red_black_tree_sort` (no se exige búsqueda ni
+borrado en el árbol ni una cola de prioridad completa). Sin embargo, como la
+suite **debe** comprobar las invariantes del **heap** tras construir y tras
+cada extracción, y las del **árbol rojo-negro** tras **cada inserción completa**,
+el módulo garantiza la observabilidad mediante una de estas dos vías según el
+lenguaje:
+
+- **Vía A — Pruebas internas del módulo** (cuando el lenguaje permite que la
+  suite acceda a símbolos internos del módulo, p. ej. `#[cfg(test)]` en Rust o
+  mismo paquete en lenguajes sin separación): la suite llama directamente a los
+  procedimientos internos (`heap_build`/`sift_down`, `llrb_insert` +
+  ennegrecido de raíz, `append_in_order`) e inspecciona los nodos internos.
+- **Vía B — Contrato mínimo de inspección en `4b`** (cuando `test/` vive en
+  una unidad/paquete separado y la encapsulación oculta `Node` o las ayudas
+  privadas, p. ej. Ada `.ads`, Java, C#, Go, OCaml, Haskell): el contrato del
+  módulo (`4b`) **declara explícitamente** los helpers mínimos de paso e
+  inspección de solo lectura (que **no** cuentan como desviación C6 ni como API
+  de dominio extra):
+  - **Para Heap:** `heap_build(arr)` (construcción bottom-up sobre la copia de
+    prueba) y `sift_down(arr, n, root)` (o `heap_extract_step(arr, active)`),
+    validando límites si se exponen públicamente para que `test/` verifique
+    `padre >= hijos`, `prefijo <= sufijo` y sufijo ordenado tras construir y tras
+    cada extracción.
+  - **Para Rojo-Negro:** un tipo opaco/árbol del módulo (`rb_tree`),
+    `rb_empty()` (o `rb_init`), `rb_insert(tree, value)` (inserción completa que
+    repara y pinta la raíz negra), `rb_to_sequence(tree)` (emisión in-order),
+    `rb_free(tree)` si el lenguaje tiene memoria manual, e **inspectores de
+    solo lectura** de la estructura y colores —por ejemplo `rb_root(tree)`,
+    `rb_is_nil(node)` (o `absent`), `rb_key(node)`, `rb_count(node)`,
+    `rb_is_red(node)`, `rb_left(node)`, `rb_right(node)` (y `rb_parent(node)`
+    solo en variante convencional) o un snapshot estructural equivalente—.
+  - **Regla anti-trampa:** la lógica que comprueba las 5 invariantes (orden ABB
+    con límites de ancestros, raíz negra, ausencia de rojo-rojo, igual altura
+    negra, suma de `count` == inserciones y sin enlace rojo derecho en LLRB)
+    **vive en `test/`** leyendo esos inspectores o snapshots; nunca se sustituye
+    por un único booleano opaco `is_valid() -> true` dentro de `src/`.
+
+**EN:** The public domain API remains only `quick_sort`, `merge_sort`,
+`heap_sort`, and `red_black_tree_sort` (no general tree search/deletion or full
+priority queue API is required). However, because the suite **must** verify
+**heap** invariants after building and after each extraction, and **red-black**
+invariants after **every completed insertion**, the module guarantees
+observability through one of two paths depending on the language:
+
+- **Path A — Internal module tests** (when the language allows tests to inspect
+  module internals, e.g., Rust `#[cfg(test)]` or same-package visibility): the
+  suite directly exercises internal helpers (`heap_build`/`sift_down`,
+  `llrb_insert` + root blackening, `append_in_order`) and inspects internal nodes.
+- **Path B — Minimal inspection contract in `4b`** (when `test/` lives in a
+  separate unit/package with strict encapsulation hiding `Node` or private
+  helpers, e.g., Ada `.ads`, Java, C#, Go, OCaml, Haskell): the module contract
+  (`4b`) **explicitly declares** minimal step and read-only inspection helpers
+  (which do **not** count as a C6 deviation or extra domain API):
+  - **For Heap:** `heap_build(arr)` (bottom-up build on a test copy) and
+    `sift_down(arr, n, root)` (or `heap_extract_step(arr, active)`), guarding
+    bounds when publicly exposed so `test/` can verify `parent >= children`,
+    `prefix <= suffix`, and sorted suffix after build and after each extraction.
+  - **For Red-Black:** an opaque module tree type (`rb_tree`), `rb_empty()`
+    (or `rb_init`), `rb_insert(tree, value)` (completed insertion repairing
+    and blackening root), `rb_to_sequence(tree)` (in-order emission),
+    `rb_free(tree)` under manual memory, and **read-only structural/color
+    inspectors** —e.g., `rb_root(tree)`, `rb_is_nil(node)` (or `absent`),
+    `rb_key(node)`, `rb_count(node)`, `rb_is_red(node)`, `rb_left(node)`,
+    `rb_right(node)` (plus `rb_parent(node)` only for conventional variant) or
+    an equivalent structural snapshot—.
+  - **Anti-stub rule:** the logic checking all 5 invariants (BST order with
+    ancestor bounds, black root, no red-red links, equal black height, positive
+    `count` sum matching insertions, and no right-leaning red links in LLRB)
+    **lives in `test/`** reading those inspectors or snapshots; never replace it
+    with a single opaque `is_valid() -> true` helper inside `src/`.
+
 ### Casos de prueba / Test Cases
 
 | Caso / Case | Entrada / Input | Salida esperada / Expected output |
@@ -787,13 +864,19 @@ equivalent linear construction, not repeated whole-list concatenation.
   `[3, 1, 2]` (rotaciones combinadas), `[1, 2, 3, 4, 5, 6, 7]`
   (propagación), su inversa y `[2, 2, 1, 3, 2]` (contadores).
   Estas asociaciones describen LLRB, no el recorrido exacto de otras variantes.
-- **Inspección / extras:** se permiten helpers públicos para insertar, recorrer,
-  obtener raíz/estructura o verificar invariantes, o un iterador que exponga
-  estructura y colores. Un in-order de enteros solo prueba orden, no balance.
-  No es obligatoria una API general de árbol ni una forma exacta del resultado
-  de inspección. Documenta los extras y sus precondiciones; si expones rotaciones,
-  prueba llamadas inválidas y ausencia de mutación antes de devolver `absent`.
-  No exijas todas las invariantes durante los pasos intermedios de reparación.
+- **Inspección / extras:** bajo **Vía A** (pruebas internas) la suite accede
+  directamente a los procedimientos y nodos internos; bajo **Vía B** (`test/`
+  separado con encapsulación estricta), el contrato `4b` **debe** declarar los
+  helpers mínimos de paso (`heap_build`, `sift_down`, `rb_empty`/`rb_insert`/
+  `rb_to_sequence`, más `rb_free` si hay memoria manual) y los inspectores de
+  solo lectura o snapshot estructural que exponen nodos, colores y contadores
+  para que **`test/`** verifique las invariantes directamente (nunca mediante un
+  booleano opaco en `src/`). Un in-order de enteros solo prueba orden, no
+  balance. No es obligatoria una API general de árbol ni una forma exacta del
+  resultado de inspección. Documenta los helpers y sus precondiciones; si
+  expones rotaciones, prueba llamadas inválidas y ausencia de mutación antes de
+  devolver `absent`. No exijas todas las invariantes durante los pasos
+  intermedios de reparación.
 
 **EN:** Group tests without expanding the four required operations:
 
@@ -816,11 +899,16 @@ equivalent linear construction, not repeated whole-list concatenation.
   `[3, 1, 2]` (combined rotations), `[1, 2, 3, 4, 5, 6, 7]` (propagation),
   its reverse, and `[2, 2, 1, 3, 2]` (counts). These associations describe LLRB,
   not other variants' exact traces.
-- **Inspection / extras:** public insertion, traversal, root/structure access,
-  or invariant-checking helpers are allowed, as is an iterator exposing
-  structure and colors. Integer in-order alone checks ordering, not balance.
+- **Inspection / extras:** under **Path A** (internal tests) the suite directly
+  accesses internal procedures and nodes; under **Path B** (separate `test/`
+  with strict encapsulation), the `4b` contract **must** declare the minimal
+  step helpers (`heap_build`, `sift_down`, `rb_empty`/`rb_insert`/
+  `rb_to_sequence`, plus `rb_free` under manual memory) and read-only node
+  inspectors or structural snapshot exposing nodes, colors, and counts so
+  **`test/`** verifies invariants directly (never via an opaque boolean in
+  `src/`). Integer in-order alone checks ordering, not balance.
   A general tree API or exact inspection output shape is not required.
-  Document extras and preconditions; if exposing rotations, test invalid calls
+  Document helpers and preconditions; if exposing rotations, test invalid calls
   and no mutation before returning `absent`. Do not require every invariant
   during intermediate repair steps.
 
@@ -856,8 +944,8 @@ heap restoration.
       **EN:** An own Node defines key, count, color, and children; the README explains its representation without assuming library nodes.
 - [ ] **ES:** `heap_sort` implementa el montículo binario siguiendo su definición teórica y **prefiriendo un heap plano** con acceso optimizado según las características del lenguaje y procedimiento explícito de `sift_down` (base de la cola de prioridad de Dijkstra), evitando degradaciones `O(n² log n)`.
       **EN:** `heap_sort` implements the binary heap following its theoretical definition and **preferring a flat heap** with access optimized for the language's characteristics and an explicit `sift_down` procedure (basis for Dijkstra's priority queue), avoiding `O(n² log n)` degradations.
-- [ ] **ES:** `red_black_tree_sort` usa LLRB como referencia o una alternativa documentada sin mezclar reglas, conserva contadores y emite por in-order; los helpers públicos o internos de inspección son extras permitidos.
-      **EN:** `red_black_tree_sort` uses reference LLRB or a documented alternative without mixing rules, preserves counts, and emits in-order; public or internal inspection helpers are allowed extras.
+- [ ] **ES:** `red_black_tree_sort` usa LLRB como referencia o una alternativa documentada sin mezclar reglas, conserva contadores y emite por in-order; se proveen las pruebas internas o los helpers mínimos de inspección/paso (Vía A o Vía B) para que la suite verifique las invariantes de heap y rojo-negro sin contar como desviación C6.
+      **EN:** `red_black_tree_sort` uses reference LLRB or a documented alternative without mixing rules, preserves counts, and emits in-order; internal tests or minimal step/inspection helpers (Path A or Path B) are provided so the suite verifies heap and red-black invariants without counting as a C6 deviation.
 - [ ] **ES:** Se verifican resultados, multiplicidad e invariantes con la suite, y la complejidad real con revisión de código.
       **EN:** The suite checks results, multiplicity and invariants; code review checks real complexity.
 - [ ] **ES:** La entrada ausente devuelve `absent` sin excepciones de validación, distinguible de una salida vacía presente; no hay códigos numéricos ni booleanos de éxito. Si el lenguaje lo exige por restricción propia para comparar `absent`, se permite `Option`/`Maybe` o representación etiquetada declarándolo en el README.
@@ -885,6 +973,10 @@ programming_languages/
                     ├── efficient_sort_test.ext
                     └── run_tests.ext
 ```
+
+El layout real puede seguir las convenciones del lenguaje; toda desviación se declara en el README.
+
+The real layout may follow the language's conventions; every deviation is declared in the README.
 
 ---
 

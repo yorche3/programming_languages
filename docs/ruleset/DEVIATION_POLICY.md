@@ -38,20 +38,24 @@ nav_exclude: true
 
 ## 🧭 Principio rector / Governing principle
 
-**ES:** La autoridad por aspecto está en
-[`../AGENT_Template.md`](../AGENT_Template.md): especificación para el contrato,
-fase para los mecanismos permitidos y capacidades verificadas para su expresión.
-Las bases homologadas orientan la forma, no sustituyen esas reglas. Tener un
-mecanismo nativo no obliga a introducirlo antes de su fase; una preferencia de la
-comunidad no demuestra que otra representación sea imposible. Si estas fuentes
-son incompatibles, se reporta el bloqueo al autor antes de cambiar el artefacto.
+**ES:** La jerarquía normativa única está en [`../AGENT_Template.md`](../AGENT_Template.md):
+`{spec}` manda en el contrato; la fase fija mecanismos permitidos; las
+capacidades verificadas del lenguaje determinan cómo expresarlos; y tanto
+`PARADIGM_FAMILIES.md` como `docs/implementations/` y las bases homologadas
+orientan la forma, **sin** prevalecer sobre `{spec}` ni sobre las capacidades
+reales del lenguaje. Tener un mecanismo nativo no obliga a introducirlo antes de
+su fase; una preferencia de la comunidad no demuestra que otra representación sea
+imposible. Si fuentes de igual o mayor rango son incompatibles, se reporta el
+bloqueo al autor (Tech Lead) antes de cambiar el artefacto.
 
-**EN:** Authority per aspect is defined in the agent guide: specification for the
-contract, phase for allowed mechanisms, verified capabilities for expression.
-Homologated references guide form, not replacements for those rules. A native
-mechanism need not be introduced before its phase; a community preference does
-not prove another representation impossible. Report incompatible sources to the
-author before changing the affected artefact.
+**EN:** The single normative hierarchy is in [`../AGENT_Template.md`](../AGENT_Template.md):
+`{spec}` governs the contract; the phase sets allowed mechanisms; verified
+language capabilities determine expression; and `PARADIGM_FAMILIES.md`,
+`docs/implementations/`, and homologated references guide form **without**
+overriding `{spec}` or actual language capabilities. A native mechanism need not
+be introduced before its phase; a community preference does not prove another
+representation impossible. Report incompatible authoritative sources to the
+author (Tech Lead) before changing the affected artefact.
 
 **ES:** La desviación documentada es **contrato verificable**; la desviación silenciosa es **deuda oculta**.
 
@@ -224,9 +228,9 @@ not cure a breach of the required bound.
 - Devolver la referencia interna mutable desde un getter en un lenguaje inmutable.
 - `#field` en JS/TS accesible desde otro módulo (no puede pasar, pero conceptualmente).
 
-**ES:** **Tratamiento:** permitida cuando el lenguaje **no tiene** un mecanismo de encapsulación adecuado, y se documenta la convención; prohibida cuando el lenguaje sí lo tiene y no se usa.
+**ES:** **Tratamiento:** permitida cuando el lenguaje **no tiene** un mecanismo de encapsulación adecuado, y se documenta la convención; prohibida cuando el lenguaje sí lo tiene y no se usa. **Excepción normativa:** los helpers mínimos de inspección o paso que una especificación autorice o exija explícitamente para que `test/` verifique invariantes internas (por ejemplo, nodos del árbol rojo-negro o pasos de `heap_build`/`sift_down`) **no** cuentan como desviación C6 ni como API de dominio extra si mantienen los campos/nodos encapsulados frente a mutaciones indebidas y se documentan en el README.
 
-**EN:** **Treatment:** allowed when the language **lacks** a suitable encapsulation mechanism, and the convention is documented; forbidden when the language has one and it is not used.
+**EN:** **Treatment:** allowed when the language **lacks** a suitable encapsulation mechanism, and the convention is documented; forbidden when the language has one and it is not used. **Normative exception:** minimal inspection or step helpers explicitly authorized or required by a specification so `test/` can verify internal invariants (for example, red-black tree nodes or `heap_build`/`sift_down` steps) do **not** count as a C6 deviation or extra domain API when they keep fields/nodes protected from improper mutation and are documented in the README.
 
 ---
 
@@ -289,9 +293,9 @@ not cure a breach of the required bound.
 
 ## 📂 Dónde vive cada desviación / Where each deviation lives
 
-**ES:** Las desviaciones viven en **cuatro** lugares, con propósitos distintos.
+**ES:** Las desviaciones del **ciclo de auditoría** (posterior al cierre `50/50`, [`../AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md)) viven en **cuatro** lugares de seguimiento del monorepo; durante el **sprint** de cada módulo, la tabla _Adaptaciones idiomáticas_ de su README de Nivel 3 (`{lenguaje}/core/{fase}/{modulo}/README.md`) es el registro inmediato de toda adaptación o excepción declarada.
 
-**EN:** Deviations live in **four** places, with different purposes.
+**EN:** Deviations in the **audit cycle** (after `50/50` closure, [`../AUDIT_WORKFLOW.md`](../AUDIT_WORKFLOW.md)) live in **four** monorepo tracking places; during each module **sprint**, the Level 3 README's _Idiomatic adaptations_ table (`{lang}/core/{phase}/{module}/README.md`) is the immediate record of every declared adaptation or exception.
 
 | Lugar / Place | Qué contiene / What it holds | Cuándo se actualiza / Updated when |
 |---|---|---|
