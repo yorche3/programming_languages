@@ -38,13 +38,15 @@ fija las bases por prioridad y la agrupación por tema e idioma para este rol.
    el lenguaje (`test/`, `tests/`, `spec/`, `t/`). Es el contrato ejecutable: no la cambies para
    que pase.
 3. **Bases homologadas del mismo lenguaje**, en el orden de la política compartida.
-   Orientan naming, manejo del caso inválido y layout. Respeta las unidades,
-   variantes y grupos que ya usan el contrato y la suite.
-4. **`AGENTS.md`** — límites de actuación y flujo de cierre.
+   Son **referencias de forma** (naming, layout); respeta las unidades, variantes y grupos que
+   ya usan el contrato y la suite.
+4. **`AGENTS.md`** y **`docs/AGENT_Template.md`** — jerarquía normativa, límites de actuación y
+   reglas de adaptación.
 
-**Resolución de conflictos:** si la especificación y un módulo ya homologado difieren en estilo,
-**gana el módulo existente** en lo idiomático (naming, paso de parámetros, nulabilidad) y **gana
-la especificación** en lo observable (orden, complejidad prometida, casos).
+**Resolución de conflictos:** sigue la jerarquía única de `docs/AGENT_Template.md`: **`{spec}`**
+manda en lo observable, el dominio, los casos, las invariantes y la complejidad; las capacidades
+reales del lenguaje y `docs/ruleset/` mandan en la traducción idiomática; las bases homologadas
+orientan el estilo sin imponerse al contrato ni a la nulabilidad exigida por `{spec}`.
 
 ---
 
@@ -62,6 +64,10 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
 ### 2. Implementación
 
 - Escribe el código **solo** en el directorio de fuentes del módulo (`src/`, `lib/`, `source/`…).
+- Implementa también los **helpers mínimos de verificación/inspección** que el contrato
+  declaró en el paso 4b porque `{spec}` exige comprobar invariantes internas: llegan con cuerpo
+  vacío y la suite del 4c los usa. Dejarlos en esqueleto deja la suite en rojo y no es una
+  omisión válida.
 - Respeta el pseudocódigo, la estructura propia pedida (por ejemplo `Node` propio o heap plano
   optimizado para el lenguaje) y las comparaciones, intercambios y **complejidad prometida**,
   que son parte del contrato. Consulta también la guía de implementación que enlace `{spec}`,

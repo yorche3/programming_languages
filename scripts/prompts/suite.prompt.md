@@ -3,7 +3,7 @@ name: suite
 step: 4c
 profile: deep
 description: Escribe la suite de pruebas unitarias del módulo desde su especificación, sobre el contrato ya declarado
-sources: AGENTS.md, docs/AGENT_ROLES.md, docs/ruleset/PSEUDOCODE_CONVENTION.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/data/canonical_names.tsv, docs/ruleset/data/language_characteristics.tsv, scripts/data/languages.tsv
+sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md, docs/ruleset/PSEUDOCODE_CONVENTION.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/DEVIATION_POLICY.md, docs/ruleset/data/canonical_names.tsv, docs/ruleset/data/language_characteristics.tsv, scripts/data/languages.tsv
 mode: agent
 ---
 
@@ -38,13 +38,16 @@ fija las bases por prioridad y la agrupación por tema e idioma para este rol.
    **autoridad única de los casos**: qué se prueba, con qué entradas y con qué salidas. Todas
    las especificaciones del repositorio tienen esa sección.
 2. **Las dos bases homologadas del mismo lenguaje**, en el orden persistente de la
-   política compartida. Orientan framework, naming, layout y runner. Elige la
-   agrupación por unidades, variantes y casos del módulo actual, no por el número
-   de archivos de una base ni por estar en la misma fase.
+   política compartida. Orientan framework, naming, layout y runner como **referencias de
+   forma**; nunca imponen el tipo de dominio ni indicadores obsoletos cuando `{spec}` exige
+   otro rango o ausencia. Elige la agrupación por unidades, variantes y casos del módulo
+   actual, no por el número de archivos de una base ni por estar en la misma fase.
 3. **El contrato del módulo** — el tipo nuevo y las firmas que dejó el encargo `contract_stub`
    (paso 4b), en el archivo donde viva según el lenguaje. Es la **autoridad del tipo**: la suite
    **usa** esos nombres y esas firmas, no los declara. Si el contrato **no existe**, **no
-   compila** o no cubre una función de `{spec}`, **detente y avísalo**; no lo escribas tú.
+   compila**, contradice a `{spec}`, o le faltan los **helpers de verificación/inspección**
+   necesarios para probar invariantes exigidas por `{spec}` cuando `test/` no accede a
+   privados, **detente y avísalo**; no los escribas tú.
    «No compila» es el contrato **inválido** —sintaxis rota, tipo mal declarado, firma que
    contradice `{spec}`— y eso sí detiene el paso. Que el contrato todavía **no enlace** es
 otra cosa: eso **no** lo detiene. Ver el paso 5.
@@ -54,8 +57,10 @@ otra cosa: eso **no** lo detiene. Ver el paso 5.
 5. **`scripts/data/languages.tsv`** — comando nativo de pruebas de `{lang}` (columna 3).
 6. **`AGENTS.md`** — límites de actuación y flujo de cierre.
 
-**Resolución de conflictos:** el *qué* (casos y valores) lo manda la especificación; el *cómo*
-(tipo de secuencia, framework, nombres, aserciones) lo manda el módulo homologado del lenguaje.
+**Resolución de conflictos:** sigue la jerarquía única de `docs/AGENT_Template.md`: `{spec}`
+manda en el *qué* (casos, valores, invariantes y ausencia observable); las capacidades reales
+del lenguaje mandan en la forma idiomática; las bases homologadas orientan el framework, el
+runner y los nombres de prueba sin imponerse al contrato nuevo.
 
 ---
 
@@ -74,7 +79,10 @@ Ejecuta los pasos **en orden**. No avances si un paso falla: reporta y detente.
   **cuerpo vacío de cada operación** y ubicación.
 - Confirma que el runner mínimo del paso 4a existe y arranca sin casos. En este paso solo
   conectas los grupos de la suite al runner ya preparado; si falta, está roto o sigue siendo
-  un ejemplo, informa el defecto del 4a y no reescribas la infraestructura.
+  un ejemplo, informa el defecto del 4a y no reescribas la infraestructura. Un cuerpo vacío
+  (`null` en Ada, `pass` en Python) que solo compila y termina **no** es un runner roto: es el
+  mínimo del 4a y aquí se completa con el runner idiomático del módulo homologado. Solo se
+  reporta si el manifiesto o el proyecto de pruebas están ausentes o mal declarados.
 - Determina y anota: framework de pruebas idiomático, dónde vive la suite, si existe un
   `run_tests` propio y si el tipo de secuencia admite nulos o cuál es su indicador de fallo.
 
@@ -164,6 +172,13 @@ no permite verificar todos los grupos. No elimines suites para superar el select
 La suite está bien cuando **falla por la razón correcta**. El criterio no es «falla»: son **cuatro
 datos** que se copian al reporte junto a la salida real del comando nativo (sin editar, sin
 resumir).
+
+En Ada, el runner lanza su propia excepción (`raised TESTS.FAILED_TESTS`)
+para devolver código no cero: esa traza es la señal agregada de fallo, **no** un
+error inesperado, y `Unexpected Errors` debe quedar en 0. Además, un agregado
+posicional de un array con índice `Integer` empieza en `Integer'First`: construye
+cada fixture con límites explícitos (`1..N`) y compara también longitud y
+límites, o la igualdad de arrays y los índices de la salida no coincidirán.
 
 1. **Compila y enlaza**: sin warnings, sin errores de compilación y sin errores de enlace.
 2. **N casos o escenarios cubiertos y K tests ejecutados**, con el mapa de cobertura por
@@ -278,7 +293,7 @@ el framework, o un test agregado que no permita identificar qué caso o paso fal
 | Naming | Convención del lenguaje (`snake_case`, `camelCase`, `PascalCase`, `kebab-case`) |
 | Aserciones | Las del framework (`assertEqual`, `is`, `Assert`, `expect`, …) |
 | Dependencias | Las estándar o ya autorizadas para el módulo según las bases y la guía de inicialización; una base no autoriza dependencias nuevas por sí sola |
-| Runner | El comando de la columna 3 del catálogo debe recoger todos los grupos y propagar fallos. El 4a deja el runner mínimo; este paso lo conecta a los grupos sin crear ni sustituir infraestructura |
+| Runner | El comando de la columna 3 del catálogo debe recoger todos los grupos y propagar fallos. El 4a deja el runner mínimo (que puede ser un cuerpo vacío); este paso completa ese cuerpo y lo conecta a los grupos, sin crear ni sustituir el manifiesto ni el proyecto de pruebas |
 | Determinismo | Sin aleatoriedad, sin reloj y sin depender del orden del sistema de ficheros: las mismas entradas dan siempre el mismo veredicto |
 | Datos | Los *fixtures* se construyen en la propia suite: nada leído de ficheros externos ni de la red |
 

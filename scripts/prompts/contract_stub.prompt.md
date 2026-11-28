@@ -3,7 +3,7 @@ name: contract_stub
 step: 4b
 profile: balanced
 description: Declara el contrato del módulo (tipo nuevo, firmas e indicador natural) y los esqueletos de todas sus operaciones, para que la suite compile y enlace
-sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md, docs/core/00_Project_Initialization_Guide.md, docs/ruleset/PSEUDOCODE_CONVENTION.md, docs/ruleset/LANGUAGE_CHARACTERISTICS.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/data/canonical_names.tsv, scripts/data/languages.tsv
+sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md, docs/core/00_Project_Initialization_Guide.md, docs/ruleset/PSEUDOCODE_CONVENTION.md, docs/ruleset/LANGUAGE_CHARACTERISTICS.md, docs/ruleset/PARADIGM_FAMILIES.md, docs/ruleset/DEVIATION_POLICY.md, docs/ruleset/data/canonical_names.tsv, scripts/data/languages.tsv
 mode: agent
 ---
 
@@ -37,24 +37,30 @@ fija las bases por prioridad y la agrupación por tema e idioma para este rol.
 
 ## Fuentes de verdad (en este orden de prioridad)
 
-1. **`{spec}`** — contrato funcional del módulo: funciones expuestas, casos de prueba y
-   criterios. Manda sobre **qué** se expone.
-2. **Bases homologadas del mismo lenguaje**, en el orden de la política compartida.
-   Orientan el **cómo**: nombre y ubicación del
-   tipo, convención de firmas, mayúsculas del identificador, si el contrato vive en un archivo
-   aparte (en Ada `src/*.ads`), en una cabecera (en C `include/*.h`) o dentro del propio módulo.
-3. **`docs/AGENT_Template.md`** — reglas de la adaptación: el contrato se declara con el
-   **indicador natural** del lenguaje (`null`, `nil`, `None`, `#f`, `-1`, `nothing`), sin
-   envoltorios de error por preferencia y sin atajos de biblioteca. Cuando el lenguaje no
-   pueda comparar o distinguir `absent` de una entrada/salida válida sin envoltorio,
-   se admite `Option`/`Maybe` (o representación etiquetada) **por restricción del lenguaje**,
+1. **`{spec}`** — contrato funcional del módulo: funciones expuestas, dominio de valores,
+   ausencia/fallo observable, invariantes, casos de prueba y criterios. Manda siempre en
+   **qué** se expone, incluida cualquier superficie mínima de inspección/paso necesaria para
+   que `suite` verifique invariantes internas cuando `test/` esté separado de `src/`.
+2. **`docs/AGENT_Template.md` y reglas de fase/desviación** — jerarquía normativa y reglas de
+   adaptación: el contrato usa el **indicador compatible** (`null`, `nil`, `None`, `#f`, `-1`,
+   `nothing` o `absent` según `{spec}`), sin envoltorios por preferencia. Cuando el lenguaje
+   no pueda comparar o distinguir `absent` de una entrada/salida válida sin envoltorio, se
+   admite `Option`/`Maybe` (o representación etiquetada) **por restricción del lenguaje**,
    declarándolo.
+3. **Bases homologadas del mismo lenguaje**, en el orden de la política compartida.
+   Son **referencias de forma** (convención de firmas, mayúsculas del identificador, dónde
+   vive el contrato: en Ada `src/*.ads`, en C `include/*.h`, o dentro del propio módulo).
+   **Nunca** sustituyen a `{spec}` en dominio de valores ni en indicadores propios de un
+   módulo nuevo.
 4. **`scripts/data/languages.tsv`** y **`docs/core/00_Project_Initialization_Guide.md`** — para
    `{lang}`: layout, ubicación del código y comando nativo de compilación y de pruebas.
 5. **`AGENTS.md`** — límites de actuación y flujo de cierre.
 
-**Resolución de conflictos:** el *qué* (funciones, casos y valores) lo manda la especificación;
-el *cómo* (tipo, nombres, ubicación) lo manda el módulo homologado del lenguaje.
+**Resolución de conflictos:** sigue la jerarquía única de `docs/AGENT_Template.md`: `{spec}`
+manda en el *qué* (funciones, dominio, ausencia/fallo, invariantes y helpers de verificación
+requeridos por `test/`); las capacidades reales del lenguaje y las reglas de `docs/ruleset/`
+mandan en la expresión idiomática; las bases homologadas orientan la forma sin imponerse al
+contrato nuevo.
 
 ---
 
@@ -130,7 +136,11 @@ operación declarada**, con la forma que el lenguaje exija:
 
 Reglas del esqueleto:
 
-- **Uno por operación declarada**, en el orden de la especificación, sin funciones de más (salvo los helpers internos o de inspección de invariantes que `{spec}` autorice explícitamente como extras educativos).
+- **Uno por operación declarada**, en el orden de la especificación; además, si `{spec}` exige
+  verificar invariantes internas desde pruebas separadas (`test/` sin acceso a privados),
+  declara también los **helpers mínimos de verificación/inspección** especificados por `{spec}`
+  (y su liberación si hay memoria manual) para que `4c` pueda probarlas. No añadas una API
+  pública general de búsqueda o borrado no pedida.
 - Devuelve el **indicador natural** (o deja el valor por defecto del tipo): **nada** del
   algoritmo. Un esqueleto que resolviera el caso sería implementación, y el paso 5 se queda sin
   qué hacer.

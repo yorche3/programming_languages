@@ -49,8 +49,10 @@ acción repetible necesaria falta, regístrala como hallazgo para corregir el ca
    Orientan layout, nombres, manifiesto y `.gitignore` según el tema; no se copian
    las divisiones de otro módulo sin justificación.
 
-**Resolución de conflictos:** si la guía de inicialización y un módulo existente difieren,
-**gana el módulo existente**, porque es código ya verificado y ejecutado.
+**Resolución de conflictos:** para el layout del proyecto y el runner mínimo en `{lang}`, si la
+guía general y un módulo homologado reciente difieren en una configuración verificada de
+herramientas, prevalece lo ya verificado para `{lang}` siempre que respete `scripts/data/languages.tsv`
+y no altere el contrato de `{spec}`.
 
 ---
 
@@ -123,6 +125,11 @@ Confirma el resultado con `git check-ignore -v <ruta_de_un_artefacto>`.
 ### 4. Verificación
 
 - El proyecto debe compilar, resolver o instalar sin warnings ni errores.
+- En Ada, `alr init --lib --in-place` deja `tests/` con `aunit` ya declarada en
+  `tests/alire.toml` y un `tests/src/tests.adb` con cuerpo `null`: ese **es** el
+  runner mínimo esperado, no un defecto. No lo sustituyas ni borres el proyecto
+  de pruebas; el 4c lo completa con `Test_Runner_With_Status` y las suites. Deja
+  constancia de que `alr -C tests run` compila, enlaza y termina sin casos.
 - Ejecuta el comando nativo de pruebas: el runner mínimo debe **arrancar sin casos**. Si la
   herramienta necesita el runner en un archivo dedicado, este paso lo deja listo; el 4c solo
   conecta los grupos de pruebas. En Perl, Raku, Scala, Scheme y Tcl, verifica que el comando

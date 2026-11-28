@@ -3,7 +3,7 @@ name: validate
 step: 6
 profile: economy
 description: Comprueba el módulo terminado contra su especificación y su README y emite un veredicto legible por máquina
-sources: AGENTS.md, docs/AGENT_ROLES.md, docs/README_Template.md, docs/WORKFLOW.md
+sources: AGENTS.md, docs/AGENT_ROLES.md, docs/AGENT_Template.md, docs/README_Template.md, docs/WORKFLOW.md, docs/ruleset/DEVIATION_POLICY.md, docs/ruleset/IDIOMATICITY_LEVELS.md
 mode: agent
 ---
 
@@ -39,7 +39,7 @@ Comprueba su prioridad y la justificación del agrupamiento sin rediseñarlo ni 
 
 ## Qué compruebas (solo lectura)
 
-1. **Contrato frente a código:** cada función de la especificación existe y respeta lo que dice —firma, parámetros, valor devuelto, comportamiento con la entrada vacía y con la entrada nula o `absent` (indicador de fallo, o `Option`/`Maybe`/representación etiquetada cuando el lenguaje lo exija por restricción propia para distinguir `absent` y esté documentado)—. Comprueba también las restricciones de implementación manual (sin delegar el algoritmo ni estructuras objetivo en bibliotecas) y la complejidad real (por ejemplo, que un heap plano no se degrade a lista enlazada indexada en `O(n² log n)`). Distingue **divergencia idiomática** (la forma propia del lenguaje, documentada) de **defecto** (no cumple el contrato).
+1. **Contrato frente a código:** cada función de la especificación existe y respeta lo que dice —firma, parámetros, valor devuelto, comportamiento con la entrada vacía y con la entrada nula o `absent` (indicador de fallo, o `Option`/`Maybe`/representación etiquetada cuando el lenguaje lo exija por restricción propia para distinguir `absent` y esté documentado)—. Comprueba también las restricciones de implementación manual (sin delegar el algoritmo ni estructuras objetivo en bibliotecas), la complejidad real (por ejemplo, que un heap plano no se degrade a lista enlazada indexada en `O(n² log n)`) y que los helpers de inspección de invariantes autorizados por `{spec}` no cuenten como violación C6 si preservan encapsulación frente a mutaciones indebidas. Distingue **divergencia idiomática** (la forma propia del lenguaje, documentada bajo la jerarquía de `docs/AGENT_Template.md`) de **defecto** (no cumple el contrato).
 2. **Cumple lo que promete su README:** las secciones obligatorias de la plantilla están (incluida la explicación teórica con invariantes, costes reales/mutabilidad y ejemplo razonado en módulos Core), el documento es bilingüe y **las salidas que cita coinciden con el acta de evidencia**. Una salida inventada o editada es un hallazgo **alto**.
 3. **Enlaces:** los relativos del README resuelven dentro del repositorio.
 4. **Suite:** los casos de la especificación están cubiertos y la evidencia muestra que se ejecutaron. **Y que no estén aprobados a base de valores codificados**: si el código bajo prueba —o la propia suite— devuelve el resultado esperado por caso (constantes, una tabla por entrada, ramas que copian la salida), es un hallazgo **alto**: la suite pasa sin probar nada. Ese ***hardcode*** es de este paso: `verify` es un *lint* de sintaxis y formato **y no lo mira**.
