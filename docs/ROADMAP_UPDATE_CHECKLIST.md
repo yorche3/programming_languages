@@ -2238,3 +2238,14 @@ README(s) verificado(s) / README(s) verified: yes (los 50 README del módulo con
 Cambio en ROADMAP.md / ROADMAP.md change: core.algorithms.data_structures_advanced sigue en ✅ 50/50; la fila del módulo pasa de 📋 a ✅ y se añade la nota del cierre de la auditoría 07; el encabezado de la Fase 1 pasa de `implementados: 2/50` a `implementados: 3/50` (el contador del sprint no se toca). La especificación y la guía del módulo enlazan ya su registro de auditoría, como en el módulo 06
 Observaciones / Notes: Cierre de la pasada 07. El pase verificó las 50 implementaciones (vecinos en orden creciente, inserción ordenada manual, sin `sort` de biblioteca, dirección de las aristas, duplicados idempotentes, bucles, extremos inexistentes y aislamiento de la salida) y dejó 15 hallazgos de búsqueda de biblioteca en el camino de adyacencia, todos cerrados con `align` en cuatro lotes e integrados en el `main` de su submódulo: lote 1 `715ef35`, `00de948`, `b400ed7`, `cfa2ee9`, `e3913de`, `351a260`; lote 2 `32c98b4`, `86ddb5d`, `2fdf193`, `c757c8d`, `16e9ef7`, `7f30d98`; lote 3 `abe0b68`, `ca5c8dd`; lote 4 `094242f`. La puerta de contrato se resolvió a favor del orden creciente, así que ningún hallazgo necesitó `correct` ni `fix`, y no hubo desviaciones aceptadas por escrito. Las nueve filas del estado de idiomaticidad suben a `idiomatic` con el commit de integración. Sin push: lo decide el autor.
 ```
+
+Fecha / Date: 2026-11-27T20:12:36-06:00
+Fase / Phase: core.algorithms
+Módulo(s) / Module(s): core.algorithms.efficient_sort
+Lenguaje(s) / Language(s): ada
+Código verificado / Code verified: yes (acta de evidencia / evidence record: `docs/evidence/algorithms/efficient_sort/ada.md`, commit `f960867`)
+Tests y comandos / Tests and commands:
+- `bash /home/yorche3/programming_languages/scripts/data/ada_test.sh` -> código `0`
+README(s) verificado(s) / README(s) verified: yes (`ada/core/algorithms/efficient_sort/README.md` y `ada/core/algorithms/README.md`)
+Cambio en ROADMAP.md / ROADMAP.md change: `core.algorithms.efficient_sort           📋` -> `core.algorithms.efficient_sort        🔄 1/50 (Ada)`
+Observaciones / Notes: entrada escrita por `glot close` desde la evidencia del sprint. La revisión cualitativa (pseudocódigo, divergencias idiomáticas) no la comprueba el script, y el commit lo hace el autor.
